@@ -45,7 +45,7 @@ final class ASTExpAnd extends ASTExpBoolean {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "&&";
     }
     
@@ -55,7 +55,7 @@ final class ASTExpAnd extends ASTExpBoolean {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpAnd(
     	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

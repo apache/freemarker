@@ -68,7 +68,7 @@ final class ASTExpComparison extends ASTExpBoolean {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return opString;
     }
 
@@ -78,7 +78,7 @@ final class ASTExpComparison extends ASTExpBoolean {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpComparison(
     	        left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

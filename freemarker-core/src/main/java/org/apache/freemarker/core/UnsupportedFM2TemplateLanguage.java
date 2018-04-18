@@ -41,7 +41,7 @@ class UnsupportedFM2TemplateLanguage extends TemplateLanguage {
     
     private UnsupportedFM2TemplateLanguage(String fileExtension, OutputFormat outputFormat,
             AutoEscapingPolicy autoEscapingPolicy) {
-        super(fileExtension, true, outputFormat, autoEscapingPolicy);
+        super(fileExtension, true, DefaultDialect.INSTANCE, outputFormat, autoEscapingPolicy);
     }
 
     @Override

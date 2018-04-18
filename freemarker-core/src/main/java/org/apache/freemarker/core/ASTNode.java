@@ -20,8 +20,21 @@
 package org.apache.freemarker.core;
 
 /**
- * AST node: The superclass of all AST nodes
+ * Superclass of all AST (Abstract Syntax Tree) nodes.
+ * <p>
+ * The AST is a tree data structure that represent the complete content of a template (static content, directive calls,
+ * interpolations and the expressions inside them, possibly comments as well), without the complexities of syntactical
+ * details. The AST is generated from the source code (which is text) by the parser of the {@link TemplateLanguage},
+ * and focuses on the meaning of the template. Thus, if the same template is rewritten in different template languages
+ * (like F3AH is converted to F3SH), the resulting AST-s will remain practically identical.
+ * <p>
+ * When a {@link Template} is processed, FreeMarker executes the AST directly. (In theory the AST could be translated
+ * further to byte code, FreeMarker doesn't try to do that, at least currently.)
+ * <p>
+ * The AST can also be used to analyze the content of templates, such as to discover its dependencies (on data-model
+ * variables, on other templates). 
  */
+//TODO [FM3] will be public
 abstract class ASTNode {
     
     private Template template;
@@ -67,51 +80,46 @@ abstract class ASTNode {
         this.endLine = endLine;
     }
     
+    // Package visible constructor to prevent extending this class outside FreeMarker 
+    ASTNode() { }
+    
+    /**
+     * The template that contains this node.
+     */
+    public Template getTemplate() {
+        return template;
+    }
+    
+    /**
+     * 1-based column number of the last character of this node in the source code. 0 if not available.
+     */
     public final int getBeginColumn() {
         return beginColumn;
     }
 
+    /**
+     * 1-based line number of the first character of this node in the source code. 0 if not available.
+     */
+    // TODO [FM3] No negative number hack in ?eval and such.
     public final int getBeginLine() {
         return beginLine;
     }
 
+    /**
+     * 1-based column number of the first character of this node in the source code. 0 if not available.
+     */
     public final int getEndColumn() {
         return endColumn;
     }
 
+    /**
+     * 1-based line number of the last character of this node in the source code. 0 if not available.
+     */
     public final int getEndLine() {
         return endLine;
     }
 
-    /**
-     * Returns a string that indicates
-     * where in the template source, this object is.
-     */
-    public String getStartLocation() {
-        return MessageUtils.formatLocationForEvaluationError(template, beginLine, beginColumn);
-    }
-
-    /**
-     * As of 2.3.20. the same as {@link #getStartLocation}. Meant to be used where there's a risk of XSS
-     * when viewing error messages.
-     */
-    public String getStartLocationQuoted() {
-        return getStartLocation();
-    }
-
-    public String getEndLocation() {
-        return MessageUtils.formatLocationForEvaluationError(template, endLine, endColumn);
-    }
-
-    /**
-     * As of 2.3.20. the same as {@link #getEndLocation}. Meant to be used where there's a risk of XSS
-     * when viewing error messages.
-     */
-    public String getEndLocationQuoted() {
-        return getEndLocation();
-    }
-    
-    public final String getSource() {
+    final String getSource() {
         String s;
         if (template != null) {
             s = template.getSource(beginColumn, beginLine, endColumn, endLine);
@@ -124,14 +132,9 @@ abstract class ASTNode {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         String s;
-    	try {
-    		s = getSource();
-    	} catch (Exception e) { // REVISIT: A bit of a hack? (JR)
-    	    s = null;
-    	}
-    	return s != null ? s : getCanonicalForm();
+    	return (s = getSource()) != null ? s : getCanonicalForm();
     }
 
     /**
@@ -155,10 +158,6 @@ abstract class ASTNode {
         return true;
     }
 
-    public Template getTemplate() {
-        return template;
-    }
-    
     ASTNode copyLocationFrom(ASTNode from) {
         template = from.template;
         beginColumn = from.beginColumn;
@@ -169,12 +168,14 @@ abstract class ASTNode {
     }    
 
     /**
-     * FTL generated from the AST of the node, which must be parseable to an AST that does the same as the original
-     * source, assuming we turn off automatic white-space removal when parsing the canonical form.
+     * Template source code generated from the AST of this node.
+     * When parsed, it should result in a practically identical AST that does the same as the original
+     * source, assuming that you turn off automatic white-space removal when parsing the canonical form.
      * 
-     * @see ASTElement#getDescription()
-     * @see #getASTNodeDescriptor()
+     * @see ASTElement#getLabelWithParameters()
+     * @see #getLabelWithoutParameters()
      */
+    // TODO [FM3] The whitespace problem isn't OK; do pretty-formatting, outside core if too big.
     abstract public String getCanonicalForm();
     
     /**
@@ -185,9 +186,9 @@ abstract class ASTNode {
      * leaf nodes the symbols should be the canonical form of value.
      *
      * @see #getCanonicalForm()
-     * @see ASTElement#getDescription()
+     * @see ASTElement#getLabelWithParameters()
      */
-    abstract String getASTNodeDescriptor();
+    public abstract String getLabelWithoutParameters();
     
     /**
      * Returns highest valid parameter index + 1. So one should scan indexes with {@link #getParameterValue(int)}

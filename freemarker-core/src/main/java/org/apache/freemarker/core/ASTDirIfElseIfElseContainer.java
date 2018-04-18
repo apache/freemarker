@@ -38,10 +38,10 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         int ln  = getChildCount();
         for (int i = 0; i < ln; i++) {
-            ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) getChild(i);
+            ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(i);
             ASTExpression condition = cblock.condition;
             env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
@@ -55,7 +55,7 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     ASTElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         if (getChildCount() == 1) {
-            ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) getChild(0);
+            ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(0);
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         } else {
@@ -64,23 +64,23 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     }
     
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) getChild(i);
+                ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(i);
                 buf.append(cblock.dump(canonical));
             }
             buf.append("</#if>");
             return buf.toString();
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#if-#elseIf-#else-container";
     }
     

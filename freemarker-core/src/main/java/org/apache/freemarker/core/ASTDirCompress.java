@@ -34,30 +34,33 @@ final class ASTDirCompress extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         ASTElement[] childBuffer = getChildBuffer();
         if (childBuffer != null) {
             CompressWriter out = new CompressWriter(env.getOut(), 2048, false);
+            Writer prevOut = env.getOut();
             try {
-                env.visit(childBuffer, out);
+                env.setOut(out);
+                env.executeElements(childBuffer);
             } finally {
                 out.close();
+                env.setOut(prevOut);
             }
         }
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getASTNodeDescriptor() + ">" + getChildrenCanonicalForm() + "</" + getASTNodeDescriptor() + ">";
+            return "<" + getLabelWithoutParameters() + ">" + getChildrenCanonicalForm() + "</" + getLabelWithoutParameters() + ">";
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#compress";
     }
     

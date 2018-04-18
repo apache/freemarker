@@ -32,12 +32,12 @@ class ASTDirSep extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new TemplateException(env,
-                    getASTNodeDescriptor(), " without iteration in context");
+                    getLabelWithoutParameters(), " without iteration in context");
         }
         
         if (iterCtx.hasNext()) {
@@ -52,22 +52,22 @@ class ASTDirSep extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getASTNodeDescriptor());
+            sb.append(getLabelWithoutParameters());
             sb.append('>');
         }
         return sb.toString();
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#sep";
     }
 

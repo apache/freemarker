@@ -39,7 +39,7 @@ final class ASTDirSwitch extends ASTDirective {
         int ignoredCnt = ignoredSectionBeforeFirstCase != null ? ignoredSectionBeforeFirstCase.getChildCount() : 0;
         setChildBufferCapacity(ignoredCnt + 4);
         for (int i = 0; i < ignoredCnt; i++) {
-            addChild(ignoredSectionBeforeFirstCase.getChild(i));
+            addChild(ignoredSectionBeforeFirstCase.fastGetChild(i));
         }
         firstCaseIndex = ignoredCnt; // Note that normally postParseCleanup will overwrite this
     }
@@ -52,13 +52,13 @@ final class ASTDirSwitch extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env)
+    ASTElement[] execute(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getChildCount();
         try {
             for (int i = firstCaseIndex; i < ln; i++) {
-                ASTDirCase cas = (ASTDirCase) getChild(i);
+                ASTDirCase cas = (ASTDirCase) fastGetChild(i);
                 boolean processCase = false;
 
                 // Fall through if a previous case tested true.
@@ -71,7 +71,7 @@ final class ASTDirSwitch extends ASTDirective {
                             _EvalUtils.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
-                    env.visit(cas);
+                    env.executeElement(cas);
                     processedCase = true;
                 }
             }
@@ -79,7 +79,7 @@ final class ASTDirSwitch extends ASTDirective {
             // If we didn't process any nestedElements, and we have a default,
             // process it.
             if (!processedCase && defaultCase != null) {
-                env.visit(defaultCase);
+                env.executeElement(defaultCase);
             }
         } catch (BreakOrContinueException br) {
             // #break was called
@@ -88,25 +88,25 @@ final class ASTDirSwitch extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getASTNodeDescriptor());
+        buf.append(getLabelWithoutParameters());
         buf.append(' ');
         buf.append(searched.getCanonicalForm());
         if (canonical) {
             buf.append('>');
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                buf.append(getChild(i).getCanonicalForm());
+                buf.append(fastGetChild(i).getCanonicalForm());
             }
-            buf.append("</").append(getASTNodeDescriptor()).append('>');
+            buf.append("</").append(getLabelWithoutParameters()).append('>');
         }
         return buf.toString();
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#switch";
     }
 
@@ -139,7 +139,7 @@ final class ASTDirSwitch extends ASTDirective {
         // The first #case might have shifted in the child array, so we have to find it again:
         int ln = getChildCount();
         int i = 0;
-        while (i < ln && !(getChild(i) instanceof ASTDirCase)) {
+        while (i < ln && !(fastGetChild(i) instanceof ASTDirCase)) {
             i++;
         }
         firstCaseIndex = i;

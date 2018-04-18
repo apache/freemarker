@@ -104,7 +104,7 @@ final class ASTDirSetting extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] execute(Environment env) throws TemplateException {
         TemplateModel mval = value.eval(env);
         String strval;
         if (mval instanceof TemplateStringModel) {
@@ -125,10 +125,10 @@ final class ASTDirSetting extends ASTDirective {
     }
     
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         sb.append(' ');
         sb.append(_StringUtils.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
@@ -138,7 +138,7 @@ final class ASTDirSetting extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#setting";
     }
 

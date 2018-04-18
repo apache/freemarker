@@ -24,6 +24,7 @@ import org.apache.freemarker.core.util._StringUtils;
 /**
  * AST comment node
  */
+//TODO [FM3] will be public
 final class ASTComment extends ASTElement {
 
     private final String text;
@@ -33,13 +34,13 @@ final class ASTComment extends ASTElement {
     }
 
     @Override
-    ASTElement[] accept(Environment env) {
+    ASTElement[] execute(Environment env) {
         // do nothing, skip the body
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             return "<#--" + text + "-->";
         } else {
@@ -48,10 +49,9 @@ final class ASTComment extends ASTElement {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#--...--";
     }
-    
 
     @Override
     int getParameterCount() {

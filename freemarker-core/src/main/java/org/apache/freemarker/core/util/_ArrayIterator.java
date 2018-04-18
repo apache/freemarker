@@ -23,12 +23,12 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _ArrayIterator implements Iterator {
+public class _ArrayIterator<T> implements Iterator<T> {
 
-    private final Object[] array;
+    private final T[] array;
     private int nextIndex;
 
-    public _ArrayIterator(Object[] array) {
+    public _ArrayIterator(T[] array) {
         this.array = array;
         nextIndex = 0;
     }
@@ -39,7 +39,7 @@ public class _ArrayIterator implements Iterator {
     }
 
     @Override
-    public Object next() {
+    public T next() {
         if (nextIndex >= array.length) {
             throw new NoSuchElementException();
         }

@@ -48,15 +48,10 @@ final class ASTExpBooleanLiteral extends ASTExpression {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return getCanonicalForm();
     }
     
-    @Override
-    public String toString() {
-        return val ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE;
-    }
-
     @Override
     TemplateModel _eval(Environment env) {
         return val ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -68,7 +63,7 @@ final class ASTExpBooleanLiteral extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpBooleanLiteral(val);
     }

@@ -171,7 +171,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateStringM
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return dynamicValue == null ? getCanonicalForm() : "dynamic \"...\"";
     }
     
@@ -181,7 +181,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateStringM
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         ASTExpStringLiteral cloned = new ASTExpStringLiteral(value);
         // FIXME: replacedIdentifier should be searched inside interpolatedOutput too:

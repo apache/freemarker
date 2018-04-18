@@ -43,6 +43,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.freemarker.core.Dialect.ConfiguredDialect;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -175,6 +176,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final Long templateUpdateDelayMilliseconds;
     private final Boolean localizedTemplateLookup;
     private final List<OutputFormat> registeredCustomOutputFormats;
+    private final Map<Dialect, ConfiguredDialect> configuredDialects;
     private final Map<String, OutputFormat> registeredCustomOutputFormatsByName;
     private final Map<String, Object> sharedVariables;
     private final Map<String, TemplateModel> wrappedSharedVariables;
@@ -441,6 +443,12 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         this.templateConfigurations = templateConfigurations;
 
         templateResolver.setDependencies(new TemplateResolverDependenciesImpl(this, templateResolver));
+        
+        // ATTENTION! Creating the configuredDialects must be the last thing, as here the user code can already access
+        // this Configuration!
+        configuredDialects = new HashMap<>();
+        // TODO [FM3] This is hard-code for now, but later we need to add the "dialects" configuration setting
+        configuredDialects.put(DefaultDialect.INSTANCE, DefaultDialect.INSTANCE.createConfiguredDialect(this));
     }
 
     private void checkSettingIsNullForThisTemplateResolver(
@@ -671,8 +679,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                 throw new IllegalArgumentException("Missing opening '{' in: " + name);
             }
             
-            MarkupOutputFormat outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
-            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(
+            MarkupOutputFormat<?> outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
+            MarkupOutputFormat<?> innerOF = getMarkupOutputFormatForCombined(
                     name.substring(openBrcIdx + 1, name.length() - 1));
             
             return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
@@ -707,6 +715,21 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             }
             return stdOF;
         }
+    }
+
+    /**
+     * Same as {@link #getOutputFormat(String)}, but also throws {@link UnregisteredOutputFormatException} of the
+     * output format doesn't extend {@link MarkupOutputFormat}. 
+     */
+    public MarkupOutputFormat<?> getMarkupOutputFormat(String name) throws UnregisteredOutputFormatException {
+        OutputFormat outputFormat = getOutputFormat(name);
+        if (!(outputFormat instanceof MarkupOutputFormat<?>)) {
+            // TODO [FM3] It's kind of silly, but so is introducing a subclass exception just for this...
+            throw new UnregisteredOutputFormatException(
+                    "The " + _StringUtils.jQuote(name) + " output format (class " + outputFormat.getClass().getName()
+                    + " is registered, but doesn't implement " + MarkupOutputFormat.class.getName() + ".");
+        }
+        return (MarkupOutputFormat<?>) outputFormat;
     }
     
     /**
@@ -815,7 +838,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public TemplateLanguage getTemplateLanguage() {
         return templateLanguage;
     }
-
+    
     /**
      * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
      * value in the {@link Configuration}.
@@ -823,6 +846,30 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     @Override
     public boolean isTemplateLanguageSet() {
         return true;
+    }
+    
+    /**
+     * Returns the {@link ConfiguredDialect} for a {@link Dialect} that's known by this {@link Configuration}.
+     * 
+     * @param dialect
+     *            Not {@code null}.
+     * 
+     * @return Never {@code null}. When invoked on the same {@link Configuration} with the same {@link Dialect}
+     *         instance, it always returns the same {@link ConfiguredDialect} instance.
+     * 
+     * @throws IllegalStateException
+     *             If the {@link Dialect} is not know by this {@link Configuration}. (TODO [FM3]: For now it only knows
+     *             {@link DefaultDialect#INSTANCE}, but that will change later when custom {@link TemplateLanguage}-s
+     *             can be added to the {@link Configuration}.)
+     */
+    public ConfiguredDialect getConfiguredDialect(Dialect dialect) {
+        _NullArgumentException.check("dialect", dialect);
+        ConfiguredDialect configuredDialect = configuredDialects.get(dialect);
+        if (configuredDialect == null) {
+            throw new IllegalStateException("No such " + Dialect.class.getName() + "  was added to this Configuration: "
+                        + dialect);
+        }
+        return configuredDialect;
     }
 
     @Override

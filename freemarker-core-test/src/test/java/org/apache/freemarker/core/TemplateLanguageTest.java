@@ -67,12 +67,13 @@ public class TemplateLanguageTest {
 
         public DummyTemplateLanguage(String fileExtension, OutputFormat outputFormat,
                 AutoEscapingPolicy autoEscapingPolicy) {
-            super(fileExtension, outputFormat, autoEscapingPolicy);
+            super(fileExtension, DefaultDialect.INSTANCE, outputFormat, autoEscapingPolicy);
         }
 
         DummyTemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF, OutputFormat outputFormat,
                 AutoEscapingPolicy autoEscapingPolicy) {
-            super(fileExtension, allowExtensionStartingWithF, outputFormat, autoEscapingPolicy);
+            super(fileExtension, allowExtensionStartingWithF, DefaultDialect.INSTANCE,
+                    outputFormat, autoEscapingPolicy);
         }
 
         @Override

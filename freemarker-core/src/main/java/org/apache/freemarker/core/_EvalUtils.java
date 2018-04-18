@@ -21,6 +21,8 @@ package org.apache.freemarker.core;
 
 import static org.apache.freemarker.core.MessageUtils.*;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
@@ -33,6 +35,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -338,6 +341,9 @@ public class _EvalUtils {
      * 
      * @param seqTip
      *            Tip to display if the value type is not coercable, but it's iterable.
+     * @param exp
+     *            The expression that was evaluated to {@code tm}. This can be {@code null}, however that may results
+     *            in poor quality error messages.
      * 
      * @return Never {@code null}
      */
@@ -539,6 +545,30 @@ public class _EvalUtils {
         return env != null
                 ? env.getArithmeticEngine()
                 : tObj.getTemplate().getParsingConfiguration().getArithmeticEngine();
+    }
+
+    public static void printTemplateMarkupOutputModel(final TemplateMarkupOutputModel mo, OutputFormat outputFormat,
+            final Writer out, ASTExpression exp) throws TemplateException, IOException {
+        final MarkupOutputFormat moOF = mo.getOutputFormat();
+        // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+        if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+            final String srcPlainText;
+            // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+            srcPlainText = moOF.getSourcePlainText(mo);
+            if (srcPlainText == null) {
+                throw new TemplateException(exp,
+                        "The value to print is in ", new _DelayedToString(moOF),
+                        " format, which differs from the current output format, ",
+                        new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
+            }
+            if (outputFormat instanceof MarkupOutputFormat) {
+                ((MarkupOutputFormat) outputFormat).output(srcPlainText, out);
+            } else {
+                out.write(srcPlainText);
+            }
+        } else {
+            moOF.output(mo, out);
+        }
     }
     
 }

@@ -83,7 +83,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         TemplateCallableModel callableValue;
         TemplateDirectiveModel directive;
         TemplateFunctionModel function;
@@ -157,7 +157,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append('@');
@@ -211,7 +211,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "@";
     }
 
@@ -286,7 +286,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
     @Override
     public boolean hasNestedContent() {
         int childCount = getChildCount();
-        return childCount != 0 && (childCount > 1 || !(getChild(0) instanceof ASTThreadInterruptionCheck));
+        return childCount != 0 && (childCount > 1 || !(fastGetChild(0) instanceof ASTThreadInterruptionCheck));
     }
 
     @Override
@@ -301,16 +301,16 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         int nestedContentParamValuesSize = nestedContentArgs != null ? nestedContentArgs.length : 0;
         if (nestedContentParamValuesSize != nestedContentParamNamesSize) {
             throw new TemplateException(env,
-                    "The invocation declares ", (nestedContentParamNamesSize != 0 ? nestedContentParamNamesSize : "no"),
-                    " nested content parameter(s)",
-                    (nestedContentParamNamesSize != 0
-                            ? new Object[] { " (", new _DelayedJQuotedListing(nestedContentParamNames.getKeys()), ")", }
-                            : ""),
-                    ", but the called object intends to pass ",
-                    nestedContentParamValuesSize, " parameters. You need to declare ", nestedContentParamValuesSize,
-                    " nested content parameters.");
+                    MessageUtils.newBadNumberOfNestedContentParameterPassedMessage(
+                            nestedContentParamNames, nestedContentParamValuesSize));
         }
-        env.visit(getChildBuffer(), nestedContentParamNames, nestedContentArgs, out);
+        Writer prevOut = env.getOut();
+        try {
+            env.setOut(out);
+            env.executeNestedContent(this, nestedContentParamNames, nestedContentArgs);
+        } finally {
+            env.setOut(prevOut);
+        }
     }
 
     @Override

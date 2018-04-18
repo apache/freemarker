@@ -21,14 +21,14 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Enumeration;
-
-import org.apache.freemarker.core.util._ArrayEnumeration;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * AST non-expression node superclass: Superclass of directive calls, interpolations, static text, top-level comments,
  * or other such non-expression node in the parsed template.
  */
+//TODO [FM3] will be public
 abstract class ASTElement extends ASTNode {
 
     private static final int INITIAL_CHILD_BUFFER_CAPACITY = 6;
@@ -51,10 +51,13 @@ abstract class ASTElement extends ASTNode {
      * The index of the element in the parent's {@link #childBuffer} array.
      */
     private int index;
+    
+    // Package visible constructor to prevent instantiating outside FreeMarker 
+    ASTElement() { }
 
     /**
      * Executes this {@link ASTElement}. Usually should not be called directly, but through
-     * {@link Environment#visit(ASTElement)} or a similar {@link Environment} method.
+     * {@link Environment#executeElement(ASTElement)} or a similar {@link Environment} method.
      *
      * @param env
      *            The runtime environment
@@ -64,42 +67,32 @@ abstract class ASTElement extends ASTNode {
      *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to do
      *         after the children was processed anyway.
      */
-    abstract ASTElement[] accept(Environment env) throws TemplateException, IOException;
+    abstract ASTElement[] execute(Environment env) throws TemplateException, IOException;
 
     /**
-     * One-line description of the element, that contain all the information that is used in {@link #getCanonicalForm()}
-     * , except the nested content (elements) of the element. The expressions inside the element (the parameters) has to
-     * be shown. Meant to be used for stack traces, also for tree views that don't go down to the expression-level.
-     * There are no backward-compatibility guarantees regarding the format used ATM, but it must be regular enough to be
-     * machine-parseable, and it must contain all information necessary for restoring an AST equivalent to the original.
+     * Single line description of the element, which contain information about what kind of element it is, what are its
+     * parameters, but doesn't contain the child nodes. Meant to be used for stack traces, also for tree views (that
+     * don't want to show the parameters as spearate nodes). There are no backward-compatibility guarantees regarding
+     * the format used at the moment.
      * 
-     * This final implementation calls {@link #dump(boolean) dump(false)}.
-     * 
+     * @see #getLabelWithoutParameters()
      * @see #getCanonicalForm()
-     * @see #getASTNodeDescriptor()
      */
-    public final String getDescription() {
+    public final String getLabelWithParameters() {
         return dump(false);
     }
 
-    /**
-     * This final implementation calls {@link #dump(boolean) dump(false)}.
-     */
     @Override
     public final String getCanonicalForm() {
         return dump(true);
     }
 
     final String getChildrenCanonicalForm() {
-        return getChildrenCanonicalForm(childBuffer);
-    }
-    
-    static String getChildrenCanonicalForm(ASTElement[] children) {
-        if (children == null) {
+        if (childBuffer == null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        for (ASTElement child : children) {
+        for (ASTElement child : childBuffer) {
             if (child == null) {
                 break;
             }
@@ -107,7 +100,7 @@ abstract class ASTElement extends ASTNode {
         }
         return sb.toString();
     }
-
+    
     /**
      * Tells if the element should show up in error stack traces. Note that this will be ignored for the top (current)
      * element of a stack trace, as that's always shown.
@@ -125,53 +118,51 @@ abstract class ASTElement extends ASTNode {
     abstract boolean isNestedBlockRepeater();
 
     /**
-     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place. Don't
+     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getLabelWithParameters()} to a single place. Don't
      * call those methods in method on {@code this}, because that will result in infinite recursion!
      * 
      * @param canonical
      *            if {@code true}, it calculates the return value of {@link #getCanonicalForm()}, otherwise of
-     *            {@link #getDescription()}.
+     *            {@link #getLabelWithParameters()}.
      */
-    abstract protected String dump(boolean canonical);
+    abstract String dump(boolean canonical);
 
-    // Methods to implement TemplateNodeModel
-
-    public String getNodeName() {
-        String className = getClass().getName();
-        int shortNameOffset = className.lastIndexOf('.') + 1;
-        return className.substring(shortNameOffset);
-    }
-
-    // Methods so that we can implement the Swing TreeNode API.
-
-    public boolean isLeaf() {
-        return childCount == 0;
-    }
-
-    public int getIndex(ASTElement node) {
-        for (int i = 0; i < childCount; i++) {
-            if (childBuffer[i].equals(node)) {
-                return i;
+    /**
+     * Note: For element with {@code #nested}, this will hide the {@code #nested} when that's an
+     * {@link ASTImplicitParent}.
+     */
+    public final Iterable<ASTElement> getChildren() {
+        return childBuffer != null ? new Iterable<ASTElement>() {
+            @Override
+            public Iterator<ASTElement> iterator() {
+                return new _ChildIterator();
             }
-        }
-        return -1;
+        } : Collections.<ASTElement>emptyList();
     }
 
-    public int getChildCount() {
+    public final int getChildCount() {
         return childCount;
     }
 
     /**
-     * Note: For element with {@code #nestedBlock}, this will hide the {@code #nestedBlock} when that's a
-     * {@link ASTImplicitParent}.
+     * Return the child node at the given index.
+     * 
+     * @throws IndexOutOfBoundsException
+     *             if the index is out of range, such as not less than {@link #getChildCount()}.
      */
-    public Enumeration children() {
-        return childBuffer != null
-                ? new _ArrayEnumeration(childBuffer, childCount)
-                : Collections.enumeration(Collections.EMPTY_LIST);
+    public final ASTElement getChild(int index) {
+        if (index >= childCount) {
+            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds. There are " + childCount
+                    + " child node(s).");
+        }
+        return fastGetChild(index);
     }
 
-    public void setChildAt(int index, ASTElement element) {
+    final ASTElement fastGetChild(int index) {
+        return childBuffer[index];
+    }
+
+    final void setChildAt(int index, ASTElement element) {
         if (index < childCount && index >= 0) {
             childBuffer[index] = element;
             element.index = index;
@@ -230,11 +221,7 @@ abstract class ASTElement extends ASTNode {
         lChildBuffer[index] = nestedElement;
         childCount = lChildCount + 1;
     }
-
-    final ASTElement getChild(int index) {
-        return childBuffer[index];
-    }
-
+    
     /**
      * @return Array containing 1 or more nested elements with optional trailing {@code null}-s, or is {@code null}
      *         exactly if there are no nested elements.
@@ -386,7 +373,8 @@ abstract class ASTElement extends ASTNode {
 
     private ASTElement getFirstLeaf() {
         ASTElement te = this;
-        while (!te.isLeaf() && !(te instanceof ASTDirMacroOrFunction) && !(te instanceof ASTDirCapturingAssignment)) {
+        while (te.getChildCount() != 0  && !(te instanceof ASTDirMacroOrFunction)
+                && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getFirstChild();
         }
@@ -395,7 +383,8 @@ abstract class ASTElement extends ASTNode {
 
     private ASTElement getLastLeaf() {
         ASTElement te = this;
-        while (!te.isLeaf() && !(te instanceof ASTDirMacroOrFunction) && !(te instanceof ASTDirCapturingAssignment)) {
+        while (te.getChildCount() != 0 && !(te instanceof ASTDirMacroOrFunction)
+                && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getLastChild();
         }
@@ -435,4 +424,29 @@ abstract class ASTElement extends ASTNode {
     boolean heedsTrailingWhitespace() {
         return false;
     }
+    
+    private class _ChildIterator implements Iterator<ASTElement> {
+
+        private int nextIndex;
+
+        @Override
+        public boolean hasNext() {
+            return nextIndex < childCount;
+        }
+
+        @Override
+        public ASTElement next() {
+            if (nextIndex >= childCount) {
+                throw new NoSuchElementException();
+            }
+            return childBuffer[nextIndex++];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+    }
+    
 }

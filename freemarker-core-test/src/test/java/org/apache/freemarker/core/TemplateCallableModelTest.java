@@ -219,7 +219,7 @@ public class TemplateCallableModelTest extends TemplateTest {
     @Test
     @SuppressWarnings("ThrowableNotThrown")
     public void testRuntimeErrors() throws IOException, TemplateException {
-        assertErrorContains("<@p 9, 9, 9 />", "can only have 2", "3", "by position");
+        assertErrorContains("<@p 9, 9, 9 />", "can only have 2", "more", "by position");
         assertErrorContains("<@n 9 />", "can't have arguments passed by position");
         assertErrorContains("<@n n3=9 />", "has no", "\"n3\"", "supported", "\"n1\", \"n2\"");
         assertErrorContains("<@p n1=9 />", "directive", "can't have arguments that are passed by name", "\"n1\"",

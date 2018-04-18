@@ -102,7 +102,7 @@ final class ASTDirAssignment extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] execute(Environment env) throws TemplateException {
         final Environment.Namespace namespace;
         if (namespaceExp == null) {
             switch (scope) {
@@ -187,9 +187,9 @@ final class ASTDirAssignment extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
-        String dn = getParent() instanceof ASTDirAssignmentsContainer ? null : getASTNodeDescriptor();
+        String dn = getParent() instanceof ASTDirAssignmentsContainer ? null : getLabelWithoutParameters();
         if (dn != null) {
             if (canonical) buf.append("<");
             buf.append(dn);
@@ -217,7 +217,7 @@ final class ASTDirAssignment extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return getDirectiveName(scope);
     }
     

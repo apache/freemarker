@@ -27,23 +27,24 @@ import org.apache.freemarker.core.debug._DebuggerService;
  * AST node: A debug breakpoint
  */
 class ASTDebugBreak extends ASTElement {
-    public ASTDebugBreak(ASTElement nestedBlock) {
+    
+    ASTDebugBreak(ASTElement nestedBlock) {
         addChild(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
     @Override
-    protected ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    protected ASTElement[] execute(Environment env) throws TemplateException, IOException {
         if (!_DebuggerService.suspendEnvironment(
-                env, getTemplate().getSourceName(), getChild(0).getBeginLine())) {
-            return getChild(0).accept(env);
+                env, getTemplate().getSourceName(), fastGetChild(0).getBeginLine())) {
+            return fastGetChild(0).execute(env);
         } else {
             throw new StopException(env, "Stopped by debugger");
         }
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             StringBuilder sb = new StringBuilder();
             sb.append("<#-- ");
@@ -52,7 +53,7 @@ class ASTDebugBreak extends ASTElement {
                 sb.append(" /-->");
             } else {
                 sb.append(" -->");
-                sb.append(getChild(0).getCanonicalForm());                
+                sb.append(fastGetChild(0).getCanonicalForm());                
                 sb.append("<#--/ debug break -->");
             }
             return sb.toString();
@@ -62,7 +63,7 @@ class ASTDebugBreak extends ASTElement {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#debugBreak";
     }
 

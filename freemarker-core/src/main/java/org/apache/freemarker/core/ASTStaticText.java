@@ -27,6 +27,7 @@ import org.apache.freemarker.core.util._StringUtils;
 /**
  * AST node representing static text.
  */
+//TODO [FM3] will be public
 final class ASTStaticText extends ASTElement {
     
     // We're using char[] instead of String for storing the text block because
@@ -37,11 +38,11 @@ final class ASTStaticText extends ASTElement {
     private char[] text;
     private final boolean unparsed;
 
-    public ASTStaticText(String text) {
+    ASTStaticText(String text) {
         this(text, false);
     }
 
-    public ASTStaticText(String text, boolean unparsed) {
+    ASTStaticText(String text, boolean unparsed) {
         this(text.toCharArray(), unparsed);
     }
 
@@ -56,19 +57,15 @@ final class ASTStaticText extends ASTElement {
 
     /**
      * Simply outputs the text.
-     * 
-     * @deprecated This is an internal API; don't call or override it.
      */
-    @Deprecated
     @Override
-    public ASTElement[] accept(Environment env)
-    throws IOException {
+    ASTElement[] execute(Environment env) throws IOException {
         env.getOut().write(text);
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             String text = new String(this.text);
             if (unparsed) {
@@ -81,7 +78,7 @@ final class ASTStaticText extends ASTElement {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#text";
     }
     

@@ -19,7 +19,6 @@
 package org.apache.freemarker.core;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ public final class _Debug {
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a ASTImplicitParent
         // Also make sure it doesn't conflict with anyone's code.
-        parent.setChildAt(parent.getIndex(te), db);
+        parent.setChildAt(indexOfChild(parent, te), db);
     }
 
     public static void removeDebugBreak(Template t, int line) {
@@ -62,7 +61,16 @@ public final class _Debug {
             return;
         }
         ASTElement parent = db.getParent();
-        parent.setChildAt(parent.getIndex(db), db.getChild(0));
+        parent.setChildAt(indexOfChild(parent, db), db.fastGetChild(0));
+    }
+    
+    private static final int indexOfChild(ASTElement parent, ASTElement node) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            if (parent.getChild(i) == node) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static ASTElement findTemplateElement(ASTElement te, int line) {
@@ -70,9 +78,8 @@ public final class _Debug {
             return null;
         }
         // Find the narrowest match
-        List childMatches = new ArrayList();
-        for (Enumeration children = te.children(); children.hasMoreElements(); ) {
-            ASTElement child = (ASTElement) children.nextElement();
+        List<ASTElement> childMatches = new ArrayList<>();
+        for (ASTElement child : te.getChildren()) {
             ASTElement childmatch = findTemplateElement(child, line);
             if (childmatch != null) {
                 childMatches.add(childmatch);
@@ -81,7 +88,7 @@ public final class _Debug {
         //find a match that exactly matches the begin/end line
         ASTElement bestMatch = null;
         for (int i = 0; i < childMatches.size(); i++) {
-            ASTElement e = (ASTElement) childMatches.get(i);
+            ASTElement e = childMatches.get(i);
 
             if ( bestMatch == null ) {
                 bestMatch = e;
@@ -110,9 +117,9 @@ public final class _Debug {
     private static void removeDebugBreaks(ASTElement te) {
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
-            ASTElement child = te.getChild(i);
+            ASTElement child = te.fastGetChild(i);
             while (child instanceof ASTDebugBreak) {
-                ASTElement dbchild = child.getChild(0);
+                ASTElement dbchild = child.fastGetChild(0);
                 te.setChildAt(i, dbchild);
                 child = dbchild;
             }

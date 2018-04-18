@@ -237,7 +237,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "...[...]";
     }
     
@@ -262,7 +262,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpDynamicKeyName(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

@@ -45,7 +45,8 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
     
     private UnparsedTemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF,
             OutputFormat outputFormat) {
-        super(fileExtension, allowExtensionStartingWithF, outputFormat, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+        super(fileExtension, allowExtensionStartingWithF, DefaultDialect.INSTANCE,
+                outputFormat, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
     }
 
     /**

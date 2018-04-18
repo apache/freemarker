@@ -59,7 +59,7 @@ final class ASTExpNumberLiteral extends ASTExpression implements TemplateNumberM
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return getCanonicalForm();
     }
     
@@ -69,7 +69,7 @@ final class ASTExpNumberLiteral extends ASTExpression implements TemplateNumberM
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         return new ASTExpNumberLiteral(value);
     }

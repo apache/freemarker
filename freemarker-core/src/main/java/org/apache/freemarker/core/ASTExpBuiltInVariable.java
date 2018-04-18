@@ -220,17 +220,12 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     }
 
     @Override
-    public String toString() {
-        return "." + name;
-    }
-
-    @Override
     public String getCanonicalForm() {
         return "." + name;
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return getCanonicalForm();
     }
 
@@ -240,7 +235,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         return this;
     }

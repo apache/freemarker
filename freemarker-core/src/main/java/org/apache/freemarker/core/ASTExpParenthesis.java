@@ -43,7 +43,7 @@ final class ASTExpParenthesis extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "(...)";
     }
     
@@ -62,7 +62,7 @@ final class ASTExpParenthesis extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         return new ASTExpParenthesis(
                 nested.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));

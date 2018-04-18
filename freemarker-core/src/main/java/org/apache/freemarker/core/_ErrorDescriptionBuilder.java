@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * Note that this class isn't serializable, thus the containing exception should render the message before it's
  * serialized.
  */
+//TODO [FM3] will be public
 public class _ErrorDescriptionBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(_ErrorDescriptionBuilder.class);
@@ -77,7 +78,7 @@ public class _ErrorDescriptionBuilder {
                 Blaming blaming = findBlaming(parentElement, blamed, 0);
                 if (blaming != null) {
                     sb.append("For ");
-                    String nss = blaming.blamer.getASTNodeDescriptor();
+                    String nss = blaming.blamer.getLabelWithoutParameters();
                     char q = nss.indexOf('"') == -1 ? '\"' : '`';
                     sb.append(q).append(nss).append(q);
                     sb.append(" ").append(blaming.roleOfblamed).append(": ");
@@ -117,7 +118,8 @@ public class _ErrorDescriptionBuilder {
             }
             
             sb.append("  [");
-            sb.append(blamed.getStartLocation());
+            sb.append(MessageUtils.formatLocationForEvaluationError(
+                    blamed.getTemplate(), blamed.getBeginLine(), blamed.getEndLine()));
             sb.append(']');
             
             

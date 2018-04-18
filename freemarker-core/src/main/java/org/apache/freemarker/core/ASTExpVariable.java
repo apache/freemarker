@@ -61,7 +61,7 @@ final class ASTExpVariable extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return getCanonicalForm();
     }
 
@@ -86,7 +86,7 @@ final class ASTExpVariable extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         if (name.equals(replacedIdentifier)) {
             if (replacementState.replacementAlreadyInUse) {

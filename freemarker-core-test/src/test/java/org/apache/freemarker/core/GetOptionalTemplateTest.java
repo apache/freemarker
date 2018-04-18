@@ -107,7 +107,7 @@ public class GetOptionalTemplateTest extends TemplateTest {
     @Test
     public void testWrongArguments() throws Exception {
         assertErrorContains("<#assign t = .getOptionalTemplate()>", "argument");
-        assertErrorContains("<#assign t = .getOptionalTemplate('1', '2', '3')>", "arguments", "3");
+        assertErrorContains("<#assign t = .getOptionalTemplate('1', '2', '3')>", "1", "arguments", "more");
         assertErrorContains("<#assign t = .getOptionalTemplate(1)>", "1st argument", "string", "number");
     }
     

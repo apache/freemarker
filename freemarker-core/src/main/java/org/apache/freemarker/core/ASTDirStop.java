@@ -31,7 +31,7 @@ final class ASTDirStop extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] execute(Environment env) throws TemplateException {
         if (exp == null) {
             throw new StopException(env);
         }
@@ -39,10 +39,10 @@ final class ASTDirStop extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (exp != null) {
             sb.append(' ');
             sb.append(exp.getCanonicalForm());
@@ -52,7 +52,7 @@ final class ASTDirStop extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#stop";
     }
     

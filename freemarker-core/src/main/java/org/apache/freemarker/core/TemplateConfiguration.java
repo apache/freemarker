@@ -36,10 +36,11 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 /**
  * A partial set of configuration settings used for customizing the {@link Configuration}-level settings for individual
  * {@link Template}-s (or rather, for a group of templates). That it's partial means that you should call the
- * corresponding {@code isXxxSet()} before getting a settings, or else you may cause
- * {@link CoreSettingValueNotSetException}. (There's no fallback to the {@link Configuration}-level settings to keep the
- * dependency graph of configuration related beans non-cyclic. As user code seldom reads settings directly from
- * {@link TemplateConfiguration}-s anyway, this compromise was chosen.)
+ * corresponding {@code isXxxSet()} before getting a setting, or else you may cause
+ * {@link CoreSettingValueNotSetException}. (There's no fallback to the {@link Configuration}-level settings implemented
+ * in this class, to keep the dependency graph of configuration related beans non-cyclic. Instead, the caller of this
+ * API must implement the fallback itself. As user code hardly ever reads directly from {@link TemplateConfiguration}-s,
+ * this compromise was chosen.)
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism ({@link
  * Configuration#getTemplate(String)} and its overloads), localized template lookup happens before the {@code locale}

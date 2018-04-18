@@ -34,22 +34,22 @@ final class ASTDirOutputFormat extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getASTNodeDescriptor() + " \"" + paramExp.getCanonicalForm() + "\">"
-                    + getChildrenCanonicalForm() + "</" + getASTNodeDescriptor() + ">";
+            return "<" + getLabelWithoutParameters() + " \"" + paramExp.getCanonicalForm() + "\">"
+                    + getChildrenCanonicalForm() + "</" + getLabelWithoutParameters() + ">";
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#outputFormat";
     }
     

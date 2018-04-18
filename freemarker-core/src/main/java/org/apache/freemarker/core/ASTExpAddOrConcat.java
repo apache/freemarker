@@ -152,7 +152,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpAddOrConcat(
     	left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
@@ -165,7 +165,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "+";
     }
     

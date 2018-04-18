@@ -43,12 +43,12 @@ class ASTDirItems extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new TemplateException(env,
-                    getASTNodeDescriptor(), " without iteration in context");
+                    getLabelWithoutParameters(), " without iteration in context");
         }
         
         iterCtx.loopForItemsElement(env, getChildBuffer(), nestedContentParamName, nestedContentParam2Name);
@@ -61,10 +61,10 @@ class ASTDirItems extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         sb.append(" as ");
         sb.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParamName));
         if (nestedContentParam2Name != null) {
@@ -75,14 +75,14 @@ class ASTDirItems extends ASTDirective {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getASTNodeDescriptor());
+            sb.append(getLabelWithoutParameters());
             sb.append('>');
         }
         return sb.toString();
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#items";
     }
 

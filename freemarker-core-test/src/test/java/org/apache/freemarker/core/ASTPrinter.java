@@ -35,7 +35,6 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -261,7 +260,7 @@ public class ASTPrinter {
     private static void validateAST(ASTElement te) {
         int childCount = te.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ASTElement child = te.getChild(i);
+            ASTElement child = te.fastGetChild(i);
             ASTElement parentElement = child.getParent();
             // As ASTImplicitParent.accept does nothing but returns its children, it's optimized out in the final
             // AST tree. While it will be present as a child, the parent element also will have children
@@ -321,7 +320,7 @@ public class ASTPrinter {
             ASTNode tObj = (ASTNode) node;
 
             printNodeLineStart(paramRole, ind, out);
-            out.write(tObj.getASTNodeDescriptor());
+            out.write(tObj.getLabelWithoutParameters());
             printNodeLineEnd(node, out, opts);
             
             if (opts.getShowConstantValue() && node instanceof ASTExpression) {
@@ -345,9 +344,8 @@ public class ASTPrinter {
                 printNode(value, ind + INDENTATION, role, opts, out);
             }
             if (tObj instanceof ASTElement) {
-                Enumeration enu = ((ASTElement) tObj).children();
-                while (enu.hasMoreElements()) {
-                    printNode(enu.nextElement(), INDENTATION + ind, null, opts, out);
+                for (ASTElement child : ((ASTElement) tObj).getChildren()) {
+                    printNode(child, INDENTATION + ind, null, opts, out);
                 }
             }
         } else {

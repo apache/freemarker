@@ -45,7 +45,7 @@ final class ASTDirImport extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullImportedTemplateName;
         try {
@@ -68,10 +68,10 @@ final class ASTDirImport extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getASTNodeDescriptor());
+        buf.append(getLabelWithoutParameters());
         buf.append(' ');
         buf.append(importedTemplateNameExp.getCanonicalForm());
         buf.append(" as ");
@@ -81,7 +81,7 @@ final class ASTDirImport extends ASTDirective {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#import";
     }
     

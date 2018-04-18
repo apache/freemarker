@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
@@ -46,13 +47,19 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         ASTElement[] children = getChildBuffer();
 
         TemplateModel capturedValue;
         if (children != null) {
             StringWriter out = new StringWriter();
-            env.visit(children, out);
+            Writer prevOut = env.getOut();
+            try {
+                env.setOut(out);
+                env.executeElements(children);
+            } finally {
+                env.setOut(prevOut);
+            }
             capturedValue = capturedStringToModel(out.toString());
         } else {
             capturedValue = capturedStringToModel("");
@@ -79,10 +86,10 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append("<");
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         sb.append(' ');
         sb.append(varName);
         if (namespaceExp != null) {
@@ -93,7 +100,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getASTNodeDescriptor());
+            sb.append(getLabelWithoutParameters());
             sb.append('>');
         } else {
             sb.append(" = .nestedOutput");
@@ -102,7 +109,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return ASTDirAssignment.getDirectiveName(scope);
     }
     

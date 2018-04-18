@@ -40,20 +40,20 @@ final class ASTDirAttemptRecoverContainer extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         env.visitAttemptRecover(this, attemptedSection, recoverySection);
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (!canonical) {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         } else {
             StringBuilder buf = new StringBuilder();
-            buf.append("<").append(getASTNodeDescriptor()).append(">");
+            buf.append("<").append(getLabelWithoutParameters()).append(">");
             buf.append(getChildrenCanonicalForm());            
-            buf.append("</").append(getASTNodeDescriptor()).append(">");
+            buf.append("</").append(getLabelWithoutParameters()).append(">");
             return buf.toString();
         }
     }
@@ -76,7 +76,7 @@ final class ASTDirAttemptRecoverContainer extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#attempt";
     }
     

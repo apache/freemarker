@@ -35,9 +35,12 @@ import org.junit.Test;
 
 /**
  * These are things that users shouldn't do, but we shouldn't break backward compatibility without knowing about it.
+ * 
+ * TODO [FM3] Now we should make this illegal, but I'm not sure how to catch when the user does this.
  */
 public class MistakenlyPublicImportAPIsTest {
 
+    
     @Test
     public void testImportCopying() throws IOException, TemplateException {
         StringTemplateLoader tl = new StringTemplateLoader();
@@ -60,7 +63,7 @@ public class MistakenlyPublicImportAPIsTest {
                 t2.process(null, _NullWriter.INSTANCE);
                 fail();
             } catch (InvalidReferenceException e) {
-                // Apparenly, it has never worked like this...
+                // Apparently, it has never worked like this...
                 assertEquals("i1", e.getBlamedExpressionString());
             }
         }
@@ -72,6 +75,7 @@ public class MistakenlyPublicImportAPIsTest {
         assertThat(i1, instanceOf(Namespace.class));
         TemplateModel i2 = env.getVariable("i2");
         assertThat(i2, instanceOf(Namespace.class));
+        Environment originalEnv = env;
 
         {
             Template t2 = new Template(null, "<@i1.m/>", cfg);
@@ -80,6 +84,7 @@ public class MistakenlyPublicImportAPIsTest {
             env = t2.createProcessingEnvironment(null, sw);
             env.setVariable("i1", i1);
             
+            originalEnv.setOut(sw); // The imported macros are still bound to and will use this.
             env.process();
             assertEquals("1", sw.toString());
         }
@@ -88,10 +93,12 @@ public class MistakenlyPublicImportAPIsTest {
             Template t2 = new Template(null, "<@i2.m/>", cfg);
             
             StringWriter sw = new StringWriter();
+            env.setOut(sw); // In the old Environment instance, to which the imported macros are bound.
             env = t2.createProcessingEnvironment(null, sw);
             env.setVariable("i2", i2);
             
             try {
+                originalEnv.setOut(sw); // The imported macros are still bound to and will use this.
                 env.process();
                 assertEquals("2", sw.toString());
             } catch (NullPointerException e) {

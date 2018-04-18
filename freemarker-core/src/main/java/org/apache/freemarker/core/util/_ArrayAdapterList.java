@@ -51,7 +51,7 @@ public class _ArrayAdapterList<E> extends AbstractList<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new _ArrayIterator(array);
+        return new _ArrayIterator<E>(array);
     }
 
     @Override

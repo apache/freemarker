@@ -44,17 +44,17 @@ final class ASTDirAssignmentsContainer extends ASTDirective {
         this.namespaceExp = namespaceExp;
         int ln = getChildCount();
         for (int i = 0; i < ln; i++) {
-            ((ASTDirAssignment) getChild(i)).setNamespaceExp(namespaceExp);
+            ((ASTDirAssignment) fastGetChild(i)).setNamespaceExp(namespaceExp);
         }
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
         buf.append(ASTDirAssignment.getDirectiveName(scope));
@@ -65,7 +65,7 @@ final class ASTDirAssignmentsContainer extends ASTDirective {
                 if (i != 0) {
                     buf.append(", ");
                 }
-                ASTDirAssignment assignment = (ASTDirAssignment) getChild(i);
+                ASTDirAssignment assignment = (ASTDirAssignment) fastGetChild(i);
                 buf.append(assignment.getCanonicalForm());
             }
         } else {
@@ -103,7 +103,7 @@ final class ASTDirAssignmentsContainer extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return ASTDirAssignment.getDirectiveName(scope);
     }
 

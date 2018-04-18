@@ -37,9 +37,9 @@ class ASTDirListElseContainer extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         if (!listPart.acceptWithResult(env)) {
-            return elsePart.accept(env);
+            return elsePart.execute(env);
         }
         return null;
     }
@@ -50,23 +50,23 @@ class ASTDirListElseContainer extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                ASTElement element = getChild(i);
+                ASTElement element = fastGetChild(i);
                 buf.append(element.dump(canonical));
             }
             buf.append("</#list>");
             return buf.toString();
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#list-#else-container";
     }
 

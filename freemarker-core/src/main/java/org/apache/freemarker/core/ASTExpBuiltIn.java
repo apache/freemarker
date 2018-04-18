@@ -384,7 +384,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "?" + key;
     }
 
@@ -394,7 +394,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     }
     
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	try {
 	    	ASTExpBuiltIn clone = (ASTExpBuiltIn) clone();

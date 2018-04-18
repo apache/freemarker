@@ -42,7 +42,7 @@ final class ASTDirNested extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] execute(Environment env) throws IOException, TemplateException {
         CallPlace macroCallPlace = env.getCurrentMacroContext().callPlace;
 
         // When nestedContParamCnt < nestedContentParameters.getCollectionSize(), then we just skip calculating the
@@ -68,10 +68,10 @@ final class ASTDirNested extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (nestedContentParameters != null) {
             for (int i = 0; i < nestedContentParameters.size(); i++) {
                 sb.append(' ');
@@ -83,7 +83,7 @@ final class ASTDirNested extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#nested";
     }
     

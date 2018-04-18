@@ -68,7 +68,7 @@ final class ASTExpHashLiteral extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "{...}";
     }
 
@@ -89,7 +89,7 @@ final class ASTExpHashLiteral extends ASTExpression {
 
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
 		ArrayList clonedKeys = (ArrayList) keys.clone();
 		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext(); ) {

@@ -65,6 +65,8 @@ public interface CallPlace {
      *         that many nested content parameters as the length of this array. If you want to allow the  caller to not
      *         declare some of the nested content parameters, then you have to make this array shorter according to
      *         {@link #getNestedContentParameterCount()}.
+     * @param out
+     *         The {@link Writer} to print. 
      */
     void executeNestedContent(TemplateModel[] nestedContentArgs, Writer out, Environment env)
             throws TemplateException, IOException;

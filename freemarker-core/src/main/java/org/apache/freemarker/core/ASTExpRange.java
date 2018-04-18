@@ -62,11 +62,11 @@ final class ASTExpRange extends ASTExpression {
     @Override
     public String getCanonicalForm() {
         String rhs = rho != null ? rho.getCanonicalForm() : "";
-        return lho.getCanonicalForm() + getASTNodeDescriptor() + rhs;
+        return lho.getCanonicalForm() + getLabelWithoutParameters() + rhs;
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         switch (endType) {
         case END_EXCLUSIVE: return "..<";
         case END_INCLUSIVE: return "..";
@@ -83,7 +83,7 @@ final class ASTExpRange extends ASTExpression {
     }
     
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         return new ASTExpRange(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

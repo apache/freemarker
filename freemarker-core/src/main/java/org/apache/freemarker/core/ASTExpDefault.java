@@ -169,7 +169,7 @@ class ASTExpDefault extends ASTExpression {
 	}
 
 	@Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
+    ASTExpression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         return new ASTExpDefault(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
                 rho != null
@@ -186,7 +186,7 @@ class ASTExpDefault extends ASTExpression {
 	}
 	
 	@Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "...!...";
     }
     

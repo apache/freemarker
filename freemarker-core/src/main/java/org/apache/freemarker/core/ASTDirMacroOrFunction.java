@@ -112,13 +112,13 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
     }
 
     @Override
-    ASTElement[] accept(Environment env) {
+    ASTElement[] execute(Environment env) {
         env.visitMacroOrFunctionDefinition(this);
         return null;
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return function ? "#function" : "#macro";
     }
 
@@ -138,10 +138,10 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         sb.append(' ');
         sb.append(_StringUtils.toFTLTopLevelTragetIdentifier(name));
 
@@ -236,7 +236,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
-            sb.append("</").append(getASTNodeDescriptor()).append('>');
+            sb.append("</").append(getLabelWithoutParameters()).append('>');
         }
         return sb.toString();
     }

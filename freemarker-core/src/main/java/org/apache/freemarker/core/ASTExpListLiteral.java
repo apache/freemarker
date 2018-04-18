@@ -70,7 +70,7 @@ final class ASTExpListLiteral extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "[...]";
     }
     
@@ -113,7 +113,7 @@ final class ASTExpListLiteral extends ASTExpression {
     
     @SuppressWarnings("unchecked")
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         ArrayList<ASTExpression> clonedValues = (ArrayList<ASTExpression>) items.clone();
 		for (ListIterator<ASTExpression> iter = clonedValues.listIterator(); iter.hasNext(); ) {

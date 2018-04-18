@@ -33,11 +33,13 @@ public class InterpolationSyntaxTest extends TemplateTest {
 
     /** Non-standard template language */
     private final TemplateLanguage F3ASU = new DefaultTemplateLanguage("dummy",
+            DefaultDialect.INSTANCE,
             UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.SQUARE_BRACKET); 
 
     /** Non-standard template language */
     private final TemplateLanguage F3SDU = new DefaultTemplateLanguage("dummy",
+            DefaultDialect.INSTANCE,
             UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.SQUARE_BRACKET, InterpolationSyntax.DOLLAR); 
     

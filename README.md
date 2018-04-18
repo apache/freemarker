@@ -201,6 +201,9 @@ Last tested Eclipse Oxygen (4.7.0)
   - Fro each project: Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
+- Setting type filters (not required, but convenient): "Window" -> "Preferences" ->
+  "Java" -> "Appearance" -> "Type filter", "Add..." these:
+  `javax.swing.*`, `freemarker.*`, `com.sun.*`
 
 ### IntelliJ IDEA
 

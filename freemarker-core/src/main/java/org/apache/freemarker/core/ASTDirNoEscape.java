@@ -31,17 +31,17 @@ class ASTDirNoEscape extends ASTDirective {
     }
     
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getASTNodeDescriptor() + '>' + getChildrenCanonicalForm()
-                    + "</" + getASTNodeDescriptor() + '>';
+            return "<" + getLabelWithoutParameters() + '>' + getChildrenCanonicalForm()
+                    + "</" + getLabelWithoutParameters() + '>';
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
 
@@ -61,7 +61,7 @@ class ASTDirNoEscape extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#noEscape";
     }
 

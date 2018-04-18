@@ -56,7 +56,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
         
         final int childCount = te.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            addInterruptionChecks(te.getChild(i));
+            addInterruptionChecks(te.fastGetChild(i));
         }
         
         if (te.isNestedBlockRepeater()) {
@@ -79,7 +79,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
         }
 
         @Override
-        ASTElement[] accept(Environment env) throws TemplateException, IOException {
+        ASTElement[] execute(Environment env) throws TemplateException, IOException {
             // As the API doesn't allow throwing InterruptedException here (nor anywhere else, most importantly,
             // Template.process can't throw it), we must not clear the "interrupted" flag of the thread.
             if (Thread.currentThread().isInterrupted()) {
@@ -89,12 +89,12 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
         }
 
         @Override
-        protected String dump(boolean canonical) {
-            return canonical ? "" : "<#--" + getASTNodeDescriptor() + "--#>";
+        String dump(boolean canonical) {
+            return canonical ? "" : "<#--" + getLabelWithoutParameters() + "--#>";
         }
 
         @Override
-        String getASTNodeDescriptor() {
+        public String getLabelWithoutParameters() {
             return "##threadInterruptionCheck";
         }
 

@@ -27,18 +27,18 @@ import java.io.IOException;
 final class ASTDirFallback extends ASTDirective {
 
     @Override
-    ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] execute(Environment env) throws IOException, TemplateException {
         env.fallback();
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
-        return canonical ? "<" + getASTNodeDescriptor() + "/>" : getASTNodeDescriptor();
+    String dump(boolean canonical) {
+        return canonical ? "<" + getLabelWithoutParameters() + "/>" : getLabelWithoutParameters();
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#fallback";
     }
     

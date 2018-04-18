@@ -31,6 +31,7 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -146,6 +147,9 @@ class MessageUtils {
      * The truncation is always signaled with a a {@code "..."} at the end of the result string.
      */
     static String shorten(String s, int maxLength) {
+        if (s == null) {
+            return null;
+        }
         if (maxLength < 5) maxLength = 5;
 
         boolean isTruncated = false;
@@ -357,6 +361,21 @@ class MessageUtils {
                     + "items, as all will be held in memory on the same time.");
         }
         return errorDescBuilder;
+    }
+
+    static _ErrorDescriptionBuilder newBadNumberOfNestedContentParameterPassedMessage(
+            StringToIndexMap paramNamesOnCallPlace,
+            int numberOfParamsAtCallee) {
+        int numberOfParamsAtCallPlace = paramNamesOnCallPlace != null ? paramNamesOnCallPlace.size() : 0;
+        return new _ErrorDescriptionBuilder(
+            "The invocation declares ", (numberOfParamsAtCallPlace != 0 ? numberOfParamsAtCallPlace : "no"),
+            " nested content parameter(s)",
+            (numberOfParamsAtCallPlace != 0
+                    ? new Object[] { " (", new _DelayedJQuotedListing(paramNamesOnCallPlace.getKeys()), ")", }
+                    : ""),
+            ", but the called object intends to pass ",
+            numberOfParamsAtCallee, " parameters. You need to declare ", numberOfParamsAtCallee,
+            " nested content parameters.");
     }
 
 }

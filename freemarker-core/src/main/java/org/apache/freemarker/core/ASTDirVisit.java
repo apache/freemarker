@@ -40,7 +40,7 @@ final class ASTDirVisit extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] execute(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
             throw MessageUtils.newUnexpectedOperandTypeException(targetNode, node, TemplateNodeModel.class, env);
@@ -72,10 +72,10 @@ final class ASTDirVisit extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         sb.append(' ');
         sb.append(targetNode.getCanonicalForm());
         if (namespaces != null) {
@@ -87,7 +87,7 @@ final class ASTDirVisit extends ASTDirective {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#visit";
     }
     

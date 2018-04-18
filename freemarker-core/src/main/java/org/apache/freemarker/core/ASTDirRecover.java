@@ -31,24 +31,24 @@ final class ASTDirRecover extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
-            buf.append('<').append(getASTNodeDescriptor()).append('>');
+            buf.append('<').append(getLabelWithoutParameters()).append('>');
             buf.append(getChildrenCanonicalForm());            
             return buf.toString();
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#recover";
     }
     

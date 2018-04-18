@@ -41,7 +41,7 @@ final class ASTDirRecurse extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] execute(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
             throw MessageUtils.newUnexpectedOperandTypeException(
@@ -75,10 +75,10 @@ final class ASTDirRecurse extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (targetNode != null) {
             sb.append(' ');
             sb.append(targetNode.getCanonicalForm());
@@ -92,7 +92,7 @@ final class ASTDirRecurse extends ASTDirective {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#recurse";
     }
 

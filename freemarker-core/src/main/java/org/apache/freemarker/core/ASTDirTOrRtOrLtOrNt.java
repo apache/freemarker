@@ -37,22 +37,22 @@ final class ASTDirTOrRtOrLtOrNt extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) {
+    ASTElement[] execute(Environment env) {
         // This instruction does nothing at render-time, only parse-time.
         return null;
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (canonical) sb.append("/>");
         return sb.toString();
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         if (left && right) {
             return "#t";
         } else if (left) {

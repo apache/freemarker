@@ -63,6 +63,8 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
@@ -70,6 +72,7 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -280,7 +283,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
-                visit(getMainTemplate().getRootASTNode());
+                executeElement(getMainTemplate().getRootASTNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
@@ -366,17 +369,18 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * "Visit" the template element.
      */
-    void visit(ASTElement element) throws IOException, TemplateException {
+    // TODO [FM3] will be public
+    void executeElement(ASTElement element) throws IOException, TemplateException {
         // ATTENTION: This method body is manually "inlined" into visit(ASTElement[]); keep them in sync!
         pushElement(element);
         try {
-            ASTElement[] templateElementsToVisit = element.accept(this);
+            ASTElement[] templateElementsToVisit = element.execute(this);
             if (templateElementsToVisit != null) {
                 for (ASTElement el : templateElementsToVisit) {
                     if (el == null) {
                         break;  // Skip unused trailing buffer capacity 
                     }
-                    visit(el);
+                    executeElement(el);
                 }
             }
         } catch (TemplateException te) {
@@ -386,12 +390,20 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
         // ATTENTION: This method body above is manually "inlined" into visit(ASTElement[]); keep them in sync!
     }
+
+    // TODO [FM3] will be public
+    final void executeNestedContent(ASTDirective parentCall) throws IOException, TemplateException {
+        executeElements(parentCall.getChildBuffer());
+    }
     
     /**
+     * Executes the elements passed in (which is usually the return value of {@link ASTElement#getChildBuffer()}).
+     * 
      * @param elementBuffer
      *            The elements to visit; might contains trailing {@code null}-s. Can be {@code null}.
      */
-    final void visit(ASTElement[] elementBuffer) throws IOException, TemplateException {
+    // TODO [FM3] will be public
+    final void executeElements(ASTElement[] elementBuffer) throws IOException, TemplateException {
         if (elementBuffer == null) {
             return;
         }
@@ -404,13 +416,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             // We don't just let Hotspot to do it, as we want a hard guarantee regarding maximum stack usage. 
             pushElement(element);
             try {
-                ASTElement[] templateElementsToVisit = element.accept(this);
+                ASTElement[] templateElementsToVisit = element.execute(this);
                 if (templateElementsToVisit != null) {
                     for (ASTElement el : templateElementsToVisit) {
                         if (el == null) {
                             break;  // Skip unused trailing buffer capacity 
                         }
-                        visit(el);
+                        executeElement(el);
                     }
                 }
             } catch (TemplateException te) {
@@ -429,13 +441,27 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
-    void visit(
-            ASTElement[] childBuffer,
-            final StringToIndexMap nestedContentParamNames, final TemplateModel[] nestedContentParamValues,
-            Writer out)
-        throws IOException, TemplateException {
+    /**
+     * Executes the nested content of a {@link ASTDirective}.
+     * 
+     * @param directiveCall
+     *            This is the directive call AST node whose nested content we will execute.
+     * @param nestedContentParamNames
+     *            The names of the nested content parameters as they were declared by the directive call. For example
+     *            {@code code <#list m as k, v>...</#list>}, a call of the {@code list} directive, declares "k" at index
+     *            0, and "v" at index 1.
+     * @param nestedContentParamValues
+     *            The actual values of the nested content parameters, which will be visible for the nested content as
+     *            variables. The caller of this method <em>must</em> ensure that {@code nestedContentParamNames} doesn't
+     *            return an index that's out of bounds in {@code nestedContentParamValues}!
+     */
+    // TODO [FM3] will be public
+    void executeNestedContent(
+            ASTDirective directiveCall,
+            final StringToIndexMap nestedContentParamNames, final TemplateModel[] nestedContentParamValues) throws IOException, TemplateException {
+        ASTElement[] childBuffer = directiveCall.getChildBuffer();
         if (nestedContentParamNames == null) { // This is by far the most frequent case
-            visit(childBuffer, out);
+            executeElements(childBuffer);
         } else {
             pushLocalContext(new LocalContext() {
                 @Override
@@ -450,21 +476,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 }
             });
             try {
-                visit(childBuffer, out);
+                executeElements(childBuffer);
             } finally {
                 popLocalContext();
             }
-        }
-    }
-
-    void visit(ASTElement[] childBuffer, Writer out) throws IOException, TemplateException {
-        // TODO [FM][CF] The plan is that `out` will be the root read only sink, so then it will work differently
-        Writer prevOut = this.out;
-        this.out = out;
-        try {
-            visit(childBuffer);
-        } finally {
-            this.out = prevOut;
         }
     }
 
@@ -482,7 +497,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         boolean lastInAttemptBlock = inAttemptBlock;
         try {
             inAttemptBlock = true;
-            visit(attemptedSection);
+            executeElement(attemptedSection);
         } catch (TemplateException te) {
             thrownException = te;
         } finally {
@@ -493,7 +508,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (thrownException != null) {
             try {
                 recoveredErrorStack.add(thrownException);
-                visit(recoverySection);
+                executeElement(recoverySection);
             } finally {
                 recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
             }
@@ -988,11 +1003,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
     }
 
-    public void setOut(Writer out) {
+    public final void setOut(Writer out) {
         this.out = out;
     }
 
-    public Writer getOut() {
+    public final Writer getOut() {
         return out;
     }
 
@@ -1047,6 +1062,67 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public String formatToPlainText(TemplateModel tm) throws TemplateException {
         return _EvalUtils.coerceModelToPlainText(tm, null, null, this);
+    }
+    
+    /**
+     * Evaluates the expression and prints its value as if it was printed with an interpolation (like
+     * <code>${exp}</code>).
+     * 
+     * @param outputFormat
+     *            Acts like the output format in a template where an interpolation is called. Not {@code null}.
+     * @param autoEscapingPolicy
+     *            Acts like the auto escaping policy in a template where an interpolation is called. Not {@code null}.
+     */
+    // TODO [FM3] will be public
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    void interpolate(
+            ASTExpression exp,
+            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
+            Environment env) throws IOException, TemplateException {
+        interpolate(exp.eval(env), exp, outputFormat, autoEscapingPolicy, env);
+    }
+    
+    /**
+     * Same as {@link #interpolate(ASTExpression, OutputFormat, AutoEscapingPolicy, Environment)}, but is used in the
+     * rare case where you have already evaluated the expression.
+     * 
+     * @param value
+     *            The value resulting from evaluating {@code exp}
+     * @param exp
+     *            The expression whose evaluation was resulted in {@code value}. It won't be evaluated again, but is
+     *            still used for error messages. {@code null} is tolerated, but should be avoided due to the resulting
+     *            poorer quality error messages.
+     */
+    void interpolate(
+            TemplateModel value, ASTExpression exp,
+            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
+            Environment env) throws IOException, TemplateException {
+        _NullArgumentException.check("outputFormat", outputFormat);
+        _NullArgumentException.check("autoEscapingPolicy", autoEscapingPolicy);
+        
+        final Writer out = env.getOut();
+        
+        final Object moOrStr = _EvalUtils.coerceModelToPlainTextOrMarkup(value, exp, null, env);
+        if (moOrStr instanceof String) {
+            final String s = (String) moOrStr;
+            
+            MarkupOutputFormat markupOutputFormat;
+            if (outputFormat instanceof MarkupOutputFormat) {
+                markupOutputFormat = (MarkupOutputFormat) outputFormat;
+                if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_SUPPORTED
+                        || autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_DEFAULT
+                                && markupOutputFormat.isAutoEscapedByDefault()) {
+                    markupOutputFormat.output(s, out);
+                } else {
+                    out.write(s);
+                }
+            } else {
+                out.write(s);
+            }
+        } else {
+            final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
+            _EvalUtils.printTemplateMarkupOutputModel(mo, outputFormat, out, exp);
+        }
     }
     
     String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
@@ -2135,7 +2211,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     static void appendInstructionStackItem(ASTElement stackEl, StringBuilder sb) {
-        sb.append(MessageUtils.shorten(stackEl.getDescription(), 40));
+        sb.append(MessageUtils.shorten(stackEl.getLabelWithParameters(), 40));
 
         sb.append("  [");
         ASTDirMacroOrFunction enclosingMacro = getEnclosingMacro(stackEl);
@@ -2286,7 +2362,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         };
     }
 
-    private void pushElement(ASTElement element) {
+    void pushElement(ASTElement element) {
         final int newSize = ++instructionStackSize;
         ASTElement[] instructionStack = this.instructionStack;
         if (newSize > instructionStack.length) {
@@ -2300,7 +2376,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         instructionStack[newSize - 1] = element;
     }
 
-    private void popElement() {
+    void popElement() {
         instructionStackSize--;
     }
 
@@ -2481,7 +2557,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         final Template prevTemplate;
 
         importMacros(includedTemplate);
-        visit(includedTemplate.getRootASTNode());
+        executeElement(includedTemplate.getRootASTNode());
     }
 
     /**
@@ -2976,7 +3052,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     : callableDefinition.getName();
         }
 
-        protected void genericExecute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+        protected void genericExecute(TemplateModel[] args, CallPlace callPlace, Environment env)
                 throws TemplateException, IOException {
             pushElement(callableDefinition);
             try {
@@ -2996,7 +3072,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     // Note: Default expressions are evaluated here, so namespace, stack, etc. must be already set
                     setLocalsFromArguments(macroCtx, args);
 
-                    visit(callableDefinition.getChildBuffer(), out);
+                    executeElements(callableDefinition.getChildBuffer());
                 } catch (ASTDirReturn.Return re) {
                     // Not an error, just a <#return>
                 } catch (TemplateException te) {
@@ -3079,7 +3155,14 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             if (getCallableDefinition() == ASTDirMacroOrFunction.PASS_MACRO) {
                 return;
             }
-            genericExecute(args, callPlace, out, env);
+            
+            Writer prevOut = env.getOut();
+            try {
+                env.setOut(out);
+                genericExecute(args, callPlace, env);
+            } finally {
+                env.setOut(prevOut);
+            }
         }
 
         @Override
@@ -3115,11 +3198,15 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                 throws TemplateException {
             env.setLastReturnValue(null);
+            Writer prevOut = env.getOut();
             try {
-                genericExecute(args, callPlace, _NullWriter.INSTANCE, env);
+                env.setOut(_NullWriter.INSTANCE);
+                genericExecute(args, callPlace, env);
             } catch (IOException e) {
                 // Should not occur
                 throw new TemplateException("Unexpected exception during function execution", e, env);
+            } finally {
+                env.setOut(prevOut);
             }
             return env.getLastReturnValue();
         }

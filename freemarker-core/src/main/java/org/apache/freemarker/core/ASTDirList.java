@@ -78,7 +78,7 @@ final class ASTDirList extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
         return null;
     }
@@ -117,10 +117,10 @@ final class ASTDirList extends ASTDirective {
     }
     
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getASTNodeDescriptor());
+        buf.append(getLabelWithoutParameters());
         buf.append(' ');
         buf.append(listedExp.getCanonicalForm());
         if (nestedContentParamName != null) {
@@ -136,7 +136,7 @@ final class ASTDirList extends ASTDirective {
             buf.append(getChildrenCanonicalForm());
             if (!(getParent() instanceof ASTDirListElseContainer)) {
                 buf.append("</");
-                buf.append(getASTNodeDescriptor());
+                buf.append(getLabelWithoutParameters());
                 buf.append('>');
             }
         }
@@ -179,7 +179,7 @@ final class ASTDirList extends ASTDirective {
     }    
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#list";
     }
 
@@ -266,7 +266,7 @@ final class ASTDirList extends ASTDirective {
                                 nestedContentParam = iterModel.next();
                                 hasNext = iterModel.hasNext();
                                 try {
-                                    env.visit(childBuffer);
+                                    env.executeElements(childBuffer);
                                 } catch (BreakOrContinueException br) {
                                     if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                         break listLoop;
@@ -279,7 +279,7 @@ final class ASTDirList extends ASTDirective {
                         // We must reuse this later, because TemplateIterableModel-s that wrap an Iterator only
                         // allow one iterator() call.
                         openedIterator = iterModel;
-                        env.visit(childBuffer);
+                        env.executeElements(childBuffer);
                     }
                 }
             } else if (listedValue instanceof TemplateHashModelEx) {
@@ -316,7 +316,7 @@ final class ASTDirList extends ASTDirective {
                                 nestedContentParam2 = kvp.getValue();
                                 hasNext = kvpIter.hasNext();
                                 try {
-                                    env.visit(childBuffer);
+                                    env.executeElements(childBuffer);
                                 } catch (BreakOrContinueException br) {
                                     if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                         break listLoop;
@@ -328,7 +328,7 @@ final class ASTDirList extends ASTDirective {
                     } else {
                         // We will reuse this at the #iterms
                         openedIterator = kvpIter;
-                        env.visit(childBuffer);
+                        env.executeElements(childBuffer);
                     }
                 }
             } else if (listedValue instanceof TemplateIterableModel) {

@@ -47,7 +47,7 @@ class ASTDirEscape extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
@@ -56,22 +56,22 @@ class ASTDirEscape extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor())
+        sb.append(getLabelWithoutParameters())
                 .append(' ').append(_StringUtils.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
-            sb.append("</").append(getASTNodeDescriptor()).append('>');
+            sb.append("</").append(getLabelWithoutParameters()).append('>');
         }
         return sb.toString();
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#escape";
     }
     

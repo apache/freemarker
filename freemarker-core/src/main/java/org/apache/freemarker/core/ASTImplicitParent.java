@@ -25,15 +25,17 @@ import java.io.IOException;
  * AST directive-like node, used where there's no other parent for a list of {@link ASTElement}-s. Most often occurs as
  * the root node of the AST.
  */
+//TODO [FM3] will be public
 final class ASTImplicitParent extends ASTElement {
 
+    // Package visible constructor to prevent instantiating outside FreeMarker 
     ASTImplicitParent() { }
     
     @Override
     ASTElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         super.postParseCleanup(stripWhitespace);
-        return getChildCount() == 1 ? getChild(0) : this;
+        return getChildCount() == 1 ? fastGetChild(0) : this;
     }
 
     /**
@@ -41,20 +43,19 @@ final class ASTImplicitParent extends ASTElement {
      * and outputs the resulting text.
      */
     @Override
-    ASTElement[] accept(Environment env)
-        throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
             return getChildrenCanonicalForm();
         } else {
             if (getParent() == null) {
                 return "root";
             }
-            return getASTNodeDescriptor(); // ASTImplicitParent is uninteresting in a stack trace.
+            return getLabelWithoutParameters(); // ASTImplicitParent is uninteresting in a stack trace.
         }
     }
 
@@ -62,7 +63,7 @@ final class ASTImplicitParent extends ASTElement {
     protected boolean isOutputCacheable() {
         int ln = getChildCount();
         for (int i = 0; i < ln; i++) {
-            if (!getChild(i).isOutputCacheable()) {
+            if (!fastGetChild(i).isOutputCacheable()) {
                 return false;
             }
         }
@@ -70,7 +71,7 @@ final class ASTImplicitParent extends ASTElement {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#mixedContent";
     }
     

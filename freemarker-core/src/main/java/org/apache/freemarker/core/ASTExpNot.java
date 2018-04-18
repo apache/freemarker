@@ -41,7 +41,7 @@ final class ASTExpNot extends ASTExpBoolean {
     }
  
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "!";
     }
     
@@ -51,7 +51,7 @@ final class ASTExpNot extends ASTExpBoolean {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpNot(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));

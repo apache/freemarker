@@ -31,7 +31,7 @@ final class ASTDirReturn extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] execute(Environment env) throws TemplateException {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }
@@ -43,10 +43,10 @@ final class ASTDirReturn extends ASTDirective {
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (exp != null) {
             sb.append(' ');
             sb.append(exp.getCanonicalForm());
@@ -56,7 +56,7 @@ final class ASTDirReturn extends ASTDirective {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#return";
     }
     

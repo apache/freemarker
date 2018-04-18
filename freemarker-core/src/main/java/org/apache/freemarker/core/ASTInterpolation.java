@@ -31,6 +31,7 @@ import org.apache.freemarker.core.util.TemplateLanguageUtils;
 /**
  * AST interpolation node: <tt>${exp}</tt>
  */
+//TODO [FM3] will be public
 final class ASTInterpolation extends ASTElement {
 
     private final ASTExpression expression;
@@ -42,7 +43,7 @@ final class ASTInterpolation extends ASTElement {
     private final OutputFormat outputFormat;
     private final MarkupOutputFormat markupOutputFormat;
     private final boolean autoEscape;
-
+    
     ASTInterpolation(
             ASTExpression expression, ASTExpression escapedExpression,
             OutputFormat outputFormat, boolean autoEscape) {
@@ -58,9 +59,21 @@ final class ASTInterpolation extends ASTElement {
      * Outputs the string value of the enclosed expression.
      */
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
-        final Object moOrStr = calculateInterpolatedStringOrMarkup(env);
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
+        printStringOrTemplateOutputModel(
+                escapedExpression, outputFormat, markupOutputFormat, autoEscape, env);
+        return null;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static void printStringOrTemplateOutputModel(
+            ASTExpression exp,
+            OutputFormat outputFormat,
+            MarkupOutputFormat markupOutputFormat, boolean autoEscape, 
+            Environment env) throws IOException, TemplateException {
         final Writer out = env.getOut();
+        
+        final Object moOrStr = _EvalUtils.coerceModelToPlainTextOrMarkup(exp.eval(env), exp, null, env);
         if (moOrStr instanceof String) {
             final String s = (String) moOrStr;
             if (autoEscape) {
@@ -70,28 +83,8 @@ final class ASTInterpolation extends ASTElement {
             }
         } else {
             final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
-            final MarkupOutputFormat moOF = mo.getOutputFormat();
-            // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-            if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
-                final String srcPlainText;
-                // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-                srcPlainText = moOF.getSourcePlainText(mo);
-                if (srcPlainText == null) {
-                    throw new TemplateException(escapedExpression,
-                            "The value to print is in ", new _DelayedToString(moOF),
-                            " format, which differs from the current output format, ",
-                            new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
-                }
-                if (outputFormat instanceof MarkupOutputFormat) {
-                    ((MarkupOutputFormat) outputFormat).output(srcPlainText, out);
-                } else {
-                    out.write(srcPlainText);
-                }
-            } else {
-                moOF.output(mo, out);
-            }
+            _EvalUtils.printTemplateMarkupOutputModel(mo, outputFormat, out, exp);
         }
-        return null;
     }
 
     /**
@@ -104,7 +97,7 @@ final class ASTInterpolation extends ASTElement {
     }
 
     @Override
-    protected final String dump(boolean canonical) {
+    final String dump(boolean canonical) {
         return dump(canonical, false);
     }
     
@@ -137,7 +130,7 @@ final class ASTInterpolation extends ASTElement {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "${...}";
     }
 

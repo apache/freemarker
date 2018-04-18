@@ -30,6 +30,7 @@ PARSER_BEGIN(FMParser)
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Dialect.ConfiguredDialect;
 import org.apache.freemarker.core.outputformat.*;
 import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
@@ -84,6 +85,7 @@ public class FMParser {
     private boolean autoEscaping;
     private ParsingConfiguration pCfg;
     DefaultTemplateLanguage templateLanguage;
+    ConfiguredDialect configuredDialect;
     private InputStream streamToUnmarkWhenEncEstabd;
 
     /** Keeps track of #list nesting. */
@@ -112,6 +114,7 @@ public class FMParser {
     private static final int INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE = 4;
     private StringToIndexMap.Entry[] topNestedContentParamNamesBuffer;
     private int topNestedContentParamNamesLength;
+
 
     FMParser(Template template, Reader reader,
             ParsingConfiguration pCfg,
@@ -143,6 +146,7 @@ public class FMParser {
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
 
+        // We know that it's a DefaultTemplateLanguage, as this is the parser of the DefaultTemplateLanguage. 
         templateLanguage = (DefaultTemplateLanguage) pCfg.getTemplateLanguage();
 
         outputFormat = pCfg.getOutputFormat();
@@ -165,6 +169,8 @@ public class FMParser {
         token_source.interpolationSyntax = templateLanguage.getInterpolationSyntax();
 
         this.stripWhitespace = pCfg.getWhitespaceStripping();
+
+        configuredDialect = template.getConfiguration().getConfiguredDialect(templateLanguage.getDialect());
     }
     
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
@@ -3315,7 +3321,7 @@ ASTElement DynamicTopLevelCall() :
         )
         |
         (
-            // This could be part of the positional paramter choice, but we can give better error messages this way.
+            // This could be part of the positional parameter choice, but we can give better error messages this way.
             t = <COMMA>
             {
                 if (prevChoiceComma != null) {

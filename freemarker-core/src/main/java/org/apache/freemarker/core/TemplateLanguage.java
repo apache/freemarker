@@ -29,9 +29,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * Represents a template language; a template language specifies the syntax, and usually also the {@link OutputFormat}
- * and {@link AutoEscapingPolicy} of the template. In the future (TODO [FM3]) custom template languages may also
- * specify the dialect (which is the set of core directives and functions).  
+ * Represents a template language; a template language specifies the syntax, the {@link Dialect}, and usually also the
+ * {@link OutputFormat} and {@link AutoEscapingPolicy}.  
  * 
  * <p><em>Currently this class is not mature, so it can't be implemented outside FreeMarker,
  * also its methods shouldn't be called from outside FreeMarker.</em>
@@ -48,6 +47,7 @@ public abstract class TemplateLanguage {
     private final String fileExtension;
     private final OutputFormat outputFormat;
     private final AutoEscapingPolicy autoEscapingPolicy;
+    private final Dialect dialect;
     
     // Package visibility to prevent user implementations until this API is mature.
 
@@ -70,14 +70,14 @@ public abstract class TemplateLanguage {
      *             If the {@code #fileExtension} argument contains upper case letter or dot, or if it starts with "f"
      *             and the language isn't defined by the FreeMarker project.
      */
-    public TemplateLanguage(String fileExtension, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
-        this(fileExtension, false, outputFormat, autoEscapingPolicy);
+    public TemplateLanguage(String fileExtension, Dialect dialect, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
+        this(fileExtension, false, dialect, outputFormat, autoEscapingPolicy);
     }
     
     /**
-     * Non-public constructor used for languages defined by the FreeMarker project.
+     * Used internally to allow extensions starting with "f" (as those are reserved for FreeMarker) 
      */
-    TemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF,
+    TemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF, Dialect dialect,
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
         _NullArgumentException.check("fileExtension", fileExtension);
         for (int i = 0; i < fileExtension.length(); i++) {
@@ -94,6 +94,10 @@ public abstract class TemplateLanguage {
                     "The \"fileExtension\" argument can't start with 'f' for an user-defined language.");
         }
         this.fileExtension = fileExtension;
+        
+        _NullArgumentException.check("dialect", dialect);
+        this.dialect = dialect;
+        
         this.outputFormat = outputFormat;
         this.autoEscapingPolicy = autoEscapingPolicy;
     }
@@ -123,12 +127,14 @@ public abstract class TemplateLanguage {
     public String getFileExtension() {
         return fileExtension;
     }
-
-    @Override
-    public final String toString() {
-        return "TemplateLanguage(" + _StringUtils.jQuote(fileExtension) + ")";
-    }
     
+    /**
+     * Returns the {@link Dialect} used by this template language; not {@code null}.
+     */
+    public Dialect getDialect() {
+        return dialect;
+    }
+
     /**
      * The {@link OutputFormat} that this language enforces, or else {@code null} (and it comes from the
      * {@link ParsingConfiguration}).
@@ -151,4 +157,9 @@ public abstract class TemplateLanguage {
         return autoEscapingPolicy;
     }
 
+    @Override
+    public final String toString() {
+        return "TemplateLanguage(" + _StringUtils.jQuote(fileExtension) + ")";
+    }
+    
 }

@@ -22,9 +22,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Used as the return value of {@link ASTElement#accept(Environment)} when the invoked element has nested elements
+ * Used as the return value of {@link ASTElement#execute(Environment)} when the invoked element has nested elements
  * to invoke. It would be more natural to invoke child elements before returning from
- * {@link ASTElement#accept(Environment)}, however, if there's nothing to do after the child elements were invoked,
+ * {@link ASTElement#execute(Environment)}, however, if there's nothing to do after the child elements were invoked,
  * that would mean wasting stack space.
  */
 class TemplateElementsToVisit {

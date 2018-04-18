@@ -25,17 +25,17 @@ package org.apache.freemarker.core;
 final class ASTDirBreak extends ASTDirective {
 
     @Override
-    ASTElement[] accept(Environment env) {
+    ASTElement[] execute(Environment env) {
         throw BreakOrContinueException.BREAK_INSTANCE;
     }
 
     @Override
-    protected String dump(boolean canonical) {
-        return canonical ? "<" + getASTNodeDescriptor() + "/>" : getASTNodeDescriptor();
+    String dump(boolean canonical) {
+        return canonical ? "<" + getLabelWithoutParameters() + "/>" : getLabelWithoutParameters();
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#break";
     }
 

@@ -31,21 +31,21 @@ final class ASTDirAutoEsc extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] execute(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getASTNodeDescriptor() + "\">" + getChildrenCanonicalForm() + "</" + getASTNodeDescriptor() + ">";
+            return "<" + getLabelWithoutParameters() + "\">" + getChildrenCanonicalForm() + "</" + getLabelWithoutParameters() + ">";
         } else {
-            return getASTNodeDescriptor();
+            return getLabelWithoutParameters();
         }
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "#autoEsc";
     }
     

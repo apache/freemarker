@@ -50,7 +50,10 @@ public interface ParsingConfiguration {
      * {@link TemplateLanguage#getAutoEscapingPolicy() autoEscapingPolicy}, that overrides the value of
      * the {@linkplain #getOutputFormat() outputFormat} and {@link #getAutoEscapingPolicy() autoEscapingPolicy}
      * settings that are coming from {@link Configuration#getTemplateConfigurations templateConfigurations}, from the
-     * {@link Configuration}, or from any other {@link ParsingConfiguration}.
+     * {@link Configuration}, or from any other {@link ParsingConfiguration}. Most {@link TemplateLanguage}-s should
+     * have non-{@code null} for those settings, to prevent confusion on the template author side. There can be
+     * exceptions from this though, like {@link DefaultTemplateLanguage#F3AC} (where the "C" at the end stands for
+     * "configurable") has {@code null} for these settings.
      * 
      * @see ParsingConfiguration#getRecognizeStandardFileExtensions()
      */

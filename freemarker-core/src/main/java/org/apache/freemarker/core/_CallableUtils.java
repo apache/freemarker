@@ -57,7 +57,7 @@ public class _CallableUtils {
             throws TemplateException {
         if (namedArgs != null) {
             throw new TemplateException(env,
-                    getNamedArgumentsNotSupportedMessage(callable, namedArgs[0], calledAsFunction));
+                    getNamedArgumentsNotSupportedMessage(callable, namedArgs[0].name, calledAsFunction));
         }
 
         TemplateModel[] execArgs;
@@ -77,8 +77,8 @@ public class _CallableUtils {
             ASTExpression[] positionalArgs, NamedArgument[] namedArgs, ArgumentArrayLayout argsLayout,
             TemplateCallableModel callable, boolean calledAsFunction,
             Environment env) throws TemplateException {
-        int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
-        int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
+        final int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
+        final int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
 
         TemplateModel[] execArgs = new TemplateModel[argsLayout.getTotalLength()];
 
@@ -104,44 +104,14 @@ public class _CallableUtils {
             }
             execArgs[posVarargsArgIdx] = varargsSeq;
         } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
-            checkSupportsAnyParameters(callable, argsLayout, calledAsFunction);
-            List<String> validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
-            _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
-                    getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
-                    "This ", getCallableTypeName(callable, calledAsFunction),
-                    " ",
-                    (predefPosArgCnt != 0
-                            ? new Object[]{ "can only have ", predefPosArgCnt }
-                            : "can't have"
-                    ),
-                    " arguments passed by position, but the invocation has ",
-                    positionalArgs.length, " such arguments.",
-                    (!argsLayout.isPositionalParametersSupported() && argsLayout.isNamedParametersSupported() ?
-                            new Object[] {
-                                    " Try to pass arguments by name (as in ",
-                                    (callable instanceof TemplateDirectiveModel
-                                            ? "<@example x=1 y=2 />"
-                                            : "example(x=1, y=2)"),
-                                    ")",
-                                    (!validPredefNames.isEmpty()
-                                            ? new Object[] { " The supported parameter names are: ",
-                                            new _DelayedJQuotedListing(validPredefNames)}
-                                            : _CollectionUtils.EMPTY_OBJECT_ARRAY)}
-                            : "")
-            );
-            if (callable instanceof Environment.TemplateLanguageDirective
-                    && !argsLayout.isPositionalParametersSupported() && argsLayout.isNamedParametersSupported()) {
-                errorDesc.tip("You can pass a parameter by position (i.e., without specifying its name, as you"
-                        + " have tried now) when the macro has defined that parameter to be a positional parameter. "
-                        + "See in the documentation how, and when that's a good practice.");
-            }
-            throw new TemplateException(env, errorDesc);
+            throw new TemplateException(env,
+                    newPositionalArgDoesNotFitArgLayoutErrorDesc(argsLayout, callable, calledAsFunction));
         }
 
         int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
         NativeHashEx namedVarargsHash = null;
         if (namedArgs != null) {
-            StringToIndexMap predefNamedArgsMap = argsLayout.getPredefinedNamedArgumentsMap();
+            final StringToIndexMap predefNamedArgsMap = argsLayout.getPredefinedNamedArgumentsMap();
             for (NamedArgument namedArg : namedArgs) {
                 int argIdx = predefNamedArgsMap.get(namedArg.name);
                 if (argIdx != -1) {
@@ -149,20 +119,9 @@ public class _CallableUtils {
                 } else {
                     if (namedVarargsHash == null) {
                         if (namedVarargsArgumentIndex == -1) {
-                            checkSupportsAnyParameters(callable, argsLayout, calledAsFunction);
-                            Collection<String> validNames = predefNamedArgsMap.getKeys();
                             throw new TemplateException(env,
-                                    validNames == null || validNames.isEmpty()
-                                            ? getNamedArgumentsNotSupportedMessage(
-                                                    callable, namedArg, calledAsFunction)
-                                            : new Object[] {
-                                                    getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
-                                                    "This ", getCallableTypeName(callable, calledAsFunction),
-                                                    " has no parameter that's passed by name and is called ",
-                                                    new _DelayedJQuote(namedArg.name),
-                                                    ". The supported parameter names are:\n",
-                                                    new _DelayedJQuotedListing(validNames)
-                                            });
+                                    newNamedArgumentDoesNotArgLayoutErrorDesc(
+                                            argsLayout, namedArg.name, callable, calledAsFunction));
                         }
 
                         namedVarargsHash = new NativeHashEx();
@@ -177,30 +136,94 @@ public class _CallableUtils {
         return execArgs;
     }
 
+    static _ErrorDescriptionBuilder newPositionalArgDoesNotFitArgLayoutErrorDesc(
+            ArgumentArrayLayout argsLayout, TemplateCallableModel callable, boolean calledAsFunction) {
+        _ErrorDescriptionBuilder noParamsED = checkSupportsAnyParameters(callable, argsLayout, calledAsFunction);
+        if (noParamsED != null) {
+            return noParamsED;
+        }
+        
+        List<String> validPredefNames;
+        _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
+                getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
+                "This ", getCallableTypeName(callable, calledAsFunction),
+                " ",
+                (argsLayout.getPredefinedPositionalArgumentCount() != 0
+                        ? new Object[]{ "can only have ", argsLayout.getPredefinedPositionalArgumentCount() }
+                        : "can't have"
+                ),
+                " arguments passed by position, but the invocation tries to pass in more.",
+                (!argsLayout.isPositionalParametersSupported() && argsLayout.isNamedParametersSupported() ?
+                        new Object[] {
+                                " Try to pass arguments by name (as in ",
+                                (callable instanceof TemplateDirectiveModel
+                                        ? "<@example x=1 y=2 />"
+                                        : "example(x=1, y=2)"),
+                                ")",
+                                (!(validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys())
+                                        .isEmpty()
+                                        ? new Object[] {
+                                                " The supported parameter names are: ",
+                                                new _DelayedJQuotedListing(validPredefNames)
+                                        }
+                                        : _CollectionUtils.EMPTY_OBJECT_ARRAY)}
+                        : "")
+        );
+        if (callable instanceof Environment.TemplateLanguageDirective
+                && !argsLayout.isPositionalParametersSupported() && argsLayout.isNamedParametersSupported()) {
+            errorDesc.tip("You can pass a parameter by position (i.e., without specifying its name, as you"
+                    + " have tried now) when the directuve (the macro) has defined that parameter to be a "
+                    + "positional parameter. See in the documentation how, and when that's a good practice.");
+        }
+        return errorDesc;
+    }
+    
+    static _ErrorDescriptionBuilder newNamedArgumentDoesNotArgLayoutErrorDesc(ArgumentArrayLayout argsLayout,
+            String argName, TemplateCallableModel callable, boolean calledAsFunction) {
+        _ErrorDescriptionBuilder noParamsED = checkSupportsAnyParameters(callable, argsLayout, calledAsFunction);
+        if (noParamsED != null) {
+            return noParamsED;
+        }
+        
+        Collection<String> validNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
+        _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
+                validNames == null || validNames.isEmpty()
+                ? getNamedArgumentsNotSupportedMessage(
+                        callable, argName, calledAsFunction)
+                : new Object[] {
+                        getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
+                        "This ", getCallableTypeName(callable, calledAsFunction),
+                        " has no parameter that's passed by name and is called ",
+                        new _DelayedJQuote(argName),
+                        ". The supported parameter names are:\n",
+                        new _DelayedJQuotedListing(validNames)
+                });
+        return errorDesc;
+    }
+    
+    static private _ErrorDescriptionBuilder checkSupportsAnyParameters(
+            TemplateCallableModel callable, ArgumentArrayLayout argsLayout, boolean calledAsFunction)  {
+        return argsLayout.getTotalLength() == 0
+                ? new _ErrorDescriptionBuilder(
+                            getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
+                            "This ", getCallableTypeName(callable, calledAsFunction),
+                            " doesn't support any parameters.")
+                : null;
+    }
+
     private static Object[] getNamedArgumentsNotSupportedMessage(TemplateCallableModel callable,
-            _CallableUtils.NamedArgument namedArg, boolean calledAsFunction) {
+            String argName, boolean calledAsFunction) {
         return new Object[] {
                 getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
                 "This ", getCallableTypeName(callable, calledAsFunction),
                 " can't have arguments that are passed by name (like ",
-                new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
+                new _DelayedJQuote(argName), "). Try to pass arguments by position "
                 + "(i.e, without name, as in ",
                 (callable instanceof TemplateDirectiveModel
                         ? "<@example arg1, arg2, arg3 />"
                         : "example(arg1, arg2, arg3)"),
                 ")."
         };
-    }
-
-    static private void checkSupportsAnyParameters(
-            TemplateCallableModel callable, ArgumentArrayLayout argsLayout, boolean calledAsFunction)
-            throws TemplateException {
-        if (argsLayout.getTotalLength() == 0) {
-            throw new TemplateException(
-                    getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
-                    "This ", getCallableTypeName(callable, calledAsFunction),
-                    " doesn't support any parameters.");
-        }
     }
 
     /**

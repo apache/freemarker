@@ -48,8 +48,8 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     }
     
     @Override
-    String getASTNodeDescriptor() {
-        return super.getASTNodeDescriptor() + "(...)";
+    public String getLabelWithoutParameters() {
+        return super.getLabelWithoutParameters() + "(...)";
     }        
     
     @Override
@@ -90,7 +90,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         final ASTExpression clone = super.deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);
         cloneArguments(clone, replacedIdentifier, replacement, replacementState);

@@ -22,9 +22,13 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.freemarker.core.util.StringToIndexMap;
+
 /**
  * AST directive node superclass.
+ * Concrete instances are normally created using {@link StaticallyLinkedNamespaceEntry#getDirectiveCallNodeFactory()}/
  */
+// TODO [FM3] will be public
 abstract class ASTDirective extends ASTElement {
 
     static final Set<String> BUILT_IN_DIRECTIVE_NAMES;
@@ -74,6 +78,65 @@ abstract class ASTDirective extends ASTElement {
 
         BUILT_IN_DIRECTIVE_NAMES = Collections.unmodifiableSet(names);
 
+    }
+    
+    /**
+     * Called by the parser to when it has parsed a parameter value expression for a positional parameter.
+     * 
+     * <p>
+     * It's guaranteed that either {@link #setPositionalArgument(int, ASTExpression)} or
+     * {@link #setNamedArgument(String, ASTExpression)} is called for each parameter in the source code exactly once, in
+     * the order as the corresponding parameters occur in the source code. (While {@link DefaultTemplateLanguage}
+     * guarantees that positional parameters are before the named parameters, other {@link TemplateLanguage}-s may don't
+     * have such restriction.)
+     * 
+     * @param position
+     *            The 0-based position of the parameter among the positional parameters.
+     */
+    public void setPositionalArgument(int position, ASTExpression valueExp)
+            throws StaticLinkingCheckException {
+        // TODO [FM3][FREEMARKER-99] Will be abstract
+    }
+
+    /**
+     * Called by the parser when it has parsed a parameter expression.
+     * 
+     * <p>See guarantees regarding the call order and the number of calls in the description of
+     * {@link #setPositionalArgument(int, ASTExpression)}.
+     */
+    public void setNamedArgument(String name, ASTExpression valueExp)
+            throws StaticLinkingCheckException {
+        // TODO [FM3][FREEMARKER-99] Will be abstract
+    }
+    
+    /**
+     * Called by the parser when it has already passed in all arguments (via
+     * {@link #setPositionalArgument(int, ASTExpression)} and such). This allows the directive to check if all required
+     * arguments were provided, and some more. It also sets the nested content parameter names (like {@code "i", "j"} in
+     * {@code <#list m as i, j>}). (These two operations are packed into this method together as optimization, though
+     * admittedly the gain is very small.)
+     * 
+     * @param nestedContentParamNames
+     *            Will be {@code null} exactly if there are 0 nested content parameters.
+     */
+    public void checkArgumentsAndSetNestedContentParameters(StringToIndexMap nestedContentParamNames)
+            throws StaticLinkingCheckException {
+        // TODO [FM3][FREEMARKER-99] Will be abstract
+    }
+
+    /**
+     * Tells if this directive can have nested content; the parser may need this information.
+     */
+    public boolean isNestedContentSupported() {
+        // TODO [FM3][FREEMARKER-99] Will be abstract
+        return true;
+    }
+    
+    /**
+     * @return {@code null} if there was no nested content parameter
+     */
+    public StringToIndexMap getNestedContentParamNames() {
+        return null;
     }
 
 }

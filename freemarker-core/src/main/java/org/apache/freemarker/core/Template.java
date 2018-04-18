@@ -122,7 +122,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private AutoEscapingPolicy autoEscapingPolicy;
     // Values from template content that are detected automatically:
     private Charset actualSourceEncoding;
-    TagSyntax actualTagSyntax; // TODO [FM3][CF] Should be private
+    TagSyntax actualTagSyntax; // TODO [FM3][FREEMARKER-99] Should be private
     private InterpolationSyntax interpolationSyntax;
 
     // Custom state:

@@ -58,18 +58,18 @@ class ASTExpExists extends ASTExpression {
 	}
 
 	@Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
+    ASTExpression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
 		return new ASTExpExists(
 		        exp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
 	}
 
 	@Override
     public String getCanonicalForm() {
-		return exp.getCanonicalForm() + getASTNodeDescriptor();
+		return exp.getCanonicalForm() + getLabelWithoutParameters();
 	}
 	
 	@Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "??";
     }
 

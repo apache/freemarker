@@ -46,11 +46,11 @@ final class ASTExpDot extends ASTExpression {
 
     @Override
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + getASTNodeDescriptor() + _StringUtils.toFTLIdentifierReferenceAfterDot(key);
+        return target.getCanonicalForm() + getLabelWithoutParameters() + _StringUtils.toFTLIdentifierReferenceAfterDot(key);
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return ".";
     }
     
@@ -60,7 +60,7 @@ final class ASTExpDot extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpDot(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

@@ -67,7 +67,7 @@ final class ASTExpNegateOrPlus extends ASTExpression {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return isMinus ? "-..." : "+...";
     }
     
@@ -77,7 +77,7 @@ final class ASTExpNegateOrPlus extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpNegateOrPlus(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

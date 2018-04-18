@@ -83,18 +83,5 @@ class TemplateElements {
             }
         }
     }
-    
-    /**
-     * Used for some backward compatibility hacks.
-     */
-    ASTImplicitParent asMixedContent() {
-        ASTImplicitParent mixedContent = new ASTImplicitParent();
-        if (count != 0) {
-            ASTElement first = buffer[0];
-            mixedContent.setChildren(this);
-            mixedContent.setLocation(first.getTemplate(), first, getLast());
-        }
-        return mixedContent;
-    }
 
 }

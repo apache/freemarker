@@ -36,7 +36,7 @@ import org.apache.freemarker.core.util._StringUtils;
 /**
  * AST expression node: {@code exp(args)}.
  */
-final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
+public final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
 
     private final ASTExpression functionExp;
     private final ASTExpression[] positionalArgs;
@@ -110,7 +110,7 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
     }
 
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return "...(...)";
     }
     
@@ -124,7 +124,7 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
         ASTExpression[] positionalArgsClone;
         if (positionalArgs != null) {

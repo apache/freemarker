@@ -41,29 +41,37 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      * from the {@link Configuration} (or {@link TemplateConfiguration}). Avoid it, as it's problematic for tooling.
      */
     public static final DefaultTemplateLanguage F3AC = new DefaultTemplateLanguage("f3ac", true,
+            DefaultDialect.INSTANCE,
             null, null,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
     public static final DefaultTemplateLanguage F3SC = new DefaultTemplateLanguage("f3sc", true,
+            DefaultDialect.INSTANCE,
             null, null,
             TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
 
     public static final DefaultTemplateLanguage F3AH = new DefaultTemplateLanguage("f3ah", true,
+            DefaultDialect.INSTANCE,
             HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
     public static final DefaultTemplateLanguage F3AX = new DefaultTemplateLanguage("f3ax", true,
+            DefaultDialect.INSTANCE,
             XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
     public static final DefaultTemplateLanguage F3AU = new DefaultTemplateLanguage("f3au", true,
+            DefaultDialect.INSTANCE,
             UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
 
     public static final DefaultTemplateLanguage F3SH = new DefaultTemplateLanguage("f3sh", true,
+            DefaultDialect.INSTANCE,
             HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
     public static final DefaultTemplateLanguage F3SX = new DefaultTemplateLanguage("f3sx", true,
+            DefaultDialect.INSTANCE,
             XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
     public static final DefaultTemplateLanguage F3SU = new DefaultTemplateLanguage("f3su", true,
+            DefaultDialect.INSTANCE,
             UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
 
@@ -81,11 +89,11 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      * call this yourself; use constants like {@link #F3AH} instead when possible.
      * 
      * @param fileExtension
-     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, Dialect, OutputFormat, AutoEscapingPolicy)}
      * @param outputFormat
-     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, Dialect, OutputFormat, AutoEscapingPolicy)}
      * @param autoEscapingPolicy
-     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, Dialect, OutputFormat, AutoEscapingPolicy)}
      * @param tagSyntax
      *            The tag syntax used; not {@code null}.
      * @param interpolationSyntax
@@ -93,20 +101,21 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      */
     public DefaultTemplateLanguage(
             String fileExtension,
+            Dialect dialect,
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
             TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax) {
-        this(fileExtension, false, outputFormat, autoEscapingPolicy, tagSyntax, interpolationSyntax);
+        this(fileExtension, false, dialect, outputFormat, autoEscapingPolicy, tagSyntax, interpolationSyntax);
     }
 
     /**
-     * Used internally to allow extensions starting with "f" 
+     * Used internally to allow extensions starting with "f" (as those are reserved for FreeMarker) 
      */
     DefaultTemplateLanguage(
-            String fileExtension,
-            boolean allowExtensionStartingWithF,
+            String fileExtension, boolean allowExtensionStartingWithF,
+            Dialect dialect,
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
             TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax) {
-        super(fileExtension, allowExtensionStartingWithF, outputFormat, autoEscapingPolicy);
+        super(fileExtension, allowExtensionStartingWithF, dialect, outputFormat, autoEscapingPolicy);
         _NullArgumentException.check("tagSyntax", tagSyntax);
         _NullArgumentException.check("interpolationSyntax", interpolationSyntax);
         this.tagSyntax = tagSyntax;

@@ -35,15 +35,15 @@ final class ASTDirCase extends ASTDirective {
     }
 
     @Override
-    ASTElement[] accept(Environment env) {
+    ASTElement[] execute(Environment env) {
         return getChildBuffer();
     }
 
     @Override
-    protected String dump(boolean canonical) {
+    String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getASTNodeDescriptor());
+        sb.append(getLabelWithoutParameters());
         if (condition != null) {
             sb.append(' ');
             sb.append(condition.getCanonicalForm());
@@ -56,7 +56,7 @@ final class ASTDirCase extends ASTDirective {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return condition != null ? "#case" : "#default";
     }
 

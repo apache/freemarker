@@ -85,7 +85,7 @@ final class ASTExpArithmetic extends ASTExpression {
     }
     
     @Override
-    String getASTNodeDescriptor() {
+    public String getLabelWithoutParameters() {
         return String.valueOf(getOperatorSymbol(operator));
     }
 
@@ -99,7 +99,7 @@ final class ASTExpArithmetic extends ASTExpression {
     }
 
     @Override
-    protected ASTExpression deepCloneWithIdentifierReplaced_inner(
+    ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpArithmetic(
     	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),

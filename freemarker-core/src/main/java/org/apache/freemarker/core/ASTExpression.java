@@ -34,6 +34,7 @@ import org.apache.freemarker.core.model.impl.BeanModel;
 /**
  * AST expression node superclass
  */
+//TODO [FM3] will be public
 abstract class ASTExpression extends ASTNode {
 
     /**
@@ -51,6 +52,9 @@ abstract class ASTExpression extends ASTNode {
 
     // Hook in here to set the constant value if possible.
     
+    // Package visible constructor to prevent extending this class outside FreeMarker 
+    ASTExpression () { }
+    
     @Override
     void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine) {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
@@ -63,11 +67,10 @@ abstract class ASTExpression extends ASTNode {
         }
     }
 
-    final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
-        return eval(env);
-    }
-    
-    final TemplateModel eval(Environment env) throws TemplateException {
+    /**
+     * Evaluates the expression, returning its current value.
+     */
+    public final TemplateModel eval(Environment env) throws TemplateException {
         try {
             return constantValue != null ? constantValue : _eval(env);
         } catch (FlowControlException | TemplateException e) {
@@ -179,7 +182,7 @@ abstract class ASTExpression extends ASTNode {
      * This should return an equivalent new expression object (or an identifier replacement expression).
      * The position need not be filled, unless it will be different from the position of what we were cloning. 
      */
-    protected abstract ASTExpression deepCloneWithIdentifierReplaced_inner(
+    abstract ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState);
 
     static boolean isEmpty(TemplateModel model) throws TemplateException {
