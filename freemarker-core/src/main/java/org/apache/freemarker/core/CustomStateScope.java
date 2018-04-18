@@ -28,6 +28,10 @@ public interface CustomStateScope {
      * Gets the custom state belonging to the key, automatically creating it if it doesn't yet exists in the scope.
      * If the scope is {@link Configuration} or {@link Template}, then this method is thread safe. If the scope is
      * {@link Environment}, then this method is not thread safe ({@link Environment} is not thread safe either).
+     * 
+     * <p>There's no {@code setCustomState} method; the code that wants to initialize the state object should call
+     * {@link CustomStateScope#getCustomState(CustomStateKey)} to receive the instance, then set up the returned object
+     * through its API. 
      */
     <T> T getCustomState(CustomStateKey<T> customStateKey);
 
