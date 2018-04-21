@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.spring.model.AbstractSpringTemplateDirectiveModel;
 import org.springframework.util.ObjectUtils;
@@ -33,6 +34,13 @@ import org.springframework.util.ObjectUtils;
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractFormTag</code>.
  */
 abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringTemplateDirectiveModel {
+
+    protected static final CustomStateKey<FormTemplateScope> FORM_TEMPLATE_SCOPE_KEY = new CustomStateKey<FormTemplateScope>() {
+        @Override
+        protected FormTemplateScope create() {
+            return new FormTemplateScope();
+        }
+    };
 
     protected AbstractFormTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);

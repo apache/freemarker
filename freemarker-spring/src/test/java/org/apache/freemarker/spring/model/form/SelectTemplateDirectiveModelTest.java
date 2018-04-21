@@ -20,6 +20,7 @@
 package org.apache.freemarker.spring.model.form;
 
 import org.apache.freemarker.spring.example.mvc.users.User;
+import org.apache.freemarker.spring.example.mvc.users.UserController;
 import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -61,12 +63,24 @@ public class SelectTemplateDirectiveModelTest {
     public void testBasicUsages() throws Exception {
         final Long userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
-        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/select-directive-usages")
+        final ResultActions resultAcctions =
+                mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/select-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//select[@name='favoriteSport']//option[@value='football']").exists())
-                .andExpect(xpath("//form[@id='form1']//select[@name='favoriteSport']//option[@value='handball']").exists())
-                .andExpect(xpath("//form[@id='form1']//select[@name='favoriteSport']//option[@value='basketball']").exists())
-                .andExpect(xpath("//form[@id='form1']//select[@name='favoriteSport']//option[@value='volleyball']").exists());
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print());
+
+        for (int i = 0; i < UserController.INDOOR_SPORTS.size(); i++) {
+            String sport = UserController.INDOOR_SPORTS.get(i);
+            resultAcctions.andExpect(xpath("//form[@id='form1']//select[@name='favoriteSport']//option[" + (i + 1) + "]").string(sport));
+        }
+
+        for (int i = 0; i < UserController.OUTDOOR_SPORTS.size(); i++) {
+            String sport = UserController.OUTDOOR_SPORTS.get(i);
+            resultAcctions.andExpect(xpath("//form[@id='form2']//select[@name='favoriteSport']//option[" + (i + 1) + "]").string(sport));
+        }
+
+        for (int i = 0; i < UserController.ALL_SPORTS.size(); i++) {
+            String sport = UserController.ALL_SPORTS.get(i);
+            resultAcctions.andExpect(xpath("//form[@id='form3']//select[@name='favoriteSport']//option[" + (i + 1) + "]").string(sport));
+        }
     }
 }

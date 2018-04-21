@@ -20,6 +20,9 @@
 package org.apache.freemarker.spring.example.mvc.users;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +45,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class UserController {
+
+    public static final List<String> INDOOR_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("bowling", "gymnastics", "handball"));
+
+    public static final List<String> OUTDOOR_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("baseball", "football", "marathon"));
+
+    public static final List<String> ALL_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("bowling", "gymnastics", "handball", "baseball", "football", "marathon"));
 
     private static final String DEFAULT_USER_LIST_VIEW_NAME = "example/users/userlist";
 
@@ -72,6 +84,9 @@ public class UserController {
     @RequestMapping(value = "/users/{id:\\d+}", method = RequestMethod.GET)
     public String getUser(@PathVariable("id") Long id,
             @RequestParam(value = "viewName", required = false) String viewName, Model model) {
+        model.addAttribute("indoorSports", INDOOR_SPORTS);
+        model.addAttribute("outdoorSports", OUTDOOR_SPORTS);
+
         User user = userRepository.getUser(id);
 
         if (user != null) {
