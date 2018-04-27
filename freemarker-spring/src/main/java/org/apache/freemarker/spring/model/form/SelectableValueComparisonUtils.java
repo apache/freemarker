@@ -28,6 +28,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 
+/**
+ * Utility to check if a value (mostly from an option item) equals to the value bound to.
+ */
 class SelectableValueComparisonUtils {
 
     private SelectableValueComparisonUtils() {

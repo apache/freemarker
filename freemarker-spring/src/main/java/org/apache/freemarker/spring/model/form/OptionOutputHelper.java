@@ -31,6 +31,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 
+/**
+ * Helper to write &lt;option&gt; HTML element.
+ */
 class OptionOutputHelper {
 
     private Object optionItems;
@@ -113,15 +116,16 @@ class OptionOutputHelper {
 
         valueDisplayString = processOptionValue(valueDisplayString);
 
-        // allows render values to handle some strange browser compat issues.
         tagOut.writeAttribute("value", valueDisplayString);
 
         if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
             tagOut.writeAttribute("selected", "selected");
         }
+
         if (isOptionDisabled()) {
             tagOut.writeAttribute("disabled", "disabled");
         }
+
         tagOut.appendValue(labelDisplayString);
         tagOut.endTag();
     }
@@ -146,8 +150,7 @@ class OptionOutputHelper {
     }
 
     private boolean isOptionSelected(Object resolvedValue) throws TemplateException {
-        // FIXME: need to compare selected value based on bindStatus values.
-        return false;
+        return SelectableValueComparisonUtils.isEqualValueBoundTo(resolvedValue, bindStatus);
     }
 
     protected boolean isOptionDisabled() throws TemplateException {

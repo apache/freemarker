@@ -131,10 +131,6 @@ class OptionTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirec
             tagOut.writeAttribute("selected", "selected");
         }
 
-        if (isDisabled()) {
-            tagOut.writeAttribute("disabled", "disabled");
-        }
-
         tagOut.appendValue(label);
         tagOut.endTag();
     }

@@ -102,6 +102,7 @@ public class User {
     @Override
     public String toString() {
         return super.toString() + " {id=" + id + ", firstName='" + firstName + "', lastName='" + lastName + "', email='"
-                + email + "', birthDate='" + birthDate + "', description='" + description + "'}";
+                + email + "', birthDate='" + birthDate + "', description='" + description + "', favoriteSport='"
+                + favoriteSport + "'}";
     }
 }

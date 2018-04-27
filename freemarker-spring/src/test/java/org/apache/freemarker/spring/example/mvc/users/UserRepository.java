@@ -19,7 +19,10 @@
 
 package org.apache.freemarker.spring.example.mvc.users;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,6 +32,15 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserRepository {
+
+    public static final List<String> INDOOR_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("bowling", "gymnastics", "handball"));
+
+    public static final List<String> OUTDOOR_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("baseball", "football", "marathon"));
+
+    public static final List<String> ALL_SPORTS = Collections
+            .unmodifiableList(Arrays.asList("bowling", "gymnastics", "handball", "baseball", "football", "marathon"));
 
     private Map<Long, User> usersMap = new ConcurrentHashMap<>();
     {
@@ -45,6 +57,7 @@ public class UserRepository {
         user.setBirthDate(birthDate.getTime());
         user.setDescription("Lorem ipsum dolor sit amet, \r\nconsectetur adipiscing elit, \r\n"
                 + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+        user.setFavoriteSport("baseball");
         usersMap.put(id, user);
 
         id = 102L;
@@ -60,6 +73,7 @@ public class UserRepository {
         user.setBirthDate(birthDate.getTime());
         user.setDescription("Ut enim ad minim veniam, \r\n"
                 + "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.");
+        user.setFavoriteSport("marathon");
         usersMap.put(id, user);
     }
 
@@ -105,6 +119,7 @@ public class UserRepository {
         clone.setLastName(source.getLastName());
         clone.setBirthDate(source.getBirthDate());
         clone.setDescription(source.getDescription());
+        clone.setFavoriteSport(source.getFavoriteSport());
         return clone;
     }
 }
