@@ -62,5 +62,21 @@
     </table>
   </form>
 
+  <h1>Form 4</h1>
+  <hr/>
+  <form id="form4">
+    <table>
+      <tr>
+        <th>Favorite Sport:</th>
+        <td>
+          <@form.select 'user.favoriteSport'>
+            <@form.option value="" label="--- Select ---" />
+            <@form.options items=outdoorSports />
+          </@form.select>
+        </td>
+      </tr>
+    </table>
+  </form>
+
 </body>
 </html>

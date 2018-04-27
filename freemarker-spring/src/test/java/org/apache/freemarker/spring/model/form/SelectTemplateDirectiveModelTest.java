@@ -82,5 +82,11 @@ public class SelectTemplateDirectiveModelTest {
             String sport = UserController.ALL_SPORTS.get(i);
             resultAcctions.andExpect(xpath("//form[@id='form3']//select[@name='favoriteSport']//option[" + (i + 1) + "]").string(sport));
         }
+
+        resultAcctions.andExpect(xpath("//form[@id='form4']//select[@name='favoriteSport']//option[1]").string("--- Select ---"));
+        for (int i = 0; i < UserController.OUTDOOR_SPORTS.size(); i++) {
+            String sport = UserController.OUTDOOR_SPORTS.get(i);
+            resultAcctions.andExpect(xpath("//form[@id='form4']//select[@name='favoriteSport']//option[" + (i + 2) + "]").string(sport));
+        }
     }
 }
