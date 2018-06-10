@@ -45,14 +45,14 @@ public class UnexpectedTypeException extends TemplateException {
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env));
+        super(null, env, blamed, newDescriptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env));
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
+        super(null, env, blamed, newDescriptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
                 .tip(tip));
     }
 
@@ -60,7 +60,7 @@ public class UnexpectedTypeException extends TemplateException {
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Object[] tips,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
+        super(null, env, blamed, newDescriptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
                 .tips(tips));
     }
 
@@ -69,7 +69,7 @@ public class UnexpectedTypeException extends TemplateException {
             Object[] tips,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, null, newDesciptionBuilder(
+        super(null, env, null, newDescriptionBuilder(
                 null, blamedAssignmentTargetVarName, model, expectedTypesDesc, expectedTypes, env).tips(tips));
     }
     
@@ -78,7 +78,7 @@ public class UnexpectedTypeException extends TemplateException {
      *            Used for assignments that use {@code +=} and such, in which case the {@code blamed} expression
      *            parameter will be null {@code null} and this parameter will be non-{null}.
      */
-    private static _ErrorDescriptionBuilder newDesciptionBuilder(
+    private static _ErrorDescriptionBuilder newDescriptionBuilder(
             Expression blamed, String blamedAssignmentTargetVarName,
             TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
