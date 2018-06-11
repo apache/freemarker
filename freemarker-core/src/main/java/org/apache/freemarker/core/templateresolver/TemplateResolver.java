@@ -35,25 +35,37 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
- * This class allows users to fully implement the template lookup, loading and caching logic,
- * in case the standard mechanism (a {@link DefaultTemplateResolver} combined with all the {@link Configuration}
- * settings like {@link Configuration#getTemplateLoader() templateLoader},
- * {@link Configuration#getTemplateConfigurations() templateConfigurations}, etc.) is not flexible enough.
- * The {@link TemplateResolver} is put into use by setting the
- * {@link Configuration#getTemplateResolver() templateResolver} configuration setting.
+ * This class allows users to fully implement the template lookup, loading, and caching logic, in case the standard
+ * mechanism (a {@link DefaultTemplateResolver} combined with all the {@link Configuration} settings like
+ * {@link Configuration#getTemplateLoader() templateLoader}, {@link Configuration#getTemplateConfigurations()
+ * templateConfigurations}, and so on) is not flexible enough. The {@link TemplateResolver} is put into use by setting
+ * the {@link Configuration#getTemplateResolver() templateResolver} configuration setting.
  * <p>
  * A custom {@link TemplateResolver} can depend on a selected set of {@link Configuration} settings; the same ones that
- * {@link DefaultTemplateResolver} depends on. These settings are collected into the
- * {@link TemplateResolverDependencies} class, and the {@link TemplateResolver} should get them in {@link #initialize()}
- * via {@link #getDependencies()}. It's possible that the custom {@link TemplateResolver} only uses some of these
- * settings, which should be reflected by the return value of the {@code supportsXxxSetting} methods (like
+ * {@link DefaultTemplateResolver} depends on. These settings are collected into a {@link TemplateResolverDependencies}
+ * object by FreeMarker, and the {@link TemplateResolver} can get them in the {@link #initialize()} implementation via
+ * {@link #getDependencies()}. It's possible that the custom {@link TemplateResolver} only uses some of these settings,
+ * which must be reflected by the return value of the {@code supportsXxxSetting} methods (like
  * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxSetting} method for
- * {@link Configuration#getTemplateLanguage() templateLanguage} and {@link Configuration#getSourceEncoding()
- * sourceEncoding}, as that must always be supported and are always exposed.) {@link TemplateResolverDependencies}
- * will also expose the {@link TemplateResolverDependencies#newTemplate(String, String, Reader, TemplateConfiguration)}
- * and {@link TemplateResolverDependencies#newTemplate(String, String, InputStream, Charset, TemplateConfiguration)}
+ * {@link Configuration#getTemplateLanguage() templateLanguage} and for {@link Configuration#getSourceEncoding()
+ * sourceEncoding}, as those must be supported and are always exposed in the {@link TemplateResolverDependencies}.)
+ * {@link TemplateResolverDependencies} will also expose the
+ * {@link TemplateResolverDependencies#newTemplate(String, String, Reader, TemplateConfiguration)} and
+ * {@link TemplateResolverDependencies#newTemplate(String, String, InputStream, Charset, TemplateConfiguration)}
  * methods, which are used to create a {@link Template} from its source code in the later
  * {@link #getTemplate(String, Locale, Serializable)} calls.
+ * <p>
+ * Notes on API design: It would be architecturally much simpler and also more general if there's no
+ * {@link TemplateResolverDependencies}, and instead the {@link TemplateResolver} subclass itself has properties like
+ * {@link Configuration#getTemplateLoader() templateLoader}, {@link Configuration#getTemplateUpdateDelayMilliseconds()
+ * templateUpdateDelayMilliseconds}, etc. However, it's usually much simpler for the user if they can just set those
+ * properties directly on the {@link Configuration} level, and not worry when and how the {@link TemplateResolver}
+ * object is created and injected. Basically, we flatten the configuration property hierarchy for the properties known
+ * by FreeMarker. Especially as the vast majority of users will just use the {@link DefaultTemplateResolver}, that's
+ * certainly a good tradeoff. Another way of architectural simplification would be just passing in the
+ * {@link Configuration} instead of a {@link DefaultTemplateResolver}, and let the {@link TemplateResolver} to get what
+ * it needs from it, but then circular dependency (initialization order) issues are more likely, also then we can't
+ * detect if the user sets properties that aren't supported by the {@link TemplateResolver}.   
  */
 public abstract class TemplateResolver {
 
@@ -61,7 +73,7 @@ public abstract class TemplateResolver {
     private boolean initialized;
 
     /**
-     * Called by FreeMarker when the {@link Configuration} is built; normally you do not call it yourself.
+     * Called by FreeMarker when the {@link Configuration} is built; normally you do not call this yourself.
      * This automatically calls {@link #initialize()}.
      *
      * @throws IllegalStateException If this method was already called with another {@link Configuration} instance.
@@ -87,15 +99,22 @@ public abstract class TemplateResolver {
     }
 
     /**
-     * Returns {@code null} before {@link #initialize()}
+     * Returns the dependencies exposed to this component; don't call it before {@link #initialize()}.
+     * 
+     * @throws IllegalStateException
+     *             If {@link #initialize()} wasn't yet called.
      */
     protected TemplateResolverDependencies getDependencies() {
+        if (dependencies == null) {
+            throw new IllegalStateException("initialize() wasn't yet called");
+        }
         return dependencies;
     }
 
     /**
-     * You meant to initialize the instance here instead of in the constructor. This is called only once (by
-     * FreeMarker at least), when the {@link #setDependencies(TemplateResolverDependencies)}  dependencies} is called.
+     * You meant to initialize the instance here instead of in the constructor, as here {@link #getDependencies()} will
+     * already return its final value. This is called only once (by FreeMarker at least), when the
+     * {@link #setDependencies(TemplateResolverDependencies)}  dependencies} is called.
      */
     protected abstract void initialize() throws ConfigurationException;
 
