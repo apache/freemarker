@@ -31,6 +31,8 @@ public class User {
     private Date birthDate;
     private String description;
     private String favoriteSport;
+    private boolean receiveNewsletter;
+    private String[] favoriteFood;
 
     public User() {
     }
@@ -99,10 +101,32 @@ public class User {
         this.favoriteSport = favoriteSport;
     }
 
+    public boolean isReceiveNewsletter() {
+        return receiveNewsletter;
+    }
+
+    public void setReceiveNewsletter(boolean receiveNewsletter) {
+        this.receiveNewsletter = receiveNewsletter;
+    }
+
+    public String[] getFavoriteFood() {
+        if (favoriteFood == null) {
+            return null;
+        }
+
+        String[] cloned = new String[favoriteFood.length];
+        System.arraycopy(favoriteFood, 0, cloned, 0, favoriteFood.length);
+        return cloned;
+    }
+
+    public void setFavoriteFood(String[] favoriteFood) {
+        this.favoriteFood = favoriteFood;
+    }
+
     @Override
     public String toString() {
         return super.toString() + " {id=" + id + ", firstName='" + firstName + "', lastName='" + lastName + "', email='"
                 + email + "', birthDate='" + birthDate + "', description='" + description + "', favoriteSport='"
-                + favoriteSport + "'}";
+                + favoriteSport + "', receiveNewsletter=" + receiveNewsletter + ", favoriteFood=" + favoriteFood + "}";
     }
 }

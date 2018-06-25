@@ -29,6 +29,7 @@ import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.spring.model.AbstractSpringTemplateDirectiveModel;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractFormTag</code>.
@@ -53,6 +54,11 @@ abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringTemplate
     public static String getDisplayString(Object value) {
         String displayValue = ObjectUtils.getDisplayString(value);
         return displayValue;
+    }
+
+    public static String getDisplayString(Object value, BindStatus bindStatus) {
+        final PropertyEditor editor = (bindStatus != null && value != null) ? bindStatus.findEditor(value.getClass()) : null;
+        return getDisplayString(value, editor);
     }
 
     public static String getDisplayString(Object value, PropertyEditor propertyEditor) {

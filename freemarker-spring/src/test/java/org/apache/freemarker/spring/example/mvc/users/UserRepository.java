@@ -58,6 +58,8 @@ public class UserRepository {
         user.setDescription("Lorem ipsum dolor sit amet, \r\nconsectetur adipiscing elit, \r\n"
                 + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
         user.setFavoriteSport("baseball");
+        user.setReceiveNewsletter(false);
+        user.setFavoriteFood(new String[] { "Sandwich", "Spaghetti" });
         usersMap.put(id, user);
 
         id = 102L;
@@ -74,6 +76,8 @@ public class UserRepository {
         user.setDescription("Ut enim ad minim veniam, \r\n"
                 + "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.");
         user.setFavoriteSport("marathon");
+        user.setReceiveNewsletter(true);
+        user.setFavoriteFood(new String[] { "Sandwich", "Sushi" });
         usersMap.put(id, user);
     }
 
@@ -90,6 +94,20 @@ public class UserRepository {
 
         if (user != null) {
             return cloneUser(user, user.getId());
+        }
+
+        return null;
+    }
+
+    public synchronized User getUserByEmail(final String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("E-Mail must be non-null.");
+        }
+
+        for (User user : usersMap.values()) {
+            if (email.equals(user.getEmail())) {
+                return cloneUser(user, user.getId());
+            }
         }
 
         return null;
@@ -120,6 +138,8 @@ public class UserRepository {
         clone.setBirthDate(source.getBirthDate());
         clone.setDescription(source.getDescription());
         clone.setFavoriteSport(source.getFavoriteSport());
+        clone.setReceiveNewsletter(source.isReceiveNewsletter());
+        clone.setFavoriteFood(source.getFavoriteFood());
         return clone;
     }
 }
