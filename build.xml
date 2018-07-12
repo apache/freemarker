@@ -33,7 +33,7 @@
 
   <!-- Maven project coordinates: -->
   <property name="mavenGroupId" value="org.freemarker" />
-  <property name="mavenArtifactId" value="freemarker-gae" />
+  <property name="mavenArtifactId" value="freemarker" />
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
@@ -832,7 +832,6 @@
   
   <name>Apache FreeMarker</name>
   <description>
-    Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
   <url>https://freemarker.apache.org/</url>
