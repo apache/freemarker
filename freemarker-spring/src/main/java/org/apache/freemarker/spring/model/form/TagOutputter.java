@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.springframework.util.StringUtils;
 
@@ -31,12 +32,19 @@ import org.springframework.util.StringUtils;
  */
 class TagOutputter {
 
+    private final Environment env;
+
     private final Writer out;
 
     private final Stack<TagEntry> tagStack = new Stack<TagEntry>();
 
-    public TagOutputter(final Writer out) {
+    public TagOutputter(final Environment env, final Writer out) {
+        this.env = env;
         this.out = out;
+    }
+
+    public Environment getEnvironment() {
+        return env;
     }
 
     public void beginTag(String tagName) throws TemplateException, IOException {

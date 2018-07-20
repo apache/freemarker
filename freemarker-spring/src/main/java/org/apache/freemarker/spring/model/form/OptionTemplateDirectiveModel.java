@@ -121,7 +121,7 @@ class OptionTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirec
         final TagOutputter tagOut = formTemplateScope.getCurrentTagOutputter();
 
         tagOut.beginTag("option");
-        writeOptionalAttribute(tagOut, "id", resolveId());
+        writeOptionalAttribute(tagOut, "id", resolveId(env));
         writeOptionalAttributes(tagOut);
         String renderedValue = getDisplayString(value, curSelectDirective.getBindStatus().getEditor());
         renderedValue = processFieldValue(env, selectName, renderedValue, "option");
@@ -144,7 +144,7 @@ class OptionTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirec
     }
 
     @Override
-    protected String autogenerateId() {
+    protected String autogenerateId(Environment env) {
         return null;
     }
 }

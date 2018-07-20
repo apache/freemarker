@@ -142,7 +142,7 @@ class ErrorsTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
         delimiter = (StringUtils.hasText(param)) ? param : DEFAULT_DELIMITER;
 
         if (!callPlace.hasNestedContent()) {
-            TagOutputter tagOut = new TagOutputter(out);
+            TagOutputter tagOut = new TagOutputter(env, out);
             renderDefaultContent(tagOut);
             return;
         }
@@ -187,7 +187,7 @@ class ErrorsTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
     }
 
     @Override
-    protected String autogenerateId() throws TemplateException {
+    protected String autogenerateId(Environment env) throws TemplateException {
         String path = getPropertyPath();
 
         if ("".equals(path) || "*".equals(path)) {

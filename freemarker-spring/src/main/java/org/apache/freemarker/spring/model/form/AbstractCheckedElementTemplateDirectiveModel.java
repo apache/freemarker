@@ -65,6 +65,11 @@ abstract class AbstractCheckedElementTemplateDirectiveModel extends AbstractHtml
         }
     }
 
+    @Override
+    protected String autogenerateId(Environment env) throws TemplateException {
+        return TagIdGenerationUtils.getNextId(env, super.autogenerateId(env));
+    }
+
     private boolean isOptionSelected(Object value) throws TemplateException {
         return SelectableValueComparisonUtils.isEqualValueBoundTo(value, getBindStatus());
     }

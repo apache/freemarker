@@ -132,7 +132,7 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
         onselect = CallableUtils.getOptionalStringArgument(args, ONSELECT_PARAM_IDX, this);
         autocomplete = CallableUtils.getOptionalStringArgument(args, AUTOCOMPLETE_PARAM_IDX, this);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag(NAME);
 

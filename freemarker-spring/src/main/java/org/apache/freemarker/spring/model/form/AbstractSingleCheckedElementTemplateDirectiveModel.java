@@ -48,10 +48,10 @@ abstract class AbstractSingleCheckedElementTemplateDirectiveModel extends Abstra
             throws TemplateException, IOException {
         super.executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag("input");
-        String id = resolveId();
+        String id = resolveId(env);
         writeOptionalAttribute(tagOut, "id", id);
         writeOptionalAttribute(tagOut, "name", getName());
         writeOptionalAttributes(tagOut);

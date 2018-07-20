@@ -33,10 +33,11 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code button}' element.
+ * Provides <code>TemplateModel</code> for data-binding-aware multiple HTML '{@code <input type="checkbox"/>}' elements.
  * This tag is provided for completeness if the application relies on a
  * <code>org.springframework.web.servlet.support.RequestDataValueProcessor</code>.
  * <P>
@@ -51,7 +52,13 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
- *   &lt;@form.button 'user.email' /&gt;
+ *   &lt;#assign foodItems = [ "Sandwich", "Spaghetti", "Sushi" ] &gt;
+ *   &lt;@form.checkboxes "user.favoriteFood" items=foodItems /&gt;
+ * </PRE>
+ * Or,
+ * <PRE>
+ *   &lt;#assign foodItemHash = { "Sandwich": "Delicious sandwich", "Spaghetti": "Lovely spaghetti", "Sushi": "Sushi with wasabi" } &gt;
+ *   &lt;@form.checkboxes "user.favoriteFood" items=foodItemHash /&gt;
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:button /&gt;</code> JSP Tag Library, this directive
@@ -60,38 +67,30 @@ import org.springframework.web.servlet.support.RequestContext;
  * </P>
  */
 
-class ButtonTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
+class CheckboxesTemplateDirectiveModel extends AbstractMultiCheckedElementTemplateDirectiveModel {
 
-    public static final String NAME = "button";
+    public static final String NAME = "checkboxes";
 
-    private static final int NAMED_ARGS_OFFSET = AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT
+    private static final int NAMED_ARGS_OFFSET = AbstractMultiCheckedElementTemplateDirectiveModel.ARGS_LAYOUT
             .getPredefinedNamedArgumentsEndIndex();
 
-    private static final int NAME_PARAM_IDX = NAMED_ARGS_OFFSET;
-    private static final String NAME_PARAM_NAME = "name";
-
-    private static final int VALUE_PARAM_IDX = NAMED_ARGS_OFFSET + 1;
+    private static final int VALUE_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String VALUE_PARAM_NAME = "value";
 
-    private static final int DISABLED_PARAM_IDX = NAMED_ARGS_OFFSET + 2;
-    private static final String DISABLED_PARAM_NAME = "disabled";
+    private static final int LABEL_PARAM_IDX = NAMED_ARGS_OFFSET + 1;
+    private static final String LABEL_PARAM_NAME = "label";
 
-    protected static final ArgumentArrayLayout ARGS_LAYOUT =
-            ArgumentArrayLayout.create(
-                    1,
-                    false,
-                    StringToIndexMap.of(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
-                            new StringToIndexMap.Entry(NAME_PARAM_NAME, NAME_PARAM_IDX),
-                            new StringToIndexMap.Entry(VALUE_PARAM_NAME, VALUE_PARAM_IDX),
-                            new StringToIndexMap.Entry(DISABLED_PARAM_NAME, DISABLED_PARAM_IDX)
-                            ),
-                    true);
+    protected static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false,
+            StringToIndexMap.of(
+                    AbstractMultiCheckedElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
+                    new StringToIndexMap.Entry(VALUE_PARAM_NAME, VALUE_PARAM_IDX),
+                    new StringToIndexMap.Entry(LABEL_PARAM_NAME, LABEL_PARAM_IDX)),
+            true);
 
-    private String name;
     private String value;
-    private boolean disabled;
+    private String label;
 
-    protected ButtonTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    protected CheckboxesTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
@@ -102,62 +101,44 @@ class ButtonTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
 
     @Override
     public boolean isNestedContentSupported() {
-        return true;
+        return false;
     }
 
     @Override
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
             throws TemplateException, IOException {
-        super.executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
-
-        name = CallableUtils.getOptionalStringArgument(args, NAME_PARAM_IDX, this);
         value = CallableUtils.getOptionalStringArgument(args, VALUE_PARAM_IDX, this);
-        disabled = CallableUtils.getOptionalBooleanArgument(args, DISABLED_PARAM_IDX, this, false);
+        label = CallableUtils.getOptionalStringArgument(args, LABEL_PARAM_IDX, this);
 
-        TagOutputter tagOut = new TagOutputter(env, out);
-
-        tagOut.beginTag("button");
-
-        writeDefaultAttributes(tagOut);
-
-        // more optional attributes by this tag
-        tagOut.writeAttribute("type", getType());
-
-        String valueToUse = (getValue() != null) ? getValue() : getDefaultValue();
-        tagOut.writeAttribute("value", processFieldValue(env, getName(), valueToUse, getType()));
-
-        if (isDisabled()) {
-            tagOut.writeAttribute(DISABLED_PARAM_NAME, "disabled");
-        }
-
-        tagOut.forceBlock();
-
-        try {
-            callPlace.executeNestedContent(null, out, env);
-        } finally {
-            tagOut.endTag();
-        }
-    }
-
-    public String getName() {
-        return name;
+        super.executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
     }
 
     public String getValue() {
         return value;
     }
 
-    public boolean isDisabled() {
-        return disabled;
+    public String getLabel() {
+        return label;
     }
 
-    protected String getDefaultValue() {
-        return "Submit";
+    @Override
+    protected void writeAdditionalDetails(Environment env, TagOutputter tagOut) throws TemplateException, IOException {
+        if (!isDisabled()) {
+            // Spring Web MVC requires to render a hidden input as a 'field was present' marker.
+            // Write out the 'field was present' marker.
+            tagOut.beginTag("input");
+            tagOut.writeAttribute("type", "hidden");
+            String name = WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName();
+            tagOut.writeAttribute("name", name);
+            tagOut.writeAttribute("value", processFieldValue(env, name, "on", getInputType()));
+            tagOut.endTag();
+        }
     }
 
-    protected String getType() {
-        return "submit";
+    @Override
+    protected String getInputType() {
+        return "checkbox";
     }
 
 }

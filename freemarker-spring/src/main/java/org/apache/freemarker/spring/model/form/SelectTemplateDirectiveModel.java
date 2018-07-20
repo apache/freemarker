@@ -130,7 +130,7 @@ class SelectTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirec
         size = CallableUtils.getOptionalStringArgument(args, SIZE_PARAM_IDX, this);
         multiple = CallableUtils.getOptionalArgument(args, MULTIPLE_PARAM_IDX, TemplateModel.class, this);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag(NAME);
         writeDefaultAttributes(tagOut);

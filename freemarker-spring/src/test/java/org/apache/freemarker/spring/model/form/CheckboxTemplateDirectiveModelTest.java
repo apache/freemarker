@@ -63,8 +63,8 @@ public class CheckboxTemplateDirectiveModelTest {
         mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter' and @name='receiveNewsletter']/@value").string("true"))
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter' and @name='receiveNewsletter']/@checked").doesNotExist())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@value").string("true"))
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@checked").doesNotExist())
                 .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_receiveNewsletter']/@value").string("on"));
     }
 
@@ -74,8 +74,8 @@ public class CheckboxTemplateDirectiveModelTest {
         mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter' and @name='receiveNewsletter']/@value").string("true"))
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter' and @name='receiveNewsletter']/@checked").string("checked"))
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@value").string("true"))
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@checked").string("checked"))
                 .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_receiveNewsletter']/@value").string("on"));
     }
 
@@ -85,13 +85,11 @@ public class CheckboxTemplateDirectiveModelTest {
         mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sandwich']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Spaghetti']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sushi']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_favoriteFood' and @value='on']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sandwich']/@checked").string("checked"))
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Spaghetti']/@checked").string("checked"))
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sushi']/@checked").doesNotExist());
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood1' and @name='favoriteFood' and @value='Sandwich' and @checked='checked']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood2' and @name='favoriteFood' and @value='Spaghetti' and @checked='checked']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood3' and @name='favoriteFood' and @value='Sushi']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood3' and @name='favoriteFood' and @value='Sushi']/@checked").doesNotExist())
+                .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_favoriteFood' and @value='on']").exists());
     }
 
     @Test
@@ -100,12 +98,10 @@ public class CheckboxTemplateDirectiveModelTest {
         mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sandwich']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Spaghetti']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sushi']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_favoriteFood' and @value='on']").exists())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sandwich']/@checked").string("checked"))
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Spaghetti']/@checked").doesNotExist())
-                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood' and @name='favoriteFood' and @value='Sushi']/@checked").string("checked"));
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood1' and @name='favoriteFood' and @value='Sandwich' and @checked='checked']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood2' and @name='favoriteFood' and @value='Spaghetti']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood3' and @name='favoriteFood' and @value='Sushi' and @checked='checked']").exists())
+                .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood3' and @name='favoriteFood' and @value='Spaghetti']/@checked").doesNotExist())
+                .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='_favoriteFood' and @value='on']").exists());
     }
 }

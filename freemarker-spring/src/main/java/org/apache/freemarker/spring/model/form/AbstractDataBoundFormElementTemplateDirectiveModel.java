@@ -51,7 +51,7 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
 
     private static final String NAME_ATTR_NAME = "name";
 
-    private static final String ID_PARAM_NAME = ID_ATTR_NAME;
+    protected static final String ID_PARAM_NAME = ID_ATTR_NAME;
 
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
@@ -102,11 +102,11 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
     }
 
     protected void writeDefaultAttributes(TagOutputter tagOut) throws TemplateException, IOException {
-        writeOptionalAttribute(tagOut, ID_ATTR_NAME, resolveId());
+        writeOptionalAttribute(tagOut, ID_ATTR_NAME, resolveId(tagOut.getEnvironment()));
         writeOptionalAttribute(tagOut, NAME_ATTR_NAME, getName());
     }
 
-    protected String resolveId() throws TemplateException {
+    protected String resolveId(Environment env) throws TemplateException {
         Object id = evaluate(ID_PARAM_NAME, getId());
 
         if (id != null) {
@@ -114,10 +114,10 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
             return (StringUtils.hasText(idString) ? idString : null);
         }
 
-        return autogenerateId();
+        return autogenerateId(env);
     }
 
-    protected String autogenerateId() throws TemplateException {
+    protected String autogenerateId(Environment env) throws TemplateException {
         return StringUtils.deleteAny(getName(), "[]");
     }
 

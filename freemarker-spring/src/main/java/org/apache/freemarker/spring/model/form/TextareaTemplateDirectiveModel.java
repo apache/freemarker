@@ -115,7 +115,7 @@ class TextareaTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDir
         cols = CallableUtils.getOptionalStringArgument(args, COLS_PARAM_IDX, this);
         onselect = CallableUtils.getOptionalStringArgument(args, ONSELECT_PARAM_IDX, this);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag(NAME);
 

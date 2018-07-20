@@ -195,7 +195,7 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
         servletRelativeAction = CallableUtils.getOptionalStringArgument(args, SERVLET_RELATIVE_ACTION_PARAM_IDX, this);
         methodParam = CallableUtils.getOptionalStringArgument(args, METHOD_PARAM_PARAM_IDX, this);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag(FORM_TAG_NAME);
         writeDefaultAttributes(tagOut);

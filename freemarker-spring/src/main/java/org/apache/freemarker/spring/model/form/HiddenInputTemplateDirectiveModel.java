@@ -103,7 +103,7 @@ class HiddenInputTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
 
         disabled = CallableUtils.getOptionalBooleanArgument(args, DISABLED_PARAM_IDX, this, false);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag("input");
 

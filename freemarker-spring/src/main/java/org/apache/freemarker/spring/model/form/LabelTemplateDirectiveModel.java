@@ -106,7 +106,7 @@ class LabelTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMo
 
         forId = CallableUtils.getOptionalStringArgument(args, FOR_ID_PARAM_IDX, this);
 
-        TagOutputter tagOut = new TagOutputter(out);
+        TagOutputter tagOut = new TagOutputter(env, out);
 
         tagOut.beginTag(NAME);
         tagOut.writeAttribute(FOR_ATTRIBUTE, resolveFor());
