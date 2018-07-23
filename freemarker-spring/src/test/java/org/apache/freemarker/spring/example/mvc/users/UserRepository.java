@@ -50,6 +50,7 @@ public class UserRepository {
         user.setPassword("johnpass");
         user.setFirstName("John");
         user.setLastName("Doe");
+        user.setGender("M");
         Calendar birthDate = Calendar.getInstance();
         birthDate.set(Calendar.YEAR, 1973);
         birthDate.set(Calendar.MONTH, Calendar.JANUARY);
@@ -68,6 +69,7 @@ public class UserRepository {
         user.setPassword("janepass");
         user.setFirstName("Jane");
         user.setLastName("Doe");
+        user.setGender("F");
         birthDate = Calendar.getInstance();
         birthDate.set(Calendar.YEAR, 1970);
         birthDate.set(Calendar.MONTH, Calendar.FEBRUARY);
@@ -135,6 +137,7 @@ public class UserRepository {
         clone.setEmail(source.getEmail());
         clone.setFirstName(source.getFirstName());
         clone.setLastName(source.getLastName());
+        clone.setGender(source.getGender());
         clone.setBirthDate(source.getBirthDate());
         clone.setDescription(source.getDescription());
         clone.setFavoriteSport(source.getFavoriteSport());

@@ -28,6 +28,7 @@ public class User {
     private String email;
     private String firstName;
     private String lastName;
+    private String gender = "U"; // 'F': female, 'M': male, 'U': unspecified, ...
     private Date birthDate;
     private String description;
     private String favoriteSport;
@@ -75,6 +76,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public Date getBirthDate() {
@@ -125,8 +134,9 @@ public class User {
 
     @Override
     public String toString() {
-        return super.toString() + " {id=" + id + ", firstName='" + firstName + "', lastName='" + lastName + "', email='"
-                + email + "', birthDate='" + birthDate + "', description='" + description + "', favoriteSport='"
-                + favoriteSport + "', receiveNewsletter=" + receiveNewsletter + ", favoriteFood=" + favoriteFood + "}";
+        return super.toString() + " {id=" + id + ", firstName='" + firstName + "', lastName='" + lastName
+                + "', gender='" + gender + ", email='" + email + "', birthDate='" + birthDate + "', description='"
+                + description + "', favoriteSport='" + favoriteSport + "', receiveNewsletter=" + receiveNewsletter
+                + ", favoriteFood=" + favoriteFood + "}";
     }
 }
