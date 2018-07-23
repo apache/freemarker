@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.servlet.AllHttpScopesHashModel;
@@ -35,6 +36,7 @@ import org.apache.freemarker.servlet.HttpSessionHashModel;
 import org.apache.freemarker.servlet.IncludePage;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.spring.model.AbstractDelegatingTemplateHashModel;
 import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
 import org.apache.freemarker.spring.model.form.SpringFormTemplateCallableHashModel;
 
@@ -112,7 +114,7 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
 
     @Override
     protected TemplateHashModel createModel(Map<String, Object> map, ObjectWrapperAndUnwrapper objectWrapper,
-            HttpServletRequest request, HttpServletResponse response) {
+            final HttpServletRequest request, final HttpServletResponse response) {
 
         AllHttpScopesHashModel model = new AllHttpScopesHashModel(objectWrapper, getServletContext(), request);
 
@@ -139,11 +141,19 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
 
         model.putUnlistedModel(FreemarkerServlet.KEY_INCLUDE, new IncludePage(request, response));
 
-        model.putUnlistedModel(SpringTemplateCallableHashModel.NAME,
-                new SpringTemplateCallableHashModel(request, response));
+        model.putUnlistedModel(SpringTemplateCallableHashModel.NAME, new AbstractDelegatingTemplateHashModel() {
+            @Override
+            public TemplateHashModel createDelegatedTemplateHashModel() throws TemplateException {
+                return new SpringTemplateCallableHashModel(request, response);
+            }
+        });
 
-        model.putUnlistedModel(SpringFormTemplateCallableHashModel.NAME,
-                new SpringFormTemplateCallableHashModel(request, response));
+        model.putUnlistedModel(SpringFormTemplateCallableHashModel.NAME, new AbstractDelegatingTemplateHashModel() {
+            @Override
+            public TemplateHashModel createDelegatedTemplateHashModel() throws TemplateException {
+                return new SpringFormTemplateCallableHashModel(request, response);
+            }
+        });
 
         model.putAll(map);
 

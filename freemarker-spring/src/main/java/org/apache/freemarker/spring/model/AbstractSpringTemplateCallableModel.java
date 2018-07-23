@@ -164,7 +164,9 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
      */
     protected SpringTemplateCallableHashModel getSpringTemplateCallableHashModel(final Environment env)
             throws TemplateException {
-        return (SpringTemplateCallableHashModel) env.getVariable(SpringTemplateCallableHashModel.NAME);
+        final AbstractDelegatingTemplateHashModel delegate = (AbstractDelegatingTemplateHashModel) env
+                .getVariable(SpringTemplateCallableHashModel.NAME);
+        return (SpringTemplateCallableHashModel) delegate.getDelegatedTemplateHashModel();
     }
 
     private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
