@@ -19,17 +19,11 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.TemplateException;
-import org.springframework.web.bind.WebDataBinder;
-
 /**
- * Provides <code>TemplateModel</code> for data-binding-aware multiple HTML '{@code <input type="checkbox"/>}' elements.
+ * Provides <code>TemplateModel</code> for data-binding-aware multiple HTML '{@code <input type="radio"/>}' elements.
  * This tag is provided for completeness if the application relies on a
  * <code>org.springframework.web.servlet.support.RequestDataValueProcessor</code>.
  * <P>
@@ -44,13 +38,13 @@ import org.springframework.web.bind.WebDataBinder;
  * Some valid example(s):
  * </P>
  * <PRE>
- *   &lt;#assign foodItems = [ "Sandwich", "Spaghetti", "Sushi" ] &gt;
- *   &lt;@form.checkboxes "user.favoriteFood" items=foodItems /&gt;
+ *   &lt;#assign genders = [ "F", "M", "U" ] &gt;
+ *   &lt;@form.radiobuttons "user.gender" items=genders /&gt;
  * </PRE>
  * Or,
  * <PRE>
- *   &lt;#assign foodItemHash = { "Sandwich": "Delicious sandwich", "Spaghetti": "Lovely spaghetti", "Sushi": "Sushi with wasabi" } &gt;
- *   &lt;@form.checkboxes "user.favoriteFood" items=foodItemHash /&gt;
+ *   &lt;#assign genderHash = { "F": "Female", "M": "Male", "U": "Unspecified" } &gt;
+ *   &lt;@form.radiobuttons "user.gender" items=genderHash /&gt;
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:button /&gt;</code> JSP Tag Library, this directive
@@ -59,31 +53,17 @@ import org.springframework.web.bind.WebDataBinder;
  * </P>
  */
 
-class CheckboxesTemplateDirectiveModel extends AbstractMultiCheckedElementTemplateDirectiveModel {
+class RadioButtonsTemplateDirectiveModel extends AbstractMultiCheckedElementTemplateDirectiveModel {
 
-    public static final String NAME = "checkboxes";
+    public static final String NAME = "radiobuttons";
 
-    protected CheckboxesTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    protected RadioButtonsTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    protected void writeAdditionalDetails(Environment env, TagOutputter tagOut) throws TemplateException, IOException {
-        if (!isDisabled()) {
-            // Spring Web MVC requires to render a hidden input as a 'field was present' marker.
-            // Write out the 'field was present' marker.
-            tagOut.beginTag("input");
-            tagOut.writeAttribute("type", "hidden");
-            String name = WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName();
-            tagOut.writeAttribute("name", name);
-            tagOut.writeAttribute("value", processFieldValue(env, name, "on", getInputType()));
-            tagOut.endTag();
-        }
-    }
-
-    @Override
     protected String getInputType() {
-        return "checkbox";
+        return "radio";
     }
 
 }

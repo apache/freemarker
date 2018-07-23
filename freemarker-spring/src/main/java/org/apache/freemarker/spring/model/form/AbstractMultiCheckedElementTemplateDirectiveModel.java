@@ -93,6 +93,16 @@ abstract class AbstractMultiCheckedElementTemplateDirectiveModel extends Abstrac
     }
 
     @Override
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
+        return ARGS_LAYOUT;
+    }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
+    @Override
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
             throws TemplateException, IOException {
@@ -203,8 +213,15 @@ abstract class AbstractMultiCheckedElementTemplateDirectiveModel extends Abstrac
         return autogenerateId(env);
     }
 
-    protected abstract void writeAdditionalDetails(Environment env, TagOutputter tagOut)
-            throws TemplateException, IOException;
+    /**
+     * Optionally extend this to write out more detail such as 'field was present' marker tags.
+     * @param env environment
+     * @param tagOut TagOutputter instance
+     * @throws TemplateException if template exception occurs
+     * @throws IOException if IO exception occurs
+     */
+    protected void writeAdditionalDetails(Environment env, TagOutputter tagOut) throws TemplateException, IOException {
+    }
 
     private void writeObjectEntry(final Environment env, final TagOutputter tagOut, String valueProperty,
             String labelProperty, Object item, int itemIndex) throws TemplateException, IOException {

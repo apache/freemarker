@@ -557,6 +557,8 @@ models by default like FreemarkerServlet does.
   - <form:options ... /> : Replaced by <@form.options ... /> directive.
   - <form:checkbox ... /> : Replaced by <@form.checkbox ... /> directive.
   - <form:checkboxes ... /> : Replaced by <@form.checkboxes ... /> directive.
+  - <form:radiobutton ... /> : Replaced by <@form.radiobutton ... /> directive.
+  - <form:radiobuttons ... /> : Replaced by <@form.radiobuttons ... /> directive.
 
 Core / Miscellaneous
 ....................

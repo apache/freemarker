@@ -59,6 +59,7 @@ public final class SpringFormTemplateCallableHashModel implements TemplateHashMo
         modelsMap.put(CheckboxTemplateDirectiveModel.NAME, new CheckboxTemplateDirectiveModel(request, response));
         modelsMap.put(CheckboxesTemplateDirectiveModel.NAME, new CheckboxesTemplateDirectiveModel(request, response));
         modelsMap.put(RadioButtonTemplateDirectiveModel.NAME, new RadioButtonTemplateDirectiveModel(request, response));
+        modelsMap.put(RadioButtonsTemplateDirectiveModel.NAME, new RadioButtonsTemplateDirectiveModel(request, response));
     }
 
     @Override
