@@ -2119,6 +2119,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but
      * maybe also used by the embedding application to set the HTTP response MIME type, etc.
      * 
+     * @param outputFormat
+     *            Not {@code null}; use {@link UndefinedOutputFormat#INSTANCE} instead.
+     * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurations(TemplateConfigurationFactory)
      * @see #setRecognizeStandardFileExtensions(boolean)
