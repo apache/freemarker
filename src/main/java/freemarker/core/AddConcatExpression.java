@@ -275,14 +275,14 @@ final class AddConcatExpression extends Expression {
             }
         }
 
-        private static void addKeys(Set set, SimpleSequence keySeq, TemplateHashModelEx hash)
+        private static void addKeys(Set keySet, SimpleSequence keySeq, TemplateHashModelEx hash)
         throws TemplateModelException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
                 TemplateScalarModel tsm = (TemplateScalarModel) it.next();
-                if (set.add(tsm.getAsString())) {
-                    // The first occurence of the key decides the index;
-                    // this is consisten with stuff like java.util.LinkedHashSet.
+                if (keySet.add(tsm.getAsString())) {
+                    // The first occurrence of the key decides the index;
+                    // this is consistent with the behavior of java.util.LinkedHashSet.
                     keySeq.add(tsm);
                 }
             }
