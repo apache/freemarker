@@ -27613,6 +27613,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_29">
+        <title>2.3.29</title>
+
+        <para>Release date: [FIXME]</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>[FIXME]</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added
+              <literal>TemplateModelUtils.wrapAsHashUnion(ObjectWrapper,
+              List&lt;?&gt;)</literal> and
+              <literal>wrapAsHashUnion(ObjectWrapper, Object...)</literal>,
+              which meant to be used when you want to compose a data-model
+              from multiple objects in a way so that their entries
+              (<literal>Map</literal> key-value pairs, bean properties, etc.)
+              appear together on the top level of the data-model.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_28">
         <title>2.3.28</title>
 
