@@ -147,7 +147,7 @@ public final class TemplateModelUtils {
      * 
      * @since 2.3.29
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static TemplateHashModel wrapAsHashUnion(ObjectWrapper objectWrapper, List<?> hashLikeObjects)
             throws TemplateModelException {
         NullArgumentException.check("hashLikeObjects", hashLikeObjects);
@@ -181,7 +181,7 @@ public final class TemplateModelUtils {
         
         return  hashes.isEmpty() ? Constants.EMPTY_HASH
                 : hashes.size() == 1 ? hashes.get(0)
-                : allTHMEx ? new HashExUnionModel((List<? extends TemplateHashModelEx>) hashes)
+                : allTHMEx ? new HashExUnionModel((List) hashes)
                 : new HashUnionModel(hashes);
     }
     
