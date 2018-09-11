@@ -105,7 +105,7 @@ public final class TemplateModelUtils {
     /**
      * Same as {@link #wrapAsHashUnion(ObjectWrapper, List)}, but uses a varargs parameter instead of a {@link List}. 
      * 
-     * @since 2.3.28
+     * @since 2.3.29
      */
     public static TemplateHashModel wrapAsHashUnion(ObjectWrapper objectWrapper, Object... hashLikeObjects)
             throws TemplateModelException {
@@ -145,7 +145,7 @@ public final class TemplateModelUtils {
      *             wrapping an element results in a {@link TemplateModel} that's not a {@link TemplateHashModel}, or if
      *             the element was already a {@link TemplateModel} that isn't a {@link TemplateHashModel}.
      * 
-     * @since 2.3.28
+     * @since 2.3.29
      */
     @SuppressWarnings("unchecked")
     public static TemplateHashModel wrapAsHashUnion(ObjectWrapper objectWrapper, List<?> hashLikeObjects)
