@@ -122,7 +122,7 @@ public final class TemplateModelUtils {
      * This method is typical used when you want to compose a data-model from multiple objects in a way so that their
      * entries ({@link Map} key-value pairs, bean properties, etc.) appear together on the top level of the data-model.
      * In such case, use the return value of this method as the combined data-model. Note that this functionality
-     * somewhat overlaps with {@link Configuration#setSharedVaribles(Map)}; check if that fits your use case better.
+     * somewhat overlaps with {@link Configuration#setSharedVariables(Map)}; check if that fits your use case better.
      * 
      * @param objectWrapper
      *            {@link ObjectWrapper} used to wrap the elements of {@code hashLikeObjects}, except those that are

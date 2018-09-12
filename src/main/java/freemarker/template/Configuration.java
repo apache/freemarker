@@ -3009,14 +3009,22 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
      *  
-     * @since 2.3.21
+     * @since 2.3.29
      */
-    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+    public void setSharedVariables(Map<String, ?> map) throws TemplateModelException {
         rewrappableSharedVariables = new HashMap(map);
         sharedVariables.clear();
         setSharedVariablesFromRewrappableSharedVariables();
     }
 
+    /**
+     * Same as {@link #setSharedVariables(Map)}, but with typo in the name.
+     * @since 2.3.21
+     * @deprecated Use {@link #setSharedVariables(Map)} instead. 
+     */
+    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+    }
+    
     private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
         if (rewrappableSharedVariables == null) return;
         for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext(); ) {
