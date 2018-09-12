@@ -138,7 +138,9 @@ public final class TemplateModelUtils {
      *            is an empty hash.
      * 
      * @return The {@link TemplateHashModel} that's the union of the objects provided. This is a "view", that delegates
-     *         to the underlying hashes, not a copy. If all elements are
+     *         to the underlying hashes, not a copy. The object is not thread safe. If all elements in
+     *         {@code hashLikeObjects} are {@link TemplateHashModelEx} objects (or if there are 0 elements), then the
+     *         result will implement {@link TemplateHashModelEx} as well.
      * 
      * @throws TemplateModelException
      *             If wrapping an element of {@code hashLikeObjects} fails with {@link TemplateModelException}, or if
@@ -184,14 +186,14 @@ public final class TemplateModelUtils {
                 : allTHMEx ? new HashExUnionModel((List) hashes)
                 : new HashUnionModel(hashes);
     }
-    
-    private static class HashUnionModel implements TemplateHashModel {
-        private final List<? extends TemplateHashModel> hashes;
 
-        HashUnionModel(List<? extends TemplateHashModel> hashes) {
+    private static abstract class AbstractHashUnionModel<T extends TemplateHashModel> implements TemplateHashModel {
+        protected final List<? extends T> hashes;
+
+        public AbstractHashUnionModel(List<? extends T> hashes) {
             this.hashes = hashes;
         }
-        
+
         public TemplateModel get(String key) throws TemplateModelException {
             for (int i = hashes.size() - 1; i >= 0; i--) {
                 TemplateModel value = hashes.get(i).get(key);
@@ -210,35 +212,23 @@ public final class TemplateModelUtils {
             }
             return true;
         }
+        
+    }
+    
+    private static class HashUnionModel extends AbstractHashUnionModel<TemplateHashModel> {
+        HashUnionModel(List<? extends TemplateHashModel> hashes) {
+            super(hashes);
+        }
     }
 
-    private static final class HashExUnionModel implements TemplateHashModelEx {
-        private final List<? extends TemplateHashModelEx> hashes;
+    private static final class HashExUnionModel extends AbstractHashUnionModel<TemplateHashModelEx>
+            implements TemplateHashModelEx {
         private CollectionAndSequence keys;
         private CollectionAndSequence values;
         private int size;
 
         private HashExUnionModel(List<? extends TemplateHashModelEx> hashes) {
-            this.hashes = hashes;
-        }
-        
-        public TemplateModel get(String key) throws TemplateModelException {
-            for (int i = hashes.size() - 1; i >= 0; i--) {
-                TemplateModel value = hashes.get(i).get(key);
-                if (value != null) {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-        public boolean isEmpty() throws TemplateModelException {
-            for (TemplateHashModel hash : hashes) {
-                if (!hash.isEmpty()) {
-                    return false;
-                }
-            }
-            return true;
+            super(hashes);
         }
         
         public int size() throws TemplateModelException {
@@ -246,8 +236,7 @@ public final class TemplateModelUtils {
             return size;
         }
 
-        public TemplateCollectionModel keys()
-        throws TemplateModelException {
+        public TemplateCollectionModel keys() throws TemplateModelException {
             initKeys();
             return keys;
         }
@@ -259,7 +248,7 @@ public final class TemplateModelUtils {
 
         private void initKeys() throws TemplateModelException {
             if (keys == null) {
-                Set keySet = new HashSet();
+                Set<String> keySet = new HashSet<String>();
                 SimpleSequence keySeq = new SimpleSequence((ObjectWrapper) null);
                 for (TemplateHashModelEx hash : hashes) {
                     addKeys(keySet, keySeq, hash);
@@ -269,7 +258,7 @@ public final class TemplateModelUtils {
             }
         }
 
-        private static void addKeys(Set keySet, SimpleSequence keySeq, TemplateHashModelEx hash)
+        private static void addKeys(Set<String> keySet, SimpleSequence keySeq, TemplateHashModelEx hash)
                 throws TemplateModelException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
@@ -282,8 +271,7 @@ public final class TemplateModelUtils {
             }
         }        
 
-        private void initValues()
-        throws TemplateModelException {
+        private void initValues() throws TemplateModelException {
             if (values == null) {
                 SimpleSequence seq = new SimpleSequence(size(), null);
                 // Note: size() invokes initKeys() if needed.
