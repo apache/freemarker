@@ -27,6 +27,7 @@ import java.util.Date;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateIterableModel;
@@ -34,6 +35,7 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.BugException;
@@ -569,6 +571,31 @@ public class _EvalUtils {
         } else {
             moOF.output(mo, out);
         }
+    }
+
+    public static Object unwrapTemplateHashModelKey(TemplateModel model) throws TemplateException {
+        if (model instanceof AdapterTemplateModel) {
+            return ((AdapterTemplateModel) model).getAdaptedObject(Object.class);
+        }
+        if (model instanceof WrapperTemplateModel) {
+            return ((WrapperTemplateModel) model).getWrappedObject();
+        }
+        if (model instanceof TemplateStringModel) {
+            return ((TemplateStringModel) model).getAsString();
+        }
+        if (model instanceof TemplateNumberModel) {
+            return ((TemplateNumberModel) model).getAsNumber();
+        }
+        if (model instanceof TemplateDateModel) {
+            return ((TemplateDateModel) model).getAsDate();
+        }
+        if (model instanceof TemplateBooleanModel) {
+            return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+        }
+        // TODO [FM3] Handle List-s, etc.? But wait until FM3 TM-s settle; we might will have TM.getWrappedObject().
+        return new TemplateException(
+                "Can't unwrapp hash key of this type, yet (TODO): ",
+                new _DelayedTemplateLanguageTypeDescription(model));
     }
     
 }

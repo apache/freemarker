@@ -20,15 +20,11 @@
 package org.apache.freemarker.core;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
@@ -36,8 +32,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
@@ -269,6 +263,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
     }
 
     private static final class ConcatenatedHashEx extends ConcatenatedHash implements TemplateHashModelEx {
+
         /** Lazily calculated list of key-value pairs; there's only one item per duplicate key. */
         private Collection<KeyValuePair> kvps;
 
@@ -283,93 +278,26 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
 
         @Override
-        public boolean isEmptyHash()
-        throws TemplateException {
+        public boolean isEmptyHash() throws TemplateException {
             return ((TemplateHashModelEx) left).isEmptyHash() && ((TemplateHashModelEx) right).isEmptyHash();
         }
         
         @Override
         public TemplateCollectionModel keys() throws TemplateException {
             initKvps();
-            return new TemplateCollectionModel() {
-                @Override
-                public TemplateModelIterator iterator() throws TemplateException {
-                    return new TemplateModelIterator() {
-                        private Iterator<KeyValuePair> iter = kvps.iterator();
-
-                        @Override
-                        public boolean hasNext() throws TemplateException {
-                            return iter.hasNext();
-                        }
-
-                        @Override
-                        public TemplateModel next() throws TemplateException {
-                            return iter.next().getKey();
-                        }
-                    };
-                }
-
-                @Override
-                public int getCollectionSize() throws TemplateException {
-                    return kvps.size();
-                }
-
-                @Override
-                public boolean isEmptyCollection() throws TemplateException {
-                    return kvps.isEmpty();
-                }
-            };
+            return new _KVPCollectionKeysModel(kvps);
         }
 
         @Override
         public TemplateCollectionModel values() throws TemplateException {
             initKvps();
-            return new TemplateCollectionModel() {
-                @Override
-                public TemplateModelIterator iterator() throws TemplateException {
-                    return new TemplateModelIterator() {
-                        private Iterator<KeyValuePair> iter = kvps.iterator();
-
-                        @Override
-                        public boolean hasNext() throws TemplateException {
-                            return iter.hasNext();
-                        }
-
-                        @Override
-                        public TemplateModel next() throws TemplateException {
-                            return iter.next().getValue();
-                        }
-                    };
-                }
-                
-                @Override
-                public boolean isEmptyCollection() throws TemplateException {
-                    return kvps.isEmpty();
-                }
-                
-                @Override
-                public int getCollectionSize() throws TemplateException {
-                    return kvps.size();
-                }
-            };
+            return new _KVPCollectionValuesModel(kvps);
         }
         
         @Override
         public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
             initKvps();
-            return new KeyValuePairIterator() {
-                private Iterator<KeyValuePair> iter = kvps.iterator();
-
-                @Override
-                public boolean hasNext() throws TemplateException {
-                    return iter.hasNext();
-                }
-
-                @Override
-                public KeyValuePair next() throws TemplateException {
-                    return iter.next();
-                }
-            };
+            return new _KVPCollectionKVPIterator(kvps);
         }
 
         /**
@@ -389,33 +317,8 @@ final class ASTExpAddOrConcat extends ASTExpression {
         private static void putKVPs(Map<Object, KeyValuePair> kvps, TemplateHashModelEx hash) throws TemplateException {
             for (KeyValuePairIterator iter = hash.keyValuePairIterator(); iter.hasNext(); ) {
                 KeyValuePair kvp = iter.next();
-                kvps.put(unwrapKey(kvp.getKey()), kvp);
+                kvps.put(_EvalUtils.unwrapTemplateHashModelKey(kvp.getKey()), kvp);
             }
-        }
-
-        private static Object unwrapKey(TemplateModel model) throws TemplateException {
-            if (model instanceof AdapterTemplateModel) {
-                return ((AdapterTemplateModel) model).getAdaptedObject(Object.class);
-            }
-            if (model instanceof WrapperTemplateModel) {
-                return ((WrapperTemplateModel) model).getWrappedObject();
-            }
-            if (model instanceof TemplateStringModel) {
-                return ((TemplateStringModel) model).getAsString();
-            }
-            if (model instanceof TemplateNumberModel) {
-                return ((TemplateNumberModel) model).getAsNumber();
-            }
-            if (model instanceof TemplateDateModel) {
-                return ((TemplateDateModel) model).getAsDate();
-            }
-            if (model instanceof TemplateBooleanModel) {
-                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
-            }
-            // TODO [FM3] Handle List-s, etc.? But wait until FM3 TM-s settle; we might will have TM.getWrappedObject().
-            return new TemplateException(
-                    "Can't unwrapp hash key of this type, yet (TODO): ",
-                    new _DelayedTemplateLanguageTypeDescription(model));
         }
         
     }
