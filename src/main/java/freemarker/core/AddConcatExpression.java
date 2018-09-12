@@ -240,7 +240,6 @@ final class AddConcatExpression extends Expression {
     implements TemplateHashModelEx {
         private CollectionAndSequence keys;
         private CollectionAndSequence values;
-        private int size;
 
         ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
             super(left, right);
@@ -248,7 +247,7 @@ final class AddConcatExpression extends Expression {
         
         public int size() throws TemplateModelException {
             initKeys();
-            return size;
+            return keys.size();
         }
 
         public TemplateCollectionModel keys()
@@ -270,7 +269,6 @@ final class AddConcatExpression extends Expression {
                 SimpleSequence keySeq = new SimpleSequence(32);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.left);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.right);
-                size = keySet.size();
                 keys = new CollectionAndSequence(keySeq);
             }
         }

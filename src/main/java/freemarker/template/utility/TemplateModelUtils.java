@@ -225,7 +225,6 @@ public final class TemplateModelUtils {
             implements TemplateHashModelEx {
         private CollectionAndSequence keys;
         private CollectionAndSequence values;
-        private int size;
 
         private HashExUnionModel(List<? extends TemplateHashModelEx> hashes) {
             super(hashes);
@@ -233,7 +232,7 @@ public final class TemplateModelUtils {
         
         public int size() throws TemplateModelException {
             initKeys();
-            return size;
+            return keys.size();
         }
 
         public TemplateCollectionModel keys() throws TemplateModelException {
@@ -253,7 +252,6 @@ public final class TemplateModelUtils {
                 for (TemplateHashModelEx hash : hashes) {
                     addKeys(keySet, keySeq, hash);
                 }
-                size = keySet.size();
                 keys = new CollectionAndSequence(keySeq);
             }
         }

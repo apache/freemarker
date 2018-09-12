@@ -38,7 +38,6 @@ import freemarker.template.DefaultMapAdapter;
 import freemarker.template.DefaultNonListCollectionAdapter;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.DefaultObjectWrapperBuilder;
-import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
@@ -134,7 +133,7 @@ public class TemplateModelUtilTest {
     }
 
     @Test
-    public void wrapAsHashUnion1() throws TemplateModelException {
+    public void wrapAsHashUnionBasics() throws TemplateModelException {
         TemplateHashModelEx thEx1 = new TemplateHashModelExOnly(ImmutableMap.of("a", 1, "b", 2));
         TemplateHashModelEx thEx2 = new TemplateHashModelExOnly(ImmutableMap.of("c", 3, "d", 4));
         TemplateHashModelEx thEx3 = new TemplateHashModelExOnly(ImmutableMap.of("b", 22, "c", 33));
@@ -185,6 +184,7 @@ public class TemplateModelUtilTest {
         assertEquals(((TemplateNumberModel) h.get("b")).getAsNumber(), 2);
         assertEquals(((TemplateNumberModel) h.get("c")).getAsNumber(), 3);
         assertNotNull(h.get("class"));
+        assertNull(h.get("noSuchVariable"));
         
         try {
             TemplateModelUtils.wrapAsHashUnion(ow, "x");
@@ -241,18 +241,16 @@ public class TemplateModelUtilTest {
     /**
      * Deliberately doesn't implement {@link TemplateHashModelEx2}, only {@link TemplateHashModelEx}. 
      */
-    private static class TemplateHashModelExOnly implements TemplateHashModelEx {
+    private class TemplateHashModelExOnly implements TemplateHashModelEx {
         
         private final Map<?, ?> map;
-        private final ObjectWrapperWithAPISupport objectWrapper;
         
         public TemplateHashModelExOnly(Map<?, ?> map) {
             this.map = map;
-            objectWrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build();
         }
 
         public TemplateModel get(String key) throws TemplateModelException {
-            return objectWrapper.wrap(map.get(key));
+            return ow.wrap(map.get(key));
         }
 
         public boolean isEmpty() throws TemplateModelException {
@@ -264,27 +262,25 @@ public class TemplateModelUtilTest {
         }
 
         public TemplateCollectionModel keys() throws TemplateModelException {
-            return DefaultNonListCollectionAdapter.adapt(map.keySet(), objectWrapper);
+            return DefaultNonListCollectionAdapter.adapt(map.keySet(), ow);
         }
 
         public TemplateCollectionModel values() throws TemplateModelException {
-            return DefaultNonListCollectionAdapter.adapt(map.values(), objectWrapper);
+            return DefaultNonListCollectionAdapter.adapt(map.values(), ow);
         } 
         
     }
     
-    private static class TemplateHashModelOnly implements TemplateHashModel {
+    private class TemplateHashModelOnly implements TemplateHashModel {
 
         private final Map<?, ?> map;
-        private final ObjectWrapper objectWrapper;
         
         public TemplateHashModelOnly(Map<?, ?> map) {
             this.map = map;
-            objectWrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build();
         }
 
         public TemplateModel get(String key) throws TemplateModelException {
-            return objectWrapper.wrap(map.get(key));
+            return ow.wrap(map.get(key));
         }
 
         public boolean isEmpty() throws TemplateModelException {
