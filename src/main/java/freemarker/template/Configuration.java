@@ -3023,6 +3023,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @deprecated Use {@link #setSharedVariables(Map)} instead. 
      */
     public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+        setSharedVariables(map);
     }
     
     private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
