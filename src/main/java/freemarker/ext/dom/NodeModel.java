@@ -742,7 +742,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
             if (ref != null) {
                 xps = (XPathSupport) ref.get();
             }
-            if (xps == null) {
+            if (xps == null && xpathSupportClass != null) {
                 try {
                     xps = (XPathSupport) xpathSupportClass.newInstance();
                     xpathSupportMap.put(doc, new WeakReference(xps));
