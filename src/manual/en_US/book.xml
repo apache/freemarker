@@ -27633,6 +27633,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-104">FREEMARKER-104</link>:
+              More helpful log and error messages (especially, no
+              <literal>NullPointerException</literal> cause exception logged
+              during FreeMarker XPath support initialization) if no XPath
+              implementation is available because Java 9 modules don't allow
+              accessing the internal Xalan that's stored under
+              <literal>com.sun</literal> packages. (The messages now recommend
+              adding Apache Xalan or Jaxen as dependency if you need XPath
+              support.)</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>TemplateModelUtils.wrapAsHashUnion(ObjectWrapper,
               List&lt;?&gt;)</literal> and
