@@ -44,48 +44,34 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * Some glue code that bridges the Xalan XPath stuff (that is built into the JDK 1.4.x)
- * with FreeMarker TemplateModel semantics
+ * XPath support implemented on Apache Xalan.
  */
-
 class XalanXPathSupport implements XPathSupport {
     
     private XPathContext xpathContext = new XPathContext();
         
-    /* I don't recommend Jaxen...
-    private static final String ERRMSG_RECOMMEND_JAXEN
-            = "(Note that there is no such restriction if you "
-                    + "configure FreeMarker to use Jaxen instead of Xalan.)";
-    */
-    private static final String ERRMSG_EMPTY_NODE_SET
-            = "Cannot perform an XPath query against an empty node set."; /* " + ERRMSG_RECOMMEND_JAXEN;*/
-    
     synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         if (!(context instanceof Node)) {
-            if (context != null) {
-                if (isNodeList(context)) {
-                    int cnt = ((List) context).size();
-                    if (cnt != 0) {
-                        throw new TemplateModelException(
-                                "Cannot perform an XPath query against a node set of " + cnt
-                                + " nodes. Expecting a single node."/* " + ERRMSG_RECOMMEND_JAXEN*/);
-                    } else {
-                        throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
-                    }
-                } else {
-                    throw new TemplateModelException(
-                            "Cannot perform an XPath query against a " + context.getClass().getName()
-                            + ". Expecting a single org.w3c.dom.Node.");
-                }
+            if (context == null || isNodeList(context)) {
+                int cnt = context != null ? ((List) context).size() : 0;
+                throw new TemplateModelException(
+                        (cnt != 0
+                                ? "Xalan can't perform an XPath query against a Node Set (contains " + cnt
+                                        + " node(s)). Expecting a single Node."
+                                : "Xalan can't perform an XPath query against an empty Node Set."
+                        )
+                                + " (There's no such restriction if you configure FreeMarker to use Jaxen for XPath.)");
             } else {
-                throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
+                throw new TemplateModelException(
+                        "Can't perform an XPath query against a " + context.getClass().getName()
+                                + ". Expecting a single org.w3c.dom.Node.");
             }
         }
         Node node = (Node) context;
         try {
-            XPath xpath = new XPath(xpathQuery, null, customPrefixResolver, XPath.SELECT, null);
+            XPath xpath = new XPath(xpathQuery, null, CUSTOM_PREFIX_RESOLVER, XPath.SELECT, null);
             int ctxtNode = xpathContext.getDTMHandleFromNode(node);
-            XObject xresult = xpath.execute(xpathContext, ctxtNode, customPrefixResolver);
+            XObject xresult = xpath.execute(xpathContext, ctxtNode, CUSTOM_PREFIX_RESOLVER);
             if (xresult instanceof XNodeSet) {
                 NodeListModel result = new NodeListModel(node);
                 result.xpathSupport = this;
@@ -117,7 +103,7 @@ class XalanXPathSupport implements XPathSupport {
         }
     }
     
-    private static PrefixResolver customPrefixResolver = new PrefixResolver() {
+    private static final PrefixResolver CUSTOM_PREFIX_RESOLVER = new PrefixResolver() {
         
         public String getNamespaceForPrefix(String prefix, Node node) {
             return getNamespaceForPrefix(prefix);
@@ -138,22 +124,22 @@ class XalanXPathSupport implements XPathSupport {
             return false;
         }
     };
-    
+
     /**
      * Used for generating more intelligent error messages.
      */
     private static boolean isNodeList(Object context) {
-        if (context instanceof List) {
-            List ls = (List) context;
-            int ln = ls.size();
-            for (int i = 0; i < ln; i++) {
-                if (!(ls.get(i) instanceof Node)) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
+        if (!(context instanceof List)) {
             return false;
         }
+
+        List ls = (List) context;
+        int ln = ls.size();
+        for (int i = 0; i < ln; i++) {
+            if (!(ls.get(i) instanceof Node)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

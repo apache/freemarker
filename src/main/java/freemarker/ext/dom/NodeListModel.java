@@ -171,14 +171,13 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             return result;
         }
         XPathSupport xps = getXPathSupport();
-        if (xps != null) {
-            Object context = (size == 0) ? null : rawNodeList(); 
-            return xps.executeQuery(context, key);
-        } else {
+        if (xps == null) {
             throw new TemplateModelException(
                     "Can't try to resolve the XML query key, because no XPath support is available. "
                     + "This is either malformed or an XPath expression: " + key);
         }
+        Object context = (size == 0) ? null : rawNodeList();
+        return xps.executeQuery(context, key);
     }
     
     private List rawNodeList() throws TemplateModelException {
