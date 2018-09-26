@@ -158,8 +158,8 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         XPathSupport xps = getXPathSupport();
         if (xps == null) {
             throw new TemplateException(
-                    "Can't try to resolve the XML query key, because no XPath support is available. "
-                    + "This is either malformed or an XPath expression: " + key);
+                    "No XPath support is available (add Apache Xalan or Jaxen as dependency). "
+                    + "This is either malformed, or an XPath expression: " + key);
         }
         Object context = (size == 0) ? null : rawNodeList();
         return xps.executeQuery(context, key);

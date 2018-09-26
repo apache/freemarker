@@ -88,7 +88,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             // do nothing
         }
         if (xpathSupportClass == null && LOG.isWarnEnabled()) {
-            LOG.warn("No XPath support is available.");
+            LOG.warn("No XPath support is available. If you need it, add Apache Xalan or Jaxen as dependency.");
         }
     }
     
@@ -149,13 +149,12 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             }
         } else {
             XPathSupport xps = getXPathSupport();
-            if (xps != null) {
-                return xps.executeQuery(node, key);
-            } else {
+            if (xps == null) {
                 throw new TemplateException(
-                        "Can't try to resolve the XML query key, because no XPath support is available. "
-                        + "This is either malformed or an XPath expression: " + key);
+                        "No XPath support is available (add Apache Xalan or Jaxen as dependency). "
+                        + "This is either malformed, or an XPath expression: " + key);
             }
+            return xps.executeQuery(node, key);
         }
     }
     
