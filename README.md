@@ -193,7 +193,7 @@ Last tested Eclipse Oxygen (4.7.0)
   go to "Run" -> "Run Configurations...", then right click on "Gradle Project" in the
   tree, then "New". The "Gradle task" (and the "Name") should be `test`, and the
   "Working directory" `${workspace_loc:/freemarker}`.
-- It's highly recommened to use the Eclipse FindBugs plugin.
+- It's highly recommended to use the Eclipse FindBugs plugin.
   - Install it from Eclipse Marketplace (3.0.2 as of this writing)
   - Window -> Preferences -> Java -> FindBugs:
     Set all bug marker ranks from Warning to Error. (For false alarms we add
@@ -218,7 +218,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
   - On the next window, all modules will be selected, that's fine, go on
   - On the next window, it will prompt to remove the `freemarker` from the project.
     Let it do it (as it's an incorrect duplication of the `freemarker` root project).
-  - At the end of this process you should have all modules Project tree view.
+  - At the end of this process you should have all modules in the Project tree view.
 - "File" -> "Project Structure..."
   Under "Project", set the SDK to 1.7, and the language level to 7.
   Under "Modules", for "freemarker-core-test-java8" / "freemarker-core-test-java8_main" and
@@ -229,12 +229,12 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
   - Under "Editor" / "Inspections", import and use
     freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
   - Copy the copyright header comment from some of the java files, then
-    under "Editor" / "Copyrigth" / "Copyrigth Profiles" click "+", enter "ASL2" as name,
-    then pase the copyright header. Delete the `/*` and ` */` lines, and the ` *`
+    under "Editor" / "Copyright" / "Copyright Profiles" click "+", enter "ASL2" as name,
+    then paste the copyright header. Delete the `/*` and ` */` lines, and the ` *`
     prefixes (to select columns of text, hold Alt while selecting with the mouse.) Then
-    go back to "Copyrigth" in the tree, and set "Default project copyright" to "ASL2".
+    go back to "Copyright" in the tree, and set "Default project copyright" to "ASL2".
 - Testing your setup:
-  - You may do "Bulild"/"Build project" (Ctrl+F9) to see if everyting compiles now.
+  - You may do "Build"/"Build project" (Ctrl+F9) to see if everything compiles now.
   - You may run the `test` task of the root project with Gradle to see that everything works as
     expected. To do that from IntelliJ, create a run configuration:
     "Run" \ "Run Configurations..." \ "+" \ "Gradle" then:
