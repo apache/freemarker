@@ -248,7 +248,7 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     Project location: Wherever you have checked out the 2.3-gae branch from Git.
     Press "Finish"
 
-- Open you newly created "FreeMarker-2.3-gae" project
+- Open your newly created "FreeMarker-2.3-gae" project
 
 - "File" -> "Project Structure..."
 
@@ -290,4 +290,15 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     FreeMarkerJspFactory2.java,  
     Java8*.java  
 
-- "Build" -> "Build project" should now succeed.
+- You may do "Build" / "Build project" (Ctrl+F9) to see if everything compiles now.
+    
+- "File" -> "Settings"
+  - Under "Editor" / "Code style", import and use
+    freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
+  - Under "Editor" / "Inspections", import and use
+    freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
+  - Copy the copyright header comment from some of the java files, then
+    under "Editor" / "Copyright" / "Copyright Profiles" click "+", enter "ASL2" as name,
+    then paste the copyright header. Delete the `/*` and ` */` lines, and the ` *`
+    prefixes (to select columns of text, hold Alt while selecting with the mouse.) Then
+    go back to "Copyright" in the tree, and set "Default project copyright" to "ASL2".
