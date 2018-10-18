@@ -96,10 +96,15 @@ public interface TemplateLoader {
      * <code>findTemplateSource()</code>.
      * 
      * @param templateSource
-     *            an object representing a template source, obtained through a prior call to
+     *            an object representing a template source (the template file), obtained through a prior call to
      *            {@link #findTemplateSource(String)}. This must be an object on which
      *            {@link TemplateLoader#closeTemplateSource(Object)} wasn't applied yet.
-     * @return the time of last modification of the specified template source, or -1 if the time is not known.
+     * @return The time of last modification for the specified template source, or -1 if the time is not known. This
+     *            value meant to be milliseconds since the epoch, but in fact FreeMarker doesn't care what it means, it
+     *            only cares if it changes, in which case the template needs to be reloaded (even if the value has
+     *            decreased). -1 is not special in that regard either; if you keep returning it, FreeMarker won't
+     *            reload the template (as far as it's not evicted from the cache from some other
+     *            reason). Note that {@link Long#MIN_VALUE} is reserved for internal use.
      */
     public long getLastModified(Object templateSource);
     
