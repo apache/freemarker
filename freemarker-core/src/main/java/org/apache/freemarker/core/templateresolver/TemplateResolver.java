@@ -142,9 +142,9 @@ public abstract class TemplateResolver {
      * @return A {@link GetTemplateResult} object that contains the {@link Template}, or a
      *         {@link GetTemplateResult} object that contains {@code null} as the {@link Template} and information
      *         about the missing template. The return value itself is never {@code null}. Note that exceptions occurring
-     *         during template loading mustn't be treated as a missing template, they must cause an exception to be
+     *         during template loading mustn't be treated as a missing templates, they must cause an exception to be
      *         thrown by this method instead of returning a {@link GetTemplateResult}. The idea is that having a
-     *         missing template is normal (not exceptional), because of how some lookup strategies work. That the
+     *         missing template is normal (not exceptional), because of how some lookup strategies work. The
      *         backing storage mechanism should indeed check that it's missing though, and not cover an error as such.
      * 
      * @throws MalformedTemplateNameException
