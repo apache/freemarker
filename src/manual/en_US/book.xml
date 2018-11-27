@@ -27635,7 +27635,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-109">FREEMARKER-109</link>:
-              In JSP TLD-s, line breaks inside a function parameter lists have
+              In JSP TLD-s, line breaks inside function parameter lists have
               caused <literal>IllegalArgumentException</literal>
               <quote>Invalid function signature</quote>.</para>
             </listitem>
