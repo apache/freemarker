@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.28</productname>
+    <productname>Freemarker 2.3.29</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -27632,6 +27632,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-109">FREEMARKER-109</link>:
+              In JSP TLD-s, line breaks inside a function parameter lists have
+              caused <literal>IllegalArgumentException</literal>
+              <quote>Invalid function signature</quote>.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-104">FREEMARKER-104</link>:

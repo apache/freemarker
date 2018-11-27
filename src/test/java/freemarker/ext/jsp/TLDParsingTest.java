@@ -41,9 +41,10 @@ import org.xml.sax.XMLReader;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateMethodModelEx;
-import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.Version;
 
@@ -79,21 +80,36 @@ public class TLDParsingTest {
         assertTrue(tldParser.getListeners().get(0) instanceof ExampleContextListener);
 
         Map tagsAndFunctions = tldParser.getTagsAndFunctions();
-        assertEquals(4, tagsAndFunctions.size());
+        assertEquals(5, tagsAndFunctions.size());
 
-        JspTagModelBase tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag");
-        assertNotNull(tag);
-        tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
-        assertNotNull(tag);
+        {
+            JspTagModelBase tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag");
+            assertNotNull(tag);
+            tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
+            assertNotNull(tag);
+        }
 
-        TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase");
-        assertNotNull(function);
-        TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
-        assertEquals("ABC", result.getAsString());
-        function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase2");
-        assertNotNull(function);
-        result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
-        assertEquals("ABC", result.getAsString());
+        {
+            TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase");
+            assertNotNull(function);
+            TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new SimpleScalar("abc")));
+            assertEquals("ABC", result.getAsString());
+        }
+
+        {
+            TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase2");
+            assertNotNull(function);
+            TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new SimpleScalar("abc")));
+            assertEquals("ABC", result.getAsString());
+        }
+
+        {
+            TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("add3");
+            assertNotNull(function);
+            TemplateNumberModel result = (TemplateNumberModel) function.exec(Arrays.asList(
+                    new SimpleNumber(1), new SimpleNumber(2), new SimpleNumber(3)));
+            assertEquals(6, result.getAsNumber());
+        }
     }
 
     public static class StringFunctions {
@@ -103,6 +119,10 @@ public class TLDParsingTest {
 
         public static String toUpperCase(String source) {
             return source.toUpperCase();
+        }
+
+        public static int add3(int x, int y, int z) {
+            return x + y + z;
         }
     }
     
