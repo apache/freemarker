@@ -1,0 +1,85 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+title = "Apache FreeMarker DOM support"
+description = """\
+FreeMarker template engine, W3C DOM (XML) wrapping support. \
+This is an optional module, useful when the data-model can contain variables that are XML nodes."""
+published = true
+inAggregateJavadoc = true
+
+dependencies {
+    compile project(":freemarker-core")
+
+    compileOnly "jaxen:jaxen:1.0-FCS"
+    compileOnly "saxpath:saxpath:1.0-FCS"
+    compileOnly("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
+
+    testCompile project(":freemarker-test-utils")
+    testRuntime "jaxen:jaxen:1.0-FCS"
+    testRuntime "saxpath:saxpath:1.0-FCS"
+    testRuntime("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
+}
+
+jar {
+    manifest {
+        instructionReplace 'Bundle-RequiredExecutionEnvironment', 'JavaSE-1.7'
+
+        attributes(
+                "Extension-name": "${project.group}:${project.name}",
+                "Specification-Title": project.title,
+                "Implementation-Title": project.title
+        )
+    }
+}
+
+javadoc {
+    title "${project.title} ${versionCanonical} API"
+}
+
+// The identical parts of Maven "deployer" and "installer" configurations:
+def mavenCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    pom.project {
+        description project.description
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            mavenCommons(delegate)
+        }
+    }
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            mavenCommons(delegate)
+        }
+    }
+}

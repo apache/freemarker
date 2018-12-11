@@ -1,0 +1,625 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+Because the Manual won't be updated for a good while, we will lead
+the FreeMarker 3 changelog here.
+
+To understand the purpose of FreeMarker 3 (FM3 from now on), please see:
+https://cwiki.apache.org/confluence/display/FREEMARKER/FreeMarker+3
+
+
+Template language changes
+=========================
+
+Note that the template converter tool (freemarker-converter) can automatically apply many of these changes on FM2
+templates. But changes that aren't purely syntactical (but behavioral) often can't be treated with 100% safety or at
+all, in which case it's always noted for that change as "Converter note:".
+
+Major template language changes / features
+------------------------------------------
+
+- Switched to camel case as the only supported naming convention. This is as if in FM2 you set the "namingConvention"
+  configuration setting to "camelCase", however the "namingConvention" setting was removed, as no other convention will
+  be supported (for the default dialect at least). Also, configuration setting names and values must use camel case
+  too (FM2 was forgiving there). Also, in XML processing, the @@ names were also converted to camel case. This means
+  `#elseif` becomes to ``#elseIf`, ``?upper_case`, `?upperCase`, and if you configure FreeMarker with Properties,
+  then `template_loader` becomes to `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
+  becomes to `node.@@nestedMarkup`.
+  Note that the template converter tool takes care of this conversion.
+- Parameters passed by position (as opposed to by name) must be separated by comma. Earlier the comma was optional.
+  (This is needed to allow passing parameters both by-position and by-name in the same invocation, which is not yet
+  implemented though.)
+  Examples:
+  `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
+  `<#nested x y>` now must be written as `<#nested x, y>`
+- #macro-s and #function  
+  - Both #macro-s and #function-s can now define parameters that are passed by position, and that are passed by name.
+    Function parameters are by default positional, which can be changed by adding `{named}` after the parameter name.
+    Macro parameters are by default named, which can be changed by adding `{positional}` after the parameter name.
+    Positional parameters always precede the named ones. There can be both a positional and a named varargs parameter;
+    the first is always a sequnce, the later is always a hash.
+    Examples:
+    - All named: `<#macro heading title icon>...</#macro>` `<@heading title="Test" icon="foo.jpg" />`
+    - Mixed: `<#macro heading title{positional} icon>...</#macro>` `<@heading "Test" icon="foo.jpg" />`
+    - All positional: `<#function f(x, y, r=0)>...</#function>` `${f(1, 2)} ${f(1, 2, 10)}`
+    - Mixed: `<#function f(x, y, r{named}=0)>...</#function>` `${f(1, 2)} ${f(1, 2, r=10)}`
+    - Positional varargs: `<#function sum(xs... abs{named}=false)>...</#function>` `${sum(1, 2, 3, abs=true)}
+    - Positional and named varargs: `<#function f(xs..., props{named}...)>...</#function>` `${f(1, 2, 3, x=1, y=2)}`
+  - In FM2, the same macro could be called with specifying all parameters by position, or by specifying all parameters
+    by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
+- Operator for handing null/missing values were reworked:
+  - The right-side operator precedence of the `exp!defaultExp` (and `exp!`) operator is now the same precedence on
+    both sides, which is lower as the precedence of `.`, but higher as the precedence of `+`. The converter takes
+    care of cases where this would change the meaning of the expression (like `x!y+1` is converted to `x!(x+1)`.)
+  - The value of `missing!` now can be used as boolean `false`, and as a function that returns `null` and accepts
+    any arguments, and as a directive that does nothing and allows any arguments (not only as "", empty sequence,
+    and empty hash).
+  - [TODO] Deeper changes are supposed to happen here later. (Some of the above changes will be meaningless then.)
+
+  
+Smaller template language changes
+---------------------------------
+
+Node: Changes already mentioned above aren't repeated here!
+
+- Removed support for all old glitches that you could turn on/off with `incompatibleImprovements` in FM2 (see
+  them in the JavaDoc of FM2 `Configuration`).
+  Converter note: The otherwise very low risk behavioral changes here aren't covered by the converter tool.
+- Removed the following operator aliases:
+  - `=` for comparison (it can only be used for assignment now). Use `==` instead.
+  - `&` for logical "and". Use `&&` instead.
+  - `\and`, `&amp;&amp;`. Use `and` instead. (HTML entity support meant to be re-added, but "globally")
+  - `|` for logical "or". Use `||` instead.
+  - `\lt`, `&lt;`. Use "lt" instead.
+  - `lte`, `\lte`, `&lt;=`. Use "le" instead (syntax from XSLT).
+  - `\gt`, `&gt;`. Use "gt" instead.
+  - `gte`, `\gte`, `&gt;=`. Use "ge" instead (syntax from XSLT).
+- New keywords (can't be used as identifier): `and`, `or`, `le`, `ge`
+- Removed some long deprecated template language directives:
+  - <#call ...> (deprecated by <@... />)
+  - <#comment>...</#comment> (deprecated by <#-- ... -->)
+  - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
+  - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
+- Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
+  Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
+  translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
+- In `#macro` and `#function` the comma must only be used between by-position parameters (earlier the comma was
+  optional).
+- In `#function`, parentheses are now required around parameter list (as in `<#function f(a, b)>`), even if there are
+  zero parameters (as in `<#function f()>`). In `#macro`, parentheses are not allowed around parameter list anymore
+  (so `#macro m(a b)` becomes to `#macro m a b`). This is to remain more consistent with the look-and-feel of the
+  invocation of the function or macro.
+- Removed some long deprecated built-ins:
+  - `webSafe` (converted to `html`)
+  - `exists` (`foo?exists` is converted `foo??`)
+  - `default` (`foo?default(bar)` is converted to `foo!bar`).
+  - `if_exists` and `ifExists` (`foo?if_exists` is converted to `foo!`).  (There's a slight difference though that
+     the return value can be called as directive (which does nothing), while with `?ifExists` that wasn't possible.)
+- Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
+  could be omitted.
+- #include has no "encoding" and "parse" parameter anymore (as now only the Configuration is responsible for deciding those)
+- You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
+  standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
+  tool does this conversion.)
+- Inside a #switch, #case can't be after #default anymore (this is actually a bug in FM2)
+  (The template converter can't fix this automatically, but reports it as an error.)
+- #else and #elseIf tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
+- Renamed `?datetime` and `?datetimeIfUnknown` and the `datetimeFormat` setting to
+  `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`. (In general, it's `dateTime`, not `datetime` everywhere.)
+          assertConverted("${.outputFormat}","${.output_format}");
+- Removed the `.currentNode` (`.current_node`) special variable, which was a deprecated alias to `.node`
+- Removed the `.templateName` (`.template_name`) special variable, which was deprecated by `.currentTemplateName`
+  since 2.3.23.
+  Converter note: This conversion is done, but note that in the rare case where a template has no name (when
+  creating a `Template` directly with its constructor using `null` as the `name` parameter) `.templateName` was an
+  empty string, while `.currentTemplateName` will be null.
+- Refactoring of callable TemplateModel interfaces and related classes:
+  - TemplateDirectiveModel was redesigned (see in the major changes section)
+  - Removed `TemplateTransformModel`; `TemplateDirectiveModel` can do the same things, and more.
+  - Renamed `DirectiveCallPlace` to `CallPlace`
+  - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the
+    parameter of the `execute` method.
+  - `?isTransform` was removed (as there are no transforms anymore); use `?isDirective` instead.
+  - `?isMacro` was removed; use `?isDirective` instead, which returns `true` both for macros and directives defined otherwise.
+  - `?isMethod` was removed; use `?isFunction` instead, which returns `true` both for Java methods and functions defined
+     otherwise (such as with `#function`).
+- The FM2 `?isCollection` and `?isEnumerable` was replaced by `?isIterable`. `?isCollectionEx` was renamed to
+  `?isCollection`. (These follows the similar nomenclature change in the TemplateModel API-s)
+  `?isIndexable` was removed, and can be replaced with `?isSequence`.
+- The directive returned by `?interpret` doesn't allow nested content anymore. (It wasn't useful earlier either;
+  the nested content was simply executed after the interpreted string.)
+- Changes in #macro/#functions
+  - See major changes first, in the earlier chapter
+  - It's not tolerated anymore if the caller of a macro has declared more nested content parameters than
+    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; i, j, k>...</@>`, where `k` has
+    no corresponding value in `#nested`).
+    (The template converter tool can't do this conversion.)
+  - In `#macro` (and `function`) named parameters with default values need not be at the end of the parameter list
+    anymore. (Positional parameters with default values need to be at the end of the list of positional parameters
+    only.)
+  - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
+    So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
+    parameter list), as `b` is not yet set when the default of `a` is calculated.
+    (The template converter tool can't do this conversion.)
+- Built-ins don't convert their parameters to string anymore; in FM some (not all) of them did, because they
+  were based on the TemplateMethod interface (deprecated even in FM2) that required String paramteters and
+  was auto-converted by FM2. (The template converter tool can't do this conversion.)
+- The string ranges like `someString[1..0]` (that is, where the end is one less than the beginning) aren't
+  tolerated anymore, and are errors. (The template converter tool can't do this conversion.)
+- Added `?sequence`, which converts an iterable value into a sequence. This is to be used with care, as iterables
+  that are not also sequences sometimes contain a large number of items, and the resulting sequence will have to
+  store all of them.
+- `?keys` and `?values` (used to return the keys and values in a hash) now returns a collection, not a sequence.
+  Note that for FM3 collections ?size works, but not accessing by index. This is to be more aligned with the
+  capabilities of java.util.Map. In case you know that you won't have a too large number of entries, and you need
+  a sequence of the keys or values, use `myMap?keys?sequence` or `myMap?values?sequence`.
+  (The template converter tool can't do this conversion. Because `?sequence` is a relatively expensive operation,
+  it shouldn't be invoked for multiple times on the same value, instead the result should be extracted into a
+  variable, like: `<#assign keySeq = keys?sequence>[... Do multiple things with keySeq here ...]`.
+
+  
+Java API changes
+================
+
+Major changes / features
+------------------------
+
+- Modularized the project. Now we have these published jar-s:
+  - org.apache.freemarker:freemarker-core
+  - org.apache.freemarker:freemarker-servlet
+  - org.apache.freemarker:freemarker-dom
+  - org.apache.freemarker:freemarker-spring
+  There are several other internal modules related to testing and such; these aren't published.
+- Reorganized package structure: Everything starts with org.apache.freemarker, and continues with
+  subpackage that corresponds to the module (see modularization above). So we have
+  org.apache.freemarker.core (has nothing to do with the old freemarker.core), org.apache.freemarker.servlet (this
+  replaced freemarker.ext.servlet and freemarker.ext.jsp), org.apache.freemarker.dom (replaces freemarker.ext.dom), etc.
+  Directly inside org.apache.freemarker.core we have most of the classes that were in freemarker.template and
+  freemarker.core, however, model related classes (and object wrappers) were moved out to
+  org.apache.freemarker.core.model, and template loading and caching related classes to
+  org.apache.freemarker.core.templateresolver (we have a class called TemplateResolver; see later).
+  OutputFormat related classes were moved to org.apache.freemarker.core.outputformat.
+  ValueFormat related classes were moved to org.apache.freemarker.core.valueformat.
+  ArithmeticEngine related classes were moved to org.apache.freemarker.core.arithmetic.
+- Added the org.apache.freemarker.core.templateresolver.TemplateResolver class and the `templateResolver` Configuration
+  setting. This allows replacing the whole template lookup, loading and caching logic with a custom implementation,
+  giving total control over this aspect of FreeMarker, in case replacing Configuration settings like `templateLoader`
+  or `templateCacheStorage` wasn't enough. The `TemplateResolver` implementation declares which of the template resolution
+  related Configuration settings it supports (for example, it may still want to rely on the `templateLoader`, but
+  doesn't use the other settings). It's an error to set a template resolution related settings that the TemplateResolver
+  doesn't support. The default implementation, `DefaultTemplateResolver`, supports all of them of course. Note that the
+  `TemplateCache` class was removed, and was basically replaced by `DefaultTemplateResolver`.
+- Totally redesigned TemplateLoader interface. The FM2 TemplateLoader can't be adapted (wrapped) to it, but usually
+  it's fairly trivial to "rearrange" an old custom TemplateLoader for the new interface. The new TemplateLoader comes
+  with several advantages, such as:
+  - It can work more efficiently with sophisticated storage mechanisms like a database, as it's now possible to pack
+    together the existence check, the last modification change check, and reading operations into less storage level
+    operations (like you can do all of them with a single SQL statement).
+  - The new TemplateLoader allows returning the template content either as an InputStream or as a Reader. Almost all
+    TemplateLoader-s should return InputStream, and FreeMarker takes care of charset issues transparently (as a result,
+    TemplateLoader-s don't have to support re-reading a template anymore, as we solve charset detection misses in
+    memory). TemplateLoader-s that are inherently backed by text (String-s), such as templates stored in a varchar or
+    CLOB column, should return a Reader. Note that templates created from a Reader will have template.getEncoding()
+    null (logically, as no charset was involved), which was impossible in FreeMarker 2.
+  - The change detection of the template doesn't have to rely on a millisecond resolution timestamp anymore; you can
+    use what's most appropriate for the storage mechanism, such as a cryptographic hash or a revision number.
+  - Template lookups (where you try multiple names until you find the best template) can now be transactional and/or
+    atomic if the backing storage mechanism supports that, by utilizing the TemplateLoaderSession interface.
+  - TemplateLoader can now return template-level settings like the output format (MIME type basically) of the loaded
+    template, in case the backing storage stores such extra information. This mechanism can be used together with
+    the TemplateConfiguration mechanism (already familiar from FreeMarker 2), and overrides the individual settings
+    coming from there.
+- Configuration is now immutable. You should use Configuration.Builder to set up the setting values, then create
+  the Configuration with the builder's build() method.
+- Configuration defaults were changed to follow the current best practices (like default charset is UTF-8 everywhere)
+- Reworked TemplateModel interfaces (see more details in the later sections):
+  - Callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`) were replaced by
+    `TemplateFunctionModel` and the reworked `TemplateDirectiveModel` interface. Both of these support padding arguments
+    by position and by name, even in the same call (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`).
+    Because of the extended capabiliteis of this interface, callables defined inside templates (via `#function` and `#macro`)
+    are now just create `TemplateFunctionModel` and `TemplateDirectiveModel` objects.
+  - Listable TemplateModel-s and their intheriance hierarchy are now much more similar the Java collection API:
+    TemplateIterableModel > TemplateCollectionModel > TemplateSequenceModel [TODO: This last will be TemplateListModel].
+- Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
+  Added org.slf4j:slf4j-api as required dependency instead.
+- Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
+  [Note: This is in very early stage, as of 2017-07-06.]
+- Added `Configuration.templateLangauge` and the `TemplateLanguage` class, which encapsulate the syntax and some of the
+  semantics, most importantly the `outputFormat`.
+- Each `TemplateLanguage` has an associated file extension, which should be sufficient for editors (IDE-s) to chose the
+  proper syntax highlighting. Syntax auto-detection was removed, as editors couldn't cope with it. Thus, the new file
+  extensions are somewhat complex, but serve tooling well. They are put together from 3 parts:
+  1. "f3" for FreeMarker 3. (Extensions starting with "f" are reserved for the FreeMarker project.)
+  2. Syntax: "a" for `ANGLE_BRACKET` `tagSyntax` and `DOLLAR` `interpolatonSyntax`, or "s" for `SQUARE_BRACKET`
+    `tagSyntax` and `SQUARE_BRACKET` `interpolationSyntax`. (Other permutations are possible, but has no standard
+     file extension reserved for them.)
+  3. Output format: Currently "h" for HTML, "x" for XML, "u" for undefined, "c" for configured (i.e., coming from
+     the `Configuration` or other kind of `ParsingConfiguration`). This is important for syntax highlighting of the
+     static parts, hence it's encoded into the file extension too. It's also important for security reasons, 
+  So a common file extensions will be "f3ah".
+  The FM2 file extensions, "ftl", "ftlh", and "ftlx" by default give error (FM 2 templates not supported) to
+  prevent confusion.
+  
+
+Smaller Java API changes (categorized)
+--------------------------------------
+
+Node: Changes already mentioned above aren't repeated here!
+
+Core / Configuration
+....................
+
+- Configuration is now immutable (see earlier), so `Configuration.Builder` was added, which extends
+  `Configuration.ExtendableBuilder`. It's now possible to change the `Configuration` setting defaults by using a custom
+  subclass instead of `Configuration.Builder`. (`FreeMarkerServlet` has switched to this approach, using its own
+  builder subclass to provide defaults that makes the sense in that particular application.)
+- setClassForTemplateLoader, setDirectoryForTemplateLoading and the like were removed, instead there's just
+  setTemplateLoader. So for example. instead of  setClassForTemplateLoader(Foo.class, "templates") now you have
+  to write setTemplateLoader(new ClassTemplateLoader(Foo.class, "templates")). While it's a bit longer, it shows
+  more clearly what's happening, and always supports all TemplateLoader constructor overloads.
+- setSetting (and the like) doesn't throw ParseException (the same exception used when parsing templates) anymore,
+  but ConfigurationException. Also, on the places where ParseException was used for other than template parsing,
+  o.a.f.core.util.GenericParseException is used now instead, which doesn't have the template parsing related fields
+  that we can't fill.
+- Removed `String Configurable.getSetting(String)` and `Properties getSettings()`. It has never worked well,
+  and is impossible to implement properly.
+- Added ProcessingConfiguration interface for the read-only access of template processing settings. This is similar to
+  the FM2 ParserConfiguration interface.
+- Renamed Configurable to MutableProcessingAndParserConfiguration. Made it abstract too.
+- Made Template immutable (via public API-s). Template-specific settings now can only come from the
+  TemplateConfiguration associated to the template, or from the #ftl header for some settings (most notably for
+  custom attributes).
+- Renamed ParserConfiguration to ParsingConfiguration, so that the name is more consistent with the new
+  ProcessingConfiguration.
+- Changed the defaults of some Configuration settings:
+  - Changed the default of sourceEncoding ("encoding" earlier) to UTF-8 from the platform default charset.
+    Using the platform default charset was proven to be fragile in practice,
+    like applications could break when moved to another server if the application
+    was unwillingly relying on the default.
+  - Changed the default of templateExceptionHandler (template_exception_hander) to
+    TemplateExceptionHandler.RETHROW from DEBUG
+  - Changed the default of sqlDateAndTimeTimeZone (sqlDateAndTimeTimeZone) to
+    TimeZone.default() from null (where null meant falling back to the timeZone setting value)
+  - Changed the default of templateNameFormat (templateNameFormat) to what's equivalent to
+    FM2 DefaultTemplateNameFormat24. The old DefaultTemplateNameFormat was removed, and
+    DefaultTemplateNameFormat24 was renamed to DefaultTemplateNameFormat.
+- Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now behaves as if it was false.
+  When a FreeMarker method throws an exception, the caller is responsible for either logging it or letting it bubble up.
+- Removed the wrapUncheckedExceptions setting. FreeMarker now behaves as if it was true.
+- Removed the strictSyntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
+  compatibility option.
+- The `tagSyntax` setting doesn't support the `autoDetect` value anymore. It was removed mostly because tools (editors)
+  could almost never implement it. Instead, there will be ([TODO]) separate file extensions for each syntax variation.
+- Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
+- Renamed the `localizedLookup` Configuration setting to `localizedTemplateLookup`.
+- Renamed the `datetimeFormat` Configuration setting to `dateTimeFormat` (following Java 8 convention).
+- Renamed the String key for the historically incorrect `autoInclude` Configuration setting to `autoIncludes`.
+- Renamed the String key for the historically incorrect `autoImport` Configuration setting to `autoImports`.
+- TemplateClassResolver.UNRESTRICTED_RESOLVER and ALLOWS_NOTHING_RESOLVER was renamed
+  to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
+  "allowsNothing" were renamed to "allowNothing".
+- TemplateExceptionHandler.IGNORE_HANDLER, RETHROW_HANDLER, DEBUG_HANDLER and
+  HTLM_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG
+- AttemptExceptionReporter.LOG_ERROR_REPORTER and LOG_WARN_REPORTER was renamed to
+  LOG_ERROR and LOG_WARN (to be consistent with the new TemplateExceptionHandler names)
+- Removed TemplateClassResolver.SAFER_RESOLVER, because the classes it has blocked were removed from FreeMarker, so it's
+  the same as UNRESTRICTED_RESOLVER
+- When specifying the templateUpdateDelay configuration setting with a String (with Properties), the time unit is
+  required, unless the value is 0.
+- Even for setting values that are class names without following `()` or other argument list, the INSTANCE field and
+  the builder class will be searched now, and used instead of the constructor of the class. Earlier they weren't for
+  backward compatibility.
+- Removed the static default Configuration instance. (It's not possible to create a template with null Configuration
+  constructor argument anymore.)
+- The strict_bean_models configuration setting was removed, as it should be set on the BeansWrapper itself
+- When looking for a builder class in builder expressions used in setting values like `com.example.Foo()`, now we first
+  look for com.example.Foo.Builder, and only then com.example.FooBuilder.
+- Removed Configuration.Builder.setEncoding(java.util.Locale, String) and the related other methods. Because of the new
+  logic of template encodings, the locale to encoding mapping doesn't make much sense anymore.
+- As "attributes" can't be modifiable now that Configuration is immutable, and hence didn't fit into the new system,
+  the "attributes" setting was removed. In place of that, two new concepts were introduced, targeting two different
+  "attributes" use-cases:
+    - Custom states: CustomStateKey class and the CustomStateScope interface was introduced, which
+      is somewhat similar to the now removed CustomAttribute. CustomStateScope contains one method, Object
+      `getCustomState(CustomStateKey)``, which may calls `CustomStateKey.create()` to lazily create the state object
+      for the key. `Configuration`, `Template` and `Environment` implements `CustomStateScope`, so you can store state
+      in any of these scopes.
+    - Custom settings: These have the same mutability rules as normal settings, that is, you can't modify them except in
+      builder objects and in the `Environment`. You can get their values with `getCustomSetting(Serializble key[, Object
+      defaultValue])`. If no default is specified, and the custom setting is not set, a `CustomSettingNotSetException`
+      is thrown. Just like standard settings, custom settings automatically inherited from higher scopes.
+    - In the `#ftl` header the `attributes` parameter name was changed to `customSettings`
+      (The template converter tool takes care of this conversion.)
+- Renamed Configuration.defaultEncoding to sourceEncoding, also added sourceEncoding to ParserConfiguration, and renamed
+  TemplateConfiguration.encoding and Template.encoding to sourceEncoding. (Before this, defaultEncoding was exclusive
+  to Configuration, but now it's like any other ParserConfiguration setting that can be overridden on the 3 levels.)
+- Settings that have contained a charset name (sourceEncoding, outputEncoding, URLEscapingCharset) are now of type Charset,
+  not String. For string based configuration sources (such as .properties files) this means that:
+  - Unrecognized charset names are now errors
+  - For recognized names the charset name will be normalized (like "latin1" becomes to "ISO-8859-1").
+  - In "object builder expressions" Charset values can now be constructed like `Charset("ISO-8859-5")`.
+    Note that as the type of the settings have changed, now you can't just write something like
+    `TemplateConfiguration(sourceEncoding = "UTF-8")`, but `TemplateConfiguration(sourceEncoding = Charset("UTF-8"))`.
+- Configuration-related int constants were replaced with enums:
+  - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
+  - FM2 Configuration.${c}_INTERPOLATION_SYNTAX with InterpolationSyntax.${c}
+  - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
+- Removed hasCustomFormats() from configuration related API-s (we don't need it anymore)
+- The tagSyntax and interpolationSyntax settings were moved inside the templateLanguage setting, as they are only
+  applicable if the templateLanguage is a DefaultTemplateLanguage instance.
+
+  
+Core / Models and Object wrapping
+.................................
+
+- DefaultObjectWrapper is now immutable (has no setter methods), so most of the mutator methods (like setters) were
+  moved rom Configuration to Configuration.Builder.
+- `DefaultObjectWrapper` now has a configuration setting, `extensions`, to add `DefaultObjectWrapperExtension`-s, which
+  meant to be used for wrapping application-specific objects specially. Along with this, `DefaultObjectWrapper` now has
+  two protected methods to customze the wrapping logic, `wrapSpecialObject(Object)` and `wrapGenericObject(Object)`; the
+  last replaces the `handleUnknownType(Object)` method from FM2. `DefaultObjectWrapperExtension`-s are applied before or
+  after `wrapSpecialObject`, depending on what `DefaultObjectWrapperExtension.getPhase()` returns. See the JavaDoc of
+  `DefaultObjectWrapper.wrap(Object)` for more on wrapping phases.
+- `DefaultObjectWrapper` doesn't wrap W3C DOM nodes (XML) specially anymore, as DOM wrapping was factored out to a
+  separate jar (freemarker-dom) as part of modularizing FreeMarker. To ensure that DOM nodes are wrapped specially as
+  in FM2, the `extensions` setting of the `DefaultObjectWrapper` has to be so that it contains
+  `DOMDefaultObjectWrapperExtension.INSTANCE`. For example:
+      cfgBuilder.objectWrapper(
+              new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                      .extensions(DOMDefaultObjectWrapperExtension.INSTANCE)
+                      .build())
+- Moved the all the static final ObjectWrapper-s to the new _StaticObjectWrappers class, and made them
+  write protected (non-configurable). Also now they come from the pool that ObjectWrapper builders use.
+- WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.
+- Removed SimpleObjectWrapper deprecated parameterless constructor
+- Removed the deprecated BeansWrapper.nullModel setting. So null is always wrapped to null now.
+- Removed the overridable BeansWrapper.finetuneMethodAppearance method, which was deprecated by the
+  finetuneMethodAppearance setting (BeansWrapper.setFinetuneMethodAppearance).
+- Removed BeansWrapper, which was the superclass of DefaultObjectWrapper, but wasn't recommended to be used as is.
+  Removed many BeansWrapper-related classes that DefaultObjectWrapper doesn't use. This includes ModelCache and
+  related classes, because DefaultObjectWrapper has only used the cache for "generic" classes (because that's where it
+  has fallen back to BeansWrapper.wrap), which is inconsistent and doesn't worth the caching overhead and complexity.
+- Removed parameterless DefaultObjectWrapper and BeansWrapper constructors. Now specifying the
+  incomplatibleImprovement version is required.
+- Removed DefaultObjectWrapper settings that only exist so that you can set backward compatible behavior instead of
+  the recommended value: useAdaptersForContainers, forceLegacyNonListCollections, iterableSupport, simpleMapWrapper
+- Java methods (when using DefaultObjectWrapper) won't be accessible as sequences anyore. That is, earlier, instead of
+  obj.m(1), you could write obj.m[1]. This strange feature has led to some tricky cases, while almost nobody has
+  utilized it.
+- SimpleObjectWrapper was renamed to RestrictedObjectWrapper. When configuring with properties, the `simple` setting
+  value for the `objectWrapper` (`object_wrapper`) setting is not supported anymore, instead `RestrictedObjectWrapper(3.0.0)`
+  can be written.
+- Removed the global static final ObjectWrapper-s. It had a "few" consequences:
+  - Standard TemplateModel implementations that can have an ObjectWrapper contrucor parameter don't allow null there anymore.
+    Also, any constructor overloads where you cold omit the ObjectWrapper were removed (these were deprecated in FM2 too).
+    In FM2, such overloads has used the global static default DefaltObjectWrapper, but that was removed.
+  - If the ObjectWrapper is not a DefaultObjectWrapper (or a subclass of it), `className?new(args)` will only accept 0 arguments.
+    (Earlier we have fallen back to using the global static default DefaultObjectWrapper instance to handle argument unwrapping
+    and overloaded constructors.) Note that ?new is only used to instantiate TemplateModel-s, typically, template language
+    functions/directives implemented in Java, and so they hardly ever has an argument.
+  - FreemarkerServlet now requires that the ObjectWrapper it uses implements ObjectWrapperAndUnwrapper. (Thus, the return type
+    of FreemarerServlet.createDefaultObjectWrapper() has changed to ObjectWrapperAndUnwrapper.) The unwrapping functionality is
+    required when calling JSP custom tags/functions, and in FreeMarker 2 this was worked around with using the
+    global static default DefaultObjectWrapper when the ObjectWrapper wasn't an ObjectWrapperAndUnwrapper.
+- If for an indexed JavaBean property there's both an indexed read method (like `Foo getFoo(int index)`) and a normal read method
+  (like Foo[] getFoo()), we prefer the normal read method, and so the result will be a clean FTL sequence (not a multi-type value
+  with sequence+method type). If there's only an indexed read method, then we don't expose the property anymore, but the indexed
+  read method can still be called as an usual method (as `myObj.getFoo(index)`). These changes were made because building on the
+  indexed read method we can't create a proper sequence (which the value of the property should be), since sequences are required
+  to support returning their size. (In FreeMarker 2 such sequences has thrown exception on calling size(), which caused more
+  problems and confusion than it solved.)
+- Removed DefaultObjectWrapper.methodsShadowItems setting, in effect defaulting it to true. This has decided if the generic
+  get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
+  name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
+- Renamed TemplateDateModel.DATETIME to DATE_TIME (to be consistent with "dateTime" used elsewhere).
+- `TemplateMethod` and `TemplateMethodEx` was removed, taken over by `TemplateFunctionModel`. `TemplateFunctionModel` is
+  the common interface bith for wrapped Java methods and functions defined in the templates, or on any other ways.
+  `OverloadedMethodsModel` and `SimpleMethodModel` were renamed to `OverloadJavaMethodModel` and  `SimpleJavaMethodModel`,
+  which of course extend `TemplateFunctionModel`, but allow inocations without `Environment` parameter.
+- `org.apache.freemarker.core.util.CallableUtils` was added to help implementing function and directives in Java.
+- `TemplateModelException` was removed, replaced with `TemplateException` on all places, except for
+  `ObjectWrapper.wrap(Object)` and `wrapAsAPI(Object)`, which now throws `ObjectWrappingException` instead (that extends
+  `TemplateException`).
+  In FM2 it `TemplateModelException` has extended `TemplateException` and was thrown by `TemplateModel` methods. As it
+  has turned out over time, some models call into FreeMarker functionality that can throw `TemplateException`, but the
+  method of the model couldn't throw that as `TemplateModelException` is more specific. Now it can. Also it's not very
+  useful in practice to catch `TemplateModelException` and the more generic `TemplateException` separately, so this
+  simplification was made.
+- Reworked TemplateModel interfaces:
+  - Reworked callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`)
+    - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
+      `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
+      `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
+      (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
+    - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
+      (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
+    - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
+      product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
+      that the callable TemplateModel-s coulnd't have.)
+  - Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
+    where strings, numbers, booleans, etc. weren't separated.)
+  - Reworked the list-like TemplateModel interfaces: 
+    - Renamed `TemplateCollectionModel` to `TemplateIterableModel`, and `TemplateCollectionModelEx` to
+      `TemplateCollectionModel`. (Since java.util.Iterable was added to Java, the TemplateCollectionModel
+      has become an unfortunate name, especailly as later TemplateCollectionModelEx was added, that was closer
+      to java.util.Collection than TemplateCollectionModel.)
+    - `TemplateSequenceModel` now extends `TemplateCollecitonModel`, and `#list` and other built-in mechanims prefer
+       using `iterator()` instead of an index loop.
+    - `TemplateModelIterator.next()` isn't required to handle anymore the case when there's no next item. If someone
+      doesn't check that with `hasNext()` before calling `next()`, anything can happen. This is to allow more efficient
+      implementations, which has become important now that `#list` and such prefers iterators over index loops.
+    - `isEmpty` of FM2 `TemplateCollectionModelEx` (now `TemplateCollectionModel`) and FM2 `TemplateHashModel` was renamed
+      to `isEmptyCollection` and `isEmptyHash`, so that for multi-typed values can give different results depending on the
+      type. Also, for collections `size()` was renamed to `getCollectionSize()`, and for hashes `getHashSize()`.
+    - `TemplateSequenceModel.get(int)` is now expected to actually return `null` for any invalid index. In FM2 this was
+      the documented expectation, but many implementaitons throw exception instead of returning `null`, but FreeMarker
+      has tolerated that.
+    - `TemplateHashModelEx.keys()` and `values()` returns `TemplateCollectoinModel`, just as in FM2, but in FM3
+      `TemplateCollectoinModel` has `getCollectionSize()` and `isEmptyCollection` method. So this affects
+      `TemplateHashModelEx` implementations as well.
+  - Map-like interfaces:
+    - `TemplateHashModelEx2` was removed, as the `keyValuePairIterator()` method was moved to `TemplateHashModelEx`,
+       so now the two interfaces would be the same.
+    - `TemplateHashModel` doesn't have `isEmpty()` method anymore. (As the point of a pure `TemplateHashModel` is that
+      it's not able to list its keys, almost all `isEmpty()` implementations in FM2 were just dummies returning `false`.)
+      Note that `?hasContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
+      based on the idea that for some `key` (which you may don't know) `get(key)` might returns something.
+  - `TemplateModel.NOTHING` was removed without replacement.
+- BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
+- Methods that return void now return an empty string instead of `TemplateModel.NOTHING` (which was removed).
+  Thus, `${obj.voidReturningMethod()}` still works (it prints nothing, just as in FM2), but things like
+  `x + obj.voidReturningMethod()` now fail (unlike in FM2), as they are probably oversights.  This all applies to
+  Java methods wrapped by the DefaultObjectWrapper (which, in FM3, is also used in place of the FM2 BeansWrapper).
+      
+Core / Template loading and caching
+...................................
+
+- Template constructors won't close the Reader passed in as argument anymore (because a Reader should be closed
+  by who has created it). This avoids some surprises from the past, such as the unablility to reset a Reader to a mark
+  after parsing. If you call those constructors, be sure that you close the Reader yourself. (Obviously, it doesn't
+  mater for StringReader-s.)
+- All CacheStorage-s must be thread safe from now on (removed ConcurrentCacheStorage marker interface)
+- Configuration.getTemplate has no "parse" parameter anymore. Similarly #include has no "parse" parameter anymore. Whether a
+  template is parsed can be specified via Configuration.templateConfigurations, for example based on the file extension. Thus,
+  a certain template is either always parsed or never parsed, and whoever gets or include it need not know about that.
+  Also added a new setting, "templateLanguage", which decides this; the two available values are
+  TemplateLanguage.FTL and TemplateLanguage.STATIC_TEXT.
+- Configuration.getTemplate has no "encoding" parameter anymore. (Similarly #include has no "encoding" parameter
+  either). The charset of templates can be specified via Configuration.sourceEncoding and Configuration
+  .templateConfigurations (for example based on the directory it is in), or with the #ftl directive inside the
+  template. Thus, a given template always has the same charset, no mater how it's accessed.
+- Require customLookupCondition-s to be Serializable.
+
+DOM (XML)
+.........
+
+- Removed NodeModel static utility classes dealing with parsing XML to DOM. How it's best to do that is environment
+  and application dependent, and it has security implications. Since XML loading/parsing is not the topic of the
+  project, these were removed. Static methods that simplify an already loaded DOM have remained, because that's
+  FreeMarker-specific functionality.
+
+Servlet
+.......
+
+- `FreeMarkerServlet` now use a `Configuration.ExtendableBuilder` to provide configuration defaults that makes for it.
+  Its API-s which were used for customizing `FreeMarkerServlet` has bean changed accordingly.
+
+Spring
+.......
+
+This is about the Spring Framework Support (freemarker-spring): FREEMARKER-54, FREEMARKER-55
+
+- ConfigurationFactoryBean, a new Spring Framework's FactoryBean to create Configuration, using Builder.
+- SpringResourceTemplateLoader, a new TemplateLoader to load templates from Spring Framework's Resources.
+- New FreeMarkerView and FreeMarkerViewResolver for MVC support. FreeMarkerView supports TaglibFactory and other
+models by default like FreemarkerServlet does.
+- Directives and Functions Support to replace Spring JSP Tag Libraries in spring.tld:
+  - <spring:htmlEscape ... /> : No need since FreeMarker Built-In's and escaping directives are better.
+  - <spring:escapeBody ... /> : No need since FreeMarker Built-In's and escaping directives are better.
+  - <spring:message ... /> : Replaced by spring.message function. e.g, ${spring.message(...)}
+  - <spring:theme ... /> : Replaced by spring.theme function. e.g, ${spring.theme(...)}
+  - <spring:argument ... /> : No need since spring.message(...) and spring.theme(...) functions support
+    positional varargs for variable length arguments.
+  - <spring:hasBindErrors ... /> : Replaced by <@spring.hasBindErrors ... /> directive.
+  - <spring:nestedPath ... /> : Replaced by <@spring.nestedPath ... /> directive.
+  - <spring:bind ... /> : Replaced by <@spring.bind ... /> directive.
+  - <spring:transform ... /> : Replaced by spring.transform(...) function.
+  - <spring:url ... /> : Replaced by spring.url(...) function.
+  - <spring:param ... /> : No need since spring.url(...) function supports named vargs for variable length parameters.
+  - <spring:eval /> : Replaced by spring.eval(...) function.
+- Directives Support to replace Spring Form JSP Tag Libraries in spring-form.tld:
+  - <form:form ... /> : Replaced by <@form.form ... /> directive.
+  - <form:input ... /> : Replaced by <@form.input ... /> directive.
+  - <form:password ... /> : Replaced by <@form.password ... /> directive.
+  - <form:textarea ... /> : Replaced by <@form.textarea ... /> directive.
+  - <form:hidden ... /> : Replaced by <@form.hidden ... /> directive.
+  - <form:button ... /> : Replaced by <@form.button ... /> directive.
+  - <form:label ... /> : Replaced by <@form.label ... /> directive.
+  - <form:errors ... /> : Replaced by <@form.errors ... /> directive.
+  - <form:select ... /> : Replaced by <@form.select ... /> directive.
+  - <form:option ... /> : Replaced by <@form.option ... /> directive.
+  - <form:options ... /> : Replaced by <@form.options ... /> directive.
+  - <form:checkbox ... /> : Replaced by <@form.checkbox ... /> directive.
+  - <form:checkboxes ... /> : Replaced by <@form.checkboxes ... /> directive.
+  - <form:radiobutton ... /> : Replaced by <@form.radiobutton ... /> directive.
+  - <form:radiobuttons ... /> : Replaced by <@form.radiobuttons ... /> directive.
+
+Core / Miscellaneous
+....................
+
+- Minimum Java version increased to 7 (including try-with-resources, as Android Studio 3.0 supports it on all
+  Android API levels).
+- Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
+- Removed legacy extensions (so these has no module): rhyno, jython, xml (not to be confused with dom), jdom, ant.
+- Servlet 3.0 and JSP 2.2 and is the minimum requirement now (if Serlvet/JSP features are used at all).
+- Log categories are now simply the full qualified class name of the logging classes. There are no predefined log
+  categories (such as "freemarker.runtime", etc.) anymore. This is to follow the common practices in logging.
+- #include-d/#import-ed templates don't inherit the charset (encoding) of the #include-ing/#import-ing template.
+  (Because, the charset of a template file is now independent of how you access it; see in template loading changes.)
+- #attempt doesn't create an additional debug level log entry when an exception is catched. It only
+  log an error level log (by default at least; see the `attemptExceptionReporter` setting)
+- Marked most static utility classes as internal, and renamed them to start with "_" (for example StringUtils was
+  renamed to _StringUtil, thus people won't accidentally use it when they wanted to autocomplete to Apache Commons
+  StringUtil). Created published static utility class, o.a.f.core.util.FTLUtil, which contains some methods moved
+  over from the now internal utility classes.
+- Template.sourceEncoding was renamed to Template.actualSourceEncoding, to emphasize that it's not the template-layer
+  equivalent of the sourceEncoding ParserConfiguration setting. This is in line with Template.actualTagSyntax and the
+  other "actual" properties. (Just as in FM2, Template.getParserConfiguration() still can be used get the
+  sourceEncoding used during parsing.)
+- Template.name (getName()) was renamed to Template.lookupName (getLookupName()), and Template.sourceName (Template.getSourceName())
+  doesn't fall back to the lookup name anymore when it's null (however, Template.getSourceOrLookupName() was added for that). There's
+  no Template.name anymore, because since sourceName was introduced, and hence the concept of template name was split into the
+  lookup and the source name, its meaning wasn't clean (but it meant the lookup name). TemplateException and ParseException
+  now also have the same properites: getTemplateSourceName(), getTemplateLookupName(), and even getSourceOrLookupName().
+  Location information in error messages show getTemplateSourceOrLookupName().
+- Removed all classes with "main" methods that were part of freemarker.jar. Such tools should be separate artifacts,
+  not part of the library, and they are often classified as CWE-489 "Leftover Debug Code". The removed classes are:
+  freemarker.core.CommandLine, freemarker.ext.dom.Transform, freemarker.template.utility.ToCanonical
+- Removed classic_compatible (classicCompatible) setting, which was used to emulate some of the FreeMarker 1.x behavior
+- Removed utility TemplateModel-s that can very easily mean a security problem: freemarker.template.utility.Execute and
+  freemarker.template.utility.ObjectConstructor
+- Removed ResourceBundleLocalizedString and LocalizedString: Hardly anybody has discovered these, and they had no
+  JUnit coverage.
+- Deleted o.a.f.core.util.DOMNodeModel (it has noting to do with the standard XML support, o.a.f.core.model.dom)
+- Removed deprecated FMParser constructors.
+- Removed Template.templateLanguageVersion, as we solely rely on incompatibleImprovements instead.
+- Made TemplateModel classes used by the parser for literals Serializable. (Without this attribute values set in the
+  `#ftl` header wouldn't be always Serializable, which in turn will sabotage making Template-s Serializable in the
+  future.)
+- util.ObjectFactory was renamed to CommonSupplier, and its createObject() method was renamed to
+  get(), to be more similar to the Java 8 API.
+- Removed the legacy predefined shared variables: "html_escape", "normalize_newlines", "xml_escape", "capture_output",
+  "compress"
+- Removed `NestedContentNotSupportedException`, as `TemplateDirectiveModel.isNestedContentSupported()` now takes care
+  of that problem.
+- CallPlaceCustomDataInitializationException is not a checked exception anymore (now it extends RuntimeException)
+- Renamed `FTLUtil` to `TemplateLanguageUtils` (as the FTL name will be abandoned in FM3, and supporting multiple
+  languages are planned in the future)
+- Removed `UnexpectedTypeException` (a `TemplateException` subclass) and its subclasses (`NonStringException`, etc.),
+  using simple `TemplateException` instead. Catching these exceptions specifically wasn't very useful, while they
+  have bloated the public API (and the code).
+- Added `org.apache.freemarker.core.util.CallableUtils`, to help in implementing (and invoking) `TemplateCallableModel`-s.
+- Renamed `Environment.getDataModel()` to `getDataModelWithSharedVariableFallback()`
+  Renamed `Environment.getGlobalVariables()` to `getGloballyVisibleVariables()()`
+- Removed `Template.createPlainTextTemplate`, as this convenience methods was hardly ever used.
+
+Build / development process changes
+-----------------------------------
+
+- Migrated buiding from Ant to Gradle. [TODO: This is only partially done; jar building, testing and javadoc works.]

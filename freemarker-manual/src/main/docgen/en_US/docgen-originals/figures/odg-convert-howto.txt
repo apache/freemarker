@@ -1,0 +1,43 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
+Converting to SVG:
+1. Open the ODG file with Libeoffice/OpenOffice Draw
+2. Ctrl+A to select all objects
+3. File/Export..., chose SVG format, and then tick "Selection"
+4. Check the result. If contour lines at the right and bottom edge of the
+   figure are partically clipped (stroke width is halved), set a stroke with
+   other than 0 for all shapes.
+   
+Converting to a decent quality (though non-transparent) PNG:
+1. Open the ODG file with Libeoffice/OpenOffice Draw
+2. Export to PDF
+3. Open PDF in Adobe Acrobat Reader
+4. Go to Adobe Acrobat Reader preferences and set it to not use subpixel
+   anti-aliasing, just normal anti-aliasing. They used to call this LCD vs
+   Monitor mode.
+5. Zoom in/out until you get the desired size in pixels, take a
+   screen shot, crop it in some image editor, save it as PNG.
+   
+Converting to transparent but somewhat ugly PNG:
+1. Convert to SVG as described earlier
+2. Use Apache Batik Rasterizer command line utility like:
+   $BARIK_INSTALLATION\batik-rasterizer-1.8.jar -dpi 72 -m image/png ${FIGURE}.svg
+   If Batik fails (as it doesn't support all SVG features), use Inkscape.
+   Of course avoid supixel anti-aliasing, as it's not device independent.

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+  <tlib-version>3.0</tlib-version>
+  <short-name>FreeMarker-test-taglib</short-name>
+  <uri>http://freemarker.org/test/taglibs/el-functions</uri>
+
+  <function>
+    <description>Reverses a string</description>
+    <name>reverse</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>JasperIgnoresThisTypeAnSoShallWe reverse(java.lang.String)</function-signature>
+  </function>
+
+  <function>
+    <description>Reverses an int (assuming radix 10)</description>
+    <name>reverseInt</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>int reverse(int)</function-signature>
+  </function>
+
+  <function>
+    <description>Reverses an int assuming the given radix</description>
+    <name><!-- white space -->
+      reverseIntRadix<!-- white space -->
+    </name>
+    <function-class><!-- white space -->
+      org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions<!-- white space -->
+    </function-class>
+    <function-signature><!-- white space -->
+      int reverse(int, int)<!-- white space -->
+    </function-signature>
+  </function>
+
+  <function>
+    <description>Calculates the hypotenuse of a right angle triangle</description>
+    <name>hypotenuse</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.EnclosingClass$NestedClass</function-class>
+    <function-signature>double hypotenuse(double, double)</function-signature>
+  </function>
+
+  <function>
+    <name>sum</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>long sum(int[])</function-signature>
+  </function>
+
+  <function>
+    <name>sumMap</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>java.lang.String sum(java.util.Map)</function-signature>
+  </function>
+
+  <function>
+    <name>testArray</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>int[] testArray()</function-signature>
+  </function>
+
+  <function>
+    <name>testMap</name>
+    <function-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestFunctions</function-class>
+    <function-signature>Map testMap()</function-signature>
+  </function>
+
+</taglib>

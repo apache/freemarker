@@ -1,0 +1,93 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+<html>
+<head>
+<title>FreeMarker: Numeric Operations Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+<p>Hello, world!</p>
+
+<p>Start with the increment operator:</p>
+<p>a1 = 0</p>
+<p>a1 = 1</p>
+<p>a1 = 2</p>
+
+<p>Now the decrement operator:</p>
+<p>a2 = 5</p>
+<p>a2 = 4</p>
+<p>a2 = 3</p>
+<p>a2 = 2</p>
+<p>a2 = 1</p>
+<p>a2 = 0</p>
+<p>a2 = -1</p>
+
+<p>Now the add operator:</p>
+<p>op1 = 5, op2 = 3, op3 = 8</p>
+<p>op3 = 11</p>
+
+<p>And the subtract operator:</p>
+<p>op1 = 5, op2 = 3, op3 = 2</p>
+<p>op3 = -1</p>
+
+<p>The comparison operators:</p>
+   <p>Item is: 0</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 1</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 2</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 3</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 4</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 5</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 6</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 7</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 8</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 9</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 10</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+   <p>Item is: 11</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+   <p>Item is: 12</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+
+</body>
+</html>

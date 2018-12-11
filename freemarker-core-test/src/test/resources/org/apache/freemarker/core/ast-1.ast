@@ -1,0 +1,179 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+#mixedContent  // o.a.f.c.ASTImplicitParent
+    #text  // o.a.f.c.ASTStaticText
+        - content: "1 "  // String
+    @  // o.a.f.c.ASTDynamicTopLevelCall
+        - callee: foo  // o.a.f.c.ASTExpVariable
+        - argument name: "x"  // String
+        - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
+        - argument name: "y"  // String
+        - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
+        #text  // o.a.f.c.ASTStaticText
+            - content: "x"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n2 "  // String
+    @  // o.a.f.c.ASTDynamicTopLevelCall
+        - callee: .  // o.a.f.c.ASTExpDot
+            - left-hand operand: ns  // o.a.f.c.ASTExpVariable
+            - right-hand operand: "bar"  // String
+        - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
+        - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
+        #text  // o.a.f.c.ASTStaticText
+            - content: "y"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n3 "  // String
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: 123  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: 123  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: ns  // o.a.f.c.ASTExpVariable
+    #global  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: 123  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "3"  // Integer
+        - namespace: null  // Null
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n4 "  // String
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer
+        #if  // o.a.f.c.ASTDirIfOrElseOrElseIf
+            - condition: ==  // o.a.f.c.ASTExpComparison
+                - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                    - left-hand operand: x  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: 0  // o.a.f.c.ASTExpNumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // o.a.f.c.ASTStaticText
+                - content: "foo"  // String
+            ${...}  // o.a.f.c.ASTInterpolation
+                - content: y  // o.a.f.c.ASTExpVariable
+            #text  // o.a.f.c.ASTStaticText
+                - content: "bar"  // String
+        #else  // o.a.f.c.ASTDirIfOrElseOrElseIf
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            ${...}  // o.a.f.c.ASTInterpolation
+                - content: "static"  // o.a.f.c.ASTExpStringLiteral
+            ${...}  // o.a.f.c.ASTInterpolation
+                - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
+                    - value part: "x"  // String
+                    - value part: ${...}  // o.a.f.c.ASTInterpolation
+                        - content: *  // o.a.f.c.ASTExpArithmetic
+                            - left-hand operand: baaz  // o.a.f.c.ASTExpVariable
+                            - right-hand operand: 10  // o.a.f.c.ASTExpNumberLiteral
+                            - AST-node subtype: "1"  // Integer
+                    - value part: "y"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n5 "  // String
+    #switch  // o.a.f.c.ASTDirSwitch
+        - value: x  // o.a.f.c.ASTExpVariable
+        #case  // o.a.f.c.ASTDirCase
+            - condition: 1  // o.a.f.c.ASTExpNumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // o.a.f.c.ASTStaticText
+                - content: "one"  // String
+        #case  // o.a.f.c.ASTDirCase
+            - condition: 2  // o.a.f.c.ASTExpNumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // o.a.f.c.ASTStaticText
+                - content: "two"  // String
+        #default  // o.a.f.c.ASTDirCase
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            #text  // o.a.f.c.ASTStaticText
+                - content: "more"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n6 "  // String
+    #macro  // o.a.f.c.ASTDirMacroOrFunction
+        - assignment target: "foo"  // String
+        - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"y\", default=2)"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"z\", default=y + 1)"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"q\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - AST-node subtype: "0"  // Integer
+        #nested  // o.a.f.c.ASTDirNested
+            - passed value: x  // o.a.f.c.ASTExpVariable
+            - passed value: y  // o.a.f.c.ASTExpVariable
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n7 "  // String
+    #function  // o.a.f.c.ASTDirMacroOrFunction
+        - assignment target: "foo"  // String
+        - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"y\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - AST-node subtype: "1"  // Integer
+        #local  // o.a.f.c.ASTDirAssignment
+            - assignment target: "x"  // String
+            - assignment operator: "="  // String
+            - assignment source: 123  // o.a.f.c.ASTExpNumberLiteral
+            - variable scope: "2"  // Integer
+            - namespace: null  // Null
+        #return  // o.a.f.c.ASTDirReturn
+            - value: 1  // o.a.f.c.ASTExpNumberLiteral
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n8 "  // String
+    #list  // o.a.f.c.ASTDirList
+        - list source: xs  // o.a.f.c.ASTExpVariable
+        - nested content parameter: "x"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n9 "  // String
+    #list-#else-container  // o.a.f.c.ASTDirListElseContainer
+        #list  // o.a.f.c.ASTDirList
+            - list source: xs  // o.a.f.c.ASTExpVariable
+            #text  // o.a.f.c.ASTStaticText
+                - content: "["  // String
+            #items  // o.a.f.c.ASTDirItems
+                - nested content parameter: "x"  // String
+                ${...}  // o.a.f.c.ASTInterpolation
+                    - content: x  // o.a.f.c.ASTExpVariable
+                #sep  // o.a.f.c.ASTDirSep
+                    #text  // o.a.f.c.ASTStaticText
+                        - content: ", "  // String
+            #text  // o.a.f.c.ASTStaticText
+                - content: "]"  // String
+        #else  // o.a.f.c.ASTDirElseOfList
+            #text  // o.a.f.c.ASTStaticText
+                - content: "None"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n10 "  // String
+    #--...--  // o.a.f.c.ASTComment
+        - content: " A comment "  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n11 "  // String
+    #outputFormat  // o.a.f.c.ASTDirOutputFormat
+        - value: "XML"  // o.a.f.c.ASTExpStringLiteral
+        #noAutoEsc  // o.a.f.c.ASTDirNoAutoEsc
+            ${...}  // o.a.f.c.ASTInterpolation
+                - content: a  // o.a.f.c.ASTExpVariable
+            #autoEsc  // o.a.f.c.ASTDirAutoEsc
+                ${...}  // o.a.f.c.ASTInterpolation
+                    - content: b  // o.a.f.c.ASTExpVariable
+            ${...}  // o.a.f.c.ASTInterpolation
+                - content: c  // o.a.f.c.ASTExpVariable

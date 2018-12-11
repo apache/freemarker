@@ -1,0 +1,211 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+=== [aardvark, bear, cat, dog] ===
+
+-- List+sep:
+    aardvark,
+    bear,
+    cat,
+    dog
+-- List+else:
+    aardvark
+    bear
+    cat
+    dog
+-- List+items:
+    [
+        aardvark
+        bear
+        cat
+        dog
+    ]
+-- List+items+else:
+    [
+        aardvark
+        bear
+        cat
+        dog
+    ]
+-- List+items+sep+else:
+    [
+        aardvark,
+        bear,
+        cat,
+        dog
+    ]
+--
+
+=== [aardvark] ===
+
+-- List+sep:
+    aardvark
+-- List+else:
+    aardvark
+-- List+items:
+    [
+        aardvark
+    ]
+-- List+items+else:
+    [
+        aardvark
+    ]
+-- List+items+sep+else:
+    [
+        aardvark
+    ]
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+

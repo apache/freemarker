@@ -1,0 +1,70 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+#mixedContent  // o.a.f.c.ASTImplicitParent
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "xs"  // String
+        - assignment operator: "="  // String
+        - assignment source: [...]  // o.a.f.c.ASTExpListLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    #list  // o.a.f.c.ASTDirList
+        - list source: x  // o.a.f.c.ASTExpVariable
+        - nested content parameter: "xs"  // String
+        #text  // o.a.f.c.ASTStaticText
+            - content: "    "  // String
+        ${...}  // o.a.f.c.ASTInterpolation
+            - content: x  // o.a.f.c.ASTExpVariable
+        #text  // o.a.f.c.ASTStaticText
+            - content: "\n"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "a"  // String
+        - assignment operator: "="  // String
+        - assignment source: 1  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "b"  // String
+        - assignment operator: "="  // String
+        - assignment source: 1  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    @  // o.a.f.c.ASTDynamicTopLevelCall
+        - callee: b  // o.a.f.c.ASTExpVariable
+        #text  // o.a.f.c.ASTStaticText
+            - content: "    x\n"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    @  // o.a.f.c.ASTDynamicTopLevelCall
+        - callee: c  // o.a.f.c.ASTExpVariable
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    @  // o.a.f.c.ASTDynamicTopLevelCall
+        - callee: d  // o.a.f.c.ASTExpVariable
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\na\n"  // String
+    #--...--  // o.a.f.c.ASTComment
+        - content: " comment "  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "b"  // String

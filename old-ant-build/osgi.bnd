@@ -1,0 +1,64 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# This file is used for creating OSGi bundles with biz.aQute.bnd
+#
+# bnd is a tool that automatically discovers the possible exports and
+# imports by examining the class files, and generates the OSGi meta-info
+# based on that and this file.
+
+-classpath: build/classes
+-failok: false
+
+Bundle-SymbolicName: ${moduleOrg}.${moduleName}
+Bundle-Version: ${versionForOSGi}
+Bundle-License: Apache License, Version 2.0; see: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-Vendor: freemarker.org
+
+Include-Resource: META-INF=build/classes/META-INF
+
+Export-Package: !org.apache.freemarker.test.*, org.apache.freemarker.*;version="${versionForOSGi}"
+# Important:
+# Packages that don't match nor the Export-Package nor the
+# Private-Package mainfest header will be excluded from
+# the .jar file!
+
+Import-Package: !org.apache.freemarker.*, *;resolution:="optional"
+# The above makes all imports optional (like org.python, etc.),
+# except those that were explicitly listed (or are inside java.*).
+# Thus, even when the Java platfrom includes a package, it won't
+# be automatically imported, unless bnd generates the import statement
+# for them. Thus, when J2SE-1.5 becomes a requirement, these should be
+# added to the above list, as then they won't be optional anymore:
+#   javax.xml.*, org.w3c.dom.*, org.xml.sax.*.
+
+# This is needed for "a.class.from.another.Bundle"?new() to work.
+DynamicImport-Package: *
+
+# The required minimum is 1.7, but we utilize 1.8 if available.
+# See also: http://wiki.eclipse.org/Execution_Environments, "Compiling
+# against more than is required"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8, JavaSE-1.7
+
+# Non-OSGi meta:
+Extension-name: Apache FreeMarker
+Specification-Title: Apache FreeMarker
+Specification-Version: ${versionForMf}
+Specification-Vendor: freemarker.org
+Implementation-Title: Apache FreeMarker
+Implementation-Version: ${versionForMf}
+Implementation-Vendor: freemarker.org

@@ -1,0 +1,434 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+// TODO: Versions should come form src/main/resource/o/a/f/c/version.properties
+ext.versionCanonical = "3.0.0-nightly"
+ext.versionForMaven = "3.0.0-SNAPSHOT"
+ext.versionForOSGi = "3.0.0.nightly"
+ext.versionForMf = "2.97.0"
+ 
+allprojects {
+    group = "org.apache.freemarker"
+    version = "${versionCanonical}"
+    ext.title = null // Title shown in JavaDoc and other documentation
+    ext.published = null // To decide if this is a published module (API) or an internal one
+    ext.inAggregateJavadoc = null // for published project, whether to include this in the main aggregate JavaDoc
+}
+
+title = "Apache FreeMarker"
+description = "Apache FreeMarker template engine, root project"
+
+// Libraries that are referred from multiple places:
+ext.libraries = [
+    findbugs: "com.google.code.findbugs:annotations:3.0.0",
+    commonsIo: "commons-io:commons-io:2.5",
+    commonsLang: "org.apache.commons:commons-lang3:3.6",
+    commonsCollections: "commons-collections:commons-collections:3.1",
+    commonsCli: "commons-cli:commons-cli:1.4",
+    guava: "com.google.guava:guava-jdk5:17.0"
+]
+ext.slf4jVersion = "1.7.25"
+
+// Unwanted transitive dependencies that often get in accidentally:
+ext.bannedLibraries = [
+    // Note that the version must be omitted in these entres!
+    // We're using SLF4J + Logback Classic, and xxx-over-slf4j to mimic other logger libraries.
+    "org.slf4j:slf4j-log4j12",
+    "org.slf4j:slf4j-jdk14",
+    "log4j:log4j",
+    "commons-logging:commons-logging"
+] as Set
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    // You don't want to repos here usually, but to `subproject { ... repositories {...} ... }` below
+}
+
+configurations {
+    rat
+}
+
+dependencies {
+    rat "org.apache.rat:apache-rat-tasks:0.12"
+}
+
+// Java boot-classpath setup:
+[7, 8].each { javaVersion ->
+    // Name used in gradle.properties:
+    String propName = "bootClasspathJava${javaVersion}"
+
+    // Alternatively, it can be set with an OS environment variable:
+    String envVarName = "freemarker_build_boot_classpath_java_${javaVersion}"
+    String envVarVal = System.getenv(envVarName);
+    if (envVarVal != null && !envVarVal.isEmpty()) {
+        ext[propName] = envVarVal;
+    }
+
+    if (!project.hasProperty(propName)) {
+        String allowNullEnvVarName = "freemarker_build_allow_no_boot_classpath"
+        String allowNullEnvVarVal = System.getenv(allowNullEnvVarName)
+        boolean allowNull
+        if (allowNullEnvVarVal != null && !allowNullEnvVarVal.isEmpty()) {
+            if (allowNullEnvVarVal == "true") {
+                allowNull = true
+            } else if (allowNullEnvVarVal == "false") {
+                allowNull = false
+            } else {
+                throw new GradleScriptException("The value of the \"${allowNullEnvVarName}\" environment " +
+                        "variable must be \"true\" or \"false\" but was \"${allowNullEnvVarVal}\".", null)
+            }
+        } else {
+            allowNull = false;
+        }
+
+        if (allowNull) {
+            ext[propName] = null
+            logger.warn "Using null for \"${propName}\"; do NOT use this build for production!"
+        } else {
+            throw new GradleScriptException(
+                    "The ${propName} property must be set (and point to the rt.jar of Java ${javaVersion}). " +
+                    "This error usually occurs because you have missed this step (described in README.md): " +
+                    "Copy gradle.properties.sample into gradle.properties and modify it to fit your environment. " +
+                    "(Alternatively, you can pass the property to gradle with -P${propName}=\"...\", " +
+                    "or set the \"${envVarName}\" environment variable, " +
+                    "or as the last resort, set the \"${allowNullEnvVarName}\" environment variable to \"true\".)",
+                    null);
+        }
+    } else {
+        String bootClasspath = project.getProperties().get(propName);
+        if (!new File(bootClasspath).exists()) {
+            throw new GradleScriptException(
+                    "The file pointed by the ${propName} property doesn't exist: ${bootClasspath}", null);
+        }
+    }
+} // each Java version
+
+// Common javadoc configuration:
+def javadocCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    exclude "**/_*.java"
+    options.use = true
+    options.encoding = "UTF-8"
+    options.docEncoding = "UTF-8"
+    options.charSet = "UTF-8"
+    options.locale = "en_US"
+    options.links = [ "http://docs.oracle.com/javase/8/docs/api/" ]
+    doLast {
+        // We will fix low quality typography of JDK 8 Javadoc here. Bascially we make it look like JDK 7.
+
+        File cssFile = new File(outputDirectory, "stylesheet.css")
+        assert cssFile.exists()
+
+        // Tell that it's modified:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $//\* (Javadoc style sheet) \*//$, replace: $//\* \1 - JDK 8 usability fix regexp substitutions applied \*//$
+        )
+
+        // Remove broken link:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/@import url\('resources/fonts/dejavu.css'\);\s*/$, replace: ""
+        )
+
+        // Font family fixes:
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans['"]/$, replace: "Arial"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans Mono['"]/$, replace: "'Courier New'"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Serif['"]/$, replace: "Arial"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])serif\b/$, replace: "sans-serif"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Georgia,\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]Times New Roman['"],\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Times,\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Arial\s*,\s*Arial\b/$, replace: "Arial"
+        )
+
+        // "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes:
+        String ddSelectorStart = $/(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b/$
+        String ddPropertyEnd = $/\b.+?;/$
+        // - Put back description (dd) indentation:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})margin${ddPropertyEnd}/$, replace: $/\1margin: 5px 0 10px 20px;/$
+        )
+        // - No monospace font for the description (dd) part:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})font-family${ddPropertyEnd}/$, replace: $/\1/$
+        )
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "maven"
+    apply plugin: "osgi"
+    apply plugin: "idea"
+
+    // Default java compiler configuration (might be overridden in subprojects):
+    sourceCompatibility = "1.7"
+    targetCompatibility = "1.7"
+    [compileJava, compileTestJava]*.options*.bootClasspath = bootClasspathJava7
+    [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+    // TODO Remove SuppressFBWarning-s from compileJava output somehow
+    // TODO Ensure that JUnit tests run on Java 7, except for the modules that were made for later versions.
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+
+        // These are only needed temporarily (remove before first stable release):
+        maven {
+            url "https://repository.apache.org/content/repositories/snapshots"
+        }
+        maven {
+            url "https://repository.apache.org/content/repositories/staging"
+        }
+    }
+    
+    // Dependencies used in all subprojects:
+    dependencies {
+        // All subprojects have access to SLF4J (regardless if they actually use it at the moment):
+        compile "org.slf4j:slf4j-api:$slf4jVersion"
+        // All subprojects might use Findbugs annotations:
+        compileOnly libraries.findbugs
+        // We don't add test dependencies to freemarker-core, as Eclipse sees that as circular dependency:
+        if (path != ':freemarker-core') {   
+            // Test libraries and utilities might come handy during testing:
+            testCompile project(":freemarker-test-utils")
+        }
+    }
+
+    // Like Maven's Enforcer plugin, make the build fail if certain libraries get in. (The problem with the
+    // customary `configurations.all { exclude ... }` soltion is that it bloats the genereated Maven POM-s a lot.)
+    test.doFirst {
+        configurations.testRuntime.getResolvedConfiguration().getResolvedArtifacts().each {
+            def artifactId = it.getModuleVersion().getId()
+            String artifactIdStr = "${artifactId.group}:${artifactId.name}"
+            if (artifactIdStr in bannedLibraries) {
+                throw new GradleScriptException(
+                        "Banned library in the dependency graph: ${artifactIdStr}. "
+                        + "Use `gradlew ${project.path}:dependencies` to find who pulls it in then exclude it there.",
+                        null);
+            }
+        }
+    }
+    
+    test {
+        testLogging {
+            exceptionFormat = "full"
+        }
+    }
+    
+    jar {
+        manifest {   // org.gradle.api.plugins.osgi.OsgiManifest
+            version versionForOSGi
+            license "Apache License, Version 2.0" // Has no effect on Gradle 3.5; see issues/2056 below
+            vendor "Apache Software Foundation"
+            // TODO The autogenerated Bundle-SymbolicName is weird, esp. for freemarker-core-java8. How should it look?
+            
+            attributes(
+                "Specification-Version": versionForMf,
+                "Specification-Vendor": "Apache Software Foundation",
+                "Implementation-Version": versionForMf,
+                "Implementation-Vendor": "Apache Software Foundation",
+                // Remove when https://github//.com/gradle/gradle/issues/2056 is fixed:
+                "Bundle-License": "Apache License, Version 2.0",
+            )
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        from javadoc.destinationDir
+        classifier = 'javadoc'
+    }
+
+    artifacts {
+        archives jar
+        archives sourcesJar
+        archives javadocJar
+        // TODO Archies must contain META-INF/{LICENSE,NOTICE,DISCLAIMER}; see in 2.3.x
+    }
+
+    // The identical parts of Maven "deployer" and "installer" configuration:
+    def mavenCommons = { callerDelegate ->
+        delegate = callerDelegate
+        
+        pom.version = versionForMaven
+        pom.project {
+            organization {
+                name "Apache Software Foundation"
+                url "http://apache.org"
+            }
+            licenses {
+                license {
+                    name "Apache License, Version 2.0"
+                    url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    distribution "repo"
+                }
+            }
+            scm {
+                connection "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git"
+                developerConnection "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git"
+                url "https://git-wip-us.apache.org/repos/asf?p=freemarker.git"
+                if (versionForOSGi.contains('.stable')) {
+                    tag "v${version}"
+                }
+            }
+            issueManagement {
+                system "jira"
+                url "https://issues.apache.org/jira/browse/FREEMARKER/"
+            }
+            mailingLists {
+                mailingList {
+                    name "FreeMarker developer list"
+                    post "dev@freemarker.apache.org"
+                    subscribe "dev-subscribe@freemarker.apache.org"
+                    unsubscribe "dev-unsubscribe@freemarker.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/freemarker-dev/"
+                }
+                mailingList {
+                    name "FreeMarker commit and Jira notifications list"
+                    post "notifications@freemarker.apache.org"
+                    subscribe "notifications-subscribe@freemarker.apache.org"
+                    unsubscribe "notifications-unsubscribe@freemarker.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/freemarker-notifications/"
+                }
+                mailingList {
+                    name "FreeMarker management private"
+                    post "private@freemarker.apache.org"
+                }
+            }
+        }
+    } // end mavenCommons
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                mavenCommons(delegate)
+                repository(
+                        // URL-s copy-pasted from the org.apacha:apache parent POM
+                        url: versionForMaven.contains('-SNAPSHOT')
+                                ? "https://repository.apache.org/content/repositories/snapshots/"
+                                : "https://repository.apache.org/service/local/staging/deploy/maven2"
+                )
+                // TODO Password authentication needed (can it use ~/.m2/settings.xml, like the real Maven?)
+                // TODO We must sign all artifacts with GPG; see old Ant build.xml
+            }
+        }
+    }    
+
+    install {
+        repositories {
+            mavenInstaller {
+                mavenCommons(delegate)
+            }
+        }
+    }
+    
+    // Post-process fully generated POM-s to remove test scope dependencies, just for the sake of aesthetics.
+    [install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured { pom ->
+        pom.dependencies = pom.dependencies.findAll { dep -> dep.scope != "test" }        
+    }
+
+    javadoc {
+        javadocCommons(delegate)
+    }
+
+    afterEvaluate { project ->
+        if (project.ext.published == null) {
+            throw new GradleScriptException("The \"published\" extension property of the \"${project.path}\" project " +
+                    "wasn't set. Use true for projects that meant to be published to Maven Central. Use false for " +
+                    "projects that are used internally only.",
+                    null);
+        }
+        if (project.ext.inAggregateJavadoc == null) {
+            if (project.ext.published) {
+                throw new GradleScriptException("The \"inAggregateJavadoc\" extension property of the \"${project.path}\" " +
+                        "project must be set, as it's a published project. Use true for projects that should be part of " +
+                        "the main unified FreeMarker API documentation. Use false for projects that are very rarely " +
+                        "used, and thus should have a " + "separate API javadoc.",
+                        null);
+            }
+        } else if (!project.ext.published && project.ext.inAggregateJavadoc) {
+            throw new GradleScriptException("Do not set the \"inAggregateJavadoc\" property extension to true when " +
+                    "for the \"${project.path}\" project, as the \"published\" extension property is false for it.",
+                    null);
+        }
+
+        if (project.published && project.inAggregateJavadoc) {
+            def aggregateJavadoc = rootProject.tasks.getByName('aggregateJavadoc')
+            def javadoc = project.tasks.getByName('javadoc')
+            aggregateJavadoc.source javadoc.source
+            aggregateJavadoc.classpath = files(aggregateJavadoc.classpath, javadoc.classpath)
+            logger.info "Added ${javadoc.path} input to ${aggregateJavadoc.path}"
+        }
+    }
+} // end subprojects
+
+task aggregateJavadoc(type: Javadoc) {
+    javadocCommons(delegate)
+    title "${project.title} ${versionCanonical} API"
+    destinationDir = new File(new File(project.buildDir, 'docs'), 'javadoc')
+    // source-s and classpath-s are added later, in the afterEvaluate of subprojects!
+}
+
+task rat {
+    doLast {
+        ant.taskdef(
+                name: 'ratReport', classname: 'org.apache.rat.anttasks.Report',
+                classpath: configurations.rat.asPath)
+        ant.ratReport(reportFile: "build/rat-report.txt") {
+            fileset(dir: "", excludesfile: "rat-excludes")
+        }
+        project.logger.lifecycle('Rat reports were written into build/rat-report.txt')
+    }
+}
+
+// TODO Build source distribution files
+// TODO Build binary distribution files (contains the binaries of all *published* modules)

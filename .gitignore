@@ -1,13 +1,12 @@
-/.ivy/
-/.bin/
-/build/
-/build.properties
-/archive/
-/ide-dependencies/
+build/
+.out/
+bin/
+.bin/
+target/
 
-/out/
-/bin/
-/target/
+/gradle.properties
+/archive/
+/META-INF
 
 .classpath
 .project
@@ -18,6 +17,7 @@
 *.iws
 *.ipr
 .idea_modules/
+**/out/
 
 *.tmp
 *.bak
@@ -26,9 +26,11 @@
 
 .gradle
 
-.DS_Store
+.DS_Store*
 .AppleDouble
 .LSOverride
 
 .directory
-.Trash-*
+.Trash*
+
+**/adhoctest/

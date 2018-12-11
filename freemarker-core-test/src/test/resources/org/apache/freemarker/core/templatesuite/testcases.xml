@@ -1,0 +1,198 @@
+<?xml version="1.0" ?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+
+<!DOCTYPE testCases [
+  <!ELEMENT testCases (setting?, testCase*)>
+  <!ELEMENT testCase (setting?)>
+     <!ATTLIST testCase 
+               name CDATA #REQUIRED
+               template CDATA #IMPLIED
+               expected CDATA #IMPLIED
+               noOutput CDATA #IMPLIED
+     >
+     <!-- The default of `template` is "${name?keep_before('[#endTN]')}.f3ac" -->
+     <!-- The default of `expected` is "${name}.txt" -->
+     <!-- The default of `noOutput` is false -->
+     
+ <!ELEMENT setting EMPTY>
+     <!ATTLIST setting 
+            autoImports CDATA #IMPLIED
+            sourceEncoding CDATA #IMPLIED
+            locale CDATA #IMPLIED
+            objectWrapper CDATA #IMPLIED
+            outputEncoding CDATA #IMPLIED
+            output_dir CDATA #IMPLIED
+            newBuiltinClassResolver CDATA #IMPLIED
+            urlEscapingCharset CDATA #IMPLIED
+            incompatibleImprovements CDATA #IMPLIED
+            timeZone CDATA #IMPLIED
+            apiBuiltinEnabled CDATA #IMPLIED
+      >
+]>
+<!--
+Note that for the incompatibleImprovements setting you can specify a list of versions, for example:
+<setting incompatibleImprovements="min, 3.0.5, max" />
+-->
+
+<testCases>
+   <setting sourceEncoding="UTF-8" outputEncoding="UTF-8" />
+   
+   <testCase name="api-builtins" noOutput="true">
+      <setting apiBuiltinEnabled="true" />
+   </testCase>
+   <testCase name="assignments" noOutput="true" />
+   <testCase name="boolean" />
+   <testCase name="charset-in-header" />
+   <testCase name="comment" />
+   <testCase name="comparisons" />
+   <testCase name="compress" />
+   <testCase name="then-builtin" noOutput="true" />
+   <testCase name="dateformat-java" />
+   <testCase name="dateformat-iso-like" noOutput="true" />
+   <testCase name="dateformat-iso-bi" noOutput="true" />
+   <testCase name="dateparsing" noOutput="true" />
+   <testCase name="default"/>
+   <testCase name="default-object-wrapper">
+      <setting apiBuiltinEnabled="true" />
+   </testCase>
+   <testCase name="encoding-builtins" />
+   <testCase name="escapes" />
+   <testCase name="hashliteral" />
+   <testCase name="identifier-non-ascii" />
+   <testCase name="identifier-escaping" />
+   <testCase name="import">
+      <setting autoImports="import_lib.f3ac as my"/>
+   </testCase>
+   <testCase name="include" />
+   <testCase name="include2">
+      <setting sourceEncoding="utf-8" />
+   </testCase>
+   <testCase name="interpret"/>
+   <testCase name="iterators"/>
+   <testCase name="lastcharacter"/>
+   <testCase name="list[#endTN]-simpleTemplateModels" expected="list.txt">
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list2[#endTN]-simpleTemplateModels" expected="list2.txt">
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list2[#endTN]-collectionAdapter" expected="list2.txt">
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list3[#endTN]-simpleTemplateModels" expected="list3.txt">
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list3[#endTN]-collectionAdapter" expected="list3.txt">
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="list-bis" />
+   <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="listhash" />
+   <testCase name="listhashliteral" />
+   <testCase name="listliteral" />
+   <testCase name="localization" >
+      <setting locale="en_AU"/>
+   </testCase>
+   <testCase name="loopvariable" />
+   <testCase name="macros"/>
+   <testCase name="macros-return"/>
+   <testCase name="multimodels"/>
+   <testCase name="nested" />
+   <testCase name="noparse" />
+   <testCase name="number-format" />
+   <testCase name="number-literal" >
+      <setting locale="fr_FR"/>
+   </testCase>
+   <testCase name="numerical-cast" />
+   <testCase name="output-encoding1"/>
+   <testCase name="output-encoding2">
+       <setting outputEncoding="UTF-16"/>
+   </testCase>
+   <testCase name="output-encoding3">
+       <setting outputEncoding="ISO-8859-1" urlEscapingCharset="UTF-16" />
+   </testCase>
+   <testCase name="precedence"/>
+   <testCase name="range" noOutput="true" />
+   <testCase name="recover" />
+   <testCase name="root" />
+   <testCase name="setting" noOutput="true" />
+   <testCase name="sequence-builtins[#endTN]-with-SimpleTemplateModel" expected="sequence-builtins.txt">
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
+   <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
+      <setting objectWrapper="default"/>
+   </testCase>
+   <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)"/>
+   </testCase>
+   <testCase name="simplehash-char-key" noOutput="true" />
+   <testCase name="existence-operators" noOutput="true" />
+   <testCase name="string-builtins1" />
+   <testCase name="string-builtins2" />
+   <testCase name="string-builtins3" noOutput="true" />
+   <testCase name="string-builtins-regexps" />
+   <testCase name="string-builtins-regexps-matches" />
+   <testCase name="stringbimethods" />
+   <testCase name="stringliteral"/>
+   <testCase name="if" />
+   <testCase name="switch" />
+   <testCase name="switch-builtin" noOutput="true" />
+   <testCase name="type-builtins" />
+   <testCase name="date-type-builtins" noOutput="true" />
+   <testCase name="url" noOutput="true" />
+   <testCase name="var-layers"/>
+   <testCase name="variables"/>
+   <testCase name="whitespace-trim"/>
+   <testCase name="wstrip-in-header"/>
+   <testCase name="hashconcat"/>
+   <testCase name="new-defaultresolver" />
+   <testCase name="new-unrestricted" template="new-defaultresolver.f3ac" expected="new-defaultresolver.txt">
+      <setting newBuiltinClassResolver="unrestricted"/>
+   </testCase>   
+   <testCase name="new-allowsnothing" template="new-defaultresolver.f3ac">
+      <setting newBuiltinClassResolver="allowNothing"/>
+   </testCase>   
+   <testCase name="new-optin">
+      <setting newBuiltinClassResolver="
+      		allowedClasses: org.apache.freemarker.core.templatesuite.models.NewTestModel,
+      		trustedTemplates: subdir/new-optin.f3ac, subdir/subsub/*"
+      />
+   </testCase>   
+   <testCase name="specialvars">
+      <setting locale="en_US" outputEncoding="utf-8" urlEscapingCharset="iso-8859-1"/>
+   </testCase>   
+   <testCase name="number-to-date" />
+   <testCase name="varargs" />
+   <testCase name="boolean-formatting"  />
+   <testCase name="number-math-builtins" noOutput="true" />
+   <testCase name="string-builtin-coercion" noOutput="true" />
+   
+   <testCase name="overloaded-methods[#endTN]-inc-dow" noOutput="true">
+      <setting objectWrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperInc"/>
+   </testCase>
+   <testCase name="overloaded-methods[#endTN]-desc-dow" noOutput="true">
+      <setting objectWrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperDesc"/>
+   </testCase>
+</testCases>

@@ -1,0 +1,37 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
+// Only the files listed here will be part of the tested Web application deployment! 
+
+test-noClasspath.f3ah
+test1.f3ah
+
+WEB-INF/fmtesttag 2.tld
+WEB-INF/fmtesttag4.tld
+WEB-INF/web.xml
+
+WEB-INF/taglib 2.jar/META-INF/taglib.tld
+
+WEB-INF/lib/taglib-foo.jar/META-INF/foo bar.tld
+
+WEB-INF/subdir-with-tld/fmtesttag3.tld
+
+not-auto-scanned/fmtesttag.tld
+
+subdir/test-rel.f3ah

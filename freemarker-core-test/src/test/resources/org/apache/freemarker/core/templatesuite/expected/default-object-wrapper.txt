@@ -1,0 +1,55 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+array-0
+array-1
+2
+array-0
+array-1
+list-0
+list-1
+list-2
+3
+not empty
+list-0
+value
+objValue
+foo-value
+hasfoo
+nobaz
+bar-value-0
+foo-value
+overloaded-int-1
+overloaded-String-String
+Message
+1974-11-14
+static-method
+static-overloaded-int-1
+static-overloaded-String-String
+static-final-field
+static-field
+ONEx
+TWOx
+THREEx
+true
+false
+false
+42
+1
+m
+
