@@ -52,4 +52,5 @@
 .directory
 .Trash*
 
-AdhocTest.java
+**/adhoctest/
+AdhocTest*.*
