@@ -693,6 +693,12 @@ public class _ObjectBuilderSettingEvaluator {
             }
 
             {
+                String mbClassName = _MarkupBuilder.class.getName();
+                SHORTHANDS.put("markup",
+                        mbClassName.substring(0, mbClassName.length() - BUILDER_CLASS_POSTFIX_2.length()));
+            }
+
+            {
                 String csClassName = _CharsetBuilder.class.getName();
                 SHORTHANDS.put("Charset",
                         csClassName.substring(0, csClassName.length() - BUILDER_CLASS_POSTFIX_2.length()));

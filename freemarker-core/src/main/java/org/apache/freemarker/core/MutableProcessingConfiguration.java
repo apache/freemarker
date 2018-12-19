@@ -40,8 +40,10 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
@@ -1625,6 +1627,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
      *     constructor.
+     *   </li>
+     *   <li>
+     *     <p>{@link TemplateMarkupOutputModel} objects can be created like
+     *     {@code markup(HTMLOutputFormat(), "<h1>Example</h1>")}. Of course the 1st argument can be any other
+     *     {@link MarkupOutputFormat} too.
      *   </li>
      *   <li>
      *     <p>{@link Charset} objects can be created like {@code Charset("ISO-8859-5")}, despite that there's no a such
