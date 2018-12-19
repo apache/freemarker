@@ -22,6 +22,7 @@ import java.util.TimeZone;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+ * Used by {@link _ObjectBuilderSettingEvaluator}.
  */
 public class _TimeZoneBuilder {
 
