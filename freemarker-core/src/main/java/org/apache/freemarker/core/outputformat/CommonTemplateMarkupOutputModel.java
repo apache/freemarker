@@ -64,4 +64,15 @@ public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateM
         this.markupContent = markupContent;
     }
 
+    /**
+     * Returns something like {@code "markup(format=HTML, markup=<p>foo</p>)"}; where the first parameter is
+     * {@link OutputFormat#getName()}, and the second is the content, that's prefixed with {@code markup=} or {@code
+     * plainText=}, depending on the way the content is internally stored.
+     */
+    @Override
+    public String toString() {
+        return "markupOutput(format=" + getOutputFormat().getName() + ", " + (plainTextContent != null ?
+                "plainText=" + plainTextContent : "markup=" + markupContent) + ")";
+    }
+
 }
