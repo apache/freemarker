@@ -440,6 +440,14 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     /**
+     * Same as {@link #getNumberMethodArg}, but checks if {@code args} is big enough, and returns {@code null} if it
+     * isn't.
+     */
+    protected final Number getOptNumberMethodArg(List args, int argIdx) throws TemplateModelException {
+        return args.size() > argIdx ? getNumberMethodArg(args, argIdx) : null;
+    }
+
+    /**
      * Gets a method argument and checks if it's a number; it does NOT check if {@code args} is big enough.
      */
     protected final Number getNumberMethodArg(List args, int argIdx)
