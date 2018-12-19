@@ -29,11 +29,11 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
+public final class CustomHTMLOutputFormat extends HTMLOutputFormat {
 
     public static final CustomHTMLOutputFormat INSTANCE = new CustomHTMLOutputFormat();
     
-    private CustomHTMLOutputFormat() {
+    protected CustomHTMLOutputFormat() {
         // Only to decrease visibility
     }
     
@@ -56,11 +56,6 @@ public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<Custo
     @Override
     public String escapePlainText(String plainTextContent) {
         return StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
-    }
-
-    @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override

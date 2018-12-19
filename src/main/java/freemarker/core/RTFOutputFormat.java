@@ -28,17 +28,22 @@ import freemarker.template.utility.StringUtil;
  * Represents the Rich Text Format output format (MIME type "application/rtf", name "RTF"). This format escapes by
  * default (via {@link StringUtil#RTFEnc(String)}). The {@code ?rtf} built-in silently bypasses template output values
  * of the type produced by this output format ({@link TemplateRTFOutputModel}).
- * 
+ *
+ * <p>This class was final before 2.3.29.
+ *
  * @since 2.3.24
  */
-public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
+public class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
-    
-    private RTFOutputFormat() {
+
+    /**
+     * @since 2.3.29
+     */
+    protected RTFOutputFormat() {
         // Only to decrease visibility
     }
     

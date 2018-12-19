@@ -20,15 +20,18 @@ package freemarker.core;
 
 /**
  * Stores XML markup to be printed; used with {@link XMLOutputFormat}.
- * 
+ *
+ * <p>This class was final before 2.3.29.
+ *
  * @since 2.3.24
  */
-public final class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
+public class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     * @since 2.3.29
      */
-    TemplateXMLOutputModel(String plainTextContent, String markupContent) {
+    protected TemplateXMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 

@@ -25,20 +25,25 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Represents the XML output format (MIME type "application/xhtml+xml", name "XHTML"). This format escapes by default
- * (via {@link StringUtil#XHTMLEnc(String)}). The {@code ?xml} built-in silently bypasses template output values of the
- * type produced by this output format ({@link TemplateXHTMLOutputModel}).
- * 
+ * Represents the XML output format (MIME type "application/xhtml+xml", name "XHTML"); this behaves identically to
+ * {@link HTMLOutputFormat}, except that the name an the MIME Type differs. Yet, it extends {@link XMLOutputFormat},
+ * as XHTML documents is a subset of XML documents, but not of HTML documents.
+ *
+ * <p>This class was final before 2.3.29.
+ *
  * @since 2.3.24
  */
-public final class XHTMLOutputFormat extends CommonMarkupOutputFormat<TemplateXHTMLOutputModel> {
+public class XHTMLOutputFormat extends XMLOutputFormat {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final XHTMLOutputFormat INSTANCE = new XHTMLOutputFormat();
-    
-    private XHTMLOutputFormat() {
+
+    /**
+     * @since 2.3.29
+     */
+    protected XHTMLOutputFormat() {
         // Only to decrease visibility
     }
     

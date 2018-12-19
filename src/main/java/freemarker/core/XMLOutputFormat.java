@@ -28,17 +28,22 @@ import freemarker.template.utility.StringUtil;
  * Represents the XML output format (MIME type "application/xml", name "XML"). This format escapes by default (via
  * {@link StringUtil#XMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
  * template output values of the type produced by this output format ({@link TemplateXHTMLOutputModel}).
- * 
+ *
+ * <p>This class was final before 2.3.29.
+ *
  * @since 2.3.24
  */
-public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
+public class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
 
-    private XMLOutputFormat() {
+    /**
+     * @since 2.3.29
+     */
+    protected XMLOutputFormat() {
         // Only to decrease visibility
     }
 

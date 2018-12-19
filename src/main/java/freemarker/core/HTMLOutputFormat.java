@@ -28,17 +28,22 @@ import freemarker.template.utility.StringUtil;
  * Represents the HTML output format (MIME type "text/html", name "HTML"). This format escapes by default (via
  * {@link StringUtil#XHTMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
  * template output values of the type produced by this output format ({@link TemplateHTMLOutputModel}).
- * 
+ *
+ * <p>This class was final before 2.3.29.
+ *
  * @since 2.3.24
  */
-public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
+public class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
-    
-    private HTMLOutputFormat() {
+
+    /**
+     * @since 2.3.29
+     */
+    protected HTMLOutputFormat() {
         // Only to decrease visibility
     }
     

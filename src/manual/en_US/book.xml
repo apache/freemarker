@@ -27665,6 +27665,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>HTMLOutputFormat</literal>,
+              <literal>XMLOutputFormat</literal>,
+              <literal>XHTMLOutputFormat</literal> aren't final classes
+              anymore, furthermore <literal>XHTMLOutputFormat</literal> now
+              extends <literal>XMLOutputFormat</literal>. Same applies to the
+              respective <literal>TemplateOutputModel</literal>-s
+              (<literal>TemplateHTMLOutputModel</literal> is not final
+              anymore, etc.). This allows defining new custom markup output
+              format classes that will work with program logic that's only
+              prepared for the standard markup output formats, because
+              <literal>instanceof
+              <replaceable>SomeStandardOutputFromat</replaceable></literal>
+              will return <literal>true</literal> for them.</para>
+            </listitem>
+
+            <listitem>
               <para>When configuring FreeMarker with string values (like with
               a <literal>.properties</literal> file), in the settings that
               support the <quote>object builder</quote> syntax, now you can
