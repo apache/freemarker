@@ -27663,6 +27663,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (<literal>Map</literal> key-value pairs, bean properties, etc.)
               appear together on the top level of the data-model.</para>
             </listitem>
+
+            <listitem>
+              <para>When configuring FreeMarker with string values (like with
+              a <literal>.properties</literal> file), in the settings that
+              support the <quote>object builder</quote> syntax, now you can
+              create a <literal>TemplateMarkupOutputModel</literal> value with
+              the new <literal>markup</literal> function, like
+              <literal>markup(HTMLOutputFormat(),
+              "&lt;p&gt;Example&lt;/p&gt;")</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

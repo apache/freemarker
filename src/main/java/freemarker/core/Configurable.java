@@ -2505,6 +2505,11 @@ public class Configurable {
      *     constructor (since 2.3.24).
      *   </li>
      *   <li>
+     *     <p>{@link TemplateMarkupOutputModel} objects can be created like
+     *     {@code markup(HTMLOutputFormat(), "<h1>Example</h1>")} (since 2.3.29). Of course the 1st argument can be
+     *     any other {@link MarkupOutputFormat} too.
+     *   </li>
+     *   <li>
      *     <p>The classes and methods that the expression meant to access must be all public.
      *   </li>
      * </ul>
