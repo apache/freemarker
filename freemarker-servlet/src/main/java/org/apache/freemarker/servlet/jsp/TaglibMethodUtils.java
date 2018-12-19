@@ -32,8 +32,8 @@ final class TaglibMethodUtils {
         // Not meant to be instantiated
     }
 
-    private static final Pattern FUNCTION_SIGNATURE_PATTERN = 
-            Pattern.compile("^([\\w\\.]+(\\s*\\[\\s*\\])?)\\s+([\\w]+)\\s*\\((.*)\\)$");
+    private static final Pattern FUNCTION_SIGNATURE_PATTERN =
+            Pattern.compile("^([\\w\\.]+(\\s*\\[\\s*\\])?)\\s+(\\w+)\\s*\\((.*)\\)$", Pattern.DOTALL);
     private static final Pattern FUNCTION_PARAMETER_PATTERN = 
             Pattern.compile("^([\\w\\.]+)(\\s*\\[\\s*\\])?$");
 
@@ -46,12 +46,13 @@ final class TaglibMethodUtils {
      * @param signature Java Server Page (TM) Specification compliant function signature string.
      * @return method if found.
      */
-    public static Method getMethodByFunctionSignature(Class clazz, String signature)
+    static Method getMethodByFunctionSignature(Class clazz, String signature)
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
         Matcher m1 = FUNCTION_SIGNATURE_PATTERN.matcher(signature);
 
         if (!m1.matches()) {
-            throw new IllegalArgumentException("Invalid function signature.");
+            throw new IllegalArgumentException("Invalid function signature (doesn't match this pattern: "
+                    + FUNCTION_SIGNATURE_PATTERN + ")");
         }
 
             String methodName = m1.group(3);
@@ -74,7 +75,8 @@ final class TaglibMethodUtils {
                     m2 = FUNCTION_PARAMETER_PATTERN.matcher(token);
 
                     if (!m2.matches()) {
-                        throw new IllegalArgumentException("Invalid argument signature: '" + token + "'.");
+                        throw new IllegalArgumentException("Invalid argument signature (doesn't match pattern " +
+                                FUNCTION_PARAMETER_PATTERN + "): " + token);
                     }
 
                     paramType = m2.group(1);

@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.ServletContextEvent;
@@ -33,10 +34,13 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
+import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,23 +80,41 @@ public class TLDParsingTest {
         assertTrue(tldParser.getListeners().get(0) instanceof ExampleContextListener);
 
         Map<String, TemplateModel> tagsAndFunctions = tldParser.getTagsAndFunctions();
-        assertEquals(4, tagsAndFunctions.size());
+        assertEquals(5, tagsAndFunctions.size());
 
-        JspTagModelBase tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag");
-        assertNotNull(tag);
-        tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
-        assertNotNull(tag);
+        {
+            JspTagModelBase tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag");
+            assertNotNull(tag);
+            tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
+            assertNotNull(tag);
+        }
 
-        JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase");
-        assertNotNull(function);
-        TemplateStringModel result = (TemplateStringModel) function.execute(
-                new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
-        assertEquals("ABC", result.getAsString());
-        function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase2");
-        assertNotNull(function);
-        result = (TemplateStringModel) function.execute(
-                new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
-        assertEquals("ABC", result.getAsString());
+        {
+            JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase");
+            assertNotNull(function);
+            TemplateStringModel result =
+                    (TemplateStringModel) function.execute(
+                            new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
+            assertEquals("ABC", result.getAsString());
+        }
+
+        {
+            JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase2");
+            assertNotNull(function);
+            TemplateStringModel result =
+                    (TemplateStringModel) function.execute(
+                            new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
+            assertEquals("ABC", result.getAsString());
+        }
+
+        {
+            JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("add3");
+            assertNotNull(function);
+            TemplateNumberModel result = (TemplateNumberModel) function.execute(
+                    new TemplateModel[] { new SimpleNumber(1), new SimpleNumber(2), new SimpleNumber(3)},
+                    NonTemplateCallPlace.INSTANCE);
+            assertEquals(6, result.getAsNumber());
+        }
     }
 
     public static class StringFunctions {
@@ -102,6 +124,10 @@ public class TLDParsingTest {
 
         public static String toUpperCase(String source) {
             return source.toUpperCase();
+        }
+
+        public static int add3(int x, int y, int z) {
+            return x + y + z;
         }
     }
     

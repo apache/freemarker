@@ -86,4 +86,15 @@
     <function-signature>String toUpperCase(java.lang.String)</function-signature>
   </function>
 
+  <function>
+    <name>add3</name>
+    <function-class>org.apache.freemarker.servlet.jsp.TLDParsingTest$StringFunctions</function-class>
+    <function-signature>
+      int  add3 (
+      int  ,
+      int,
+      int
+      )
+    </function-signature>
+  </function>
 </taglib>
