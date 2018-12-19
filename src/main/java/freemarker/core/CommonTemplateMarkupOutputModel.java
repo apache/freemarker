@@ -33,14 +33,14 @@ public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateM
         implements TemplateMarkupOutputModel<MO> {
 
     private final String plainTextContent;
-    private String markupContet;
+    private String markupContent;
 
     /**
      * A least one of the parameters must be non-{@code null}!
      */
     protected CommonTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         this.plainTextContent = plainTextContent;
-        this.markupContet = markupContent;
+        this.markupContent = markupContent;
     }
 
     public abstract CommonMarkupOutputFormat<MO> getOutputFormat();
@@ -52,15 +52,15 @@ public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateM
 
     /** Maybe {@code null}, but then {@link #getPlainTextContent()} isn't {@code null}. */
     final String getMarkupContent() {
-        return markupContet;
+        return markupContent;
     }
 
     /**
      * Use only to set the value calculated from {@link #getPlainTextContent()}, when {@link #getMarkupContent()} was
      * still {@code null}!
      */
-    final void setMarkupContet(String markupContet) {
-        this.markupContet = markupContet;
+    final void setMarkupContent(String markupContent) {
+        this.markupContent = markupContent;
     }
 
 }
