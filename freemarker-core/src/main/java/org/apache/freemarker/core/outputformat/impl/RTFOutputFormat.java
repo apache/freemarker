@@ -31,14 +31,14 @@ import org.apache.freemarker.core.util._StringUtils;
  * default (via {@link _StringUtils#RTFEnc(String)}). The {@code ?rtf} built-in silently bypasses template output values
  * of the type produced by this output format ({@link TemplateRTFOutputModel}).
  */
-public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
+public class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
     
-    private RTFOutputFormat() {
+    protected RTFOutputFormat() {
         // Only to decrease visibility
     }
     

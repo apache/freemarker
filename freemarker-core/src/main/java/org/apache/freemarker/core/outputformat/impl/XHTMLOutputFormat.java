@@ -27,18 +27,18 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * Represents the XML output format (MIME type "application/xhtml+xml", name "XHTML"). This format escapes by default
- * (via {@link _StringUtils#XHTMLEnc(String)}). The {@code ?xml} built-in silently bypasses template output values of the
- * type produced by this output format ({@link TemplateXHTMLOutputModel}).
+ * Represents the XML output format (MIME type "application/xhtml+xml", name "XHTML"); this is the same as
+ * {@link HTMLOutputFormat}, except the name an the MIME Type. (Also, it returns {@link TemplateXHTMLOutputModel}
+ * instead of {@link TemplateHTMLOutputModel}, but the former extends the later.)
  */
-public final class XHTMLOutputFormat extends CommonMarkupOutputFormat<TemplateXHTMLOutputModel> {
+public class XHTMLOutputFormat extends XMLOutputFormat {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final XHTMLOutputFormat INSTANCE = new XHTMLOutputFormat();
     
-    private XHTMLOutputFormat() {
+    protected XHTMLOutputFormat() {
         // Only to decrease visibility
     }
     

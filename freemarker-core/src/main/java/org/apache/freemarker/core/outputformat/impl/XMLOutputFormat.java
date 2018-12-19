@@ -31,14 +31,14 @@ import org.apache.freemarker.core.util._StringUtils;
  * {@link _StringUtils#XMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
  * template output values of the type produced by this output format ({@link TemplateXHTMLOutputModel}).
  */
-public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
+public class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
 
-    private XMLOutputFormat() {
+    protected XMLOutputFormat() {
         // Only to decrease visibility
     }
 

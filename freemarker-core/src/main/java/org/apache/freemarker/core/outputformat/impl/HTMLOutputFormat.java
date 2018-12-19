@@ -27,18 +27,19 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * Represents the HTML output format (MIME type "text/html", name "HTML"). This format escapes by default (via
- * {@link _StringUtils#XHTMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
- * template output values of the type produced by this output format ({@link TemplateHTMLOutputModel}).
+ * Represents the HTML output format (MIME type "text/html", name "HTML"). This format escapes by default, replacing
+ * all reserved HTML characters (and character sequences) with entity references. The {@code ?html}, {@code ?xhtml}
+ * and {@code ?xml} built-ins silently bypass template output values of the type produced by this output format
+ * ({@link TemplateHTMLOutputModel}).
  */
-public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
+public class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
 
     /**
      * The only instance (singleton) of this {@link OutputFormat}.
      */
     public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
     
-    private HTMLOutputFormat() {
+    protected HTMLOutputFormat() {
         // Only to decrease visibility
     }
     

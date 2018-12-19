@@ -23,12 +23,12 @@ import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 /**
  * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
  */
-public final class TemplateXHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXHTMLOutputModel> {
+public class TemplateXHTMLOutputModel extends TemplateXMLOutputModel {
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    TemplateXHTMLOutputModel(String plainTextContent, String markupContent) {
+    protected TemplateXHTMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
