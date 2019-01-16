@@ -52,6 +52,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
@@ -1043,6 +1044,16 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     @Override
     public boolean isAPIBuiltinEnabledSet() {
         return tCfg != null && tCfg.isAPIBuiltinEnabledSet();
+    }
+
+    @Override
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm() {
+        return tCfg != null && tCfg.isTruncateBuiltinAlgorithmSet() ? tCfg.getTruncateBuiltinAlgorithm() : cfg.getTruncateBuiltinAlgorithm();
+    }
+
+    @Override
+    public boolean isTruncateBuiltinAlgorithmSet() {
+        return tCfg != null && tCfg.isTruncateBuiltinAlgorithmSet();
     }
 
     @Override

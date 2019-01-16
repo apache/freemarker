@@ -50,6 +50,7 @@ import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
@@ -188,6 +189,7 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        SETTING_ASSIGNMENTS.put("truncateBuiltinAlgorithm", DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE);
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", UnparsedTemplateLanguage.F3UU);

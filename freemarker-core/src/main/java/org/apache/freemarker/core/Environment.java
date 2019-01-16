@@ -65,6 +65,7 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
@@ -884,6 +885,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return getMainTemplate().getAPIBuiltinEnabled();
     }
 
+    @Override
+    protected TruncateBuiltinAlgorithm getDefaultTruncateBuiltinAlgorithm() {
+        return getMainTemplate().getTruncateBuiltinAlgorithm();
+    }
+    
     @Override
     protected boolean getDefaultLazyImports() {
         return getMainTemplate().getLazyImports();

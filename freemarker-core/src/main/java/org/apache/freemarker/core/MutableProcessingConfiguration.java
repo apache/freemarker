@@ -50,6 +50,8 @@ import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.AndMatcher;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
@@ -102,6 +104,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "newBuiltinClassResolver";
     public static final String SHOW_ERROR_TIPS_KEY = "showErrorTips";
     public static final String API_BUILTIN_ENABLED_KEY = "apiBuiltinEnabled";
+    public static final String TRUNCATE_BUILTIN_ALGORITHM_KEY = "truncateBuiltinAlgorithm";
     public static final String LAZY_IMPORTS_KEY = "lazyImports";
     public static final String LAZY_AUTO_IMPORTS_KEY = "lazyAutoImports";
     public static final String AUTO_IMPORTS_KEY = "autoImports";
@@ -131,6 +134,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         TEMPLATE_EXCEPTION_HANDLER_KEY,
         TIME_FORMAT_KEY,
         TIME_ZONE_KEY,
+        TRUNCATE_BUILTIN_ALGORITHM_KEY,
         URL_ESCAPING_CHARSET_KEY
     );
     
@@ -154,6 +158,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
+    private TruncateBuiltinAlgorithm truncateBuiltinAlgorithm;
     private Map<String, TemplateDateFormatFactory> customDateFormats;
     private Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private Map<String, String> autoImports;
@@ -1049,6 +1054,46 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return apiBuiltinEnabled != null;
     }
 
+    /**
+     * Setter pair of {@link #getTruncateBuiltinAlgorithm()}
+     */
+    public void setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm value) {
+        _NullArgumentException.check("value", value);
+        truncateBuiltinAlgorithm = value;
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)}
+     */
+    public SelfT truncateBuiltinAlgorithm(TruncateBuiltinAlgorithm value) {
+        setTruncateBuiltinAlgorithm(value);
+        return self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetTruncateBuiltinAlgorithm() {
+        truncateBuiltinAlgorithm = null;
+    }
+
+    @Override
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm() {
+        return isTruncateBuiltinAlgorithmSet() ? truncateBuiltinAlgorithm : getDefaultTruncateBuiltinAlgorithm();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
+     */
+    protected abstract TruncateBuiltinAlgorithm getDefaultTruncateBuiltinAlgorithm();
+
+    @Override
+    public boolean isTruncateBuiltinAlgorithmSet() {
+        return truncateBuiltinAlgorithm != null;
+    }
+
     @Override
     public boolean getLazyImports() {
          return isLazyImportsSet() ? lazyImports : getDefaultLazyImports();
@@ -1445,7 +1490,27 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       See {@link #setAPIBuiltinEnabled(boolean)}.
      *       Since 2.3.22.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
-     *       
+     *
+     *   <li><p>{@code "truncateBuiltinAlgorithm"}:
+     *       See {@link #setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)}.
+     *       <br>String value: An
+     *       <a href="#fm_obe">object builder expression</a>, or one of the predefined values (case insensitive),
+     *       {@code ascii} (for {@link DefaultTruncateBuiltinAlgorithm#ASCII_INSTANCE}) and
+     *       {@code unicode} (for {@link DefaultTruncateBuiltinAlgorithm#UNICODE_INSTANCE}).
+     *       <br>Example object builder expressions:
+     *       <br>Use {@code "..."} as terminator (and same as markup terminator), and add space if the
+     *       truncation happened on word boundary:
+     *       <br>{@code DefaultTruncateBuiltinAlgorithm("...", true)}
+     *       <br>Use {@code "..."} as terminator, and also a custom HTML for markup terminator, and add space if the
+     *       truncation happened on word boundary:
+     *       <br>{@code DefaultTruncateBuiltinAlgorithm("...",
+     *       markup(HTMLOutputFormat(), "<span class=trunc>...</span>"), true)}
+     *       <br>Recreate default truncate algorithm, but with not preferring truncation at word boundaries (i.e.,
+     *       with {@code wordBoundaryMinLength} 1.0):
+     *       <br><code>DefaultTruncateBuiltinAlgorithm(<br>
+     *       DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, null, null,<br>
+     *       DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR, null, null,<br>
+     *       true, 1.0)</code>
      * </ul>
      * 
      * <p>{@link Configuration} (a subclass of {@link MutableProcessingConfiguration}) also understands these:</p>
@@ -1622,7 +1687,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}, {@link TagSyntax}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}, {@link TagSyntax},
+     *     {@link DefaultTruncateBuiltinAlgorithm}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
@@ -1759,6 +1825,16 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 setShowErrorTips(_StringUtils.getYesNo(value));
             } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
                 setAPIBuiltinEnabled(_StringUtils.getYesNo(value));
+            } else if (TRUNCATE_BUILTIN_ALGORITHM_KEY.equals(name)) {
+                if ("ascii".equalsIgnoreCase(value)) {
+                    setTruncateBuiltinAlgorithm(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE);
+                } else if ("unicode".equalsIgnoreCase(value)) {
+                    setTruncateBuiltinAlgorithm(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE);
+                } else {
+                    setTruncateBuiltinAlgorithm((TruncateBuiltinAlgorithm) _ObjectBuilderSettingEvaluator.eval(
+                            value, TruncateBuiltinAlgorithm.class, false,
+                            _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED);

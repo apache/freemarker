@@ -64,6 +64,8 @@ import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
@@ -211,6 +213,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final TemplateClassResolver newBuiltinClassResolver;
     private final Boolean showErrorTips;
     private final Boolean apiBuiltinEnabled;
+    private final TruncateBuiltinAlgorithm truncateBuiltinAlgorithm;
     private final Map<String, TemplateDateFormatFactory> customDateFormats;
     private final Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private final Map<String, String> autoImports;
@@ -374,6 +377,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         newBuiltinClassResolver = builder.getNewBuiltinClassResolver();
         showErrorTips = builder.getShowErrorTips();
         apiBuiltinEnabled = builder.getAPIBuiltinEnabled();
+        truncateBuiltinAlgorithm = builder.getTruncateBuiltinAlgorithm();
         customDateFormats = _CollectionUtils.mergeImmutableMaps(
                 builder.getImpliedCustomDateFormats(), builder.getCustomDateFormats(), false);
         customNumberFormats = _CollectionUtils.mergeImmutableMaps(
@@ -1116,6 +1120,20 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * value in the {@link Configuration}.
      */
     @Override
+    public boolean isTruncateBuiltinAlgorithmSet() {
+        return true;
+    }
+
+    @Override
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm() {
+        return truncateBuiltinAlgorithm;
+    }
+
+    /**
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
+     */
+    @Override
     public boolean isAPIBuiltinEnabledSet() {
         return true;
     }
@@ -1207,7 +1225,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     /**
      * {@inheritDoc}
      * <p>
-     * Because {@link Configuration} has on parent, the {@code includeInherited} parameter is ignored.
+     * Because {@link Configuration} has no parent, the {@code includeInherited} parameter is ignored.
      */
     @Override
     public Map<Serializable, Object> getCustomSettings(boolean includeInherited) {
@@ -2655,6 +2673,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         @Override
         protected boolean getDefaultAPIBuiltinEnabled() {
             return false;
+        }
+
+        @Override
+        protected TruncateBuiltinAlgorithm getDefaultTruncateBuiltinAlgorithm() {
+            return DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE;
         }
 
         @Override

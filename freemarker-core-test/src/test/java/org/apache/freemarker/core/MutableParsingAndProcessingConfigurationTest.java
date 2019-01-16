@@ -32,6 +32,7 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.junit.Test;
@@ -276,6 +277,67 @@ public class MutableParsingAndProcessingConfigurationTest {
         cfgB.setSetting(Configuration.Builder.TIME_ZONE_KEY, "JVM default");
         assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
         assertTrue(cfgB.isTimeZoneSet());
+    }
+
+
+    public void testTruncateBuiltinAlgorithm() throws TemplateException {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
+
+        cfgB.setSetting("truncateBuiltinAlgorithm", "unicodE");
+        assertSame(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
+
+        cfgB.setSetting("truncate_builtin_algorithm", "ASCII");
+        assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
+
+        {
+            cfgB.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm('...', false)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfgB.getTruncateBuiltinAlgorithm();
+            assertEquals("...", alg.getDefaultTerminator());
+            assertFalse(alg.getAddSpaceAtWordBoundary());
+            assertEquals(3, alg.getDefaultTerminatorLength());
+            assertNull(alg.getDefaultMTerminator());
+            assertNull(alg.getDefaultMTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength());
+        }
+
+        {
+            cfgB.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm(" +
+                            "'...', " +
+                            "markup(HTMLOutputFormat(), '<span class=trunc>...</span>'), " +
+                            "true)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfgB.getTruncateBuiltinAlgorithm();
+            assertEquals("...", alg.getDefaultTerminator());
+            assertTrue(alg.getAddSpaceAtWordBoundary());
+            assertEquals(3, alg.getDefaultTerminatorLength());
+            assertEquals("markupOutput(format=HTML, markup=<span class=trunc>...</span>)",
+                    alg.getDefaultMTerminator().toString());
+            assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength());
+        }
+
+        {
+            cfgB.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm(" +
+                            "DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, null, null, " +
+                            "DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR, null, null, " +
+                            "true, 0.5)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfgB.getTruncateBuiltinAlgorithm();
+            assertEquals(DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, alg.getDefaultTerminator());
+            assertTrue(alg.getAddSpaceAtWordBoundary());
+            assertEquals(5, alg.getDefaultTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR.toString(),
+                    alg.getDefaultMTerminator().toString());
+            assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
+            assertEquals(0.5, alg.getWordBoundaryMinLength(), 0);
+        }
     }
 
     // ------------

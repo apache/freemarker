@@ -29,10 +29,12 @@ import java.util.regex.Pattern;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -742,6 +744,145 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleString(s.trim());
+        }
+    }
+
+    static abstract class AbstractTruncateBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(final String s, final Environment env) {
+            return new TemplateFunctionModel() {
+
+                @Override
+                public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws
+                        TemplateException {
+                    int maxLength = CallableUtils.getIntArgument(args, 0, this);
+                    if (maxLength < 0) {
+                        throw newArgumentValueException(
+                                0, "must be at least 0, but was " + maxLength + ".", this);
+                    }
+
+                    TemplateModel terminator = args[1];
+                    Integer terminatorLength;
+                    if (terminator != null) {
+                        if (!(terminator instanceof  TemplateStringModel)) {
+                            if (allowMarkupTerminator()) {
+                                if (!(terminator instanceof TemplateMarkupOutputModel)) {
+                                    throw newArgumentValueTypeException(
+                                            terminator, 1,
+                                            new Class[] { TemplateStringModel.class, TemplateMarkupOutputModel.class },
+                                            "string or markup", this);
+                                }
+                            } else {
+                                throw newArgumentValueTypeException(terminator, 1, TemplateStringModel.class, this);
+                            }
+                        }
+
+                        terminatorLength = CallableUtils.getOptionalIntArgument(args, 2, this);
+                        if (terminatorLength != null && terminatorLength < 0) {
+                            throw newArgumentValueException(
+                                    2, "must be at least 0, but was " + terminatorLength + ".", this);
+                        }
+                    } else {
+                        terminatorLength = null;
+                    }
+                    try {
+                        TruncateBuiltinAlgorithm algorithm = env.getTruncateBuiltinAlgorithm();
+                        return truncate(algorithm, s, maxLength, terminator, terminatorLength, env);
+                    } catch (TemplateException e) {
+                        throw new TemplateException(e, env, "Truncation failed; see cause exception");
+                    }
+                }
+
+                @Override
+                public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                    return ArgumentArrayLayout.THREE_POSITIONAL_PARAMETERS;
+                }
+            };
+        }
+
+        protected abstract TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException;
+
+        protected abstract boolean allowMarkupTerminator();
+    }
+
+    static class truncateBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncate(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return false;
+        }
+    }
+
+    static class truncate_wBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncateW(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return false;
+        }
+    }
+
+    static class truncate_cBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncateC(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return false;
+        }
+    }
+
+    static class truncate_mBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncateM(s, maxLength, terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return true;
+        }
+    }
+
+    static class truncate_w_mBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncateWM(s, maxLength, terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return true;
+        }
+    }
+
+    static class truncate_c_mBI extends AbstractTruncateBI {
+        protected TemplateModel truncate(
+                TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
+                TemplateModel terminator, Integer terminatorLength, Environment env)
+                throws TemplateException {
+            return algorithm.truncateCM(s, maxLength, terminator, terminatorLength, env);
+        }
+
+        protected boolean allowMarkupTerminator() {
+            return true;
         }
     }
 

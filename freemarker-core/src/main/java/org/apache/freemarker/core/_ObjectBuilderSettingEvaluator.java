@@ -47,6 +47,7 @@ import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.AndMatcher;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
@@ -681,6 +682,8 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
             addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
+
+            addWithSimpleName(SHORTHANDS, DefaultTruncateBuiltinAlgorithm.class);
 
             addWithSimpleName(SHORTHANDS, TemplateLanguage.class);
 

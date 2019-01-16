@@ -28,6 +28,7 @@ import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -73,6 +74,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final TemplateClassResolver newBuiltinClassResolver;
     private final Boolean showErrorTips;
     private final Boolean apiBuiltinEnabled;
+    private final TruncateBuiltinAlgorithm truncateBuiltinAlgorithm;
     private final Map<String, TemplateDateFormatFactory> customDateFormats;
     private final Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private final Map<String, String> autoImports;
@@ -113,6 +115,8 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         newBuiltinClassResolver = builder.isNewBuiltinClassResolverSet() ? builder.getNewBuiltinClassResolver() : null;
         showErrorTips = builder.isShowErrorTipsSet() ? builder.getShowErrorTips() : null;
         apiBuiltinEnabled = builder.isAPIBuiltinEnabledSet() ? builder.getAPIBuiltinEnabled() : null;
+        truncateBuiltinAlgorithm = builder.isTruncateBuiltinAlgorithmSet() ? builder.getTruncateBuiltinAlgorithm()
+                : null;
         customDateFormats = builder.isCustomDateFormatsSet() ? builder.getCustomDateFormats() : null;
         customNumberFormats = builder.isCustomNumberFormatsSet() ? builder.getCustomNumberFormats() : null;
         autoImports = builder.isAutoImportsSet() ? builder.getAutoImports() : null;
@@ -474,6 +478,19 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm() {
+        if (!isTruncateBuiltinAlgorithmSet()) {
+            throw new CoreSettingValueNotSetException("truncateBuiltinAlgorithm");
+        }
+        return truncateBuiltinAlgorithm;
+    }
+
+    @Override
+    public boolean isTruncateBuiltinAlgorithmSet() {
+        return truncateBuiltinAlgorithm != null;
+    }
+
+    @Override
     public boolean getAutoFlush() {
         if (!isAutoFlushSet()) {
             throw new CoreSettingValueNotSetException("autoFlush");
@@ -709,6 +726,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
+        protected TruncateBuiltinAlgorithm getDefaultTruncateBuiltinAlgorithm() {
+            throw new CoreSettingValueNotSetException("truncateBuiltinAlgorithm");
+        }
+        
+        @Override
         protected boolean getDefaultLazyImports() {
             throw new CoreSettingValueNotSetException("lazyImports");
         }
@@ -789,6 +811,9 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isNewBuiltinClassResolverSet()) {
                 setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
+            }
+            if (tc.isTruncateBuiltinAlgorithmSet()) {
+                setTruncateBuiltinAlgorithm(tc.getTruncateBuiltinAlgorithm());
             }
             if (tc.isNumberFormatSet()) {
                 setNumberFormat(tc.getNumberFormat());

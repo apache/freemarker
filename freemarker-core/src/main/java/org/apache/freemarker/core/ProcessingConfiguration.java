@@ -28,10 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -750,5 +753,22 @@ public interface ProcessingConfiguration {
      * You shouldn't change the content of those objects.
      */
     Map<Serializable, Object> getCustomSettings(boolean includeInherited);
+
+    /**
+     * The algorithm used for {@code ?truncate}. Defaults to {@link DefaultTruncateBuiltinAlgorithm#ASCII_INSTANCE}.
+     * Most customization needs can be addressed by creating a new {@link DefaultTruncateBuiltinAlgorithm} with the
+     * proper constructor parameters. Otherwise users my use their own {@link TruncateBuiltinAlgorithm} implementation.
+     *
+     * <p>In case you need to set this with {@link Properties}, or a similar configuration approach that doesn't let you
+     * create the value in Java, see examples at {@link MutableProcessingConfiguration#setSetting(String, String)}.
+     */
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm();
+
+    /**
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
+     * an {@link CoreSettingValueNotSetException}.
+     */
+    public boolean isTruncateBuiltinAlgorithmSet();
 
 }
