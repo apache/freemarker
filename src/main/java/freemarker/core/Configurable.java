@@ -240,7 +240,14 @@ public class Configurable {
     public static final String API_BUILTIN_ENABLED_KEY_CAMEL_CASE = "apiBuiltinEnabled";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
     public static final String API_BUILTIN_ENABLED_KEY = API_BUILTIN_ENABLED_KEY_SNAKE_CASE;
-    
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.29 */
+    public static final String TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE = "truncate_builtin_algorithm";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.29 */
+    public static final String TRUNCATE_BUILTIN_ALGORITHM_KEY_CAMEL_CASE = "truncateBuiltinAlgorithm";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TRUNCATE_BUILTIN_ALGORITHM_KEY = TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE;
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE = "log_template_exceptions";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -282,7 +289,7 @@ public class Configurable {
     public static final String AUTO_INCLUDE_KEY_CAMEL_CASE = "autoInclude";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
-    
+
     /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
     @Deprecated
     public static final String STRICT_BEAN_MODELS = STRICT_BEAN_MODELS_KEY;
@@ -315,6 +322,7 @@ public class Configurable {
         TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
         TIME_FORMAT_KEY_SNAKE_CASE,
         TIME_ZONE_KEY_SNAKE_CASE,
+        TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE,
         URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
         WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE
     };
@@ -347,6 +355,7 @@ public class Configurable {
         TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
         TIME_FORMAT_KEY_CAMEL_CASE,
         TIME_ZONE_KEY_CAMEL_CASE,
+        TRUNCATE_BUILTIN_ALGORITHM_KEY_CAMEL_CASE,
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
         WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE
     };
@@ -376,9 +385,10 @@ public class Configurable {
     private String urlEscapingCharset;
     private boolean urlEscapingCharsetSet;
     private Boolean autoFlush;
-    private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
+    private TemplateClassResolver newBuiltinClassResolver;
     private Boolean apiBuiltinEnabled;
+    private TruncateBuiltinAlgorithm truncateBuiltinAlgorithm;
     private Boolean logTemplateExceptions;
     private Boolean wrapUncheckedExceptions;
     private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
@@ -452,7 +462,9 @@ public class Configurable {
         
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
-        
+
+        truncateBuiltinAlgorithm = DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE;
+
         showErrorTips = Boolean.TRUE;
         properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
         
@@ -1476,7 +1488,10 @@ public class Configurable {
         }
         outputEncodingSet = true;
     }
-    
+
+    /**
+     * Getter pair of {@link #setOutputEncoding(String)}.
+     */
     public String getOutputEncoding() {
         return outputEncodingSet
                 ? outputEncoding
@@ -1666,7 +1681,41 @@ public class Configurable {
     public boolean isAPIBuiltinEnabledSet() {
         return apiBuiltinEnabled != null;
     }
-    
+
+    /**
+     * Specifies the algorithm used for {@code ?truncate}. Defaults to
+     * {@link DefaultTruncateBuiltinAlgorithm#ASCII_INSTANCE}. Most customization needs can be addressed by
+     * creating a new {@link DefaultTruncateBuiltinAlgorithm} with the proper constructor parameters. Otherwise users
+     * my use their own {@link TruncateBuiltinAlgorithm} implementation.
+     *
+     * <p>In case you need to set this with {@link Properties}, or a similar configuration approach that doesn't let you
+     * create the value in Java, see examples at {@link #setSetting(String, String)}.
+     *
+     * @since 2.3.29
+     */
+    public void setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm truncateBuiltinAlgorithm) {
+        NullArgumentException.check("truncateBuiltinAlgorithm", truncateBuiltinAlgorithm);
+        this.truncateBuiltinAlgorithm = truncateBuiltinAlgorithm;
+    }
+
+    /**
+     * See {@link #setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)}
+     *
+     * @since 2.3.29
+     */
+    public TruncateBuiltinAlgorithm getTruncateBuiltinAlgorithm() {
+        return truncateBuiltinAlgorithm != null ? truncateBuiltinAlgorithm : parent.getTruncateBuiltinAlgorithm();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.29
+     */
+    public boolean isTruncateBuiltinAlgorithmSet() {
+        return truncateBuiltinAlgorithm != null;
+    }
+
     /**
      * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
      * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
@@ -2287,7 +2336,28 @@ public class Configurable {
      *       See {@link #setAPIBuiltinEnabled(boolean)}.
      *       Since 2.3.22.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
-     *       
+     *
+     *   <li><p>{@code "truncate_builtin_algorithm"}:
+     *       See {@link #setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)}.
+     *       Since 2.3.19.
+     *       <br>String value: An
+     *       <a href="#fm_obe">object builder expression</a>, or one of the predefined values (case insensitive),
+     *       {@code ascii} (for {@link DefaultTruncateBuiltinAlgorithm#ASCII_INSTANCE}) and
+     *       {@code unicode} (for {@link DefaultTruncateBuiltinAlgorithm#UNICODE_INSTANCE}).
+     *       <br>Example object builder expressions:
+     *       <br>Use {@code "..."} as terminator (and same as markup terminator), and add space if the
+     *       truncation happened on word boundary:
+     *       <br>{@code DefaultTruncateBuiltinAlgorithm("...", true)}
+     *       <br>Use {@code "..."} as terminator, and also a custom HTML for markup terminator, and add space if the
+     *       truncation happened on word boundary:
+     *       <br>{@code DefaultTruncateBuiltinAlgorithm("...",
+     *       markup(HTMLOutputFormat(), "<span class=trunc>...</span>"), true)}
+     *       <br>Recreate default truncate algorithm, but with not preferring truncation at word boundaries (i.e.,
+     *       with {@code wordBoundaryMinLength} 1.0):
+     *       <br><code>freemarker.core.DefaultTruncateBuiltinAlgorithm(<br>
+     *       DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, null, null,<br>
+     *       DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR, null, null,<br>
+     *       true, 1.0)</code>
      * </ul>
      * 
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
@@ -2498,7 +2568,7 @@ public class Configurable {
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}, {@link Configuration}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link DefaultTruncateBuiltinAlgorithm}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
@@ -2663,6 +2733,17 @@ public class Configurable {
             } else if (API_BUILTIN_ENABLED_KEY_SNAKE_CASE.equals(name)
                     || API_BUILTIN_ENABLED_KEY_CAMEL_CASE.equals(name)) {
                 setAPIBuiltinEnabled(StringUtil.getYesNo(value));
+            } else if (TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE.equals(name)
+                    || TRUNCATE_BUILTIN_ALGORITHM_KEY_CAMEL_CASE.equals(name)) {
+                if ("ascii".equalsIgnoreCase(value)) {
+                    setTruncateBuiltinAlgorithm(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE);
+                } else if ("unicode".equalsIgnoreCase(value)) {
+                    setTruncateBuiltinAlgorithm(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE);
+                } else {
+                    setTruncateBuiltinAlgorithm((TruncateBuiltinAlgorithm) _ObjectBuilderSettingEvaluator.eval(
+                            value, TruncateBuiltinAlgorithm.class, false,
+                            _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
                     || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {

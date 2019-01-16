@@ -59,6 +59,7 @@ import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
+import freemarker.core.DefaultTruncateBuiltinAlgorithm;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
 import freemarker.core.EpochMillisDivTemplateDateFormatFactory;
@@ -1801,7 +1802,67 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE, "allows_nothing");
         assertSame(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
     }
-    
+
+    public void testTruncateBuiltinAlgorithm() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfg.getTruncateBuiltinAlgorithm());
+
+        cfg.setSetting("truncateBuiltinAlgorithm", "unicodE");
+        assertSame(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE, cfg.getTruncateBuiltinAlgorithm());
+
+        cfg.setSetting("truncate_builtin_algorithm", "ASCII");
+        assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfg.getTruncateBuiltinAlgorithm());
+
+        {
+            cfg.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm('...', false)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfg.getTruncateBuiltinAlgorithm();
+            assertEquals("...", alg.getDefaultTerminator());
+            assertFalse(alg.getAddSpaceAtWordBoundary());
+            assertEquals(3, alg.getDefaultTerminatorLength());
+            assertNull(alg.getDefaultMTerminator());
+            assertNull(alg.getDefaultMTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength());
+        }
+
+        {
+            cfg.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm(" +
+                            "'...', " +
+                            "markup(HTMLOutputFormat(), '<span class=trunc>...</span>'), " +
+                            "true)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfg.getTruncateBuiltinAlgorithm();
+            assertEquals("...", alg.getDefaultTerminator());
+            assertTrue(alg.getAddSpaceAtWordBoundary());
+            assertEquals(3, alg.getDefaultTerminatorLength());
+            assertEquals("markupOutput(format=HTML, markup=<span class=trunc>...</span>)",
+                    alg.getDefaultMTerminator().toString());
+            assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength());
+        }
+
+        {
+            cfg.setSetting("truncate_builtin_algorithm",
+                    "DefaultTruncateBuiltinAlgorithm(" +
+                            "DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, null, null, " +
+                            "DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR, null, null, " +
+                            "true, 0.5)");
+            DefaultTruncateBuiltinAlgorithm alg =
+                    (DefaultTruncateBuiltinAlgorithm) cfg.getTruncateBuiltinAlgorithm();
+            assertEquals(DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, alg.getDefaultTerminator());
+            assertTrue(alg.getAddSpaceAtWordBoundary());
+            assertEquals(5, alg.getDefaultTerminatorLength());
+            assertEquals(DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR.toString(),
+                    alg.getDefaultMTerminator().toString());
+            assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
+            assertEquals(0.5, alg.getWordBoundaryMinLength());
+        }
+    }
+
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);

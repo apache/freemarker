@@ -13047,6 +13047,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_truncate">truncate,
+            truncate_<replaceable>...</replaceable></link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_uncap_first">uncap_first</link></para>
           </listitem>
@@ -14633,6 +14638,228 @@ foobar</programlisting>
           <para>The output:</para>
 
           <programlisting role="output">(green mouse)</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_truncate">
+          <title>truncate, truncate_...</title>
+
+          <indexterm>
+            <primary>truncate built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_c built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_wbuilt-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_m built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_c_m built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_w_m built-in</primary>
+          </indexterm>
+
+          <para>Cuts off the end of a string if that's necessary to keep it
+          under a the length given as parameter, and appends a terminator
+          string (<literal>[...]</literal> by default) to indicate that the
+          string was truncated. Example (assuming default FreeMarker
+          configuration settings):</para>
+
+          <programlisting role="template">&lt;#assign shortName='This is short'&gt;
+&lt;#assign longName='This is a too long name'&gt;
+&lt;#assign difficultName='This isoneveryverylongword'&gt;
+
+No truncation needed:
+${shortName?truncate(16)} 
+
+Truncated at word boundary:
+${longName?truncate(16)}
+
+Truncated at "character boundary":
+${difficultName?truncate(16)}</programlisting>
+
+          <programlisting role="output">No truncation needed:
+This is short
+
+Truncated at word boundary:
+This is a [...]
+
+Truncated at "character boundary":
+This isonev[...]</programlisting>
+
+          <para>Things to note above:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The string is returned as is if its length doesn't exceed
+              the specified length (16 in this case).</para>
+            </listitem>
+
+            <listitem>
+              <para>When the string exceeded that length, its end was cut off
+              in a way so that together with the added terminator string
+              (<literal>[...]</literal> here) its length won't exceed 16. The
+              result length is possibly shorter than 16, for the sake of
+              better look (see later). Actually, the result length can also be
+              longer than the parameter length, when the desired length is
+              shorter than the terminator string alone, in which case the
+              terminator is still returned as is. Also, an algorithms other
+              than the default might choses to return a longer string, as the
+              length parameter is in principle just hint for the desired
+              visual length.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>truncate</literal> prefers cutting at word
+              boundary, rather than mid-word, however, if doing so would give
+              a result that's shorter than the 75% of the length specified
+              with the argument, it falls back to cut mid-word. In the last
+              line of the above example, <quote>This [...]</quote> would be
+              too short (11 &lt; 16 * 75%), so it was cut mid-word
+              instead.</para>
+            </listitem>
+
+            <listitem>
+              <para>If the cut happened at word boundary, there's a space
+              between the word end and the terminator string, otherwise
+              there's no space between them. Only whitespace is treated as
+              word separator, not punctuation, so this generally gives
+              intuitive results.</para>
+            </listitem>
+          </itemizedlist>
+
+          <simplesect>
+            <title>Adjusting truncation rules</title>
+
+            <para>Truncation rules are highly configurable by setting the
+            <literal>truncate_builtin_algorithm</literal> configuration
+            setting. This can be done by the programmers, not template
+            authors, so for more details and examples please see the JavaDoc
+            of <link
+            xlink:href="api/freemarker/core/Configurable.html#setTruncateBuiltinAlgorithm-freemarker.core.TruncateBuiltinAlgorithm-">Configurable.setTruncateBuiltinAlgorithm</link>.</para>
+
+            <para>Truncation rules can also be influenced right in the
+            template to a smaller extent:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Specifying if the truncation should happen at word
+                boundary or not: </para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para><literal>truncate_w</literal> will always truncate
+                    at word boundary. For example,
+                    <literal>difficultName?truncate_w(16)</literal> returns
+                    <quote>This [...]</quote>, rather than <quote>This
+                    isonev[...]</quote> (as saw in earlier example).</para>
+                  </listitem>
+
+                  <listitem>
+                    <para><literal>truncate_c</literal> will truncate at any
+                    character, not just at word ends. For example,
+                    <literal>longName?truncate_c(16)</literal> returns
+                    <quote>This is a t[...]</quote>, rather than <quote>This
+                    is a [...]</quote> (as saw in earlier example). This tends
+                    to give a string length closer to the length specified,
+                    but still not an exact length, as it removes white-space
+                    before the terminator string, and re-adds a space if we
+                    are just after the end of a word, etc.</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+
+              <listitem>
+                <para>Specifying the terminator string (instead of relying on
+                its default): <literal>truncate</literal> and all
+                <literal>truncate_<replaceable>...</replaceable></literal>
+                built-ins have an additional optional parameter for it. After
+                that, a further optional parameter can specify the assumed
+                length of the terminator string (otherwise its real length
+                will be used). If you find yourself specifying the terminator
+                string often, then certainly the defaults should be configured
+                instead (via <literal>truncate_builtin_algorithm
+                configuration</literal> - see earlier). Example:</para>
+
+                <programlisting role="template">${longName?truncate(16, '...')}
+${longName?truncate(16, '...', 1)}</programlisting>
+
+                <programlisting role="output">This is a ...
+This is a too ...</programlisting>
+
+                <para>When the terminator string starts with dot
+                (<literal>.</literal>) or ellipsis (<literal>…</literal>), the
+                default algorithm will remove the dots and ellipses that the
+                terminator touches, to prevent ending up with more than 3 dots
+                at the end:</para>
+
+                <programlisting role="template">${'Foo bar.baaz'?truncate(11, '---')}
+${'Foo bar.baaz'?truncate(11, '...')} (Not "Foo bar....")
+${'Fo bar. baaz'?truncate(11, '...')} (Word separator space prevents touching)</programlisting>
+
+                <programlisting role="output">Foo bar.---
+Foo bar... (Not "Foo bar....")
+Fo bar. ... (Word separator space prevents touching)</programlisting>
+              </listitem>
+            </itemizedlist>
+          </simplesect>
+
+          <simplesect>
+            <title>Using markup as terminator string</title>
+
+            <para>Each truncation built-in has a variation whose name ends
+            with <literal>_m</literal> (for markup). These allow using markup
+            (like HTML) as terminator, which is useful if you want the
+            terminator to be styled differently than the truncated text. By
+            default the markup terminator is <literal>&lt;span
+            class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</literal>,
+            (where <literal>&amp;#8230;</literal> prints an ellipsis
+            character), but of course this can be changed with the
+            <literal>truncate_builtin_algorithm</literal> configuration
+            setting (see earlier). Example (see the variables used in earlier
+            example):</para>
+
+            <programlisting role="template">${longName?truncate_m(16)}
+${difficultName?truncate_w_m(16)}
+${longName?truncate_c_m(16)}</programlisting>
+
+            <programlisting role="output">This is a &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;
+This &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;
+This is a to&lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</programlisting>
+
+            <para>Note above that the terminator string was considered to be
+            only 3 characters long (<literal>'['</literal>,
+            <literal>'…'</literal>, <literal>']'</literal>) by the truncation
+            built-ins, because inside the terminator string they only count
+            the characters outside HTML/XML tags and comments, and they can
+            also interpret numeric character references (but not other entity
+            references). (The same applies when they decide if the terminator
+            starts with dot or ellipsis; preceding tags/comments are skipped,
+            etc.)</para>
+
+            <para>If a markup terminator is used (like above), the return
+            value of the
+            <literal>truncate<replaceable>...</replaceable>_m</literal>
+            built-in will be markup as well, which means that <link
+            linkend="dgui_misc_autoescaping">auto-escaping</link> won't escape
+            it. Of course, the content of the truncated string itself will be
+            still auto-escaped:</para>
+
+            <programlisting role="template">&lt;#ftl output_format='HTML'&gt;
+${'This is auto-escaped: &lt;span&gt;'}
+${'This is auto-escaped: &lt;span&gt;, but not the terminator string'?truncate_m(41)}</programlisting>
+
+            <programlisting role="output">This is auto-escaped: &amp;lt;span&amp;gt;
+This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</programlisting>
+          </simplesect>
         </section>
 
         <section xml:id="ref_builtin_uncap_first">
@@ -27623,7 +27850,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[FIXME]</para>
+              <para>Added new built-ins for truncating text.
+              <literal><replaceable>string</replaceable>?truncate(<replaceable>length</replaceable>)</literal>
+              truncates the text to the given length, and by default adds
+              <literal>[...]</literal> at the end if truncation has happened.
+              Truncation happens at word boundaries, unless the result is too
+              short that way, in which case it falls back to truncation mid
+              word. There's also <literal>?truncate_w</literal> to force Word
+              Boundary truncation, and <literal>?truncate_c</literal> (for
+              Character Boundary) that doesn't care about word boundaries. The
+              truncation algorithm is pluggable in the FreeMarker
+              configuration. See <link linkend="ref_builtin_truncate">the
+              reference</link> for more details.</para>
             </listitem>
           </itemizedlist>
         </section>
