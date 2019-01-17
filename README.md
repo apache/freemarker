@@ -98,7 +98,7 @@ Building FreeMarker
 
 If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
-http://freemarker.org/sourcecode.html
+https://freemarker.apache.org/sourcecode.html
 
 You need JDK 8 to be installed.
 
@@ -115,11 +115,11 @@ etc.). You can also install the jar-s into your local Maven repository with
 
 Note for Windows users: If you are using an Apache source release (as opposed
 to checking the project out from the Git repository), ./gradlew will fail as
-`gradle\wrapper\gradle-wrapper.jar` is missing. Due to Apache policy restricton
-we can't include that file in distributions, so you have to download that very
-common artifact from somewhere manually (like from Git repository of
-FreeMarker). (On UN*X-like systems you don't need that jar, as our custom
-`gradlew` shell script does everything itself.)
+`gradle\wrapper\gradle-wrapper.jar` is missing. Due to Apache policy we can't
+include that file in distributions, so you have to download that very common
+artifact from somewhere manually (like from the Git repository of FreeMarker).
+(On UN*X-like systems you don't need that jar, as our custom `gradlew` shell
+script does everything itself.)
 
 To test your build, issue `./gradlew test`. Issued from the top directory,
 this will run the tests of all modules.
@@ -210,19 +210,21 @@ Last tested Eclipse Oxygen (4.7.0)
 Last tested on IntelliJ IDEA Community 2017.1.5.
     
 - First, build the project with Gradle if you haven't yet (see earlier how).
-- "New..." -> "Project from existing source"
+- "New..." -> "Project from existing source" (or if you start on the Welcome screen: "Import project")
   - Point to the project root directory
   - On the next screen, select "Import project from external model" and "Gradle"
-  - On the next screen, select "Use gradle wrapper task configuration" [TODO: or keep default?].
-    Be sure at least Java 8 is selected for Gradle. Other defaults should be fine.
-  - On the next window, all modules will be selected, that's fine, go on
-  - On the next window, it will prompt to remove the `freemarker` from the project.
+  - On the next screen, ensure that at least Java 8 is selected for Gradle. Other defaults
+    ("Use default gradle wrapper", etc.) should be fine.
+  - On the next window (if there's one), all modules will be selected, that's fine, go on
+  - On the next window (if there's one), it will prompt to remove `freemarker` from the project.
     Let it do it (as it's an incorrect duplication of the `freemarker` root project).
   - At the end of this process you should have all modules in the Project tree view.
 - "File" -> "Project Structure..."
   Under "Project", set the SDK to 1.7, and the language level to 7.
-  Under "Modules", for "freemarker-core-test-java8" / "freemarker-core-test-java8_main" and
-  "freemarker-core-test-java8_test", change the "Module SDK" to 1.8 (on the "Dependencies" tab).
+  Under "Modules", expand the "freemarker" module in the tree view, and select
+  "freemarker-core-test-java8", and change the "Module SDK" to 1.8 (on the "Dependencies" tab).
+  Do the same with the "main" and "test" submodules under that (they are maybe shown as
+  "freemarker-core-test-java8_main" and "freemarker-core-test-java8_test" instead). 
 - "File" -> "Settings"
   - Under "Editor" / "Code style", import and use
     freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
