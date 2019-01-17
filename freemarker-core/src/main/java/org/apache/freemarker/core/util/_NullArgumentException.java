@@ -40,19 +40,21 @@ public class _NullArgumentException extends IllegalArgumentException {
     /**
      * Convenience method to protect against a {@code null} argument.
      */
-    public static void check(String argumentName, Object argumentValue) {
+    public static <T> T check(String argumentName, T argumentValue) {
         if (argumentValue == null) {
             throw new _NullArgumentException(argumentName);
         }
+        return argumentValue;
     }
 
     /**
      * Convenience method to protect against a {@code null} argument.
      */
-    public static void check(Object argumentValue) {
+    public static <T> T check(T argumentValue) {
         if (argumentValue == null) {
             throw new _NullArgumentException();
         }
+        return argumentValue;
     }
     
 }
