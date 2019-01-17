@@ -37,8 +37,8 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
     private final InterpolationSyntax interpolationSyntax;
     
     /**
-     * For the case when the file extension doesn't specify the exact syntax and the output format, instead both comes
-     * from the {@link Configuration} (or {@link TemplateConfiguration}). Avoid it, as it's problematic for tooling.
+     * For the case when the file extension doesn't specify the output format, instead it comes from the
+     * {@link Configuration} (or {@link TemplateConfiguration}). Avoid it, as it's problematic for tooling.
      */
     public static final DefaultTemplateLanguage F3AC = new DefaultTemplateLanguage("f3ac", true,
             DefaultDialect.INSTANCE,
