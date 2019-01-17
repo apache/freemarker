@@ -39,11 +39,7 @@ class UnsupportedFM2TemplateLanguage extends TemplateLanguage {
             "ftlx", null, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
     
     static final UnsupportedFM2TemplateLanguage[] INSTANCES =
-            new UnsupportedFM2TemplateLanguage[] {
-                    _NullArgumentException.check(FTL),
-                    _NullArgumentException.check(FTLH),
-                    _NullArgumentException.check(FTLX)
-    };
+            new UnsupportedFM2TemplateLanguage[] { FTL, FTLH, FTLX };
     
     private UnsupportedFM2TemplateLanguage(String fileExtension, OutputFormat outputFormat,
             AutoEscapingPolicy autoEscapingPolicy) {

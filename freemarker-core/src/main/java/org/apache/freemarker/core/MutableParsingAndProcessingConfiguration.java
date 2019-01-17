@@ -85,7 +85,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetOutputFormat();
                 } else {
-                    OutputFormat stdOF = Configuration.STANDARD_OUTPUT_FORMATS.get(value);
+                    OutputFormat stdOF = Configuration.LazyStatics.STANDARD_OUTPUT_FORMATS.get(value);
                     setOutputFormat(
                             stdOF != null ? stdOF
                             : (OutputFormat) _ObjectBuilderSettingEvaluator.eval(
@@ -113,8 +113,8 @@ public abstract class MutableParsingAndProcessingConfiguration<
                     setRecognizeStandardFileExtensions(_StringUtils.getYesNo(value));
                 }
             } else if (TEMPLATE_LANGUAGE_KEY.equals(name)) {
-                TemplateLanguage templateLanguage = Configuration.PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(
-                        value.toLowerCase());
+                TemplateLanguage templateLanguage = Configuration.LazyStatics.PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION
+                        .get(value.toLowerCase());
                 if (templateLanguage == null) {
                     if ("unparsed".equals(value)) {
                         templateLanguage = UnparsedTemplateLanguage.F3UU;

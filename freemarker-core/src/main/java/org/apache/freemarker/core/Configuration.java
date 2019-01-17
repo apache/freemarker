@@ -103,10 +103,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
  * and grave mistake from performance standpoint, as the {@link Configuration} holds the template cache, and often also
  * the class introspection cache, which then will be lost. (Note that, naturally, having multiple long-lived instances,
- * like one per component that internally uses FreeMarker is fine.)  
- * 
+ * like one per component that internally uses FreeMarker is fine.)
+ *
  * <p>The basic usage pattern is like:
- * 
+ *
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
  *  Configuration cfg = new Configuration.Builder(VERSION_<i>X</i>_<i>Y</i>_<i>Z</i>));
@@ -116,11 +116,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *  // VERSION_<i>X</i>_<i>Y</i>_<i>Z</i> enables the not-100%-backward-compatible fixes introduced in
  *  // FreeMarker version X.Y.Z and earlier (see {@link Configuration#getIncompatibleImprovements()}).
  *  ...
- *  
+ *
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
  *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.f3ah");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
- * 
+ *
  * <p>Note that you certainly want to set the {@link #getTemplateLoader templateLoader} setting, as its default
  * value is {@code null}, so you won't be able to load any templates (as FreeMarker doesn't know where from should it
  * load them).
@@ -131,29 +131,53 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * are set on the {@link Configuration} level (even if they were just initialized to a default value).
  */
 public final class Configuration implements TopLevelConfiguration, CustomStateScope {
-    
+
     private static final String VERSION_PROPERTIES_PATH = "/org/apache/freemarker/core/version.properties";
 
-    static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
-    static {
-        STANDARD_OUTPUT_FORMATS = new HashMap<>();
-        STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(XHTMLOutputFormat.INSTANCE.getName(), XHTMLOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(PlainTextOutputFormat.INSTANCE.getName(), PlainTextOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(CSSOutputFormat.INSTANCE.getName(), CSSOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(JavaScriptOutputFormat.INSTANCE.getName(), JavaScriptOutputFormat.INSTANCE);
-        STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
+    /**
+     * Holds the static fields that can't be put directly into {@link Configuration}, as depending on the exact Java
+     * version, that could lead to class initialization order issues (reading fields before they are initialized), as
+     * the classes of the values of these fields might refer back to the Configuration} class. But, this only works
+     * reliably if you don't refer this class from static methods, only from instance methods and constructors.
+     */
+    static final class LazyStatics {
+        private LazyStatics() { throw new AssertionError(); }
+
+        static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
+        static {
+            STANDARD_OUTPUT_FORMATS = new HashMap<>();
+            STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(XHTMLOutputFormat.INSTANCE.getName(), XHTMLOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(PlainTextOutputFormat.INSTANCE.getName(), PlainTextOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(CSSOutputFormat.INSTANCE.getName(), CSSOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(JavaScriptOutputFormat.INSTANCE.getName(), JavaScriptOutputFormat.INSTANCE);
+            STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
+        }
+
+        static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
+        static {
+            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(32);
+
+            for (TemplateLanguage tl : DefaultTemplateLanguage.STANDARD_INSTANCES) {
+                PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);
+            }
+            for (TemplateLanguage tl : UnsupportedFM2TemplateLanguage.INSTANCES) {
+                PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);
+            }
+            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(
+                    UnparsedTemplateLanguage.F3UU.getFileExtension(), UnparsedTemplateLanguage.F3UU);
+        }
     }
 
     /** FreeMarker version 3.0.0 */
     public static final Version VERSION_3_0_0 = new Version(3, 0, 0);
-    
+
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_3_0_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_3_0_0;
-    
+
     private static final Version VERSION;
     static {
         try {
@@ -447,7 +471,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         this.templateConfigurations = templateConfigurations;
 
         templateResolver.setDependencies(new TemplateResolverDependenciesImpl(this, templateResolver));
-        
+
         // ATTENTION! Creating the configuredDialects must be the last thing, as here the user code can already access
         // this Configuration!
         configuredDialects = new HashMap<>();
@@ -543,7 +567,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public boolean isTemplateLookupStrategySet() {
         return true;
     }
-    
+
     @Override
     public TemplateNameFormat getTemplateNameFormat() {
         return templateNameFormat;
@@ -654,7 +678,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     /**
      * Returns the output format for a name.
-     * 
+     *
      * @param name
      *            Either the name of the output format as it was registered with the
      *            {@link Configuration#getRegisteredCustomOutputFormats registeredCustomOutputFormats} setting,
@@ -663,9 +687,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
      *            existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is
      *            also valid.
-     * 
+     *
      * @return Not {@code null}.
-     * 
+     *
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * @throws IllegalArgumentException
@@ -682,29 +706,29 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             if (openBrcIdx == -1) {
                 throw new IllegalArgumentException("Missing opening '{' in: " + name);
             }
-            
+
             MarkupOutputFormat<?> outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
             MarkupOutputFormat<?> innerOF = getMarkupOutputFormatForCombined(
                     name.substring(openBrcIdx + 1, name.length() - 1));
-            
+
             return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
         } else {
             OutputFormat custOF = registeredCustomOutputFormatsByName.get(name);
             if (custOF != null) {
                 return custOF;
             }
-            
-            OutputFormat stdOF = STANDARD_OUTPUT_FORMATS.get(name);
+
+            OutputFormat stdOF = LazyStatics.STANDARD_OUTPUT_FORMATS.get(name);
             if (stdOF == null) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Unregistered output format name, ");
                 sb.append(_StringUtils.jQuote(name));
                 sb.append(". The output formats registered in the Configuration are: ");
-                
+
                 Set<String> registeredNames = new TreeSet<>();
-                registeredNames.addAll(STANDARD_OUTPUT_FORMATS.keySet());
+                registeredNames.addAll(LazyStatics.STANDARD_OUTPUT_FORMATS.keySet());
                 registeredNames.addAll(registeredCustomOutputFormatsByName.keySet());
-                
+
                 boolean first = true;
                 for (String registeredName : registeredNames) {
                     if (first) {
@@ -714,7 +738,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     }
                     sb.append(_StringUtils.jQuote(registeredName));
                 }
-                
+
                 throw new UnregisteredOutputFormatException(sb.toString());
             }
             return stdOF;
@@ -723,7 +747,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     /**
      * Same as {@link #getOutputFormat(String)}, but also throws {@link UnregisteredOutputFormatException} of the
-     * output format doesn't extend {@link MarkupOutputFormat}. 
+     * output format doesn't extend {@link MarkupOutputFormat}.
      */
     public MarkupOutputFormat<?> getMarkupOutputFormat(String name) throws UnregisteredOutputFormatException {
         OutputFormat outputFormat = getOutputFormat(name);
@@ -735,7 +759,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
         return (MarkupOutputFormat<?>) outputFormat;
     }
-    
+
     /**
      * Returns the argument {@link OutputFormat} as is, unless a {@link #getRegisteredCustomOutputFormats()
      * customOutputFormats} contains
@@ -756,7 +780,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
         return (MarkupOutputFormat) of;
     }
-    
+
     @Override
     public Collection<OutputFormat> getRegisteredCustomOutputFormats() {
         return registeredCustomOutputFormats;
@@ -786,37 +810,17 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public boolean isRecognizeStandardFileExtensionsSet() {
         return true;
     }
-    
-    static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
-    static {
-        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(32);
-        
-        for (TemplateLanguage tl : DefaultTemplateLanguage.STANDARD_INSTANCES) {
-            if (tl == null) {
-                throw new AssertionError("tl was null");
-            }
-            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);
-        }
-        for (TemplateLanguage tl : UnsupportedFM2TemplateLanguage.INSTANCES) {
-            if (tl == null) {
-                throw new AssertionError("tl was null");
-            }
-            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);            
-        }
-        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(
-                UnparsedTemplateLanguage.F3UU.getFileExtension(), UnparsedTemplateLanguage.F3UU);            
-    }
-    
+
     /**
      * Returns the {@link TemplateLanguage} associated to the template name based on its "file" extension (the section
      * after the last dot). This lookup looks for a matching {@link TemplateLanguage#getFileExtension()}. The file
      * extension lookup is case insensitive.
-     * 
+     *
      * @param templateName
      *            This is preferably the {@link Template#getSourceName()}, though if that's {@code null}, then you
      *            should generally use the {@link Template#getLookupName()}. If {@code null}, the method returns
      *            {@code null}.
-     * 
+     *
      * @return The associated {@link TemplateLanguage}, or {@code null} if none matches the file extension, or if the
      *         {@code templateName} parameter was {@code null}.
      */
@@ -824,31 +828,31 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         if (templateName == null) {
             return null;
         }
-        
+
         int dotIdx = templateName.lastIndexOf('.');
         if (dotIdx == -1) {
             return null;
         }
-        
+
         return getTemplateLanguageForFileExtension(templateName.substring(dotIdx + 1));
     }
 
     /**
      * Returns the {@link TemplateLanguage} associated to given file extension, or {@code null} if none is associated
      * with it. The lookup is case insensitive.
-     * 
+     *
      * @param fileExtension Case insensitive, not {@code null}.
      */
     public TemplateLanguage getTemplateLanguageForFileExtension(String fileExtension) {
         _NullArgumentException.check(fileExtension, "extension");
-        return PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(fileExtension.toLowerCase());
+        return LazyStatics.PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(fileExtension.toLowerCase());
     }
 
     @Override
     public TemplateLanguage getTemplateLanguage() {
         return templateLanguage;
     }
-    
+
     /**
      * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
      * value in the {@link Configuration}.
@@ -857,16 +861,16 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public boolean isTemplateLanguageSet() {
         return true;
     }
-    
+
     /**
      * Returns the {@link ConfiguredDialect} for a {@link Dialect} that's known by this {@link Configuration}.
-     * 
+     *
      * @param dialect
      *            Not {@code null}.
-     * 
+     *
      * @return Never {@code null}. When invoked on the same {@link Configuration} with the same {@link Dialect}
      *         instance, it always returns the same {@link ConfiguredDialect} instance.
-     * 
+     *
      * @throws IllegalStateException
      *             If the {@link Dialect} is not know by this {@link Configuration}. (TODO [FM3]: For now it only knows
      *             {@link DefaultDialect#INSTANCE}, but that will change later when custom {@link TemplateLanguage}-s
@@ -1292,7 +1296,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
         return customState;
     }
-    
+
     /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first
      * if it's missing/staled.
@@ -1328,10 +1332,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     /**
      * Retrieves the template with the given name (and according the specified further parameters) from the template
      * cache, loading it into the cache first if it's missing/staled.
-     * 
+     *
      * <p>
      * This method is thread-safe.
-     * 
+     *
      * <p>
      * See {@link Configuration} for an example of basic usage.
      *
@@ -1371,7 +1375,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            {@link TemplateConfiguration} provided by {@link #getTemplateConfigurations()}, that overrides the
      *            value specified here, but only after the localized template lookup, that is, it modifies the template
      *            found by the localized template lookup.
-     * 
+     *
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
      *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
@@ -1384,9 +1388,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * @param ignoreMissing
      *            If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template doesn't
      *            exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
-     * 
+     *
      * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
-     * 
+     *
      * @throws TemplateNotFoundException
      *             If the template could not be found. Note that this exception extends {@link IOException}.
      * @throws MalformedTemplateNameException
@@ -1411,9 +1415,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             if (ignoreMissing) {
                 return null;
             }
-            
-            TemplateLoader tl = getTemplateLoader();  
-            String msg; 
+
+            TemplateLoader tl = getTemplateLoader();
+            String msg;
             if (tl == null) {
                 msg = "Don't know where to load template " + _StringUtils.jQuote(name)
                       + " from because the \"templateLoader\" FreeMarker "
@@ -1444,7 +1448,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                                     + "template names should use slash only."
                                 : "");
             }
-            
+
             String normName = maybeTemp.getMissingTemplateNormalizedName();
             throw new TemplateNotFoundException(
                     normName != null ? normName : name,
@@ -1453,7 +1457,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
         return temp;
     }
-    
+
     private boolean isKnownNonConfusingLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
         return templateLookupStrategy == DefaultTemplateLookupStrategy.INSTANCE;
     }
@@ -1466,7 +1470,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         if (s == null || s.length() == 0) {
             return s;
         }
-        
+
         final char lastChar = s.charAt(s.length() - 1);
         return lastChar == '.' || lastChar == '!' || lastChar == '?' ? s : s + ".";
     }
@@ -1506,23 +1510,23 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     /**
      * Removes all entries from the template cache, thus forcing reloading of templates
      * on subsequent <code>getTemplate</code> calls.
-     * 
+     *
      * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void clearTemplateCache() {
         getTemplateResolver().clearTemplateCache();
     }
-    
+
     /**
      * Removes a template from the template cache, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application
      * finer control over cache updating than the
      * {@link #getTemplateUpdateDelayMilliseconds() templateUpdateDelayMilliseconds} setting
      * alone does.
-     * 
+     *
      * <p>For the meaning of the parameters, see
      * {@link #getTemplate(String, Locale, Serializable, boolean)}.
-     * 
+     *
      * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void removeTemplateFromCache(String name, Locale locale, Serializable customLookupCondition)
@@ -1552,16 +1556,16 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public static Version getVersion() {
         return VERSION;
     }
-    
+
     /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
-     * to be future-proof, it's an instance method. 
+     * to be future-proof, it's an instance method.
      */
     public Set<String> getSupportedBuiltInNames() {
         return Collections.unmodifiableSet(ASTExpBuiltIn.BUILT_INS_BY_NAME.keySet());
     }
-    
+
     /**
      * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
      * <tt>&lt;#directiveName ...&gt;</tt>.
@@ -1569,7 +1573,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public Set<String> getSupportedBuiltInDirectiveNames() {
         return ASTDirective.BUILT_IN_DIRECTIVE_NAMES;
     }
-    
+
     private static String getRequiredVersionProperty(Properties vp, String properyName) {
         String s = vp.getProperty(properyName);
         if (s == null) {
@@ -2396,7 +2400,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public void unsetSharedVariables() {
             this.sharedVariables = null;
         }
-        
+
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
             return DefaultTemplateLanguage.F3AC;
@@ -2414,9 +2418,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         /**
          * Setter pair of {@link Configuration#getIncompatibleImprovements()}.
-         * 
+         *
          * <p>Do NOT ever use {@link Configuration#getVersion()} to set the "incompatible improvements". Always use
-         * a fixed value, like {@link #VERSION_3_0_0}. Otherwise your application can break as you upgrade FreeMarker. 
+         * a fixed value, like {@link #VERSION_3_0_0}. Otherwise your application can break as you upgrade FreeMarker.
          *
          * <p>This is not called from the {@link ExtendableBuilder#ExtendableBuilder(Version)}; the initial value is set
          * without this.
@@ -2595,7 +2599,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         protected AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
             return AttemptExceptionReporter.LOG_ERROR;
         }
-        
+
         @Override
         protected ArithmeticEngine getDefaultArithmeticEngine() {
             return BigDecimalArithmeticEngine.INSTANCE;
