@@ -14652,7 +14652,7 @@ foobar</programlisting>
           </indexterm>
 
           <indexterm>
-            <primary>truncate_wbuilt-in</primary>
+            <primary>truncate_w built-in</primary>
           </indexterm>
 
           <indexterm>
@@ -14752,7 +14752,7 @@ This isonev[...]</programlisting>
             <itemizedlist>
               <listitem>
                 <para>Specifying if the truncation should happen at word
-                boundary or not: </para>
+                boundary or not:</para>
 
                 <itemizedlist>
                   <listitem>
