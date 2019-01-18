@@ -27638,37 +27638,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <itemizedlist>
               <listitem>
-                <para>Denial-of-Service (DoS) attacks: It's trivial to create
-                templates that run practically forever (with a loop), or
-                exhaust memory (by concatenating to a string in a loop).
-                FreeMarker can't enforce CPU or memory usage limits, so this
-                is something that has no solution on the
-                FreeMarker-level.</para>
-              </listitem>
-
-              <listitem>
                 <para>Data-model and wrapping
                 (<literal>Configuration.setObjectWrapper</literal>): The
                 data-model might gives access to the public Java API of some
                 objects that you have put into the data-model. By default, for
                 objects that aren't instances of a the bunch of specially
-                handler types (<literal>String</literal>,
+                handled types (<literal>String</literal>,
                 <literal>Number</literal>, <literal>Boolean</literal>,
                 <literal>Date</literal>, <literal>Map</literal>,
                 <literal>List</literal>, array, and a few others), their
-                public Java API will be exposed. To avoid that, you have to
-                construct the data-model so that it only exposes the things
-                that are really necessary for the template. For that, you may
-                want to use <literal>SimpleObjectWrapper</literal> (via
-                <literal>Configuration.setObjectWrapper</literal> or the
+                public Java API will be exposed, including most methods
+                inherited from standard Java classes
+                (<literal>getClass()</literal>, etc.). To avoid that, you have
+                to construct the data-model so that it only exposes the
+                members that are really necessary for the template. One
+                possibility is using <literal>SimpleObjectWrapper</literal>
+                (via <literal>Configuration.setObjectWrapper</literal> or the
                 <literal>object_wrapper</literal> setting) and then create the
                 data-model purely from <literal>Map</literal>-s,
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
                 <literal>Boolean</literal>-s and <literal>Date</literal>-s.
-                Or, you can implement your own extremely restrictive
-                <literal>ObjectWrapper</literal>, which for example could
-                expose your POJO-s safely.</para>
+                For many application though that's too restrictive, and
+                instead you need to implement your own extremely restrictive
+                <literal>ObjectWrapper</literal>, which, for example, only
+                exposes those members of POJO-s that were explicitly marked to
+                be safe (opt-in approach).</para>
+
+                <para>Also, don't forget about the <link
+                linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
+                built-in</link>, if you have enabled it (it's disabled by
+                default). While the Java API of <literal>Map</literal>-s,
+                <literal>List</literal>-s and similar container-like objects
+                is not directly exposed by most
+                <literal>ObjectWrapper</literal>-s, so
+                <literal>someMap.someJavaMethod()</literal> won't work, using
+                <literal>?api</literal> the template author can still get to
+                the Java API-s of these objects, like
+                <literal>someMap?api.someJavaMethod()</literal>. But note that
+                the <literal>ObjectWrapper</literal> is still in control, as
+                it decides what objects support <literal>?api</literal>, and
+                what will <literal>?api</literal> expose for them (it usually
+                exposes the same as for a generic POJO).</para>
+
+                <para>Last not least, some maybe aware of that the standard
+                object wrappers filters out some well known
+                <quote>unsafe</quote> methods, like
+                <literal>System.exit</literal>. Do not ever rely on this as
+                your only line of defense, since it only blocks the methods
+                that's in a predefined list. Thus, for example, if a new Java
+                version adds a new problematic method, it won't be filtered
+                out.</para>
               </listitem>
 
               <listitem>
@@ -27711,6 +27731,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 accessible classes (possibly based on which template asks for
                 them), such as
                 <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>Denial-of-Service (DoS) attacks: It's trivial to create
+                templates that run practically forever (with a loop), or
+                exhaust memory (by concatenating to a string in a loop).
+                FreeMarker can't enforce CPU or memory usage limits, so this
+                is something that has no solution on the
+                FreeMarker-level.</para>
               </listitem>
             </itemizedlist>
           </answer>
