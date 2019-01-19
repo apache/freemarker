@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class WhitespaceStrippingTest extends TemplateTest {
@@ -53,10 +52,10 @@ public class WhitespaceStrippingTest extends TemplateTest {
     
     private void assertOutput(String ftl, String expectedOutStripped, String expectedOutNonStripped)
             throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder().build());
+        setConfiguration(newConfigurationBuilder());
         assertOutput(ftl, expectedOutStripped);
         
-        setConfiguration(new TestConfigurationBuilder().whitespaceStripping(false).build());
+        setConfiguration(newConfigurationBuilder().whitespaceStripping(false));
         assertOutput(ftl, expectedOutNonStripped);
     }
 

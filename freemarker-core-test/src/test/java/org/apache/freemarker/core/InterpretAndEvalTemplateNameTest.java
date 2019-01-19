@@ -50,7 +50,7 @@ public class InterpretAndEvalTemplateNameTest extends TemplateTest {
             tl.putTemplate("sub/a.f3au", "In sub/a.f3au, " + getTemplateNames);
             tl.putTemplate("a.f3au", "In a.f3au");
 
-            setConfiguration(new TestConfigurationBuilder().templateLoader(tl).build());
+            setConfiguration(newConfigurationBuilder().templateLoader(tl));
             
             assertOutputForNamed("main.f3au",
                     "c=main.f3au, m=main.f3au "

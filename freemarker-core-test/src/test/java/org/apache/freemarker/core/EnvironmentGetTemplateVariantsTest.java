@@ -122,7 +122,6 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
     
     @Test
     public void test() throws IOException, TemplateException {
-        setConfiguration(createConfiguration(Configuration.VERSION_3_0_0));
         assertOutputForNamed(
                 "main",
                 "<ct=main mt=main>\n"
@@ -180,17 +179,17 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
 
     @Test
     public void testNotStarted() throws IOException, TemplateException {
-        Template t = new Template("foo", "", createConfiguration(Configuration.VERSION_3_0_0));
+        Template t = new Template("foo", "", getConfiguration());
         final Environment env = t.createProcessingEnvironment(null, null);
         assertSame(t, env.getMainTemplate());
         assertSame(t, env.getCurrentTemplate());
     }
-    
-    private Configuration createConfiguration(Version iciVersion) {
-        return new TestConfigurationBuilder(iciVersion)
+
+    @Override
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb
                 .templateLoader(TEMPLATES)
-                .whitespaceStripping(false)
-                .build();
+                .whitespaceStripping(false);
     }
 
     @Override

@@ -32,7 +32,6 @@ import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurati
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class ConfigureOutputFormatExamples extends TemplateTest {
@@ -54,24 +53,22 @@ public class ConfigureOutputFormatExamples extends TemplateTest {
     private void example2(boolean javaCfg) throws IOException {
         setConfiguration(
                 javaCfg
-                        ? new TestConfigurationBuilder()
+                        ? newConfigurationBuilder()
                                 .templateConfigurations(
                                         new ConditionalTemplateConfigurationFactory(
                                                 new PathGlobMatcher("mail/**"),
                                                 new TemplateConfiguration.Builder()
                                                         .outputFormat(HTMLOutputFormat.INSTANCE)
                                                         .build()))
-                                .build()
-                        : new TestConfigurationBuilder()
-                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties"))
-                                .build());
+                        : newConfigurationBuilder()
+                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties")));
         assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("mail/news").getOutputFormat());
     }
 
     private void example3(boolean javaCfg) throws IOException {
         setConfiguration(
                 javaCfg
-                        ? new TestConfigurationBuilder()
+                        ? newConfigurationBuilder()
                                 .templateConfigurations(
                                         new FirstMatchTemplateConfigurationFactory(
                                                 new ConditionalTemplateConfigurationFactory(
@@ -92,10 +89,8 @@ public class ConfigureOutputFormatExamples extends TemplateTest {
                                                                 .outputFormat(RTFOutputFormat.INSTANCE)
                                                                 .build()))
                                         .allowNoMatch(true))
-                                .build()
-                        : new TestConfigurationBuilder()
-                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples2.properties"))
-                                .build());
+                        : newConfigurationBuilder()
+                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples2.properties")));
         assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.html").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.htm").getOutputFormat());
         assertEquals(XMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.xml").getOutputFormat());

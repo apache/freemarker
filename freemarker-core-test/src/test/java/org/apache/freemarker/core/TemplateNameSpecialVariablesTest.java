@@ -152,8 +152,8 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
     }
 
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder().whitespaceStripping(false).build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.whitespaceStripping(false);
     }
 
 }

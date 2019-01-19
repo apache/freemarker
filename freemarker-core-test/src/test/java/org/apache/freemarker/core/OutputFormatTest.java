@@ -40,7 +40,6 @@ import org.apache.freemarker.core.userpkg.CustomHTMLOutputFormat;
 import org.apache.freemarker.core.userpkg.DummyOutputFormat;
 import org.apache.freemarker.core.userpkg.SeldomEscapedOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,11 +55,11 @@ public class OutputFormatTest extends TemplateTest {
         
         for (OutputFormat cfgOutputFormat
                 : new OutputFormat[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
+            Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder();
             if (!cfgOutputFormat.equals(UndefinedOutputFormat.INSTANCE)) {
                 cfgB.setOutputFormat(cfgOutputFormat);
             }
-            setConfiguration(cfgB.build());
+            setConfiguration(cfgB);
 
             assertEquals(cfgOutputFormat, getConfiguration().getOutputFormat());
             
@@ -100,7 +99,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeader.f3ax", "<#ftl outputFormat='HTML'>" + commonContent);
         
         for (int setupNumber = 1; setupNumber <= 3; setupNumber++) {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
+            Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder();
             final OutputFormat cfgOutputFormat;
             final OutputFormat ftlhOutputFormat;
             final OutputFormat ftlxOutputFormat;
@@ -135,7 +134,7 @@ public class OutputFormatTest extends TemplateTest {
                 throw new AssertionError();
             }
 
-            setConfiguration(cfgB.build());
+            setConfiguration(cfgB);
             assertEquals(cfgOutputFormat, getConfiguration().getOutputFormat());
             
             {
@@ -192,37 +191,37 @@ public class OutputFormatTest extends TemplateTest {
                         .build());
 
         {
-            setConfiguration(createDefaultConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE).build());
+            setConfiguration(newConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE));
             assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
-            setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfHTML).build());
+            setConfiguration(newConfigurationBuilder().templateConfigurations(tcfHTML));
             assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
-            setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfNoAutoEsc).build());
+            setConfiguration(newConfigurationBuilder().templateConfigurations(tcfNoAutoEsc));
             assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
         }
 
         {
-            setConfiguration(createDefaultConfigurationBuilder().recognizeStandardFileExtensions(false).build());
+            setConfiguration(newConfigurationBuilder().recognizeStandardFileExtensions(false));
             assertErrorContainsForNamed("t.f3ax", UndefinedOutputFormat.INSTANCE.getName());
 
-            setConfiguration(createDefaultConfigurationBuilder()
+            setConfiguration(newConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
-                    .outputFormat(HTMLOutputFormat.INSTANCE).build());
+                    .outputFormat(HTMLOutputFormat.INSTANCE));
             assertOutputForNamed("t.f3ax", "&#39; &#39; '");
 
-            setConfiguration(createDefaultConfigurationBuilder()
+            setConfiguration(newConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
-                    .outputFormat(XMLOutputFormat.INSTANCE).build());
+                    .outputFormat(XMLOutputFormat.INSTANCE));
             assertOutputForNamed("t.f3ax", "&apos; &apos; '");
 
-            setConfiguration(createDefaultConfigurationBuilder()
+            setConfiguration(newConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
-                    .templateConfigurations(tcfHTML).build());
+                    .templateConfigurations(tcfHTML));
             assertOutputForNamed("t.f3ax", "&#39; &#39; '");
 
-            setConfiguration(createDefaultConfigurationBuilder()
+            setConfiguration(newConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
                     .templateConfigurations(tcfNoAutoEsc)
-                    .outputFormat(XMLOutputFormat.INSTANCE).build());
+                    .outputFormat(XMLOutputFormat.INSTANCE));
             assertOutputForNamed("t.f3ax", "' &apos; '");
         }
     }
@@ -260,14 +259,12 @@ public class OutputFormatTest extends TemplateTest {
 
         assertOutputForNamed("t.f3ah", "a&amp;x");
 
-        setConfiguration(new TestConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(CustomHTMLOutputFormat.INSTANCE))
-                .build());
+        setConfiguration(newConfigurationBuilder()
+                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(CustomHTMLOutputFormat.INSTANCE)));
         assertOutputForNamed("t.f3ah", "a&amp;X");
 
-        setConfiguration(new TestConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>emptyList())
-                .build());
+        setConfiguration(newConfigurationBuilder()
+                .registeredCustomOutputFormats(Collections.<OutputFormat>emptyList()));
         assertOutputForNamed("t.f3ah", "a&amp;x");
     }
     
@@ -278,13 +275,13 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeaderTrue", "<#ftl autoEsc=true>${'a&b'}");
         
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder().outputFormat(XMLOutputFormat.INSTANCE);
+            Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder().outputFormat(XMLOutputFormat.INSTANCE);
             assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
             if (!cfgAutoEscaping) {
                 cfgB.setAutoEscapingPolicy(DISABLE);
             }
-            setConfiguration(cfgB.build());
+            setConfiguration(cfgB);
 
             {
                 Template t = getConfiguration().getTemplate("t");
@@ -336,9 +333,7 @@ public class OutputFormatTest extends TemplateTest {
                 // Cfg default is autoEscaping true
                 assertOutput(commonAutoEscFtl, "&amp;");
             } else {
-                setConfiguration(createDefaultConfigurationBuilder()
-                        .autoEscapingPolicy(DISABLE)
-                        .build());
+                setConfiguration(newConfigurationBuilder().autoEscapingPolicy(DISABLE));
                 assertOutput(commonAutoEscFtl, "&");
             }
             
@@ -414,7 +409,7 @@ public class OutputFormatTest extends TemplateTest {
             assertEquals(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
         }
         {
-            setConfiguration(new TestConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE).build());
+            setConfiguration(newConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE));
             Template t = new Template("x", content, getConfiguration(), tc);
             Writer sw = new StringWriter();
             t.process(null, sw);
@@ -628,9 +623,8 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains(
                 "<#outputFormat 'dummy'></#outputFormat>",
                 "dummy", "nregistered");
-        setConfiguration(new TestConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(DummyOutputFormat.INSTANCE))
-                .build());
+        setConfiguration(newConfigurationBuilder()
+                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(DummyOutputFormat.INSTANCE)));
         assertOutput(
                 "<#outputFormat 'dummy'>${.outputFormat}</#outputFormat>",
                 "dummy");
@@ -693,9 +687,8 @@ public class OutputFormatTest extends TemplateTest {
                 "<#noautoEsc></#noautoEsc>",
                 "Unknown directive");
 
-        setConfiguration(new TestConfigurationBuilder()
-                .outputFormat(XMLOutputFormat.INSTANCE)
-                .build());
+        setConfiguration(newConfigurationBuilder()
+                .outputFormat(XMLOutputFormat.INSTANCE));
         
         // Empty block:
         assertOutput(
@@ -734,7 +727,7 @@ public class OutputFormatTest extends TemplateTest {
 
     @Test
     public void testAutoEscPolicy() throws Exception {
-        assertEquals(ENABLE_IF_DEFAULT, createDefaultConfigurationBuilder().getAutoEscapingPolicy());
+        assertEquals(ENABLE_IF_DEFAULT, newConfigurationBuilder().getAutoEscapingPolicy());
         
         String commonFTL = "${'.'} ${.autoEsc?c}";
         String notEsced = ". false";
@@ -810,7 +803,7 @@ public class OutputFormatTest extends TemplateTest {
     private Configuration testAutoEscPolicy_createCfg(AutoEscapingPolicy autoEscPolicy,
             OutputFormat outpoutFormat)
             throws TemplateException {
-        return createDefaultConfigurationBuilder()
+        return super.newConfigurationBuilder()
                 .registeredCustomOutputFormats(ImmutableList.<OutputFormat>of(
                         SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE))
                 .autoEscapingPolicy(autoEscPolicy)
@@ -994,17 +987,6 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("${m1?isMarkupOutput?c} ${m2?isMarkupOutput?c} ${s?isMarkupOutput?c}", "true true false");
     }
 
-    private TestConfigurationBuilder createDefaultConfigurationBuilder() throws TemplateException {
-        return new TestConfigurationBuilder()
-                .templateConfigurations(
-                        new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("*.xml"),
-                                new TemplateConfiguration.Builder()
-                                        .outputFormat(XMLOutputFormat.INSTANCE)
-                                        .build()))
-                .templateCacheStorage(NullCacheStorage.INSTANCE); // Prevent caching as we change the cfgB between build().
-    }
-
     @Before
     public void addCommonDataModelVariables() throws TemplateException {
         addToDataModel("rtfPlain", RTFOutputFormat.INSTANCE.fromPlainTextByEscaping("\\par a & b"));
@@ -1016,8 +998,15 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Override
-    protected Configuration createDefaultConfiguration() throws TemplateException {
-        return createDefaultConfigurationBuilder().build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb
+                .templateConfigurations(
+                        new ConditionalTemplateConfigurationFactory(
+                                new FileNameGlobMatcher("*.xml"),
+                                new TemplateConfiguration.Builder()
+                                        .outputFormat(XMLOutputFormat.INSTANCE)
+                                        .build()))
+                .templateCacheStorage(NullCacheStorage.INSTANCE); // Prevent caching as we change the cfgB between build().
     }
-    
+
 }

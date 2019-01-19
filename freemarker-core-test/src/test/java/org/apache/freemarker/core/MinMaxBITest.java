@@ -36,8 +36,8 @@ import com.google.common.collect.ImmutableList;
 public class MinMaxBITest extends TemplateTest {
     
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder().sqlDateAndTimeTimeZone(_DateUtils.UTC).timeFormat("HH:mm:ss").build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.sqlDateAndTimeTimeZone(_DateUtils.UTC).timeFormat("HH:mm:ss");
     }
 
     @Test

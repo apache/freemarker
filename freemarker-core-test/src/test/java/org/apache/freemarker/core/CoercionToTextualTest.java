@@ -30,7 +30,6 @@ import org.apache.freemarker.core.userpkg.PrintfGTemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,11 +53,10 @@ public class CoercionToTextualTest extends TemplateTest {
 
     @Test
     public void testEscBuiltin() throws IOException, TemplateException {
-        setConfiguration(createDefaultConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .outputFormat(HTMLOutputFormat.INSTANCE)
                 .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
-                .booleanFormat("<y>,<n>")
-                .build());
+                .booleanFormat("<y>,<n>"));
         assertOutput("${'a<b'?esc}", "a&lt;b");
         assertOutput("${n?string?esc}", "1.50E+03");
         assertOutput("${n?esc}", "1.50*10<sup>3</sup>");
@@ -121,12 +119,8 @@ public class CoercionToTextualTest extends TemplateTest {
     }
 
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return createDefaultConfigurationBuilder().build();
-    }
-
-    private TestConfigurationBuilder createDefaultConfigurationBuilder() {
-        return new TestConfigurationBuilder()
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb
                 .customNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
                         "G", PrintfGTemplateNumberFormatFactory.INSTANCE))
                 .customDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(

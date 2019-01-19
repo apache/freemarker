@@ -30,7 +30,6 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.dom.test.DOMLoader;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -44,13 +43,12 @@ public class DefaultObjectWrapperExtensionTest extends TemplateTest {
 
     @Test
     public void testWithExtensions() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .objectWrapper(
                         new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                                 .extensions(DOMDefaultObjectWrapperExtension.INSTANCE)
                                 .build()
-                )
-                .build());
+                ));
         assertOutput("${doc.title}", "test");
     }
 

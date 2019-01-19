@@ -141,7 +141,7 @@ public class SQLTimeZoneTest extends TemplateTest {
             Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
             cfgB.setSQLDateAndTimeTimeZone(null);
             cfgB.unsetTimeZone();
-            setConfiguration(cfgB.build());
+            setConfiguration(cfgB);
 
             assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
             assertEquals(TimeZone.getDefault(), getConfiguration().getTimeZone());
@@ -159,7 +159,7 @@ public class SQLTimeZoneTest extends TemplateTest {
         try {
             Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
             cfgB.sqlDateAndTimeTimeZone(GMT_P02).unsetTimeZone();
-            setConfiguration(cfgB.build());
+            setConfiguration(cfgB);
 
             assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
         } finally {
@@ -171,8 +171,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT1AndNullSQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(TimeZone.getTimeZone("GMT+01:00"))
-                .sqlDateAndTimeTimeZone(null)
-                .build());
+                .sqlDateAndTimeTimeZone(null));
         assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
@@ -182,8 +181,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT1AndGMT2SQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .sqlDateAndTimeTimeZone(GMT_P02)
-                .timeZone(TimeZone.getTimeZone("GMT+01:00"))
-                .build());
+                .timeZone(TimeZone.getTimeZone("GMT+01:00")));
 
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
@@ -192,8 +190,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT2AndNullSQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(TimeZone.getTimeZone("GMT+02"))
-                .sqlDateAndTimeTimeZone(null)
-                .build());
+                .sqlDateAndTimeTimeZone(null));
         assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
@@ -203,15 +200,14 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT2AndGMT2SQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
             .sqlDateAndTimeTimeZone(GMT_P02)
-            .timeZone(TimeZone.getTimeZone("GMT+02"))
-            .build());
+            .timeZone(TimeZone.getTimeZone("GMT+02")));
         
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
     
     @Test
     public void testCacheFlushings() throws Exception {
-        setConfiguration(testCacheFlushing_createBuilder().build());
+        setConfiguration(testCacheFlushing_createBuilder());
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?dateTime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='hu'>\n"
@@ -237,7 +233,7 @@ public class SQLTimeZoneTest extends TemplateTest {
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
 
-        setConfiguration(testCacheFlushing_createBuilder().sqlDateAndTimeTimeZone(GMT_P02).build());
+        setConfiguration(testCacheFlushing_createBuilder().sqlDateAndTimeTimeZone(GMT_P02));
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?dateTime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='hu'>\n"
@@ -277,8 +273,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(_DateUtils.UTC)
-                .sqlDateAndTimeTimeZone(GMT_P02)
-                .build());
+                .sqlDateAndTimeTimeZone(GMT_P02));
 
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
@@ -298,8 +293,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testChangeSettingInTemplate() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(_DateUtils.UTC)
-                .sqlDateAndTimeTimeZone(null)
-                .build());
+                .sqlDateAndTimeTimeZone(null));
 
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?dateTime}\n"
@@ -334,8 +328,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testFormatUTCFlagHasNoEffect() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .sqlDateAndTimeTimeZone(GMT_P02)
-                .timeZone(TimeZone.getTimeZone("GMT-01"))
-                .build());
+                .timeZone(TimeZone.getTimeZone("GMT-01")));
         
         assertOutput(
                 "<#setting dateFormat='xs fz'><#setting timeFormat='xs fz'>\n"

@@ -339,7 +339,7 @@ public class NumberFormatTest extends TemplateTest {
             cfgB.setTemplateConfigurations(templateConfigurationFactory);
         }
 
-        setConfiguration(cfgB.build());
+        setConfiguration(cfgB);
     }
 
     private void setConfigurationWithNumberFormat(String numberFormat) {

@@ -36,7 +36,7 @@ public class MiscErrorMessagesTest extends TemplateTest {
     
     @Test
     public void wrongTemplateNameFormat() {
-        setConfiguration(new TestConfigurationBuilder().templateNameFormat(DefaultTemplateNameFormat.INSTANCE).build());
+        setConfiguration(newConfigurationBuilder().templateNameFormat(DefaultTemplateNameFormat.INSTANCE));
 
         assertErrorContains("<#include 'foo:/bar:baaz'>", "Malformed template name", "':'");
         assertErrorContains("<#include '../baaz'>", "Malformed template name", "root");

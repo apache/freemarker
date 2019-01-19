@@ -28,7 +28,6 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -38,15 +37,14 @@ public class CustomFormatsExample extends TemplateTest {
 
     @Test
     public void aliases1() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder(this.getClass())
+        setConfiguration(newConfigurationBuilder()
             .customNumberFormats(ImmutableMap.<String, TemplateNumberFormatFactory>of(
                     "price", new AliasTemplateNumberFormatFactory(",000.00"),
                     "weight", new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp")))
             .customDateFormats(ImmutableMap.<String, TemplateDateFormatFactory>of(
                     "fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"),
                     "logEventTime", new AliasTemplateDateFormatFactory("iso ms u")
-                    ))
-            .build());
+                    )));
 
         addToDataModel("p", 10000);
         addToDataModel("w", new BigDecimal("10.305"));
@@ -58,22 +56,20 @@ public class CustomFormatsExample extends TemplateTest {
 
     @Test
     public void aliases2() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder(this.getClass())
+        setConfiguration(newConfigurationBuilder()
                 .customNumberFormats(ImmutableMap.of(
                         "base", BaseNTemplateNumberFormatFactory.INSTANCE,
-                        "oct", new AliasTemplateNumberFormatFactory("@base 8")))
-                .build());
+                        "oct", new AliasTemplateNumberFormatFactory("@base 8"))));
 
         assertOutputForNamed("CustomFormatsExample-alias2.f3ah");
     }
 
     @Test
     public void modelAware() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder(this.getClass())
+        setConfiguration(newConfigurationBuilder()
                 .customNumberFormats(ImmutableMap.<String, TemplateNumberFormatFactory>of(
                         "ua", UnitAwareTemplateNumberFormatFactory.INSTANCE))
-                .numberFormat("@ua 0.####;; roundingMode=halfUp")
-                .build());
+                .numberFormat("@ua 0.####;; roundingMode=halfUp"));
 
         addToDataModel("weight", new UnitAwareTemplateNumberModel(1.5, "kg"));
         

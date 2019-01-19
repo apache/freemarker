@@ -49,12 +49,7 @@ public class SpecialVariableTest extends TemplateTest {
 
     @Test
     public void testIncompationImprovements() throws Exception {
-        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0).build());
-        assertOutput(
-                "${.incompatibleImprovements}",
-                getConfiguration().getIncompatibleImprovements().toString());
-        
-        setConfiguration(new Configuration.Builder(Configuration.getVersion()).build());
+        setConfiguration(newConfigurationBuilder());
         assertOutput(
                 "${.incompatibleImprovements}",
                 getConfiguration().getIncompatibleImprovements().toString());
@@ -64,49 +59,43 @@ public class SpecialVariableTest extends TemplateTest {
     public void testAutoEsc() throws Exception {
         for (AutoEscapingPolicy autoEscaping : new AutoEscapingPolicy[] {
                 AutoEscapingPolicy.ENABLE_IF_DEFAULT, AutoEscapingPolicy.ENABLE_IF_SUPPORTED }) {
-            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+            setConfiguration(newConfigurationBuilder()
                     .autoEscapingPolicy(autoEscaping)
-                    .outputFormat(HTMLOutputFormat.INSTANCE)
-                    .build());
+                    .outputFormat(HTMLOutputFormat.INSTANCE));
             assertOutput("${.autoEsc?c}", "true");
             assertOutput("<#ftl autoEsc=false>${.autoEsc?c}", "false");
 
-            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+            setConfiguration(newConfigurationBuilder()
                     .autoEscapingPolicy(autoEscaping)
-                    .outputFormat(PlainTextOutputFormat.INSTANCE)
-                    .build());
+                    .outputFormat(PlainTextOutputFormat.INSTANCE));
             assertOutput("${.autoEsc?c}", "false");
 
-            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+            setConfiguration(newConfigurationBuilder()
                     .autoEscapingPolicy(autoEscaping)
-                    .outputFormat(UndefinedOutputFormat.INSTANCE)
-                    .build());
+                    .outputFormat(UndefinedOutputFormat.INSTANCE));
             assertOutput("${.autoEsc?c}", "false");
         }
         
-        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+        setConfiguration(newConfigurationBuilder()
                 .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
-                .outputFormat(HTMLOutputFormat.INSTANCE)
-                .build());
+                .outputFormat(HTMLOutputFormat.INSTANCE));
         assertOutput("${.autoEsc?c}", "false");
         assertOutput("<#ftl autoEsc=true>${.autoEsc?c}", "true");
 
-        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+        setConfiguration(newConfigurationBuilder()
                 .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
-                .outputFormat(PlainTextOutputFormat.INSTANCE)
-                .build());
+                .outputFormat(PlainTextOutputFormat.INSTANCE));
         assertOutput("${.autoEsc?c}", "false");
 
-        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+        setConfiguration(newConfigurationBuilder()
                 .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
                 .outputFormat(UndefinedOutputFormat.INSTANCE)
                 .build());
         assertOutput("${.autoEsc?c}", "false");
 
-        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+        setConfiguration(newConfigurationBuilder()
                 .autoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT)
-                .outputFormat(UndefinedOutputFormat.INSTANCE)
-                .build());
+                .outputFormat(UndefinedOutputFormat.INSTANCE));
         assertOutput(
                 "${.autoEsc?c} "
                 + "<#outputFormat 'HTML'>${.autoEsc?c}</#outputFormat> "

@@ -41,6 +41,7 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateConfiguration.Builder;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
@@ -63,12 +64,13 @@ public abstract class TemplateTest {
     private LinkedList<TemplateConfiguration> tcStack = new LinkedList<>();
 
     /**
-     * Gets the {@link Configuration} used, automatically creating and setting if it wasn't yet.
+     * Gets the {@link Configuration} used, automatically creating and setting if it wasn't yet. Automatic creation
+     * happens via {@link #newConfigurationBuilder()}.
      */
     protected final Configuration getConfiguration() {
         if (configuration == null) {
             try {
-                setConfiguration(createDefaultConfiguration());
+                setConfiguration(newConfigurationBuilder());
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create configuration", e);
             }
@@ -77,8 +79,11 @@ public abstract class TemplateTest {
     }
 
     /**
-     * @param configuration Usually should be built using {@link TestConfigurationBuilder}; not {@code null}.
-     * 
+     * Set the {@link Configuration} used.
+     *
+     * @param configuration The {@link Configuration} used from now on; not {@code null}. Usually built with
+     * {@link #newConfigurationBuilder()}.
+     *
      * @see #pushNamelessTemplateConfiguraitonSettings(TemplateConfiguration)
      */
     protected final void setConfiguration(Configuration configuration) {
@@ -89,6 +94,14 @@ public abstract class TemplateTest {
 
         this.configuration = configuration;
         afterConfigurationSet();
+    }
+
+    /**
+     * Convenience overload, that calls {@link #setConfiguration(Configuration)} after calling
+     * with the result of {@link Configuration.ExtendableBuilder#build()}.
+     */
+    protected final void setConfiguration(Configuration.ExtendableBuilder<?> configurationBuilder) {
+        setConfiguration(configurationBuilder.build());
     }
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
@@ -177,9 +190,46 @@ public abstract class TemplateTest {
         });
         return out.toString();
     }
-    
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder().build();
+
+    /**
+     * Same as {@link #newConfigurationBuilderBeforeSetup(Version)} with {@code null} parameter.
+     */
+    protected final Configuration.ExtendableBuilder<?> newConfigurationBuilder() {
+        return newConfigurationBuilder(null);
+    }
+
+    /**
+     * Return a new {@link TestConfigurationBuilder} that you can pass to {@link #setConfiguration(Configuration)}.
+     * This is also called automatically when {@link #getConfiguration()} is called for the first time, and
+     * #setConfiguration(Configuration)} wasn't called before.
+     * The instance will be created with {@link #newConfigurationBuilderBeforeSetup(Version)}, and then set up with
+     * {@link #setupConfigurationBuilder(Configuration.ExtendableBuilder)}.
+     *
+     * @param incompatibleImprovements Can be {@code null}, in which case a default value is used (normally the
+     *                                 lowest supported value).
+     */
+    protected final Configuration.ExtendableBuilder<?> newConfigurationBuilder(Version incompatibleImprovements) {
+        Configuration.ExtendableBuilder<?> cb = newConfigurationBuilderBeforeSetup(incompatibleImprovements);
+        setupConfigurationBuilder(cb);
+        return cb;
+    }
+
+    /**
+     * Override this only if the {@link TestConfigurationBuilder} <em>class</em> is not appropriate for the test.
+     * Otherwise you probably should override {@link #setupConfigurationBuilder(Configuration.ExtendableBuilder)} instead.
+     *
+     * @param incompatibleImprovements {@code null} if wasn't explicitly specified in the test.
+     */
+    protected Configuration.ExtendableBuilder<?> newConfigurationBuilderBeforeSetup(Version incompatibleImprovements) {
+        return new TestConfigurationBuilder(incompatibleImprovements, this.getClass());
+    }
+
+    /**
+     * Override this if you want change the configuration settings for all tests in a test class.
+     * The default implementation in {@link TemplateTest} does nothing.
+     */
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        // No op
     }
 
     private void afterConfigurationSet() {

@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,12 +13,8 @@ public class TruncateBuiltInTest extends TemplateTest {
     private static final String M_TERM_SRC = "<span class=trunc>&hellips;</span>";
 
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return createConfigurationBuilder().build();
-    }
-
-    private TestConfigurationBuilder createConfigurationBuilder() {
-        return new TestConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE);
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.outputFormat(HTMLOutputFormat.INSTANCE);
     }
 
     @Before
@@ -116,7 +111,8 @@ public class TruncateBuiltInTest extends TemplateTest {
     public void testSettingHasEffect() throws IOException, TemplateException {
         assertOutput("${t?truncate(20)}", "Some text for [...]");
         assertOutput("${t?truncateC(20)}", "Some text for t[...]");
-        setConfiguration(createConfigurationBuilder().truncateBuiltinAlgorithm(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE).build());
+        setConfiguration(newConfigurationBuilder().truncateBuiltinAlgorithm(
+                DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE));
         assertOutput("${t?truncate(20)}", "Some text for [\u2026]");
         assertOutput("${t?truncateC(20)}", "Some text for tru[\u2026]");
     }
@@ -125,9 +121,8 @@ public class TruncateBuiltInTest extends TemplateTest {
     public void testDifferentMarkupSeparatorSetting() throws IOException, TemplateException {
         assertOutput("${t?truncate(20)}", "Some text for [...]");
         assertOutput("${t?truncateM(20)}", "Some text for <span class='truncateTerminator'>[&#8230;]</span>");
-        setConfiguration(createConfigurationBuilder().truncateBuiltinAlgorithm(
-                new DefaultTruncateBuiltinAlgorithm("|...", HTMLOutputFormat.INSTANCE.fromMarkup(M_TERM_SRC), true))
-                .build());
+        setConfiguration(newConfigurationBuilder().truncateBuiltinAlgorithm(
+                new DefaultTruncateBuiltinAlgorithm("|...", HTMLOutputFormat.INSTANCE.fromMarkup(M_TERM_SRC), true)));
         assertOutput("${t?truncate(20)}", "Some text for |...");
         assertOutput("${t?truncateM(20)}", "Some text for " + M_TERM_SRC);
     }

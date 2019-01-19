@@ -39,7 +39,6 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class TemplateConfigurationExamples extends TemplateTest {
@@ -55,7 +54,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
     }
 
     private void example1(boolean javaCfg) throws Exception {
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass());
+        Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder();
         if (javaCfg) {
             cfgB.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
                     new FileExtensionMatcher("xml"),
@@ -68,7 +67,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
             cfgB.setTemplateConfigurations(null);
             cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
         }
-        setConfiguration(cfgB.build());
+        setConfiguration(cfgB);
 
         addTemplate("t.xml", "");
 
@@ -88,7 +87,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
     }
 
     private void example2(boolean javaCfg) throws Exception {
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass());
+        Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder();
         if (javaCfg) {
             cfgB.setTemplateConfigurations(
                     new ConditionalTemplateConfigurationFactory(
@@ -110,7 +109,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
         } else{
             cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples2.properties"));
         }
-        setConfiguration(cfgB.build());
+        setConfiguration(cfgB);
 
         addTemplate("t.subject.t", "");
         addTemplate("mail/t.subject.t", "");
@@ -133,7 +132,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
     }
 
     private void example3(boolean javaCfg) throws Exception {
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass())
+        Configuration.ExtendableBuilder<?> cfgB = newConfigurationBuilder()
                 .sourceEncoding(StandardCharsets.ISO_8859_1);
         if (javaCfg) {
             cfgB.setTemplateConfigurations(
@@ -168,7 +167,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
         } else {
             cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
         }
-        setConfiguration(cfgB.build());
+        setConfiguration(cfgB);
 
         addTemplate("t.stats.html", "${ts?dateTime} ${ts?date} ${ts?time}");
         addTemplate("t.html", "");

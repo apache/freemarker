@@ -102,11 +102,10 @@ public class StringLiteralInterpolationTest extends TemplateTest {
     
     @Test
     public void markup() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .customNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
                         "G", PrintfGTemplateNumberFormatFactory.INSTANCE))
-                .numberFormat("@G 3")
-                .build());
+                .numberFormat("@G 3"));
 
         assertOutput("${\"${1000}\"}", "1.00*10<sup>3</sup>");
         assertOutput("${\"&_${1000}\"}", "&amp;_1.00*10<sup>3</sup>");

@@ -10,14 +10,13 @@ import org.junit.Test;
 public class GetOptionalTemplateTest extends TemplateTest {
 
     private ByteArrayTemplateLoader byteArrayTemplateLoader = new ByteArrayTemplateLoader();
-    
+
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new Configuration.Builder(Configuration.VERSION_3_0_0)
-                .templateLoader(
-                        new MultiTemplateLoader(new TemplateLoader[] {
-                                new StringTemplateLoader(), byteArrayTemplateLoader
-                        })).build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.templateLoader(
+                new MultiTemplateLoader(new TemplateLoader[] {
+                        new StringTemplateLoader(), byteArrayTemplateLoader
+                }));
     }
 
     @Test

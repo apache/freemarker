@@ -65,18 +65,14 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 #{1} [=1]");
         
         assertOutput("<#setting booleanFormat='y,n'>${2>1}", "y"); // Not an error since 2.3.28
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(F3SDU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(F3SDU));
         assertOutput("[#setting booleanFormat='y,n']${2>1}", "y"); // Not an error since 2.3.28
     }
 
     @Test
     public void squareBracketInterpolationSyntaxTest() throws Exception {
         
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(F3ASU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(F3ASU));
         
         assertOutput("${1} #{1} [=1]", "${1} #{1} 1");
         assertOutput(
@@ -89,14 +85,10 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertErrorContains("<#if [true][0]]></#if>", "\"]\"", "nothing open");
 
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3SU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3SU));
         assertOutput("[#if [true][0]]>[/#if]", ">");
         assertOutput("[=1][=2]${3}", "12${3}");
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(F3ASU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(F3ASU));
         assertOutput("[#ftl][#if [true][0]]>[/#if]", ">");
         assertOutput("[#ftl][=1][=2]${3}", "12${3}");
          
@@ -126,9 +118,7 @@ public class InterpolationSyntaxTest extends TemplateTest {
     @Test
     public void squareBracketTagSyntaxStillWorks() throws Exception {
         for (TemplateLanguage tempLang : new TemplateLanguage[] { F3SDU, DefaultTemplateLanguage.F3SU }) {
-            setConfiguration(new TestConfigurationBuilder()
-                    .templateLanguage(tempLang)
-                    .build());
+            setConfiguration(newConfigurationBuilder().templateLanguage(tempLang));
             
             assertOutput("[#if [true][0]]t[#else]f[/#if]", "t");
             assertOutput("[@r'[#if [true][0]]t[#else]f[/#if]'?interpret /]", "t");
@@ -142,17 +132,13 @@ public class InterpolationSyntaxTest extends TemplateTest {
         String badFtl3 = "<#assign x = 'OK'/]${x}";
         String badFtl4 = " <#t/]OK\n";
         
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3AU)
-                .build());
+        setConfiguration(new TestConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3AU));
         assertErrorContains(badFtl1, "\"]\"");
         assertErrorContains(badFtl2, "\"]\"");
         assertErrorContains(badFtl3, "\"]\"");
         assertErrorContains(badFtl4, "\"]\"");
         
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(F3ASU)
-                .build());
+        setConfiguration(new TestConfigurationBuilder().templateLanguage(F3ASU));
         assertErrorContains(badFtl1, "\"]\"");
         assertErrorContains(badFtl2, "\"]\"");
         assertErrorContains(badFtl3, "\"]\"");
@@ -169,9 +155,7 @@ public class InterpolationSyntaxTest extends TemplateTest {
     public void unclosedSyntaxErrorTest() throws Exception {
         assertErrorContains("${1", "unclosed \"{\"");
         
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3SU)
-                .build());
+        setConfiguration(new TestConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3SU));
         assertErrorContains("[=1", "unclosed \"[\"");
     }
     

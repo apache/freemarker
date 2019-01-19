@@ -22,13 +22,12 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class HeaderParsingTest extends TemplateTest {
 
-    private final Configuration cfgStripWS = new TestConfigurationBuilder().build();
-    private final Configuration cfgNoStripWS = new TestConfigurationBuilder().whitespaceStripping(false).build();
+    private final Configuration cfgStripWS = newConfigurationBuilder().build();
+    private final Configuration cfgNoStripWS = newConfigurationBuilder().whitespaceStripping(false).build();
 
     @Test
     public void test() throws IOException, TemplateException {

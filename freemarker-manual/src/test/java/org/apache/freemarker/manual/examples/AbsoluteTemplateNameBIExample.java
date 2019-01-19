@@ -27,13 +27,6 @@ import org.junit.Test;
 
 public class AbsoluteTemplateNameBIExample extends TemplateTest {
 
-    @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder()
-                .templateLoader(new ClassTemplateLoader(AbsoluteTemplateNameBIExample.class, ""))
-                .build();
-    }
-
     @Test
     public void test() throws Exception {
         assertOutputForNamed("dir/AbsoluteTemplateNameBIExample-main.f3ah");

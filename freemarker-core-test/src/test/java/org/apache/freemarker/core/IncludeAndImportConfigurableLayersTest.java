@@ -32,9 +32,21 @@ import com.google.common.collect.ImmutableMap;
 
 public class IncludeAndImportConfigurableLayersTest {
 
+    private static final StringTemplateLoader TEMPLATE_LOADER = new StringTemplateLoader();
+    static {
+        TEMPLATE_LOADER.putTemplate("main.f3ah", "In main: ${loaded}");
+        TEMPLATE_LOADER.putTemplate("main2.f3ah", "In main2: ${loaded}");
+        TEMPLATE_LOADER.putTemplate("t1.f3ah", "<#global loaded = (loaded!) + 't1;'>T1;");
+        TEMPLATE_LOADER.putTemplate("t2.f3ah", "<#global loaded = (loaded!) + 't2;'>T2;");
+        TEMPLATE_LOADER.putTemplate("t3.f3ah", "<#global loaded = (loaded!) + 't3;'>T3;");
+        TEMPLATE_LOADER.putTemplate("t1b.f3ah", "<#global loaded = (loaded!) + 't1b;'>T1b;");
+        TEMPLATE_LOADER.putTemplate("t2b.f3ah", "<#global loaded = (loaded!) + 't2b;'>T2b;");
+        TEMPLATE_LOADER.putTemplate("t3b.f3ah", "<#global loaded = (loaded!) + 't3b;'>T3b;");
+    }
+
     @Test
     public void test3LayerImportNoClashes() throws Exception {
-        TestConfigurationBuilder cfgB = createConfigurationBuilder()
+        TestConfigurationBuilder cfgB = newConfigurationBuilder()
                 .autoImports(ImmutableMap.of("t1", "t1.f3ah"))
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
@@ -73,7 +85,7 @@ public class IncludeAndImportConfigurableLayersTest {
     
     @Test
     public void test3LayerImportClashes() throws Exception {
-        Configuration cfg = createConfigurationBuilder()
+        Configuration cfg = newConfigurationBuilder()
                 .autoImports(ImmutableMap.of(
                         "t1", "t1.f3ah",
                         "t2", "t2.f3ah",
@@ -115,7 +127,7 @@ public class IncludeAndImportConfigurableLayersTest {
 
     @Test
     public void test3LayerIncludesNoClashes() throws Exception {
-        Configuration cfg = createConfigurationBuilder()
+        Configuration cfg = newConfigurationBuilder()
                 .autoIncludes("t1.f3ah")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
@@ -154,7 +166,7 @@ public class IncludeAndImportConfigurableLayersTest {
 
     @Test
     public void test3LayerIncludeClashes() throws Exception {
-        Configuration cfg = createConfigurationBuilder()
+        Configuration cfg = newConfigurationBuilder()
                 .autoIncludes("t1.f3ah", "t2.f3ah", "t3.f3ah")
                 .templateConfigurations(new ConditionalTemplateConfigurationFactory(
                         new FileNameGlobMatcher("main.f3ah"),
@@ -201,7 +213,7 @@ public class IncludeAndImportConfigurableLayersTest {
     
     @Test
     public void test3LayerIncludesClashes2() throws Exception {
-        Configuration cfg = createConfigurationBuilder()
+        Configuration cfg = newConfigurationBuilder()
                 .autoIncludes("t1.f3ah", "t1.f3ah")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
@@ -249,7 +261,7 @@ public class IncludeAndImportConfigurableLayersTest {
             throws Exception {
         Configuration cfg;
         {
-            TestConfigurationBuilder cfgB = createConfigurationBuilder()
+            TestConfigurationBuilder cfgB = newConfigurationBuilder()
                     .autoImports(ImmutableMap.of("t1", "t1.f3ah"));
             if (layer == Configuration.class) {
                 setLazinessOfConfigurable(cfgB, lazyImports, lazyAutoImports, setLazyAutoImports);
@@ -288,19 +300,9 @@ public class IncludeAndImportConfigurableLayersTest {
             cfg.setLazyAutoImports(lazyAutoImports);
         }
     }
-    
-    private TestConfigurationBuilder createConfigurationBuilder() {
-        StringTemplateLoader loader = new StringTemplateLoader();
-        loader.putTemplate("main.f3ah", "In main: ${loaded}");
-        loader.putTemplate("main2.f3ah", "In main2: ${loaded}");
-        loader.putTemplate("t1.f3ah", "<#global loaded = (loaded!) + 't1;'>T1;");
-        loader.putTemplate("t2.f3ah", "<#global loaded = (loaded!) + 't2;'>T2;");
-        loader.putTemplate("t3.f3ah", "<#global loaded = (loaded!) + 't3;'>T3;");
-        loader.putTemplate("t1b.f3ah", "<#global loaded = (loaded!) + 't1b;'>T1b;");
-        loader.putTemplate("t2b.f3ah", "<#global loaded = (loaded!) + 't2b;'>T2b;");
-        loader.putTemplate("t3b.f3ah", "<#global loaded = (loaded!) + 't3b;'>T3b;");
 
-        return new TestConfigurationBuilder().templateLoader(loader);
+    private TestConfigurationBuilder newConfigurationBuilder() {
+        return new TestConfigurationBuilder().templateLoader(TEMPLATE_LOADER);
     }
 
 }

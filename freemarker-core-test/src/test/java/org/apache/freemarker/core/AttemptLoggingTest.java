@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class AttemptLoggingTest extends TemplateTest {
@@ -40,9 +39,7 @@ public class AttemptLoggingTest extends TemplateTest {
         // Here, we should have an ERROR entry in the log that refers to an exception in an #attempt block. But we can't
         // easily assert that automatically, so it has to be checked manually...
 
-        setConfiguration(new TestConfigurationBuilder()
-                .attemptExceptionReporter(AttemptExceptionReporter.LOG_WARN)
-                .build());
+        setConfiguration(newConfigurationBuilder().attemptExceptionReporter(AttemptExceptionReporter.LOG_WARN));
         assertOutput("<#attempt>${missingVar2}<#recover>r</#attempt>", "r");
         // Again, it must be checked manually if there's a WARN entry
     }
@@ -50,9 +47,8 @@ public class AttemptLoggingTest extends TemplateTest {
     @Test
     public void customConfigTest() throws IOException, TemplateException {
         List<String> reports = new ArrayList<String>();
-        setConfiguration(new TestConfigurationBuilder()
-                .attemptExceptionReporter(new TestAttemptExceptionReporter(reports))
-                .build());
+        setConfiguration(newConfigurationBuilder()
+                .attemptExceptionReporter(new TestAttemptExceptionReporter(reports)));
 
         assertOutput(
                 "<#attempt>${missingVar1}<#recover>r</#attempt>"
@@ -66,7 +62,7 @@ public class AttemptLoggingTest extends TemplateTest {
     @Test
     public void dontReportSuppressedExceptionsTest() throws IOException, TemplateException {
         List<String> reports = new ArrayList<String>();
-        setConfiguration(new TestConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .attemptExceptionReporter(new TestAttemptExceptionReporter(reports))
                 .templateExceptionHandler(new TemplateExceptionHandler() {
                     public void handleTemplateException(TemplateException te, Environment env, Writer out)
@@ -77,8 +73,7 @@ public class AttemptLoggingTest extends TemplateTest {
                             throw new TemplateException("Failed to write to the output", e, env);
                         }
                     }
-                })
-                .build());
+                }));
 
         assertOutput("<#attempt>${missingVar1}t<#recover>r</#attempt>", "[E]t");
 

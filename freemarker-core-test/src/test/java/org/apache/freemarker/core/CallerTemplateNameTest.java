@@ -26,8 +26,8 @@ import org.junit.Test;
 public class CallerTemplateNameTest  extends TemplateTest {
 
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder().localizedTemplateLookup(true).build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.localizedTemplateLookup(true);
     }
 
     @Test

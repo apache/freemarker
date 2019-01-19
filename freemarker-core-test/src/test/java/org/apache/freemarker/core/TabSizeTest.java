@@ -23,15 +23,9 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class TabSizeTest extends TemplateTest {
-
-    @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return super.createDefaultConfiguration();
-    }
 
     @Test
     public void testBasics() throws Exception {
@@ -40,7 +34,7 @@ public class TabSizeTest extends TemplateTest {
         assertErrorColumnNumber(16 + 3, "\t\t${*}");
         assertErrorColumnNumber(16 + 3, "  \t  \t${*}");
 
-        setConfiguration(new TestConfigurationBuilder().tabSize(1).build());
+        setConfiguration(newConfigurationBuilder().tabSize(1));
         assertErrorColumnNumber(3, "${*}");
         assertErrorColumnNumber(1 + 3, "\t${*}");
         assertErrorColumnNumber(2 + 3, "\t\t${*}");
@@ -50,14 +44,14 @@ public class TabSizeTest extends TemplateTest {
     @Test
     public void testEvalBI() throws Exception {
         assertErrorContains("${r'\t~'?eval}", "column 9");
-        setConfiguration(new TestConfigurationBuilder().tabSize(4).build());
+        setConfiguration(newConfigurationBuilder().tabSize(4));
         assertErrorContains("${r'\t~'?eval}", "column 5");
     }
 
     @Test
     public void testInterpretBI() throws Exception {
         assertErrorContains("<@'\\t$\\{*}'?interpret />", "column 11");
-        setConfiguration(new TestConfigurationBuilder().tabSize(4).build());
+        setConfiguration(newConfigurationBuilder().tabSize(4));
         assertErrorContains("<@'\\t$\\{*}'?interpret />", "column 7");
     }
     
@@ -65,7 +59,7 @@ public class TabSizeTest extends TemplateTest {
     public void testStringLiteralInterpolation() throws Exception {
         assertErrorColumnNumber(6, "${'${*}'}");
         assertErrorColumnNumber(9, "${'${\t*}'}");
-        setConfiguration(new TestConfigurationBuilder().tabSize(16).build());
+        setConfiguration(newConfigurationBuilder().tabSize(16));
         assertErrorColumnNumber(17, "${'${\t*}'}");
     }
 

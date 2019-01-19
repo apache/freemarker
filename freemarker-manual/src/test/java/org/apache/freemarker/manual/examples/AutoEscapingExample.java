@@ -64,9 +64,4 @@ public class AutoEscapingExample extends TemplateTest {
     public void testStringConcat() throws Exception {
         assertOutputForNamed("AutoEscapingExample-stringConcat.f3ah");
     }
-
-    @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder(AutoEscapingExample.class).build();
-    }
 }

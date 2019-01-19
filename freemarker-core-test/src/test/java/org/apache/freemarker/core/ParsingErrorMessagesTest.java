@@ -35,8 +35,7 @@ public class ParsingErrorMessagesTest extends TemplateTest {
         assertErrorContainsAS("<@foo ${x == 3} />", "instead of ${");
         
         setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3SU)
-                .build());
+                .templateLanguage(DefaultTemplateLanguage.F3SU));
         assertErrorContains("[@foo [= x == 3] /]", "instead of [=");
     }
 

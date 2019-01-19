@@ -43,8 +43,8 @@ import org.junit.Test;
 public class NewBiObjectWrapperRestrictionTest extends TemplateTest {
 
     @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder().objectWrapper(new EntirelyCustomObjectWrapper()).build();
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb.objectWrapper(new EntirelyCustomObjectWrapper());
     }
 
     @Test

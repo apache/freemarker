@@ -41,17 +41,13 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
 
     @Test
     public void tagSyntaxTest() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3AU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3AU));
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
 
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3SU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3SU));
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
@@ -69,9 +65,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
         assertOutput("<#ftl stripWhitespace=false><#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "\nXY");
         assertOutput("<#assign x = 1>\nX<@'<#ftl stripWhitespace=false><#assign x = 1>\\nY'?interpret />", "X\nY");
 
-        setConfiguration(new TestConfigurationBuilder()
-                .whitespaceStripping(false)
-                .build());
+        setConfiguration(newConfigurationBuilder().whitespaceStripping(false));
         assertOutput("<#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "\nX\nY");
         assertOutput("<#ftl stripWhitespace=true><#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "X\nY");
         assertOutput("<#assign x = 1>\nX<@'<#ftl stripWhitespace=true><#assign x = 1>\\nY'?interpret />", "\nXY");
@@ -79,15 +73,11 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
 
     @Test
     public void evalTest() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3AU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3AU));
         assertOutput("<@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput("[#ftl][@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_A);
 
-        setConfiguration(new TestConfigurationBuilder()
-                .templateLanguage(DefaultTemplateLanguage.F3SU)
-                .build());
+        setConfiguration(newConfigurationBuilder().templateLanguage(DefaultTemplateLanguage.F3SU));
         assertOutput("[@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput("<#ftl><@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_S);
     }

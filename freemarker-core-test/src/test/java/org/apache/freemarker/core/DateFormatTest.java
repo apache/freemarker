@@ -43,7 +43,6 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -53,9 +52,10 @@ public class DateFormatTest extends TemplateTest {
     /** 2015-09-06T12:00:00Z */
     private static long T = 1441540800000L;
     private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATE_TIME);
-    
-    private TestConfigurationBuilder createConfigurationBuilder() {
-        return new TestConfigurationBuilder()
+
+    @Override
+    protected void setupConfigurationBuilder(Configuration.ExtendableBuilder<?> cb) {
+        cb
                 .locale(Locale.US)
                 .timeZone(TimeZone.getTimeZone("GMT+01:00"))
                 .sqlDateAndTimeTimeZone(TimeZone.getTimeZone("UTC"))
@@ -65,11 +65,6 @@ public class DateFormatTest extends TemplateTest {
                         "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE,
                         "appMeta", AppMetaTemplateDateFormatFactory.INSTANCE,
                         "htmlIso", HTMLISOTemplateDateFormatFactory.INSTANCE));
-    }
-
-    @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return createConfigurationBuilder().build();
     }
 
     @Test
@@ -156,11 +151,10 @@ public class DateFormatTest extends TemplateTest {
         assertErrorContains("${.now?string('x2')}", "\"x2\"", "'x'");
         assertErrorContains("${.now?string('[wrong]')}", "format string", "[wrong]");
 
-        setConfiguration(createConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .dateFormat("[wrong d]")
                 .dateTimeFormat("[wrong dt]")
-                .timeFormat("[wrong t]")
-                .build());
+                .timeFormat("[wrong t]"));
         assertErrorContains("${.now?date}", "\"dateFormat\"", "[wrong d]");
         assertErrorContains("${.now?dateTime}", "\"dateTimeFormat\"", "[wrong dt]");
         assertErrorContains("${.now?time}", "\"timeFormat\"", "[wrong t]");
@@ -191,13 +185,13 @@ public class DateFormatTest extends TemplateTest {
             
         }
         {
-            setConfiguration(createConfigurationBuilder().dateFormat("@noSuchFormatD").build());
+            setConfiguration(newConfigurationBuilder().dateFormat("@noSuchFormatD"));
             assertErrorContains(
                     "${.now?date}",
                     "\"@noSuchFormatD\"", "\"noSuchFormatD\"", "\"dateFormat\"");
         }
         {
-            setConfiguration(createConfigurationBuilder().timeFormat("@noSuchFormatT").build());
+            setConfiguration(newConfigurationBuilder().timeFormat("@noSuchFormatT"));
             assertErrorContains(
                     "${.now?time}",
                     "\"@noSuchFormatT\"", "\"noSuchFormatT\"", "\"timeFormat\"");
@@ -212,7 +206,7 @@ public class DateFormatTest extends TemplateTest {
     }
 
     private void setConfigurationWithDateTimeFormat(String formatString) {
-        setConfiguration(createConfigurationBuilder().dateTimeFormat(formatString).build());
+        setConfiguration(newConfigurationBuilder().dateTimeFormat(formatString));
     }
 
     @Test
@@ -233,10 +227,9 @@ public class DateFormatTest extends TemplateTest {
         setConfigurationWithDateTimeFormat("@@yyyy");
         assertOutput("${d}", "@@1970");
 
-        setConfiguration(createConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .customDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap())
-                .dateTimeFormat("@epoch")
-                .build());
+                .dateTimeFormat("@epoch"));
         assertErrorContains("${d}", "custom", "\"epoch\"");
     }
 
@@ -246,11 +239,10 @@ public class DateFormatTest extends TemplateTest {
         String timeFormatStr = "HH:mm";
         String dateTimeFormatStr = "yyyy.MM.dd. HH:mm";
 
-        setConfiguration(createConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .dateFormat(dateFormatStr)
                 .timeFormat(timeFormatStr)
-                .dateTimeFormat(dateTimeFormatStr)
-                .build());
+                .dateTimeFormat(dateTimeFormatStr));
 
         Configuration cfg = getConfiguration();
 
@@ -336,7 +328,7 @@ public class DateFormatTest extends TemplateTest {
 
     @Test
     public void testAliases() throws Exception {
-        setConfiguration(createConfigurationBuilder()
+        setConfiguration(newConfigurationBuilder()
                 .customDateFormats(ImmutableMap.of(
                         "d", new AliasTemplateDateFormatFactory("yyyy-MMM-dd"),
                         "m", new AliasTemplateDateFormatFactory("yyyy-MMM"),
@@ -348,8 +340,7 @@ public class DateFormatTest extends TemplateTest {
                                         .customDateFormats(ImmutableMap.<String, TemplateDateFormatFactory>of(
                                                 "m", new AliasTemplateDateFormatFactory("yyyy-MMMM"),
                                                 "i", new AliasTemplateDateFormatFactory("@epoch")))
-                                        .build()))
-                .build());
+                                        .build())));
 
         addToDataModel("d", TM);
         String commonFtl = "${d?string.@d} ${d?string.@m} "
@@ -366,15 +357,14 @@ public class DateFormatTest extends TemplateTest {
     @Test
     public void testAliases2() throws Exception {
         setConfiguration(
-                createConfigurationBuilder()
+                newConfigurationBuilder()
                 .customDateFormats(ImmutableMap.<String, TemplateDateFormatFactory>of(
                         "d", new AliasTemplateDateFormatFactory("yyyy-MMM",
                                 ImmutableMap.of(
                                         new Locale("en"), "yyyy-MMM'_en'",
                                         Locale.UK, "yyyy-MMM'_en_GB'",
                                         Locale.FRANCE, "yyyy-MMM'_fr_FR'"))))
-                .dateTimeFormat("@d")
-                .build());
+                .dateTimeFormat("@d"));
         addToDataModel("d", TM);
         assertOutput(
                 "<#setting locale='en_US'>${d} "
@@ -391,11 +381,10 @@ public class DateFormatTest extends TemplateTest {
     @Test
     public void testZeroArgDateBI() throws IOException, TemplateException {
         setConfiguration(
-                createConfigurationBuilder()
+                newConfigurationBuilder()
                 .dateFormat("@epoch")
                 .dateTimeFormat("@epoch")
-                .timeFormat("@epoch")
-                .build());
+                .timeFormat("@epoch"));
 
         addToDataModel("t", String.valueOf(T));
         
@@ -413,11 +402,10 @@ public class DateFormatTest extends TemplateTest {
     @Test
     public void testAppMetaRoundtrip() throws IOException, TemplateException {
         setConfiguration(
-                createConfigurationBuilder()
-                .dateFormat("@appMeta")
-                .dateTimeFormat("@appMeta")
-                .timeFormat("@appMeta")
-                .build());
+                newConfigurationBuilder()
+                        .dateFormat("@appMeta")
+                        .dateTimeFormat("@appMeta")
+                        .timeFormat("@appMeta"));
 
         addToDataModel("t", String.valueOf(T) + "/foo");
         
