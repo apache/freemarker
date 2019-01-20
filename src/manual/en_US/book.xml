@@ -16757,24 +16757,26 @@ Tue, Apr 8, '03
             <secondary>boolean</secondary>
           </indexterm>
 
-          <para><emphasis>All usages of this built-in has been deprecated; see
-          below.</emphasis></para>
-
           <para>Converts a boolean to a string. You can use it in two
           ways:</para>
 
           <itemizedlist>
             <listitem>
-              <para>As <literal>foo?string("yes", "no")</literal>:
-              <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
-              linkend="ref_builtin_then"><literal>?then("yes",
-              "no")</literal></link> instead. </emphasis>This will return the
-              first parameter (here: <literal>"yes"</literal>) if the boolean
-              is true, otherwise the second parameter (here:
-              <literal>"no"</literal>). Note that the return value is always a
-              string; if the parameters were numbers, they would be converted
-              to strings first. Also note that both parameters are evaluated,
-              despite that only one of them will be used; this might have
+              <para>As <literal>foo?string("yes", "no")</literal>: Formats the
+              boolean value to the first parameter (here:
+              <literal>"yes"</literal>) if the boolean is true, and to the
+              second parameter (here: <literal>"no"</literal>) if it's false.
+              Unless you only meant to format a boolean with simple literals,
+              use <link
+              linkend="ref_builtin_then"><literal>?then(<replaceable>whenTrue</replaceable>,
+              <replaceable>whenFalse</replaceable>)</literal></link> instead,
+              as that has less type limitations, and it evaluate its
+              parameters lazily! The return value of
+              <literal>?string</literal> is always a string (unlike for
+              <literal>?then</literal>), because if the parameters aren't
+              strings, they will be converted to strings. Also note that both
+              parameters are evaluated (unlike for <literal>?then</literal>),
+              despite that only one of them will be used; this might has
               negative impact if the parameters aren't just literals.</para>
             </listitem>
 
@@ -16789,18 +16791,17 @@ Tue, Apr 8, '03
               this will convert the boolean to string using the default
               strings for representing true and false values. By default, true
               is rendered as <literal>"true"</literal> and false is rendered
-              as <literal>"false"</literal>. This is mostly useful if you
+              as <literal>"false"</literal>. This is mostly only useful if you
               generate source code with FreeMarker <emphasis>(but use
-              <literal>?c</literal> for that starting from 2.3.20)</emphasis>,
-              since the values are not locale (language, country) sensitive.
+              <literal>?c</literal> for that starting from 2.3.20)</emphasis>.
               To change these default strings, you can use the
               <literal>boolean_format</literal> <link
               linkend="ref_directive_setting">setting</link>.</para>
 
-              <para role="forProgrammers">Note, that in the very rare case
-              when a value is multi-typed and is both a boolean and a string,
-              then the string value of the variable will be returned, and so
-              the <literal>boolean_format</literal> setting will have no
+              <para role="forProgrammers">Note that in the very rare case when
+              a value is multi-typed and is both a boolean and a string, then
+              the string value of the variable will be returned, and so the
+              <literal>boolean_format</literal> setting will have no
               effect.</para>
             </listitem>
           </itemizedlist>
