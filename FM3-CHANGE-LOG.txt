@@ -618,6 +618,8 @@ Core / Miscellaneous
 - Renamed `Environment.getDataModel()` to `getDataModelWithSharedVariableFallback()`
   Renamed `Environment.getGlobalVariables()` to `getGloballyVisibleVariables()()`
 - Removed `Template.createPlainTextTemplate`, as this convenience methods was hardly ever used.
+- The extended BigDecimal format parser doesn't accept the "multipier" parameter name anymore. It has to be written with
+  correct spelling, as "multiplier".
 
 Build / development process changes
 -----------------------------------

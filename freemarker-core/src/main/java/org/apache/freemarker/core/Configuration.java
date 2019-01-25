@@ -1735,29 +1735,29 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     valueWithoutUnit = value.substring(0, numberEnd).trim();
                     unit = value.substring(numberEnd).trim();
 
-                    final long multipier;
+                    final long multiplier;
                     if (unit.equals("ms")) {
-                        multipier = 1;
+                        multiplier = 1;
                     } else if (unit.equals("s")) {
-                        multipier = 1000;
+                        multiplier = 1000;
                     } else if (unit.equals("m")) {
-                        multipier = 1000 * 60;
+                        multiplier = 1000 * 60;
                     } else if (unit.equals("h")) {
-                        multipier = 1000 * 60 * 60;
+                        multiplier = 1000 * 60 * 60;
                     } else if (!unit.isEmpty()) {
                         throw new InvalidSettingValueException(name, value,
                                 "Unrecognized time unit " + _StringUtils.jQuote(unit) + ". Valid units are: ms, s, m, h");
                     } else {
-                        multipier = 0;
+                        multiplier = 0;
                     }
 
                     int parsedValue = Integer.parseInt(valueWithoutUnit);
-                    if (multipier == 0 && parsedValue != 0) {
+                    if (multiplier == 0 && parsedValue != 0) {
                         throw new InvalidSettingValueException(name, value,
                                 "Time unit must be specified for a non-0 value (examples: 500 ms, 3 s, 2 m, 1 h).");
                     }
 
-                    setTemplateUpdateDelayMilliseconds(parsedValue * multipier);
+                    setTemplateUpdateDelayMilliseconds(parsedValue * multiplier);
                 } else if (SHARED_VARIABLES_KEY.equals(name)) {
                     Map<?, ?> sharedVariables = (Map<?, ?>) _ObjectBuilderSettingEvaluator.eval(
                             value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());

@@ -218,7 +218,7 @@ public final class StringToIndexMap {
     }
 
     private static BucketsSetup getBucketsSetup(Entry[] entries, int entriesLength, int variation) {
-        // The 2.5 multipier was chosen experimentally.
+        // The 2.5 multiplier was chosen experimentally.
         int bucketCnt = getPowerOf2GreaterThanOrEqualTo(entriesLength * 2 + entriesLength / 2);
 
         Entry[] buckets = new Entry[bucketCnt];

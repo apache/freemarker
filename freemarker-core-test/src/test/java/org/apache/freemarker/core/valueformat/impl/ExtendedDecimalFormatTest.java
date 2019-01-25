@@ -188,11 +188,11 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
                     containsStringIgnoringCase("\"decimalSeparator\""), containsString("exactly 1 char")));
         }
         try {
-            ExtendedDecimalFormatParser.parse("0.0;;multipier=ten", LOC);
+            ExtendedDecimalFormatParser.parse("0.0;;multiplier=ten", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(), allOf(
-                    containsString("\"multipier\""), containsString("\"ten\""), containsString("integer")));
+                    containsString("\"multiplier\""), containsString("\"ten\""), containsString("integer")));
         }
     }
     
@@ -223,8 +223,8 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
             // Expected
         }
 
-        assertFormatted("0.##;; multipier=100", 12.345, "1234.5");
-        assertFormatted("0.##;; multipier=1000", 12.345, "12345");
+        assertFormatted("0.##;; multiplier=100", 12.345, "1234.5");
+        assertFormatted("0.##;; multiplier=1000", 12.345, "12345");
         
         assertFormatted(",##0.##;; groupingSeparator=_ decimalSeparator=D", 12345.1, "12_345D1", 1, "1");
         
