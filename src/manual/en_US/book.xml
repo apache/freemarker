@@ -27893,6 +27893,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               configuration. See <link linkend="ref_builtin_truncate">the
               reference</link> for more details.</para>
             </listitem>
+
+            <listitem>
+              <para>Extended big decimal format parameter
+              <quote>multiplier</quote> was incorrectly written as
+              <quote>multipier</quote>. Now both words are recognized.</para>
+            </listitem>
           </itemizedlist>
         </section>
 

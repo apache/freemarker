@@ -225,7 +225,9 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
 
         assertFormatted("0.##;; multipier=100", 12.345, "1234.5");
         assertFormatted("0.##;; multipier=1000", 12.345, "12345");
-        
+        assertFormatted("0.##;; multiplier=100", 12.345, "1234.5");
+        assertFormatted("0.##;; multiplier=1000", 12.345, "12345");
+
         assertFormatted(",##0.##;; groupingSeparator=_ decimalSeparator=D", 12345.1, "12_345D1", 1, "1");
         
         assertFormatted("0.##E0;; exponentSeparator='*10^'", 12345.1, "1.23*10^4");
