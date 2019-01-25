@@ -15541,7 +15541,7 @@ rif: foo XYr baar</programlisting>
           value of the number (like big numbers are possibly
           <quote>damaged</quote> by grouping separators).</para>
 
-          <para>If the <literal>incompatible_imporvements</literal> FreeMarker
+          <para>If the <literal>incompatible_improvements</literal> FreeMarker
           configuration setting is set to 2.3.24 or higher (also if it's set
           to 2.3.20 or higher and you are outside a string literal), this
           built-in will return <literal>"INF"</literal>,
@@ -15979,7 +15979,7 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                 </tr>
 
                 <tr>
-                  <td><literal>multipier</literal></td>
+                  <td><literal>multiplier</literal></td>
 
                   <td>The number will be shown after multiplied with this
                   integer number.</td>
