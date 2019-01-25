@@ -3308,25 +3308,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
-                long multipier;
+                long multiplier;
                 String valueWithoutUnit;
                 if (value.endsWith("ms")) {
-                    multipier = 1;
+                    multiplier = 1;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 2));
                 } else if (value.endsWith("s")) {
-                    multipier = 1000;
+                    multiplier = 1000;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else if (value.endsWith("m")) {
-                    multipier = 1000 * 60;
+                    multiplier = 1000 * 60;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else if (value.endsWith("h")) {
-                    multipier = 1000 * 60 * 60;
+                    multiplier = 1000 * 60 * 60;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else {
-                    multipier = 1000;  // Default is seconds for backward compatibility
+                    multiplier = 1000;  // Default is seconds for backward compatibility
                     valueWithoutUnit = value;
                 }
-                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
+                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multiplier);
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
