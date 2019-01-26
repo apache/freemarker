@@ -15979,8 +15979,8 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                 </tr>
 
                 <tr>
-                  <td><literal>multiplier</literal> (was
-                  <literal>multipier</literal> before 2.3.29)</td>
+                  <td><literal>multiplier</literal> since 2.3.29;
+                  <literal>multipier</literal> since 2.3.24</td>
 
                   <td>The number will be shown after multiplied with this
                   integer number.</td>
