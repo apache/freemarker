@@ -15979,7 +15979,8 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                 </tr>
 
                 <tr>
-                  <td><literal>multiplier</literal></td>
+                  <td><literal>multiplier</literal> (was
+                  <literal>multipier</literal> before 2.3.29)</td>
 
                   <td>The number will be shown after multiplied with this
                   integer number.</td>
@@ -16721,10 +16722,18 @@ Tue, Apr 8, '03
           <quote>computer language</quote> as opposed to for human audience.
           The result will be <literal>"true"</literal> or
           <literal>"false"</literal>, regardless of the
-          <literal>boolean_format</literal> setting. When generating
-          JavaScript and such, this should be used, as otherwise changing the
-          <literal>boolean_format</literal> can break the generated
-          computer-language output.</para>
+          <literal>boolean_format</literal> configuration setting, as that
+          setting is meant to specify the format for human consumption. When
+          generating boolean literals for JavaScript and such, this should be
+          used.</para>
+
+          <para>If you only generate output that's computer language and isn't
+          read by end-users, you may want to set the
+          <literal>boolean_format</literal> configuration setting to
+          <literal>c</literal> (since FreeMarker 2.3.29), in which case
+          <literal>${<replaceable>aBoolean</replaceable>}</literal> will have
+          the same output as
+          <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.</para>
 
           <para>Note that this built-in <link linkend="ref_builtin_c">also
           works on strings</link>.</para>
@@ -26752,14 +26761,14 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Unlike numbers, booleans has no commonly accepted format,
-            not even a common format within the same page. Like when you show
-            on a HTML page if a product is washable, you will hardly want to
-            show for the visitor "Washable: true", but rather "Washable: yes".
-            So we force the template author (by <literal>${washable}</literal>
-            causing error) to find out with his human knowledge how the
-            boolean value should be shown at the given place. The common way
-            of formatting a boolean is like <literal>${washable?string("yes",
+            <para><literal>${<replaceable>...</replaceable>}</literal> meant
+            to format values for human consumption, and unlike numbers,
+            booleans has no commonly accepted format
+            (<literal>true</literal>/<literal>false</literal> is common in
+            computer languages, but you rarely use it outside that). The
+            proper format depends quite much on the context, therefore,
+            usually the template author should decide the proper format for
+            each case, like <literal>${washable?string("yes",
             "no")}</literal>, <literal>${caching?string("Enabled",
             "Disabled")}</literal>, <literal>${heating?string("on",
             "off")}</literal>, etc.</para>
@@ -26771,14 +26780,24 @@ End book</programlisting>
               <listitem>
                 <para>When printing boolean to generate computer language
                 output, and hence you want
-                <literal>true</literal>/<literal>false</literal>, use
-                <literal>${<replaceable>someBoolean</replaceable>?c}</literal>.
-                (This requires at least FreeMarker 2.3.20. Before that, the
-                common practice was writing
-                <literal>${<replaceable>someBoolean</replaceable>?string}</literal>,
-                however that's dangerous because its output depends on the
-                current boolean format setting, whose default is
-                <literal>"true"</literal>/<literal>"false"</literal>.)</para>
+                <literal>true</literal>/<literal>false</literal>. In such case
+                use <literal>${<replaceable>someBoolean</replaceable><link
+                linkend="ref_builtin_c_boolean">?c</link>}</literal> (requires
+                FreeMarker 2.3.20). If you never generate for human
+                consumption, only for computer language output, you might want
+                to set <literal>boolean_format</literal> to
+                <literal>c</literal> (available since FreeMarker 2.3.29), and
+                then <literal>${<replaceable>aBoolean</replaceable>}</literal>
+                will behave as
+                <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.</para>
+
+                <para>Before 2.3.20, if you really can't upgrade FreeMarker,
+                try if
+                <literal>${<replaceable>someBoolean</replaceable>?string}</literal>.
+                By default that prints
+                <literal>true</literal>/<literal>false</literal>. Then somehow
+                try to ensure that <literal>boolean_format</literal> won't be
+                changed later by someone, breaking your output.</para>
               </listitem>
 
               <listitem>
@@ -27925,6 +27944,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>com.sun</literal> packages. (The messages now recommend
               adding Apache Xalan or Jaxen as dependency if you need XPath
               support.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>boolean_format</literal> configuration
+              setting now can be set to <literal>"c"</literal>. Then
+              <literal>${<replaceable>aBoolean</replaceable>}</literal> will
+              behave as
+              <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.
+              This should be only used if you are generating output for
+              non-human (computer) consumption only. If your output has pieces
+              for human audience too, it's still recommended to use
+              <literal>${<replaceable>aBoolean</replaceable>?c}</literal>
+              where <literal>true</literal>/<literal>false</literal> output is
+              needed, and either not set the <literal>boolean_format</literal>
+              at all, or set it to something that's appropriate for everyday
+              uses (like <literal>"yes,no"</literal>).</para>
             </listitem>
 
             <listitem>

@@ -81,7 +81,8 @@ import freemarker.template.utility.StringUtil;
  */
 public class Configurable {
     static final String C_TRUE_FALSE = "true,false";
-    
+    static final String C_FORMAT_STRING = "c";
+
     private static final String NULL = "null";
     private static final String DEFAULT = "default";
     private static final String DEFAULT_2_3_0 = "default_2_3_0";
@@ -963,39 +964,46 @@ public class Configurable {
     }
     
     /**
-     * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
-     * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
-     * so {@code "yes, no"} is WRONG (unless you want that leading space before "no").
+     * The string value for the boolean {@code true} and {@code false} values, usually intended for human consumption
+     * (not for a computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is
+     * significant, so {@code "yes, no"} is WRONG (unless you want that leading space before "no"). Because the proper
+     * way of formatting booleans depends on the context too much, it's probably the best to leave this setting on its
+     * default, which will enforce explicit formatting, like <code>${aBoolean?string('on', 'off')}</code>.
      * 
      * <p>For backward compatibility the default is {@code "true,false"}, but using that value is denied for automatic
-     * boolean-to-string conversion (like <code>${myBoolean}</code> will fail with it), only {@code myBool?string} will
-     * allow it, which is deprecated since FreeMarker 2.3.20.
+     * boolean-to-string conversion, like <code>${myBoolean}</code> will fail with it. If you generate the piece of
+     * output for "computer audience" as opposed to "human audience", then you should write
+     * <code>${myBoolean?c}</code>, which will print {@code true} or {@code false}. If you really want to always
+     * format for computer audience, then it's might be reasonable to set this setting to {@code c}.
      * 
      * <p>Note that automatic boolean-to-string conversion only exists since FreeMarker 2.3.20. Earlier this setting
      * only influenced the result of {@code myBool?string}. 
      */
     public void setBooleanFormat(String booleanFormat) {
         NullArgumentException.check("booleanFormat", booleanFormat);
-        
-        int commaIdx = booleanFormat.indexOf(',');
-        if (commaIdx == -1) {
-            throw new IllegalArgumentException(
-                    "Setting value must be a string that contains two comma-separated values for true and false, " +
-                    "respectively.");
-        }
-        
-        this.booleanFormat = booleanFormat; 
-        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
-        
+
         if (booleanFormat.equals(C_TRUE_FALSE)) {
             // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
             // pretend that it wasn't set.
             trueStringValue = null; 
             falseStringValue = null;
+        } else if (booleanFormat.equals(C_FORMAT_STRING)) {
+            trueStringValue = MiscUtil.C_TRUE;
+            falseStringValue = MiscUtil.C_FALSE;
         } else {
-            trueStringValue = booleanFormat.substring(0, commaIdx); 
+            int commaIdx = booleanFormat.indexOf(',');
+            if (commaIdx == -1) {
+                throw new IllegalArgumentException(
+                        "Setting value must be a string that contains two comma-separated values for true and false, " +
+                                "or it must be \"" + C_FORMAT_STRING + "\", but it was " +
+                                StringUtil.jQuote(booleanFormat) + ".");
+            }
+            trueStringValue = booleanFormat.substring(0, commaIdx);
             falseStringValue = booleanFormat.substring(commaIdx + 1);
         }
+
+        this.booleanFormat = booleanFormat;
+        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
     }
     
     /**
@@ -1045,15 +1053,23 @@ public class Configurable {
                 "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
                 new _DelayedJQuote(getBooleanFormat()), 
                 (getBooleanFormat().equals(C_TRUE_FALSE)
-                    ? ", which is the legacy default computer-language format, and hence isn't accepted."
+                    ? ", which is the legacy deprecated default, and we treat it as if no format was set. "
+                            + "This is the default configuration; you should provide the format explicitly for each "
+                            + "place where you print a boolean."
                     : ".")
                 ).tips(
-                     "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
-                     + "use \"?c\", like ${myBool?c}.",
-                     "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
-                     new Object[] {
-                         "If you need the same two values on most places, the programmers should set the \"",
-                         BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
+                     "Write something like myBool?string('yes', 'no') to specify boolean formatting in place.",
+                    new Object[]{
+                        "If you want \"true\"/\"false\" result as you are generating computer-language output "
+                                + "(not for direct human consumption), then use \"?c\", like ${myBool?c}. (If you "
+                                + "always generate computer-language output, then it's might be reasonable to set "
+                                + "the \"", BOOLEAN_FORMAT_KEY, "\" setting to \"c\" instead.)",
+                    },
+                    new Object[] {
+                        "If you need the same two values on most places, the programmers can set the \"",
+                        BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\". However, then it will be easy to "
+                                + "unwillingly format booleans like that."
+                    }
                  );
     }
 

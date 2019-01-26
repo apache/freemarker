@@ -16,6 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<#setting boolean_format="c">
 --
 <#assign s = "abbcdbb">
 ${s?index_of("bb")} = 1
@@ -26,19 +27,19 @@ ${s?last_index_of("bb")} = 5
 ${s?last_index_of("bb", 4)} = 1
 ${s?last_index_of("")} = ${s?length}
 --
-${s?starts_with("abb")?string} = true
-${s?starts_with("bb")?string} = false
-${s?starts_with("")?string} = true
+${s?starts_with("abb")} = true
+${s?starts_with("bb")} = false
+${s?starts_with("")} = true
 --
-${s?ends_with("dbb")?string} = true
-${s?ends_with("cbb")?string} = false
-${s?ends_with("")?string} = true
+${s?ends_with("dbb")} = true
+${s?ends_with("cbb")} = false
+${s?ends_with("")} = true
 --
-${s?contains("abb")?string} = true
-${s?contains("bcd")?string} = true
-${s?contains("dbb")?string} = true
-${s?contains("bbx")?string} = false
-${s?contains("")?string} = true
+${s?contains("abb")} = true
+${s?contains("bcd")} = true
+${s?contains("dbb")} = true
+${s?contains("bbx")} = false
+${s?contains("")} = true
 --
 [${s?chop_linebreak}] = [abbcdbb]
 [${"qwe\n"?chop_linebreak}] = [qwe]

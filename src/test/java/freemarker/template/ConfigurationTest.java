@@ -1417,6 +1417,24 @@ public class ConfigurationTest extends TestCase {
     }
 
     @Test
+    public void testSetBooleanFormat() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        cfg.setBooleanFormat("yes,no");
+        assertOutputEquals("yes no", new Template(null, "${true} ${false}", cfg));
+
+        cfg.setBooleanFormat("c");
+        assertOutputEquals("true false", new Template(null, "${true} ${false}", cfg));
+
+        try {
+            cfg.setBooleanFormat("yes no");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("comma"));
+        }
+    }
+
+    @Test
     public void testSetTabSize() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         
