@@ -458,11 +458,11 @@ class BuiltInsForMultipleTypes {
 
             @Override
             public String getAsString() throws TemplateException {
-                // Boolean should have come first... but that change would be non-BC. 
+                // TODO [FM3] Boolean should have come first... but that change would be non-BC.
                 if (bool instanceof TemplateStringModel) {
                     return ((TemplateStringModel) bool).getAsString();
                 } else {
-                    return env.formatBoolean(bool.getAsBoolean(), true);
+                    return env.formatBoolean(bool.getAsBoolean());
                 }
             }
         }

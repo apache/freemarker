@@ -16,21 +16,22 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#assign suppress>
-<@assertFails message="true,false">${true}</@>
-<@assertFails message="true,false">${false}</@>
-<@assertFails message="true,false">${"" + true}</@>
-<@assertFails message="true,false">${"" + false}</@>
-<@assertFails message="true,false">${true?upperCase}</@>
-<@assertFails message="true,false">${false?upperCase}</@>
-<@assertEquals expected="true" actual=true?string />
-<@assertEquals expected="false" actual=false?string />
+<@noOutput>
+<@assertFails message="setting was not set">${true}</@>
+<@assertFails message="setting was not set">${false}</@>
+<@assertFails message="setting was not set">${true?string}</@>
+<@assertFails message="setting was not set">${false?string}</@>
+<@assertFails message="setting was not set">${"" + true}</@>
+<@assertFails message="setting was not set">${"" + false}</@>
+<@assertFails message="setting was not set">${true?upperCase}</@>
+<@assertFails message="setting was not set">${false?upperCase}</@>
 <@assertEquals expected="true" actual=true?c />
 <@assertEquals expected="false" actual=false?c />
 <@assertEquals expected="t" actual=true?string('t', 'f') />
 <@assertEquals expected="f" actual=false?string('t', 'f') />
-<#setting booleanFormat = 'true,false'>
-<@assertFails message="true,false">${true}</@>
+<#setting booleanFormat='true,false'>
+<@assertEquals expected="true" actual=true?string />
+<@assertEquals expected="true" actual=""+true />
 
 <#setting booleanFormat = 'ja,nein'>
 <@assertEquals expected="ja" actual="" + true />
@@ -58,7 +59,7 @@
 <@assertEquals actual=123?upperCase expected="123" />
 <@assertEquals actual=true?upperCase expected="Y" />
 
-</#assign>
+</@noOutput>
 <#escape x as x?upperCase>
 <#assign x = true>${x} ${true} ${true?string}
 <#assign x = false>${x} ${false} ${false?string}

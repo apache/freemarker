@@ -79,6 +79,9 @@ import freemarker.template.utility.StringUtil;
  * that as the FM3 template language evolves, we will have to change the output for some pieces.
  * </ul>
  */
+// TODO:
+// - Log warn for myBoolean?string, recommend using myBoolean?c, as myBoolean?string won't work with the default
+//   booleanFormat.
 @SuppressWarnings("deprecation")
 public class FM2ASTToFM3SourceConverter {
 

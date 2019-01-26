@@ -25,39 +25,55 @@ import org.apache.freemarker.core.valueformat.TemplateValueFormat;
 // TODO Should be public and moved over to core.valueformat?
 final class TemplateBooleanFormat extends TemplateValueFormat {
 
+    static final String C_FORMAT_STRING = "c";
     static final String C_FALSE = "false";
     static final String C_TRUE = "true";
-    static final String C_TRUE_FALSE = C_TRUE + "," + C_FALSE;
-    static final TemplateBooleanFormat C_TRUE_FALSE_FORMAT = new TemplateBooleanFormat();
-
-    static TemplateBooleanFormat getInstance(String format) {
-        return format.equals(C_TRUE_FALSE) ? C_TRUE_FALSE_FORMAT : new TemplateBooleanFormat(format);
-    }
-
-    private final String formatString;
-    private final String trueStringValue;  // deduced from booleanFormat
-    private final String falseStringValue;  // deduced from booleanFormat
+    static final TemplateBooleanFormat C_INSTANCE = new TemplateBooleanFormat(C_FORMAT_STRING, C_TRUE, C_FALSE);
 
     /**
-     * Use for {@link #C_TRUE_FALSE} only!
+     * @return {@code null} if the format string was an empty string.
      */
-    private TemplateBooleanFormat() {
-        formatString = C_TRUE_FALSE;
-        trueStringValue = null;
-        falseStringValue = null;
+    static TemplateBooleanFormat getInstance(String formatString) {
+        return getInstanceOrValidate(formatString, false);
     }
 
-    private TemplateBooleanFormat(String formatString) {
+    static void validateFormatString(String formatString) {
+        getInstanceOrValidate(formatString, true);
+    }
+
+    private static TemplateBooleanFormat getInstanceOrValidate(String formatString, boolean validationOnly) {
+        if (formatString.length() == 0) {
+            return null;
+        }
+        if (formatString.equals(C_FORMAT_STRING)) {
+            return C_INSTANCE;
+        }
+
         int commaIdx = formatString.indexOf(',');
         if (commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting value must be string that contains two comma-separated values for true and false, " +
-                            "respectively.");
+                    "Setting value must be a string that contains two comma-separated values for true and false, "
+                            + "or it must be \"" + TemplateBooleanFormat.C_FORMAT_STRING + "\", "
+                            + "or it must be an empty string, but it was "
+                            + _StringUtils.jQuote(formatString) + ".");
+        }
+        if (validationOnly) {
+            return null;
         }
 
+        String trueStringValue = formatString.substring(0, commaIdx);
+        String falseStringValue = formatString.substring(commaIdx + 1);
+        return new TemplateBooleanFormat(formatString, trueStringValue, falseStringValue);
+    }
+
+    private final String formatString;
+    private final String trueStringValue;  // Usually deduced from booleanFormat
+    private final String falseStringValue;  // Usually deduced from booleanFormat
+
+    private TemplateBooleanFormat(String formatString, String trueStringValue, String falseStringValue) {
         this.formatString = formatString;
-        trueStringValue = formatString.substring(0, commaIdx);
-        falseStringValue = formatString.substring(commaIdx + 1);
+        this.trueStringValue = trueStringValue;
+        this.falseStringValue = falseStringValue;
     }
 
     public String getFormatString() {

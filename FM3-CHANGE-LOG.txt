@@ -120,6 +120,8 @@ Node: Changes already mentioned above aren't repeated here!
 - Inside a #switch, #case can't be after #default anymore (this is actually a bug in FM2)
   (The template converter can't fix this automatically, but reports it as an error.)
 - #else and #elseIf tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
+- ${someBoolean?string} with the default booleanFormat setting value will not convert the boolean to true/false anymore,
+  instead it will fail just like ${someBoolean} would. Use ${someBoolean?c} instead - it's preferable in FM2 as well.
 - Renamed `?datetime` and `?datetimeIfUnknown` and the `datetimeFormat` setting to
   `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`. (In general, it's `dateTime`, not `datetime` everywhere.)
           assertConverted("${.outputFormat}","${.output_format}");
@@ -620,6 +622,10 @@ Core / Miscellaneous
 - Removed `Template.createPlainTextTemplate`, as this convenience methods was hardly ever used.
 - The extended BigDecimal format parser doesn't accept the "multipier" parameter name anymore. It has to be written with
   correct spelling, as "multiplier".
+- The booleanFormat setting now defaults to "", just like numberFormat, etc. It's not possible to format a boolean with
+  that setting value, it will give an error. On the other hand, "true,false" is now a legit setting value (although the
+  better practice is to set the format to "c", if you generate computer language output), but it's hardly a good practice
+  to use.
 
 Build / development process changes
 -----------------------------------

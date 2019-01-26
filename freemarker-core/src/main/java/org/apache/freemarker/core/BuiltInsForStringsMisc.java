@@ -47,20 +47,27 @@ class BuiltInsForStringsMisc {
     static class booleanBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
-            final boolean b;
+            return toBool(s, env) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+
+        private boolean toBool(String s, Environment env) throws TemplateException {
             if (s.equals(TemplateBooleanFormat.C_TRUE)) {
-                b = true;
-            } else if (s.equals(TemplateBooleanFormat.C_FALSE)) {
-                b = false;
-            } else if (s.equals(env.getTemplateBooleanFormat().getTrueStringValue())) {
-                b = true;
-            } else if (s.equals(env.getTemplateBooleanFormat().getFalseStringValue())) {
-                b = false;
-            } else {
-                throw new TemplateException(this, env,
-                        "Can't convert this string to boolean: ", new _DelayedJQuote(s));
+                return true;
             }
-            return b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            if (s.equals(TemplateBooleanFormat.C_FALSE)) {
+                return false;
+            }
+            TemplateBooleanFormat templateBooleanFormat = env.getTemplateBooleanFormat();
+            if (templateBooleanFormat != null) {
+                if (s.equals(templateBooleanFormat.getTrueStringValue())) {
+                    return true;
+                }
+                if (s.equals(templateBooleanFormat.getFalseStringValue())) {
+                    return false;
+                }
+            }
+            throw new TemplateException(this, env,
+                    "Can't convert this string to boolean: ", new _DelayedJQuote(s));
         }
     }
 

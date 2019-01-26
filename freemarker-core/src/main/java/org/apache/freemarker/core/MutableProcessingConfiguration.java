@@ -447,15 +447,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     public void setBooleanFormat(String booleanFormat) {
         _NullArgumentException.check("booleanFormat", booleanFormat);
-        
-        int commaIdx = booleanFormat.indexOf(',');
-        if (commaIdx == -1) {
-            throw new IllegalArgumentException(
-                    "Setting value must be a string that contains two comma-separated values for true and false, " +
-                    "respectively.");
-        }
-        
-        this.booleanFormat = booleanFormat; 
+        TemplateBooleanFormat.validateFormatString(booleanFormat);
+        this.booleanFormat = booleanFormat;
     }
 
     /**

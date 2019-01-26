@@ -219,13 +219,15 @@ public interface ProcessingConfiguration {
     boolean isCustomNumberFormatsSet();
 
     /**
-     * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
-     * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
-     * so {@code "yes, no"} is WRONG (unless you want that leading space before "no").
+     * The string value for the boolean {@code true} and {@code false} values, usually intended for human consumption
+     * (not for a computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is
+     * significant, so {@code "yes, no"} is WRONG (unless you want that leading space before "no"). Because the proper
+     * way of formatting booleans depends on the context too much, it's probably the best to leave this setting on its
+     * default, {@code ""}, which will enforce explicit formatting, like <code>${aBoolean?string('on', 'off')}</code>.
      *
-     * <p>For backward compatibility the default is {@code "true,false"}, but using that value is denied for automatic
-     * boolean-to-string conversion (like <code>${myBoolean}</code> will fail with it), only {@code myBool?string} will
-     * allow it, which is deprecated since FreeMarker 2.3.20.
+     * <p>If you generate the piece of output for "computer audience" as opposed to "human audience", then you should
+     * write <code>${myBoolean?c}</code>, which will print {@code true} or {@code false}. If you really want to always
+     * format for computer audience, then it's might be reasonable to set this setting to {@code c}.
      */
     String getBooleanFormat();
 

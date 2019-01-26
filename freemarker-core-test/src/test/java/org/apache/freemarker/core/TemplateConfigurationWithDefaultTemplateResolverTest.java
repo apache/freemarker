@@ -137,7 +137,7 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     @Test
     public void testConfigurableSettings() throws Exception {
-        String commonFTL = "${.locale} ${true?string} ${1.2}";
+        String commonFTL = "${.locale} ${true} ${1.2}";
         StringTemplateLoader loader = new StringTemplateLoader();
         loader.putTemplate("default", commonFTL);
         loader.putTemplate("(fr)", commonFTL);
@@ -145,6 +145,7 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
         loader.putTemplate("(00)(fr)", commonFTL);
 
         Configuration cfg = new TestConfigurationBuilder()
+                .booleanFormat("c")
                 .templateConfigurations(
                         new MergingTemplateConfigurationFactory(
                                 new ConditionalTemplateConfigurationFactory(

@@ -468,7 +468,7 @@ public class _EvalUtils {
             // `${missing!}` wouldn't print `""` anymore if we reorder these. But, if and when `null` handling is
             // reworked ("checked nulls"), this problem should go away, and so we should move this. 
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
-            return env.formatBoolean(booleanValue, false);
+            return env.formatBoolean(booleanValue);
         } else {
             if (returnNullOnNonCoercableType) {
                 return null;

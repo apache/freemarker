@@ -18,6 +18,7 @@
 -->
 <@noOutput>
 <#setting locale="en_US">
+<#setting booleanFormat="c">
 <#setting numberFormat="0.#########">
 
 <#assign ls = []?sort>
@@ -67,7 +68,7 @@ Boolean order:
         false,
         true]>
 <#list x?sort as i>
-- ${i?string}
+- ${i?c}
 </#list>
 
 
@@ -135,25 +136,25 @@ Contains:
 <#macro test></#macro>
 <#assign x = [1, "2", true, [1,2,3], {"a":1}, test, '1992-02-21'?date('yyyy-MM-dd')]>
 True:
-${x?seqContains(1.0)?string}
-${x?seqContains("2")?string}
-${x?seqContains(true)?string}
-${x?seqContains('1992-02-21'?date('yyyy-MM-dd'))?string}
-${abcSet?seqContains("a")?string}
-${abcSet?seqContains("b")?string}
-${abcSet?seqContains("c")?string}
+${x?seqContains(1.0)}
+${x?seqContains("2")}
+${x?seqContains(true)}
+${x?seqContains('1992-02-21'?date('yyyy-MM-dd'))}
+${abcSet?seqContains("a")}
+${abcSet?seqContains("b")}
+${abcSet?seqContains("c")}
 
 False:
-${x?seqContains("1")?string}
-${x?seqContains(2)?string}
-${x?seqContains(false)?string}
-${x?seqContains('1992-02-22'?date('yyyy-MM-dd'))?string}
-${abcSet?seqContains("A")?string}
-${abcSet?seqContains(1)?string}
-${abcSet?seqContains(true)?string}
+${x?seqContains("1")}
+${x?seqContains(2)}
+${x?seqContains(false)}
+${x?seqContains('1992-02-22'?date('yyyy-MM-dd'))}
+${abcSet?seqContains("A")}
+${abcSet?seqContains(1)}
+${abcSet?seqContains(true)}
 
 <#assign x = []>
-False: ${x?seqContains(1)?string}
+False: ${x?seqContains(1)}
 
 Index_of:
 ---------
@@ -285,12 +286,12 @@ seq_last_index_of "c":
 Sequence builtins ignoring nulls
 --------------------------------
 
-true = ${listWithNull?seqContains('c')?string}
+true = ${listWithNull?seqContains('c')}
 2 = ${listWithNull?seqIndexOf('c')}
 0 = ${listWithNull?seqLastIndexOf('a')}
 
 These should throw exception, but for BC they don't:
-false = ${listWithNull?seqContains(noSuchVar)?string}
+false = ${listWithNull?seqContains(noSuchVar)}
 -1 = ${listWithNull?seqIndexOf(noSuchVar)}
 -1 = ${listWithNull?seqLastIndexOf(noSuchVar)}
 

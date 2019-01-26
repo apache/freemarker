@@ -1131,38 +1131,41 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
     }
     
-    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
+    String formatBoolean(boolean value) throws TemplateException {
         TemplateBooleanFormat templateBooleanFormat = getTemplateBooleanFormat();
-        if (value) {
-            String s = templateBooleanFormat.getTrueStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return TemplateBooleanFormat.C_TRUE;
-                } else {
-                    throw new TemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
-        } else {
-            String s = templateBooleanFormat.getFalseStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return TemplateBooleanFormat.C_FALSE;
-                } else {
-                    throw new TemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
+        if (templateBooleanFormat == null) {
+            throw new TemplateException(new _ErrorDescriptionBuilder(
+                    "Can't convert boolean to string automatically, because the "
+                            + "\"", BOOLEAN_FORMAT_KEY ,"\" setting was not set. This is the default configuration; "
+                            + "you should provide the format explicitly for each place where you print a boolean."
+            ).tips(
+                    "Write something like myBool?string('yes', 'no') to specify boolean formatting in place.",
+                    new Object[]{
+                            "If you want \"true\"/\"false\" result as you are generating computer-language output "
+                                    + "(not for direct human consumption), then use \"?c\", like ${myBool?c}. (If you "
+                                    + "always generate computer-language output, then it's might be reasonable to set "
+                                    + "the \"", BOOLEAN_FORMAT_KEY, "\" setting to \"c\" instead.)",
+                    },
+                    new Object[] {
+                            "If you need the same two values on most places, the programmers can set the \"",
+                            BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\". However, then it will be "
+                                    + "easy to unwillingly format booleans like that."
+                    }
+            ));
         }
+        return value ? templateBooleanFormat.getTrueStringValue() : templateBooleanFormat.getFalseStringValue();
     }
 
+    /**
+     * @return {@code null} if the boolean format string was an empty string.
+     */
     TemplateBooleanFormat getTemplateBooleanFormat() {
         TemplateBooleanFormat format = cachedTemplateBooleanFormat;
         if (format == null) {
             format = TemplateBooleanFormat.getInstance(getBooleanFormat());
-            cachedTemplateBooleanFormat = format;
+            if (format != null) {
+                cachedTemplateBooleanFormat = format;
+            }
         }
         return format;
     }
@@ -1174,23 +1177,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (!booleanFormat.equals(previousFormat)) {
             cachedTemplateBooleanFormat = null;
         }
-    }
-
-    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
-        return new _ErrorDescriptionBuilder(
-                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
-                new _DelayedJQuote(getBooleanFormat()),
-                (getBooleanFormat().equals(TemplateBooleanFormat.C_TRUE_FALSE)
-                        ? ", which is the legacy default computer-language format, and hence isn't accepted."
-                        : ".")
-        ).tips(
-                "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
-                        + "use \"?c\", like ${myBool?c}.",
-                "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
-                new Object[] {
-                        "If you need the same two values on most places, the programmers should set the \"",
-                        BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
-        );
     }
 
     /**

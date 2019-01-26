@@ -389,9 +389,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         timeFormat = builder.getTimeFormat();
         dateFormat = builder.getDateFormat();
         dateTimeFormat = builder.getDateTimeFormat();
+        booleanFormat = builder.getBooleanFormat();
         timeZone = builder.getTimeZone();
         sqlDateAndTimeTimeZone = builder.getSQLDateAndTimeTimeZone();
-        booleanFormat = builder.getBooleanFormat();
         templateExceptionHandler = builder.getTemplateExceptionHandler();
         attemptExceptionReporter = builder.getAttemptExceptionReporter();
         arithmeticEngine = builder.getArithmeticEngine();
@@ -2546,7 +2546,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected String getDefaultBooleanFormat() {
-            return TemplateBooleanFormat.C_TRUE_FALSE;
+            return "";
         }
 
         @Override

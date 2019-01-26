@@ -26,7 +26,7 @@ ${'01:02:03'?time.iso?string("iso ms nz")}
 ${multi}
 <#assign a = true>
 <#assign b = false>
-${a?string} ${b?string}
+${a?c} ${b?c}
 ${a?string("yes", "no")} ${b?string("yes", "no")}
 <#setting booleanFormat="igen,nem"/>
-${a?string} ${b?string}
+${a?string} ${b}
