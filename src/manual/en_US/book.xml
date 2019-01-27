@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.28</productname>
+    <productname>Freemarker 2.3.29</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -2664,14 +2664,14 @@ baz
             contain letters (including non-Latin letters), digits (including
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
-            Furthermore, the first character can't be a ASCII digit
+            Furthermore, the first character can't be an ASCII digit
             (<literal>0</literal>-<literal>9</literal>). Starting from
             FreeMarker 2.3.22, the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
-            with a preceding backslash (<literal>\</literal>), or else they
-            would be interpreted as operators. For example, to read the
-            variable whose name is <quote>data-id</quote>, the expression is
+            with a preceding backslash (<literal>\</literal>), otherwise they
+            are interpreted as operators. For example, to read the variable
+            whose name is <quote>data-id</quote>, the expression is
             <literal>data\-id</literal>, as <literal>data-id</literal> would
             be interpreted as <quote>data minus id</quote>. (Note that these
             escapes only work in identifiers, not in string literals.)</para>
@@ -13047,6 +13047,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_truncate">truncate,
+            truncate_<replaceable>...</replaceable></link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_uncap_first">uncap_first</link></para>
           </listitem>
@@ -14635,6 +14640,228 @@ foobar</programlisting>
           <programlisting role="output">(green mouse)</programlisting>
         </section>
 
+        <section xml:id="ref_builtin_truncate">
+          <title>truncate, truncate_...</title>
+
+          <indexterm>
+            <primary>truncate built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_c built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_w built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_m built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_c_m built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>truncate_w_m built-in</primary>
+          </indexterm>
+
+          <para>Cuts off the end of a string if that's necessary to keep it
+          under a the length given as parameter, and appends a terminator
+          string (<literal>[...]</literal> by default) to indicate that the
+          string was truncated. Example (assuming default FreeMarker
+          configuration settings):</para>
+
+          <programlisting role="template">&lt;#assign shortName='This is short'&gt;
+&lt;#assign longName='This is a too long name'&gt;
+&lt;#assign difficultName='This isoneveryverylongword'&gt;
+
+No truncation needed:
+${shortName?truncate(16)} 
+
+Truncated at word boundary:
+${longName?truncate(16)}
+
+Truncated at "character boundary":
+${difficultName?truncate(16)}</programlisting>
+
+          <programlisting role="output">No truncation needed:
+This is short
+
+Truncated at word boundary:
+This is a [...]
+
+Truncated at "character boundary":
+This isonev[...]</programlisting>
+
+          <para>Things to note above:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The string is returned as is if its length doesn't exceed
+              the specified length (16 in this case).</para>
+            </listitem>
+
+            <listitem>
+              <para>When the string exceeded that length, its end was cut off
+              in a way so that together with the added terminator string
+              (<literal>[...]</literal> here) its length won't exceed 16. The
+              result length is possibly shorter than 16, for the sake of
+              better look (see later). Actually, the result length can also be
+              longer than the parameter length, when the desired length is
+              shorter than the terminator string alone, in which case the
+              terminator is still returned as is. Also, an algorithms other
+              than the default might choses to return a longer string, as the
+              length parameter is in principle just hint for the desired
+              visual length.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>truncate</literal> prefers cutting at word
+              boundary, rather than mid-word, however, if doing so would give
+              a result that's shorter than the 75% of the length specified
+              with the argument, it falls back to cut mid-word. In the last
+              line of the above example, <quote>This [...]</quote> would be
+              too short (11 &lt; 16 * 75%), so it was cut mid-word
+              instead.</para>
+            </listitem>
+
+            <listitem>
+              <para>If the cut happened at word boundary, there's a space
+              between the word end and the terminator string, otherwise
+              there's no space between them. Only whitespace is treated as
+              word separator, not punctuation, so this generally gives
+              intuitive results.</para>
+            </listitem>
+          </itemizedlist>
+
+          <simplesect>
+            <title>Adjusting truncation rules</title>
+
+            <para>Truncation rules are highly configurable by setting the
+            <literal>truncate_builtin_algorithm</literal> configuration
+            setting. This can be done by the programmers, not template
+            authors, so for more details and examples please see the JavaDoc
+            of <link
+            xlink:href="api/freemarker/core/Configurable.html#setTruncateBuiltinAlgorithm-freemarker.core.TruncateBuiltinAlgorithm-">Configurable.setTruncateBuiltinAlgorithm</link>.</para>
+
+            <para>Truncation rules can also be influenced right in the
+            template to a smaller extent:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Specifying if the truncation should happen at word
+                boundary or not:</para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para><literal>truncate_w</literal> will always truncate
+                    at word boundary. For example,
+                    <literal>difficultName?truncate_w(16)</literal> returns
+                    <quote>This [...]</quote>, rather than <quote>This
+                    isonev[...]</quote> (as saw in earlier example).</para>
+                  </listitem>
+
+                  <listitem>
+                    <para><literal>truncate_c</literal> will truncate at any
+                    character, not just at word ends. For example,
+                    <literal>longName?truncate_c(16)</literal> returns
+                    <quote>This is a t[...]</quote>, rather than <quote>This
+                    is a [...]</quote> (as saw in earlier example). This tends
+                    to give a string length closer to the length specified,
+                    but still not an exact length, as it removes white-space
+                    before the terminator string, and re-adds a space if we
+                    are just after the end of a word, etc.</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+
+              <listitem>
+                <para>Specifying the terminator string (instead of relying on
+                its default): <literal>truncate</literal> and all
+                <literal>truncate_<replaceable>...</replaceable></literal>
+                built-ins have an additional optional parameter for it. After
+                that, a further optional parameter can specify the assumed
+                length of the terminator string (otherwise its real length
+                will be used). If you find yourself specifying the terminator
+                string often, then certainly the defaults should be configured
+                instead (via <literal>truncate_builtin_algorithm
+                configuration</literal> - see earlier). Example:</para>
+
+                <programlisting role="template">${longName?truncate(16, '...')}
+${longName?truncate(16, '...', 1)}</programlisting>
+
+                <programlisting role="output">This is a ...
+This is a too ...</programlisting>
+
+                <para>When the terminator string starts with dot
+                (<literal>.</literal>) or ellipsis (<literal>…</literal>), the
+                default algorithm will remove the dots and ellipses that the
+                terminator touches, to prevent ending up with more than 3 dots
+                at the end:</para>
+
+                <programlisting role="template">${'Foo bar.baaz'?truncate(11, '---')}
+${'Foo bar.baaz'?truncate(11, '...')} (Not "Foo bar....")
+${'Fo bar. baaz'?truncate(11, '...')} (Word separator space prevents touching)</programlisting>
+
+                <programlisting role="output">Foo bar.---
+Foo bar... (Not "Foo bar....")
+Fo bar. ... (Word separator space prevents touching)</programlisting>
+              </listitem>
+            </itemizedlist>
+          </simplesect>
+
+          <simplesect>
+            <title>Using markup as terminator string</title>
+
+            <para>Each truncation built-in has a variation whose name ends
+            with <literal>_m</literal> (for markup). These allow using markup
+            (like HTML) as terminator, which is useful if you want the
+            terminator to be styled differently than the truncated text. By
+            default the markup terminator is <literal>&lt;span
+            class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</literal>,
+            (where <literal>&amp;#8230;</literal> prints an ellipsis
+            character), but of course this can be changed with the
+            <literal>truncate_builtin_algorithm</literal> configuration
+            setting (see earlier). Example (see the variables used in earlier
+            example):</para>
+
+            <programlisting role="template">${longName?truncate_m(16)}
+${difficultName?truncate_w_m(16)}
+${longName?truncate_c_m(16)}</programlisting>
+
+            <programlisting role="output">This is a &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;
+This &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;
+This is a to&lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</programlisting>
+
+            <para>Note above that the terminator string was considered to be
+            only 3 characters long (<literal>'['</literal>,
+            <literal>'…'</literal>, <literal>']'</literal>) by the truncation
+            built-ins, because inside the terminator string they only count
+            the characters outside HTML/XML tags and comments, and they can
+            also interpret numeric character references (but not other entity
+            references). (The same applies when they decide if the terminator
+            starts with dot or ellipsis; preceding tags/comments are skipped,
+            etc.)</para>
+
+            <para>If a markup terminator is used (like above), the return
+            value of the
+            <literal>truncate<replaceable>...</replaceable>_m</literal>
+            built-in will be markup as well, which means that <link
+            linkend="dgui_misc_autoescaping">auto-escaping</link> won't escape
+            it. Of course, the content of the truncated string itself will be
+            still auto-escaped:</para>
+
+            <programlisting role="template">&lt;#ftl output_format='HTML'&gt;
+${'This is auto-escaped: &lt;span&gt;'}
+${'This is auto-escaped: &lt;span&gt;, but not the terminator string'?truncate_m(41)}</programlisting>
+
+            <programlisting role="output">This is auto-escaped: &amp;lt;span&amp;gt;
+This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerminator'&gt;[&amp;#8230;]&lt;/span&gt;</programlisting>
+          </simplesect>
+        </section>
+
         <section xml:id="ref_builtin_uncap_first">
           <title>uncap_first</title>
 
@@ -15314,7 +15541,7 @@ rif: foo XYr baar</programlisting>
           value of the number (like big numbers are possibly
           <quote>damaged</quote> by grouping separators).</para>
 
-          <para>If the <literal>incompatible_imporvements</literal> FreeMarker
+          <para>If the <literal>incompatible_improvements</literal> FreeMarker
           configuration setting is set to 2.3.24 or higher (also if it's set
           to 2.3.20 or higher and you are outside a string literal), this
           built-in will return <literal>"INF"</literal>,
@@ -15752,7 +15979,8 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                 </tr>
 
                 <tr>
-                  <td><literal>multipier</literal></td>
+                  <td><literal>multiplier</literal> since 2.3.29;
+                  <literal>multipier</literal> since 2.3.24</td>
 
                   <td>The number will be shown after multiplied with this
                   integer number.</td>
@@ -16494,10 +16722,18 @@ Tue, Apr 8, '03
           <quote>computer language</quote> as opposed to for human audience.
           The result will be <literal>"true"</literal> or
           <literal>"false"</literal>, regardless of the
-          <literal>boolean_format</literal> setting. When generating
-          JavaScript and such, this should be used, as otherwise changing the
-          <literal>boolean_format</literal> can break the generated
-          computer-language output.</para>
+          <literal>boolean_format</literal> configuration setting, as that
+          setting is meant to specify the format for human consumption. When
+          generating boolean literals for JavaScript and such, this should be
+          used.</para>
+
+          <para>If you only generate output that's computer language and isn't
+          read by end-users, you may want to set the
+          <literal>boolean_format</literal> configuration setting to
+          <literal>c</literal> (since FreeMarker 2.3.29), in which case
+          <literal>${<replaceable>aBoolean</replaceable>}</literal> will have
+          the same output as
+          <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.</para>
 
           <para>Note that this built-in <link linkend="ref_builtin_c">also
           works on strings</link>.</para>
@@ -16530,24 +16766,26 @@ Tue, Apr 8, '03
             <secondary>boolean</secondary>
           </indexterm>
 
-          <para><emphasis>All usages of this built-in has been deprecated; see
-          below.</emphasis></para>
-
           <para>Converts a boolean to a string. You can use it in two
           ways:</para>
 
           <itemizedlist>
             <listitem>
-              <para>As <literal>foo?string("yes", "no")</literal>:
-              <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
-              linkend="ref_builtin_then"><literal>?then("yes",
-              "no")</literal></link> instead. </emphasis>This will return the
-              first parameter (here: <literal>"yes"</literal>) if the boolean
-              is true, otherwise the second parameter (here:
-              <literal>"no"</literal>). Note that the return value is always a
-              string; if the parameters were numbers, they would be converted
-              to strings first. Also note that both parameters are evaluated,
-              despite that only one of them will be used; this might have
+              <para>As <literal>foo?string("yes", "no")</literal>: Formats the
+              boolean value to the first parameter (here:
+              <literal>"yes"</literal>) if the boolean is true, and to the
+              second parameter (here: <literal>"no"</literal>) if it's false.
+              Unless you only meant to format a boolean with simple literals,
+              use <link
+              linkend="ref_builtin_then"><literal>?then(<replaceable>whenTrue</replaceable>,
+              <replaceable>whenFalse</replaceable>)</literal></link> instead,
+              as that has less type limitations, and it evaluate its
+              parameters lazily! The return value of
+              <literal>?string</literal> is always a string (unlike for
+              <literal>?then</literal>), because if the parameters aren't
+              strings, they will be converted to strings. Also note that both
+              parameters are evaluated (unlike for <literal>?then</literal>),
+              despite that only one of them will be used; this might has
               negative impact if the parameters aren't just literals.</para>
             </listitem>
 
@@ -16562,18 +16800,17 @@ Tue, Apr 8, '03
               this will convert the boolean to string using the default
               strings for representing true and false values. By default, true
               is rendered as <literal>"true"</literal> and false is rendered
-              as <literal>"false"</literal>. This is mostly useful if you
+              as <literal>"false"</literal>. This is mostly only useful if you
               generate source code with FreeMarker <emphasis>(but use
-              <literal>?c</literal> for that starting from 2.3.20)</emphasis>,
-              since the values are not locale (language, country) sensitive.
+              <literal>?c</literal> for that starting from 2.3.20)</emphasis>.
               To change these default strings, you can use the
               <literal>boolean_format</literal> <link
               linkend="ref_directive_setting">setting</link>.</para>
 
-              <para role="forProgrammers">Note, that in the very rare case
-              when a value is multi-typed and is both a boolean and a string,
-              then the string value of the variable will be returned, and so
-              the <literal>boolean_format</literal> setting will have no
+              <para role="forProgrammers">Note that in the very rare case when
+              a value is multi-typed and is both a boolean and a string, then
+              the string value of the variable will be returned, and so the
+              <literal>boolean_format</literal> setting will have no
               effect.</para>
             </listitem>
           </itemizedlist>
@@ -26524,14 +26761,14 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Unlike numbers, booleans has no commonly accepted format,
-            not even a common format within the same page. Like when you show
-            on a HTML page if a product is washable, you will hardly want to
-            show for the visitor "Washable: true", but rather "Washable: yes".
-            So we force the template author (by <literal>${washable}</literal>
-            causing error) to find out with his human knowledge how the
-            boolean value should be shown at the given place. The common way
-            of formatting a boolean is like <literal>${washable?string("yes",
+            <para><literal>${<replaceable>...</replaceable>}</literal> meant
+            to format values for human consumption, and unlike numbers,
+            booleans has no commonly accepted format
+            (<literal>true</literal>/<literal>false</literal> is common in
+            computer languages, but you rarely use it outside that). The
+            proper format depends quite much on the context, therefore,
+            usually the template author should decide the proper format for
+            each case, like <literal>${washable?string("yes",
             "no")}</literal>, <literal>${caching?string("Enabled",
             "Disabled")}</literal>, <literal>${heating?string("on",
             "off")}</literal>, etc.</para>
@@ -26543,14 +26780,24 @@ End book</programlisting>
               <listitem>
                 <para>When printing boolean to generate computer language
                 output, and hence you want
-                <literal>true</literal>/<literal>false</literal>, use
-                <literal>${<replaceable>someBoolean</replaceable>?c}</literal>.
-                (This requires at least FreeMarker 2.3.20. Before that, the
-                common practice was writing
-                <literal>${<replaceable>someBoolean</replaceable>?string}</literal>,
-                however that's dangerous because its output depends on the
-                current boolean format setting, whose default is
-                <literal>"true"</literal>/<literal>"false"</literal>.)</para>
+                <literal>true</literal>/<literal>false</literal>. In such case
+                use <literal>${<replaceable>someBoolean</replaceable><link
+                linkend="ref_builtin_c_boolean">?c</link>}</literal> (requires
+                FreeMarker 2.3.20). If you never generate for human
+                consumption, only for computer language output, you might want
+                to set <literal>boolean_format</literal> to
+                <literal>c</literal> (available since FreeMarker 2.3.29), and
+                then <literal>${<replaceable>aBoolean</replaceable>}</literal>
+                will behave as
+                <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.</para>
+
+                <para>Before 2.3.20, if you really can't upgrade FreeMarker,
+                try if
+                <literal>${<replaceable>someBoolean</replaceable>?string}</literal>.
+                By default that prints
+                <literal>true</literal>/<literal>false</literal>. Then somehow
+                try to ensure that <literal>boolean_format</literal> won't be
+                changed later by someone, breaking your output.</para>
               </listitem>
 
               <listitem>
@@ -27411,37 +27658,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <itemizedlist>
               <listitem>
-                <para>Denial-of-Service (DoS) attacks: It's trivial to create
-                templates that run practically forever (with a loop), or
-                exhaust memory (by concatenating to a string in a loop).
-                FreeMarker can't enforce CPU or memory usage limits, so this
-                is something that has no solution on the
-                FreeMarker-level.</para>
-              </listitem>
-
-              <listitem>
                 <para>Data-model and wrapping
                 (<literal>Configuration.setObjectWrapper</literal>): The
                 data-model might gives access to the public Java API of some
                 objects that you have put into the data-model. By default, for
                 objects that aren't instances of a the bunch of specially
-                handler types (<literal>String</literal>,
+                handled types (<literal>String</literal>,
                 <literal>Number</literal>, <literal>Boolean</literal>,
                 <literal>Date</literal>, <literal>Map</literal>,
                 <literal>List</literal>, array, and a few others), their
-                public Java API will be exposed. To avoid that, you have to
-                construct the data-model so that it only exposes the things
-                that are really necessary for the template. For that, you may
-                want to use <literal>SimpleObjectWrapper</literal> (via
-                <literal>Configuration.setObjectWrapper</literal> or the
+                public Java API will be exposed, including most methods
+                inherited from standard Java classes
+                (<literal>getClass()</literal>, etc.). To avoid that, you have
+                to construct the data-model so that it only exposes the
+                members that are really necessary for the template. One
+                possibility is using <literal>SimpleObjectWrapper</literal>
+                (via <literal>Configuration.setObjectWrapper</literal> or the
                 <literal>object_wrapper</literal> setting) and then create the
                 data-model purely from <literal>Map</literal>-s,
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
                 <literal>Boolean</literal>-s and <literal>Date</literal>-s.
-                Or, you can implement your own extremely restrictive
-                <literal>ObjectWrapper</literal>, which for example could
-                expose your POJO-s safely.</para>
+                For many application though that's too restrictive, and
+                instead you need to implement your own extremely restrictive
+                <literal>ObjectWrapper</literal>, which, for example, only
+                exposes those members of POJO-s that were explicitly marked to
+                be safe (opt-in approach).</para>
+
+                <para>Also, don't forget about the <link
+                linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
+                built-in</link>, if you have enabled it (it's disabled by
+                default). While the Java API of <literal>Map</literal>-s,
+                <literal>List</literal>-s and similar container-like objects
+                is not directly exposed by most
+                <literal>ObjectWrapper</literal>-s, so
+                <literal>someMap.someJavaMethod()</literal> won't work, using
+                <literal>?api</literal> the template author can still get to
+                the Java API-s of these objects, like
+                <literal>someMap?api.someJavaMethod()</literal>. But note that
+                the <literal>ObjectWrapper</literal> is still in control, as
+                it decides what objects support <literal>?api</literal>, and
+                what will <literal>?api</literal> expose for them (it usually
+                exposes the same as for a generic POJO).</para>
+
+                <para>Last not least, some maybe aware of that the standard
+                object wrappers filters out some well known
+                <quote>unsafe</quote> methods, like
+                <literal>System.exit</literal>. Do not ever rely on this as
+                your only line of defense, since it only blocks the methods
+                that's in a predefined list. Thus, for example, if a new Java
+                version adds a new problematic method, it won't be filtered
+                out.</para>
               </listitem>
 
               <listitem>
@@ -27484,6 +27751,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 accessible classes (possibly based on which template asks for
                 them), such as
                 <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>Denial-of-Service (DoS) attacks: It's trivial to create
+                templates that run practically forever (with a loop), or
+                exhaust memory (by concatenating to a string in a loop).
+                FreeMarker can't enforce CPU or memory usage limits, so this
+                is something that has no solution on the
+                FreeMarker-level.</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -27612,6 +27888,119 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_29">
+        <title>2.3.29</title>
+
+        <para>Release date: [FIXME]</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added new built-ins for truncating text.
+              <literal><replaceable>string</replaceable>?truncate(<replaceable>length</replaceable>)</literal>
+              truncates the text to the given length, and by default adds
+              <literal>[...]</literal> at the end if truncation has happened.
+              Truncation happens at word boundaries, unless the result is too
+              short that way, in which case it falls back to truncation mid
+              word. There's also <literal>?truncate_w</literal> to force Word
+              Boundary truncation, and <literal>?truncate_c</literal> (for
+              Character Boundary) that doesn't care about word boundaries. The
+              truncation algorithm is pluggable in the FreeMarker
+              configuration. See <link linkend="ref_builtin_truncate">the
+              reference</link> for more details.</para>
+            </listitem>
+
+            <listitem>
+              <para>Extended big decimal format parameter
+              <quote>multiplier</quote> was incorrectly written as
+              <quote>multipier</quote>. Now both words are recognized.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-109">FREEMARKER-109</link>:
+              In JSP TLD-s, line breaks inside function parameter lists have
+              caused <literal>IllegalArgumentException</literal>
+              <quote>Invalid function signature</quote>.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-104">FREEMARKER-104</link>:
+              More helpful log and error messages (especially, no
+              <literal>NullPointerException</literal> cause exception logged
+              during FreeMarker XPath support initialization) if no XPath
+              implementation is available because Java 9 modules don't allow
+              accessing the internal Xalan that's stored under
+              <literal>com.sun</literal> packages. (The messages now recommend
+              adding Apache Xalan or Jaxen as dependency if you need XPath
+              support.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>boolean_format</literal> configuration
+              setting now can be set to <literal>"c"</literal>. Then
+              <literal>${<replaceable>aBoolean</replaceable>}</literal> will
+              behave as
+              <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.
+              This should be only used if you are generating output for
+              non-human (computer) consumption only. If your output has pieces
+              for human audience too, it's still recommended to use
+              <literal>${<replaceable>aBoolean</replaceable>?c}</literal>
+              where <literal>true</literal>/<literal>false</literal> output is
+              needed, and either not set the <literal>boolean_format</literal>
+              at all, or set it to something that's appropriate for everyday
+              uses (like <literal>"yes,no"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>TemplateModelUtils.wrapAsHashUnion(ObjectWrapper,
+              List&lt;?&gt;)</literal> and
+              <literal>wrapAsHashUnion(ObjectWrapper, Object...)</literal>,
+              which meant to be used when you want to compose a data-model
+              from multiple objects in a way so that their entries
+              (<literal>Map</literal> key-value pairs, bean properties, etc.)
+              appear together on the top level of the data-model.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>HTMLOutputFormat</literal>,
+              <literal>XMLOutputFormat</literal>,
+              <literal>XHTMLOutputFormat</literal> aren't final classes
+              anymore, furthermore <literal>XHTMLOutputFormat</literal> now
+              extends <literal>XMLOutputFormat</literal>. Same applies to the
+              respective <literal>TemplateOutputModel</literal>-s
+              (<literal>TemplateHTMLOutputModel</literal> is not final
+              anymore, etc.). This allows defining new custom markup output
+              format classes that will work with program logic that's only
+              prepared for the standard markup output formats, because
+              <literal>instanceof
+              <replaceable>SomeStandardOutputFromat</replaceable></literal>
+              will return <literal>true</literal> for them.</para>
+            </listitem>
+
+            <listitem>
+              <para>When configuring FreeMarker with string values (like with
+              a <literal>.properties</literal> file), in the settings that
+              support the <quote>object builder</quote> syntax, now you can
+              create a <literal>TemplateMarkupOutputModel</literal> value with
+              the new <literal>markup</literal> function, like
+              <literal>markup(HTMLOutputFormat(),
+              "&lt;p&gt;Example&lt;/p&gt;")</literal>.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_28">
         <title>2.3.28</title>

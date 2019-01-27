@@ -19,6 +19,7 @@
 
 deployUrl: "https://freemarker.apache.org/docs/"
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+cookieConsentScriptURL: "https://cdn.jsdelivr.net/npm/cookie-bar/cookiebar-latest.min.js"
 searchKey: "003127866208504630097:arjqbv_znfw"
 validation: {
   programlistingsRequireRole

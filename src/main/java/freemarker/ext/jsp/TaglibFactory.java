@@ -361,7 +361,7 @@ public class TaglibFactory implements TemplateHashModel {
      * loader provided by the servlet container.
      * 
      * <p>
-     * This is usually set via the init-params of {@link FreemarkerServlet}.
+     * This is usually set via the init-params of {@link FreemarkerServlet}. Otherwise it defaults to an empty list.
      * 
      * @param classpathTlds
      *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like

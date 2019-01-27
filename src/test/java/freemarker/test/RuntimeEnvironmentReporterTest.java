@@ -16,28 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package freemarker.core;
+
+package freemarker.test;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
- *
- * <p>This class was final before 2.3.29.
- *
- * @since 2.3.24
+ * Prints and logs what the JUnit test are running on (doesn't actually test anything). 
  */
-public class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
+public class RuntimeEnvironmentReporterTest {
     
-    /**
-     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
-     * @since 2.3.29
-     */
-    protected TemplateHTMLOutputModel(String plainTextContent, String markupContent) {
-        super(plainTextContent, markupContent);
-    }
-
-    @Override
-    public HTMLOutputFormat getOutputFormat() {
-        return HTMLOutputFormat.INSTANCE;
+    private Logger log = LoggerFactory.getLogger(RuntimeEnvironmentReporterTest.class);
+    
+    @Test
+    public void logRuntimeEnvironment() {
+        for (String propName : new String[] {
+                "java.version", "java.vendor", "java.vm.name", "java.home",
+                "os.name", "os.arch", "os.version" }) {
+            String propValue = System.getProperty(propName);
+            System.out.println(propName + ": " + propValue);
+            log.info("{}: {}", propName, propValue);
+        }
     }
 
 }

@@ -19,6 +19,7 @@
 <@noOutput>
 <#setting locale="en_US">
 <#setting number_format="0.#########">
+<#setting boolean_format="c">
 
 <#assign ls = []?sort>
 <#list ls as i>
@@ -67,7 +68,7 @@ Boolean order:
         false,
         true]>
 <#list x?sort as i>
-- ${i?string}
+- ${i}
 </#list>
 
 
@@ -135,25 +136,25 @@ Contains:
 <#macro test></#macro>
 <#assign x = [1, "2", true, [1,2,3], {"a":1}, test, '1992-02-21'?date('yyyy-MM-dd')]>
 True:
-${x?seq_contains(1.0)?string}
-${x?seq_contains("2")?string}
-${x?seq_contains(true)?string}
-${x?seq_contains('1992-02-21'?date('yyyy-MM-dd'))?string}
-${abcSet?seq_contains("a")?string}
-${abcSet?seq_contains("b")?string}
-${abcSet?seq_contains("c")?string}
+${x?seq_contains(1.0)}
+${x?seq_contains("2")}
+${x?seq_contains(true)}
+${x?seq_contains('1992-02-21'?date('yyyy-MM-dd'))}
+${abcSet?seq_contains("a")}
+${abcSet?seq_contains("b")}
+${abcSet?seq_contains("c")}
 
 False:
-${x?seq_contains("1")?string}
-${x?seq_contains(2)?string}
-${x?seq_contains(false)?string}
-${x?seq_contains('1992-02-22'?date('yyyy-MM-dd'))?string}
-${abcSet?seq_contains("A")?string}
-${abcSet?seq_contains(1)?string}
-${abcSet?seq_contains(true)?string}
+${x?seq_contains("1")}
+${x?seq_contains(2)}
+${x?seq_contains(false)}
+${x?seq_contains('1992-02-22'?date('yyyy-MM-dd'))}
+${abcSet?seq_contains("A")}
+${abcSet?seq_contains(1)}
+${abcSet?seq_contains(true)}
 
 <#assign x = []>
-False: ${x?seq_contains(1)?string}
+False: ${x?seq_contains(1)}
 
 Index_of:
 ---------
@@ -285,12 +286,12 @@ seq_last_index_of "c":
 Sequence builtins ignoring nulls
 --------------------------------
 
-true = ${listWithNull?seq_contains('c')?string}
+true = ${listWithNull?seq_contains('c')}
 2 = ${listWithNull?seq_index_of('c')}
 0 = ${listWithNull?seq_last_index_of('a')}
 
 These should throw exception, but for BC they don't:
-false = ${listWithNull?seq_contains(noSuchVar)?string}
+false = ${listWithNull?seq_contains(noSuchVar)}
 -1 = ${listWithNull?seq_index_of(noSuchVar)}
 -1 = ${listWithNull?seq_last_index_of(noSuchVar)}
 
@@ -301,7 +302,7 @@ Sequence built-ins failing on date-type mismatch
 <@assertEquals actual=x?seq_index_of('foo') expected=1 />
 <@assertEquals actual=x?seq_index_of('1992-02-21'?date('yyyy-MM-dd')) expected=0 />
 <@assertFails message="dates of different types">
-  0 = ${x?seq_index_of('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
+  ${x?seq_index_of('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
 </@>
 
 Chunk

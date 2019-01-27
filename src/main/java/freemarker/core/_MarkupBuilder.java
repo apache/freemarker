@@ -16,28 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package freemarker.core;
 
+import freemarker.template.TemplateModelException;
+
 /**
- * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
+ * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+ * Used by {@link _ObjectBuilderSettingEvaluator}.
  *
- * <p>This class was final before 2.3.29.
- *
- * @since 2.3.24
+ * @since  2.3.29
  */
-public class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
-    
-    /**
-     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
-     * @since 2.3.29
-     */
-    protected TemplateHTMLOutputModel(String plainTextContent, String markupContent) {
-        super(plainTextContent, markupContent);
+public class _MarkupBuilder<MO extends TemplateMarkupOutputModel> {
+
+    private final String markupSource;
+    private final MarkupOutputFormat<MO> markupOutputFormat;
+
+    public _MarkupBuilder(MarkupOutputFormat<MO> markupOutputFormat, String markupSource) {
+        this.markupOutputFormat = markupOutputFormat;
+        this.markupSource = markupSource;
     }
 
-    @Override
-    public HTMLOutputFormat getOutputFormat() {
-        return HTMLOutputFormat.INSTANCE;
+    public MO build() throws TemplateModelException {
+        return markupOutputFormat.fromMarkup(markupSource);
     }
 
 }

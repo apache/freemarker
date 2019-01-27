@@ -688,9 +688,12 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
             addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
-            
+
+            addWithSimpleName(SHORTHANDS, DefaultTruncateBuiltinAlgorithm.class);
+
             addWithSimpleName(SHORTHANDS, Locale.class);
             SHORTHANDS.put("TimeZone", "freemarker.core._TimeZone");
+            SHORTHANDS.put("markup", "freemarker.core._Markup");
 
             // For accessing static fields:
             addWithSimpleName(SHORTHANDS, Configuration.class);

@@ -208,6 +208,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isNewBuiltinClassResolverSet()) {
             setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
         }
+        if (tc.isTruncateBuiltinAlgorithmSet()) {
+            setTruncateBuiltinAlgorithm(tc.getTruncateBuiltinAlgorithm());
+        }
         if (tc.isNumberFormatSet()) {
             setNumberFormat(tc.getNumberFormat());
         }
@@ -343,6 +346,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isNewBuiltinClassResolverSet() && !template.isNewBuiltinClassResolverSet()) {
             template.setNewBuiltinClassResolver(getNewBuiltinClassResolver());
+        }
+        if (isTruncateBuiltinAlgorithmSet() && !template.isTruncateBuiltinAlgorithmSet()) {
+            template.setTruncateBuiltinAlgorithm(getTruncateBuiltinAlgorithm());
         }
         if (isNumberFormatSet() && !template.isNumberFormatSet()) {
             template.setNumberFormat(getNumberFormat());
@@ -669,6 +675,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isLogTemplateExceptionsSet()
                 || isWrapUncheckedExceptionsSet()
                 || isNewBuiltinClassResolverSet()
+                || isTruncateBuiltinAlgorithmSet()
                 || isNumberFormatSet()
                 || isObjectWrapperSet()
                 || isOutputEncodingSet()

@@ -18,7 +18,7 @@
  */
 package freemarker.core;
 
-public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
+public final class CustomTemplateHTMLModel extends TemplateHTMLOutputModel {
     
     CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);

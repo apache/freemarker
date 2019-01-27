@@ -180,6 +180,7 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        SETTING_ASSIGNMENTS.put("truncateBuiltinAlgorithm", DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE);
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);

@@ -128,17 +128,23 @@ To test your build, issue `ant test`.
 To generate documentation, issue `ant javadoc` and `ant manualOffline`.
 
 
-Eclipse and other IDE setup
----------------------------
+IDE setup
+---------
 
-Below you find the step-by-step setup for Eclipse Mars.1. If you are using a
-different version or an entierly different IDE, still read this, and try to
-apply it to your development environment:
+### First steps for all IDE-s
+
+Do these first, regardless of which IDE you are using:
 
 - Install Ant and Ivy, if you haven't yet; see earlier.
+
 - From the command line, run  `ant clean jar ide-dependencies`
   (Note that now the folders `ide-dependencies`, `build/generated-sources` and
   `META-INF` were created.)
+
+### Eclipse
+
+Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
+
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
   it's optional.
@@ -179,9 +185,9 @@ apply it to your development environment:
     - On "Source" tab, ensure that exactly these are marked as source
       directories (be careful, Eclipse doesn't auto-detect these well):
         build/generated-sources/java
-        src/main/java
-        src/main/resources
-        src/test/java
+        src/main/java,
+        src/main/resources,
+        src/test/java,
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
@@ -189,8 +195,8 @@ apply it to your development environment:
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
     - On the "Order and Export" tab find dom4j-*.jar, and send it to the
-        bottom of the list (becase, an old org.jaxen is included inside
-        dom4j-*.jar, which casues compilation errors if it wins over
+        bottom of the list (because, an old org.jaxen is included inside
+        dom4j-*.jar, which causes compilation errors if it wins over
         jaxen-*.jar).
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
@@ -203,10 +209,10 @@ apply it to your development environment:
   files depend on different versions of the same library, and Eclipse can't
   handle that). Exclude those java files from the Build Path (in the Package
   Explorer, right click on the problematic file -> "Build Path" -> "Exclude"):
-    _Jython20*.java
-    _Jython22*.java
-    _FreeMarkerPageContext2.java
-    FreeMarkerJspFactory2.java
+    _Jython20*.java,
+    _Jython22*.java,
+    _FreeMarkerPageContext2.java,
+    FreeMarkerJspFactory2.java,
     Java8*.java
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
@@ -219,7 +225,7 @@ apply it to your development environment:
   "Add missing @Deprecated annotations", and "Remove unnecessary cast").
 - Right click on the project -> Run As -> JUnit Test
   It should run without problems (all green).
-- It's highly recommened to use the Eclipse FindBugs plugin.
+- It's highly recommended to use the Eclipse FindBugs plugin.
   - Install it from Eclipse Marketplace (3.0.1 as of this writing)
   - Window -> Preferences -> Java -> FindBugs:
     Set all bug marker ranks from Warning to Error. (For false alarms we add
@@ -227,3 +233,72 @@ apply it to your development environment:
   - Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
+
+### IntelliJ IDEA
+
+Originally done on IntelliJ IDEA Community 2018.2.4:
+
+- "New" -> "Project". In order as the IntelliJ will prompt you:
+
+  - Select "Java" on the left side, and "1.8" for SDK on the right side. Press "Next".
+  
+  - Template selection: Don't chose anything, "Next"
+  
+  - Project name: "FreeMarker-2.3-gae".
+    Project location: Wherever you have checked out the 2.3-gae branch from Git.
+    Press "Finish"
+
+- Open your newly created "FreeMarker-2.3-gae" project
+
+- "File" -> "Project Structure..."
+
+  - Select "Modules" (on the left) / "Sources" (tab on the right). Now you see a Content Root
+    that was automatically added (at the rightmost side, under the "Add Content Root" button).
+    Remove it (click the "X" next to it); no Content Root should remain.
+    Now "Add Content Root", and select the FreeMarker project folder. IntelliJ will now add the new
+    Content Root, and automatically add some "Source Folders" and maybe some more under it, but it
+    won't be correct, so edit it until your newly added Source Root has this content:
+    
+    - Source Folders:  
+      src/main/java,  
+      build/generated-sources/java [generated]
+    
+    - Test Source folders:  
+      src/test/java  
+      
+    - Resource Folders:  
+      src/main/resources
+
+    - Test Resource Folders:  
+      src/test/resources
+      
+  - Still inside the "Sources" tab, change the "Language level" to "5". (Yes, we use Java 8 SDK with
+    language level 5 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
+    
+  - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
+    all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon
+    at the right edge, select "JARs or directory", navigate to `ide-dependencies` directory, expand
+    it, then range-select all the jars in it. Thus you add all of them at once.) After all jar-s were added,
+    find  dom4j-*.jar in the table, and move it to the bottom of the table (otherwise it shadows some
+    Jaxen classes with a too old version).
+
+- "File" -> "Settings" -> "Build, Execution, Deployment" -> "Compiler" -> "Excludes":
+  Add source files that match these (you simply find them manually, and add their absolute path):  
+    _Jython20*.java,  
+    _Jython22*.java,  
+    _FreeMarkerPageContext2.java,  
+    FreeMarkerJspFactory2.java,  
+    Java8*.java  
+
+- You may do "Build" / "Build project" (Ctrl+F9) to see if everything compiles now.
+    
+- "File" -> "Settings"
+  - Under "Editor" / "Code style", import and use
+    freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
+  - Under "Editor" / "Inspections", import and use
+    freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
+  - Copy the copyright header comment from some of the java files, then
+    under "Editor" / "Copyright" / "Copyright Profiles" click "+", enter "ASL2" as name,
+    then paste the copyright header. Delete the `/*` and ` */` lines, and the ` *`
+    prefixes (to select columns of text, hold Alt while selecting with the mouse.) Then
+    go back to "Copyright" in the tree, and set "Default project copyright" to "ASL2".

@@ -84,7 +84,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    static final int NUMBER_OF_BIS = 268;
+    static final int NUMBER_OF_BIS = 279;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -280,6 +280,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
         putBI("time_if_unknown", "timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         putBI("trim", new BuiltInsForStringsBasic.trimBI());
+        putBI("truncate", new BuiltInsForStringsBasic.truncateBI());
+        putBI("truncate_w", "truncateW", new BuiltInsForStringsBasic.truncate_wBI());
+        putBI("truncate_c", "truncateC", new BuiltInsForStringsBasic.truncate_cBI());
+        putBI("truncate_m", "truncateM", new BuiltInsForStringsBasic.truncate_mBI());
+        putBI("truncate_w_m", "truncateWM", new BuiltInsForStringsBasic.truncate_w_mBI());
+        putBI("truncate_c_m", "truncateCM", new BuiltInsForStringsBasic.truncate_c_mBI());
         putBI("uncap_first", "uncapFirst", new BuiltInsForStringsBasic.uncap_firstBI());
         putBI("upper_abc", "upperAbc", new BuiltInsForNumbers.upper_abcBI());
         putBI("upper_case", "upperCase", new BuiltInsForStringsBasic.upper_caseBI());
@@ -437,6 +443,14 @@ abstract class BuiltIn extends Expression implements Cloneable {
         } else {
             return EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
         }
+    }
+
+    /**
+     * Same as {@link #getNumberMethodArg}, but checks if {@code args} is big enough, and returns {@code null} if it
+     * isn't.
+     */
+    protected final Number getOptNumberMethodArg(List args, int argIdx) throws TemplateModelException {
+        return args.size() > argIdx ? getNumberMethodArg(args, argIdx) : null;
     }
 
     /**

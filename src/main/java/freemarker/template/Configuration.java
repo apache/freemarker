@@ -2038,10 +2038,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets when auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
-     * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output format,
-     * {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping will be off.
-     * Note that the templates can turn auto-escaping on/off locally with directives like {@code <#ftl auto_esc=...>},
-     * which will ignore the policy.
+     * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
+     * 
+     * <p>Note that the default output format, {@link UndefinedOutputFormat}, is a non-escaping format, so there
+     * auto-escaping will be off.
+     * 
+     * <p>Note that the templates can turn auto-escaping on/off locally with directives like
+     * {@code <#ftl auto_esc=...>}, {@code <#autoesc>...</#autoesc>}, and {@code <#noautoesc>...</#noautoesc>}, which
+     * are ignoring the auto-escaping policy.
      * 
      * <p><b>About auto-escaping</b></p>
      * 
@@ -2114,6 +2118,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>
      * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but
      * maybe also used by the embedding application to set the HTTP response MIME type, etc.
+     * 
+     * @param outputFormat
+     *            Not {@code null}; use {@link UndefinedOutputFormat#INSTANCE} instead.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurations(TemplateConfigurationFactory)
@@ -3002,14 +3009,23 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
      *  
-     * @since 2.3.21
+     * @since 2.3.29
      */
-    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+    public void setSharedVariables(Map<String, ?> map) throws TemplateModelException {
         rewrappableSharedVariables = new HashMap(map);
         sharedVariables.clear();
         setSharedVariablesFromRewrappableSharedVariables();
     }
 
+    /**
+     * Same as {@link #setSharedVariables(Map)}, but with typo in the name.
+     * @since 2.3.21
+     * @deprecated Use {@link #setSharedVariables(Map)} instead. 
+     */
+    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+        setSharedVariables(map);
+    }
+    
     private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
         if (rewrappableSharedVariables == null) return;
         for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext(); ) {
@@ -3292,25 +3308,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
-                long multipier;
+                long multiplier;
                 String valueWithoutUnit;
                 if (value.endsWith("ms")) {
-                    multipier = 1;
+                    multiplier = 1;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 2));
                 } else if (value.endsWith("s")) {
-                    multipier = 1000;
+                    multiplier = 1000;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else if (value.endsWith("m")) {
-                    multipier = 1000 * 60;
+                    multiplier = 1000 * 60;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else if (value.endsWith("h")) {
-                    multipier = 1000 * 60 * 60;
+                    multiplier = 1000 * 60 * 60;
                     valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
                 } else {
-                    multipier = 1000;  // Default is seconds for backward compatibility
+                    multiplier = 1000;  // Default is seconds for backward compatibility
                     valueWithoutUnit = value;
                 }
-                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
+                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multiplier);
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);

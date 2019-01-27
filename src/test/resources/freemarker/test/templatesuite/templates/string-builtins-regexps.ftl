@@ -16,31 +16,32 @@
   specific language governing permissions and limitations
   under the License.
 -->
-${"test"?matches('test')?string} == true
-${"test"?matches('test', '')?string} == true
+<#setting boolean_format="c">
+${"test"?matches('test')} == true
+${"test"?matches('test', '')} == true
 
-${"TEST"?matches('test')?string} == false
-${"TEST"?matches('test', 'i')?string} == true
+${"TEST"?matches('test')} == false
+${"TEST"?matches('test', 'i')} == true
 
-${"test\nfoo"?matches('.*^foo')?string} == false
-${"test\nfoo"?matches(r'.*\n^foo', 'm')?string} == true
+${"test\nfoo"?matches('.*^foo')} == false
+${"test\nfoo"?matches(r'.*\n^foo', 'm')} == true
 
-${"test\nfoo"?matches('test.foo')?string} == false
-${"test\nfoo"?matches('test.foo', 's')?string} == true
+${"test\nfoo"?matches('test.foo')} == false
+${"test\nfoo"?matches('test.foo', 's')} == true
 
-${"test\nFoo"?matches('.*foo', 's')?string} == false
-${"test\nFoo"?matches('.*foo', 'i')?string} == false
-${"test\nFoo"?matches('.*foo', 'im')?string} == false
-${"test\nFoo"?matches('.*foo', 'si')?string} == true
-${"test\nFoo"?matches('.*foo', 'is')?string} == true
-${"test\nFoo"?matches('.*foo', 'mis')?string} == true
+${"test\nFoo"?matches('.*foo', 's')} == false
+${"test\nFoo"?matches('.*foo', 'i')} == false
+${"test\nFoo"?matches('.*foo', 'im')} == false
+${"test\nFoo"?matches('.*foo', 'si')} == true
+${"test\nFoo"?matches('.*foo', 'is')} == true
+${"test\nFoo"?matches('.*foo', 'mis')} == true
 
-${"test\nFoo"?matches('.*\n^foo', 'm')?string} == false
-${"test\nFoo"?matches('.*\n^foo', 'i')?string} == false
-${"test\nFoo"?matches('.*\n^foo', 'im')?string} == true
-${"test\nFoo"?matches('.*\n^foo', 'mi')?string} == true
-${"test\nFoo"?matches('.*^foo', 'ism')?string} == true
-${"test\nFoo"?matches('.*^foo', 'smi')?string} == true
+${"test\nFoo"?matches('.*\n^foo', 'm')} == false
+${"test\nFoo"?matches('.*\n^foo', 'i')} == false
+${"test\nFoo"?matches('.*\n^foo', 'im')} == true
+${"test\nFoo"?matches('.*\n^foo', 'mi')} == true
+${"test\nFoo"?matches('.*^foo', 'ism')} == true
+${"test\nFoo"?matches('.*^foo', 'smi')} == true
 <#setting boolean_format="True,False">
 <@assert test=false?matches('[eslaF]+') />
 <@assert test='False'?matches('[eslaF]+') />
@@ -89,12 +90,12 @@ Lower c-word with follower in the same line:
 </#list>
 
 <#attempt>
-  Ignored but logged in 2.3: ${s?matches('broken', 'I')?string} == False
+  Ignored but logged in 2.3: ${s?matches('broken', 'I')} == False
 <#recover>
   Fails in 2.4
 </#attempt>
 <#attempt>
-  Ignored but logged in 2.3: ${s?matches('broken', 'f')?string} == False
+  Ignored but logged in 2.3: ${s?matches('broken', 'f')} == False
 <#recover>
   Fails in 2.4
 </#attempt>

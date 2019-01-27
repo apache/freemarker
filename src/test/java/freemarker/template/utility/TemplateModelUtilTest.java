@@ -22,27 +22,38 @@ package freemarker.template.utility;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultMapAdapter;
 import freemarker.template.DefaultNonListCollectionAdapter;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateHashModelEx2.KeyValuePair;
 import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 
 public class TemplateModelUtilTest {
 
+    private final DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_28).build();
+    
     @Test
     public void testGetKeyValuePairIterator() throws Exception {
         Map<Object, Object> map = new LinkedHashMap<Object, Object>();
@@ -82,8 +93,7 @@ public class TemplateModelUtilTest {
     @Test
     public void testGetKeyValuePairIteratorWithEx2() throws Exception {
         Map<Object, Object> map = new LinkedHashMap<Object, Object>();
-        TemplateHashModelEx thme = DefaultMapAdapter.adapt(
-                map, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build());
+        TemplateHashModelEx thme = DefaultMapAdapter.adapt(map, ow);
         
         assertetGetKeyValuePairIteratorContent("", thme);
         
@@ -122,21 +132,125 @@ public class TemplateModelUtilTest {
         throw new IllegalArgumentException("Type unsupported by test: " + model.getClass().getName());
     }
 
+    @Test
+    public void wrapAsHashUnionBasics() throws TemplateModelException {
+        TemplateHashModelEx thEx1 = new TemplateHashModelExOnly(ImmutableMap.of("a", 1, "b", 2));
+        TemplateHashModelEx thEx2 = new TemplateHashModelExOnly(ImmutableMap.of("c", 3, "d", 4));
+        TemplateHashModelEx thEx3 = new TemplateHashModelExOnly(ImmutableMap.of("b", 22, "c", 33));
+        TemplateHashModelEx thEx4 = new TemplateHashModelExOnly(Collections.emptyMap());
+        TemplateHashModel th1 = new TemplateHashModelOnly(ImmutableMap.of("a", 1, "b", 2));
+        TemplateHashModel th2 = new TemplateHashModelOnly(ImmutableMap.of("c", 3, "d", 4));
+        TemplateHashModel th3 = new TemplateHashModelOnly(ImmutableMap.of("b", 22, "c", 33));
+        TemplateHashModel th4 = new TemplateHashModelOnly(Collections.emptyMap());
+        
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx1, thEx2));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th1, th2));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx1, th2));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th1, thEx2));
+        
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 22, "c", 33), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx1, thEx3));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 22, "c", 33), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th1, th3));
+        assertUnionResult(ImmutableMap.of("b", 2, "c", 33, "a", 1), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx3, thEx1));
+        assertUnionResult(ImmutableMap.of("b", 2, "c", 33, "a", 1), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th3, th1));
+        
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx1, thEx4));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx4, thEx1));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th1, th4));
+        assertUnionResult(ImmutableMap.of("a", 1, "b", 2), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th4, th1));
+        assertUnionResult(Collections.<String, Integer>emptyMap(), true,
+                TemplateModelUtils.wrapAsHashUnion(ow, thEx4, thEx4));
+        assertUnionResult(Collections.<String, Integer>emptyMap(), false,
+                TemplateModelUtils.wrapAsHashUnion(ow, th4, th4));
+    }
+
+    @Test
+    public void wrapAsHashUnionWrapping() throws TemplateModelException {
+        TemplateHashModel h = TemplateModelUtils.wrapAsHashUnion(ow,
+                ImmutableMap.of("a", 1), new MyBean(), null, ow.wrap(ImmutableMap.of("c", 3)));
+        assertThat(h, instanceOf(TemplateHashModelEx.class));
+        assertEquals(((TemplateNumberModel) h.get("a")).getAsNumber(), 1);
+        assertEquals(((TemplateNumberModel) h.get("b")).getAsNumber(), 2);
+        assertEquals(((TemplateNumberModel) h.get("c")).getAsNumber(), 3);
+        assertNotNull(h.get("class"));
+        assertNull(h.get("noSuchVariable"));
+        
+        try {
+            TemplateModelUtils.wrapAsHashUnion(ow, "x");
+            fail();
+        } catch (TemplateModelException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void wrapAsHashUnionSizeEdgeCases() throws TemplateModelException {
+        assertSame(Constants.EMPTY_HASH, TemplateModelUtils.wrapAsHashUnion(ow));
+        assertSame(Constants.EMPTY_HASH, TemplateModelUtils.wrapAsHashUnion(ow, null, null));
+        
+        TemplateModel hash = ow.wrap(ImmutableMap.of("a", 1));
+        assertSame(hash, TemplateModelUtils.wrapAsHashUnion(ow, hash));
+        assertSame(hash, TemplateModelUtils.wrapAsHashUnion(ow, null, hash, null));
+    }
+    
+    private void assertUnionResult(
+            Map<String, Integer> expected, boolean expectHashEx,
+            TemplateHashModel actual) throws TemplateModelException {
+        assertTrue(expectHashEx == actual instanceof TemplateHashModelEx);
+        
+        for (Entry<String, Integer> kvp : expected.entrySet()) {
+            TemplateModel tmValue = actual.get(kvp.getKey());
+            assertNotNull(tmValue);
+            assertEquals(kvp.getValue(), ((TemplateNumberModel) tmValue).getAsNumber());
+        }
+        
+        assertEquals(expected.isEmpty(), actual.isEmpty());
+        
+        if (actual instanceof TemplateHashModelEx) {
+            TemplateHashModelEx actualEx = (TemplateHashModelEx) actual;
+            
+            assertEquals(expected.size(), actualEx.size());
+            
+            List<String> expectedKeys = new ArrayList<String>(expected.keySet());
+            List<String> actualKeys = new ArrayList<String>();
+            for (TemplateModelIterator it = ((TemplateHashModelEx) actual).keys().iterator(); it.hasNext(); ) {
+                actualKeys.add(((TemplateScalarModel) it.next()).getAsString());
+            }
+            assertEquals(expectedKeys, actualKeys);
+            
+            List<Integer> expectedValues = new ArrayList<Integer>(expected.values());
+            List<Integer> actualValues = new ArrayList<Integer>();
+            for (TemplateModelIterator it = ((TemplateHashModelEx) actual).values().iterator(); it.hasNext(); ) {
+                actualValues.add((Integer) ((TemplateNumberModel) it.next()).getAsNumber());
+            }
+            assertEquals(expectedValues, actualValues);
+        }
+    }
+
     /**
      * Deliberately doesn't implement {@link TemplateHashModelEx2}, only {@link TemplateHashModelEx}. 
      */
-    private static class TemplateHashModelExOnly implements TemplateHashModelEx {
+    private class TemplateHashModelExOnly implements TemplateHashModelEx {
         
         private final Map<?, ?> map;
-        private final ObjectWrapperWithAPISupport objectWrapper;
         
         public TemplateHashModelExOnly(Map<?, ?> map) {
             this.map = map;
-            objectWrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build();
         }
 
         public TemplateModel get(String key) throws TemplateModelException {
-            return objectWrapper.wrap(map.get(key));
+            return ow.wrap(map.get(key));
         }
 
         public boolean isEmpty() throws TemplateModelException {
@@ -148,13 +262,37 @@ public class TemplateModelUtilTest {
         }
 
         public TemplateCollectionModel keys() throws TemplateModelException {
-            return DefaultNonListCollectionAdapter.adapt(map.keySet(), objectWrapper);
+            return DefaultNonListCollectionAdapter.adapt(map.keySet(), ow);
         }
 
         public TemplateCollectionModel values() throws TemplateModelException {
-            return DefaultNonListCollectionAdapter.adapt(map.values(), objectWrapper);
+            return DefaultNonListCollectionAdapter.adapt(map.values(), ow);
         } 
         
+    }
+    
+    private class TemplateHashModelOnly implements TemplateHashModel {
+
+        private final Map<?, ?> map;
+        
+        public TemplateHashModelOnly(Map<?, ?> map) {
+            this.map = map;
+        }
+
+        public TemplateModel get(String key) throws TemplateModelException {
+            return ow.wrap(map.get(key));
+        }
+
+        public boolean isEmpty() throws TemplateModelException {
+            return map.isEmpty();
+        }
+        
+    }
+    
+    public static class MyBean {
+        public int getB() {
+            return 2;
+        }
     }
     
 }

@@ -16,7 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#assign suppress>
+<@noOutput>
 <@assertFails message="true,false">${true}</@>
 <@assertFails message="true,false">${false}</@>
 <@assertFails message="true,false">${"" + true}</@>
@@ -31,6 +31,11 @@
 <@assertEquals expected="f" actual=false?string('t', 'f') />
 <#setting boolean_format = 'true,false'>
 <@assertFails message="true,false">${true}</@>
+<#setting boolean_format = 'c'>
+<@assertEquals expected="true" actual=true?string />
+<@assertEquals expected="false" actual=false?string />
+<@assertEquals expected="true" actual="${true}" />
+<@assertEquals expected="false" actual="${false}" />
 
 <#setting boolean_format = 'ja,nein'>
 <@assertEquals expected="ja" actual="" + true />
@@ -58,7 +63,7 @@
 <@assertEquals actual=123?upper_case expected="123" />
 <@assertEquals actual=true?upper_case expected="Y" />
 
-</#assign>
+</@noOutput>
 <#escape x as x?upper_case>
 <#assign x = true>${x} ${true} ${true?string}
 <#assign x = false>${x} ${false} ${false?string}

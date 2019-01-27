@@ -52,7 +52,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
                 throw (TemplateModelException) e;
             } else {
                 throw new _TemplateModelException(e,
-                        "Failed to get valeu for key ", new _DelayedJQuote(key), "; see cause exception.");
+                        "Failed to get value for key ", new _DelayedJQuote(key), "; see cause exception.");
             }
         }
     }

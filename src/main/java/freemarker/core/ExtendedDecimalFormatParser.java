@@ -34,6 +34,7 @@ class ExtendedDecimalFormatParser {
     
     private static final String PARAM_ROUNDING_MODE = "roundingMode";
     private static final String PARAM_MULTIPIER = "multipier";
+    private static final String PARAM_MULTIPLIER = "multiplier";
     private static final String PARAM_DECIMAL_SEPARATOR = "decimalSeparator";
     private static final String PARAM_MONETARY_DECIMAL_SEPARATOR = "monetaryDecimalSeparator";
     private static final String PARAM_GROUP_SEPARATOR = "groupingSeparator";
@@ -93,16 +94,18 @@ class ExtendedDecimalFormatParser {
                 parser.roundingMode = parsedValue;
             }
         });
-        m.put(PARAM_MULTIPIER, new ParameterHandler() {
+        ParameterHandler multiplierParamHandler = new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 try {
-                    parser.multipier = Integer.valueOf(value);
+                    parser.multiplier = Integer.valueOf(value);
                 } catch (NumberFormatException e) {
                     throw new InvalidParameterValueException("Malformed integer.");
                 }
             }
-        });
+        };
+        m.put(PARAM_MULTIPLIER, multiplierParamHandler);
+        m.put(PARAM_MULTIPIER, multiplierParamHandler);
         m.put(PARAM_DECIMAL_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
@@ -211,7 +214,7 @@ class ExtendedDecimalFormatParser {
 
     private final DecimalFormatSymbols symbols;
     private RoundingMode roundingMode;
-    private Integer multipier;
+    private Integer multiplier;
 
     static DecimalFormat parse(String formatString, Locale locale) throws ParseException {
         return new ExtendedDecimalFormatParser(formatString, locale).parse();
@@ -244,8 +247,8 @@ class ExtendedDecimalFormatParser {
             _JavaVersions.JAVA_6.setRoundingMode(decimalFormat, roundingMode);
         }
 
-        if (multipier != null) {
-            decimalFormat.setMultiplier(multipier.intValue());
+        if (multiplier != null) {
+            decimalFormat.setMultiplier(multiplier.intValue());
         }
 
         return decimalFormat;

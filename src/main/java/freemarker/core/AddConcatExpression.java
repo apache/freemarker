@@ -240,7 +240,6 @@ final class AddConcatExpression extends Expression {
     implements TemplateHashModelEx {
         private CollectionAndSequence keys;
         private CollectionAndSequence values;
-        private int size;
 
         ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
             super(left, right);
@@ -248,7 +247,7 @@ final class AddConcatExpression extends Expression {
         
         public int size() throws TemplateModelException {
             initKeys();
-            return size;
+            return keys.size();
         }
 
         public TemplateCollectionModel keys()
@@ -270,19 +269,18 @@ final class AddConcatExpression extends Expression {
                 SimpleSequence keySeq = new SimpleSequence(32);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.left);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.right);
-                size = keySet.size();
                 keys = new CollectionAndSequence(keySeq);
             }
         }
 
-        private static void addKeys(Set set, SimpleSequence keySeq, TemplateHashModelEx hash)
+        private static void addKeys(Set keySet, SimpleSequence keySeq, TemplateHashModelEx hash)
         throws TemplateModelException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
                 TemplateScalarModel tsm = (TemplateScalarModel) it.next();
-                if (set.add(tsm.getAsString())) {
-                    // The first occurence of the key decides the index;
-                    // this is consisten with stuff like java.util.LinkedHashSet.
+                if (keySet.add(tsm.getAsString())) {
+                    // The first occurrence of the key decides the index;
+                    // this is consistent with the behavior of java.util.LinkedHashSet.
                     keySeq.add(tsm);
                 }
             }

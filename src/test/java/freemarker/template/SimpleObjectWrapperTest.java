@@ -22,10 +22,13 @@ package freemarker.template;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import freemarker.template.DefaultObjectWrapperTest.TestBean;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +42,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class SimpleObjetWrapperTest {
+public class SimpleObjectWrapperTest {
     
     @Test
     public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
@@ -97,6 +100,44 @@ public class SimpleObjetWrapperTest {
             fail();
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(), containsString("won't wrap"));
+        }
+    }
+
+    @Test
+    public void testIncompatibleImprovements() throws TemplateModelException {
+        {
+            SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
+            testIncompatibleImprovementsIndependentPart(ow);
+            assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
+            assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
+            assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
+            assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
+        }
+        
+        {
+            SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_2_3_21);
+            testIncompatibleImprovementsIndependentPart(ow);
+            assertTrue(ow.wrap(Collections.emptyMap()) instanceof SimpleHash);
+            assertTrue(ow.wrap(Collections.emptyList()) instanceof SimpleSequence);
+            assertTrue(ow.wrap(new boolean[] { }) instanceof SimpleSequence);
+            assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);
+        }
+    }
+
+    @SuppressWarnings("boxing")
+    private void testIncompatibleImprovementsIndependentPart(SimpleObjectWrapper ow) throws TemplateModelException {
+        assertFalse(ow.isWriteProtected());
+        
+        assertTrue(ow.wrap("x") instanceof SimpleScalar);
+        assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
+        assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
+        assertEquals(TemplateBooleanModel.TRUE, ow.wrap(true));
+        
+        try {
+            ow.wrap(new TestBean());
+            fail();
+        } catch (TemplateModelException e) {
+            assertTrue(e.getMessage().contains("type"));
         }
     }
     

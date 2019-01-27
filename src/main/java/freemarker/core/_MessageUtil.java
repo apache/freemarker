@@ -262,7 +262,12 @@ public class _MessageUtil {
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence or collection", arg);
     }
-    
+
+    public static TemplateModelException newMethodArgMustBeStringOrMarkupOutputException(
+            String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "string or markup output", arg);
+    }
+
     public static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
         return new _TemplateModelException(
