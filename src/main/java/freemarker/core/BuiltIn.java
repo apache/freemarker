@@ -272,11 +272,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("sort_by", "sortBy", new sort_byBI());
         putBI("sort", new sortBI());
         putBI("split", new BuiltInsForStringsBasic.split_BI());
-        putBI("switch", new BuiltInsWithParseTimeParameters.switch_BI());
+        putBI("switch", new BuiltInsWithLazyConditionals.switch_BI());
         putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
         putBI("substring", new BuiltInsForStringsBasic.substringBI());
-        putBI("then", new BuiltInsWithParseTimeParameters.then_BI());
+        putBI("then", new BuiltInsWithLazyConditionals.then_BI());
         putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
         putBI("time_if_unknown", "timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         putBI("trim", new BuiltInsForStringsBasic.trimBI());

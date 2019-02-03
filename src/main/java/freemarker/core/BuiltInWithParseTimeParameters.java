@@ -20,10 +20,13 @@ package freemarker.core;
 
 import java.util.List;
 
-
+/**
+ * Built-in like {@code ?foo(params)}, where the parameter list must be present on parsing time, so that it can
+ * be processed on parsing time.
+ */
 abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
 
-    abstract void bindToParameters(List/*<Expression>*/ parameters, Token openParen, Token closeParen)
+    abstract void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen)
             throws ParseException;
 
     @Override
@@ -33,13 +36,13 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         buf.append(super.getCanonicalForm());
         
         buf.append("(");
-        List/*<Expression>*/args = getArgumentsAsList();
+        List<Expression> args = getArgumentsAsList();
         int size = args.size();
         for (int i = 0; i < size; i++) {
             if (i != 0) {
                 buf.append(", ");
             }
-            Expression arg = (Expression) args.get(i);
+            Expression arg = args.get(i);
             buf.append(arg.getCanonicalForm());
         }
         buf.append(")");
@@ -97,7 +100,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         return clone;
     }
 
-    protected abstract List getArgumentsAsList();
+    protected abstract List<Expression> getArgumentsAsList();
     
     protected abstract int getArgumentsCount();
 

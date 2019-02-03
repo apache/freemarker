@@ -25,7 +25,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 
-final class BuiltInsWithParseTimeParameters {
+final class BuiltInsWithLazyConditionals {
     
     /**
      * Behaves similarly to the ternary operator of Java.
@@ -42,12 +42,12 @@ final class BuiltInsWithParseTimeParameters {
         }
 
         @Override
-        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
+        void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
             if (parameters.size() != 2) {
                 throw newArgumentCountException("requires exactly 2", openParen, closeParen);
             }
-            whenTrueExp = (Expression) parameters.get(0);
-            whenFalseExp = (Expression) parameters.get(1);
+            whenTrueExp = parameters.get(0);
+            whenFalseExp = parameters.get(1);
         }
         
         @Override
@@ -65,8 +65,8 @@ final class BuiltInsWithParseTimeParameters {
         }
         
         @Override
-        protected List getArgumentsAsList() {
-            ArrayList args = new ArrayList(2);
+        protected List<Expression> getArgumentsAsList() {
+            ArrayList<Expression> args = new ArrayList<Expression>(2);
             args.add(whenTrueExp);
             args.add(whenFalseExp);
             return args;
@@ -82,16 +82,16 @@ final class BuiltInsWithParseTimeParameters {
         
     }
     
-    private BuiltInsWithParseTimeParameters() {
+    private BuiltInsWithLazyConditionals() {
         // Not to be instantiated
     }
 
     static class switch_BI extends BuiltInWithParseTimeParameters {
         
-        private List/*<Expression>*/ parameters;
+        private List<Expression> parameters;
 
         @Override
-        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
+        void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
             if (parameters.size() < 2) {
                 throw newArgumentCountException("must have at least 2", openParen, closeParen);
             }
@@ -99,7 +99,7 @@ final class BuiltInsWithParseTimeParameters {
         }
 
         @Override
-        protected List getArgumentsAsList() {
+        protected List<Expression> getArgumentsAsList() {
             return parameters;
         }
 
@@ -116,9 +116,9 @@ final class BuiltInsWithParseTimeParameters {
         @Override
         protected void cloneArguments(Expression clone, String replacedIdentifier, Expression replacement,
                 ReplacemenetState replacementState) {
-            ArrayList parametersClone = new ArrayList(parameters.size());
-            for (int i = 0; i < parameters.size(); i++) {
-                parametersClone.add(((Expression) parameters.get(i))
+            List<Expression> parametersClone = new ArrayList<Expression>(parameters.size());
+            for (Expression parameter : parameters) {
+                parametersClone.add(parameter
                         .deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
             }
             ((switch_BI) clone).parameters = parametersClone;
@@ -128,10 +128,10 @@ final class BuiltInsWithParseTimeParameters {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel targetValue = target.evalToNonMissing(env);
             
-            List parameters = this.parameters;
+            List<Expression> parameters = this.parameters;
             int paramCnt = parameters.size();
             for (int i = 0; i + 1 < paramCnt; i += 2) {
-                Expression caseExp = (Expression) parameters.get(i);
+                Expression caseExp = parameters.get(i);
                 TemplateModel caseValue = caseExp.evalToNonMissing(env);
                 if (EvalUtil.compare(
                         targetValue, target,
@@ -140,7 +140,7 @@ final class BuiltInsWithParseTimeParameters {
                         this, true,
                         false, false, false,
                         env)) {
-                    return ((Expression) parameters.get(i + 1)).evalToNonMissing(env);
+                    return parameters.get(i + 1).evalToNonMissing(env);
                 }
             }
             
@@ -150,7 +150,7 @@ final class BuiltInsWithParseTimeParameters {
                         + "case parameters, and there was no default value parameter (an additional last parameter) "
                         + "eithter. ");
             }
-            return ((Expression) parameters.get(paramCnt - 1)).evalToNonMissing(env);
+            return parameters.get(paramCnt - 1).evalToNonMissing(env);
         }
         
     }

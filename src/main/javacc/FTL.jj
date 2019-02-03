@@ -2177,7 +2177,7 @@ Expression BuiltIn(Expression lhoExp) :
 {
     Token t = null;
     BuiltIn result;
-    ArrayList/*<Expression>*/ args = null;
+    ArrayList<Expression> args = null;
     Token openParen;
     Token closeParen;
 }
