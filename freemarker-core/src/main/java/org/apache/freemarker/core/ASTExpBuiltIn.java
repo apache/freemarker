@@ -256,11 +256,11 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("sortBy", new sort_byBI());
         putBI("sort", new sortBI());
         putBI("split", new BuiltInsForStringsBasic.split_BI());
-        putBI("switch", new BuiltInsWithParseTimeParameters.switch_BI());
+        putBI("switch", new BuiltInsWithLazyConditionals.switch_BI());
         putBI("startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
         putBI("substring", new BuiltInsForStringsBasic.substringBI());
-        putBI("then", new BuiltInsWithParseTimeParameters.then_BI());
+        putBI("then", new BuiltInsWithLazyConditionals.then_BI());
         putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
         putBI("timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         putBI("trim", new BuiltInsForStringsBasic.trimBI());

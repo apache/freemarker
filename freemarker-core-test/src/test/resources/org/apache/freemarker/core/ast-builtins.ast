@@ -41,7 +41,7 @@
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
     ${...}  // o.a.f.c.ASTInterpolation
-        - content: ?then(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$then_BI
+        - content: ?then(...)  // o.a.f.c.BuiltInsWithLazyConditionals$then_BI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable
             - right-hand operand: "then"  // String
             - argument value: "y"  // o.a.f.c.ASTExpStringLiteral
@@ -49,7 +49,7 @@
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
     ${...}  // o.a.f.c.ASTInterpolation
-        - content: ?switch(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$switch_BI
+        - content: ?switch(...)  // o.a.f.c.BuiltInsWithLazyConditionals$switch_BI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable
             - right-hand operand: "switch"  // String
             - argument value: 1  // o.a.f.c.ASTExpNumberLiteral

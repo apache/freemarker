@@ -1901,7 +1901,7 @@ ASTExpression BuiltIn(ASTExpression lhoExp) :
 {
     Token t = null;
     ASTExpBuiltIn result;
-    ArrayList/*<ASTExpression>*/ args = null;
+    ArrayList<ASTExpression> args = null;
     Token openParen;
     Token closeParen;
 }

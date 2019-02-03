@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.freemarker.core.model.TemplateModel;
 
 
-final class BuiltInsWithParseTimeParameters {
+final class BuiltInsWithLazyConditionals {
     
     /**
      * Behaves similarly to the ternary operator of Java.
@@ -41,12 +41,12 @@ final class BuiltInsWithParseTimeParameters {
         }
 
         @Override
-        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
+        void bindToParameters(List<ASTExpression> parameters, Token openParen, Token closeParen) throws ParseException {
             if (parameters.size() != 2) {
                 throw newArgumentCountException("requires exactly 2", openParen, closeParen);
             }
-            whenTrueExp = (ASTExpression) parameters.get(0);
-            whenFalseExp = (ASTExpression) parameters.get(1);
+            whenTrueExp = parameters.get(0);
+            whenFalseExp = parameters.get(1);
         }
         
         @Override
@@ -64,8 +64,8 @@ final class BuiltInsWithParseTimeParameters {
         }
         
         @Override
-        protected List getArgumentsAsList() {
-            ArrayList args = new ArrayList(2);
+        protected List<ASTExpression> getArgumentsAsList() {
+            ArrayList<ASTExpression> args = new ArrayList<>(2);
             args.add(whenTrueExp);
             args.add(whenFalseExp);
             return args;
@@ -81,16 +81,16 @@ final class BuiltInsWithParseTimeParameters {
         
     }
     
-    private BuiltInsWithParseTimeParameters() {
+    private BuiltInsWithLazyConditionals() {
         // Not to be instantiated
     }
 
     static class switch_BI extends BuiltInWithParseTimeParameters {
         
-        private List/*<ASTExpression>*/ parameters;
+        private List<ASTExpression> parameters;
 
         @Override
-        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
+        void bindToParameters(List<ASTExpression> parameters, Token openParen, Token closeParen) throws ParseException {
             if (parameters.size() < 2) {
                 throw newArgumentCountException("must have at least 2", openParen, closeParen);
             }
@@ -98,7 +98,7 @@ final class BuiltInsWithParseTimeParameters {
         }
 
         @Override
-        protected List getArgumentsAsList() {
+        protected List<ASTExpression> getArgumentsAsList() {
             return parameters;
         }
 
@@ -109,15 +109,15 @@ final class BuiltInsWithParseTimeParameters {
 
         @Override
         protected ASTExpression getArgumentParameterValue(int argIdx) {
-            return (ASTExpression) parameters.get(argIdx);
+            return parameters.get(argIdx);
         }
 
         @Override
         protected void cloneArguments(ASTExpression clone, String replacedIdentifier, ASTExpression replacement,
                 ReplacemenetState replacementState) {
-            ArrayList parametersClone = new ArrayList(parameters.size());
-            for (int i = 0; i < parameters.size(); i++) {
-                parametersClone.add(((ASTExpression) parameters.get(i))
+            ArrayList<ASTExpression> parametersClone = new ArrayList<>(parameters.size());
+            for (ASTExpression parameter : parameters) {
+                parametersClone.add(parameter
                         .deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
             }
             ((switch_BI) clone).parameters = parametersClone;
@@ -127,10 +127,10 @@ final class BuiltInsWithParseTimeParameters {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel targetValue = target.evalToNonMissing(env);
             
-            List parameters = this.parameters;
+            List<ASTExpression> parameters = this.parameters;
             int paramCnt = parameters.size();
             for (int i = 0; i + 1 < paramCnt; i += 2) {
-                ASTExpression caseExp = (ASTExpression) parameters.get(i);
+                ASTExpression caseExp = parameters.get(i);
                 TemplateModel caseValue = caseExp.evalToNonMissing(env);
                 if (_EvalUtils.compare(
                         targetValue, target,
@@ -139,7 +139,7 @@ final class BuiltInsWithParseTimeParameters {
                         this, true,
                         false, false, false,
                         env)) {
-                    return ((ASTExpression) parameters.get(i + 1)).evalToNonMissing(env);
+                    return parameters.get(i + 1).evalToNonMissing(env);
                 }
             }
             
@@ -149,7 +149,7 @@ final class BuiltInsWithParseTimeParameters {
                         + "case parameters, and there was no default value parameter (an additional last parameter) "
                         + "eithter. ");
             }
-            return ((ASTExpression) parameters.get(paramCnt - 1)).evalToNonMissing(env);
+            return parameters.get(paramCnt - 1).evalToNonMissing(env);
         }
         
     }
