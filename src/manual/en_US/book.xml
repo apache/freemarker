@@ -23462,7 +23462,7 @@ or
             deducted from the node's name
             (<literal><replaceable>node</replaceable>?node_name</literal>) and
             namespace
-            (<literal><replaceable>node</replaceable>?node_namesoace</literal>).
+            (<literal><replaceable>node</replaceable>?node_namespace</literal>).
             The rules of name deduction:</para>
 
             <itemizedlist>
