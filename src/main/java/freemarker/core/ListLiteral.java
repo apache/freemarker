@@ -35,9 +35,9 @@ import freemarker.template.TemplateSequenceModel;
 
 final class ListLiteral extends Expression {
 
-    final ArrayList/*<Expression>*/ items;
+    final ArrayList<Expression> items;
 
-    ListLiteral(ArrayList items) {
+    ListLiteral(ArrayList<Expression> items) {
         this.items = items;
         items.trimToSize();
     }

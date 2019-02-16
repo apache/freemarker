@@ -59,7 +59,7 @@ abstract public class Expression extends TemplateObject {
     // Hook in here to set the constant value if possible.
     
     @Override
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine) {
+    final void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine) {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
@@ -129,13 +129,13 @@ abstract public class Expression extends TemplateObject {
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env, String seqTip) throws TemplateException {
         return EvalUtil.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
     }
-    
+
     Number evalToNumber(Environment env) throws TemplateException {
         TemplateModel model = eval(env);
         return modelToNumber(model, env);
     }
 
-    Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
+    final Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
         if (model instanceof TemplateNumberModel) {
             return EvalUtil.modelToNumber((TemplateNumberModel) model, this);
         } else {
@@ -151,7 +151,7 @@ abstract public class Expression extends TemplateObject {
         return evalToBoolean(null, cfg);
     }
 
-    TemplateModel evalToNonMissing(Environment env) throws TemplateException {
+    final TemplateModel evalToNonMissing(Environment env) throws TemplateException {
         TemplateModel result = this.eval(env);
         assertNonNull(result, env);
         return result;
@@ -162,11 +162,11 @@ abstract public class Expression extends TemplateObject {
         return modelToBoolean(model, env, cfg);
     }
     
-    boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
+    final boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
         return modelToBoolean(model, env, null);
     }
 
-    boolean modelToBoolean(TemplateModel model, Configuration cfg) throws TemplateException {
+    final boolean modelToBoolean(TemplateModel model, Configuration cfg) throws TemplateException {
         return modelToBoolean(model, null, cfg);
     }
     
@@ -229,7 +229,7 @@ abstract public class Expression extends TemplateObject {
         }
     }
     
-    void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
+    final void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
         if (model == null) throw InvalidReferenceException.getInstance(this, env);
     }
     

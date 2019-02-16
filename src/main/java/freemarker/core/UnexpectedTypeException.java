@@ -98,7 +98,7 @@ public class UnexpectedTypeException extends TemplateException {
                         || Arrays.asList(expectedTypes).contains(TemplateCollectionModelEx.class))) {
             errorDescBuilder.tip("As the problematic value contains a collection of items, you could convert it "
                     + "to a sequence like someValue?sequence. Be sure though that you won't have a large number of "
-                    + "items, as all will be held in memory one the same time.");
+                    + "items, as all will be held in memory the same time.");
         }
         return errorDescBuilder;
     }

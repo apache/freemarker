@@ -670,7 +670,7 @@ public final class Environment extends Configurable {
         try {
             TemplateModel macroOrTransform = getNodeProcessor(node);
             if (macroOrTransform instanceof Macro) {
-                invoke((Macro) macroOrTransform, null, null, null, null);
+                invokeMacro((Macro) macroOrTransform, null, null, null, null);
             } else if (macroOrTransform instanceof TemplateTransformModel) {
                 visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
             } else {
@@ -726,19 +726,48 @@ public final class Environment extends Configurable {
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (macroOrTransform instanceof Macro) {
-            invoke((Macro) macroOrTransform, null, null, null, null);
+            invokeMacro((Macro) macroOrTransform, null, null, null, null);
         } else if (macroOrTransform instanceof TemplateTransformModel) {
             visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
         }
     }
 
     /**
-     * Calls the macro or function with the given arguments and nested block.
+     * Calls a macro with the given arguments and nested block.
      */
-    void invoke(Macro macro,
-            Map namedArgs, List positionalArgs,
+    void invokeMacro(Macro macro,
+            Map namedArgs, List<? extends Expression> positionalArgs,
             List bodyParameterNames, TemplateObject callPlace) throws TemplateException, IOException {
-        if (macro == Macro.DO_NOTHING_MACRO) {
+        invokeMacroOrFunctionCommonPart(macro, namedArgs, positionalArgs, bodyParameterNames, callPlace);
+    }
+
+    /**
+     * Calls an FTL function, and returns its return value.
+     */
+    TemplateModel invokeFunction(
+            Environment env, Macro func, List<? extends Expression> argumentExps, TemplateObject callPlace)
+            throws TemplateException {
+        env.setLastReturnValue(null);
+        if (!func.isFunction()) {
+            throw new _MiscTemplateException(env, "A macro cannot be called in an expression. (Functions can be.)");
+        }
+        Writer prevOut = env.getOut();
+        try {
+            env.setOut(NullWriter.INSTANCE);
+            env.invokeMacro(func, null, argumentExps, null, callPlace);
+        } catch (IOException e) {
+            // Should not occur
+            throw new TemplateException("Unexpected exception during function execution", e, env);
+        } finally {
+            env.setOut(prevOut);
+        }
+        return env.getLastReturnValue();
+    }
+
+    private void invokeMacroOrFunctionCommonPart(Macro macroOrFunction,
+            Map namedArgs, List<? extends Expression> positionalArgs,
+            List<Expression> bodyParameterNames, TemplateObject callPlace) throws TemplateException, IOException {
+        if (macroOrFunction == Macro.DO_NOTHING_MACRO) {
             return;
         }
 
@@ -746,18 +775,18 @@ public final class Environment extends Configurable {
         if (!incompatibleImprovementsGE2328) {
             // Doing this so early is wrong, as now the arguments will be evaluated while the called macro/function is
             // in the element stack. Thus .current_template_name will be wrong for example.
-            pushElement(macro);
+            pushElement(macroOrFunction);
             elementPushed = true;
         } else {
             elementPushed = false;
         }
         try {
-            final Macro.Context macroCtx = macro.new Context(this, callPlace, bodyParameterNames);
+            final Macro.Context macroCtx = macroOrFunction.new Context(this, callPlace, bodyParameterNames);
             // Causes the evaluation of argument expressions:
-            setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
-            
+            setMacroContextLocalsFromArguments(macroCtx, macroOrFunction, namedArgs, positionalArgs);
+
             if (!elementPushed) { // When incompatibleImprovements >= 2.3.28
-                pushElement(macro);
+                pushElement(macroOrFunction);
                 elementPushed = true;
             }
 
@@ -768,11 +797,11 @@ public final class Environment extends Configurable {
             localContextStack = null;
 
             final Namespace prevNamespace = currentNamespace;
-            currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
+            currentNamespace = (Namespace) macroToNamespaceLookup.get(macroOrFunction);
 
             try {
                 macroCtx.sanityCheck(this);
-                visit(macro.getChildBuffer());
+                visit(macroOrFunction.getChildBuffer());
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>
             } catch (TemplateException te) {
@@ -795,7 +824,8 @@ public final class Environment extends Configurable {
     private void setMacroContextLocalsFromArguments(
             final Macro.Context macroCtx,
             final Macro macro,
-            final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
+            final Map namedArgs, final List<? extends Expression> positionalArgs) throws TemplateException,
+            _MiscTemplateException {
         String catchAllParamName = macro.getCatchAll();
         if (namedArgs != null) {
             final SimpleHash catchAllParamValue;
@@ -842,7 +872,7 @@ public final class Environment extends Configurable {
                         new _DelayedToString(argsCnt), ".");
             }
             for (int i = 0; i < argsCnt; i++) {
-                Expression argValueExp = (Expression) positionalArgs.get(i);
+                Expression argValueExp = positionalArgs.get(i);
                 TemplateModel argValue = argValueExp.eval(this);
                 try {
                     if (i < argNames.length) {

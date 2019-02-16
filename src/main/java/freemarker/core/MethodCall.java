@@ -23,8 +23,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +30,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
-import freemarker.template.utility.NullWriter;
 
 
 /**
@@ -60,29 +57,14 @@ final class MethodCall extends Expression {
             TemplateMethodModel targetMethod = (TemplateMethodModel) targetModel;
             List argumentStrings = 
             targetMethod instanceof TemplateMethodModelEx
-            ? arguments.getModelList(env)
-            : arguments.getValueList(env);
+                    ? arguments.getModelList(env)
+                    : arguments.getValueList(env);
             Object result = targetMethod.exec(argumentStrings);
             return env.getObjectWrapper().wrap(result);
         } else if (targetModel instanceof Macro) {
-            Macro func = (Macro) targetModel;
-            env.setLastReturnValue(null);
-            if (!func.isFunction()) {
-                throw new _MiscTemplateException(env, "A macro cannot be called in an expression. (Functions can be.)");
-            }
-            Writer prevOut = env.getOut();
-            try {
-                env.setOut(NullWriter.INSTANCE);
-                env.invoke(func, null, arguments.items, null, this);
-            } catch (IOException e) {
-                // Should not occur
-                throw new TemplateException("Unexpected exception during function execution", e, env);
-            } finally {
-                env.setOut(prevOut);
-            }
-            return env.getLastReturnValue();
+            return env.invokeFunction(env, (Macro) targetModel, arguments.items, this);
         } else {
-            throw new NonMethodException(target, targetModel, env);
+            throw new NonMethodException(target, targetModel, true, null, env);
         }
     }
 
