@@ -85,23 +85,4 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
         }
     }
 
-    private static class SequenceIterator
-    implements TemplateModelIterator {
-        private final TemplateSequenceModel sequence;
-        private final int size;
-        private int index = 0;
-
-        SequenceIterator(TemplateSequenceModel sequence) throws TemplateModelException {
-            this.sequence = sequence;
-            this.size = sequence.size();
-            
-        }
-        public TemplateModel next() throws TemplateModelException {
-            return sequence.get(index++);
-        }
-
-        public boolean hasNext() {
-            return index < size;
-        }
-    }
 }
