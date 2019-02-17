@@ -59,7 +59,7 @@ public class NonMethodException extends UnexpectedTypeException {
 
     NonMethodException(
             Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        this(blamed, model, false, tips, env);
+        this(blamed, model, false, false, tips, env);
     }
 
     /**
@@ -68,10 +68,11 @@ public class NonMethodException extends UnexpectedTypeException {
      * @since 2.3.29
      */
     NonMethodException(
-            Expression blamed, TemplateModel model, boolean allowFTLFunction, String[] tips, Environment env)
+            Expression blamed, TemplateModel model, boolean allowFTLFunction, boolean allowLambdaExp,
+            String[] tips, Environment env)
             throws InvalidReferenceException {
         super(blamed, model,
-                allowFTLFunction ? "method or function" : "method",
+                "method" + (allowFTLFunction ? " or function" : "") + (allowLambdaExp ? " or lambda expression" : ""),
                 allowFTLFunction ? EXPECTED_TYPES_WITH_FUNCTION : EXPECTED_TYPES,
                 tips, env);
     }

@@ -31,6 +31,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -645,6 +646,43 @@ public final class Environment extends Configurable {
             return true;
         } finally {
             localContextStack.pop();
+        }
+    }
+
+    /**
+     * Evaluate expression with shadowing a single variable with a new local variable.
+     *
+     * @since 2.3.29
+     */
+    TemplateModel evaluateWithNewLocal(Expression exp, String lambdaArgName, TemplateModel lamdaArgValue)
+            throws TemplateException {
+        pushLocalContext(new LocalContextWithNewLocal(lambdaArgName, lamdaArgValue));
+        try {
+            return exp.eval(this);
+        } finally {
+            localContextStack.pop();
+        }
+    }
+
+    /**
+     * Specialization for 1 local variables.
+     */
+    private static class LocalContextWithNewLocal implements LocalContext {
+        private final String lambdaArgName;
+        private final TemplateModel lambdaArgValue;
+
+        public LocalContextWithNewLocal(String lambdaArgName, TemplateModel lambdaArgValue) {
+            this.lambdaArgName = lambdaArgName;
+            this.lambdaArgValue = lambdaArgValue;
+        }
+
+        public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+            // TODO [lambda] Do not allow fallback (i.e., introduce untransparent null-s)
+            return name.equals(lambdaArgName) ? lambdaArgValue : null;
+        }
+
+        public Collection getLocalVariableNames() throws TemplateModelException {
+            return Collections.singleton(lambdaArgName);
         }
     }
 

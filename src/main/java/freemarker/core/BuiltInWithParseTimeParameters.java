@@ -85,11 +85,23 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         }
     }
 
-    protected ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
+    protected final ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
         return new ParseException(
                 "?" + key + "(...) " + ordinalityDesc + " parameters", this.getTemplate(),
                 openParen.beginLine, openParen.beginColumn,
                 closeParen.endLine, closeParen.endColumn);
+    }
+
+    protected final void checkLocalLambdaParamCount(LocalLambdaExpression localLambdaExp, int expectedParamCount)
+            throws ParseException {
+        int actualParamCount = localLambdaExp.getLambdaParameterList().getParameters().size();
+        if (actualParamCount != expectedParamCount) {
+            throw new ParseException(
+                    "?" + key + "(...) parameter lambda expression must declare exactly " + expectedParamCount + " "
+                            + "parameter" + (expectedParamCount > 1 ? "s" : "") + ", but it declared "
+                            + actualParamCount + ".",
+                    localLambdaExp);
+        }
     }
 
     @Override
@@ -108,5 +120,12 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     
     protected abstract void cloneArguments(Expression clone, String replacedIdentifier,
             Expression replacement, ReplacemenetState replacementState);
+
+    /**
+     * If parameter expressions can be {@link LocalLambdaExpression}-s.
+     */
+    protected boolean isLocalLambdaParameterSupported() {
+        return false;
+    }
     
 }

@@ -84,7 +84,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    static final int NUMBER_OF_BIS = 279;
+    static final int NUMBER_OF_BIS = 281;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -115,6 +115,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
         putBI("exists", new BuiltInsForExistenceHandling.existsBI());
+        putBI("filter", new BuiltInsForSequences.filterBI());
         putBI("first", new firstBI());
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
@@ -238,6 +239,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("long", new longBI());
         putBI("lower_abc", "lowerAbc", new BuiltInsForNumbers.lower_abcBI());
         putBI("lower_case", "lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
+        putBI("map", new BuiltInsForSequences.mapBI());
         putBI("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         putBI("new", new NewBI());
         putBI("markup_string", "markupString", new markup_stringBI());
@@ -385,7 +387,17 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
         bi.key = key;
         bi.target = target;
+        if (bi.isSingleIterationCollectionTargetSupported()) {
+            if (target instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
+                ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) target)
+                        .setLazyProcessingAllowed(true);
+            }
+        }
         return bi;
+    }
+
+    protected boolean isSingleIterationCollectionTargetSupported() {
+        return false;
     }
 
     @Override

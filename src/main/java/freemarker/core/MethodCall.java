@@ -64,7 +64,7 @@ final class MethodCall extends Expression {
         } else if (targetModel instanceof Macro) {
             return env.invokeFunction(env, (Macro) targetModel, arguments.items, this);
         } else {
-            throw new NonMethodException(target, targetModel, true, null, env);
+            throw new NonMethodException(target, targetModel, true, false, null, env);
         }
     }
 

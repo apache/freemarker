@@ -49,6 +49,7 @@ final class IteratorBlock extends TemplateElement {
     private final String loopVar2Name;
     private final boolean hashListing;
     private final boolean forEach;
+    private final boolean fetchElementsOutsideLoopVarContext;
 
     /**
      * @param listedExp
@@ -82,6 +83,13 @@ final class IteratorBlock extends TemplateElement {
         setChildren(childrenBeforeElse);
         this.hashListing = hashListing;
         this.forEach = forEach;
+
+        if (listedExp instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
+            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) listedExp).setLazyProcessingAllowed(true);
+            fetchElementsOutsideLoopVarContext = true;
+        } else {
+            fetchElementsOutsideLoopVarContext = false;
+        }
     }
     
     boolean isHashListing() {
@@ -243,8 +251,7 @@ final class IteratorBlock extends TemplateElement {
         }
 
         void loopForItemsElement(Environment env, TemplateElement[] childBuffer, String loopVarName, String loopVar2Name)
-                    throws NonSequenceOrCollectionException, TemplateModelException, InvalidReferenceException,
-                    TemplateException, IOException {
+                    throws TemplateException, IOException {
             try {
                 if (alreadyEntered) {
                     throw new _MiscTemplateException(env,
@@ -265,16 +272,14 @@ final class IteratorBlock extends TemplateElement {
          * each list item once, otherwise once if {@link #listedValue} isn't empty.
          */
         private boolean executeNestedContent(Environment env, TemplateElement[] childBuffer)
-                throws TemplateModelException, TemplateException, IOException, NonSequenceOrCollectionException,
-                InvalidReferenceException {
+                throws TemplateException, IOException  {
             return !hashListing
                     ? executedNestedContentForCollOrSeqListing(env, childBuffer)
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
         private boolean executedNestedContentForCollOrSeqListing(Environment env, TemplateElement[] childBuffer)
-                throws TemplateModelException, IOException, TemplateException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
+                throws IOException, TemplateException {
             final boolean listNotEmpty;
             if (listedValue instanceof TemplateCollectionModel) {
                 final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
@@ -284,22 +289,22 @@ final class IteratorBlock extends TemplateElement {
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
                     if (loopVarName != null) {
-                            listLoop: do {
-                                loopVar = iterModel.next();
-                                hasNext = iterModel.hasNext();
-                                try {
-                                    env.visit(childBuffer);
-                                } catch (BreakOrContinueException br) {
-                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
-                                        break listLoop;
-                                    }
+                        listLoop: do {
+                            loopVar = iterModel.next();
+                            hasNext = iterModel.hasNext();
+                            try {
+                                env.visit(childBuffer);
+                            } catch (BreakOrContinueException br) {
+                                if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                    break listLoop;
                                 }
-                                index++;
-                            } while (hasNext);
+                            }
+                            index++;
+                        } while (hasNext);
                         openedIterator = null;
                     } else {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
-                        // allow one iterator() call.
+                        // allow one iterator() call. (Also those returned by ?filter, etc. with lazy processing on.)
                         openedIterator = iterModel;
                         env.visit(childBuffer);
                     }
