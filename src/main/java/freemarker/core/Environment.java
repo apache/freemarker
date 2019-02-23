@@ -650,6 +650,39 @@ public final class Environment extends Configurable {
     }
 
     /**
+     * @param loopVarName
+     *            Then name of the loop variable that's also visible in FTL at the moment, whose context we are looking
+     *            for.
+     * @return The matching context or {@code null} if no such context exists.
+     */
+    IteratorBlock.IterationContext findEnclosingIterationContextWithVisibleVariable(String loopVarName) {
+        return findEnclosingIterationContext(loopVarName);
+    }
+
+    /**
+     * @return The matching context or {@code null} if no such context exists.
+     */
+    IteratorBlock.IterationContext findClosestEnclosingIterationContext() {
+        return findEnclosingIterationContext(null);
+    }
+
+    private IteratorBlock.IterationContext findEnclosingIterationContext(String visibleLoopVarName) {
+        LocalContextStack ctxStack = getLocalContextStack();
+        if (ctxStack != null) {
+            for (int i = ctxStack.size() - 1; i >= 0; i--) {
+                Object ctx = ctxStack.get(i);
+                if (ctx instanceof IteratorBlock.IterationContext
+                        && (visibleLoopVarName == null
+                            || ((IteratorBlock.IterationContext) ctx)
+                                    .hasVisibleLoopVar(visibleLoopVarName))) {
+                    return (IteratorBlock.IterationContext) ctx;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Evaluate expression with shadowing a single variable with a new local variable.
      *
      * @since 2.3.29

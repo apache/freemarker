@@ -164,58 +164,6 @@ public class MapBiTest extends TemplateTest {
     }
 
     @Test
-    public void testLaziness() throws Exception {
-        // #list enables lazy evaluation:
-        assertOutput(
-                "" +
-                        "<#assign s = ''>" +
-                        "<#function tenTimes(x)><#assign s += '${x}->'><#return x * 10></#function>" +
-                        "<#list (1..3)?map(tenTimes) as x>" +
-                            "<#assign s += x>" +
-                            "<#sep><#assign s += ', '>" +
-                        "</#list>" +
-                        "${s}",
-                "1->10, 2->20, 3->30");
-        // Most other context causes eager behavior:
-        assertOutput(
-                "" +
-                        "<#assign s = ''>" +
-                        "<#function tenTimes(x)><#assign s += '${x}->'><#return x * 10></#function>" +
-                        "<#assign xs = (1..3)?map(tenTimes)>" +
-                        "<#list xs as x>" +
-                        "<#assign s += x>" +
-                        "<#sep><#assign s += ', '>" +
-                        "</#list>" +
-                        "${s}",
-                "1->2->3->10, 20, 30");
-
-        // ?map-s can be chained and all is "streaming":
-        assertOutput(
-                "" +
-                        "<#assign s = ''>" +
-                        "<#function tenTimes(x)><#assign s += '${x}->'><#return x * 10></#function>" +
-                        "<#list (1..3)?map(tenTimes)?map(tenTimes)?map(tenTimes) as x>" +
-                            "<#assign s += x>" +
-                            "<#sep><#assign s += ', '>" +
-                        "</#list>" +
-                "${s}",
-                "1->10->100->1000, 2->20->200->2000, 3->30->300->3000");
-
-        // Rest of the elements not consumed after #break:
-        assertOutput(
-                "" +
-                        "<#assign s = ''>" +
-                        "<#function tenTimes(x)><#assign s += '${x}->'><#return x * 10></#function>" +
-                        "<#list (1..3)?map(tenTimes) as x>" +
-                            "<#assign s += x>" +
-                            "<#sep><#assign s += ', '>" +
-                            "<#if x == 20><#break></#if>" +
-                        "</#list>" +
-                        "${s}",
-                "1->10, 2->20, ");
-    }
-
-    @Test
     public void testErrorMessages() {
         assertErrorContains("${1?map(it -> it)}", TemplateException.class,
                 "sequence or collection", "number");

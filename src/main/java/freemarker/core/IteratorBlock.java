@@ -33,7 +33,6 @@ import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateHashModelEx2.KeyValuePair;
 import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
@@ -45,7 +44,7 @@ import freemarker.template.utility.Constants;
 final class IteratorBlock extends TemplateElement {
 
     private final Expression listedExp;
-    private final String loopVarName;
+    private final String loopVar1Name;
     private final String loopVar2Name;
     private final boolean hashListing;
     private final boolean forEach;
@@ -54,7 +53,7 @@ final class IteratorBlock extends TemplateElement {
     /**
      * @param listedExp
      *            a variable referring to a sequence or collection or extended hash to list
-     * @param loopVarName
+     * @param loopVar1Name
      *            The name of the variable that will hold the value of the current item when looping through listed value,
      *            or {@code null} if we have a nested {@code #items}. If this is a hash listing then this variable will holds the value
      *            of the hash key.
@@ -72,13 +71,13 @@ final class IteratorBlock extends TemplateElement {
      *            Whether this is {@code #foreach} or a {@code #list}.
      */
     IteratorBlock(Expression listedExp,
-                  String loopVarName,
+                  String loopVar1Name,
                   String loopVar2Name,
                   TemplateElements childrenBeforeElse,
                   boolean hashListing,
                   boolean forEach) {
         this.listedExp = listedExp;
-        this.loopVarName = loopVarName;
+        this.loopVar1Name = loopVar1Name;
         this.loopVar2Name = loopVar2Name;
         setChildren(childrenBeforeElse);
         this.hashListing = hashListing;
@@ -112,33 +111,9 @@ final class IteratorBlock extends TemplateElement {
             }
         }
 
-        return env.visitIteratorBlock(new IterationContext(listedValue, loopVarName, loopVar2Name));
+        return env.visitIteratorBlock(new IterationContext(listedValue, loopVar1Name, loopVar2Name));
     }
 
-    /**
-     * @param loopVariableName
-     *            Then name of the loop variable whose context we are looking for, or {@code null} if we simply look for
-     *            the innermost context.
-     * @return The matching context or {@code null} if no such context exists.
-     */
-    static IterationContext findEnclosingIterationContext(Environment env, String loopVariableName)
-            throws _MiscTemplateException {
-        LocalContextStack ctxStack = env.getLocalContextStack();
-        if (ctxStack != null) {
-            for (int i = ctxStack.size() - 1; i >= 0; i--) {
-                Object ctx = ctxStack.get(i);
-                if (ctx instanceof IterationContext
-                        && (loopVariableName == null
-                            || loopVariableName.equals(((IterationContext) ctx).getLoopVariableName())
-                            || loopVariableName.equals(((IterationContext) ctx).getLoopVariable2Name())
-                            )) {
-                    return (IterationContext) ctx;
-                }
-            }
-        }
-        return null;
-    }
-    
     @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
@@ -146,14 +121,14 @@ final class IteratorBlock extends TemplateElement {
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
         if (forEach) {
-            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar1Name));
             buf.append(" in ");
             buf.append(listedExp.getCanonicalForm());
         } else {
             buf.append(listedExp.getCanonicalForm());
-            if (loopVarName != null) {
+            if (loopVar1Name != null) {
                 buf.append(" as ");
-                buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+                buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar1Name));
                 if (loopVar2Name != null) {
                     buf.append(", ");
                     buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar2Name));
@@ -174,7 +149,7 @@ final class IteratorBlock extends TemplateElement {
     
     @Override
     int getParameterCount() {
-        return 1 + (loopVarName != null ? 1 : 0) + (loopVar2Name != null ? 1 : 0);
+        return 1 + (loopVar1Name != null ? 1 : 0) + (loopVar2Name != null ? 1 : 0);
     }
 
     @Override
@@ -183,8 +158,8 @@ final class IteratorBlock extends TemplateElement {
         case 0:
             return listedExp;
         case 1:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
-            return loopVarName;
+            if (loopVar1Name == null) throw new IndexOutOfBoundsException();
+            return loopVar1Name;
         case 2:
             if (loopVar2Name == null) throw new IndexOutOfBoundsException();
             return loopVar2Name;
@@ -198,7 +173,7 @@ final class IteratorBlock extends TemplateElement {
         case 0:
             return ParameterRole.LIST_SOURCE;
         case 1:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
+            if (loopVar1Name == null) throw new IndexOutOfBoundsException();
             return ParameterRole.TARGET_LOOP_VARIABLE;
         case 2:
             if (loopVar2Name == null) throw new IndexOutOfBoundsException();
@@ -214,7 +189,7 @@ final class IteratorBlock extends TemplateElement {
 
     @Override
     boolean isNestedBlockRepeater() {
-        return loopVarName != null;
+        return loopVar1Name != null;
     }
 
     /**
@@ -227,22 +202,47 @@ final class IteratorBlock extends TemplateElement {
         
         private Object openedIterator;
         private boolean hasNext;
-        private TemplateModel loopVar;
-        private TemplateModel loopVar2;
+        private TemplateModel loopVar1Value;
+        private TemplateModel loopVar2Value;
         private int index;
         private boolean alreadyEntered;
-        private Collection localVarNames = null;
+        private Collection<String> localVarNames = null;
         
-        /** If the {@code #list} has nested {@code #items}, it's {@code null} outside the {@code #items}. */
-        private String loopVarName;
-        /** Used if we list key-value pairs */
+        /**
+         * The name of the 1st loop variable.
+         * If the {@code #list} has nested {@code #items}, it's {@code null} outside the {@code #items}.
+         * Do not use this to resolve {@link LocalContext#getLocalVariable(String)} and such, as the loop variable might
+         * be still out of scope in FTL when this is already filled; use {@link #visibleLoopVar1Name} for that
+         * instead.
+         */
+        private String loopVar1Name;
+        /**
+         * The name of the 1st loop variable in the {@link LocalContext}. Either {@code null} or {@link #loopVar1Name}.
+         * When {@code null}, none of the loop variables are in scope in FTL.
+         * It would be more intuitive if the {@link LocalContext} is not in the local stack when they aren't visible,
+         * but the {@link LocalContext} is also used for {@code #items} to find its parent, for which we need the tricky
+         * scoping of the local context stack {@link Environment#getLocalContextStack()}.
+         *
+         * (It would be cleaner to have
+         * {@code boolean loopVarsVisible} instead, but it's a trick to decrease runtime overhead added because of
+         * lambdas. Certainly an unmeasurable difference... yet it just doesn't feel right when new features slows
+         * down every existing template a tiny bit, so we try to mitigate that effect.)
+         *
+         * @since 2.3.29
+         */
+        private String visibleLoopVar1Name;
+        /*
+         * The name of the 2nd loop variable, only used if we list key-value pairs.
+         * Do not use this to resolve {@link LocalContext#getLocalVariable} and such, when {@link
+         * #localContextLoopVar1Name} is {@code null}, as then this is not yet in scope as FTL variable.
+         */
         private String loopVar2Name;
-        
+
         private final TemplateModel listedValue;
         
-        public IterationContext(TemplateModel listedValue, String loopVarName, String loopVar2Name) {
+        public IterationContext(TemplateModel listedValue, String loopVar1Name, String loopVar2Name) {
             this.listedValue = listedValue;
-            this.loopVarName = loopVarName;
+            this.loopVar1Name = loopVar1Name;
             this.loopVar2Name = loopVar2Name;
         }
         
@@ -258,17 +258,17 @@ final class IteratorBlock extends TemplateElement {
                             "The #items directive was already entered earlier for this listing.");
                 }
                 alreadyEntered = true;
-                this.loopVarName = loopVarName;
+                this.loopVar1Name = loopVarName;
                 this.loopVar2Name = loopVar2Name;
                 executeNestedContent(env, childBuffer);
             } finally {
-                this.loopVarName = null;
+                this.loopVar1Name = null;
                 this.loopVar2Name = null;
             }
         }
 
         /**
-         * Executes the given block for the {@link #listedValue}: if {@link #loopVarName} is non-{@code null}, then for
+         * Executes the given block for the {@link #listedValue}: if {@link #loopVar1Name} is non-{@code null}, then for
          * each list item once, otherwise once if {@link #listedValue} isn't empty.
          */
         private boolean executeNestedContent(Environment env, TemplateElement[] childBuffer)
@@ -288,16 +288,19 @@ final class IteratorBlock extends TemplateElement {
                                 : ((TemplateModelIterator) openedIterator);
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
-                    if (loopVarName != null) {
+                    if (loopVar1Name != null) {
                         listLoop: do {
-                            loopVar = iterModel.next();
+                            loopVar1Value = iterModel.next();
                             hasNext = iterModel.hasNext();
                             try {
+                                visibleLoopVar1Name = loopVar1Name; // Makes all loop variables visible in FTL
                                 env.visit(childBuffer);
                             } catch (BreakOrContinueException br) {
                                 if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                     break listLoop;
                                 }
+                            } finally {
+                                visibleLoopVar1Name = null; // Hides all loop variables in FTL
                             }
                             index++;
                         } while (hasNext);
@@ -306,6 +309,7 @@ final class IteratorBlock extends TemplateElement {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
                         // allow one iterator() call. (Also those returned by ?filter, etc. with lazy processing on.)
                         openedIterator = iterModel;
+                        // Note: Loop variables will only become visible inside #items
                         env.visit(childBuffer);
                     }
                 }
@@ -314,32 +318,39 @@ final class IteratorBlock extends TemplateElement {
                 final int size = seqModel.size();
                 listNotEmpty = size != 0;
                 if (listNotEmpty) {
-                    if (loopVarName != null) {
+                    if (loopVar1Name != null) {
                             listLoop: for (index = 0; index < size; index++) {
-                                loopVar = seqModel.get(index);
+                                loopVar1Value = seqModel.get(index);
                                 hasNext = (size > index + 1);
                                 try {
+                                    visibleLoopVar1Name = loopVar1Name; // Makes all loop variables visible in FTL
                                     env.visit(childBuffer);
                                 } catch (BreakOrContinueException br) {
                                     if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                         break listLoop;
                                     }
+                                } finally {
+                                    visibleLoopVar1Name = null; // Hides all loop variables in FTL
                                 }
                             }
                     } else {
+                        // Note: Loop variables will only become visible inside #items
                         env.visit(childBuffer);
                     }
                 }
             } else if (env.isClassicCompatible()) {
                 listNotEmpty = true;
-                if (loopVarName != null) {
-                    loopVar = listedValue;
+                if (loopVar1Name != null) {
+                    loopVar1Value = listedValue;
                     hasNext = false;
                 }
                 try {
+                    visibleLoopVar1Name = loopVar1Name; // Makes all loop variables visible in FTL
                     env.visit(childBuffer);
                 } catch (BreakOrContinueException br) {
                     // Silently exit "loop"
+                } finally {
+                    visibleLoopVar1Name = null; // Hides all loop variables in FTL
                 }
             } else if (listedValue instanceof TemplateHashModelEx
                     && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
@@ -357,7 +368,7 @@ final class IteratorBlock extends TemplateElement {
         }
 
         private boolean executedNestedContentForHashListing(Environment env, TemplateElement[] childBuffer)
-                throws TemplateModelException, IOException, TemplateException {
+                throws IOException, TemplateException {
             final boolean hashNotEmpty;
             if (listedValue instanceof TemplateHashModelEx) {
                 TemplateHashModelEx listedHash = (TemplateHashModelEx) listedValue; 
@@ -367,25 +378,29 @@ final class IteratorBlock extends TemplateElement {
                                     : (KeyValuePairIterator) openedIterator;
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
-                        if (loopVarName != null) {
+                        if (loopVar1Name != null) {
                             listLoop: do {
                                 KeyValuePair kvp = kvpIter.next();
-                                loopVar = kvp.getKey();
-                                loopVar2 = kvp.getValue();
+                                loopVar1Value = kvp.getKey();
+                                loopVar2Value = kvp.getValue();
                                 hasNext = kvpIter.hasNext();
                                 try {
+                                    visibleLoopVar1Name = loopVar1Name; // Makes all loop variables visible in FTL
                                     env.visit(childBuffer);
                                 } catch (BreakOrContinueException br) {
                                     if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                         break listLoop;
                                     }
+                                } finally {
+                                    visibleLoopVar1Name = null; // Hides all loop variables in FTL
                                 }
                                 index++;
                             } while (hasNext);
                             openedIterator = null;
                         } else {
-                            // We will reuse this at the #iterms
+                            // We will reuse this at #items
                             openedIterator = kvpIter;
+                            // Note: Loop variables will only become visible inside #items
                             env.visit(childBuffer);
                         }
                     }
@@ -393,25 +408,29 @@ final class IteratorBlock extends TemplateElement {
                     TemplateModelIterator keysIter = listedHash.keys().iterator();
                     hashNotEmpty = keysIter.hasNext();
                     if (hashNotEmpty) {
-                        if (loopVarName != null) {
+                        if (loopVar1Name != null) {
                             listLoop: do {
-                                loopVar = keysIter.next();
-                                if (!(loopVar instanceof TemplateScalarModel)) {
+                                loopVar1Value = keysIter.next();
+                                if (!(loopVar1Value instanceof TemplateScalarModel)) {
                                     throw _MessageUtil.newKeyValuePairListingNonStringKeyExceptionMessage(
-                                                loopVar, (TemplateHashModelEx) listedValue);
+                                            loopVar1Value, (TemplateHashModelEx) listedValue);
                                 }
-                                loopVar2 = listedHash.get(((TemplateScalarModel) loopVar).getAsString());
+                                loopVar2Value = listedHash.get(((TemplateScalarModel) loopVar1Value).getAsString());
                                 hasNext = keysIter.hasNext();
                                 try {
+                                    visibleLoopVar1Name = loopVar1Name; // Makes all loop variables visible in FTL
                                     env.visit(childBuffer);
                                 } catch (BreakOrContinueException br) {
                                     if (br == BreakOrContinueException.BREAK_INSTANCE) {
                                         break listLoop;
                                     }
+                                } finally {
+                                    visibleLoopVar1Name = null; // Hides all loop variables in FTL
                                 }
                                 index++;
                             } while (hasNext);
                         } else {
+                            // Note: Loop variables will only become visible inside #items
                             env.visit(childBuffer);
                         }
                     }
@@ -431,20 +450,25 @@ final class IteratorBlock extends TemplateElement {
             return hashNotEmpty;
         }
 
-        String getLoopVariableName() {
-            return this.loopVarName;
+        boolean hasVisibleLoopVar(String visibleLoopVarName) {
+            String visibleLoopVar1Name = this.visibleLoopVar1Name;
+            if (visibleLoopVar1Name == null) {
+                return false; // Loop vars aren't in scope in FTL
+            }
+            return visibleLoopVarName.equals(visibleLoopVar1Name) || visibleLoopVarName.equals(loopVar2Name);
         }
 
-        String getLoopVariable2Name() {
-            return this.loopVar2Name;
-        }
-        
         public TemplateModel getLocalVariable(String name) {
-            String loopVariableName = this.loopVarName;
-            if (loopVariableName != null && name.startsWith(loopVariableName)) {
-                switch(name.length() - loopVariableName.length()) {
+            String visibleLoopVar1Name = this.visibleLoopVar1Name; // Not this.loopVar1Name!
+            if (visibleLoopVar1Name == null) {
+                // Loop variables aren't yet in scope in FTL
+                return null;
+            }
+
+            if (name.startsWith(visibleLoopVar1Name)) {
+                switch(name.length() - visibleLoopVar1Name.length()) {
                     case 0: 
-                        return loopVar;
+                        return loopVar1Value;
                     case 6: 
                         if (name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
@@ -459,24 +483,24 @@ final class IteratorBlock extends TemplateElement {
             }
             
             if (name.equals(loopVar2Name)) {
-                return loopVar2;
+                return loopVar2Value;
             }
             
             return null;
         }
         
-        public Collection getLocalVariableNames() {
-            String loopVariableName = this.loopVarName;
-            if (loopVariableName != null) {
+        public Collection<String> getLocalVariableNames() {
+            String visibleLoopVar1Name = this.visibleLoopVar1Name; // Not this.loopVar1Name!
+            if (visibleLoopVar1Name != null) {
                 if (localVarNames == null) {
                     localVarNames = new ArrayList(3);
-                    localVarNames.add(loopVariableName);
-                    localVarNames.add(loopVariableName + LOOP_STATE_INDEX);
-                    localVarNames.add(loopVariableName + LOOP_STATE_HAS_NEXT);
+                    localVarNames.add(visibleLoopVar1Name);
+                    localVarNames.add(visibleLoopVar1Name + LOOP_STATE_INDEX);
+                    localVarNames.add(visibleLoopVar1Name + LOOP_STATE_HAS_NEXT);
                 }
                 return localVarNames;
             } else {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
         }
 
