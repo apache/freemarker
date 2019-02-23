@@ -32,7 +32,7 @@ abstract class BuiltInForNestedContentParameter extends SpecialBuiltIn {
     
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, nestedContentParamName);
+        IterationContext iterCtx = env.findEnclosingIterationContextWithVisibleVariable(nestedContentParamName);
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new TemplateException(

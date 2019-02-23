@@ -44,7 +44,7 @@ class ASTDirItems extends ASTDirective {
 
     @Override
     ASTElement[] execute(Environment env) throws TemplateException, IOException {
-        final IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, null);
+        final IterationContext iterCtx = env.findClosestEnclosingIterationContext();
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new TemplateException(env,

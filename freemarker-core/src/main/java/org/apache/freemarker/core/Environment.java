@@ -576,6 +576,39 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
+     * @param nestedContentParamName
+     *            Then name of the loop variable that's also visible in FTL at the moment, whose context we are looking
+     *            for.
+     * @return The matching context or {@code null} if no such context exists.
+     */
+    ASTDirList.IterationContext findEnclosingIterationContextWithVisibleVariable(String nestedContentParamName) {
+        return findEnclosingIterationContext(nestedContentParamName);
+    }
+
+    /**
+     * @return The matching context or {@code null} if no such context exists.
+     */
+    ASTDirList.IterationContext findClosestEnclosingIterationContext() {
+        return findEnclosingIterationContext(null);
+    }
+    private ASTDirList.IterationContext findEnclosingIterationContext(String nestedContentParamName) {
+        LocalContextStack ctxStack = getLocalContextStack();
+        if (ctxStack != null) {
+            for (int i = ctxStack.size() - 1; i >= 0; i--) {
+                Object ctx = ctxStack.get(i);
+                if (ctx instanceof ASTDirList.IterationContext
+                        && (nestedContentParamName == null
+                        || nestedContentParamName.equals(((ASTDirList.IterationContext) ctx).getNestedContentParameter1Name())
+                        || nestedContentParamName.equals(((ASTDirList.IterationContext) ctx).getNestedContentParameter2Name())
+                )) {
+                    return (ASTDirList.IterationContext) ctx;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Used for {@code #visit} and {@code #recurse}.
      */
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
