@@ -34,7 +34,7 @@ class Sep extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
+        final IterationContext iterCtx = env.findClosestEnclosingIterationContext();
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(env,

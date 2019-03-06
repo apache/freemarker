@@ -20,10 +20,13 @@ package freemarker.core;
 
 import java.util.List;
 
-
+/**
+ * Built-in like {@code ?foo(params)}, where the parameter list must be present on parsing time, so that it can
+ * be processed on parsing time.
+ */
 abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
 
-    abstract void bindToParameters(List/*<Expression>*/ parameters, Token openParen, Token closeParen)
+    abstract void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen)
             throws ParseException;
 
     @Override
@@ -33,13 +36,13 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         buf.append(super.getCanonicalForm());
         
         buf.append("(");
-        List/*<Expression>*/args = getArgumentsAsList();
+        List<Expression> args = getArgumentsAsList();
         int size = args.size();
         for (int i = 0; i < size; i++) {
             if (i != 0) {
                 buf.append(", ");
             }
-            Expression arg = (Expression) args.get(i);
+            Expression arg = args.get(i);
             buf.append(arg.getCanonicalForm());
         }
         buf.append(")");
@@ -82,11 +85,23 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         }
     }
 
-    protected ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
+    protected final ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
         return new ParseException(
                 "?" + key + "(...) " + ordinalityDesc + " parameters", this.getTemplate(),
                 openParen.beginLine, openParen.beginColumn,
                 closeParen.endLine, closeParen.endColumn);
+    }
+
+    protected final void checkLocalLambdaParamCount(LocalLambdaExpression localLambdaExp, int expectedParamCount)
+            throws ParseException {
+        int actualParamCount = localLambdaExp.getLambdaParameterList().getParameters().size();
+        if (actualParamCount != expectedParamCount) {
+            throw new ParseException(
+                    "?" + key + "(...) parameter lambda expression must declare exactly " + expectedParamCount + " "
+                            + "parameter" + (expectedParamCount > 1 ? "s" : "") + ", but it declared "
+                            + actualParamCount + ".",
+                    localLambdaExp);
+        }
     }
 
     @Override
@@ -97,7 +112,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         return clone;
     }
 
-    protected abstract List getArgumentsAsList();
+    protected abstract List<Expression> getArgumentsAsList();
     
     protected abstract int getArgumentsCount();
 
@@ -105,5 +120,12 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     
     protected abstract void cloneArguments(Expression clone, String replacedIdentifier,
             Expression replacement, ReplacemenetState replacementState);
+
+    /**
+     * If parameter expressions can be {@link LocalLambdaExpression}-s.
+     */
+    protected boolean isLocalLambdaParameterSupported() {
+        return false;
+    }
     
 }

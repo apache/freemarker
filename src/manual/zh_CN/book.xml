@@ -17482,7 +17482,7 @@ ${1.2}</programlisting>
 			它看上去像用户自定义指令(比如宏)来调用从结点名称
 			(<literal><replaceable>node</replaceable>?node_name</literal>)
 			和命名空间
-			(<literal><replaceable>node</replaceable>?node_namesoace</literal>)
+			(<literal><replaceable>node</replaceable>?node_namespace</literal>)
 			中有名称扣除的结点。名称扣除的规则：</para>
 
             <itemizedlist>

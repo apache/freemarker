@@ -33,7 +33,7 @@ abstract class BuiltInForLoopVariable extends SpecialBuiltIn {
     
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, loopVarName);
+        IterationContext iterCtx = env.findEnclosingIterationContextWithVisibleVariable(loopVarName);
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(

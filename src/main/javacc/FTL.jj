@@ -29,6 +29,7 @@ PARSER_BEGIN(FMParser)
 
 package freemarker.core;
 
+import freemarker.core.LocalLambdaExpression.LambdaParameterList;
 import freemarker.template.*;
 import freemarker.template.utility.*;
 import java.io.*;
@@ -1278,6 +1279,8 @@ TOKEN:
     |
     <ESCAPED_GTE : "gte" | "\\gte" | "&gt;=">
     |
+    <LAMBDA_ARROW : "->" | "-&gt;">
+    |
     <PLUS : "+">
     |
     <MINUS : "-">
@@ -1993,9 +1996,6 @@ Expression RangeExpression() :
     }
 }
 
-
-
-
 Expression AndExpression() :
 {
     Expression lhs, rhs, result;
@@ -2122,8 +2122,10 @@ BuiltinVariable BuiltinVariable() :
             parseTimeValue = new SimpleScalar(outputFormat.getName());
         } else if (nameStr.equals(BuiltinVariable.AUTO_ESC) || nameStr.equals(BuiltinVariable.AUTO_ESC_CC)) {
             parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        } else {            parseTimeValue = null;
-        }        
+        } else {
+            parseTimeValue = null;
+        }
+        
         result = new BuiltinVariable(name, token_source, parseTimeValue);
         
         result.setLocation(template, dot, name);
@@ -2177,7 +2179,7 @@ Expression BuiltIn(Expression lhoExp) :
 {
     Token t = null;
     BuiltIn result;
-    ArrayList/*<Expression>*/ args = null;
+    ArrayList<Expression> args = null;
     Token openParen;
     Token closeParen;
 }
@@ -2235,13 +2237,31 @@ Expression BuiltIn(Expression lhoExp) :
         }
     }
     [
-        LOOKAHEAD({ result instanceof BuiltInWithParseTimeParameters  })
+        LOOKAHEAD({
+                result instanceof BuiltInWithParseTimeParameters
+                && !((BuiltInWithParseTimeParameters) result).isLocalLambdaParameterSupported() })
         openParen = <OPEN_PAREN>
         args = PositionalArgs()
         closeParen = <CLOSE_PAREN> {
             result.setLocation(template, lhoExp, closeParen);
             ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
-            
+
+            return result;
+        }
+    ]
+    // In principle we should embed the BuiltInWithParseTimeParameters LOOKAHEAD into the
+    // isLocalLambdaParameterSupported LOOKAHEAD, but then the `result` variable was out of scope in the code
+    // generated for the nested LOOKAHEAD. So we had to flatten this by checking isLocalLambdaParameterSupported twice.
+    [
+        LOOKAHEAD({
+                result instanceof BuiltInWithParseTimeParameters
+                && ((BuiltInWithParseTimeParameters) result).isLocalLambdaParameterSupported() })
+        openParen = <OPEN_PAREN>
+        args = PositionalMaybeLambdaArgs()
+        closeParen = <CLOSE_PAREN> {
+            result.setLocation(template, lhoExp, closeParen);
+            ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
+
             return result;
         }
     ]
@@ -2251,6 +2271,78 @@ Expression BuiltIn(Expression lhoExp) :
     }
 }
 
+// Only supported as the argument of certain built-ins, so it's not called inside Expression.
+Expression LocalLambdaExpression() :
+{
+    LambdaParameterList lhs;
+    Expression rhs, result;
+}
+{
+    (
+        LOOKAHEAD(LambdaExpressionParameterList() <LAMBDA_ARROW>)
+        (
+            lhs = LambdaExpressionParameterList()
+            <LAMBDA_ARROW>
+            rhs = OrExpression()
+            {
+    result = new LocalLambdaExpression(lhs, rhs);
+    if (lhs.getOpeningParenthesis() != null) {
+        // (args) -> exp
+        result.setLocation(template, lhs.getOpeningParenthesis(), rhs);
+    } else {
+        // singleArg -> exp
+        result.setLocation(template, lhs.getParameters().get(0), rhs);
+    }
+}
+        )
+        |
+        result = OrExpression()
+    )
+    {
+        return result;
+    }
+}
+
+LambdaParameterList LambdaExpressionParameterList() :
+{
+    Token openParen = null;
+    Token closeParen = null;
+    List<Identifier> params = null;
+    Identifier param;
+}
+{
+    (
+        (
+            openParen = <OPEN_PAREN>
+            [
+                param = Identifier()
+                {
+                    params = new ArrayList<Identifier>(4);
+                    params.add(param);
+                }
+                (
+                    <COMMA>
+                    param = Identifier()
+                    {
+                        params.add(param);
+                    }
+                )*
+            ]
+            closeParen = <CLOSE_PAREN>
+        )
+        |
+        param = Identifier()
+        {
+            params = Collections.<Identifier>singletonList(param);
+        }
+    )
+    {
+        return new LambdaParameterList(
+                openParen,
+                params != null ? params : Collections.<Identifier>emptyList(),
+                closeParen);
+    }
+}
 
 /**
  * production for when a key is specified by <DOT> + keyname
@@ -3636,6 +3728,27 @@ ArrayList PositionalArgs() :
     }
 }
 
+/**
+ * Like PositionalArgs, but allows lambdas. This is separate as it's slower, while lambdas are only allowed on a few
+ * places.
+ */
+ArrayList PositionalMaybeLambdaArgs() :
+{
+    ArrayList result = new ArrayList();
+    Expression arg;
+}
+{
+    [
+        arg = LocalLambdaExpression() { result.add(arg); }
+        (
+            [<COMMA>]
+            arg = LocalLambdaExpression() { result.add(arg); }
+        )*
+    ]
+    {
+        return result;
+    }
+}
 
 Comment Comment() :
 {

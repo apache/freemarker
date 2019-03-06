@@ -30,7 +30,8 @@ import freemarker.template.TemplateModel;
 public class NonMethodException extends UnexpectedTypeException {
 
     private static final Class[] EXPECTED_TYPES = new Class[] { TemplateMethodModel.class };
-    
+    private static final Class[] EXPECTED_TYPES_WITH_FUNCTION = new Class[] { TemplateMethodModel.class, Macro.class };
+
     public NonMethodException(Environment env) {
         super(env, "Expecting method value here");
     }
@@ -58,7 +59,22 @@ public class NonMethodException extends UnexpectedTypeException {
 
     NonMethodException(
             Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        super(blamed, model, "method", EXPECTED_TYPES, tips, env);
-    }    
+        this(blamed, model, false, false, tips, env);
+    }
+
+    /**
+     * @param allowFTLFunction Whether FTL functions are also acceptable
+     *
+     * @since 2.3.29
+     */
+    NonMethodException(
+            Expression blamed, TemplateModel model, boolean allowFTLFunction, boolean allowLambdaExp,
+            String[] tips, Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model,
+                "method" + (allowFTLFunction ? " or function" : "") + (allowLambdaExp ? " or lambda expression" : ""),
+                allowFTLFunction ? EXPECTED_TYPES_WITH_FUNCTION : EXPECTED_TYPES,
+                tips, env);
+    }
 
 }
