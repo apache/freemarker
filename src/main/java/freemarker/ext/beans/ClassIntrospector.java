@@ -860,7 +860,7 @@ class ClassIntrospector {
     // Cache management:
 
     /**
-     * Corresponds to {@link BeansWrapper#clearClassIntrospecitonCache()}.
+     * Corresponds to {@link BeansWrapper#clearClassIntrospectionCache()}.
      * 
      * @since 2.3.20
      */
