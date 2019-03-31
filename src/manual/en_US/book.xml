@@ -27899,6 +27899,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added new built-ins:
+              <literal>?filter(<replaceable>predicate</replaceable>)</literal>
+              and <literal>?map(<replaceable>mapper</replaceable>)</literal>.
+              These allow using lambda expression, like
+              <literal>users?filter(user -&gt; user.superuser)</literal> or
+              <literal>users?map(user -&gt; user.name)</literal>, or accept a
+              functions/method as parameter. (Lambda expressions are also new
+              in this release, but they can only be used in said built-ins, so
+              they aren't like in Java for example.) These built-ins are
+              generally eager, that is, they immediately build a new sequence.
+              However at selected places, most notably when used as
+              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
+              directive parameter, they are working in lazy mode instead, that
+              is, they won't built the a new sequence, just stream through the
+              existing one and apply the filter or mapping element by element.
+              [TODO: document and link documentation]</para>
+            </listitem>
+
+            <listitem>
               <para>Added new built-ins for truncating text.
               <literal><replaceable>string</replaceable>?truncate(<replaceable>length</replaceable>)</literal>
               truncates the text to the given length, and by default adds
