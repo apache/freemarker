@@ -388,8 +388,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
         bi.key = key;
         bi.target = target;
         if (bi.isLazilyGeneratedSequenceModelTargetSupported()) {
-            if (target instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-                ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) target)
+            Expression cleanedTarget = MiscUtil.peelParentheses(target);
+            if (cleanedTarget instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
+                ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) cleanedTarget)
                         .setLazyResultGenerationAllowed(true);
             }
         }

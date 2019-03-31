@@ -48,6 +48,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template._TemplateAPI;
+import freemarker.template.utility.NumberUtil;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -488,12 +489,16 @@ class BuiltInsForMultipleTypes {
             return true;
         }
 
+        private int countingLimit;
+
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
 
             final int size;
-            if (model instanceof TemplateSequenceModel) {
+            if (countingLimit == 1 && model instanceof TemplateCollectionModelEx) {
+                size = ((TemplateCollectionModelEx) model).isEmpty() ? 0 : 1;
+            } else if (model instanceof TemplateSequenceModel) {
                 size = ((TemplateSequenceModel) model).size();
             } else if (model instanceof TemplateCollectionModelEx) {
                 size = ((TemplateCollectionModelEx) model).size();
@@ -508,8 +513,11 @@ class BuiltInsForMultipleTypes {
                 // expected by the template author, and we just made that calculation less wasteful here.
                 TemplateModelIterator iterator = ((LazilyGeneratedSequenceModel) model).iterator();
                 int counter = 0;
-                while (iterator.hasNext()) {
+                countElements: while (iterator.hasNext()) {
                     counter++;
+                    if (counter == countingLimit) {
+                        break countElements;
+                    }
                     iterator.next();
                 }
                 size = counter;
@@ -525,6 +533,31 @@ class BuiltInsForMultipleTypes {
                         env);
             }
             return new SimpleNumber(size);
+        }
+
+        /**
+         * Enables an optimization trick when the result of the built-in will be compared with a number literal.
+         * For example, in the case of {@code things?size != 0} we only need to check of the target is non-empty, which
+         * is often more efficient than telling exactly how many elements it has.
+         */
+        void setCountingLimit(int cmpOperator, NumberLiteral rightOperand) {
+            int cmpInt;
+            try {
+                cmpInt = NumberUtil.toIntExact(rightOperand.getAsNumber());
+            } catch (ArithmeticException e) {
+                // As we can't know what the ArithmeticEngine will be on runtime, we won't risk this for non-integers.
+                return;
+            }
+
+            switch (cmpOperator) {
+                case EvalUtil.CMP_OP_EQUALS: countingLimit = cmpInt + 1; break;
+                case EvalUtil.CMP_OP_NOT_EQUALS: countingLimit = cmpInt + 1; break;
+                case EvalUtil.CMP_OP_LESS_THAN: countingLimit = cmpInt; break;
+                case EvalUtil.CMP_OP_GREATER_THAN: countingLimit = cmpInt + 1; break;
+                case EvalUtil.CMP_OP_LESS_THAN_EQUALS: countingLimit = cmpInt + 1; break;
+                case EvalUtil.CMP_OP_GREATER_THAN_EQUALS: countingLimit = cmpInt; break;
+                default: throw new BugException("Unsupported comparator operator code: " + cmpOperator);
+            }
         }
     }
     

@@ -27963,6 +27963,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>If the result of
+              <literal><replaceable>seq</replaceable>?size</literal> is
+              compared to an integer literal in a template, like in
+              <literal><replaceable>seq</replaceable>?size != 0</literal>, or
+              <literal><replaceable>seq</replaceable>?size &lt; 1</literal>,
+              and to decide the answer it's enough to know if
+              <literal><replaceable>seq</replaceable></literal> is an empty
+              sequence or collection (i.e., the exact size isn't needed), and
+              said value implements
+              <literal>TemplateCollectionModelEx</literal>, FreeMarker will
+              call <literal>TemplateCollectionModelEx.isEmpty()</literal>
+              instead of <literal>size()</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>TemplateModelUtils.wrapAsHashUnion(ObjectWrapper,
               List&lt;?&gt;)</literal> and

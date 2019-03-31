@@ -51,6 +51,22 @@ final class ComparisonExpression extends BooleanExpression {
         } else {
             throw new BugException("Unknown comparison operator " + opString);
         }
+
+        Expression cleanedLeft = MiscUtil.peelParentheses(left);
+        Expression cleanedRight = MiscUtil.peelParentheses(right);
+        if (cleanedLeft instanceof BuiltInsForMultipleTypes.sizeBI) {
+            if (cleanedRight instanceof NumberLiteral) {
+                ((BuiltInsForMultipleTypes.sizeBI) cleanedLeft).setCountingLimit(
+                        operation, (NumberLiteral) cleanedRight
+                );
+            }
+        } else if (cleanedRight instanceof BuiltInsForMultipleTypes.sizeBI) {
+            if (cleanedLeft instanceof NumberLiteral) {
+                ((BuiltInsForMultipleTypes.sizeBI) cleanedRight).setCountingLimit(
+                        EvalUtil.mirrorCmpOperator(operation), (NumberLiteral) cleanedLeft
+                );
+            }
+        }
     }
 
     /*

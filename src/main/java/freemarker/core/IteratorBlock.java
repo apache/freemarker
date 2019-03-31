@@ -83,8 +83,10 @@ final class IteratorBlock extends TemplateElement {
         this.hashListing = hashListing;
         this.forEach = forEach;
 
-        if (listedExp instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) listedExp).setLazyResultGenerationAllowed(true);
+        Expression cleanedListExp = MiscUtil.peelParentheses(listedExp);
+        if (cleanedListExp instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
+            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) cleanedListExp)
+                    .setLazyResultGenerationAllowed(true);
             fetchElementsOutsideLoopVarContext = true;
         } else {
             fetchElementsOutsideLoopVarContext = false;

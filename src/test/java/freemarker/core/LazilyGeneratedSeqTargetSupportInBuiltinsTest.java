@@ -43,7 +43,7 @@ import freemarker.test.TemplateTest;
 public class LazilyGeneratedSeqTargetSupportInBuiltinsTest extends TemplateTest {
 
     @Test
-    public void sizeTest() throws Exception {
+    public void sizeBasicsTest() throws Exception {
         assertOutput("${seq?size}",
                 "[size]3");
         assertOutput("${collEx?size}",
@@ -60,6 +60,56 @@ public class LazilyGeneratedSeqTargetSupportInBuiltinsTest extends TemplateTest 
                 "[size][get 0][get 1][get 2]2");
         assertOutput("${collEx?filter(x -> x != 1)?size}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]2");
+    }
+
+    @Test
+    public void sizeComparisonTest() throws Exception {
+        // These actually aren't related to lazy generation...
+        assertOutput("${collEx?size}",
+                "[size]3");
+        assertOutput("${collEx?size != 0}",
+                "[isEmpty]true");
+        assertOutput("${0 != collEx?size}",
+                "[isEmpty]true");
+        assertOutput("${collEx?size == 0}",
+                "[isEmpty]false");
+        assertOutput("${0 == collEx?size}",
+                "[isEmpty]false");
+        assertOutput("${(collEx?size >= 1)}",
+                "[isEmpty]true");
+        assertOutput("${1 <= collEx?size}",
+                "[isEmpty]true");
+        assertOutput("${collEx?size <= 0}",
+                "[isEmpty]false");
+        assertOutput("${(0 >= collEx?size)}",
+                "[isEmpty]false");
+        assertOutput("${collEx?size > 0}",
+                "[isEmpty]true");
+        assertOutput("${0 < collEx?size}",
+                "[isEmpty]true");
+        assertOutput("${collEx?size < 1}",
+                "[isEmpty]false");
+        assertOutput("${1 > collEx?size}",
+                "[isEmpty]false");
+        assertOutput("${collEx?size == 1}",
+                "[size]false");
+        assertOutput("${1 == collEx?size}",
+                "[size]false");
+
+        // Now the lazy generation things:
+        assertOutput("${collLong?filter(x -> true)?size}",
+                "[iterator]" +
+                        "[hasNext][next][hasNext][next][hasNext][next]" +
+                        "[hasNext][next][hasNext][next][hasNext][next][hasNext]6");
+        // Note: "[next]" is added by ?filter, as it has to know if the element matches the predicate.
+        assertOutput("${collLong?filter(x -> true)?size != 0}",
+                "[iterator][hasNext][next]true");
+        assertOutput("${collLong?filter(x -> true)?size != 1}",
+                "[iterator][hasNext][next][hasNext][next]true");
+        assertOutput("${collLong?filter(x -> true)?size == 1}",
+                "[iterator][hasNext][next][hasNext][next]false");
+        assertOutput("${collLong?filter(x -> true)?size < 3}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next]false");
     }
 
     @Test
@@ -87,13 +137,26 @@ public class LazilyGeneratedSeqTargetSupportInBuiltinsTest extends TemplateTest 
     @Test
     public void listTest() throws Exception {
         // Note: #list has to fetch elements up to 4 to know if it?hasNext
-        assertOutput("<#list collLong?filter(x -> x % 2 == 0) as it>${it} ${it?hasNext?c}<#break></#list>",
-                "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext][next]2 true");
+        String commonSourceExp = "collLong?filter(x -> x % 2 == 0)";
+        for (String sourceExp : new String[] {commonSourceExp, "(" + commonSourceExp + ")"}) {
+            assertOutput("<#list " + sourceExp + " as it>${it} ${it?hasNext}<#break></#list>",
+                    "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext][next]2 true");
+        }
     }
+
+    @Test
+    public void biTargetParenthesisTest() throws Exception {
+        assertOutput("${(coll?filter(x -> x % 2 == 0))?first}",
+                "[iterator][hasNext][next][hasNext][next]2");
+    }
+
+
 
     @Override
     protected Configuration createConfiguration() throws Exception {
         Configuration cfg = super.createConfiguration();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_29);
+        cfg.setBooleanFormat("c");
         cfg.setSharedVariable("seq", new MonitoredTemplateSequenceModel(1, 2, 3));
         cfg.setSharedVariable("coll", new MonitoredTemplateCollectionModel(1, 2, 3));
         cfg.setSharedVariable("collLong", new MonitoredTemplateCollectionModel(1, 2, 3, 4, 5, 6));
