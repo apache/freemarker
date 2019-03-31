@@ -144,7 +144,7 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
             return true;
         }
 
@@ -185,7 +185,7 @@ class BuiltInsForSequences {
     static class joinBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
             return true;
         }
 
@@ -302,7 +302,7 @@ class BuiltInsForSequences {
     static class seq_containsBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
             return true;
         }
 
@@ -374,7 +374,7 @@ class BuiltInsForSequences {
     static class seq_index_ofBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
             return true;
         }
 
@@ -915,7 +915,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
             return true;
         }
 
@@ -980,19 +980,20 @@ class BuiltInsForSequences {
     }
 
     /**
-     * Built-in that's similar to an Java 8 Stream intermediate operation. To be on the safe side, by default these
-     * are eager, and just produce a {@link TemplateSequenceModel}. But when circumstances allow, they become
-     * lazy, similarly to Java 8 Stream-s. Another characteristic of the built-ins that they usually accept
-     * lambda expressions as parameters.
+     * Built-in that's similar to a Java 8 Stream intermediate operation. To be on the safe side, by default these
+     * are eager, and just produce a {@link TemplateSequenceModel}. But when circumstances allow, they become lazy,
+     * similarly to Java 8 Stream intermediate operations. Another characteristic of these built-ins is that they
+     * usually accept lambda expressions as parameters.
      */
     static abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTimeParameters {
 
         private Expression elementTransformerExp;
         private ElementTransformer precreatedElementTransformer;
-        private boolean lazyProcessingAllowed;
+        private boolean lazyResultGenerationAllowed;
 
         @Override
         void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
+            // At the moment all built-ins of this kind requires 1 parameter.
             if (parameters.size() != 1) {
                 throw newArgumentCountException("requires exactly 1", openParen, closeParen);
             }
@@ -1003,10 +1004,6 @@ class BuiltInsForSequences {
                 // We can't do this with other kind of expressions, as they need to be evaluated on runtime:
                 precreatedElementTransformer = new LocalLambdaElementTransformer(localLambdaExp);
             }
-
-            if (target instanceof IntermediateStreamOperationLikeBuiltIn) {
-                ((IntermediateStreamOperationLikeBuiltIn) target).setLazyProcessingAllowed(true);
-            }
         }
 
         @Override
@@ -1014,12 +1011,17 @@ class BuiltInsForSequences {
             return true;
         }
 
-        boolean isLazyProcessingAllowed() {
-            return lazyProcessingAllowed;
+        @Override
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+            return true;
+        }
+
+        final boolean isLazyResultGenerationAllowed() {
+            return lazyResultGenerationAllowed;
         }
 
         /**
-         * Used to allow processing of the collection or sequence elements on an as-needed basis, similarly as
+         * Used to allow generating the result collection or sequence elements on an as-needed basis, similarly as
          * Java 8 Stream intermediate operations do it. This is initially {@code false}. The containing expression or
          * directive sets it to {@code true} if it can ensure that:
          * <ul>
@@ -1030,8 +1032,8 @@ class BuiltInsForSequences {
          *       built-in was called. This is required as lambda expression are {@link LocalLambdaExpression}-s.
          * </ul>
          */
-        void setLazyProcessingAllowed(boolean lazyProcessingAllowed) {
-            this.lazyProcessingAllowed = lazyProcessingAllowed;
+        void setLazyResultGenerationAllowed(boolean lazyResultGenerationAllowed) {
+            this.lazyResultGenerationAllowed = lazyResultGenerationAllowed;
         }
 
         protected List<Expression> getArgumentsAsList() {
@@ -1084,10 +1086,12 @@ class BuiltInsForSequences {
         private TemplateModelIterator getTemplateModelIterator(Environment env, TemplateModel model) throws TemplateModelException,
                 NonSequenceOrCollectionException, InvalidReferenceException {
             if (model instanceof TemplateCollectionModel) {
-                return ((TemplateCollectionModel) model).iterator();
+                return isLazyResultGenerationAllowed()
+                        ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) model)
+                        : ((TemplateCollectionModel) model).iterator();
             } else if (model instanceof TemplateSequenceModel) {
-                return new SequenceIterator((TemplateSequenceModel) model);
-            } else if (model instanceof TemplateModelIterator) { // For a stream mode LHO
+                return new LazySequenceIterator((TemplateSequenceModel) model);
+            } else if (model instanceof TemplateModelIterator) { // For a lazily generated LHO
                 return (TemplateModelIterator) model;
             } else {
                 throw new NonSequenceOrCollectionException(target, model, env);
@@ -1095,8 +1099,10 @@ class BuiltInsForSequences {
         }
 
         /**
-         * @param lhoIterator Use this to iterate through the items
-         * @param lho Maybe needed for operations specific to the built-in, like getting the size
+         * @param lhoIterator Use this to read the elements of the left hand operand
+         * @param lho Maybe needed for operations specific to the built-in, like getting the size, otherwise use the
+         *           {@code lhoIterator} only.
+         * @param elementTransformer The argument to the built-in (typically a lambda expression)
          *
          * @return {@link TemplateSequenceModel} or {@link TemplateCollectionModel} or {@link TemplateModelIterator}.
          */
@@ -1104,10 +1110,15 @@ class BuiltInsForSequences {
                 TemplateModelIterator lhoIterator, TemplateModel lho, ElementTransformer elementTransformer,
                 Environment env) throws TemplateException;
 
+        /**
+         * Wraps the built-in argument that specifies how to transform the elements of the sequence, to hide the
+         * complexity of doing that.
+         */
         interface ElementTransformer {
             TemplateModel transformElement(TemplateModel element, Environment env) throws TemplateException;
         }
 
+        /** {@link ElementTransformer} that wraps a local lambda expression. */
         private static class LocalLambdaElementTransformer implements ElementTransformer {
             private final LocalLambdaExpression elementTransformerExp;
 
@@ -1120,6 +1131,7 @@ class BuiltInsForSequences {
             }
         }
 
+        /** {@link ElementTransformer} that wraps a (Java) method call. */
         private static class MethodElementTransformer implements ElementTransformer {
             private final TemplateMethodModel elementTransformer;
 
@@ -1134,6 +1146,7 @@ class BuiltInsForSequences {
             }
         }
 
+        /** {@link ElementTransformer} that wraps a call to an FTL function (things defined with {@code #function}). */
         private static class FunctionElementTransformer implements ElementTransformer {
             private final Macro templateTransformer;
             private final Expression elementTransformerExp;
@@ -1145,6 +1158,8 @@ class BuiltInsForSequences {
 
             public TemplateModel transformElement(TemplateModel element, Environment env) throws
                     TemplateException {
+                // #function-s were originally designed to be called from templates directly, so they expect an
+                // Expression as argument. So we have to create a fake one.
                 ExpressionWithFixedResult functionArgExp = new ExpressionWithFixedResult(
                         element, elementTransformerExp);
                 return env.invokeFunction(env, templateTransformer,
@@ -1161,7 +1176,7 @@ class BuiltInsForSequences {
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
                 final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyProcessingAllowed()) {
+            if (!isLazyResultGenerationAllowed()) {
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
@@ -1171,7 +1186,7 @@ class BuiltInsForSequences {
                 }
                 return new TemplateModelListSequence(resultList);
             } else {
-                return new SingleIterationCollectionModel(
+                return new LazilyGeneratedSequenceModel(
                         new TemplateModelIterator() {
                             boolean prefetchDone;
                             TemplateModel prefetchedElement;
@@ -1223,17 +1238,17 @@ class BuiltInsForSequences {
             }
         }
 
-        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env) throws
-                TemplateException {
+        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env)
+                throws TemplateException {
             TemplateModel transformedElement = elementTransformer.transformElement(element, env);
             if (!(transformedElement instanceof TemplateBooleanModel)) {
                 if (transformedElement == null) {
                     throw new _TemplateModelException(getElementTransformerExp(), env,
-                            "The element transformer function has returned no return value (has returned null) " +
-                            "instead of a boolean.");
+                            "The filter expression has returned no value (has returned null), " +
+                            "rather than a boolean.");
                 }
                 throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The element transformer function had to return a boolean value, but it has returned ",
+                        "The filter expression had to return a boolean value, but it returned ",
                         new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
                         " instead.");
             }
@@ -1247,19 +1262,17 @@ class BuiltInsForSequences {
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, TemplateModel lho, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyProcessingAllowed()) {
+            if (!isLazyResultGenerationAllowed()) {
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
-                    resultList.add(fetchAndTransformNextElement(lhoIterator, elementTransformer, env));
+                    resultList.add(fetchAndMapNextElement(lhoIterator, elementTransformer, env));
                 }
                 return new TemplateModelListSequence(resultList);
             } else {
-                return new SingleIterationCollectionModel(
-                        new TemplateModelIterator() {
-
+                TemplateModelIterator mappedLhoIterator = new TemplateModelIterator() {
                     public TemplateModel next() throws TemplateModelException {
                         try {
-                            return fetchAndTransformNextElement(lhoIterator, elementTransformer, env);
+                            return fetchAndMapNextElement(lhoIterator, elementTransformer, env);
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e, env, "Failed to transform element");
                         }
@@ -1268,17 +1281,25 @@ class BuiltInsForSequences {
                     public boolean hasNext() throws TemplateModelException {
                         return lhoIterator.hasNext();
                     }
-                });
+                };
+                if (lho instanceof TemplateCollectionModelEx) { // Preferred branch, as TempCollModEx has isEmpty() too
+                    return new SameSizeCollLazilyGeneratedSequenceModel(mappedLhoIterator,
+                            (TemplateCollectionModelEx) lho);
+                } else if (lho instanceof TemplateSequenceModel) {
+                    return new SameSizeSeqLazilyGeneratedSequenceModel(mappedLhoIterator, (TemplateSequenceModel) lho);
+                } else {
+                    return new LazilyGeneratedSequenceModel(mappedLhoIterator);
+                }
             }
         }
 
-        private TemplateModel fetchAndTransformNextElement(
+        private TemplateModel fetchAndMapNextElement(
                 TemplateModelIterator lhoIterator, ElementTransformer elementTransformer, Environment env)
                 throws TemplateException {
             TemplateModel transformedElement = elementTransformer.transformElement(lhoIterator.next(), env);
             if (transformedElement == null) {
                 throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The element transformer function has returned no return value (has returned null).");
+                        "The element mapper function has returned no return value (has returned null).");
             }
             return transformedElement;
         }

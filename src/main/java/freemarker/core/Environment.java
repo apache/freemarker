@@ -684,8 +684,6 @@ public final class Environment extends Configurable {
 
     /**
      * Evaluate expression with shadowing a single variable with a new local variable.
-     *
-     * @since 2.3.29
      */
     TemplateModel evaluateWithNewLocal(Expression exp, String lambdaArgName, TemplateModel lamdaArgValue)
             throws TemplateException {

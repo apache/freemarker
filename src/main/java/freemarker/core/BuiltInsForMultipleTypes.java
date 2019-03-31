@@ -40,6 +40,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
@@ -481,6 +482,12 @@ class BuiltInsForMultipleTypes {
     }
 
     static class sizeBI extends BuiltIn {
+
+        @Override
+        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+            return true;
+        }
+
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -492,6 +499,20 @@ class BuiltInsForMultipleTypes {
                 size = ((TemplateCollectionModelEx) model).size();
             } else if (model instanceof TemplateHashModelEx) {
                 size = ((TemplateHashModelEx) model).size();
+            } else if (model instanceof LazilyGeneratedSequenceModel) {
+                // While this is a TemplateCollectionModel, and thus ?size will be O(N), and N might be infinite,
+                // it's for the result of ?filter(predicate) or such. Those "officially" return a sequence. Returning a
+                // TemplateCollectionModel (a LazilyGeneratedSequenceModel more specifically) is a (mostly) transparent
+                // optimization to avoid creating the result sequence in memory, which would be unnecessary work for
+                // ?size. Creating that result sequence would be O(N) too, so the O(N) time complexity should be
+                // expected by the template author, and we just made that calculation less wasteful here.
+                TemplateModelIterator iterator = ((LazilyGeneratedSequenceModel) model).iterator();
+                int counter = 0;
+                while (iterator.hasNext()) {
+                    counter++;
+                    iterator.next();
+                }
+                size = counter;
             } else {
                 throw new UnexpectedTypeException(
                         target, model,

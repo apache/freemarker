@@ -387,16 +387,16 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
         bi.key = key;
         bi.target = target;
-        if (bi.isSingleIterationCollectionTargetSupported()) {
+        if (bi.isLazilyGeneratedSequenceModelTargetSupported()) {
             if (target instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
                 ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) target)
-                        .setLazyProcessingAllowed(true);
+                        .setLazyResultGenerationAllowed(true);
             }
         }
         return bi;
     }
 
-    protected boolean isSingleIterationCollectionTargetSupported() {
+    protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
         return false;
     }
 

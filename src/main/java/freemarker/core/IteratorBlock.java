@@ -84,7 +84,7 @@ final class IteratorBlock extends TemplateElement {
         this.forEach = forEach;
 
         if (listedExp instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) listedExp).setLazyProcessingAllowed(true);
+            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) listedExp).setLazyResultGenerationAllowed(true);
             fetchElementsOutsideLoopVarContext = true;
         } else {
             fetchElementsOutsideLoopVarContext = false;
@@ -307,7 +307,7 @@ final class IteratorBlock extends TemplateElement {
                         openedIterator = null;
                     } else {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
-                        // allow one iterator() call. (Also those returned by ?filter, etc. with lazy processing on.)
+                        // allow one iterator() call. (Also those returned by ?filter, etc. with lazy result generation.)
                         openedIterator = iterModel;
                         // Note: Loop variables will only become visible inside #items
                         env.visit(childBuffer);
