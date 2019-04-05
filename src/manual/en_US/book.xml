@@ -15904,7 +15904,7 @@ ${1.234}</programlisting>
           <programlisting role="template">&lt;#setting number_format=",##0.00"&gt;
 &lt;#setting locale="en_US"&gt;
 US people write:     ${12345678}
-&lt;#setting locale="hu"&gt;
+&lt;#setting locale="de_DE"&gt;
 German people write: ${12345678}</programlisting>
 
           <programlisting role="output">US people write:     12,345,678.00
