@@ -57,7 +57,7 @@ public class ModelCacheTest {
         TemplateModel wrappedC = ow.wrap(c);
         assertSame(wrappedC, ow.wrap(c));
         
-        ow.clearClassIntrospecitonCache();
+        ow.clearClassIntrospectionCache();
         assertNotSame(wrappedC, ow.wrap(c));
         assertSame(ow.wrap(c), ow.wrap(c));
     }

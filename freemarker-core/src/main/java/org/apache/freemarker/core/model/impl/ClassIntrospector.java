@@ -826,7 +826,7 @@ class ClassIntrospector {
     // Cache management:
 
     /**
-     * Corresponds to {@link DefaultObjectWrapper#clearClassIntrospecitonCache()}.
+     * Corresponds to {@link DefaultObjectWrapper#clearClassIntrospectionCache()}.
      */
     void clearCache() {
         if (getHasSharedInstanceRestrictons()) {

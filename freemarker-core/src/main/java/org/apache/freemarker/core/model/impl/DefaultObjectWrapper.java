@@ -313,7 +313,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
     /**
      * Tells if this instance acts like if its class introspection cache is sharable with other {@link DefaultObjectWrapper}-s.
-     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
+     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospectionCache()}.
      * The value depends on how the instance
      * was created; with a public constructor (then this is {@code false}), or with {@link Builder}
      * (then it's {@code true}). Note that in the last case it's possible that the introspection cache
@@ -1119,7 +1119,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      *
      * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
      */
-    public void clearClassIntrospecitonCache() {
+    public void clearClassIntrospectionCache() {
         classIntrospector.clearCache();
     }
 

@@ -507,6 +507,7 @@ Core / Template loading and caching
   .templateConfigurations (for example based on the directory it is in), or with the #ftl directive inside the
   template. Thus, a given template always has the same charset, no mater how it's accessed.
 - Require customLookupCondition-s to be Serializable.
+- BeansWrapper.clearClassIntrospecitonCache was renamed to clearClassIntrospectionCache (note the typo)
 
 DOM (XML)
 .........

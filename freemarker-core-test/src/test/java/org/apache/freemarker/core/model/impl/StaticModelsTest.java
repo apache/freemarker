@@ -71,7 +71,7 @@ public class StaticModelsTest {
         
         assertSame(s, statics.get(S.class.getName()));
         
-        ow.clearClassIntrospecitonCache();
+        ow.clearClassIntrospectionCache();
         TemplateHashModel sAfterClean = (TemplateHashModel) statics.get(S.class.getName());
         assertNotSame(s, sAfterClean);
         assertSame(sAfterClean, statics.get(S.class.getName()));

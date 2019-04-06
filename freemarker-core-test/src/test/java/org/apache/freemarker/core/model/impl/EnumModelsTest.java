@@ -64,7 +64,7 @@ public class EnumModelsTest {
         
         assertSame(e, enums.get(E.class.getName()));
         
-        ow.clearClassIntrospecitonCache();
+        ow.clearClassIntrospectionCache();
         TemplateHashModel eAfterClean = (TemplateHashModel) enums.get(E.class.getName());
         assertNotSame(e, eAfterClean);
         assertSame(eAfterClean, enums.get(E.class.getName()));

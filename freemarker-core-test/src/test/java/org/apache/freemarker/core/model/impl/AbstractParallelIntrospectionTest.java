@@ -87,7 +87,7 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
             try {
                 for (int i = 0; i < iterations; i++) {
                     if (Math.random() < CACHE_CLEARING_CHANCE) {
-                        ow.clearClassIntrospecitonCache();
+                        ow.clearClassIntrospectionCache();
                     }
                     int objIdx = (int) (Math.random() * NUM_ENTITYES);
                     TemplateHashModel h = getWrappedEntity(objIdx);
