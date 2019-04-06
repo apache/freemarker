@@ -673,7 +673,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * Tells if this instance acts like if its class introspection cache is sharable with other {@link BeansWrapper}-s.
-     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
+     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospectionCache()}.
      * The value depends on how the instance
      * was created; with a public constructor (then this is {@code false}), or with {@link BeansWrapperBuilder}
      * (then it's {@code true}). Note that in the last case it's possible that the introspection cache
@@ -1617,6 +1617,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
+     * @deprecated Use {@link #clearClassIntrospectionCache()};
      * Removes all class introspection data from the cache.
      * 
      * <p>Use this if you want to free up memory on the expense of recreating
@@ -1626,10 +1627,25 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @since 2.3.20
      */
+    @Deprecated
     public void clearClassIntrospecitonCache() {
         classIntrospector.clearCache();
     }
-    
+
+    /**
+     * Removes all class introspection data from the cache.
+     *
+     * <p>Use this if you want to free up memory on the expense of recreating
+     * the cache entries for the classes that will be used later in templates.
+     *
+     * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
+     *
+     * @since 2.3.29
+     */
+    public void clearClassIntrospectionCache() {
+        classIntrospector.clearCache();
+    }
+
     ClassIntrospector getClassIntrospector() {
         return classIntrospector;
     }
