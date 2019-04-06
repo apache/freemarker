@@ -1617,8 +1617,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * @deprecated Use {@link #clearClassIntrospectionCache()};
-     * Removes all class introspection data from the cache.
+     * <p>Removes all class introspection data from the cache.
      * 
      * <p>Use this if you want to free up memory on the expense of recreating
      * the cache entries for the classes that will be used later in templates.
@@ -1626,6 +1625,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
      * 
      * @since 2.3.20
+     *
+     * @deprecated There's a typo in this method name, so use {@link #clearClassIntrospectionCache()} instead.
      */
     @Deprecated
     public void clearClassIntrospecitonCache() {
@@ -1640,7 +1641,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *
      * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
      *
-     * @since 2.3.29
+     * @since 2.3.29 (in earlier versions use {@link #clearClassIntrospecitonCache()})
      */
     public void clearClassIntrospectionCache() {
         classIntrospector.clearCache();

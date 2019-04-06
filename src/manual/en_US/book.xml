@@ -28032,6 +28032,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>markup(HTMLOutputFormat(),
               "&lt;p&gt;Example&lt;/p&gt;")</literal>.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>BeansWrapper.clearClassIntrospecitonCache</literal>
+              was deprecated as there's a typo in the method name; use
+              <literal>clearClassIntrospectionCache</literal> instead.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
