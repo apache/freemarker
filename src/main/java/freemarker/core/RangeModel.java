@@ -53,6 +53,6 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
     
     abstract boolean isRightAdaptive();
     
-    abstract boolean isAffactedByStringSlicingBug();
+    abstract boolean isAffectedByStringSlicingBug();
 
 }

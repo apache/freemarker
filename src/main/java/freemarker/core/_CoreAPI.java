@@ -218,5 +218,8 @@ public class _CoreAPI {
     public static void setPreventStrippings(FMParser parser, boolean preventStrippings) {
         parser.setPreventStrippings(preventStrippings);
     }
-    
+
+    public static boolean isLazilyGeneratedSequenceModel(Class cl) {
+        return LazilyGeneratedSequenceModel.class.isAssignableFrom(cl);
+    }
 }

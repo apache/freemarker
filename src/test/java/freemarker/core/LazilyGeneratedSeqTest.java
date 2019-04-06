@@ -38,9 +38,31 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.test.TemplateTest;
 
 /**
- * Tests built-ins that are support getting {@link LazilyGeneratedSequenceModel} as their LHO input.
+ * Tests operators and built-ins that are support getting {@link LazilyGeneratedSequenceModel} as their operands.
  */
-public class LazilyGeneratedSeqTargetSupportInBuiltinsTest extends TemplateTest {
+public class LazilyGeneratedSeqTest extends TemplateTest {
+
+    @Test
+    public void dynamicIndexTest() throws Exception {
+        assertErrorContains("${coll?map(it -> it)['x']}",
+                "hash", "evaluated to a sequence");
+
+        assertOutput("${coll?map(it -> it)[0]}",
+                "[iterator][hasNext][next]1");
+        assertOutput("${coll?map(it -> it)[1]}",
+                "[iterator][hasNext][next][hasNext][next]2");
+        assertOutput("${coll?map(it -> it)[2]}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next]3");
+        assertOutput("${coll?map(it -> it)[3]!'missing'}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]missing");
+        assertOutput("${coll?filter(it -> it % 2 == 0)[0]}",
+                "[iterator][hasNext][next][hasNext][next]2");
+        assertOutput("${coll?filter(it -> it > 3)[0]!'missing'}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]missing");
+
+        assertOutput("${collLong?map(it -> it)[1 .. 2]?join(', ')}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next]2, 3");
+    }
 
     @Test
     public void sizeBasicsTest() throws Exception {

@@ -41,7 +41,7 @@ abstract class RightUnboundedRangeModel extends RangeModel {
     }
 
     @Override
-    final boolean isAffactedByStringSlicingBug() {
+    final boolean isAffectedByStringSlicingBug() {
         return false;
     }
     

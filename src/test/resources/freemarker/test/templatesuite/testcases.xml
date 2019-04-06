@@ -18,7 +18,7 @@
   under the License.
 -->
 
-<!DOCTYPE testcases [
+<!DOCTYPE testCases [
   <!ELEMENT testCases (setting?, testCase*)>
   <!ELEMENT testCase (setting?)>
      <!ATTLIST testCase 
@@ -173,6 +173,9 @@
    </testCase>
    <testCase name="range-ici-2.3.21" noOutput="true">
       <setting incompatible_improvements="2.3.21, max"/>
+   </testCase>
+   <testCase name="range-lazy" noOutput="true">
+      <setting incompatible_improvements="2.3.22"/>
    </testCase>
    <testCase name="recover" />
    <testCase name="root" />

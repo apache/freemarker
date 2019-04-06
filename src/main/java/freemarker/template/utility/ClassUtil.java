@@ -29,6 +29,7 @@ import java.util.Set;
 import freemarker.core.Environment;
 import freemarker.core.Macro;
 import freemarker.core.TemplateMarkupOutputModel;
+import freemarker.core._CoreAPI;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -207,7 +208,7 @@ public class ClassUtil {
             appendTypeName(sb, typeNamesAppended, "transform");
         }
         
-        if (TemplateSequenceModel.class.isAssignableFrom(cl)) {
+        if (TemplateSequenceModel.class.isAssignableFrom(cl) || _CoreAPI.isLazilyGeneratedSequenceModel(cl)) {
             appendTypeName(sb, typeNamesAppended, "sequence");
         } else if (TemplateCollectionModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended,

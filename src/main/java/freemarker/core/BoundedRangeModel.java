@@ -62,7 +62,7 @@ final class BoundedRangeModel extends RangeModel {
     }
 
     @Override
-    boolean isAffactedByStringSlicingBug() {
+    boolean isAffectedByStringSlicingBug() {
         return affectedByStringSlicingBug;
     }
     
