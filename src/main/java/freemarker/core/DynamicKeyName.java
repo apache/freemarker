@@ -51,11 +51,7 @@ final class DynamicKeyName extends Expression {
         this.target = target; 
         this.keyExpression = keyExpression;
 
-        Expression cleanedTarget = MiscUtil.peelParentheses(target);
-        if (cleanedTarget instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) cleanedTarget)
-                    .setLazyResultGenerationAllowed(true);
-        }
+        target.enableLazilyGeneratedResult();
     }
 
     @Override

@@ -34,7 +34,7 @@ import freemarker.template.utility.NullArgumentException;
 class SingleIterationCollectionModel implements TemplateCollectionModel {
     private TemplateModelIterator iterator;
 
-    public SingleIterationCollectionModel(TemplateModelIterator iterator) {
+    SingleIterationCollectionModel(TemplateModelIterator iterator) {
         NullArgumentException.check(iterator);
         this.iterator = iterator;
     }

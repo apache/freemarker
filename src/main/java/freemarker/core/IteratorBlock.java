@@ -48,7 +48,6 @@ final class IteratorBlock extends TemplateElement {
     private final String loopVar2Name;
     private final boolean hashListing;
     private final boolean forEach;
-    private final boolean fetchElementsOutsideLoopVarContext;
 
     /**
      * @param listedExp
@@ -83,14 +82,7 @@ final class IteratorBlock extends TemplateElement {
         this.hashListing = hashListing;
         this.forEach = forEach;
 
-        Expression cleanedListExp = MiscUtil.peelParentheses(listedExp);
-        if (cleanedListExp instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-            ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) cleanedListExp)
-                    .setLazyResultGenerationAllowed(true);
-            fetchElementsOutsideLoopVarContext = true;
-        } else {
-            fetchElementsOutsideLoopVarContext = false;
-        }
+        listedExp.enableLazilyGeneratedResult();
     }
     
     boolean isHashListing() {

@@ -77,6 +77,24 @@ abstract public class Expression extends TemplateObject {
     public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
         return eval(env);
     }
+
+    /**
+     * Allows generating the result collection or sequence elements (or maybe others in future) on an as-needed basis,
+     * similarly as Java 8 Stream intermediate operations do it. The default implementation in {@link Expression}
+     * does nothing, as most expressions can't create such result. The containing expression or directive calls
+     * this if it can ensure that:
+     * <ul>
+     *   <li>If the returned value is a {@link TemplateCollectionModel}, then it's traversed at most once, more
+     *       specifically, {@link TemplateCollectionModel#iterator()} is called at most once.
+     *   <li>When the methods of the collection or iterator are called, the context provided by
+     *       the {@link Environment} (such as the local context stack) is similar to the context from where this
+     *       expression was called. This is required as lazily generated results are allowed to be based on
+     *       {@link LocalLambdaExpression}-s.
+     * </ul>
+     */
+    void enableLazilyGeneratedResult() {
+        // Has no effect by default
+    }
     
     final TemplateModel eval(Environment env) throws TemplateException {
         try {

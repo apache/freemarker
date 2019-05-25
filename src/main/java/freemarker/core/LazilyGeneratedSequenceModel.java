@@ -26,10 +26,12 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Same as {@link SingleIterationCollectionModel}, but marks the value as something that's in principle a
  * {@link TemplateSequenceModel}, but to allow lazy result generation a {@link CollectionModel} is used internally.
- * This is an optimization that we do where we consider it to be transparent enough for the user.
+ * This is an optimization that we do where we consider it to be transparent enough for the user. An operator or
+ * built-in should only ever receive a {@link LazilyGeneratedSequenceModel} if it has explicitly allowed its
+ * input expression to return such value via calling {@link Expression#enableLazilyGeneratedResult()}.
  */
 class LazilyGeneratedSequenceModel extends SingleIterationCollectionModel {
-    public LazilyGeneratedSequenceModel(TemplateModelIterator iterator) {
+    LazilyGeneratedSequenceModel(TemplateModelIterator iterator) {
         super(iterator);
     }
 }

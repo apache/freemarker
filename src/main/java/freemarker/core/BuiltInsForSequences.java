@@ -144,7 +144,7 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -185,7 +185,7 @@ class BuiltInsForSequences {
     static class joinBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -302,7 +302,7 @@ class BuiltInsForSequences {
     static class seq_containsBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -374,7 +374,7 @@ class BuiltInsForSequences {
     static class seq_index_ofBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -915,7 +915,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -989,7 +989,7 @@ class BuiltInsForSequences {
 
         private Expression elementTransformerExp;
         private ElementTransformer precreatedElementTransformer;
-        private boolean lazyResultGenerationAllowed;
+        private boolean lazilyGeneratedResultEnabled;
 
         @Override
         void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
@@ -1007,33 +1007,23 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLocalLambdaParameterSupported() {
+        protected final boolean isLocalLambdaParameterSupported() {
             return true;
         }
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        final void enableLazilyGeneratedResult() {
+            this.lazilyGeneratedResultEnabled = true;
+        }
+
+        /** Tells if {@link #enableLazilyGeneratedResult()} was called. */
+        protected final boolean isLazilyGeneratedResultEnabled() {
+            return lazilyGeneratedResultEnabled;
+        }
+
+        @Override
+        protected final boolean isLazilyGeneratedTargetResultSupported() {
             return true;
-        }
-
-        final boolean isLazyResultGenerationAllowed() {
-            return lazyResultGenerationAllowed;
-        }
-
-        /**
-         * Used to allow generating the result collection or sequence elements on an as-needed basis, similarly as
-         * Java 8 Stream intermediate operations do it. This is initially {@code false}. The containing expression or
-         * directive sets it to {@code true} if it can ensure that:
-         * <ul>
-         *   <li>The returned {@link TemplateCollectionModel} is traversed only once, more specifically,
-         *       {@link TemplateCollectionModel#iterator()} is called only once.
-         *   <li>When the methods of the collection or iterator are called, the context provided by
-         *       the {@link Environment} (such as the local context stack) is similar to the context from where the
-         *       built-in was called. This is required as lambda expression are {@link LocalLambdaExpression}-s.
-         * </ul>
-         */
-        void setLazyResultGenerationAllowed(boolean lazyResultGenerationAllowed) {
-            this.lazyResultGenerationAllowed = lazyResultGenerationAllowed;
         }
 
         protected List<Expression> getArgumentsAsList() {
@@ -1086,7 +1076,7 @@ class BuiltInsForSequences {
         private TemplateModelIterator getTemplateModelIterator(Environment env, TemplateModel model) throws TemplateModelException,
                 NonSequenceOrCollectionException, InvalidReferenceException {
             if (model instanceof TemplateCollectionModel) {
-                return isLazyResultGenerationAllowed()
+                return isLazilyGeneratedResultEnabled()
                         ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) model)
                         : ((TemplateCollectionModel) model).iterator();
             } else if (model instanceof TemplateSequenceModel) {
@@ -1176,7 +1166,7 @@ class BuiltInsForSequences {
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
                 final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyResultGenerationAllowed()) {
+            if (!isLazilyGeneratedResultEnabled()) {
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
@@ -1262,7 +1252,7 @@ class BuiltInsForSequences {
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, TemplateModel lho, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyResultGenerationAllowed()) {
+            if (!isLazilyGeneratedResultEnabled()) {
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     resultList.add(fetchAndMapNextElement(lhoIterator, elementTransformer, env));

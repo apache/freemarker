@@ -485,7 +485,7 @@ class BuiltInsForMultipleTypes {
     static class sizeBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 

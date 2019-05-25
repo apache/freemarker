@@ -386,18 +386,15 @@ abstract class BuiltIn extends Expression implements Cloneable {
             throw new InternalError();
         }
         bi.key = key;
-        bi.target = target;
-        if (bi.isLazilyGeneratedSequenceModelTargetSupported()) {
-            Expression cleanedTarget = MiscUtil.peelParentheses(target);
-            if (cleanedTarget instanceof BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) {
-                ((BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn) cleanedTarget)
-                        .setLazyResultGenerationAllowed(true);
-            }
+        if (bi.isLazilyGeneratedTargetResultSupported()) {
+            target.enableLazilyGeneratedResult();
         }
+        bi.target = target;
         return bi;
     }
 
-    protected boolean isLazilyGeneratedSequenceModelTargetSupported() {
+    /** If the built-in supports a lazily generated value as its left operand (the target). */
+    protected boolean isLazilyGeneratedTargetResultSupported() {
         return false;
     }
 
