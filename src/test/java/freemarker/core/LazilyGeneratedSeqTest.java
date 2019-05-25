@@ -172,7 +172,51 @@ public class LazilyGeneratedSeqTest extends TemplateTest {
                 "[iterator][hasNext][next][hasNext][next]2");
     }
 
+    @Test
+    public void rangeOperatorTest() throws Exception {
+        assertErrorContains("${coll[1..2]?join(', ')}", "sequence", "collection");
 
+        assertOutput("${seq[1..2]?first}", "[size][get 1][get 2]2");
+        assertOutput("${seq[1..]?first}",  "[size][get 1][get 2]2");
+        assertOutput("${seq[2..1]?first}",  "[size][get 2][get 1]3");
+
+        assertOutput("${seqLong[1..3]?first}", "[size][get 1][get 2][get 3]2");
+        assertOutput("${seqLong[1..]?first}",  "[size][get 1][get 2][get 3][get 4][get 5]2");
+        assertOutput("${seqLong[3..1]?first}",  "[size][get 3][get 2][get 1]4");
+
+        assertOutput("${seq?map(x->x)[1..2]?first}", "[size][size][get 0][get 1]2");
+        assertOutput("${seq?map(x->x)[1..]?first}",  "[size][size][get 0][get 1]2");
+        // Why 2 [size]-s above: 1st to validate range. 2nd for the 1st hasNext call on the iterator.
+        assertOutput("${seq?map(x->x)[2..1]?first}",  "[size][size][get 0][get 1][get 2]3");
+
+        assertOutput("${seqLong?map(x->x)[1..3]?first}", "[size][size][get 0][get 1]2");
+        assertOutput("${seqLong?map(x->x)[1..]?first}",  "[size][size][get 0][get 1]2");
+        assertOutput("${seqLong?map(x->x)[3..1]?first}",  "[size][size][get 0][get 1][get 2][get 3]4");
+
+        assertOutput("${seq?filter(x->true)[1..2]?first}", "[size][get 0][get 1]2");
+        assertOutput("${seq?filter(x->true)[1..]?first}",  "[size][get 0][get 1]2");
+        assertOutput("${seq?filter(x->true)[2..1]?first}",  "[size][get 0][get 1][get 2]3");
+
+        assertOutput("${seqLong?filter(x->true)[1..3]?first}", "[size][get 0][get 1]2");
+        assertOutput("${seqLong?filter(x->true)[1..]?first}",  "[size][get 0][get 1]2");
+        assertOutput("${seqLong?filter(x->true)[3..1]?first}",  "[size][get 0][get 1][get 2][get 3]4");
+
+        assertOutput("${seq[1..2][0..1]?first}", "[size][get 1][get 2]2");
+        assertOutput("${seq?map(x->x)[1..2][0..1]?first}", "[size][size][get 0][get 1]2");
+        assertOutput("${seq?filter(x->true)[1..2][0..1]?first}", "[size][get 0][get 1]2");
+
+        assertOutput("<#list seqLong?filter(x->true)[1..3] as it>${it}</#list>",
+                "[size][get 0][get 1]2[get 2]3[get 3]4");
+        assertOutput("<#list seqLong[1..3] as it>${it}</#list>",
+                "[size][get 1][get 2][get 3]234");
+
+        assertOutput("${seq?map(x->x)[1..2]?size}", "[size]2");
+        assertOutput("${seq?filter(x->true)[1..2]?size}", "[size][get 0][get 1][get 2]2");
+        assertOutput("${seqLong?map(x->x)[2..]?size}", "[size]4");
+        assertOutput("${seqLong?filter(x->true)[2..]?size}", "[size][get 0][get 1][get 2][get 3][get 4][get 5]4");
+        assertOutput("${seqLong?map(x->x)[2..*3]?size}", "[size]3");
+        assertOutput("${seqLong?filter(x->true)[2..*3]?size}", "[size][get 0][get 1][get 2][get 3][get 4]3");
+    }
 
     @Override
     protected Configuration createConfiguration() throws Exception {
@@ -180,6 +224,7 @@ public class LazilyGeneratedSeqTest extends TemplateTest {
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_29);
         cfg.setBooleanFormat("c");
         cfg.setSharedVariable("seq", new MonitoredTemplateSequenceModel(1, 2, 3));
+        cfg.setSharedVariable("seqLong", new MonitoredTemplateSequenceModel(1, 2, 3, 4, 5, 6));
         cfg.setSharedVariable("coll", new MonitoredTemplateCollectionModel(1, 2, 3));
         cfg.setSharedVariable("collLong", new MonitoredTemplateCollectionModel(1, 2, 3, 4, 5, 6));
         cfg.setSharedVariable("collEx", new MonitoredTemplateCollectionModelEx(1, 2, 3));

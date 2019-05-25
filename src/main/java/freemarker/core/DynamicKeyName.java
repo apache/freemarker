@@ -20,7 +20,9 @@
 package freemarker.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -46,6 +48,7 @@ final class DynamicKeyName extends Expression {
 
     private final Expression keyExpression;
     private final Expression target;
+    private boolean lazilyGeneratedResultEnabled;
 
     DynamicKeyName(Expression target, Expression keyExpression) {
         this.target = target; 
@@ -162,7 +165,7 @@ final class DynamicKeyName extends Expression {
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)
     throws TemplateException {
-        // We can have 3 kind of left hand operands ("targets"): sequence, lazyily generated sequence, string
+        // We can have 3 kind of left hand operands ("targets"): sequence, lazily generated sequence, string
         final TemplateSequenceModel targetSeq;
         final LazilyGeneratedSequenceModel targetLazySeq;
         final String targetStr;
@@ -238,8 +241,11 @@ final class DynamicKeyName extends Expression {
                         ". ", "(Note that indices are 0-based).");
             }
         }
-        
-        final int resultSize; // Might will be UNKNOWN_RESULT_SIZE, when targetLazySeq != null
+
+        // Calculate resultSize. Note that:
+        // - It might will be UNKNOWN_RESULT_SIZE when targetLazySeq != null.
+        // - It might will be out-of-bounds if !targetSizeKnown (otherwise we validate if the range is correct)
+        final int resultSize;
         if (!rightUnbounded) {
             final int lastIdx = firstIdx + (rangeSize - 1) * step; // Note: lastIdx is inclusive
             if (lastIdx < 0) {
@@ -271,6 +277,9 @@ final class DynamicKeyName extends Expression {
             return emptyResult(targetSeq != null);
         }
         if (targetSeq != null) {
+            // In principle we should take lazilyGeneratedResultEnabled into account, but that wouldn't be backward
+            // compatible. For example, with lazily generated sequence result <#list xs[b..e] as x> would behave
+            // differently if xs is modified inside the #list nested content.
             ArrayList<TemplateModel> resultList = new ArrayList<TemplateModel>(resultSize);
             int srcIdx = firstIdx;
             for (int i = 0; i < resultSize; i++) {
@@ -280,8 +289,10 @@ final class DynamicKeyName extends Expression {
             // List items are already wrapped, so the wrapper will be null:
             return new SimpleSequence(resultList, null);
         } else if (targetLazySeq != null) {
+            // As a targetLazySeq can only occur if a new built-in like ?filter or ?map was used somewhere in the target
+            // expression, in this case we can return lazily generated sequence without breaking backward compatibility.
             if (step == 1) {
-                return getStep1RangeFromIterator(targetLazySeq.iterator(), range, resultSize);
+                return getStep1RangeFromIterator(targetLazySeq.iterator(), range, resultSize, targetSizeKnown);
             } else if (step == -1) {
                 return getStepMinus1RangeFromIterator(targetLazySeq.iterator(), range, resultSize);
             } else {
@@ -308,55 +319,88 @@ final class DynamicKeyName extends Expression {
         }
     }
 
-    private TemplateModel getStep1RangeFromIterator(final TemplateModelIterator targetIter, final RangeModel range, int resultSize)
+    private TemplateModel getStep1RangeFromIterator(
+            final TemplateModelIterator targetIter, final RangeModel range, int resultSize, boolean targetSizeKnown)
             throws TemplateModelException {
         final int firstIdx = range.getBegining();
         final int lastIdx = firstIdx + (range.size() - 1); // Note: meaningless if the range is right unbounded
         final boolean rightAdaptive = range.isRightAdaptive();
         final boolean rightUnbounded = range.isRightUnbounded();
-        return new LazilyGeneratedSequenceModel(new TemplateModelIterator() {
-            private boolean elementsBeforeFirsIndexWereSkipped;
-            private int nextIdx;
+        if (lazilyGeneratedResultEnabled) {
+            TemplateModelIterator iterator = new TemplateModelIterator() {
+                private boolean elementsBeforeFirsIndexWereSkipped;
+                private int nextIdx;
 
-            public TemplateModel next() throws TemplateModelException {
-                ensureElementsBeforeFirstIndexWereSkipped();
-                if (!rightUnbounded && nextIdx > lastIdx) {
-                    throw new _TemplateModelException(
-                            "Iterator has no more elements (at index ", Integer.valueOf(nextIdx), ")");
-                }
-                if (!rightAdaptive && !targetIter.hasNext()) {
-                    // We fail because the range was wrong, not because this iterator was over-consumed.
-                    throw new _TemplateModelException(keyExpression,
-                            "Range end index ", Integer.valueOf(lastIdx), " is out of bounds, as sliced sequence " +
-                            "only has ", nextIdx, " elements.");
-                }
-                TemplateModel result = targetIter.next();
-                nextIdx++;
-                return result;
-            }
-
-            public boolean hasNext() throws TemplateModelException {
-                ensureElementsBeforeFirstIndexWereSkipped();
-                return (rightUnbounded || nextIdx <= lastIdx) && (!rightAdaptive || targetIter.hasNext());
-            }
-
-            public void ensureElementsBeforeFirstIndexWereSkipped() throws TemplateModelException {
-                if (elementsBeforeFirsIndexWereSkipped) {
-                    return;
-                }
-
-                while (nextIdx < firstIdx) {
-                    if (!targetIter.hasNext()) {
-                        throw new _TemplateModelException(keyExpression,
-                                "Range start index ", Integer.valueOf(firstIdx), " is out of bounds, as the sliced " +
-                                "sequence only has ", nextIdx, " elements.");
+                public TemplateModel next() throws TemplateModelException {
+                    ensureElementsBeforeFirstIndexWereSkipped();
+                    if (!rightUnbounded && nextIdx > lastIdx) {
+                        // We fail because the consumer of this iterator hasn't used hasNext() properly.
+                        throw new _TemplateModelException(
+                                "Iterator has no more elements (at index ", Integer.valueOf(nextIdx), ")");
                     }
-                    targetIter.next();
+                    if (!rightAdaptive && !targetIter.hasNext()) {
+                        // We fail because the range was wrong, not because of the consumer of this iterator .
+                        throw newRangeEndOutOfBoundsException(nextIdx, lastIdx);
+                    }
+                    TemplateModel result = targetIter.next();
                     nextIdx++;
+                    return result;
                 }
-                elementsBeforeFirsIndexWereSkipped = true;
+
+                public boolean hasNext() throws TemplateModelException {
+                    ensureElementsBeforeFirstIndexWereSkipped();
+                    return (rightUnbounded || nextIdx <= lastIdx) && (!rightAdaptive || targetIter.hasNext());
+                }
+
+                public void ensureElementsBeforeFirstIndexWereSkipped() throws TemplateModelException {
+                    if (elementsBeforeFirsIndexWereSkipped) {
+                        return;
+                    }
+
+                    skipElementsBeforeFirstIndex(targetIter, firstIdx);
+                    nextIdx = firstIdx;
+                    elementsBeforeFirsIndexWereSkipped = true;
+                }
+            };
+            return resultSize != UNKNOWN_RESULT_SIZE && targetSizeKnown  // targetSizeKnown => range end was validated
+                    ? new LazilyGeneratedSequenceModelWithSize(iterator, resultSize)
+                    : new LazilyGeneratedSequenceModel(iterator);
+        } else { // !lazilyGeneratedResultEnabled
+            List<TemplateModel> resultList = resultSize != UNKNOWN_RESULT_SIZE
+                    ? new ArrayList<TemplateModel>(resultSize)
+                    : new ArrayList<TemplateModel>();
+            skipElementsBeforeFirstIndex(targetIter, firstIdx);
+            collectElements: for (int nextIdx = firstIdx; rightUnbounded || nextIdx <= lastIdx; nextIdx++) {
+                if (!targetIter.hasNext()) {
+                    if (!rightAdaptive) {
+                        throw newRangeEndOutOfBoundsException(nextIdx, lastIdx);
+                    }
+                    break collectElements;
+                }
+                resultList.add(targetIter.next());
             }
-        });
+            // List items are already wrapped, so the wrapper will be null:
+            return new SimpleSequence(resultList, null);
+        }
+    }
+
+    private void skipElementsBeforeFirstIndex(TemplateModelIterator targetIter, int firstIdx) throws TemplateModelException {
+        int nextIdx = 0;
+        while (nextIdx < firstIdx) {
+            if (!targetIter.hasNext()) {
+                throw new _TemplateModelException(keyExpression,
+                        "Range start index ", Integer.valueOf(firstIdx),
+                        " is out of bounds, as the sliced sequence only has ", nextIdx, " elements.");
+            }
+            targetIter.next();
+            nextIdx++;
+        }
+    }
+
+    private _TemplateModelException newRangeEndOutOfBoundsException(int nextIdx, int lastIdx) {
+        return new _TemplateModelException(keyExpression,
+                "Range end index ", Integer.valueOf(lastIdx), " is out of bounds, as sliced sequence " +
+                "only has ", nextIdx, " elements.");
     }
 
     // Because the order has to be reversed, we have to "buffer" the stream in this case.
@@ -383,21 +427,7 @@ final class DynamicKeyName extends Expression {
                     "Range top index " + highIndex + " (0-based) is outside the sliced sequence of length " +
                     srcIdx + ".");
         }
-        return new LazilyGeneratedSequenceModel(new TemplateModelIterator() {
-            private int nextIndex;
-
-            public TemplateModel next() throws TemplateModelException {
-                try {
-                    return resultElements[nextIndex++];
-                } catch (IndexOutOfBoundsException e) {
-                    throw new TemplateModelException("There are no more elements in the iterator");
-                }
-            }
-
-            public boolean hasNext() throws TemplateModelException {
-                return nextIndex < resultElements.length;
-            }
-        });
+        return new SimpleSequence(Arrays.asList(resultElements), null);
     }
 
     private TemplateModel emptyResult(boolean seq) {
@@ -406,6 +436,11 @@ final class DynamicKeyName extends Expression {
                         ? new SimpleSequence(Collections.EMPTY_LIST, null)
                         : Constants.EMPTY_SEQUENCE)
                 : TemplateScalarModel.EMPTY_STRING;
+    }
+
+    @Override
+    void enableLazilyGeneratedResult() {
+        lazilyGeneratedResultEnabled = true;
     }
 
     @Override
