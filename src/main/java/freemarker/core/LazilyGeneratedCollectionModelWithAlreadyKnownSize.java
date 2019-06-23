@@ -19,15 +19,14 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 
-class LazilyGeneratedSequenceModelWithSize extends LazilyGeneratedSequenceModel implements TemplateCollectionModelEx {
+final class LazilyGeneratedCollectionModelWithAlreadyKnownSize extends LazilyGeneratedCollectionModelEx {
     private final int size;
 
-    LazilyGeneratedSequenceModelWithSize(TemplateModelIterator iterator, int size) {
-        super(iterator);
+    LazilyGeneratedCollectionModelWithAlreadyKnownSize(TemplateModelIterator iterator, int size, boolean sequence) {
+        super(iterator, sequence);
         this.size = size;
     }
 
@@ -37,5 +36,10 @@ class LazilyGeneratedSequenceModelWithSize extends LazilyGeneratedSequenceModel 
 
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    @Override
+    protected LazilyGeneratedCollectionModel withIsSequenceFromFalseToTrue() {
+        return new LazilyGeneratedCollectionModelWithAlreadyKnownSize(getIterator(), size, true);
     }
 }

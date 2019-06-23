@@ -114,8 +114,12 @@ final class DynamicKeyName extends Expression {
             }
             return index < size ? tsm.get(index) : null;
         }
-        if (targetModel instanceof LazilyGeneratedSequenceModel) {
-            TemplateModelIterator iter = ((LazilyGeneratedSequenceModel) targetModel).iterator();
+        if (targetModel instanceof LazilyGeneratedCollectionModel
+                && ((LazilyGeneratedCollectionModel) targetModel).isSequence()) {
+            if (index < 0) {
+                return null;
+            }
+            TemplateModelIterator iter = ((LazilyGeneratedCollectionModel) targetModel).iterator();
             for (int curIndex = 0; iter.hasNext(); curIndex++) {
                 TemplateModel next = iter.next();
                 if (index == curIndex) {
@@ -167,15 +171,16 @@ final class DynamicKeyName extends Expression {
     throws TemplateException {
         // We can have 3 kind of left hand operands ("targets"): sequence, lazily generated sequence, string
         final TemplateSequenceModel targetSeq;
-        final LazilyGeneratedSequenceModel targetLazySeq;
+        final LazilyGeneratedCollectionModel targetLazySeq;
         final String targetStr;
         if (targetModel instanceof TemplateSequenceModel) {
             targetSeq = (TemplateSequenceModel) targetModel;
             targetLazySeq = null;
             targetStr = null;
-        } else if (targetModel instanceof LazilyGeneratedSequenceModel) {
+        } else if (targetModel instanceof LazilyGeneratedCollectionModel
+                && ((LazilyGeneratedCollectionModel) targetModel).isSequence()) {
             targetSeq = null;
-            targetLazySeq = (LazilyGeneratedSequenceModel) targetModel;
+            targetLazySeq = (LazilyGeneratedCollectionModel) targetModel;
             targetStr = null;
         } else {
             targetSeq = null;
@@ -363,8 +368,8 @@ final class DynamicKeyName extends Expression {
                 }
             };
             return resultSize != UNKNOWN_RESULT_SIZE && targetSizeKnown  // targetSizeKnown => range end was validated
-                    ? new LazilyGeneratedSequenceModelWithSize(iterator, resultSize)
-                    : new LazilyGeneratedSequenceModel(iterator);
+                    ? new LazilyGeneratedCollectionModelWithAlreadyKnownSize(iterator, resultSize, true)
+                    : new LazilyGeneratedCollectionModelWithUnknownSize(iterator, true);
         } else { // !lazilyGeneratedResultEnabled
             List<TemplateModel> resultList = resultSize != UNKNOWN_RESULT_SIZE
                     ? new ArrayList<TemplateModel>(resultSize)

@@ -19,31 +19,35 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used instead of {@link LazilyGeneratedSequenceModel} for operations that don't change the element count of the
+ * Used instead of {@link LazilyGeneratedCollectionModel} for operations that don't change the element count of the
  * source, if the source can also give back an element count.
  */
-class SameSizeCollLazilyGeneratedSequenceModel extends LazilyGeneratedSequenceModel
-        implements TemplateCollectionModelEx {
-    private final TemplateCollectionModelEx sizeSourceCollEx;
+class LazilyGeneratedCollectionModelWithSameSizeSeq extends LazilyGeneratedCollectionModelEx {
+    private final TemplateSequenceModel sizeSourceSeq;
 
-    public SameSizeCollLazilyGeneratedSequenceModel(
-            TemplateModelIterator iterator, TemplateCollectionModelEx sizeSourceCollEx) {
-        super(iterator);
-        NullArgumentException.check(sizeSourceCollEx);
-        this.sizeSourceCollEx = sizeSourceCollEx;
+    public LazilyGeneratedCollectionModelWithSameSizeSeq(
+            TemplateModelIterator iterator, TemplateSequenceModel sizeSourceSeq) {
+        super(iterator, true);
+        NullArgumentException.check(sizeSourceSeq);
+        this.sizeSourceSeq = sizeSourceSeq;
     }
 
     public int size() throws TemplateModelException {
-        return sizeSourceCollEx.size();
+        return sizeSourceSeq.size();
     }
 
     public boolean isEmpty() throws TemplateModelException {
-        return sizeSourceCollEx.isEmpty();
+        return sizeSourceSeq.size() == 0;
+    }
+
+    @Override
+    protected LazilyGeneratedCollectionModelWithSameSizeSeq withIsSequenceFromFalseToTrue() {
+        return this; // Won't be actually called...
     }
 }

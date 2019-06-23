@@ -28,6 +28,7 @@ import java.util.List;
 import org.junit.Test;
 
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateCollectionModelEx;
@@ -38,30 +39,64 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.test.TemplateTest;
 
 /**
- * Tests operators and built-ins that are support getting {@link LazilyGeneratedSequenceModel} as their operands.
+ * Tests operators and built-ins that are support getting and/or returning {@link LazilyGeneratedCollectionModel}.
+ * @see MapBiTest
+ * @see FilterBiTest
  */
-public class LazilyGeneratedSeqTest extends TemplateTest {
+public class LazilyGeneratedCollectionTest extends TemplateTest {
+
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        Configuration cfg = super.createConfiguration();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_29);
+        cfg.setBooleanFormat("c");
+        cfg.setSharedVariable("seq", new MonitoredTemplateSequenceModel(1, 2, 3));
+        cfg.setSharedVariable("seqLong", new MonitoredTemplateSequenceModel(1, 2, 3, 4, 5, 6));
+        cfg.setSharedVariable("coll", new MonitoredTemplateCollectionModel(1, 2, 3));
+        cfg.setSharedVariable("collLong", new MonitoredTemplateCollectionModel(1, 2, 3, 4, 5, 6));
+        cfg.setSharedVariable("collEx", new MonitoredTemplateCollectionModelEx(1, 2, 3));
+
+        DefaultObjectWrapper objectWrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28);
+        objectWrapper.setForceLegacyNonListCollections(false);
+        cfg.setObjectWrapper(objectWrapper);
+
+        return cfg;
+    }
 
     @Test
     public void dynamicIndexTest() throws Exception {
-        assertErrorContains("${coll?map(it -> it)['x']}",
+        assertErrorContains("${coll?sequence?map(it -> it)['x']}",
                 "hash", "evaluated to a sequence");
 
-        assertOutput("${coll?map(it -> it)[0]}",
+        assertOutput("${coll?sequence?map(it -> it)[0]}",
                 "[iterator][hasNext][next]1");
-        assertOutput("${coll?map(it -> it)[1]}",
+        assertOutput("${coll?sequence?map(it -> it)[1]}",
                 "[iterator][hasNext][next][hasNext][next]2");
-        assertOutput("${coll?map(it -> it)[2]}",
+        assertOutput("${coll?map(it -> it)?sequence[1]}",
+                "[iterator][hasNext][next][hasNext][next]2");
+        assertOutput("${coll?sequence?map(it -> it)[2]}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next]3");
-        assertOutput("${coll?map(it -> it)[3]!'missing'}",
+        assertOutput("${coll?sequence?map(it -> it)[3]!'missing'}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]missing");
-        assertOutput("${coll?filter(it -> it % 2 == 0)[0]}",
+        assertOutput("${coll?sequence?filter(it -> it % 2 == 0)[0]}",
                 "[iterator][hasNext][next][hasNext][next]2");
-        assertOutput("${coll?filter(it -> it > 3)[0]!'missing'}",
+        assertOutput("${coll?sequence?filter(it -> it > 3)[0]!'missing'}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]missing");
 
-        assertOutput("${collLong?map(it -> it)[1 .. 2]?join(', ')}",
+        assertOutput("${collLong?sequence?map(it -> it)[1 .. 2]?join(', ')}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next]2, 3");
+    }
+
+    @Test
+    public void dynamicIndexNonSequenceInput() throws Exception {
+        assertErrorContains("${coll[1]}", "sequence", "evaluated to a collection");
+        assertOutput("${coll?sequence[1]}", "[iterator][hasNext][next][hasNext][next]2");
+
+        assertErrorContains("<#assign t = coll[1..2]>", "sequence", "evaluated to a collection");
+        assertOutput("<#assign t = coll?sequence[1..2]>${t?join('')}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next]23");
+        assertOutput("<#list coll?sequence[1..2] as it>${it}</#list>",
+                "[iterator][hasNext][next][hasNext][next]2[hasNext][next]3");
     }
 
     @Test
@@ -75,12 +110,16 @@ public class LazilyGeneratedSeqTest extends TemplateTest {
 
         assertOutput("${seq?map(x -> x * 10)?size}",
                 "[size]3");
-        assertOutput("${collEx?map(x -> x * 10)?size}",
+        assertOutput("${collEx?sequence?map(x -> x * 10)?size}",
+                "[size]3");
+        assertOutput("${collEx?map(x -> x * 10)?sequence?size}",
                 "[size]3");
 
         assertOutput("${seq?filter(x -> x != 1)?size}",
                 "[size][get 0][get 1][get 2]2");
-        assertOutput("${collEx?filter(x -> x != 1)?size}",
+        assertOutput("${collEx?sequence?filter(x -> x != 1)?size}",
+                "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]2");
+        assertOutput("${collEx?filter(x -> x != 1)?sequence?size}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]2");
     }
 
@@ -119,19 +158,27 @@ public class LazilyGeneratedSeqTest extends TemplateTest {
                 "[size]false");
 
         // Now the lazy generation things:
-        assertOutput("${collLong?filter(x -> true)?size}",
+        assertOutput("${collLong?sequence?filter(x -> true)?size}",
                 "[iterator]" +
                         "[hasNext][next][hasNext][next][hasNext][next]" +
                         "[hasNext][next][hasNext][next][hasNext][next][hasNext]6");
         // Note: "[next]" is added by ?filter, as it has to know if the element matches the predicate.
-        assertOutput("${collLong?filter(x -> true)?size != 0}",
+        assertOutput("${collLong?sequence?filter(x -> true)?size != 0}",
                 "[iterator][hasNext][next]true");
-        assertOutput("${collLong?filter(x -> true)?size != 1}",
+        assertOutput("${collLong?sequence?filter(x -> true)?size != 1}",
                 "[iterator][hasNext][next][hasNext][next]true");
-        assertOutput("${collLong?filter(x -> true)?size == 1}",
+        assertOutput("${collLong?sequence?filter(x -> true)?size == 1}",
                 "[iterator][hasNext][next][hasNext][next]false");
-        assertOutput("${collLong?filter(x -> true)?size < 3}",
+        assertOutput("${collLong?filter(x -> true)?sequence?size == 1}",
+                "[iterator][hasNext][next][hasNext][next]false");
+        assertOutput("${collLong?sequence?filter(x -> true)?size < 3}",
                 "[iterator][hasNext][next][hasNext][next][hasNext][next]false");
+    }
+
+    @Test
+    public void sizeNonSequenceInput() throws Exception {
+        assertErrorContains("${coll?size}", "sequence", "evaluated to a collection");
+        assertOutput("${coll?sequence?size}", "[iterator][hasNext][next][hasNext][next][hasNext][next][hasNext]3");
     }
 
     @Test
@@ -216,19 +263,6 @@ public class LazilyGeneratedSeqTest extends TemplateTest {
         assertOutput("${seqLong?filter(x->true)[2..]?size}", "[size][get 0][get 1][get 2][get 3][get 4][get 5]4");
         assertOutput("${seqLong?map(x->x)[2..*3]?size}", "[size]3");
         assertOutput("${seqLong?filter(x->true)[2..*3]?size}", "[size][get 0][get 1][get 2][get 3][get 4]3");
-    }
-
-    @Override
-    protected Configuration createConfiguration() throws Exception {
-        Configuration cfg = super.createConfiguration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_29);
-        cfg.setBooleanFormat("c");
-        cfg.setSharedVariable("seq", new MonitoredTemplateSequenceModel(1, 2, 3));
-        cfg.setSharedVariable("seqLong", new MonitoredTemplateSequenceModel(1, 2, 3, 4, 5, 6));
-        cfg.setSharedVariable("coll", new MonitoredTemplateCollectionModel(1, 2, 3));
-        cfg.setSharedVariable("collLong", new MonitoredTemplateCollectionModel(1, 2, 3, 4, 5, 6));
-        cfg.setSharedVariable("collEx", new MonitoredTemplateCollectionModelEx(1, 2, 3));
-        return cfg;
     }
 
     public static abstract class ListContainingTemplateModel {

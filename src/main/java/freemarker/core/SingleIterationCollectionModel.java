@@ -48,4 +48,8 @@ class SingleIterationCollectionModel implements TemplateCollectionModel {
         iterator = null;
         return result;
     }
+
+    protected TemplateModelIterator getIterator() {
+        return iterator;
+    }
 }

@@ -188,6 +188,9 @@ public class ClassUtil {
             }
         } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
             return TemplateMethodModelEx.class;
+        } else if (tm instanceof TemplateCollectionModel
+                && _CoreAPI.isLazilyGeneratedSequenceModel((TemplateCollectionModel) tm)) {
+            return TemplateSequenceModel.class;
         } else {
             return null;
         }
@@ -208,7 +211,7 @@ public class ClassUtil {
             appendTypeName(sb, typeNamesAppended, "transform");
         }
         
-        if (TemplateSequenceModel.class.isAssignableFrom(cl) || _CoreAPI.isLazilyGeneratedSequenceModel(cl)) {
+        if (TemplateSequenceModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "sequence");
         } else if (TemplateCollectionModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended,

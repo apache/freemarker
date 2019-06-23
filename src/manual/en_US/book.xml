@@ -27933,6 +27933,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><link
+              linkend="ref_builtin_sequence"><literal>?sequence</literal></link>
+              now collaborates with
+              <literal><replaceable>seq</replaceable>?size</literal>,
+              <literal><replaceable>seq</replaceable>[<replaceable>index</replaceable>]</literal>,
+              <literal><replaceable>seq</replaceable>[<replaceable>range</replaceable>]</literal>,
+              and with some built-ins (<literal>filter</literal>,
+              <literal>map</literal>, <literal>join</literal>, etc.) to spare
+              collecting all the elements into the memory when possible. For
+              example <literal>anIterator?sequence[1]</literal> now will just
+              fetch the first 2 items, instead of building a sequence that
+              contains all the elements, and then getting the 2nd element from
+              that. Or, if you write
+              <literal>anIterator?sequence?size</literal>, it will just skip
+              through all elements to count them, but won't store them in
+              memory. These optimizations only work within the same chain of
+              built-in calls, so for example in <literal>&lt;#assign seq =
+              anIterator?sequence&gt;${seq[1]}</literal> will still collect
+              all the elements into the memory, as
+              <literal>anIterator?sequence</literal> and
+              <literal>seq[1]</literal> are separated. [TODO: document this at
+              <link linkend="ref_builtin_sequence">ref_builtin_sequence</link>
+              too]</para>
+            </listitem>
+
+            <listitem>
               <para>Extended big decimal format parameter
               <quote>multiplier</quote> was incorrectly written as
               <quote>multipier</quote>. Now both words are recognized.</para>

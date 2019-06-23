@@ -855,6 +855,8 @@ class BuiltInsForSequences {
 
     static class sequenceBI extends BuiltIn {
 
+        private boolean lazilyGeneratedResultEnabled;
+
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -867,17 +869,37 @@ class BuiltInsForSequences {
                 throw new NonSequenceOrCollectionException(target, model, env);
             }
             TemplateCollectionModel coll = (TemplateCollectionModel) model;
-            
-            SimpleSequence seq =
-                    coll instanceof TemplateCollectionModelEx
-                            ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
-                            : new SimpleSequence();
-            for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
-                seq.add(iter.next());
+
+            if (!lazilyGeneratedResultEnabled) {
+                SimpleSequence seq =
+                        coll instanceof TemplateCollectionModelEx
+                                ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
+                                : new SimpleSequence();
+                for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
+                    seq.add(iter.next());
+                }
+                return seq;
+            } else {
+                return coll instanceof LazilyGeneratedCollectionModel
+                        ? ((LazilyGeneratedCollectionModel) coll).withIsSequenceTrue()
+                        : coll instanceof TemplateCollectionModelEx
+                                ? new LazilyGeneratedCollectionModelWithSameSizeCollEx(
+                                        new LazyCollectionTemplateModelIterator(coll),
+                                        (TemplateCollectionModelEx) coll, true)
+                                : new LazilyGeneratedCollectionModelWithUnknownSize(
+                                        new LazyCollectionTemplateModelIterator(coll), true);
             }
-            return seq;
         }
-        
+
+        @Override
+        void enableLazilyGeneratedResult() {
+            lazilyGeneratedResultEnabled = true;
+        }
+
+        @Override
+        protected boolean isLazilyGeneratedTargetResultSupported() {
+            return true;
+        }
     }
     
     private static boolean isBuggySeqButGoodCollection(
@@ -1001,7 +1023,8 @@ class BuiltInsForSequences {
             if (elementTransformerExp instanceof LocalLambdaExpression) {
                 LocalLambdaExpression localLambdaExp = (LocalLambdaExpression) elementTransformerExp;
                 checkLocalLambdaParamCount(localLambdaExp, 1);
-                // We can't do this with other kind of expressions, as they need to be evaluated on runtime:
+                // We can't do this with other kind of expressions, like a function or method reference, as they
+                // need to be evaluated on runtime:
                 precreatedElementTransformer = new LocalLambdaElementTransformer(localLambdaExp);
             }
         }
@@ -1053,9 +1076,32 @@ class BuiltInsForSequences {
         }
 
         TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel lho = target.eval(env);
-            TemplateModelIterator lhoIterator = getTemplateModelIterator(env, lho);
-            return calculateResult(lhoIterator, lho, evalElementTransformerExp(env), env);
+            TemplateModel targetValue = target.eval(env);
+
+            final TemplateModelIterator targetIterator;
+            final boolean targetIsSequence;
+            {
+                if (targetValue instanceof TemplateCollectionModel) {
+                    targetIterator = isLazilyGeneratedResultEnabled()
+                            ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) targetValue)
+                            : ((TemplateCollectionModel) targetValue).iterator();
+                    targetIsSequence = targetValue instanceof LazilyGeneratedCollectionModel ?
+                        ((LazilyGeneratedCollectionModel) targetValue).isSequence() : false;
+                } else if (targetValue instanceof TemplateSequenceModel) {
+                    targetIterator = new LazySequenceIterator((TemplateSequenceModel) targetValue);
+                    targetIsSequence = true;
+                } else if (targetValue instanceof TemplateModelIterator) {
+                    targetIterator = (TemplateModelIterator) targetValue;
+                    targetIsSequence = false;
+                } else {
+                    throw new NonSequenceOrCollectionException(target, targetValue, env);
+                }
+            }
+
+            return calculateResult(
+                    targetIterator, targetValue, targetIsSequence,
+                    evalElementTransformerExp(env),
+                    env);
         }
 
         private ElementTransformer evalElementTransformerExp(Environment env) throws TemplateException {
@@ -1073,31 +1119,18 @@ class BuiltInsForSequences {
             }
         }
 
-        private TemplateModelIterator getTemplateModelIterator(Environment env, TemplateModel model) throws TemplateModelException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
-            if (model instanceof TemplateCollectionModel) {
-                return isLazilyGeneratedResultEnabled()
-                        ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) model)
-                        : ((TemplateCollectionModel) model).iterator();
-            } else if (model instanceof TemplateSequenceModel) {
-                return new LazySequenceIterator((TemplateSequenceModel) model);
-            } else if (model instanceof TemplateModelIterator) { // For a lazily generated LHO
-                return (TemplateModelIterator) model;
-            } else {
-                throw new NonSequenceOrCollectionException(target, model, env);
-            }
-        }
-
         /**
          * @param lhoIterator Use this to read the elements of the left hand operand
          * @param lho Maybe needed for operations specific to the built-in, like getting the size, otherwise use the
          *           {@code lhoIterator} only.
+         * @param lhoIsSequence See {@link LazilyGeneratedCollectionModel#isSequence}
          * @param elementTransformer The argument to the built-in (typically a lambda expression)
          *
          * @return {@link TemplateSequenceModel} or {@link TemplateCollectionModel} or {@link TemplateModelIterator}.
          */
         protected abstract TemplateModel calculateResult(
-                TemplateModelIterator lhoIterator, TemplateModel lho, ElementTransformer elementTransformer,
+                TemplateModelIterator lhoIterator, TemplateModel lho, boolean lhoIsSequence,
+                ElementTransformer elementTransformer,
                 Environment env) throws TemplateException;
 
         /**
@@ -1164,9 +1197,13 @@ class BuiltInsForSequences {
 
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
-                final ElementTransformer elementTransformer,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
             if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(filterBI.this);
+                }
+
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
@@ -1176,7 +1213,7 @@ class BuiltInsForSequences {
                 }
                 return new TemplateModelListSequence(resultList);
             } else {
-                return new LazilyGeneratedSequenceModel(
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
                         new TemplateModelIterator() {
                             boolean prefetchDone;
                             TemplateModel prefetchedElement;
@@ -1223,7 +1260,8 @@ class BuiltInsForSequences {
                                 } while (!conclusionReached);
                                 prefetchDone = true;
                             }
-                        }
+                        },
+                        lhoIsSequence
                 );
             }
         }
@@ -1250,9 +1288,13 @@ class BuiltInsForSequences {
     static class mapBI extends IntermediateStreamOperationLikeBuiltIn {
 
         protected TemplateModel calculateResult(
-                final TemplateModelIterator lhoIterator, TemplateModel lho, final ElementTransformer elementTransformer,
+                final TemplateModelIterator lhoIterator, TemplateModel lho, boolean lhoIsSequence, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
             if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(mapBI.this);
+                }
+
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     resultList.add(fetchAndMapNextElement(lhoIterator, elementTransformer, env));
@@ -1273,12 +1315,14 @@ class BuiltInsForSequences {
                     }
                 };
                 if (lho instanceof TemplateCollectionModelEx) { // Preferred branch, as TempCollModEx has isEmpty() too
-                    return new SameSizeCollLazilyGeneratedSequenceModel(mappedLhoIterator,
-                            (TemplateCollectionModelEx) lho);
+                    return new LazilyGeneratedCollectionModelWithSameSizeCollEx(
+                            mappedLhoIterator, (TemplateCollectionModelEx) lho, lhoIsSequence);
                 } else if (lho instanceof TemplateSequenceModel) {
-                    return new SameSizeSeqLazilyGeneratedSequenceModel(mappedLhoIterator, (TemplateSequenceModel) lho);
+                    return new LazilyGeneratedCollectionModelWithSameSizeSeq(
+                            mappedLhoIterator, (TemplateSequenceModel) lho);
                 } else {
-                    return new LazilyGeneratedSequenceModel(mappedLhoIterator);
+                    return new LazilyGeneratedCollectionModelWithUnknownSize(
+                            mappedLhoIterator, lhoIsSequence);
                 }
             }
         }

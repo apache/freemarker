@@ -22,31 +22,32 @@ package freemarker.core;
 import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
-import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used instead of {@link LazilyGeneratedSequenceModel} for operations that don't change the element count of the
+ * Used instead of {@link LazilyGeneratedCollectionModel} for operations that don't change the element count of the
  * source, if the source can also give back an element count.
- *
- * @since 2.3.29
  */
-class SameSizeSeqLazilyGeneratedSequenceModel extends LazilyGeneratedSequenceModel
-        implements TemplateCollectionModelEx {
-    private final TemplateSequenceModel sizeSourceSeq;
+class LazilyGeneratedCollectionModelWithSameSizeCollEx extends LazilyGeneratedCollectionModelEx {
+    private final TemplateCollectionModelEx sizeSourceCollEx;
 
-    public SameSizeSeqLazilyGeneratedSequenceModel(
-            TemplateModelIterator iterator, TemplateSequenceModel sizeSourceSeq) {
-        super(iterator);
-        NullArgumentException.check(sizeSourceSeq);
-        this.sizeSourceSeq = sizeSourceSeq;
+    public LazilyGeneratedCollectionModelWithSameSizeCollEx(
+            TemplateModelIterator iterator, TemplateCollectionModelEx sizeSourceCollEx, boolean sequenceSourced) {
+        super(iterator, sequenceSourced);
+        NullArgumentException.check(sizeSourceCollEx);
+        this.sizeSourceCollEx = sizeSourceCollEx;
     }
 
     public int size() throws TemplateModelException {
-        return sizeSourceSeq.size();
+        return sizeSourceCollEx.size();
     }
 
     public boolean isEmpty() throws TemplateModelException {
-        return sizeSourceSeq.size() == 0;
+        return sizeSourceCollEx.isEmpty();
+    }
+
+    @Override
+    protected LazilyGeneratedCollectionModelWithSameSizeCollEx withIsSequenceFromFalseToTrue() {
+        return new LazilyGeneratedCollectionModelWithSameSizeCollEx(getIterator(), sizeSourceCollEx, true);
     }
 }

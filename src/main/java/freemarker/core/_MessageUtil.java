@@ -341,22 +341,31 @@ public class _MessageUtil {
                         new _DelayedShortClassName(TemplateHashModelEx2.class),
                         ", which leads to this restriction."));
     }
-    
+
+    public static TemplateException newLazilyGeneratedCollectionMustBeSequenceException(Expression blamed) {
+        return new _MiscTemplateException(blamed,
+                "The result is a listable value with lazy transformation(s) applied on it, but it's not " +
+                "an FTL sequence (it's not a List-like value, but an Iterator-like value). The place doesn't " +
+                "support such values due to technical limitations. So either pass it to a construct that supports " +
+                "such values (like ", "<#list transformedListable as x>", "), or, if you know that you don't have " +
+                "too many elements, use transformedListable?sequence to allow it to be treated as an FTL sequence.");
+    }
+
     /**
      * @return "a" or "an" or "a(n)" (or "" for empty string) for an FTL type name
      */
     static public String getAOrAn(String s) {
         if (s == null) return null;
         if (s.length() == 0) return "";
-        
+
         char fc = Character.toLowerCase(s.charAt(0));
         if (fc == 'a' || fc == 'e' || fc == 'i') {
             return "an";
-        } else if (fc == 'h') { 
+        } else if (fc == 'h') {
             String ls = s.toLowerCase();
-            if (ls.startsWith("has") || ls.startsWith("hi")) { 
+            if (ls.startsWith("has") || ls.startsWith("hi")) {
                 return "a";
-            } else if (ls.startsWith("ht")) { 
+            } else if (ls.startsWith("ht")) {
                 return "an";
             } else {
                 return "a(n)";
@@ -364,7 +373,7 @@ public class _MessageUtil {
         } else if (fc == 'u' || fc == 'o') {
             return "a(n)";
         } else {
-            char sc = (s.length() > 1) ? s.charAt(1) : '\0'; 
+            char sc = (s.length() > 1) ? s.charAt(1) : '\0';
             if (fc == 'x' && !(sc == 'a' || sc == 'e' || sc == 'i' || sc == 'a' || sc == 'o' || sc == 'u')) {
                 return "an";
             } else {
@@ -372,5 +381,4 @@ public class _MessageUtil {
             }
         }
     }
-    
 }

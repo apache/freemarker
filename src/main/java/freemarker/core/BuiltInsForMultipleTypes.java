@@ -504,14 +504,15 @@ class BuiltInsForMultipleTypes {
                 size = ((TemplateCollectionModelEx) model).size();
             } else if (model instanceof TemplateHashModelEx) {
                 size = ((TemplateHashModelEx) model).size();
-            } else if (model instanceof LazilyGeneratedSequenceModel) {
+            } else if (model instanceof LazilyGeneratedCollectionModel
+                    && ((LazilyGeneratedCollectionModel) model).isSequence()) {
                 // While this is a TemplateCollectionModel, and thus ?size will be O(N), and N might be infinite,
                 // it's for the result of ?filter(predicate) or such. Those "officially" return a sequence. Returning a
-                // TemplateCollectionModel (a LazilyGeneratedSequenceModel more specifically) is a (mostly) transparent
+                // TemplateCollectionModel (a LazilyGeneratedCollectionModel to be exact) is a (mostly) transparent
                 // optimization to avoid creating the result sequence in memory, which would be unnecessary work for
                 // ?size. Creating that result sequence would be O(N) too, so the O(N) time complexity should be
                 // expected by the template author, and we just made that calculation less wasteful here.
-                TemplateModelIterator iterator = ((LazilyGeneratedSequenceModel) model).iterator();
+                TemplateModelIterator iterator = ((LazilyGeneratedCollectionModel) model).iterator();
                 int counter = 0;
                 countElements: while (iterator.hasNext()) {
                     counter++;

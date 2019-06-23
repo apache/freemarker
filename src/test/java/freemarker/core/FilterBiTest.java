@@ -24,7 +24,10 @@ import java.util.List;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
@@ -38,6 +41,17 @@ public class FilterBiTest extends TemplateTest {
             this.list = list;
             this.result = result;
         }
+    }
+
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        Configuration cfg = super.createConfiguration();
+
+        DefaultObjectWrapper objectWrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28);
+        objectWrapper.setForceLegacyNonListCollections(false);
+        cfg.setObjectWrapper(objectWrapper);
+
+        return cfg;
     }
 
     private static final List<TestParam> TEST_PARAMS = ImmutableList.of(
@@ -128,6 +142,17 @@ public class FilterBiTest extends TemplateTest {
                 "lambda", "1 parameter", "declared 0");
         assertErrorContains("${[]?filter((i, j) -> true)}", ParseException.class,
                 "lambda", "1 parameter", "declared 2");
+    }
+
+    @Test
+    public void testNonSequenceInput() throws Exception {
+        addToDataModel("coll", ImmutableSet.of("a", "b", "c"));
+        assertErrorContains("${coll?filter(it -> it != 'a')[0]}", "sequence", "evaluated to a collection");
+        assertErrorContains("[#ftl][#assign t = coll?filter(it -> it != 'a')]",
+                "lazy transformation", "?sequence", "[#list");
+        assertOutput("${coll?sequence?filter(it -> it != 'a')[0]}", "b");
+        assertOutput("${coll?filter(it -> it != 'a')?sequence[0]}", "b");
+        assertOutput("<#list coll?filter(it -> it != 'a') as it>${it}</#list>", "bc");
     }
 
     public static class FilterObject {
