@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -218,5 +219,8 @@ public class _CoreAPI {
     public static void setPreventStrippings(FMParser parser, boolean preventStrippings) {
         parser.setPreventStrippings(preventStrippings);
     }
-    
+
+    public static boolean isLazilyGeneratedSequenceModel(TemplateCollectionModel model) {
+        return model instanceof LazilyGeneratedCollectionModel && ((LazilyGeneratedCollectionModel) model).isSequence();
+    }
 }

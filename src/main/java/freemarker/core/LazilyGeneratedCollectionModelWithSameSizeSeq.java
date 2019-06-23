@@ -19,37 +19,35 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateCollectionModel;
-import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used where we really want to return/pass a {@link TemplateModelIterator}, but the API requires us to return
- * a {@link TemplateModel}.
- *
- * @since 2.3.29
+ * Used instead of {@link LazilyGeneratedCollectionModel} for operations that don't change the element count of the
+ * source, if the source can also give back an element count.
  */
-class SingleIterationCollectionModel implements TemplateCollectionModel {
-    private TemplateModelIterator iterator;
+class LazilyGeneratedCollectionModelWithSameSizeSeq extends LazilyGeneratedCollectionModelEx {
+    private final TemplateSequenceModel sizeSourceSeq;
 
-    SingleIterationCollectionModel(TemplateModelIterator iterator) {
-        NullArgumentException.check(iterator);
-        this.iterator = iterator;
+    public LazilyGeneratedCollectionModelWithSameSizeSeq(
+            TemplateModelIterator iterator, TemplateSequenceModel sizeSourceSeq) {
+        super(iterator, true);
+        NullArgumentException.check(sizeSourceSeq);
+        this.sizeSourceSeq = sizeSourceSeq;
     }
 
-    public TemplateModelIterator iterator() throws TemplateModelException {
-        if (iterator == null) {
-            throw new IllegalStateException(
-                    "Can't return the iterator again, as this TemplateCollectionModel can only be iterated once.");
-        }
-        TemplateModelIterator result = iterator;
-        iterator = null;
-        return result;
+    public int size() throws TemplateModelException {
+        return sizeSourceSeq.size();
     }
 
-    protected TemplateModelIterator getIterator() {
-        return iterator;
+    public boolean isEmpty() throws TemplateModelException {
+        return sizeSourceSeq.size() == 0;
+    }
+
+    @Override
+    protected LazilyGeneratedCollectionModelWithSameSizeSeq withIsSequenceFromFalseToTrue() {
+        return this; // Won't be actually called...
     }
 }

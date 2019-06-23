@@ -36,7 +36,7 @@ public class ListWithStreamLikeBuiltinsTest extends TemplateTest {
 
     @Test
     public void testLambdaScope() throws Exception {
-        // The loop variables aren't visible during the lazy processing done for the elements
+        // Loop variables aren't visible during the lazy result generation:
         assertOutput("<#list (1..3)?map(p -> p * 10 + it!'-') as it>${it}<#sep>, </#list>",
                 "10-, 20-, 30-");
         assertOutput("<#list (1..3)?map(p -> p * 10 + it_has_next!'-') as it>${it}<#sep>, </#list>",

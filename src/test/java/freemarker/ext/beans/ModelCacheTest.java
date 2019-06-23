@@ -56,7 +56,7 @@ public class ModelCacheTest {
         TemplateModel wrappedC = bw.wrap(c);
         assertSame(wrappedC, bw.wrap(c));
         
-        bw.clearClassIntrospecitonCache();
+        bw.clearClassIntrospectionCache();
         assertNotSame(wrappedC, bw.wrap(c));
         assertSame(bw.wrap(c), bw.wrap(c));
     }

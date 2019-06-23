@@ -343,6 +343,18 @@ class EvalUtil {
         }
     }
 
+    static int mirrorCmpOperator(int operator) {
+        switch (operator) {
+            case CMP_OP_EQUALS: return CMP_OP_EQUALS;
+            case CMP_OP_NOT_EQUALS: return CMP_OP_NOT_EQUALS;
+            case CMP_OP_LESS_THAN: return CMP_OP_GREATER_THAN;
+            case CMP_OP_GREATER_THAN: return CMP_OP_LESS_THAN;
+            case CMP_OP_LESS_THAN_EQUALS: return CMP_OP_GREATER_THAN_EQUALS;
+            case CMP_OP_GREATER_THAN_EQUALS: return CMP_OP_LESS_THAN_EQUALS;
+            default: throw new BugException("Unsupported comparator operator code: " + operator);
+        }
+    }
+
     /**
      * Converts a value to plain text {@link String}, or a {@link TemplateMarkupOutputModel} if that's what the
      * {@link TemplateValueFormat} involved produces.

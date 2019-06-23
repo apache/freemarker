@@ -646,7 +646,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *         cache) because the singleton is modified after publishing to other threads.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
      *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
-     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
+     *         {@link BeansWrapper#clearClassIntrospectionCache()} will be disallowed; see more about it there.
      *       </li>
      *       <li><p>
      *          The {@code ?iso_...} built-ins won't show the time zone offset for {@link java.sql.Time} values anymore,

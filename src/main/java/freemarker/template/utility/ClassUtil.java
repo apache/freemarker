@@ -29,6 +29,7 @@ import java.util.Set;
 import freemarker.core.Environment;
 import freemarker.core.Macro;
 import freemarker.core.TemplateMarkupOutputModel;
+import freemarker.core._CoreAPI;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -187,6 +188,9 @@ public class ClassUtil {
             }
         } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
             return TemplateMethodModelEx.class;
+        } else if (tm instanceof TemplateCollectionModel
+                && _CoreAPI.isLazilyGeneratedSequenceModel((TemplateCollectionModel) tm)) {
+            return TemplateSequenceModel.class;
         } else {
             return null;
         }

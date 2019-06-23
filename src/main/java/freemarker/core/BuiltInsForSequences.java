@@ -144,7 +144,7 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -185,7 +185,7 @@ class BuiltInsForSequences {
     static class joinBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -302,7 +302,7 @@ class BuiltInsForSequences {
     static class seq_containsBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -374,7 +374,7 @@ class BuiltInsForSequences {
     static class seq_index_ofBI extends BuiltIn {
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -855,6 +855,8 @@ class BuiltInsForSequences {
 
     static class sequenceBI extends BuiltIn {
 
+        private boolean lazilyGeneratedResultEnabled;
+
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -867,17 +869,37 @@ class BuiltInsForSequences {
                 throw new NonSequenceOrCollectionException(target, model, env);
             }
             TemplateCollectionModel coll = (TemplateCollectionModel) model;
-            
-            SimpleSequence seq =
-                    coll instanceof TemplateCollectionModelEx
-                            ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
-                            : new SimpleSequence();
-            for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
-                seq.add(iter.next());
+
+            if (!lazilyGeneratedResultEnabled) {
+                SimpleSequence seq =
+                        coll instanceof TemplateCollectionModelEx
+                                ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
+                                : new SimpleSequence();
+                for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
+                    seq.add(iter.next());
+                }
+                return seq;
+            } else {
+                return coll instanceof LazilyGeneratedCollectionModel
+                        ? ((LazilyGeneratedCollectionModel) coll).withIsSequenceTrue()
+                        : coll instanceof TemplateCollectionModelEx
+                                ? new LazilyGeneratedCollectionModelWithSameSizeCollEx(
+                                        new LazyCollectionTemplateModelIterator(coll),
+                                        (TemplateCollectionModelEx) coll, true)
+                                : new LazilyGeneratedCollectionModelWithUnknownSize(
+                                        new LazyCollectionTemplateModelIterator(coll), true);
             }
-            return seq;
         }
-        
+
+        @Override
+        void enableLazilyGeneratedResult() {
+            lazilyGeneratedResultEnabled = true;
+        }
+
+        @Override
+        protected boolean isLazilyGeneratedTargetResultSupported() {
+            return true;
+        }
     }
     
     private static boolean isBuggySeqButGoodCollection(
@@ -915,7 +937,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isSingleIterationCollectionTargetSupported() {
+        protected boolean isLazilyGeneratedTargetResultSupported() {
             return true;
         }
 
@@ -980,19 +1002,20 @@ class BuiltInsForSequences {
     }
 
     /**
-     * Built-in that's similar to an Java 8 Stream intermediate operation. To be on the safe side, by default these
-     * are eager, and just produce a {@link TemplateSequenceModel}. But when circumstances allow, they become
-     * lazy, similarly to Java 8 Stream-s. Another characteristic of the built-ins that they usually accept
-     * lambda expressions as parameters.
+     * Built-in that's similar to a Java 8 Stream intermediate operation. To be on the safe side, by default these
+     * are eager, and just produce a {@link TemplateSequenceModel}. But when circumstances allow, they become lazy,
+     * similarly to Java 8 Stream intermediate operations. Another characteristic of these built-ins is that they
+     * usually accept lambda expressions as parameters.
      */
     static abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTimeParameters {
 
         private Expression elementTransformerExp;
         private ElementTransformer precreatedElementTransformer;
-        private boolean lazyProcessingAllowed;
+        private boolean lazilyGeneratedResultEnabled;
 
         @Override
         void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
+            // At the moment all built-ins of this kind requires 1 parameter.
             if (parameters.size() != 1) {
                 throw newArgumentCountException("requires exactly 1", openParen, closeParen);
             }
@@ -1000,38 +1023,30 @@ class BuiltInsForSequences {
             if (elementTransformerExp instanceof LocalLambdaExpression) {
                 LocalLambdaExpression localLambdaExp = (LocalLambdaExpression) elementTransformerExp;
                 checkLocalLambdaParamCount(localLambdaExp, 1);
-                // We can't do this with other kind of expressions, as they need to be evaluated on runtime:
+                // We can't do this with other kind of expressions, like a function or method reference, as they
+                // need to be evaluated on runtime:
                 precreatedElementTransformer = new LocalLambdaElementTransformer(localLambdaExp);
-            }
-
-            if (target instanceof IntermediateStreamOperationLikeBuiltIn) {
-                ((IntermediateStreamOperationLikeBuiltIn) target).setLazyProcessingAllowed(true);
             }
         }
 
         @Override
-        protected boolean isLocalLambdaParameterSupported() {
+        protected final boolean isLocalLambdaParameterSupported() {
             return true;
         }
 
-        boolean isLazyProcessingAllowed() {
-            return lazyProcessingAllowed;
+        @Override
+        final void enableLazilyGeneratedResult() {
+            this.lazilyGeneratedResultEnabled = true;
         }
 
-        /**
-         * Used to allow processing of the collection or sequence elements on an as-needed basis, similarly as
-         * Java 8 Stream intermediate operations do it. This is initially {@code false}. The containing expression or
-         * directive sets it to {@code true} if it can ensure that:
-         * <ul>
-         *   <li>The returned {@link TemplateCollectionModel} is traversed only once, more specifically,
-         *       {@link TemplateCollectionModel#iterator()} is called only once.
-         *   <li>When the methods of the collection or iterator are called, the context provided by
-         *       the {@link Environment} (such as the local context stack) is similar to the context from where the
-         *       built-in was called. This is required as lambda expression are {@link LocalLambdaExpression}-s.
-         * </ul>
-         */
-        void setLazyProcessingAllowed(boolean lazyProcessingAllowed) {
-            this.lazyProcessingAllowed = lazyProcessingAllowed;
+        /** Tells if {@link #enableLazilyGeneratedResult()} was called. */
+        protected final boolean isLazilyGeneratedResultEnabled() {
+            return lazilyGeneratedResultEnabled;
+        }
+
+        @Override
+        protected final boolean isLazilyGeneratedTargetResultSupported() {
+            return true;
         }
 
         protected List<Expression> getArgumentsAsList() {
@@ -1061,9 +1076,32 @@ class BuiltInsForSequences {
         }
 
         TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel lho = target.eval(env);
-            TemplateModelIterator lhoIterator = getTemplateModelIterator(env, lho);
-            return calculateResult(lhoIterator, lho, evalElementTransformerExp(env), env);
+            TemplateModel targetValue = target.eval(env);
+
+            final TemplateModelIterator targetIterator;
+            final boolean targetIsSequence;
+            {
+                if (targetValue instanceof TemplateCollectionModel) {
+                    targetIterator = isLazilyGeneratedResultEnabled()
+                            ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) targetValue)
+                            : ((TemplateCollectionModel) targetValue).iterator();
+                    targetIsSequence = targetValue instanceof LazilyGeneratedCollectionModel ?
+                        ((LazilyGeneratedCollectionModel) targetValue).isSequence() : false;
+                } else if (targetValue instanceof TemplateSequenceModel) {
+                    targetIterator = new LazySequenceIterator((TemplateSequenceModel) targetValue);
+                    targetIsSequence = true;
+                } else if (targetValue instanceof TemplateModelIterator) {
+                    targetIterator = (TemplateModelIterator) targetValue;
+                    targetIsSequence = false;
+                } else {
+                    throw new NonSequenceOrCollectionException(target, targetValue, env);
+                }
+            }
+
+            return calculateResult(
+                    targetIterator, targetValue, targetIsSequence,
+                    evalElementTransformerExp(env),
+                    env);
         }
 
         private ElementTransformer evalElementTransformerExp(Environment env) throws TemplateException {
@@ -1081,33 +1119,29 @@ class BuiltInsForSequences {
             }
         }
 
-        private TemplateModelIterator getTemplateModelIterator(Environment env, TemplateModel model) throws TemplateModelException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
-            if (model instanceof TemplateCollectionModel) {
-                return ((TemplateCollectionModel) model).iterator();
-            } else if (model instanceof TemplateSequenceModel) {
-                return new SequenceIterator((TemplateSequenceModel) model);
-            } else if (model instanceof TemplateModelIterator) { // For a stream mode LHO
-                return (TemplateModelIterator) model;
-            } else {
-                throw new NonSequenceOrCollectionException(target, model, env);
-            }
-        }
-
         /**
-         * @param lhoIterator Use this to iterate through the items
-         * @param lho Maybe needed for operations specific to the built-in, like getting the size
+         * @param lhoIterator Use this to read the elements of the left hand operand
+         * @param lho Maybe needed for operations specific to the built-in, like getting the size, otherwise use the
+         *           {@code lhoIterator} only.
+         * @param lhoIsSequence See {@link LazilyGeneratedCollectionModel#isSequence}
+         * @param elementTransformer The argument to the built-in (typically a lambda expression)
          *
          * @return {@link TemplateSequenceModel} or {@link TemplateCollectionModel} or {@link TemplateModelIterator}.
          */
         protected abstract TemplateModel calculateResult(
-                TemplateModelIterator lhoIterator, TemplateModel lho, ElementTransformer elementTransformer,
+                TemplateModelIterator lhoIterator, TemplateModel lho, boolean lhoIsSequence,
+                ElementTransformer elementTransformer,
                 Environment env) throws TemplateException;
 
+        /**
+         * Wraps the built-in argument that specifies how to transform the elements of the sequence, to hide the
+         * complexity of doing that.
+         */
         interface ElementTransformer {
             TemplateModel transformElement(TemplateModel element, Environment env) throws TemplateException;
         }
 
+        /** {@link ElementTransformer} that wraps a local lambda expression. */
         private static class LocalLambdaElementTransformer implements ElementTransformer {
             private final LocalLambdaExpression elementTransformerExp;
 
@@ -1120,6 +1154,7 @@ class BuiltInsForSequences {
             }
         }
 
+        /** {@link ElementTransformer} that wraps a (Java) method call. */
         private static class MethodElementTransformer implements ElementTransformer {
             private final TemplateMethodModel elementTransformer;
 
@@ -1134,6 +1169,7 @@ class BuiltInsForSequences {
             }
         }
 
+        /** {@link ElementTransformer} that wraps a call to an FTL function (things defined with {@code #function}). */
         private static class FunctionElementTransformer implements ElementTransformer {
             private final Macro templateTransformer;
             private final Expression elementTransformerExp;
@@ -1145,6 +1181,8 @@ class BuiltInsForSequences {
 
             public TemplateModel transformElement(TemplateModel element, Environment env) throws
                     TemplateException {
+                // #function-s were originally designed to be called from templates directly, so they expect an
+                // Expression as argument. So we have to create a fake one.
                 ExpressionWithFixedResult functionArgExp = new ExpressionWithFixedResult(
                         element, elementTransformerExp);
                 return env.invokeFunction(env, templateTransformer,
@@ -1159,9 +1197,13 @@ class BuiltInsForSequences {
 
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
-                final ElementTransformer elementTransformer,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyProcessingAllowed()) {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(filterBI.this);
+                }
+
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
@@ -1171,7 +1213,7 @@ class BuiltInsForSequences {
                 }
                 return new TemplateModelListSequence(resultList);
             } else {
-                return new SingleIterationCollectionModel(
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
                         new TemplateModelIterator() {
                             boolean prefetchDone;
                             TemplateModel prefetchedElement;
@@ -1218,22 +1260,23 @@ class BuiltInsForSequences {
                                 } while (!conclusionReached);
                                 prefetchDone = true;
                             }
-                        }
+                        },
+                        lhoIsSequence
                 );
             }
         }
 
-        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env) throws
-                TemplateException {
+        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env)
+                throws TemplateException {
             TemplateModel transformedElement = elementTransformer.transformElement(element, env);
             if (!(transformedElement instanceof TemplateBooleanModel)) {
                 if (transformedElement == null) {
                     throw new _TemplateModelException(getElementTransformerExp(), env,
-                            "The element transformer function has returned no return value (has returned null) " +
-                            "instead of a boolean.");
+                            "The filter expression has returned no value (has returned null), " +
+                            "rather than a boolean.");
                 }
                 throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The element transformer function had to return a boolean value, but it has returned ",
+                        "The filter expression had to return a boolean value, but it returned ",
                         new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
                         " instead.");
             }
@@ -1245,21 +1288,23 @@ class BuiltInsForSequences {
     static class mapBI extends IntermediateStreamOperationLikeBuiltIn {
 
         protected TemplateModel calculateResult(
-                final TemplateModelIterator lhoIterator, TemplateModel lho, final ElementTransformer elementTransformer,
+                final TemplateModelIterator lhoIterator, TemplateModel lho, boolean lhoIsSequence, final ElementTransformer elementTransformer,
                 final Environment env) throws TemplateException {
-            if (!isLazyProcessingAllowed()) {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(mapBI.this);
+                }
+
                 List<TemplateModel> resultList = new ArrayList<TemplateModel>();
                 while (lhoIterator.hasNext()) {
-                    resultList.add(fetchAndTransformNextElement(lhoIterator, elementTransformer, env));
+                    resultList.add(fetchAndMapNextElement(lhoIterator, elementTransformer, env));
                 }
                 return new TemplateModelListSequence(resultList);
             } else {
-                return new SingleIterationCollectionModel(
-                        new TemplateModelIterator() {
-
+                TemplateModelIterator mappedLhoIterator = new TemplateModelIterator() {
                     public TemplateModel next() throws TemplateModelException {
                         try {
-                            return fetchAndTransformNextElement(lhoIterator, elementTransformer, env);
+                            return fetchAndMapNextElement(lhoIterator, elementTransformer, env);
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e, env, "Failed to transform element");
                         }
@@ -1268,17 +1313,27 @@ class BuiltInsForSequences {
                     public boolean hasNext() throws TemplateModelException {
                         return lhoIterator.hasNext();
                     }
-                });
+                };
+                if (lho instanceof TemplateCollectionModelEx) { // Preferred branch, as TempCollModEx has isEmpty() too
+                    return new LazilyGeneratedCollectionModelWithSameSizeCollEx(
+                            mappedLhoIterator, (TemplateCollectionModelEx) lho, lhoIsSequence);
+                } else if (lho instanceof TemplateSequenceModel) {
+                    return new LazilyGeneratedCollectionModelWithSameSizeSeq(
+                            mappedLhoIterator, (TemplateSequenceModel) lho);
+                } else {
+                    return new LazilyGeneratedCollectionModelWithUnknownSize(
+                            mappedLhoIterator, lhoIsSequence);
+                }
             }
         }
 
-        private TemplateModel fetchAndTransformNextElement(
+        private TemplateModel fetchAndMapNextElement(
                 TemplateModelIterator lhoIterator, ElementTransformer elementTransformer, Environment env)
                 throws TemplateException {
             TemplateModel transformedElement = elementTransformer.transformElement(lhoIterator.next(), env);
             if (transformedElement == null) {
                 throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The element transformer function has returned no return value (has returned null).");
+                        "The element mapper function has returned no return value (has returned null).");
             }
             return transformedElement;
         }

@@ -60,6 +60,11 @@ final class ParentheticalExpression extends Expression {
     }
 
     @Override
+    void enableLazilyGeneratedResult() {
+        nested.enableLazilyGeneratedResult();
+    }
+
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new ParentheticalExpression(
@@ -82,5 +87,5 @@ final class ParentheticalExpression extends Expression {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.ENCLOSED_OPERAND;
     }
-    
+
 }

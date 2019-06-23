@@ -64,5 +64,12 @@ class MiscUtil {
         });
         return res;
     }
+
+    static Expression peelParentheses(Expression exp) {
+        while (exp instanceof ParentheticalExpression) {
+            exp = ((ParentheticalExpression) exp).getNestedExpression();
+        }
+        return exp;
+    }
     
 }

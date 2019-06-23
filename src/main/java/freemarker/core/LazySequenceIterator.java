@@ -19,37 +19,37 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
-import freemarker.template.utility.NullArgumentException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
- * Used where we really want to return/pass a {@link TemplateModelIterator}, but the API requires us to return
- * a {@link TemplateModel}.
+ * {@link TemplateModelIterator} that wraps a sequence, delaying calling any of its methods until it's actually needed.
  *
  * @since 2.3.29
  */
-class SingleIterationCollectionModel implements TemplateCollectionModel {
-    private TemplateModelIterator iterator;
+class LazySequenceIterator implements TemplateModelIterator {
+    private final TemplateSequenceModel sequence;
+    private Integer size;
+    private int index = 0;
 
-    SingleIterationCollectionModel(TemplateModelIterator iterator) {
-        NullArgumentException.check(iterator);
-        this.iterator = iterator;
+    LazySequenceIterator(TemplateSequenceModel sequence) throws TemplateModelException {
+        this.sequence = sequence;
+
+    }
+    public TemplateModel next() throws TemplateModelException {
+        return sequence.get(index++);
     }
 
-    public TemplateModelIterator iterator() throws TemplateModelException {
-        if (iterator == null) {
-            throw new IllegalStateException(
-                    "Can't return the iterator again, as this TemplateCollectionModel can only be iterated once.");
+    public boolean hasNext() {
+        if (size == null) {
+            try {
+                size = sequence.size();
+            } catch (TemplateModelException e) {
+                throw new RuntimeException("Error when getting sequence size", e);
+            }
         }
-        TemplateModelIterator result = iterator;
-        iterator = null;
-        return result;
-    }
-
-    protected TemplateModelIterator getIterator() {
-        return iterator;
+        return index < size;
     }
 }

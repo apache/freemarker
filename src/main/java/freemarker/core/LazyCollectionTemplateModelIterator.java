@@ -23,33 +23,32 @@ import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
-import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used where we really want to return/pass a {@link TemplateModelIterator}, but the API requires us to return
- * a {@link TemplateModel}.
- *
- * @since 2.3.29
+ * Delays creating the {@link TemplateModelIterator} of the wrapped model until it's actually needed.
  */
-class SingleIterationCollectionModel implements TemplateCollectionModel {
+class LazyCollectionTemplateModelIterator implements TemplateModelIterator {
+
+    private final TemplateCollectionModel templateCollectionModel;
     private TemplateModelIterator iterator;
 
-    SingleIterationCollectionModel(TemplateModelIterator iterator) {
-        NullArgumentException.check(iterator);
-        this.iterator = iterator;
+    public LazyCollectionTemplateModelIterator(TemplateCollectionModel templateCollectionModel) {
+        this.templateCollectionModel = templateCollectionModel;
     }
 
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModel next() throws TemplateModelException {
+        ensureIteratorInitialized();
+        return iterator.next();
+    }
+
+    public boolean hasNext() throws TemplateModelException {
+        ensureIteratorInitialized();
+        return iterator.hasNext();
+    }
+
+    private void ensureIteratorInitialized() throws TemplateModelException {
         if (iterator == null) {
-            throw new IllegalStateException(
-                    "Can't return the iterator again, as this TemplateCollectionModel can only be iterated once.");
+            iterator = templateCollectionModel.iterator();
         }
-        TemplateModelIterator result = iterator;
-        iterator = null;
-        return result;
-    }
-
-    protected TemplateModelIterator getIterator() {
-        return iterator;
     }
 }

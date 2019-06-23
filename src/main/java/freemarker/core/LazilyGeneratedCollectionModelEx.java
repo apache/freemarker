@@ -19,30 +19,15 @@
 
 package freemarker.core;
 
-abstract class RightUnboundedRangeModel extends RangeModel {
-    
-    RightUnboundedRangeModel(int begin) {
-        super(begin);
-    }
+import freemarker.template.TemplateCollectionModelEx;
+import freemarker.template.TemplateModelIterator;
 
-    @Override
-    final int getStep() {
-        return 1;
+/**
+ * A {@link LazilyGeneratedCollectionModel} that supports {@link TemplateCollectionModelEx} methods.
+ */
+abstract class LazilyGeneratedCollectionModelEx extends LazilyGeneratedCollectionModel implements
+        TemplateCollectionModelEx {
+    LazilyGeneratedCollectionModelEx(TemplateModelIterator iterator, boolean sequence) {
+        super(iterator, sequence);
     }
-
-    @Override
-    final boolean isRightUnbounded() {
-        return true;
-    }
-    
-    @Override
-    final boolean isRightAdaptive() {
-        return true;
-    }
-
-    @Override
-    final boolean isAffectedByStringSlicingBug() {
-        return false;
-    }
-    
 }

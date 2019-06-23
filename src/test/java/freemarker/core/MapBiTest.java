@@ -25,8 +25,10 @@ import java.util.List;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
@@ -51,8 +53,14 @@ public class MapBiTest extends TemplateTest {
     @Override
     protected Configuration createConfiguration() throws Exception {
         Configuration cfg = super.createConfiguration();
+
         cfg.setNumberFormat("0.####");
         cfg.setBooleanFormat("c");
+
+        DefaultObjectWrapper objectWrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28);
+        objectWrapper.setForceLegacyNonListCollections(false);
+        cfg.setObjectWrapper(objectWrapper);
+
         return cfg;
     }
 
@@ -179,6 +187,17 @@ public class MapBiTest extends TemplateTest {
                 "lambda", "1 parameter", "declared 0");
         assertErrorContains("${[]?map((i, j) -> 1)}", ParseException.class,
                 "lambda", "1 parameter", "declared 2");
+    }
+
+    @Test
+    public void testNonSequenceInput() throws Exception {
+        addToDataModel("coll", ImmutableSet.of("a", "b", "c"));
+        assertErrorContains("${coll?map(it -> it?upperCase)[0]}", "sequence", "evaluated to an extended_collection");
+        assertErrorContains("[#ftl][#assign t = coll?map(it -> it?upperCase)]",
+                "lazy transformation", "?sequence", "[#list");
+        assertOutput("${coll?sequence?map(it -> it?upperCase)[0]}", "A");
+        assertOutput("${coll?map(it -> it?upperCase)?sequence[0]}", "A");
+        assertOutput("<#list coll?map(it -> it?upperCase) as it>${it}</#list>", "ABC");
     }
 
     public static class MapperObject {
