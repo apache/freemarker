@@ -1022,7 +1022,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * primitives, primitive wrappers, numbers, dates, sets, lists, maps, and
      * native arrays.
      * @param model the model to unwrap
-     * @param targetClass the class of the unwrapped result; {@code Object.class} of we don't know what the expected type is.
+     * @param targetClass the class of the unwrapped result; {@code Object.class} if we don't know what the expected type is.
      * @return the unwrapped result of the desired class
      * @throws TemplateModelException if an attempted unwrapping fails.
      * 
