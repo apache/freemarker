@@ -2502,6 +2502,9 @@ public class Configurable {
      *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
      *       for {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_3_0}, {@code "default_2_4_0"} for
      *       {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_4_0}.
+     *
+     *   <li><p>{@code "tab_size"}:
+     *       See {@link Configuration#setTabSize(int)}.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
