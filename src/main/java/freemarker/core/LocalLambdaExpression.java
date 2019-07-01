@@ -62,7 +62,8 @@ final class LocalLambdaExpression extends Expression {
      * Call the function defined by the lambda expression; overload specialized for 1 argument, the most common case.
      */
     TemplateModel invokeLambdaDefinedFunction(TemplateModel argValue, Environment env) throws TemplateException {
-        return env.evaluateWithNewLocal(rho, lho.getParameters().get(0).getName(), argValue);
+        return env.evaluateWithNewLocal(rho, lho.getParameters().get(0).getName(),
+                argValue != null ? argValue : NullTemplateModel.INSTANCE);
     }
 
     @Override

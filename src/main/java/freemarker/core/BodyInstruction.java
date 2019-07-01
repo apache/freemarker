@@ -135,7 +135,12 @@ final class BodyInstruction extends TemplateElement {
                         if (bodyVars == null) {
                             bodyVars = env.new Namespace();
                         }
-                        bodyVars.put(bodyParameterName, tm);
+                        bodyVars.put(
+                                bodyParameterName,
+                                tm != null
+                                        ? tm
+                                        : getTemplate().getConfiguration().getFallbackOnNullLoopVariable()
+                                                ? null : NullTemplateModel.INSTANCE);
                     }
                 }
             }
