@@ -461,8 +461,10 @@ final class IteratorBlock extends TemplateElement {
 
             if (name.startsWith(visibleLoopVar1Name)) {
                 switch(name.length() - visibleLoopVar1Name.length()) {
-                    case 0: 
-                        return loopVar1Value;
+                    case 0:
+                        return loopVar1Value != null ? loopVar1Value
+                                : getTemplate().getConfiguration().getFallbackOnNullLoopVariable()
+                                        ? null : NullTemplateModel.INSTANCE;
                     case 6: 
                         if (name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
@@ -477,7 +479,9 @@ final class IteratorBlock extends TemplateElement {
             }
             
             if (name.equals(loopVar2Name)) {
-                return loopVar2Value;
+                return loopVar2Value != null ? loopVar2Value
+                        : getTemplate().getConfiguration().getFallbackOnNullLoopVariable()
+                                ? null : NullTemplateModel.INSTANCE;
             }
             
             return null;

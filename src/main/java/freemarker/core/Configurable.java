@@ -2455,7 +2455,7 @@ public class Configurable {
      *       <br>Note that setting the {@code "tagSyntax"} to {@code "square_bracket"} does <em>not</em> change
      *       <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so use the
      *       {@code "interpolation_syntax"} setting for that, not this setting.
-     *        
+     *
      *   <li><p>{@code "interpolation_syntax"} (since 2.3.28):
      *       See {@link Configuration#setInterpolationSyntax(int)}.
      *       <br>String value: Must be one of
@@ -2468,7 +2468,13 @@ public class Configurable {
      *       See {@link Configuration#setNamingConvention(int)}.
      *       <br>String value: Must be one of
      *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}.
-     *       
+     *
+     *   <li><p>{@code "fallback_on_null_loop_variable"}:
+     *       See {@link Configuration#setFallbackOnNullLoopVariable(boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
+     *       Case insensitive.
+     *
      *   <li><p>{@code "incompatible_improvements"}:
      *       See {@link Configuration#setIncompatibleImprovements(Version)}.
      *       <br>String value: version number like {@code 2.3.20}.

@@ -2048,7 +2048,7 @@ public final class Environment extends Configurable {
      *
      * @since 2.3.29
      */
-    final TemplateModel getNullableLocalVariable(String name) throws TemplateModelException {
+    private final TemplateModel getNullableLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
                 LocalContext lc = localContextStack.get(i);

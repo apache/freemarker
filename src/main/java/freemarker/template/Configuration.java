@@ -273,7 +273,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
     /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.25 */
     public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
-    
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -315,12 +315,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
     @Deprecated
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
-    
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.29 */
+    public static final String FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_SNAKE_CASE = "fallback_on_null_loop_variable";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.29 */
+    public static final String FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_CAMEL_CASE = "fallbackOnNullLoopVariable";
+    /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.25 */
+    public static final String FALLBACK_ON_NULL_LOOP_VARIABLE_KEY = FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_SNAKE_CASE;
+
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
         CACHE_STORAGE_KEY_SNAKE_CASE,
         DEFAULT_ENCODING_KEY_SNAKE_CASE,
+        FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
         INTERPOLATION_SYNTAX_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
@@ -344,6 +352,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
         CACHE_STORAGE_KEY_CAMEL_CASE,
         DEFAULT_ENCODING_KEY_CAMEL_CASE,
+        FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
         INTERPOLATION_SYNTAX_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
@@ -536,6 +545,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private int interpolationSyntax = LEGACY_INTERPOLATION_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x
+    private boolean fallbackOnNullLoopVariable = true;  // Default for backward compatibility
     private boolean preventStrippings;
 
     private TemplateCache cache;
@@ -2573,7 +2583,35 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public int getTabSize() {
         return tabSize;
     }
-    
+
+    /**
+     * The getter pair of {@link #setFallbackOnNullLoopVariable(boolean)}.
+     *
+     * @since 2.3.29
+     */
+    public boolean getFallbackOnNullLoopVariable() {
+        return fallbackOnNullLoopVariable;
+    }
+
+    /**
+     * Specifies the behavior when reading a loop variable (like {@code i} in {@code <#list items as i>}) that's
+     * {@code null} (missing); if {@code true}, FreeMarker will look for a variable with the same name in higher
+     * variable scopes, or if {@code false} the variable will be simply {@code null} (missing).
+     * For backward compatibility the default is {@code true}. The recommended value for new projects is
+     * {@code false}, as otherwise adding new variables to higher scopes (typically to the data-model) can
+     * unintentionally change the behavior of templates. You have to be quite unlucky for that to happen though:
+     * The newly added variable has to have the same name as the loop variable, and there must be some null (missing)
+     * values in what you loop through.
+     *
+     * <p>Note that this doesn't influence the behavior of lambdas, like {@code items?filter(i -> i?hasContent)},
+     * because reading lambda arguments never fall back to higher scopes.
+     *
+     * @since 2.3.29
+     */
+    public void setFallbackOnNullLoopVariable(boolean fallbackOnNullLoopVariable) {
+        this.fallbackOnNullLoopVariable = fallbackOnNullLoopVariable;
+    }
+
     /**
      * Getter pair of {@link #setPreventStrippings(boolean)}.
      * 
@@ -3399,6 +3437,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setTemplateConfigurations((TemplateConfigurationFactory) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateConfigurationFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
+            } else if (FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_SNAKE_CASE.equals(name)
+                    || FALLBACK_ON_NULL_LOOP_VARIABLE_KEY_CAMEL_CASE.equals(name)) {
+                setFallbackOnNullLoopVariable(StringUtil.getYesNo(value));
             } else {
                 unknown = true;
             }
