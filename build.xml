@@ -990,6 +990,15 @@ Proceed? </input>
   <!-- ================================================================== -->
   
   <target name="_autoget-deps" unless="deps.available">
+    <antcall target="_autoget-deps-condition-workaround" />
+  </target>
+
+  <!--
+    Called with antcall to ensure that deps.available will be up-to-date.
+    Without this trick, if ant is called with multiple tasks, the local .ivy
+    directory might ends up corrupted if it was created by the 1st task.
+  -->
+  <target name="_autoget-deps-condition-workaround" unless="deps.available">
     <antcall target="update-deps" />
   </target>
   
