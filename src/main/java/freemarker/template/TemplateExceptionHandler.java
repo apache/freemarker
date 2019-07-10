@@ -65,8 +65,8 @@ public interface TemplateExceptionHandler {
     };
         
     /**
-     * {@link TemplateExceptionHandler} that simply re-throws the exception; this should be used in most production
-     * systems.
+     * {@link TemplateExceptionHandler} that simply re-throws the exception; this should be used 
+     * in most production systems.
      */
     TemplateExceptionHandler RETHROW_HANDLER = new TemplateExceptionHandler() {
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
@@ -76,8 +76,8 @@ public interface TemplateExceptionHandler {
     };
         
     /**
-     * {@link TemplateExceptionHandler} useful when you developing non-HTML templates. This handler
-     * outputs the stack trace information to the client and then re-throws the exception.
+     * {@link TemplateExceptionHandler} useful when you are developing non-HTML templates. This 
+     * handler outputs the stack trace information to the client and then re-throws the exception.
      */
     TemplateExceptionHandler DEBUG_HANDLER = new TemplateExceptionHandler() {
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
@@ -94,9 +94,9 @@ public interface TemplateExceptionHandler {
     }; 
     
     /**
-     * {@link TemplateExceptionHandler} useful when you developing HTML templates. This handler
-     * outputs the stack trace information to the client, formatting it so that it will be usually well readable
-     * in the browser, and then re-throws the exception.
+     * {@link TemplateExceptionHandler} useful when you are developing HTML templates. This handler
+     * outputs the stack trace information to the client, formatting it so that it will be usually 
+     * well readable in the browser, and then re-throws the exception.
      */
     TemplateExceptionHandler HTML_DEBUG_HANDLER = new TemplateExceptionHandler() {
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
