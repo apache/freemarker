@@ -19,6 +19,14 @@
 
 package freemarker.template;
 
+import freemarker.cache.*;
+import freemarker.cache.TemplateCache.MaybeMissingTemplate;
+import freemarker.core.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.log.Logger;
+import freemarker.template.utility.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -26,78 +34,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import freemarker.cache.CacheStorage;
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.MruCacheStorage;
-import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.SoftCacheStorage;
-import freemarker.cache.TemplateCache;
-import freemarker.cache.TemplateCache.MaybeMissingTemplate;
-import freemarker.cache.TemplateConfigurationFactory;
-import freemarker.cache.TemplateLoader;
-import freemarker.cache.TemplateLookupContext;
-import freemarker.cache.TemplateLookupStrategy;
-import freemarker.cache.TemplateNameFormat;
-import freemarker.cache.URLTemplateLoader;
-import freemarker.core.BugException;
-import freemarker.core.CSSOutputFormat;
-import freemarker.core.CombinedMarkupOutputFormat;
-import freemarker.core.Configurable;
-import freemarker.core.Environment;
-import freemarker.core.HTMLOutputFormat;
-import freemarker.core.JSONOutputFormat;
-import freemarker.core.JavaScriptOutputFormat;
-import freemarker.core.MarkupOutputFormat;
-import freemarker.core.OutputFormat;
-import freemarker.core.ParseException;
-import freemarker.core.ParserConfiguration;
-import freemarker.core.PlainTextOutputFormat;
-import freemarker.core.RTFOutputFormat;
-import freemarker.core.TemplateConfiguration;
-import freemarker.core.TemplateMarkupOutputModel;
-import freemarker.core.UndefinedOutputFormat;
-import freemarker.core.UnregisteredOutputFormatException;
-import freemarker.core.XHTMLOutputFormat;
-import freemarker.core.XMLOutputFormat;
-import freemarker.core._CoreAPI;
-import freemarker.core._DelayedJQuote;
-import freemarker.core._MiscTemplateException;
-import freemarker.core._ObjectBuilderSettingEvaluator;
-import freemarker.core._SettingEvaluationEnvironment;
-import freemarker.core._SortedArraySet;
-import freemarker.core._UnmodifiableCompositeSet;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.log.Logger;
-import freemarker.template.utility.CaptureOutput;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Constants;
-import freemarker.template.utility.HtmlEscape;
-import freemarker.template.utility.NormalizeNewlines;
-import freemarker.template.utility.NullArgumentException;
-import freemarker.template.utility.SecurityUtilities;
-import freemarker.template.utility.StandardCompress;
-import freemarker.template.utility.StringUtil;
-import freemarker.template.utility.XmlEscape;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -2594,17 +2534,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Specifies the behavior when reading a loop variable (like {@code i} in {@code <#list items as i>}) that's
-     * {@code null} (missing); if {@code true}, FreeMarker will look for a variable with the same name in higher
-     * variable scopes, or if {@code false} the variable will be simply {@code null} (missing).
-     * For backward compatibility the default is {@code true}. The recommended value for new projects is
+     * Specifies the behavior when reading a loop variable (like {@code i} in {@code <#list items as i>}, or in
+     * {@code <@myMacro items; i>}) that's {@code null} (missing); if {@code true}, FreeMarker will look for a variable
+     * with the same name in higher variable scopes, or if {@code false} the variable will be simply {@code null}
+     * (missing). For backward compatibility the default is {@code true}. The recommended value for new projects is
      * {@code false}, as otherwise adding new variables to higher scopes (typically to the data-model) can
      * unintentionally change the behavior of templates. You have to be quite unlucky for that to happen though:
      * The newly added variable has to have the same name as the loop variable, and there must be some null (missing)
      * values in what you loop through.
      *
-     * <p>Note that this doesn't influence the behavior of lambdas, like {@code items?filter(i -> i?hasContent)},
-     * because reading lambda arguments never fall back to higher scopes.
+     * <p>This setting doesn't influence the behavior of lambdas, like {@code items?filter(i -> i?hasContent)}, as they
+     * never had this problem. Reading a lambda argument never falls back to higher scopes.
      *
      * @since 2.3.29
      */
