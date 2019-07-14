@@ -19,19 +19,14 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Test;
-
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class NullTransparencyTest extends TemplateTest {
 
@@ -91,18 +86,22 @@ public class NullTransparencyTest extends TemplateTest {
     protected void testLoopVariables(String expectedFallback) throws IOException, TemplateException {
         assertOutput("<#list list as it>${it!'null'}<#sep>, </#list>",
                 "a, " + expectedFallback + ", b");
+        assertOutput("<#list list><#items as it>${it!'null'}<#sep>, </#items></#list>",
+                "a, " + expectedFallback + ", b");
 
         assertOutput("<#list map?values as it>${it!'null'}<#sep>, </#list>",
                 "av, bv, " + expectedFallback);
         assertOutput("<#list map as k, it>${k!'null'}=${it!'null'}<#sep>, </#list>",
+                "ak=av, null=bv, ck=" + expectedFallback);
+        assertOutput("<#list map><#items as k, it>${k!'null'}=${it!'null'}<#sep>, </#items></#list>",
                 "ak=av, null=bv, ck=" + expectedFallback);
 
         assertOutput("<#list map?keys as it>${it!'null'}<#sep>, </#list>",
                 "ak, " + expectedFallback + ", ck");
         assertOutput("<#list map as it, v>${it!'null'}=${v!'null'}<#sep>, </#list>",
                 "ak=av, " + expectedFallback + "=bv, ck=null");
-
-        // TODO #item
+        assertOutput("<#list map><#items as it, v>${it!'null'}=${v!'null'}<#sep>, </#items></#list>",
+                "ak=av, " + expectedFallback + "=bv, ck=null");
 
         assertOutput("" +
                 "<#macro loop><#nested 1>, <#nested totallyMissing></#macro>\n" +

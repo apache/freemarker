@@ -19,72 +19,28 @@
 
 package freemarker.template;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import freemarker.cache.CacheStorageWithGetSize;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.NullCacheStorage;
-import freemarker.cache.SoftCacheStorage;
-import freemarker.cache.StringTemplateLoader;
-import freemarker.cache.StrongCacheStorage;
-import freemarker.cache.TemplateCache;
-import freemarker.cache.TemplateLookupContext;
-import freemarker.cache.TemplateLookupResult;
-import freemarker.cache.TemplateLookupStrategy;
-import freemarker.cache.TemplateNameFormat;
-import freemarker.core.BaseNTemplateNumberFormatFactory;
-import freemarker.core.CombinedMarkupOutputFormat;
-import freemarker.core.Configurable;
+import freemarker.cache.*;
+import freemarker.core.*;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
-import freemarker.core.ConfigurableTest;
-import freemarker.core.CustomHTMLOutputFormat;
-import freemarker.core.DefaultTruncateBuiltinAlgorithm;
-import freemarker.core.DummyOutputFormat;
-import freemarker.core.Environment;
-import freemarker.core.EpochMillisDivTemplateDateFormatFactory;
-import freemarker.core.EpochMillisTemplateDateFormatFactory;
-import freemarker.core.HTMLOutputFormat;
-import freemarker.core.HexTemplateNumberFormatFactory;
-import freemarker.core.MarkupOutputFormat;
-import freemarker.core.OptInTemplateClassResolver;
-import freemarker.core.OutputFormat;
-import freemarker.core.ParseException;
-import freemarker.core.RTFOutputFormat;
-import freemarker.core.TemplateClassResolver;
-import freemarker.core.TemplateDateFormatFactory;
-import freemarker.core.TemplateNumberFormatFactory;
-import freemarker.core.UndefinedOutputFormat;
-import freemarker.core.UnregisteredOutputFormatException;
-import freemarker.core.XHTMLOutputFormat;
-import freemarker.core.XMLOutputFormat;
-import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import junit.framework.TestCase;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.util.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 public class ConfigurationTest extends TestCase {
 
@@ -1879,6 +1835,21 @@ public class ConfigurationTest extends TestCase {
             assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
             assertEquals(0.5, alg.getWordBoundaryMinLength());
         }
+    }
+
+    @Test
+    public void testFallbackOnNullLoopVariable() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        assertTrue(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallback_on_null_loop_variable", "false");
+        assertFalse(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallback_on_null_loop_variable", "true");
+        assertTrue(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallbackOnNullLoopVariable", "NO");
+        assertFalse(cfg.getFallbackOnNullLoopVariable());
     }
 
     @Test
