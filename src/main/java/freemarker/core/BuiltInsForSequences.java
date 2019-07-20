@@ -1085,8 +1085,9 @@ class BuiltInsForSequences {
                     targetIterator = isLazilyGeneratedResultEnabled()
                             ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) targetValue)
                             : ((TemplateCollectionModel) targetValue).iterator();
-                    targetIsSequence = targetValue instanceof LazilyGeneratedCollectionModel ?
-                        ((LazilyGeneratedCollectionModel) targetValue).isSequence() : false;
+                    targetIsSequence = targetValue instanceof LazilyGeneratedCollectionModel
+                            ? ((LazilyGeneratedCollectionModel) targetValue).isSequence()
+                            : targetValue instanceof TemplateSequenceModel;
                 } else if (targetValue instanceof TemplateSequenceModel) {
                     targetIterator = new LazySequenceIterator((TemplateSequenceModel) targetValue);
                     targetIsSequence = true;
