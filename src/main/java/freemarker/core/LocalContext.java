@@ -19,11 +19,11 @@
 
 package freemarker.core;
 
+import java.util.Collection;
+
 import freemarker.template.Configuration;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-
-import java.util.Collection;
 
 /**
  * Represents a local context (a set of local variables); should be internal, but left public for backward

@@ -19,18 +19,6 @@
 
 package freemarker.core;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import freemarker.cache.TemplateNameFormat;
-import freemarker.cache._CacheAPI;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.log.Logger;
-import freemarker.template.*;
-import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
-import freemarker.template.utility.NullWriter;
-import freemarker.template.utility.StringUtil;
-import freemarker.template.utility.UndeclaredThrowableException;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -41,7 +29,53 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.cache.TemplateNameFormat;
+import freemarker.cache._CacheAPI;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.log.Logger;
+import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleSequence;
+import freemarker.template.Template;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
+import freemarker.template.TransformControl;
+import freemarker.template._TemplateAPI;
+import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
+import freemarker.template.utility.NullWriter;
+import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * Object that represents the runtime environment during template processing. For every invocation of a

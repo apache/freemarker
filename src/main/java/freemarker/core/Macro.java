@@ -19,9 +19,17 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * An element representing a macro declaration.

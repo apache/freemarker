@@ -19,14 +19,19 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateException;
-import freemarker.test.TemplateTest;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import freemarker.template.TemplateException;
+import freemarker.test.TemplateTest;
 
 public class NullTransparencyTest extends TemplateTest {
 
