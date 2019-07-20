@@ -397,7 +397,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
      * If the built-in supports a lazily generated value as its left operand (the target).
      * Don't confuse this with what's allowed for result of the built-in itself; that's influenced by
      * {@link Expression#enableLazilyGeneratedResult()} (and so
-     * {@link BuiltInsForSequences.IntermediateStreamOperationLikeBuiltIn#isLazilyGeneratedTargetResultSupported()}).
+     * {@link IntermediateStreamOperationLikeBuiltIn#isLazilyGeneratedTargetResultSupported()}).
      */
     protected boolean isLazilyGeneratedTargetResultSupported() {
         return false;
