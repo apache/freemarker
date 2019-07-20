@@ -1090,9 +1090,6 @@ class BuiltInsForSequences {
                 } else if (targetValue instanceof TemplateSequenceModel) {
                     targetIterator = new LazySequenceIterator((TemplateSequenceModel) targetValue);
                     targetIsSequence = true;
-                } else if (targetValue instanceof TemplateModelIterator) {
-                    targetIterator = (TemplateModelIterator) targetValue;
-                    targetIsSequence = false;
                 } else {
                     throw new NonSequenceOrCollectionException(target, targetValue, env);
                 }
