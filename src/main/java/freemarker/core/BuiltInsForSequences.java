@@ -1000,7 +1000,27 @@ class BuiltInsForSequences {
         
     }
 
-    static class filterBI extends IntermediateStreamOperationLikeBuiltIn {
+    private static abstract class FilterLikeBI extends IntermediateStreamOperationLikeBuiltIn {
+        protected final boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer,
+                Environment env)
+                throws TemplateException {
+            TemplateModel transformedElement = elementTransformer.transformElement(element, env);
+            if (!(transformedElement instanceof TemplateBooleanModel)) {
+                if (transformedElement == null) {
+                    throw new _TemplateModelException(getElementTransformerExp(), env,
+                            "The filter expression has returned no value (has returned null), " +
+                                    "rather than a boolean.");
+                }
+                throw new _TemplateModelException(getElementTransformerExp(), env,
+                        "The filter expression had to return a boolean value, but it returned ",
+                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
+                        " instead.");
+            }
+            return ((TemplateBooleanModel) transformedElement).getAsBoolean();
+        }
+    }
+
+    static class filterBI extends FilterLikeBI {
 
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
@@ -1073,21 +1093,79 @@ class BuiltInsForSequences {
             }
         }
 
-        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env)
-                throws TemplateException {
-            TemplateModel transformedElement = elementTransformer.transformElement(element, env);
-            if (!(transformedElement instanceof TemplateBooleanModel)) {
-                if (transformedElement == null) {
-                    throw new _TemplateModelException(getElementTransformerExp(), env,
-                            "The filter expression has returned no value (has returned null), " +
-                            "rather than a boolean.");
+    }
+
+    static class take_whileBI extends FilterLikeBI {
+
+        protected TemplateModel calculateResult(
+                final TemplateModelIterator lhoIterator, final TemplateModel lho,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
+                final Environment env) throws TemplateException {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(take_whileBI.this);
                 }
-                throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The filter expression had to return a boolean value, but it returned ",
-                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
-                        " instead.");
+
+                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                while (lhoIterator.hasNext()) {
+                    TemplateModel element = lhoIterator.next();
+                    if (elementMatches(element, elementTransformer, env)) {
+                        resultList.add(element);
+                    } else {
+                        break;
+                    }
+                }
+                return new TemplateModelListSequence(resultList);
+            } else {
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
+                        new TemplateModelIterator() {
+                            boolean prefetchDone;
+                            TemplateModel prefetchedElement;
+                            boolean prefetchedEndOfIterator;
+
+                            public TemplateModel next() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                if (prefetchedEndOfIterator) {
+                                    throw new IllegalStateException("next() was called when hasNext() is false");
+                                }
+                                prefetchDone = false;
+                                return prefetchedElement;
+                            }
+
+                            public boolean hasNext() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                return !prefetchedEndOfIterator;
+                            }
+
+                            private void ensurePrefetchDone() throws TemplateModelException {
+                                if (prefetchDone) {
+                                    return;
+                                }
+
+                                if (lhoIterator.hasNext()) {
+                                    TemplateModel element = lhoIterator.next();
+                                    boolean elementMatched;
+                                    try {
+                                        elementMatched = elementMatches(element, elementTransformer, env);
+                                    } catch (TemplateException e) {
+                                        throw new _TemplateModelException(e, env, "Failed to transform element");
+                                    }
+                                    if (elementMatched) {
+                                        prefetchedElement = element;
+                                    } else {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                } else {
+                                    prefetchedEndOfIterator = true;
+                                    prefetchedElement = null;
+                                }
+                                prefetchDone = true;
+                            }
+                        },
+                        lhoIsSequence
+                );
             }
-            return ((TemplateBooleanModel) transformedElement).getAsBoolean();
         }
 
     }
@@ -1143,6 +1221,95 @@ class BuiltInsForSequences {
                         "The element mapper function has returned no return value (has returned null).");
             }
             return transformedElement;
+        }
+
+    }
+
+    static class drop_whileBI extends FilterLikeBI {
+
+        protected TemplateModel calculateResult(
+                final TemplateModelIterator lhoIterator, final TemplateModel lho,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
+                final Environment env) throws TemplateException {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(drop_whileBI.this);
+                }
+
+                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                while (lhoIterator.hasNext()) {
+                    TemplateModel element = lhoIterator.next();
+                    if (!elementMatches(element, elementTransformer, env)) {
+                        resultList.add(element);
+                        while (lhoIterator.hasNext()) {
+                            resultList.add(lhoIterator.next());
+                        }
+                        break;
+                    }
+                }
+                return new TemplateModelListSequence(resultList);
+            } else {
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
+                        new TemplateModelIterator() {
+                            boolean dropMode = true;
+                            boolean prefetchDone;
+                            TemplateModel prefetchedElement;
+                            boolean prefetchedEndOfIterator;
+
+                            public TemplateModel next() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                if (prefetchedEndOfIterator) {
+                                    throw new IllegalStateException("next() was called when hasNext() is false");
+                                }
+                                prefetchDone = false;
+                                return prefetchedElement;
+                            }
+
+                            public boolean hasNext() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                return !prefetchedEndOfIterator;
+                            }
+
+                            private void ensurePrefetchDone() throws TemplateModelException {
+                                if (prefetchDone) {
+                                    return;
+                                }
+
+                                if (dropMode) {
+                                    boolean foundElement = false;
+                                    dropElements: while  (lhoIterator.hasNext()) {
+                                        TemplateModel element = lhoIterator.next();
+                                        try {
+                                            if (!elementMatches(element, elementTransformer, env)) {
+                                                prefetchedElement = element;
+                                                foundElement = true;
+                                                break dropElements;
+                                            }
+                                        } catch (TemplateException e) {
+                                            throw new _TemplateModelException(e, env,
+                                                    "Failed to transform element");
+                                        }
+                                    }
+                                    dropMode = false;
+                                    if (!foundElement) {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                } else {
+                                    if (lhoIterator.hasNext()) {
+                                        TemplateModel element = lhoIterator.next();
+                                        prefetchedElement = element;
+                                    } else {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                }
+                                prefetchDone = true;
+                            }
+                        },
+                        lhoIsSequence
+                );
+            }
         }
 
     }

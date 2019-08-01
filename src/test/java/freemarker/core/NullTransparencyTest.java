@@ -56,7 +56,6 @@ public class NullTransparencyTest extends TemplateTest {
 
     @Test
     public void testWithoutClashingHigherScopeVar() throws Exception {
-
         assertTrue(getConfiguration().getFallbackOnNullLoopVariable());
         testLambdaArguments();
         testLoopVariables("null");
@@ -83,6 +82,8 @@ public class NullTransparencyTest extends TemplateTest {
     protected void testLambdaArguments() throws IOException, TemplateException {
         assertOutput("<#list list?filter(it -> it??) as it>${it!'null'}<#sep>, </#list>",
                 "a, b");
+        assertOutput("<#list list?takeWhile(it -> it??) as it>${it!'null'}<#sep>, </#list>",
+                "a");
         assertOutput("<#list list?map(it -> it!'null') as it>${it}<#sep>, </#list>",
                 "a, null, b");
     }

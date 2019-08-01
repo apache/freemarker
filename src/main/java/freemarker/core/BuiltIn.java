@@ -84,7 +84,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    static final int NUMBER_OF_BIS = 281;
+    static final int NUMBER_OF_BIS = 285;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -109,6 +109,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("datetime_if_unknown", "datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
         putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
+        putBI("drop_while", "dropWhile", new BuiltInsForSequences.drop_whileBI());
         putBI("ends_with", "endsWith", new BuiltInsForStringsBasic.ends_withBI());
         putBI("ensure_ends_with", "ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
         putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
@@ -278,6 +279,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
         putBI("substring", new BuiltInsForStringsBasic.substringBI());
+        putBI("take_while", "takeWhile", new BuiltInsForSequences.take_whileBI());
         putBI("then", new BuiltInsWithLazyConditionals.then_BI());
         putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
         putBI("time_if_unknown", "timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
