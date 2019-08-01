@@ -20,11 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:xi="http://www.w3.org/2001/XInclude"
-      xmlns:ns5="http://www.w3.org/1999/xhtml"
-      xmlns:ns4="http://www.w3.org/2000/svg"
-      xmlns:ns3="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -27900,8 +27896,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Added new built-ins:
-              <literal>?filter(<replaceable>predicate</replaceable>)</literal>
-              and <literal>?map(<replaceable>mapper</replaceable>)</literal>.
+              <literal>?filter(<replaceable>predicate</replaceable>)</literal>,
+              <literal>?map(<replaceable>mapper</replaceable>)</literal>,
+              <literal>?take_while(<replaceable>predicate</replaceable>)</literal>,
+              <literal>?drop_while(<replaceable>predicate</replaceable>)</literal>.
               These allow using lambda expression, like
               <literal>users?filter(user -&gt; user.superuser)</literal> or
               <literal>users?map(user -&gt; user.name)</literal>, or accept a
@@ -27963,6 +27961,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <quote>multiplier</quote> was incorrectly written as
               <quote>multipier</quote>. Now both words are recognized.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>?min</literal> and <literal>?max</literal> will
+              now immediately stop with error when applied on a right
+              unbounded numerical range (like <literal>1..</literal>), as that
+              would run forever anyway.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -28005,6 +28010,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               needed, and either not set the <literal>boolean_format</literal>
               at all, or set it to something that's appropriate for everyday
               uses (like <literal>"yes,no"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>New configuration setting,
+              <literal>fallback_on_null_loop_variable</literal>: Specifies the
+              behavior when reading a loop variable (like <literal>i</literal>
+              in <literal>&lt;#list items as i&gt;</literal>, or in
+              <literal>&lt;@myMacro items; i&gt;</literal>) that's
+              <literal>null</literal> (missing); if <literal>true</literal>,
+              FreeMarker will look for a variable with the same name in higher
+              variable scopes, or if <literal>false</literal> the variable
+              will be simply <literal>null</literal> (missing). For backward
+              compatibility the default is <literal>true</literal>. The
+              recommended value for new projects is <literal>false</literal>,
+              as otherwise adding new variables to higher scopes (typically to
+              the data-model) can unintentionally change the behavior of
+              templates.</para>
             </listitem>
 
             <listitem>

@@ -242,10 +242,6 @@ public final class Macro extends TemplateElement implements TemplateModel {
             }
         }
 
-        /**
-         * @return the local variable of the given name
-         * or null if it doesn't exist.
-         */ 
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
              return localVars.get(name);
         }

@@ -28,7 +28,13 @@ import com.google.common.collect.ImmutableSet;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.test.TemplateTest;
 
 public class FilterBiTest extends TemplateTest {
@@ -145,6 +151,13 @@ public class FilterBiTest extends TemplateTest {
     }
 
     @Test
+    public void testSequenceAndCollectionTarget() throws Exception {
+        addToDataModel("xs", new SequenceAndCollection());
+        assertOutput("${xs?filter(x -> x != 'a')?join(', ')}", "b");
+        assertOutput("<#assign xs2 = xs?filter(x -> x != 'a')>${xs2?join(', ')}", "b");
+    }
+
+    @Test
     public void testNonSequenceInput() throws Exception {
         addToDataModel("coll", ImmutableSet.of("a", "b", "c"));
         assertErrorContains("${coll?filter(it -> it != 'a')[0]}", "sequence", "evaluated to a collection");
@@ -161,6 +174,24 @@ public class FilterBiTest extends TemplateTest {
         }
         public boolean isInteger(double n) {
             return n == (int) n;
+        }
+    }
+
+    public class SequenceAndCollection implements TemplateSequenceModel, TemplateCollectionModel {
+        public TemplateModelIterator iterator() throws TemplateModelException {
+            return new SequenceIterator(this);
+        }
+
+        public TemplateModel get(int index) throws TemplateModelException {
+            switch (index) {
+                case 0: return new SimpleScalar("a");
+                case 1: return new SimpleScalar("b");
+                default: return null;
+            }
+        }
+
+        public int size() throws TemplateModelException {
+            return 2;
         }
     }
 

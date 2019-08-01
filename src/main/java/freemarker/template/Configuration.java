@@ -2594,17 +2594,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Specifies the behavior when reading a loop variable (like {@code i} in {@code <#list items as i>}) that's
-     * {@code null} (missing); if {@code true}, FreeMarker will look for a variable with the same name in higher
-     * variable scopes, or if {@code false} the variable will be simply {@code null} (missing).
-     * For backward compatibility the default is {@code true}. The recommended value for new projects is
+     * Specifies the behavior when reading a loop variable (like {@code i} in {@code <#list items as i>}, or in
+     * {@code <@myMacro items; i>}) that's {@code null} (missing); if {@code true}, FreeMarker will look for a variable
+     * with the same name in higher variable scopes, or if {@code false} the variable will be simply {@code null}
+     * (missing). For backward compatibility the default is {@code true}. The recommended value for new projects is
      * {@code false}, as otherwise adding new variables to higher scopes (typically to the data-model) can
      * unintentionally change the behavior of templates. You have to be quite unlucky for that to happen though:
      * The newly added variable has to have the same name as the loop variable, and there must be some null (missing)
      * values in what you loop through.
      *
-     * <p>Note that this doesn't influence the behavior of lambdas, like {@code items?filter(i -> i?hasContent)},
-     * because reading lambda arguments never fall back to higher scopes.
+     * <p>This setting doesn't influence the behavior of lambdas, like {@code items?filter(i -> i?hasContent)}, as they
+     * never had this problem. Reading a lambda argument never falls back to higher scopes.
      *
      * @since 2.3.29
      */

@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
+import freemarker.template.Configuration;
 import freemarker.template.DefaultIterableAdapter;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.ObjectWrapperWithAPISupport;
@@ -82,6 +83,15 @@ public class MinMaxBITest extends TemplateTest {
     public void comparisonErrorTest() {
         assertErrorContains("${['a', 'x']?min}", "less-than", "string");
         assertErrorContains("${[0, true]?min}", "number", "boolean");
+    }
+
+    @Test
+    public void rightUnboundedNumericalRangeTest() throws Exception {
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_21); // So (1..) is listable at all
+        assertErrorContains("${(1..)?min}", "right-unbounded", "infinite");
+        assertErrorContains("${(1..)?max}", "right-unbounded", "infinite");
+        assertOutput("${(1..2)?min}", "1");
+        assertOutput("${(1..2)?max}", "2");
     }
     
 }

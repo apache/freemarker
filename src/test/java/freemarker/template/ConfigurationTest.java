@@ -1882,6 +1882,21 @@ public class ConfigurationTest extends TestCase {
     }
 
     @Test
+    public void testFallbackOnNullLoopVariable() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        assertTrue(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallback_on_null_loop_variable", "false");
+        assertFalse(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallback_on_null_loop_variable", "true");
+        assertTrue(cfg.getFallbackOnNullLoopVariable());
+
+        cfg.setSetting("fallbackOnNullLoopVariable", "NO");
+        assertFalse(cfg.getFallbackOnNullLoopVariable());
+    }
+
+    @Test
     public void testGetSettingNamesAreSorted() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         for (boolean camelCase : new boolean[] { false, true }) {

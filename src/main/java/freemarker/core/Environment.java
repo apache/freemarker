@@ -708,7 +708,6 @@ public final class Environment extends Configurable {
         }
 
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
-            // TODO [lambda] Do not allow fallback (i.e., introduce untransparent null-s)
             return name.equals(lambdaArgName) ? lambdaArgValue : null;
         }
 

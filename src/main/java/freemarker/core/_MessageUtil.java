@@ -342,6 +342,12 @@ public class _MessageUtil {
                         ", which leads to this restriction."));
     }
 
+    /**
+     * Because of the limitations of FTL lambdas (called "local lambdas"), sometimes we must condense the lazy result
+     * down into a sequence. However, doing that automatically is only allowed if the input was a sequence as well. If
+     * it wasn't a sequence, we don't dare to collect the result into a sequence automatically (because it's possibly
+     * too long), and that's when this error message comes.
+     */
     public static TemplateException newLazilyGeneratedCollectionMustBeSequenceException(Expression blamed) {
         return new _MiscTemplateException(blamed,
                 "The result is a listable value with lazy transformation(s) applied on it, but it's not " +

@@ -22,8 +22,6 @@ package freemarker.template;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import freemarker.template.DefaultObjectWrapperTest.TestBean;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -41,6 +39,8 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import freemarker.template.DefaultObjectWrapperTest.TestBean;
 
 public class SimpleObjectWrapperTest {
     

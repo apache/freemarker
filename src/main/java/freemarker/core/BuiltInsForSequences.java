@@ -37,7 +37,6 @@ import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
-import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -246,10 +245,7 @@ class BuiltInsForSequences {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
-                if (model instanceof RightUnboundedRangeModel) {
-                    throw new _TemplateModelException(
-                            "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
-                }
+                checkNotRightUnboundedNumericalRange(model);
                 return new BIMethodForCollection(env, (TemplateCollectionModel) model);
             } else if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
@@ -908,7 +904,15 @@ class BuiltInsForSequences {
                 ? !((CollectionModel) model).getSupportsIndexedAccess()
                 : false;
     }
-    
+
+    private static void checkNotRightUnboundedNumericalRange(TemplateModel model) throws TemplateModelException {
+        if (model instanceof RightUnboundedRangeModel) {
+            throw new _TemplateModelException(
+                    "The input sequence is a right-unbounded numerical range, thus, it's infinitely long, and can't " +
+                    "processed with this built-in.");
+        }
+    }
+
     private static boolean modelsEqual(
             int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
             Environment env)
@@ -946,7 +950,8 @@ class BuiltInsForSequences {
                 throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
-                return calculateResultForColletion((TemplateCollectionModel) model, env);
+                checkNotRightUnboundedNumericalRange(model);
+                return calculateResultForCollection((TemplateCollectionModel) model, env);
             } else if (model instanceof TemplateSequenceModel) {
                 return calculateResultForSequence((TemplateSequenceModel) model, env);
             } else {
@@ -954,7 +959,7 @@ class BuiltInsForSequences {
             }
         }        
 
-        private TemplateModel calculateResultForColletion(TemplateCollectionModel coll, Environment env)
+        private TemplateModel calculateResultForCollection(TemplateCollectionModel coll, Environment env)
         throws TemplateException {
             TemplateModel best = null;
             TemplateModelIterator iter = coll.iterator();
@@ -983,7 +988,7 @@ class BuiltInsForSequences {
             return best;
         }
         
-    }    
+    }
 
     static class maxBI extends MinOrMaxBI {
 
@@ -1001,199 +1006,27 @@ class BuiltInsForSequences {
         
     }
 
-    /**
-     * Built-in that's similar to a Java 8 Stream intermediate operation. To be on the safe side, by default these
-     * are eager, and just produce a {@link TemplateSequenceModel}. But when circumstances allow, they become lazy,
-     * similarly to Java 8 Stream intermediate operations. Another characteristic of these built-ins is that they
-     * usually accept lambda expressions as parameters.
-     */
-    static abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTimeParameters {
-
-        private Expression elementTransformerExp;
-        private ElementTransformer precreatedElementTransformer;
-        private boolean lazilyGeneratedResultEnabled;
-
-        @Override
-        void bindToParameters(List<Expression> parameters, Token openParen, Token closeParen) throws ParseException {
-            // At the moment all built-ins of this kind requires 1 parameter.
-            if (parameters.size() != 1) {
-                throw newArgumentCountException("requires exactly 1", openParen, closeParen);
-            }
-            this.elementTransformerExp = parameters.get(0);
-            if (elementTransformerExp instanceof LocalLambdaExpression) {
-                LocalLambdaExpression localLambdaExp = (LocalLambdaExpression) elementTransformerExp;
-                checkLocalLambdaParamCount(localLambdaExp, 1);
-                // We can't do this with other kind of expressions, like a function or method reference, as they
-                // need to be evaluated on runtime:
-                precreatedElementTransformer = new LocalLambdaElementTransformer(localLambdaExp);
-            }
-        }
-
-        @Override
-        protected final boolean isLocalLambdaParameterSupported() {
-            return true;
-        }
-
-        @Override
-        final void enableLazilyGeneratedResult() {
-            this.lazilyGeneratedResultEnabled = true;
-        }
-
-        /** Tells if {@link #enableLazilyGeneratedResult()} was called. */
-        protected final boolean isLazilyGeneratedResultEnabled() {
-            return lazilyGeneratedResultEnabled;
-        }
-
-        @Override
-        protected final boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
-        }
-
-        protected List<Expression> getArgumentsAsList() {
-            return Collections.singletonList(elementTransformerExp);
-        }
-
-        protected int getArgumentsCount() {
-            return 1;
-        }
-
-        protected Expression getArgumentParameterValue(int argIdx) {
-            if (argIdx != 0) {
-                throw new IndexOutOfBoundsException();
-            }
-            return elementTransformerExp;
-        }
-
-        protected Expression getElementTransformerExp() {
-            return elementTransformerExp;
-        }
-
-        protected void cloneArguments(
-                Expression clone, String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-            ((IntermediateStreamOperationLikeBuiltIn) clone).elementTransformerExp
-                    = elementTransformerExp.deepCloneWithIdentifierReplaced(
-                            replacedIdentifier, replacement, replacementState);
-        }
-
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel targetValue = target.eval(env);
-
-            final TemplateModelIterator targetIterator;
-            final boolean targetIsSequence;
-            {
-                if (targetValue instanceof TemplateCollectionModel) {
-                    targetIterator = isLazilyGeneratedResultEnabled()
-                            ? new LazyCollectionTemplateModelIterator((TemplateCollectionModel) targetValue)
-                            : ((TemplateCollectionModel) targetValue).iterator();
-                    targetIsSequence = targetValue instanceof LazilyGeneratedCollectionModel ?
-                        ((LazilyGeneratedCollectionModel) targetValue).isSequence() : false;
-                } else if (targetValue instanceof TemplateSequenceModel) {
-                    targetIterator = new LazySequenceIterator((TemplateSequenceModel) targetValue);
-                    targetIsSequence = true;
-                } else if (targetValue instanceof TemplateModelIterator) {
-                    targetIterator = (TemplateModelIterator) targetValue;
-                    targetIsSequence = false;
-                } else {
-                    throw new NonSequenceOrCollectionException(target, targetValue, env);
+    private static abstract class FilterLikeBI extends IntermediateStreamOperationLikeBuiltIn {
+        protected final boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer,
+                Environment env)
+                throws TemplateException {
+            TemplateModel transformedElement = elementTransformer.transformElement(element, env);
+            if (!(transformedElement instanceof TemplateBooleanModel)) {
+                if (transformedElement == null) {
+                    throw new _TemplateModelException(getElementTransformerExp(), env,
+                            "The filter expression has returned no value (has returned null), " +
+                                    "rather than a boolean.");
                 }
+                throw new _TemplateModelException(getElementTransformerExp(), env,
+                        "The filter expression had to return a boolean value, but it returned ",
+                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
+                        " instead.");
             }
-
-            return calculateResult(
-                    targetIterator, targetValue, targetIsSequence,
-                    evalElementTransformerExp(env),
-                    env);
+            return ((TemplateBooleanModel) transformedElement).getAsBoolean();
         }
-
-        private ElementTransformer evalElementTransformerExp(Environment env) throws TemplateException {
-            if (precreatedElementTransformer != null) {
-                return precreatedElementTransformer;
-            }
-
-            TemplateModel elementTransformerModel = elementTransformerExp.eval(env);
-            if (elementTransformerModel instanceof TemplateMethodModel) {
-                return new MethodElementTransformer((TemplateMethodModel) elementTransformerModel);
-            } else if (elementTransformerModel instanceof Macro) {
-                return new FunctionElementTransformer((Macro) elementTransformerModel, elementTransformerExp);
-            } else {
-                throw new NonMethodException(elementTransformerExp, elementTransformerModel, true, true, null, env);
-            }
-        }
-
-        /**
-         * @param lhoIterator Use this to read the elements of the left hand operand
-         * @param lho Maybe needed for operations specific to the built-in, like getting the size, otherwise use the
-         *           {@code lhoIterator} only.
-         * @param lhoIsSequence See {@link LazilyGeneratedCollectionModel#isSequence}
-         * @param elementTransformer The argument to the built-in (typically a lambda expression)
-         *
-         * @return {@link TemplateSequenceModel} or {@link TemplateCollectionModel} or {@link TemplateModelIterator}.
-         */
-        protected abstract TemplateModel calculateResult(
-                TemplateModelIterator lhoIterator, TemplateModel lho, boolean lhoIsSequence,
-                ElementTransformer elementTransformer,
-                Environment env) throws TemplateException;
-
-        /**
-         * Wraps the built-in argument that specifies how to transform the elements of the sequence, to hide the
-         * complexity of doing that.
-         */
-        interface ElementTransformer {
-            TemplateModel transformElement(TemplateModel element, Environment env) throws TemplateException;
-        }
-
-        /** {@link ElementTransformer} that wraps a local lambda expression. */
-        private static class LocalLambdaElementTransformer implements ElementTransformer {
-            private final LocalLambdaExpression elementTransformerExp;
-
-            public LocalLambdaElementTransformer(LocalLambdaExpression elementTransformerExp) {
-                this.elementTransformerExp = elementTransformerExp;
-            }
-
-            public TemplateModel transformElement(TemplateModel element, Environment env) throws TemplateException {
-                return elementTransformerExp.invokeLambdaDefinedFunction(element, env);
-            }
-        }
-
-        /** {@link ElementTransformer} that wraps a (Java) method call. */
-        private static class MethodElementTransformer implements ElementTransformer {
-            private final TemplateMethodModel elementTransformer;
-
-            public MethodElementTransformer(TemplateMethodModel elementTransformer) {
-                this.elementTransformer = elementTransformer;
-            }
-
-            public TemplateModel transformElement(TemplateModel element, Environment env)
-                    throws TemplateModelException {
-                Object result = elementTransformer.exec(Collections.singletonList(element));
-                return result instanceof TemplateModel ? (TemplateModel) result : env.getObjectWrapper().wrap(result);
-            }
-        }
-
-        /** {@link ElementTransformer} that wraps a call to an FTL function (things defined with {@code #function}). */
-        private static class FunctionElementTransformer implements ElementTransformer {
-            private final Macro templateTransformer;
-            private final Expression elementTransformerExp;
-
-            public FunctionElementTransformer(Macro templateTransformer, Expression elementTransformerExp) {
-                this.templateTransformer = templateTransformer;
-                this.elementTransformerExp = elementTransformerExp;
-            }
-
-            public TemplateModel transformElement(TemplateModel element, Environment env) throws
-                    TemplateException {
-                // #function-s were originally designed to be called from templates directly, so they expect an
-                // Expression as argument. So we have to create a fake one.
-                ExpressionWithFixedResult functionArgExp = new ExpressionWithFixedResult(
-                        element, elementTransformerExp);
-                return env.invokeFunction(env, templateTransformer,
-                        Collections.singletonList(functionArgExp),
-                        elementTransformerExp);
-            }
-        }
-
     }
 
-    static class filterBI extends IntermediateStreamOperationLikeBuiltIn {
+    static class filterBI extends FilterLikeBI {
 
         protected TemplateModel calculateResult(
                 final TemplateModelIterator lhoIterator, final TemplateModel lho,
@@ -1266,21 +1099,79 @@ class BuiltInsForSequences {
             }
         }
 
-        private boolean elementMatches(TemplateModel element, ElementTransformer elementTransformer, Environment env)
-                throws TemplateException {
-            TemplateModel transformedElement = elementTransformer.transformElement(element, env);
-            if (!(transformedElement instanceof TemplateBooleanModel)) {
-                if (transformedElement == null) {
-                    throw new _TemplateModelException(getElementTransformerExp(), env,
-                            "The filter expression has returned no value (has returned null), " +
-                            "rather than a boolean.");
+    }
+
+    static class take_whileBI extends FilterLikeBI {
+
+        protected TemplateModel calculateResult(
+                final TemplateModelIterator lhoIterator, final TemplateModel lho,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
+                final Environment env) throws TemplateException {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(take_whileBI.this);
                 }
-                throw new _TemplateModelException(getElementTransformerExp(), env,
-                        "The filter expression had to return a boolean value, but it returned ",
-                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(transformedElement)),
-                        " instead.");
+
+                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                while (lhoIterator.hasNext()) {
+                    TemplateModel element = lhoIterator.next();
+                    if (elementMatches(element, elementTransformer, env)) {
+                        resultList.add(element);
+                    } else {
+                        break;
+                    }
+                }
+                return new TemplateModelListSequence(resultList);
+            } else {
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
+                        new TemplateModelIterator() {
+                            boolean prefetchDone;
+                            TemplateModel prefetchedElement;
+                            boolean prefetchedEndOfIterator;
+
+                            public TemplateModel next() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                if (prefetchedEndOfIterator) {
+                                    throw new IllegalStateException("next() was called when hasNext() is false");
+                                }
+                                prefetchDone = false;
+                                return prefetchedElement;
+                            }
+
+                            public boolean hasNext() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                return !prefetchedEndOfIterator;
+                            }
+
+                            private void ensurePrefetchDone() throws TemplateModelException {
+                                if (prefetchDone) {
+                                    return;
+                                }
+
+                                if (lhoIterator.hasNext()) {
+                                    TemplateModel element = lhoIterator.next();
+                                    boolean elementMatched;
+                                    try {
+                                        elementMatched = elementMatches(element, elementTransformer, env);
+                                    } catch (TemplateException e) {
+                                        throw new _TemplateModelException(e, env, "Failed to transform element");
+                                    }
+                                    if (elementMatched) {
+                                        prefetchedElement = element;
+                                    } else {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                } else {
+                                    prefetchedEndOfIterator = true;
+                                    prefetchedElement = null;
+                                }
+                                prefetchDone = true;
+                            }
+                        },
+                        lhoIsSequence
+                );
             }
-            return ((TemplateBooleanModel) transformedElement).getAsBoolean();
         }
 
     }
@@ -1336,6 +1227,95 @@ class BuiltInsForSequences {
                         "The element mapper function has returned no return value (has returned null).");
             }
             return transformedElement;
+        }
+
+    }
+
+    static class drop_whileBI extends FilterLikeBI {
+
+        protected TemplateModel calculateResult(
+                final TemplateModelIterator lhoIterator, final TemplateModel lho,
+                boolean lhoIsSequence, final ElementTransformer elementTransformer,
+                final Environment env) throws TemplateException {
+            if (!isLazilyGeneratedResultEnabled()) {
+                if (!lhoIsSequence) {
+                    throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(drop_whileBI.this);
+                }
+
+                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                while (lhoIterator.hasNext()) {
+                    TemplateModel element = lhoIterator.next();
+                    if (!elementMatches(element, elementTransformer, env)) {
+                        resultList.add(element);
+                        while (lhoIterator.hasNext()) {
+                            resultList.add(lhoIterator.next());
+                        }
+                        break;
+                    }
+                }
+                return new TemplateModelListSequence(resultList);
+            } else {
+                return new LazilyGeneratedCollectionModelWithUnknownSize(
+                        new TemplateModelIterator() {
+                            boolean dropMode = true;
+                            boolean prefetchDone;
+                            TemplateModel prefetchedElement;
+                            boolean prefetchedEndOfIterator;
+
+                            public TemplateModel next() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                if (prefetchedEndOfIterator) {
+                                    throw new IllegalStateException("next() was called when hasNext() is false");
+                                }
+                                prefetchDone = false;
+                                return prefetchedElement;
+                            }
+
+                            public boolean hasNext() throws TemplateModelException {
+                                ensurePrefetchDone();
+                                return !prefetchedEndOfIterator;
+                            }
+
+                            private void ensurePrefetchDone() throws TemplateModelException {
+                                if (prefetchDone) {
+                                    return;
+                                }
+
+                                if (dropMode) {
+                                    boolean foundElement = false;
+                                    dropElements: while  (lhoIterator.hasNext()) {
+                                        TemplateModel element = lhoIterator.next();
+                                        try {
+                                            if (!elementMatches(element, elementTransformer, env)) {
+                                                prefetchedElement = element;
+                                                foundElement = true;
+                                                break dropElements;
+                                            }
+                                        } catch (TemplateException e) {
+                                            throw new _TemplateModelException(e, env,
+                                                    "Failed to transform element");
+                                        }
+                                    }
+                                    dropMode = false;
+                                    if (!foundElement) {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                } else {
+                                    if (lhoIterator.hasNext()) {
+                                        TemplateModel element = lhoIterator.next();
+                                        prefetchedElement = element;
+                                    } else {
+                                        prefetchedEndOfIterator = true;
+                                        prefetchedElement = null;
+                                    }
+                                }
+                                prefetchDone = true;
+                            }
+                        },
+                        lhoIsSequence
+                );
+            }
         }
 
     }
