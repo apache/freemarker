@@ -28006,6 +28006,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>New configuration setting,
+              <literal>fallback_on_null_loop_variable</literal>: Specifies the
+              behavior when reading a loop variable (like <literal>i</literal>
+              in <literal>&lt;#list items as i&gt;</literal>, or in
+              <literal>&lt;@myMacro items; i&gt;</literal>) that's
+              <literal>null</literal> (missing); if <literal>true</literal>,
+              FreeMarker will look for a variable with the same name in higher
+              variable scopes, or if <literal>false</literal> the variable
+              will be simply <literal>null</literal> (missing). For backward
+              compatibility the default is <literal>true</literal>. The
+              recommended value for new projects is <literal>false</literal>,
+              as otherwise adding new variables to higher scopes (typically to
+              the data-model) can unintentionally change the behavior of
+              templates.</para>
+            </listitem>
+
+            <listitem>
               <para>If the result of
               <literal><replaceable>seq</replaceable>?size</literal> is
               compared to an integer literal in a template, like in
