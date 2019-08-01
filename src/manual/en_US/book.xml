@@ -27961,6 +27961,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <quote>multiplier</quote> was incorrectly written as
               <quote>multipier</quote>. Now both words are recognized.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>?min</literal> and <literal>?max</literal> will
+              now immediately stop with error when applied on a right
+              unbounded numerical range (like <literal>1..</literal>), as that
+              would run forever anyway.</para>
+            </listitem>
           </itemizedlist>
         </section>
 

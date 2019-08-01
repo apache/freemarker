@@ -245,10 +245,7 @@ class BuiltInsForSequences {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
-                if (model instanceof RightUnboundedRangeModel) {
-                    throw new _TemplateModelException(
-                            "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
-                }
+                checkNotRightUnboundedNumericalRange(model);
                 return new BIMethodForCollection(env, (TemplateCollectionModel) model);
             } else if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
@@ -907,7 +904,15 @@ class BuiltInsForSequences {
                 ? !((CollectionModel) model).getSupportsIndexedAccess()
                 : false;
     }
-    
+
+    private static void checkNotRightUnboundedNumericalRange(TemplateModel model) throws TemplateModelException {
+        if (model instanceof RightUnboundedRangeModel) {
+            throw new _TemplateModelException(
+                    "The input sequence is a right-unbounded numerical range, thus, it's infinitely long, and can't " +
+                    "processed with this built-in.");
+        }
+    }
+
     private static boolean modelsEqual(
             int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
             Environment env)
@@ -945,7 +950,8 @@ class BuiltInsForSequences {
                 throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
-                return calculateResultForColletion((TemplateCollectionModel) model, env);
+                checkNotRightUnboundedNumericalRange(model);
+                return calculateResultForCollection((TemplateCollectionModel) model, env);
             } else if (model instanceof TemplateSequenceModel) {
                 return calculateResultForSequence((TemplateSequenceModel) model, env);
             } else {
@@ -953,7 +959,7 @@ class BuiltInsForSequences {
             }
         }        
 
-        private TemplateModel calculateResultForColletion(TemplateCollectionModel coll, Environment env)
+        private TemplateModel calculateResultForCollection(TemplateCollectionModel coll, Environment env)
         throws TemplateException {
             TemplateModel best = null;
             TemplateModelIterator iter = coll.iterator();
@@ -982,7 +988,7 @@ class BuiltInsForSequences {
             return best;
         }
         
-    }    
+    }
 
     static class maxBI extends MinOrMaxBI {
 

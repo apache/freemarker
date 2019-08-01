@@ -88,8 +88,7 @@ public class SequenceBuiltInTest extends TemplateTest {
     @Test
     public void testWithSequence() throws TemplateException, IOException {
         assertOutput("${[11, 12]?sequence[1]}", "12");
-        
-        
+
         getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_23);
         // As it returns the sequence as is, it works with an infinite sequence:
         assertOutput("${(11..)?sequence[1]}", "12");
