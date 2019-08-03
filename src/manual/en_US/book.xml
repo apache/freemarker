@@ -20,7 +20,11 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:ns5="http://www.w3.org/1999/xhtml"
+      xmlns:ns4="http://www.w3.org/2000/svg"
+      xmlns:ns3="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -1373,7 +1377,10 @@ brown</programlisting>
               its size or retrieve its sub variables by index, but they can be
               still listed with the <link
               linkend="ref.directive.list"><literal>list</literal>
-              directive</link>.</para>
+              directive</link>. Furthermore, very often they can only be
+              listed once. (If you are a Java programmer,
+              <quote>iterable</quote> would be a more fitting name than
+              collection.)</para>
             </listitem>
           </itemizedlist>
 
@@ -2158,6 +2165,12 @@ The average of the price of a python and an elephant is:
               <literal>-=</literal>, <literal>*=</literal>,
               <literal>/=</literal>, <literal>%=</literal>,
               <literal>++</literal>, <literal>--</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><link linkend="dgui_template_exp_lambda">Local
+              lambdas</link>: <literal>x -&gt; x + 1</literal>, <literal>(x,
+              y) -&gt; x + y</literal></para>
             </listitem>
           </itemizedlist>
 
@@ -3998,6 +4011,31 @@ Creating mouse...
           </note>
         </section>
 
+        <section xml:id="dgui_template_exp_lambda">
+          <title>Local lambdas</title>
+
+          <indexterm>
+            <primary>lambda</primary>
+          </indexterm>
+
+          <para>FreeMarker doesn't support general purpose lambdas (unlike
+          Java). The usage of lambdas is restricted to the parameters of
+          certain <link linkend="dgui_template_exp_builtin">built-ins</link>,
+          like: <link
+          linkend="ref_builtin_filter"><literal>filter</literal></link>, <link
+          linkend="ref_builtin_map"><literal>map</literal></link>, <link
+          linkend="ref_builtin_take_while"><literal>take_while</literal></link>,
+          <link
+          linkend="ref_builtin_drop_while"><literal>drop_while</literal></link>.</para>
+
+          <para>The reason of this restriction is that FreeMarker doesn't
+          implement binding/capturing variables that are referred from the
+          lambda, instead it ensures that the evaluation of the lambda happens
+          before the enclosing variable scope is ended. Hence, and to
+          differentiate them from <quote>real</quote> lambdas, these are
+          called <emphasis>local</emphasis> lambdas.</para>
+        </section>
+
         <section xml:id="dgui_template_exp_parentheses">
           <title>Parentheses</title>
 
@@ -4162,6 +4200,12 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
                 <td>logical <quote>or</quote> operator</td>
 
                 <td><literal>||</literal></td>
+              </tr>
+
+              <tr>
+                <td>local lambda</td>
+
+                <td><literal>-&gt;</literal></td>
               </tr>
             </tbody>
           </informaltable>
@@ -12666,6 +12710,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_drop_while">drop_while</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_esc">esc</link></para>
           </listitem>
 
@@ -12686,6 +12735,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_eval">eval</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_filter">filter</link></para>
           </listitem>
 
           <listitem>
@@ -12860,6 +12913,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_map">map</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_markup_string">markup_string</link></para>
           </listitem>
@@ -13021,6 +13078,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_switch">switch</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_take_while">take_while</link></para>
           </listitem>
 
           <listitem>
@@ -16958,6 +17020,421 @@ N
           be of any type and value.</para>
         </section>
 
+        <section xml:id="ref_builtin_drop_while">
+          <title>drop_while</title>
+
+          <indexterm>
+            <primary>drop_while built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>drop while</secondary>
+          </indexterm>
+
+          <para>Filters out elements that match the parameter condition
+          (predicate), and stops filtering out elements with the first element
+          that does not match the condition. See the <link
+          linkend="ref_builtin_filter"><literal>filter</literal>
+          built-in</link> for more details about parameters, and other
+          details, but note that the condition in <literal>filter</literal>
+          has opposite meaning (what to keep, instead of what to drop).</para>
+
+          <para>Example and comparison with <literal>filter</literal>:</para>
+
+          <programlisting role="template">&lt;#assign xs = [1, 2, -3, 4, -5, 6]&gt;
+
+Drop while positive:
+&lt;#list xs?drop_while(x -&gt; x &gt; 0) as x&gt;${x} &lt;/#list&gt;
+
+Filer for positives:
+&lt;#list xs?filter(x -&gt; x &gt; 0) as x&gt;${x} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">Drop while positive:
+-3 4 -5 6 
+
+Filer for positives:
+1 2 4 6 </programlisting>
+
+          <para>As you can see, <literal>take_while</literal> has stopped
+          dropping the elements once it ran into the first element that didn't
+          match the predicate (<literal>x &gt; 0</literal>). On the other
+          hand, <literal>filter</literal> keeps the elements that match the
+          same predicate, and it doesn't stop.</para>
+        </section>
+
+        <section xml:id="ref_builtin_filter">
+          <title>filter</title>
+
+          <indexterm>
+            <primary>filter built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>filter</secondary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since 2.3.29</para>
+          </note>
+
+          <para>This built-in only keeps elements from a sequence that match
+          the parameter condition (predicate). For example:</para>
+
+          <programlisting role="template">&lt;#assign xs = [1, -2, 3, 4, -5]&gt;
+Positives:
+&lt;#list xs?<emphasis>filter(x -&gt; x &gt; 0)</emphasis> as x&gt;${x} &lt;/#list&gt;
+Negatives:
+&lt;#list xs?<emphasis>filter(x -&gt; x &lt; 0)</emphasis> as x&gt;${x} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">Positives:
+1 3 4 
+Negatives:
+-2 -5 </programlisting>
+
+          <para>This built-in has a single required parameter, which specifies
+          the filter condition (what to keep). The filter condition can be
+          specified in 3 ways:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>As a single argument <link
+              linkend="dgui_template_exp_lambda">lambda expression</link>:
+              <literal><replaceable>element</replaceable> -&gt;
+              <replaceable>predicate</replaceable></literal>. In that,
+              <literal><replaceable>element</replaceable></literal> is the
+              variable name with which you can refer to the current element in
+              the <literal><replaceable>predicate</replaceable></literal>, and
+              the <literal><replaceable>predicate</replaceable></literal> is
+              an arbitrarily complex <link
+              linkend="dgui_template_exp">expression</link> that must return a
+              boolean value (<literal>true</literal> or
+              <literal>false</literal>). An example this was shown above. Note
+              again the predicates can be arbitrarily complex, like the
+              predicate in <literal>products?filter(product -&gt;
+              product.discounted &amp;&amp;
+              !user.hasBought(product))</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>A <link linkend="ref_directive_function">function</link>
+              or method that has a single argument, and returns boolean. For
+              example, the <quote>Negatives</quote> example above could be
+              implemented like this:</para>
+
+              <programlisting role="template">&lt;#function negative(x)&gt;
+  &lt;#return x &lt; 0&gt;
+&lt;/#function&gt;
+
+<replaceable>...</replaceable>
+
+Negatives:
+&lt;#list xs<emphasis>?filter(negative)</emphasis> as x&gt;${x} &lt;/#list&gt;</programlisting>
+
+              <para>Note how we just referred to the function by name, and did
+              not call it. Similarly, if you have a Java object called
+              <literal>utils</literal> in the data-model, and it has a
+              <literal>boolean isNegative(Number n)</literal> method, then you
+              could use that like
+              <literal>xs?filter(utils.isNegative)</literal>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <note>
+            <para>Remember, the condition (predicate) that you specify tells
+            <emphasis>what to keep</emphasis>, not what to filter out! That
+            is, the element will be in the result sequence when you return
+            <literal>true</literal>, not when you return
+            <literal>false</literal>. (It's like the <literal>WHERE</literal>
+            condition in SQL, if you know that.)</para>
+          </note>
+
+          <para>While <literal>filter</literal> is most often used in the
+          <link linkend="ref.directive.list"><literal>list</literal>
+          directive</link>, naturally it can be used anywhere where a filtered
+          sequence is needed, and so this works as well:</para>
+
+          <programlisting role="template">&lt;#assign negatives = xs?filter(x -&gt; x &lt; 0)&gt;
+Negatives:
+&lt;#list negatives as x&gt;${x} &lt;/#list&gt;</programlisting>
+
+          <para>Note however, that for a very long sequences, the above
+          solution can consume significantly more memory. That's because
+          <literal>&lt;list
+          <replaceable>seq</replaceable>?filter(<replaceable>pred</replaceable>)
+          <replaceable>...</replaceable>&gt;</literal> is optimized to do
+          filtering without building an intermediate filtered sequence, while
+          the n above example, <literal>assign</literal> will first build the
+          whole filtered sequence in memory, and we pass that filtered
+          sequence later to <literal>list</literal>. But again, this only
+          matters for very long sequences.</para>
+
+          <para>See also: <link
+          linkend="ref_builtin_take_while"><literal>take_while</literal>
+          built-in</link>, <link
+          linkend="ref_builtin_drop_while"><literal>drop_while</literal>
+          built-in</link></para>
+
+          <simplesect xml:id="topic.filterLazyEval">
+            <title>Lazy evaluation and its consequences</title>
+
+            <note>
+              <para>Identical rules apply to these built-ins as well: <link
+              linkend="ref_builtin_map"><literal>map(<replaceable>mapper</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_take_while"><literal>take_while(<replaceable>predicate</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_drop_while"><literal>drop_while(<replaceable>predicate</replaceable>)</literal></link>.</para>
+            </note>
+
+            <para>To optimize processing, <literal>filter</literal> might
+            delays fetching the elements of the input sequence, and applying
+            the predicate on them. But it's guaranteed that those operations
+            are not delayed past the point where the execution of the
+            directive or interpolation, whose parameter contains the
+            <literal><replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)</literal>,
+            is finished. Some examples:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>In the case of <literal>&lt;list
+                <replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)
+                <replaceable>...</replaceable>&gt;<replaceable>nested
+                content</replaceable>&lt;/#list&gt;</literal>, when the
+                execution enters the <literal><replaceable>nested
+                content</replaceable></literal>, it's not true that all
+                elements of <literal><replaceable>seq</replaceable></literal>
+                was already consumed and filtered. Consuming and filtering
+                <literal><replaceable>seq</replaceable></literal> is instead
+                done bit by bit as <literal>list</literal> repeats the nested
+                content. But it's guaranteed that past the
+                <literal>&lt;/#list&gt;</literal> tag (the end of the
+                execution of the <literal>list</literal> directive), there are
+                no delayed readings of
+                <literal><replaceable>seq</replaceable></literal>, or delayed
+                evaluation of the
+                <literal><replaceable>predicate</replaceable></literal>. So
+                avoid changing a such variable (or other system state) in the
+                nested content of <literal>list</literal>, which influences
+                the result of the
+                <literal><replaceable>predicate</replaceable></literal>. Doing
+                so could change the filtering for the rest of the
+                <literal><replaceable>seq</replaceable></literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>In the case of <literal>&lt;#assign
+                <replaceable>filteredSeq</replaceable> =
+                <replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)&gt;</literal>
+                it's guaranteed that all elements of
+                <literal><replaceable>seq</replaceable></literal> were
+                processed, and thus
+                <literal><replaceable>predicate</replaceable></literal> won't
+                be evaluated after the <literal>assign</literal>
+                directive.</para>
+              </listitem>
+
+              <listitem>
+                <para>In the case of
+                <literal>${<replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)?join(',
+                ')}</literal> it's guaranteed that all elements of
+                <literal><replaceable>seq</replaceable></literal> were
+                processed, and thus
+                <literal><replaceable>predicate</replaceable></literal> won't
+                be evaluated after the <literal>assign</literal>
+                directive.</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>Inside <link linkend="dgui_template_exp">expressions</link>
+            however, there's no promise regarding when the elements are
+            consumed and when the predicate is evaluated. Like in the case of
+            <literal><replaceable>seq</replaceable>?filter(<replaceable>predicate1</replaceable>)?filter(<replaceable>predicate2</replaceable>)</literal>,
+            it's not guaranteed that
+            <literal><replaceable>predicate1</replaceable></literal> will only
+            be evaluated before
+            <literal><replaceable>predicate2</replaceable></literal>. (Most
+            likely they will be called alternately:
+            <literal><replaceable>predicate1</replaceable></literal> for the
+            1st element, then
+            <literal><replaceable>predicate2</replaceable></literal> for the
+            1st element, then
+            <literal><replaceable>predicate1</replaceable></literal> for the
+            2nd element, then
+            <literal><replaceable>predicate2</replaceable></literal> for the
+            2nd element, and so on.)</para>
+
+            <para>If you pass a filtered sequence to a
+            <emphasis>custom</emphasis> directive (a macro) or function or
+            method, as in <literal>&lt;@<replaceable>myMacro</replaceable>
+            <replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)
+            /&gt;</literal> or
+            <literal><replaceable>myFunction</replaceable>(<replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>))</literal>,
+            then it's guaranteed that the filtering is not delayed past the
+            point when the custom directive/function/method is invoked. That
+            is, your macro/function/method will aways receive a fully
+            constructed filtered sequence.</para>
+
+            <para>Also note that in it's <emphasis>not</emphasis> guaranteed
+            that all elements of the input sequence will be read, and
+            therefore that the predicate will be evaluated for all elements.
+            Some examples of such cases:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>You may <link
+                linkend="ref.directive.list.break"><literal>break</literal></link>
+                out from <literal>&lt;list
+                <replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)
+                <replaceable>...</replaceable>&gt;</literal> before it reaches
+                the last element, in which case the rest of the
+                <literal><replaceable>seq</replaceable></literal> elements
+                won't be fetched and filtered.</para>
+              </listitem>
+
+              <listitem>
+                <para>In the case of
+                <literal><replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)[2]</literal>,
+                which reads the 3rd element of the filtered sequence,
+                FreeMarker stops fetching and filtering the elements of
+                <literal><replaceable>seq</replaceable></literal> when we have
+                found the 3rd element that matches the
+                <literal><replaceable>predicate</replaceable></literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>In the case of
+                <literal><replaceable>seq</replaceable>?filter(<replaceable>predicate</replaceable>)?size
+                != 0</literal>, which tells whether the filtered sequence is
+                non-empty, we stop fetching and filtering the elements of
+                <literal><replaceable>seq</replaceable></literal> when we have
+                found the 1st element that matches the
+                <literal><replaceable>predicate</replaceable></literal>.
+                (That's certainly surprising as <literal>?size</literal> needs
+                to process the whole sequence to tell the size. But in this
+                case FreeMarker notices that we don't really need the exact
+                size.)</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>If you are a Java programmer, note how the
+            <literal>filter</literal> built-in differs from Java
+            <literal>Stream.filter</literal>. <literal>Stream.filter</literal>
+            is <quote>lazy</quote>, while FreeMarker <literal>filter</literal>
+            is basically <quote>eager</quote>, and is only <quote>lazy</quote>
+            in special cases, and within a limited scope. Thus, unlike in
+            Java, calling <literal>filter</literal> is not always free. In
+            particular, if you assign a filtered sequence to a variable, or
+            pass it to a custom directive/function/method, the filtered
+            sequence will be created eagerly.</para>
+          </simplesect>
+
+          <simplesect xml:id="toic.filterLongInput">
+            <title>Filtering very long input that you don't hold in
+            memory</title>
+
+            <note>
+              <para>Identical rules apply to these built-ins as well: <link
+              linkend="ref_builtin_map"><literal>map(<replaceable>mapper</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_take_while"><literal>take_while(<replaceable>predicate</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_drop_while"><literal>drop_while(<replaceable>predicate</replaceable>)</literal></link>.</para>
+            </note>
+
+            <para>Some applications, particularly those that render huge
+            tables, use <link linkend="dgui_datamodel_container">sequence-like
+            values</link> in the data-model that are not held in memory at
+            once, instead they are like a stream of elements that you can only
+            read in the order as they are given to you (on the Java side these
+            are <literal>java.util.Iterator</literal>-s, or
+            <literal>java.util.Iterables</literal>, or the like). These will
+            have <quote>collection</quote> type in the template language,
+            which is like a restricted sequence.</para>
+
+            <para><literal>filter</literal> works with collection input too.
+            As you have seen earlier, <literal>filter</literal> might stores
+            the entire filtered sequence in the memory, which in this case
+            sounds concerning, because if the input was too big to fit into
+            the memory (hence it wasn't exposed as a sequence), then the
+            filtered collection can be too big as well. For that reason, if
+            the input is not a sequence (but a collection),
+            <literal>filter</literal> never collects its result into the
+            memory, and never fetches and processes the input elements until
+            they are really needed (<quote>lazy</quote> behavior). Furthermore
+            the result of <literal>filter</literal> is then a collection, not
+            a sequence, therefor sequence operations (like
+            <literal><replaceable>seq</replaceable>[<replaceable>index</replaceable>]</literal>)
+            will not work on it.</para>
+
+            <para>Unlike with sequence input, any operation that would cause
+            collecting the whole filtered result into the memory will now
+            fail. Let's see that through examples. Let's say we have
+            <literal>hugeTable</literal> in the data-model, which is not a
+            sequence, but still a collection (probably an
+            <literal>Iterator</literal> in Java). Then, consider:</para>
+
+            <programlisting role="template">&lt;#-- Works: --&gt;
+&lt;#list hugeTable?filter(<replaceable>predicate</replaceable>) as row&gt;<replaceable>nested content</replaceable>&lt;/#list&gt;</programlisting>
+
+            <para>This works fine, since <literal>list</literal> doesn't
+            require collecting the result into the memory</para>
+
+            <para>Consider this:</para>
+
+            <programlisting role="template">&lt;#-- Fails if hugeTable is not a sequence, just a collection: --&gt;
+&lt;#assign filteredHugeTable = hugeTable?filter(<replaceable>predicate</replaceable>)&gt;</programlisting>
+
+            <para>This fails, as filtering can't be postponed beyond the
+            containing directive (<literal>assign</literal>), so FreeMareker
+            had to put the entire filtered result into
+            <literal>filteredHugeTable</literal>. If, however, you know that
+            <literal>filteredHugeTable</literal> won't be too big, you can
+            explicitly collect the result into a sequence via the <link
+            linkend="ref_builtin_sequence"><literal>sequence</literal>
+            built-in</link>:</para>
+
+            <programlisting role="template">&lt;#-- Works, but be sure filtredHugeTable fits into the memory: --&gt;
+&lt;#assign filteredHugeTable = hugeTable?filter(predicate)<emphasis>?sequence</emphasis>&gt;</programlisting>
+
+            <para>Naturally, applying the <literal>sequence</literal> built-in
+            allows all sequence operations, such as
+            <literal><replaceable>seq</replaceable>[<replaceable>index</replaceable>]</literal>,
+            <literal><replaceable>seq</replaceable>[<replaceable>range</replaceable>]</literal>,
+            or
+            <literal><replaceable>seq</replaceable>?<replaceable>size</replaceable></literal>.
+            If these operations are directly applied on a sequence that was
+            converted from a collection, then FreeMarker optimizes out
+            actually creating the sequence in memory. So these won't consume
+            much memory regardless of the size of the filtered
+            <literal>hugeTable</literal>:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><literal>hugeTable?filter(<replaceable>predicate</replaceable>)?sequence[index]</literal>:
+                FreeMarker will just fetch and drop the elements till it
+                reaches the element at the desired position.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>hugeTable?filter(<replaceable>predicate</replaceable>)?sequence[0..9]</literal>:
+                FreeMarker will just collect the first 10 elements.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>hugeTable?filter(<replaceable>predicate</replaceable>)?sequence?size</literal>:
+                In this case the whole <literal>hugeTable</literal> will be
+                fetched, which is possibly slow, but the fetched elements are
+                still not collected into the memory, as they only need to be
+                counted.</para>
+              </listitem>
+            </itemizedlist>
+          </simplesect>
+        </section>
+
         <section xml:id="ref_builtin_first">
           <title>first</title>
 
@@ -17057,6 +17534,22 @@ red, green, blue.
           die with error if the sequence is empty.</para>
         </section>
 
+        <section xml:id="ref_builtin_map">
+          <title>map</title>
+
+          <indexterm>
+            <primary>map built-in</primary>
+          </indexterm>
+
+          <para>[TODO]</para>
+
+          <para>Regarding lazy evaluation, and handling of very long inputs,
+          it <link linkend="topic.filterLazyEval">works on the same way</link>
+          as with the <link
+          linkend="ref_builtin_filter"><literal>filter</literal>
+          built-in</link>.</para>
+        </section>
+
         <section xml:id="ref_builtin_min_max">
           <title>min, max</title>
 
@@ -17108,11 +17601,6 @@ ${[]?min!'-'}</programlisting>
           <indexterm>
             <primary>seq_contains built-in</primary>
           </indexterm>
-
-          <note>
-            <para>This built-in is available since FreeMarker 2.3.1. It
-            doesn't exist in 2.3.</para>
-          </note>
 
           <note>
             <para>The <literal>seq_</literal> prefix is required in the
@@ -17405,6 +17893,48 @@ Sorted by name.last:
 - Crooger, Fred: 35 years old
 - Fox, Amanda: 25 years old
 - Smith, Joe: 40 years old</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_take_while">
+          <title>take_while</title>
+
+          <indexterm>
+            <primary>take_while built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>take while</secondary>
+          </indexterm>
+
+          <para>This is very similar to the <link
+          linkend="ref_builtin_filter"><literal>filter</literal>
+          built-in</link>, but it filters out all element starting with first
+          element that doesn't match the argument condition (predicate). See
+          the <link linkend="ref_builtin_filter"><literal>filter</literal>
+          built-in</link> for more details.</para>
+
+          <para>Example and comparison with <literal>filter</literal>:</para>
+
+          <programlisting role="template">&lt;#assign xs = [1, 2, -3, 4, -5, 6]&gt;
+
+Take while positive:
+&lt;#list xs<emphasis>?take_while</emphasis>(x -&gt; x &gt; 0) as x&gt;${x} &lt;/#list&gt;
+
+Filer for positives:
+&lt;#list xs?filter(x -&gt; x &gt; 0) as x&gt;${x} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">Take while positive:
+1 2 
+
+Filer for positives:
+1 2 4 6 </programlisting>
+
+          <para>As you can see, <literal>take_while</literal> has stopped at
+          the first number that didn't match the predicate (<literal>x &gt;
+          0</literal>), while <literal>filter</literal> has continued finding
+          further matches.</para>
         </section>
       </section>
 
@@ -27895,12 +28425,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added new built-ins:
-              <literal>?filter(<replaceable>predicate</replaceable>)</literal>,
-              <literal>?map(<replaceable>mapper</replaceable>)</literal>,
-              <literal>?take_while(<replaceable>predicate</replaceable>)</literal>,
-              <literal>?drop_while(<replaceable>predicate</replaceable>)</literal>.
-              These allow using lambda expression, like
+              <para>Added new built-ins: <link
+              linkend="ref_builtin_filter"><literal>?filter(<replaceable>predicate</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_map"><literal>?map(<replaceable>mapper</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_take_while"><literal>?take_while(<replaceable>predicate</replaceable>)</literal></link>,
+              <link
+              linkend="ref_builtin_drop_while"><literal>?drop_while(<replaceable>predicate</replaceable>)</literal></link>.
+              These allow using lambda expressions, like
               <literal>users?filter(user -&gt; user.superuser)</literal> or
               <literal>users?map(user -&gt; user.name)</literal>, or accept a
               functions/method as parameter. (Lambda expressions are also new
@@ -27911,8 +28444,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
               directive parameter, they are working in lazy mode instead, that
               is, they won't built the a new sequence, just stream through the
-              existing one and apply the filter or mapping element by element.
-              [TODO: document and link documentation]</para>
+              existing one and apply the filter or mapping element by
+              element.</para>
             </listitem>
 
             <listitem>
