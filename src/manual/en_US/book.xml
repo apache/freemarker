@@ -17061,7 +17061,7 @@ N
             <secondary>drop while</secondary>
           </indexterm>
 
-          <para>Returns a new sequence that contains the elements fro the
+          <para>Returns a new sequence that contains the elements from the
           input sequence starting with from the first element that does
           <emphasis>not</emphasis> match the parameter predicate (condition).
           After that, all elements are included, regardless if they match the
