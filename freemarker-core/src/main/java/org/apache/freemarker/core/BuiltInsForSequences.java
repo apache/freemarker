@@ -238,10 +238,7 @@ class BuiltInsForSequences {
 
         @Override
         TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
-            if (model instanceof RightUnboundedRangeModel) {
-                throw new TemplateException(
-                        "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
-            }
+            checkNotRightUnboundedNumericalRange(model);
             return new BIMethodForIterable(model);
         }
    
@@ -798,6 +795,14 @@ class BuiltInsForSequences {
         
     }
 
+    private static void checkNotRightUnboundedNumericalRange(TemplateModel model) throws TemplateException {
+        if (model instanceof RightUnboundedRangeModel) {
+            throw new TemplateException(
+                    "The input sequence is a right-unbounded numerical range, thus, it's infinitely long, and can't " +
+                    "processed with this built-in.");
+        }
+    }
+
     private static boolean modelsEqual(
             int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem, Environment env)
             throws TemplateException {
@@ -845,7 +850,8 @@ class BuiltInsForSequences {
 
         @Override
         TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
-            // TODO Auto-generated method stub
+            checkNotRightUnboundedNumericalRange(model);
+
             TemplateModel best = null;
             TemplateModelIterator iter = model.iterator();
             while (iter.hasNext()) {

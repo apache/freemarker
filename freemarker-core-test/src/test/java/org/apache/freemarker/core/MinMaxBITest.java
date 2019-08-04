@@ -66,7 +66,15 @@ public class MinMaxBITest extends TemplateTest {
             }
         }
     }
-    
+
+    @Test
+    public void rightUnboundedNumericalRangeTest() throws Exception {
+        assertErrorContains("${(1..)?min}", "right-unbounded", "infinite");
+        assertErrorContains("${(1..)?max}", "right-unbounded", "infinite");
+        assertOutput("${(1..2)?min}", "1");
+        assertOutput("${(1..2)?max}", "2");
+    }
+
     private class InputMinMax {
         private final List<?> input;
         private final String minExpected;
