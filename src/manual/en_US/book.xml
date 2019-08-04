@@ -848,6 +848,14 @@ All Rights Reserved.
               true of false depending on if <literal>user</literal> starts
               with the letter <quote>J</quote> or not.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>animals?filter(it -&gt; it.protected)</literal>
+              gives the list of protected animals. To list protected animals
+              only, you could use <literal>&lt;#list animals?filter(it -&gt;
+              it.protected) as
+              animal&gt;<replaceable>...</replaceable>&lt;/#list&gt;</literal>.</para>
+            </listitem>
           </itemizedlist>
 
           <para>Built-in applications can be chained, like
@@ -3828,7 +3836,7 @@ Jerry</programlisting>
             <warning>
               <para>If you have a composite expression after the
               <literal>!</literal>, like <literal>1 + x</literal>,
-              <emphasis>always</emphasis> use parenthesses, like
+              <emphasis>always</emphasis> use parentheses, like
               <literal>${x!(1 + y)}</literal> or <literal>${(x!1) +
               y)}</literal>, depending on which interpretation you meant.
               That's needed because due to a programming mistake in FreeMarker
@@ -4034,6 +4042,26 @@ Creating mouse...
           before the enclosing variable scope is ended. Hence, and to
           differentiate them from <quote>real</quote> lambdas, these are
           called <emphasis>local</emphasis> lambdas.</para>
+
+          <para>The syntax of lambdas is like
+          <literal>(<replaceable>name1</replaceable>,
+          <replaceable>name2</replaceable>, <replaceable>...</replaceable>,
+          <replaceable>nameN</replaceable>) -&gt;
+          <replaceable>expression</replaceable></literal>. If there's only a
+          single argument, the parentheses can be omitted:
+          <literal><replaceable>name1</replaceable> -&gt;
+          <replaceable>expression</replaceable></literal>.</para>
+
+          <para>As the right side of the <literal>-&gt;</literal> is just a
+          single expression, if you need complex logic there, you probably
+          want to move that into a <link
+          linkend="ref.directive.function">function</link>, as the you can use
+          directives like <literal>if</literal>, <literal>list</literal>, etc.
+          In that case though, you don't need a lambda expression, as all
+          built-ins that support a lambda parameter, also support passing in a
+          function directly. For example, instead of <literal>seq?map(x -&gt;
+          myMapper(x))</literal> you should just write
+          <literal>seq?map(myMapper)</literal>.</para>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
@@ -17033,9 +17061,11 @@ N
             <secondary>drop while</secondary>
           </indexterm>
 
-          <para>Filters out elements that match the parameter condition
-          (predicate), and stops filtering out elements with the first element
-          that does not match the condition. See the <link
+          <para>Returns a new sequence that contains the elements fro the
+          input sequence starting with from the first element that does
+          <emphasis>not</emphasis> match the parameter predicate (condition).
+          After that, all elements are included, regardless if they match the
+          predicate or not. See the <link
           linkend="ref_builtin_filter"><literal>filter</literal>
           built-in</link> for more details about parameters, and other
           details, but note that the condition in <literal>filter</literal>
@@ -17062,6 +17092,10 @@ Filer for positives:
           match the predicate (<literal>x &gt; 0</literal>). On the other
           hand, <literal>filter</literal> keeps the elements that match the
           same predicate, and it doesn't stop.</para>
+
+          <para>See also: <link
+          linkend="ref_builtin_take_while"><literal>take_while</literal>
+          built-in</link></para>
         </section>
 
         <section xml:id="ref_builtin_filter">
@@ -17081,8 +17115,9 @@ Filer for positives:
             <para>This built-in is available since 2.3.29</para>
           </note>
 
-          <para>This built-in only keeps elements from a sequence that match
-          the parameter condition (predicate). For example:</para>
+          <para>Returns a new sequence that only contains the elements for
+          which the parameter condition (the predicate) returns
+          <literal>true</literal>. For example:</para>
 
           <programlisting role="template">&lt;#assign xs = [1, -2, 3, 4, -5]&gt;
 Positives:
@@ -17095,9 +17130,9 @@ Negatives:
 Negatives:
 -2 -5 </programlisting>
 
-          <para>This built-in has a single required parameter, which specifies
-          the filter condition (what to keep). The filter condition can be
-          specified in 3 ways:</para>
+          <para>This built-in has a single required parameter, the predicate
+          (filter condition, what to keep). The predicate can be specified in
+          3 ways:</para>
 
           <itemizedlist>
             <listitem>
@@ -17120,10 +17155,11 @@ Negatives:
             </listitem>
 
             <listitem>
-              <para>A <link linkend="ref_directive_function">function</link>
-              or method that has a single argument, and returns boolean. For
-              example, the <quote>Negatives</quote> example above could be
-              implemented like this:</para>
+              <para>As a <link
+              linkend="ref_directive_function">function</link> or method that
+              has a single argument, and returns boolean. For example, the
+              <quote>Negatives</quote> example above could be implemented like
+              this:</para>
 
               <programlisting role="template">&lt;#function negative(x)&gt;
   &lt;#return x &lt; 0&gt;
@@ -17541,11 +17577,29 @@ red, green, blue.
             <primary>map built-in</primary>
           </indexterm>
 
-          <para>[TODO]</para>
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>filter</secondary>
+          </indexterm>
+
+          <para>Returns an new sequence where all elements are replaced with
+          the result of the parameter lambda, function, or method. For
+          example, you have a list of user objects in
+          <literal>users</literal>, but instead you need a list of user names
+          in variable, then you could do this:</para>
+
+          <programlisting role="template">&lt;#assign userNames = users?map(user -&gt; user.name)&gt;</programlisting>
+
+          <para>The parameter work like the parameter of the with <link
+          linkend="ref_builtin_filter"><literal>filter</literal>
+          built-in</link> (so see there), except that the
+          lambda/function/method you specify can return values of any
+          type.</para>
 
           <para>Regarding lazy evaluation, and handling of very long inputs,
-          it <link linkend="topic.filterLazyEval">works on the same way</link>
-          as with the <link
+          it also <link linkend="topic.filterLazyEval">works on the same
+          way</link> as the <link
           linkend="ref_builtin_filter"><literal>filter</literal>
           built-in</link>.</para>
         </section>
@@ -17908,12 +17962,11 @@ Sorted by name.last:
             <secondary>take while</secondary>
           </indexterm>
 
-          <para>This is very similar to the <link
-          linkend="ref_builtin_filter"><literal>filter</literal>
-          built-in</link>, but it filters out all element starting with first
-          element that doesn't match the argument condition (predicate). See
+          <para>Returns a sequence that only contains the elements of the
+          input sequence which are before the first element that doesn't match
+          the parameter predicate (filter condition). This is very similar to
           the <link linkend="ref_builtin_filter"><literal>filter</literal>
-          built-in</link> for more details.</para>
+          built-in</link>, so see further details there.</para>
 
           <para>Example and comparison with <literal>filter</literal>:</para>
 
@@ -17935,6 +17988,10 @@ Filer for positives:
           the first number that didn't match the predicate (<literal>x &gt;
           0</literal>), while <literal>filter</literal> has continued finding
           further matches.</para>
+
+          <para>See also: <link
+          linkend="ref_builtin_drop_while"><literal>drop_while</literal>
+          built-in</link></para>
         </section>
       </section>
 
@@ -21611,9 +21668,9 @@ All rights reserved.</emphasis></programlisting>
     <replaceable>Part repeated for each key-value pair</replaceable>
 &lt;/#list&gt;</literal></programlisting>
 
-          <para>But these are just cases of the generic forms, which are shown
-          below. Note that for simplicity we only show the generic forms for
-          sequence listing; simply replace <quote><literal>as
+          <para>But these are just special cases of the generic forms, which
+          are shown below. Note that for simplicity we only show the generic
+          forms for sequence listing; simply replace <quote><literal>as
           <replaceable>item</replaceable></literal></quote> with
           <quote><literal>as <replaceable>key</replaceable>,
           <replaceable>value</replaceable></literal></quote> to get the
@@ -21926,6 +21983,16 @@ All rights reserved.</emphasis></programlisting>
               <primary>break directive</primary>
             </indexterm>
 
+            <note>
+              <para><literal>break</literal> is deprecated for most use cases,
+              as it doesn't work well with <literal>&lt;#sep&gt;</literal> and
+              <literal><replaceable>item</replaceable>?has_next</literal>.
+              Instead, use <link
+              linkend="ref_builtin_take_while"><literal><replaceable>sequence</replaceable>?take_while(<replaceable>predicate</replaceable>)</literal></link>
+              to cut the sequence before you list it. See also examples <link
+              linkend="ref_list_skipping">here.</link></para>
+            </note>
+
             <para>You can exit the iteration at any point with the
             <literal>break</literal> directive. For example:</para>
 
@@ -21966,10 +22033,11 @@ All rights reserved.</emphasis></programlisting>
             <literal>break</literal>-able directive.</para>
 
             <para>Using <literal>break</literal> together with
-            <literal>sep</literal> is generally a bad idea, as
-            <literal>sep</literal> can't know if you will skip the rest of
-            items with <literal>break</literal>, and then you end up with a
-            separator after the item printed last.</para>
+            <literal>sep</literal> or <literal>?has_next</literal> is
+            generally a bad idea, as these can't know if you will skip the
+            rest of items with a <literal>break</literal>. To solve such
+            situations see <link linkend="ref_list_skipping">these
+            examples</link>.</para>
 
             <para>Just like <literal>else</literal> and
             <literal>items</literal>, <literal>break</literal> must be
@@ -21987,8 +22055,22 @@ All rights reserved.</emphasis></programlisting>
             </indexterm>
 
             <note>
+              <para><literal>continue</literal> is deprecated for most use
+              cases, as it doesn't work well with
+              <literal>&lt;#sep&gt;</literal>,
+              <literal><replaceable>item</replaceable>?has_next</literal>,
+              <literal><replaceable>item</replaceable>?count</literal>,
+              <literal><replaceable>item</replaceable>?index</literal>,
+              <literal><replaceable>item</replaceable>?item_parity</literal>,
+              etc. Instead, use <link
+              linkend="ref_builtin_filter"><literal><replaceable>sequence</replaceable>?filter(<replaceable>predicate</replaceable>)</literal></link>
+              to remove unwanted elements. See also examples <link
+              linkend="ref_list_skipping">here.</link></para>
+            </note>
+
+            <note>
               <para>The <literal>continue</literal> directive exists since
-              FreeMarker 2.3.27</para>
+              FreeMarker 2.3.27.</para>
             </note>
 
             <para>You can skip the rest of the iteration body (the section
@@ -22026,10 +22108,12 @@ All rights reserved.</emphasis></programlisting>
             <para>When you call <literal>continue</literal>, the
             <literal>sep</literal> directive will not be executed for that
             iteration. Using <literal>continue</literal> together with
-            <literal>sep</literal> is generally a bad idea, as
-            <literal>sep</literal> can't know if you will skip the rest of the
-            items, and then you end up with a separator after the item printed
-            last.</para>
+            <literal>sep</literal> is generally a bad idea anyway, also
+            <literal>?has_next</literal>, <literal>?count</literal>,
+            <literal>?index</literal>, <literal>?item_parity</literal>, etc.
+            will not work as you certainly wanted if you completely skip
+            items. To solve such situations see <link
+            linkend="ref_list_skipping">these examples</link>.</para>
 
             <para>Just like <literal>break</literal>,
             <literal>continue</literal> must be literally inside body of the
@@ -22102,6 +22186,78 @@ All rights reserved.</emphasis></programlisting>
             <para>so in the above example, you could replace
             <literal>${user?counter}</literal> with <literal>${user_index +
             1}</literal>.</para>
+          </section>
+
+          <section xml:id="ref_list_skipping">
+            <title>Skipping items conditionally</title>
+
+            <para>If you need to skip certain element in a list, it's
+            generally a bad idea to use <link
+            linkend="ref.directive.if"><literal>if</literal> directive</link>
+            for that, because then <literal>&lt;#sep&gt;</literal>,
+            <literal><replaceable>item</replaceable>?has_next</literal>,
+            <literal><replaceable>item</replaceable>?count</literal>,
+            <literal><replaceable>item</replaceable>?index</literal>,
+            <literal><replaceable>item</replaceable>?item_parity</literal>,
+            etc., will not be usable, as FreeMarker doesn't know what items
+            were and will be actually displayed. Instead, you should try to
+            remove the unwanted items from the sequence that you will list,
+            and then list it (since 2.3.29). Here are some typical examples
+            with and without <literal>if</literal>.</para>
+
+            <simplesect>
+              <title>Filtering</title>
+
+              <para>In this example, you want to show the recommended products
+              from <literal>products</literal>. Here's the wrong solution with
+              <literal>if</literal>:</para>
+
+              <programlisting role="template">&lt;#-- WRONG solution! The row parity classes will be possibly messed up: --&gt;
+&lt;#list products as product&gt;
+   &lt;#<emphasis>if product.recommended</emphasis>&gt;
+     &lt;div class="${product<emphasis>?item_parity</emphasis>}Row"&gt;${product.name}&lt;/div&gt;
+   &lt;/#if&gt;
+&lt;/#list&gt;</programlisting>
+
+              <para>Here's the good solution that uses the <link
+              linkend="ref_builtin_filter"><literal>filter</literal>
+              built-in</link>:</para>
+
+              <programlisting role="template">&lt;#-- Good solution: --&gt;
+&lt;#list products<emphasis>?filter(p -&gt; p.recommended)</emphasis> as product&gt;
+  &lt;div class="${product?item_parity}Row"&gt;${product.name}&lt;/div&gt;
+&lt;/#list&gt;</programlisting>
+            </simplesect>
+
+            <simplesect>
+              <title>Stop listing when a certain element is found</title>
+
+              <para>Let's say you have a list of lines in
+              <literal>lines</literal>, and you need to stop at the first
+              empty line (if there's any). Furthermore you need to
+              <literal>&lt;br&gt;</literal> between the elements. Here's the
+              wrong solution with <literal>if</literal> and
+              <literal>break</literal>:</para>
+
+              <programlisting role="template">&lt;#-- WRONG solution! &lt;br&gt; might be added after the last printed line: --&gt;
+&lt;#list lines as line&gt;
+   &lt;#if line == ''&gt;
+     &lt;#break&gt;
+   &lt;/#if&gt;
+   ${line}&lt;#sep&gt;&lt;br&gt;
+&lt;/#list&gt;</programlisting>
+
+              <para>Here's the good solution that uses the <link
+              linkend="ref_builtin_take_while"><literal>take_while</literal>
+              built-in</link> (note that the condition is inverted compared to
+              the <literal>if</literal>+<literal>break</literal>
+              solution):</para>
+
+              <programlisting role="template">&lt;#-- Good solution: --&gt;
+&lt;#list lines?take_while(line -&gt; line != '') as line&gt;
+   ${line}&lt;#sep&gt;&lt;br&gt;
+&lt;/#list&gt;</programlisting>
+            </simplesect>
           </section>
 
           <section xml:id="ref_list_nesting">
