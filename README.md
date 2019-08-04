@@ -239,7 +239,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
   - You may do "Build"/"Build project" (Ctrl+F9) to see if everything compiles now.
   - You may run the `test` task of the root project with Gradle to see that everything works as
     expected. To do that from IntelliJ, create a run configuration:
-    "Run" \ "Run Configurations..." \ "+" \ "Gradle" then:
+    "Run" \ "Edit Configurations..." \ "+" \ "Gradle" then:
     - Set "Name" to `All tests` for example
     - Set "Gradle project" to the root project (`freemarker`)
     - Set "Tasks" to `test`
