@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 /**

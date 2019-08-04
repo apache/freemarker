@@ -34,10 +34,9 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class NewBiObjectWrapperRestrictionTest extends TemplateTest {

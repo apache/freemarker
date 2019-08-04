@@ -19,18 +19,13 @@
 
 package org.apache.freemarker.core.util;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import org.apache.freemarker.core.util.StringToIndexMap.Entry;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class StringToIndexMapTest {
 

@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class MiscErrorMessagesTest extends TemplateTest {

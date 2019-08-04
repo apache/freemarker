@@ -22,12 +22,12 @@ package org.apache.freemarker.core.templatesuite.models;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.

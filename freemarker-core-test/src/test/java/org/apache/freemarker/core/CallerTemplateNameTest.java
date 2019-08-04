@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class CallerTemplateNameTest  extends TemplateTest {

@@ -20,10 +20,10 @@ package org.apache.freemarker.core.valueformat;
 
 import java.util.Locale;
 
-import org.apache.freemarker.core.CustomStateKey;
-import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 
 /**
  * Factory for a certain kind of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or

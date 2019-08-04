@@ -31,10 +31,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.converter.ConversionMarkers;
-import org.apache.freemarker.converter.MissingRequiredPropertyException;
-import org.apache.freemarker.converter.PropertyValidationException;
 import org.apache.freemarker.converter.Converter;
 import org.apache.freemarker.converter.ConverterException;
+import org.apache.freemarker.converter.MissingRequiredPropertyException;
+import org.apache.freemarker.converter.PropertyValidationException;
 import org.freemarker.converter.test.ConverterTest;
 import org.junit.Test;
 

@@ -30,7 +30,6 @@ import java.util.Locale;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class ExtendedDecimalFormatTest extends TemplateTest {

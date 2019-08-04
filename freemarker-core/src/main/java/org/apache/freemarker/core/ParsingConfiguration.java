@@ -18,7 +18,6 @@
  */
 package org.apache.freemarker.core;
 
-import java.io.Writer;
 import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;

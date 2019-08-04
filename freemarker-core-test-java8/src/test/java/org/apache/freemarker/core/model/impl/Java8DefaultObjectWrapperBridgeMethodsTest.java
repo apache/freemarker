@@ -23,8 +23,8 @@ import static org.junit.Assert.*;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.junit.Test;
 
 public class Java8DefaultObjectWrapperBridgeMethodsTest {

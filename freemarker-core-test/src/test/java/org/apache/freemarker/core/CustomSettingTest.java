@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
-import static org.hamcrest.Matchers.containsString;
+import static org.apache.freemarker.core.ProcessingConfiguration.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.Serializable;

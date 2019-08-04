@@ -23,7 +23,6 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.ServletContextEvent;
@@ -34,7 +33,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;

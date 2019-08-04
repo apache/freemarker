@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.Reader;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * FreeMarker 2 template language, which we don't support. To avoid confusion we ban loading such templates. 

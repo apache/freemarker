@@ -18,9 +18,7 @@
  */
 package org.apache.freemarker.manual.examples;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class AutoEscapingExample extends TemplateTest {

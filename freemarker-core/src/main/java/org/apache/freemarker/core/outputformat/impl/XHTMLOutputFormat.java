@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
 

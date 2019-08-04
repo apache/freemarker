@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Version;
 import org.junit.After;

@@ -28,7 +28,6 @@ import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.impl.DefaultIterableAdapter;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

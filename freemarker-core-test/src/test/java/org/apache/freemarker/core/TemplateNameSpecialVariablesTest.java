@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class TemplateNameSpecialVariablesTest extends TemplateTest {
