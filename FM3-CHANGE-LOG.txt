@@ -566,8 +566,7 @@ models by default like FreemarkerServlet does.
 Core / Miscellaneous
 ....................
 
-- Minimum Java version increased to 7 (including try-with-resources, as Android Studio 3.0 supports it on all
-  Android API levels).
+- Minimum Java version increased to 8
 - Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
 - Removed legacy extensions (so these has no module): rhyno, jython, xml (not to be confused with dom), jdom, ant.
 - Servlet 3.0 and JSP 2.2 and is the minimum requirement now (if Serlvet/JSP features are used at all).

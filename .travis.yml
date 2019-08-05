@@ -18,12 +18,11 @@
 language: java
 #before_install:
 #  - sudo apt-get -qq update
-#  - sudo apt-get install -y openjdk-7-jre
+#  - sudo apt-get install -y openjdk-8-jre
 jdk:
 - openjdk8
 env:
   global:
-  - freemarker_build_boot_classpath_java_7=/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/rt.jar
   - freemarker_build_boot_classpath_java_8=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar
 install:
 - ./gradlew assemble aggregateJavadoc javadoc

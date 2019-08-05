@@ -21,7 +21,6 @@ rootProject.name = 'freemarker'
 
 include 'freemarker-core'
 include 'freemarker-core-test'
-include 'freemarker-core-test-java8'
 include 'freemarker-servlet'
 include 'freemarker-test-utils'
 include 'freemarker-manual'
