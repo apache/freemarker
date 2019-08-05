@@ -1,10 +1,12 @@
 package org.apache.freemarker.core.pluggablebuiltin;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 
 /**
  * Used for implementing the "truncate" family of built-ins. There are several variations of the "truncate" built-ins,
@@ -14,7 +16,7 @@ import org.apache.freemarker.core.model.TemplateStringModel;
  *
  * <p>New methods may be added in later versions, whoever they won't be abstract for backward compatibility.
  *
- * @see Configurable#setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)
+ * @see MutableProcessingConfiguration#setTruncateBuiltinAlgorithm(TruncateBuiltinAlgorithm)
  *
  * @since 2.3.29
  */

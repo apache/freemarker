@@ -33,7 +33,7 @@ import org.junit.Test;
 
 public class Java8DefaultObjectWrapperTest {
     
-    private static final DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();    
+    private static final DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
     @Test
     public void testDefaultMethodRecognized() throws TemplateException {
