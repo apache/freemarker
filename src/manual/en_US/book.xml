@@ -19581,8 +19581,9 @@ May 16, 2011
           support operations like <literal>xs[index]</literal> and
           <literal>xs?size</literal>. Also, the resulting value is listable
           for multiple times, even if the original value was backed by a
-          <literal>java.util.Iterator</literal>. This built-in is typically
-          used to work around data-model problems, in case you can't fix the
+          <literal>java.util.Iterator</literal> (which gives error when you
+          try to list it for the 2nd time). This built-in is typically used to
+          work around data-model problems, in case you can't fix the
           data-model itself. If you can, always fix the data-model instead
           (give a <literal>java.util.List</literal> or array to the template
           instead of a more restricted object, like a
@@ -19593,10 +19594,13 @@ May 16, 2011
           returns that as is. If the value is not something that the <link
           linkend="ref.directive.list"><literal>list</literal>
           directive</link> could list, then template processing will be
-          aborted with error. Otherwise, it fetches all the values, and stores
-          them into a sequence. Be careful if you can have a huge number of
-          items, as all of them will be held in memory on the same
-          time.</para>
+          aborted with error. Otherwise, it usually fetches all the values,
+          and stores them into a sequence. Be careful if you can have a huge
+          number of items, as all of them will be held in memory on the same
+          time. However, in some special cases fetching and/or storing all
+          elements is avoided; see about the <link
+          linkend="ref_builtin_sequence_optimizations">optimizations</link>
+          later.</para>
 
           <para>You should convert a value with <literal>sequence</literal>
           only once. If you need the resulting sequence at multiple places,
@@ -19619,6 +19623,39 @@ May 16, 2011
 Again:
 &lt;#list usersSeq as user&gt;...&lt;/#list&gt;
 </programlisting>
+
+          <simplesect xml:id="ref_builtin_sequence_optimizations">
+            <title>Optimizations</title>
+
+            <para>Since version 2.3.29, if the result of the
+            <literal>sequence</literal> built-in is directly the input of to
+            the <link
+            linkend="dgui_template_exp_var_sequence"><literal>[<replaceable>index</replaceable>]</literal></link>
+            or <link
+            linkend="dgui_template_exp_seqenceop_slice"><literal>[<replaceable>range</replaceable>]</literal></link>
+            operator, or of <literal>?size</literal>, or of
+            <literal>?first</literal>, or a chain of these operations, then
+            the elements will not be collected into the memory, and only as
+            many elements as strictly necessary will be fetched. For example
+            <literal>anIterator?sequence[1]</literal> will just fetch the
+            first 2 items (instead of building a sequence that contains all
+            the elements, and then getting the 2nd element from that). Or, if
+            you write <literal>anIterator?sequence?size</literal>, it will
+            just skip through all elements to count them, but won't store them
+            in memory.</para>
+
+            <para>The optimizations will only work within the same chain of
+            built-in calls, so for example in <literal>&lt;#assign seq =
+            anIterator?sequence&gt;${seq[1]}</literal> the
+            <literal>?sequence</literal> step will collect all the elements
+            into the memory, as <literal>anIterator?sequence</literal> and
+            <literal>seq[1]</literal> are separated. On the other hand, the
+            optimizations will work in
+            <literal>anIterator?sequence[10..]?size</literal>, as both
+            <literal>[<replaceable>range</replaceable>]</literal> and
+            <literal>?size</literal> supports it, and they are directly
+            chained together.</para>
+          </simplesect>
         </section>
       </section>
     </chapter>
@@ -28630,19 +28667,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>map</literal>, <literal>join</literal>, etc.) to spare
               collecting all the elements into the memory when possible. For
               example <literal>anIterator?sequence[1]</literal> now will just
-              fetch the first 2 items, instead of building a sequence that
+              fetch the first 2 items (instead of building a sequence that
               contains all the elements, and then getting the 2nd element from
-              that. Or, if you write
-              <literal>anIterator?sequence?size</literal>, it will just skip
-              through all elements to count them, but won't store them in
-              memory. These optimizations only work within the same chain of
-              built-in calls, so for example in <literal>&lt;#assign seq =
-              anIterator?sequence&gt;${seq[1]}</literal> will still collect
-              all the elements into the memory, as
-              <literal>anIterator?sequence</literal> and
-              <literal>seq[1]</literal> are separated. [TODO: document this at
-              <link linkend="ref_builtin_sequence">ref_builtin_sequence</link>
-              too]</para>
+              that.) Or, <literal>anIterator?sequence?size</literal> will just
+              count the elements, without collecting them into the memory. See
+              <link linkend="ref_builtin_sequence_optimizations">the
+              reference</link> for more details.</para>
             </listitem>
 
             <listitem>
