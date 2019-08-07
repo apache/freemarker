@@ -143,8 +143,9 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
 
         @Override
@@ -893,8 +894,9 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
     }
     
@@ -941,8 +943,9 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
 
         @Override

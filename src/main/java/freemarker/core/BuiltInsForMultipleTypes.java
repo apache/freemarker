@@ -485,8 +485,9 @@ class BuiltInsForMultipleTypes {
     static class sizeBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
 
         private int countingLimit;

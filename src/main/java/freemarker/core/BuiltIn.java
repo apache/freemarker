@@ -388,21 +388,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
             throw new InternalError();
         }
         bi.key = key;
-        if (bi.isLazilyGeneratedTargetResultSupported()) {
-            target.enableLazilyGeneratedResult();
-        }
-        bi.target = target;
+        bi.setTarget(target);
         return bi;
     }
 
-    /**
-     * If the built-in supports a lazily generated value as its left operand (the target).
-     * Don't confuse this with what's allowed for result of the built-in itself; that's influenced by
-     * {@link Expression#enableLazilyGeneratedResult()} (and so
-     * {@link IntermediateStreamOperationLikeBuiltIn#isLazilyGeneratedTargetResultSupported()}).
-     */
-    protected boolean isLazilyGeneratedTargetResultSupported() {
-        return false;
+    protected void setTarget(Expression target) {
+        this.target = target;
     }
 
     @Override
