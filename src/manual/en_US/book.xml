@@ -4059,9 +4059,17 @@ Creating mouse...
           directives like <literal>if</literal>, <literal>list</literal>, etc.
           In that case though, you don't need a lambda expression, as all
           built-ins that support a lambda parameter, also support passing in a
-          function directly. For example, instead of <literal>seq?map(x -&gt;
-          myMapper(x))</literal> you should just write
+          function directly. For example, instead of <literal>seq?map(it -&gt;
+          myMapper(it))</literal> you should just write
           <literal>seq?map(myMapper)</literal>.</para>
+
+          <para>The argument specified in a lambda expression can hold the
+          missing (Java <literal>null</literal>) value. Reading a lambda
+          argument never falls back to higher scope, so a variable with
+          identical name will not interfere when accessing the lambda
+          parameter. Therefore something like <literal>seq?filter(it -&gt;
+          it??)</literal>, which filters out missing element from the
+          sequence, will work reliably.</para>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
@@ -5071,10 +5079,11 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
             <literal>x</literal> in <literal>&lt;#list xs as
             x&gt;<replaceable>...</replaceable>&lt;/#list&gt;</literal>), and
             they only exist between the start-tag and end-tag of the
-            directive. They are only visible directly between these tags, not
-            from macros or functions called from there. As such, they are
-            quite similar to local variables, but they can't be assigned to
-            directly.</para>
+            directive. (User defined directives, like macros, can also create
+            loop variables.) They are only visible directly between these
+            tags, not from macros or functions called from there. As such,
+            they are quite similar to local variables, but they can't be
+            assigned to directly.</para>
           </listitem>
 
           <listitem>
@@ -6513,13 +6522,16 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.27) do you want to apply the fixes that are not 100%
+// version (here 2.3.29) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
 cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
+
+// From here we will set the settings recommended for new projects. These
+// aren't the defaults for backward compatibilty.
 
 // Set the preferred charset template files are stored in. UTF-8 is
 // a good choice in most applications:
@@ -6532,8 +6544,11 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 // Don't log exceptions inside FreeMarker that it will thrown at you anyway:
 cfg.setLogTemplateExceptions(false);
 
-// Wrap unchecked exceptions thrown during template processing into TemplateException-s.
-cfg.setWrapUncheckedExceptions(true);</programlisting>
+// Wrap unchecked exceptions thrown during template processing into TemplateException-s:
+cfg.setWrapUncheckedExceptions(true);
+
+// Do not fall back to higher scopes when reading a null loop variable:
+cfg.setFallbackOnNullLoopVariable(false);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6805,12 +6820,14 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
+        // Recommended settings for new projects:
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
         cfg.setWrapUncheckedExceptions(true);
+        cfg.setFallbackOnNullLoopVariable(false);
 
         /* ------------------------------------------------------------------------ */
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
@@ -17368,7 +17385,7 @@ Negatives:
             sequence will be created eagerly.</para>
           </simplesect>
 
-          <simplesect xml:id="toic.filterLongInput">
+          <simplesect xml:id="topic.filterLongInput">
             <title>Filtering very long input that you don't hold in
             memory</title>
 
@@ -17468,6 +17485,16 @@ Negatives:
                 counted.</para>
               </listitem>
             </itemizedlist>
+          </simplesect>
+
+          <simplesect xml:id="topic.filterMissing">
+            <title>Filtering missing (null) values</title>
+
+            <para>The argument to a lambda expression can hold the missing
+            (Java <literal>null</literal>) value, and reading such value will
+            not fall back to a higher scope. Thus, something like
+            <literal>seq?filter(it -&gt; it??)</literal>, which filters out
+            missing element from the sequence, will work reliably.</para>
           </simplesect>
         </section>
 
@@ -22338,6 +22365,40 @@ All rights reserved.</emphasis></programlisting>
     Inner: 11
     Inner: 12
   Outer again: 2</programlisting>
+          </section>
+
+          <section xml:id="ref_list_missing_element">
+            <title>Treatment of missing (null) elements</title>
+
+            <para>As you know by now, the <literal>list</literal> directive
+            will repeat its nested content for each element of the listed
+            value. However, it's technically possible that you have holes
+            (missing values, Java <literal>null</literal>-s) in the list of
+            elements. The nested content will executed for these
+            <quote>holes</quote> as well, but then the loop variable (the
+            variable whose name you specify after the <literal>as</literal>
+            keyword) will be missing. When FreeMarker finds that there's no
+            variable with the given name in the loop variable scope, it will
+            just fall back to a higher scopes to find it. However, this
+            fallback behavior can be problematic in this case.
+            Consider:</para>
+
+            <programlisting role="template">&lt;#list xs as x&gt;
+  ${x!'Missing'}
+&lt;/#list&gt;</programlisting>
+
+            <para>Here, the intent of the author is to print
+            <quote>Missing</quote> for the missing elements (hopes) of
+            <literal>xs</literal>. But if accidentally there's an
+            <literal>x</literal> variable in a higher scope, like in the
+            data-model, then <literal>x</literal> will evaluate to that in
+            case the currently listed element is missing, and so it won't
+            default to <quote>Missing</quote>. To solve that, the programmers
+            should set the <literal>fallback_on_null_loop_variable</literal>
+            configuration setting to <literal>false</literal>. (Unfortunately,
+            the default must be <literal>true</literal> for backward
+            compatibility.) In that case no fallback will occur if a loop
+            variable is missing.</para>
           </section>
 
           <section xml:id="ref_list_java_notes">
