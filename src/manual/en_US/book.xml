@@ -28672,7 +28672,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_29">
         <title>2.3.29</title>
 
-        <para>Release date: [FIXME]</para>
+        <para>Release date: 2019-08-09 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -28690,16 +28690,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               These allow using lambda expressions, like
               <literal>users?filter(user -&gt; user.superuser)</literal> or
               <literal>users?map(user -&gt; user.name)</literal>, or accept a
-              functions/method as parameter. (Lambda expressions are also new
+              functions/method as parameter. Lambda expressions are also new
               in this release, but they can only be used in said built-ins, so
-              they aren't like in Java for example.) These built-ins are
-              generally eager, that is, they immediately build a new sequence.
-              However at selected places, most notably when used as
-              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              directive parameter, they are working in lazy mode instead, that
-              is, they won't built the a new sequence, just stream through the
-              existing one and apply the filter or mapping element by
-              element.</para>
+              they aren't like in Java for example, and also, unlike the
+              similar Java methods, these built-ins aren't lazy in general,
+              only in specific cases (see more <link
+              linkend="topic.filterLazyEval">here</link>). The main goal of
+              adding these built-ins was to allow conditionally skipping
+              elements in the <literal>list</literal> directive without nested
+              <literal>if</literal>-s that interfere with the <link
+              linkend="ref.directive.sep"><literal>sep</literal>
+              directive</link>, and the <link
+              linkend="ref_builtins_loop_var">loop variable built-ins</link>
+              (see examples <link
+              linkend="ref_list_skipping">here</link>).</para>
             </listitem>
 
             <listitem>
@@ -28724,15 +28728,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>seq</replaceable>?size</literal>,
               <literal><replaceable>seq</replaceable>[<replaceable>index</replaceable>]</literal>,
               <literal><replaceable>seq</replaceable>[<replaceable>range</replaceable>]</literal>,
-              and with some built-ins (<literal>filter</literal>,
+              and with some other built-ins (<literal>filter</literal>,
               <literal>map</literal>, <literal>join</literal>, etc.) to spare
               collecting all the elements into the memory when possible. For
-              example <literal>anIterator?sequence[1]</literal> now will just
-              fetch the first 2 items (instead of building a sequence that
-              contains all the elements, and then getting the 2nd element from
-              that.) Or, <literal>anIterator?sequence?size</literal> will just
-              count the elements, without collecting them into the memory. See
-              <link linkend="ref_builtin_sequence_optimizations">the
+              example <literal>anIterator?sequence[1]</literal> will now just
+              fetch the first 2 items, while earlier it has built a sequence
+              that contains all the elements, only to get the 2nd element from
+              that. Or, <literal>anIterator?sequence?size</literal> will now
+              just count the elements, without collecting them into the
+              memory. See <link
+              linkend="ref_builtin_sequence_optimizations">the
               reference</link> for more details.</para>
             </listitem>
 
@@ -28782,14 +28787,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>${<replaceable>aBoolean</replaceable>}</literal> will
               behave as
               <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.
-              This should be only used if you are generating output for
+              This should only be used if you are generating output for
               non-human (computer) consumption only. If your output has pieces
               for human audience too, it's still recommended to use
               <literal>${<replaceable>aBoolean</replaceable>?c}</literal>
               where <literal>true</literal>/<literal>false</literal> output is
               needed, and either not set the <literal>boolean_format</literal>
               at all, or set it to something that's appropriate for everyday
-              uses (like <literal>"yes,no"</literal>).</para>
+              users (like <literal>"yes,no"</literal>).</para>
             </listitem>
 
             <listitem>
@@ -28812,16 +28817,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>If the result of
               <literal><replaceable>seq</replaceable>?size</literal> is
-              compared to an integer literal in a template, like in
-              <literal><replaceable>seq</replaceable>?size != 0</literal>, or
-              <literal><replaceable>seq</replaceable>?size &lt; 1</literal>,
-              and to decide the answer it's enough to know if
-              <literal><replaceable>seq</replaceable></literal> is an empty
-              sequence or collection (i.e., the exact size isn't needed), and
-              said value implements
+              compared to an integer <emphasis>literal</emphasis> in a
+              template, like in <literal><replaceable>seq</replaceable>?size
+              != 0</literal>, or <literal><replaceable>seq</replaceable>?size
+              &lt; 1</literal>, and to decide the answer it's enough to know
+              if <literal><replaceable>seq</replaceable></literal> is empty or
+              not (i.e., the exact size isn't needed), and
+              <literal><replaceable>seq</replaceable></literal> implements
               <literal>TemplateCollectionModelEx</literal>, FreeMarker will
               call <literal>TemplateCollectionModelEx.isEmpty()</literal>
-              instead of <literal>size()</literal>.</para>
+              instead of <literal>size()</literal>. Furthermore, if
+              <literal><replaceable>seq</replaceable></literal> is the result
+              of <literal>?filter</literal>, or of a similar built-ins that
+              can provide lazily generated result, it will do counting to
+              figure out the size (rather than constructing the whole sequence
+              in memory), and will limit how far it counts based on what
+              literal the result of <literal>?size</literal> is compared
+              with.</para>
             </listitem>
 
             <listitem>
@@ -28829,8 +28841,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>TemplateModelUtils.wrapAsHashUnion(ObjectWrapper,
               List&lt;?&gt;)</literal> and
               <literal>wrapAsHashUnion(ObjectWrapper, Object...)</literal>,
-              which meant to be used when you want to compose a data-model
-              from multiple objects in a way so that their entries
+              which is useful when you want to compose the data-model from
+              multiple objects in a way so that their entries
               (<literal>Map</literal> key-value pairs, bean properties, etc.)
               appear together on the top level of the data-model.</para>
             </listitem>
