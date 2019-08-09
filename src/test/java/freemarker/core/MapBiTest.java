@@ -165,6 +165,11 @@ public class MapBiTest extends TemplateTest {
                 "<#function tenTimes(x)><#assign s += '${x};'><#return x * 10></#function>" +
                 "${(1..3)?map(tenTimes)?seqIndexOf(20)} ${s}", "1 1;2;");
 
+        assertOutput("" +
+                "<#assign s = ''>" +
+                "<#function tenTimes(x)><#assign s += '${x};'><#return x * 10></#function>" +
+                "${[1, 2, 3, 2, 5]?map(tenTimes)?seqLastIndexOf(20)} ${s}", "3 1;2;3;2;5;");
+
         // For these this test can't check that there was no sequence built, but at least we know they are working:
         assertOutput("${(1..3)?map(it -> it * 10)?min}", "10");
         assertOutput("${(1..3)?map(it -> it * 10)?max}", "30");

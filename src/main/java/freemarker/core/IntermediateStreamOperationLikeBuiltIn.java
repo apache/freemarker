@@ -74,8 +74,9 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
     }
 
     @Override
-    protected final boolean isLazilyGeneratedTargetResultSupported() {
-        return true;
+    protected void setTarget(Expression target) {
+        super.setTarget(target);
+        target.enableLazilyGeneratedResult();
     }
 
     protected List<Expression> getArgumentsAsList() {

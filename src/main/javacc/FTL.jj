@@ -2182,6 +2182,7 @@ Expression BuiltIn(Expression lhoExp) :
     ArrayList<Expression> args = null;
     Token openParen;
     Token closeParen;
+    MethodCall methodCall;
 }
 {
     <BUILT_IN>
@@ -2236,6 +2237,7 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
     }
+
     [
         LOOKAHEAD({
                 result instanceof BuiltInWithParseTimeParameters
@@ -2265,10 +2267,26 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
     ]
+
+    [
+        LOOKAHEAD(<OPEN_PAREN>, { result instanceof BuiltInWithDirectCallOptimization })
+        methodCall = MethodArgs(result)
+        {
+            ((BuiltInWithDirectCallOptimization) result).setDirectlyCalled();
+            return methodCall;
+        }
+    ]
+
     {
+        if (result instanceof BuiltInWithDirectCallOptimization) {
+            // We had no (...)
+            return result;
+        }
+
         // Should have already return-ed
         throw new AssertionError("Unhandled " + SpecialBuiltIn.class.getName() + " subclass: " + result.getClass());
     }
+
 }
 
 // Only supported as the argument of certain built-ins, so it's not called inside Expression.

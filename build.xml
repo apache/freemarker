@@ -239,7 +239,7 @@
     <delete dir="build/src-main-java-filtered" />
     <mkdir dir="build/src-main-java-filtered" />
     <copy toDir="build/src-main-java-filtered">
-      <fileset dir="src/main/java" />
+      <fileset dir="src/main/java" excludes="**/AdhocTest*" />
     </copy>
     <replaceregexp
         flags="gs" encoding="utf-8"

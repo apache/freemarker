@@ -143,8 +143,9 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltIn {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
 
         @Override
@@ -181,11 +182,11 @@ class BuiltInsForSequences {
         
     }
 
-    static class joinBI extends BuiltIn {
+    static class joinBI extends BuiltInWithDirectCallOptimization {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setDirectlyCalled() {
+            target.enableLazilyGeneratedResult();
         }
 
         private class BIMethodForCollection implements TemplateMethodModelEx {
@@ -295,11 +296,11 @@ class BuiltInsForSequences {
         }
     }
 
-    static class seq_containsBI extends BuiltIn {
+    static class seq_containsBI extends BuiltInWithDirectCallOptimization {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setDirectlyCalled() {
+            target.enableLazilyGeneratedResult();
         }
 
         private class BIMethodForCollection implements TemplateMethodModelEx {
@@ -367,15 +368,15 @@ class BuiltInsForSequences {
     
     }
     
-    static class seq_index_ofBI extends BuiltIn {
+    static class seq_index_ofBI extends BuiltInWithDirectCallOptimization {
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setDirectlyCalled() {
+            target.enableLazilyGeneratedResult();
         }
 
         private class BIMethod implements TemplateMethodModelEx {
-            
+
             protected final TemplateSequenceModel m_seq;
             protected final TemplateCollectionModel m_col;
             protected final Environment m_env;
@@ -893,8 +894,9 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
     }
     
@@ -941,8 +943,9 @@ class BuiltInsForSequences {
         }
 
         @Override
-        protected boolean isLazilyGeneratedTargetResultSupported() {
-            return true;
+        protected void setTarget(Expression target) {
+            super.setTarget(target);
+            target.enableLazilyGeneratedResult();
         }
 
         @Override

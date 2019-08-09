@@ -265,6 +265,28 @@ public class LazilyGeneratedCollectionTest extends TemplateTest {
         assertOutput("${seqLong?filter(x->true)[2..*3]?size}", "[size][get 0][get 1][get 2][get 3][get 4]3");
     }
 
+    @Test
+    public void testNonDirectCalledBuiltInsAreNotLazy() throws Exception {
+        assertOutput("" +
+                "<#assign changing = 1>" +
+                "<#assign method = [1, 2]?filter(it -> it != changing)?join>" +
+                "<#assign changing = 2>" +
+                "${method(', ')}",
+                "2");
+        assertOutput("" +
+                "<#assign changing = 1>" +
+                "<#assign method = [1, 2]?filter(it -> it != changing)?seq_contains>" +
+                "<#assign changing = 2>" +
+                "${method(2)?c}",
+                "true");
+        assertOutput("" +
+                "<#assign changing = 1>" +
+                "<#assign method = [1, 2]?filter(it -> it != changing)?seq_index_of>" +
+                "<#assign changing = 2>" +
+                "${method(2)}",
+                "0");
+    }
+
     public static abstract class ListContainingTemplateModel {
         protected final List<Number> elements;
 
