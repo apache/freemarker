@@ -21,7 +21,7 @@ package freemarker.core;
 
 import freemarker.template.TemplateModelIterator;
 
-public final class LazilyGeneratedCollectionModelWithUnknownSize extends LazilyGeneratedCollectionModel {
+final class LazilyGeneratedCollectionModelWithUnknownSize extends LazilyGeneratedCollectionModel {
     public LazilyGeneratedCollectionModelWithUnknownSize(TemplateModelIterator iterator, boolean sequence) {
         super(iterator, sequence);
     }
