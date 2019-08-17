@@ -83,22 +83,31 @@ final class LocalLambdaExpression extends Expression {
 
     @Override
     int getParameterCount() {
-        return 2;
+        return lho.getParameters().size() + 1;
     }
 
     @Override
     Object getParameterValue(int idx) {
-        // TODO [lambda] should be similar to #function
-        switch (idx) {
-        case 0: return lho;
-        case 1: return rho;
-        default: throw new IndexOutOfBoundsException();
+        int paramCount = getParameterCount();
+        if (idx < paramCount - 1) {
+            return lho.getParameters().get(idx);
+        } else if (idx == paramCount - 1) {
+            return rho;
+        } else {
+            throw new IndexOutOfBoundsException();
         }
     }
 
     @Override
     ParameterRole getParameterRole(int idx) {
-        return ParameterRole.forBinaryOperatorOperand(idx);
+        int paramCount = getParameterCount();
+        if (idx < paramCount - 1) {
+            return ParameterRole.ARGUMENT_NAME;
+        } else if (idx == paramCount - 1) {
+            return ParameterRole.VALUE;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
     LambdaParameterList getLambdaParameterList() {

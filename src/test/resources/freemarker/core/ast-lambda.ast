@@ -1,0 +1,72 @@
+#mixed_content  // f.c.MixedContent
+    #text  // f.c.TextBlock
+        - content: "1 "  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "filter"  // String
+            - argument value: ->  // f.c.LocalLambdaExpression
+                - argument name: x  // f.c.Identifier
+                - value: !  // f.c.NotExpression
+                    - right-hand operand: x  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n2 "  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "filter"  // String
+            - argument value: ->  // f.c.LocalLambdaExpression
+                - argument name: x  // f.c.Identifier
+                - value: !  // f.c.NotExpression
+                    - right-hand operand: x  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n3 "  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "filter"  // String
+            - argument value: ->  // f.c.LocalLambdaExpression
+                - argument name: x  // f.c.Identifier
+                - value: (...)  // f.c.ParentheticalExpression
+                    - enclosed operand: !  // f.c.NotExpression
+                        - right-hand operand: x  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n4 "  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "filter"  // String
+            - argument value: ->  // f.c.LocalLambdaExpression
+                - argument name: x  // f.c.Identifier
+                - value: ||  // f.c.OrExpression
+                    - left-hand operand: ==  // f.c.ComparisonExpression
+                        - left-hand operand: +  // f.c.AddConcatExpression
+                            - left-hand operand: x  // f.c.Identifier
+                            - right-hand operand: 1  // f.c.NumberLiteral
+                        - right-hand operand: 2  // f.c.NumberLiteral
+                    - right-hand operand: ==  // f.c.ComparisonExpression
+                        - left-hand operand: /  // f.c.ArithmeticExpression
+                            - left-hand operand: x  // f.c.Identifier
+                            - right-hand operand: 2  // f.c.NumberLiteral
+                            - AST-node subtype: "2"  // Integer
+                        - right-hand operand: 4  // f.c.NumberLiteral
+    #text  // f.c.TextBlock
+        - content: "\n5 "  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "filter"  // String
+            - argument value: ->  // f.c.LocalLambdaExpression
+                - argument name: x  // f.c.Identifier
+                - value: ?hasContent  // f.c.BuiltInsForExistenceHandling$has_contentBI
+                    - left-hand operand: ?filter(...)  // f.c.BuiltInsForSequences$filterBI
+                        - left-hand operand: x  // f.c.Identifier
+                        - right-hand operand: "filter"  // String
+                        - argument value: ->  // f.c.LocalLambdaExpression
+                            - argument name: y  // f.c.Identifier
+                            - value: ==  // f.c.ComparisonExpression
+                                - left-hand operand: y  // f.c.Identifier
+                                - right-hand operand: 1  // f.c.NumberLiteral
+                    - right-hand operand: "hasContent"  // String
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
