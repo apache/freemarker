@@ -48,9 +48,14 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
         if (parameters.size() != 1) {
             throw newArgumentCountException("requires exactly 1", openParen, closeParen);
         }
-        this.elementTransformerExp = parameters.get(0);
-        if (elementTransformerExp instanceof LocalLambdaExpression) {
-            LocalLambdaExpression localLambdaExp = (LocalLambdaExpression) elementTransformerExp;
+        Expression elementTransformerExp = parameters.get(0);
+        setElementTransformerExp(elementTransformerExp);
+    }
+
+    private void setElementTransformerExp(Expression elementTransformerExp) throws ParseException {
+        this.elementTransformerExp = elementTransformerExp;
+        if (this.elementTransformerExp instanceof LocalLambdaExpression) {
+            LocalLambdaExpression localLambdaExp = (LocalLambdaExpression) this.elementTransformerExp;
             checkLocalLambdaParamCount(localLambdaExp, 1);
             // We can't do this with other kind of expressions, like a function or method reference, as they
             // need to be evaluated on runtime:
@@ -100,9 +105,13 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
 
     protected void cloneArguments(
             Expression clone, String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-        ((IntermediateStreamOperationLikeBuiltIn) clone).elementTransformerExp
-                = elementTransformerExp.deepCloneWithIdentifierReplaced(
-                        replacedIdentifier, replacement, replacementState);
+        try {
+            ((IntermediateStreamOperationLikeBuiltIn) clone).setElementTransformerExp(
+                    elementTransformerExp.deepCloneWithIdentifierReplaced(
+                            replacedIdentifier, replacement, replacementState));
+        } catch (ParseException e) {
+            throw new BugException("Deep-clone elementTransformerExp failed", e);
+        }
     }
 
     TemplateModel _eval(Environment env) throws TemplateException {

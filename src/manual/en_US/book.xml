@@ -28689,6 +28689,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Bug fixed: In <literal>&lt;#escape
+              <replaceable>placeholder</replaceable> as
+              <replaceable>escExpression</replaceable>&gt;</literal>, the
+              <literal><replaceable>placeholder</replaceable></literal> wasn't
+              substituted inside lambda expressions inside
+              <literal><replaceable>escExpression</replaceable></literal>.
+              Fortunately it's very unlikely that anyone wanted to use lambdas
+              there (given the few built-ins that accept lambdas).</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: AST traversal API now can properly traverse the
               inside of lambda expressions (such as the parameter list)</para>
             </listitem>

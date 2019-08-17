@@ -75,8 +75,17 @@ final class LocalLambdaExpression extends Expression {
     @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-        // TODO [lambda] replacement in lho is illegal; detect it
-    	return new LocalLambdaExpression(
+        for (Identifier parameter : lho.getParameters()) {
+            if (parameter.getName().equals(replacedIdentifier)) {
+                // As Expression.deepCloneWithIdentifierReplaced was exposed to users back then, now we can't add
+                // "throws ParseException" to this, therefore, we use UncheckedParseException as a workaround.
+                throw new UncheckedParseException(new ParseException(
+                        "Escape placeholder (" + replacedIdentifier + ") can't be used in the " +
+                        "parameter list of a lambda expressions.", this));
+            }
+        }
+
+        return new LocalLambdaExpression(
     	        lho,
     	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
