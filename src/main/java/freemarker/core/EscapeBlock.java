@@ -51,8 +51,12 @@ class EscapeBlock extends TemplateElement {
         return getChildBuffer();
     }
 
-    Expression doEscape(Expression expression) {
-        return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
+    Expression doEscape(Expression expression) throws ParseException {
+        try {
+            return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
+        } catch (UncheckedParseException e) {
+            throw e.getParseException();
+        }
     }
 
     @Override

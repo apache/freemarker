@@ -477,7 +477,7 @@ public class FMParser {
         notNumberLiteral(exp, "boolean (true/false)");
     }
 
-    private Expression escapedExpression(Expression exp) {
+    private Expression escapedExpression(Expression exp) throws ParseException {
         if (!escapes.isEmpty()) {
             return ((EscapeBlock) escapes.getFirst()).doEscape(exp);
         } else {

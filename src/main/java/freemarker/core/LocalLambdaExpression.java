@@ -75,30 +75,48 @@ final class LocalLambdaExpression extends Expression {
     @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-        // TODO [lambda] replacement in lho is illegal; detect it
-    	return new LocalLambdaExpression(
+        for (Identifier parameter : lho.getParameters()) {
+            if (parameter.getName().equals(replacedIdentifier)) {
+                // As Expression.deepCloneWithIdentifierReplaced was exposed to users back then, now we can't add
+                // "throws ParseException" to this, therefore, we use UncheckedParseException as a workaround.
+                throw new UncheckedParseException(new ParseException(
+                        "Escape placeholder (" + replacedIdentifier + ") can't be used in the " +
+                        "parameter list of a lambda expressions.", this));
+            }
+        }
+
+        return new LocalLambdaExpression(
     	        lho,
     	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
     @Override
     int getParameterCount() {
-        return 2;
+        return lho.getParameters().size() + 1;
     }
 
     @Override
     Object getParameterValue(int idx) {
-        // TODO [lambda] should be similar to #function
-        switch (idx) {
-        case 0: return lho;
-        case 1: return rho;
-        default: throw new IndexOutOfBoundsException();
+        int paramCount = getParameterCount();
+        if (idx < paramCount - 1) {
+            return lho.getParameters().get(idx);
+        } else if (idx == paramCount - 1) {
+            return rho;
+        } else {
+            throw new IndexOutOfBoundsException();
         }
     }
 
     @Override
     ParameterRole getParameterRole(int idx) {
-        return ParameterRole.forBinaryOperatorOperand(idx);
+        int paramCount = getParameterCount();
+        if (idx < paramCount - 1) {
+            return ParameterRole.ARGUMENT_NAME;
+        } else if (idx == paramCount - 1) {
+            return ParameterRole.VALUE;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
     LambdaParameterList getLambdaParameterList() {

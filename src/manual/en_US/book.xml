@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.29</productname>
+    <productname>Freemarker 2.3.30</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -28669,10 +28669,48 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_30">
+        <title>2.3.30</title>
+
+        <para>Release date: [FIXME]</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>[TODO]</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bug fixed: In <literal>&lt;#escape
+              <replaceable>placeholder</replaceable> as
+              <replaceable>escExpression</replaceable>&gt;</literal>, the
+              <literal><replaceable>placeholder</replaceable></literal> wasn't
+              substituted inside lambda expressions inside
+              <literal><replaceable>escExpression</replaceable></literal>.
+              Fortunately it's very unlikely that anyone wanted to use lambdas
+              there (given the few built-ins that accept lambdas).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: AST traversal API now can properly traverse the
+              inside of lambda expressions (such as the parameter list)</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_29">
         <title>2.3.29</title>
 
-        <para>Release date: 2019-08-09 + release process</para>
+        <para>Release date: 2019-08-17</para>
 
         <section>
           <title>Changes on the FTL side</title>

@@ -69,6 +69,10 @@ public class ASTTest extends FileTestCase {
         testAST("ast-nestedignoredchildren");
     }
 
+    public void testLambda() throws Exception {
+        testAST("ast-lambda");
+    }
+
     public void testLocations() throws Exception {
         testASTWithLocations("ast-locations");
     }
