@@ -419,7 +419,7 @@ public class FMParser {
      */
     private void notBooleanLiteral(Expression exp, String expected) throws ParseException {
         if (exp instanceof BooleanLiteral) {
-            throw new ParseException("Found: " + exp.getCanonicalForm() + ". Expecting " + expected, exp);
+            throw new ParseException("Found: " + exp.getCanonicalForm() + " literal. Expecting " + expected , exp);
         }
     }
 
@@ -1893,10 +1893,10 @@ Expression EqualityExpression() :
         )
         rhs = RelationalExpression()
         {
-	        notHashLiteral(lhs, "string");
-	        notHashLiteral(rhs, "string");
-	        notListLiteral(lhs, "string");
-	        notListLiteral(rhs, "string");
+	        notHashLiteral(lhs, "different type for equality check");
+	        notHashLiteral(rhs, "different type for equality check");
+	        notListLiteral(lhs, "different type for equality check");
+	        notListLiteral(rhs, "different type for equality check");
 	        result = new ComparisonExpression(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
@@ -1930,12 +1930,8 @@ Expression RelationalExpression() :
         )
         rhs = RangeExpression()
         {
-            notHashLiteral(lhs, "number");
-            notHashLiteral(rhs, "number");
-            notListLiteral(lhs, "number");
-            notListLiteral(rhs, "number");
-            notStringLiteral(lhs, "number");
-            notStringLiteral(rhs, "number");
+            numberLiteralOnly(lhs);
+            numberLiteralOnly(rhs);
             result = new ComparisonExpression(lhs, rhs, t.image);
             result.setLocation(template, lhs, rhs);
         }
