@@ -71,7 +71,7 @@ public class InvalidReferenceException extends TemplateException {
      * Creates and invalid reference exception that contains no information about what was missing or null.
      * As such, try to avoid this constructor.
      */
-    public InvalidReferenceException(Environment env) {
+    private InvalidReferenceException(Environment env) {
         super("Invalid reference: The expression has evaluated to null or refers to something that doesn't exist.",
                 env);
     }
@@ -81,7 +81,7 @@ public class InvalidReferenceException extends TemplateException {
      * blamed expression. As such, try to avoid this constructor, unless need to raise this expression from outside
      * the FreeMarker core.
      */
-    public InvalidReferenceException(String description, Environment env) {
+    private InvalidReferenceException(String description, Environment env) {
         super(description, env);
     }
 
@@ -92,7 +92,7 @@ public class InvalidReferenceException extends TemplateException {
      *     the failing one, like in {@code goodStep.failingStep.furtherStep} it should only contain
      *     {@code goodStep.failingStep}.
      */
-    InvalidReferenceException(_ErrorDescriptionBuilder description, Environment env, ASTExpression expression) {
+    private InvalidReferenceException(_ErrorDescriptionBuilder description, Environment env, ASTExpression expression) {
         super(null, env, expression, description);
     }
 

@@ -455,13 +455,7 @@ public class _EvalUtils {
         if (tm instanceof TemplateStringModel) {
             return modelToString((TemplateStringModel) tm, exp);
         } else if (tm == null) {
-            if (exp != null) {
-                throw InvalidReferenceException.getInstance(exp, env);
-            } else {
-                throw new InvalidReferenceException(
-                        "Null/missing value (no more information available)",
-                        env);
-            }
+            throw InvalidReferenceException.getInstance(exp, env);
         } else if (tm instanceof TemplateBooleanModel) {
             // TODO [FM3] It would be more logical if it's before TemplateStringModel (number etc. are before it as
             // well). But currently, in FM3, `exp!` returns a multi-typed value that's also a boolean `false`, and so

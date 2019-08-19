@@ -36,19 +36,15 @@ abstract class BuiltInForHashEx extends ASTExpBuiltIn {
     abstract TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
             throws TemplateException, InvalidReferenceException;
     
-    protected InvalidReferenceException newNullPropertyException(
-            String propertyName, TemplateModel tm, Environment env) {
-        if (env.getFastInvalidReferenceExceptions()) {
-            return InvalidReferenceException.FAST_INSTANCE;
-        } else {
-            return new InvalidReferenceException(
-                    new _ErrorDescriptionBuilder(
-                        "The exteneded hash (of class ", tm.getClass().getName(), ") has returned null for its \"",
-                        propertyName,
-                        "\" property. This is maybe a bug. The extended hash was returned by this expression:")
-                    .blame(target),
-                    env, this);
-        }
+    protected TemplateException newWrongTemplateModelMethodReturnValueException(
+            String methodName, TemplateModel tm, Environment env) {
+        return new TemplateException(
+                new _ErrorDescriptionBuilder(
+                    "The exteneded hash (of class ", tm.getClass().getName(), ") " +
+                        methodName +  " method has returned null, which is illegal. The extended hash was " +
+                        "returned by this expression:")
+                .blame(target),
+                env, this);
     }
     
 }

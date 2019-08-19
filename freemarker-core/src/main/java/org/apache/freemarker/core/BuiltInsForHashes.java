@@ -34,7 +34,9 @@ class BuiltInsForHashes {
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateException, InvalidReferenceException {
             TemplateCollectionModel keys = hashExModel.keys();
-            if (keys == null) throw newNullPropertyException("keys", hashExModel, env);
+            if (keys == null) {
+                throw newWrongTemplateModelMethodReturnValueException("keys", hashExModel, env);
+            }
             return keys;
         }
         
@@ -45,7 +47,9 @@ class BuiltInsForHashes {
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateException, InvalidReferenceException {
             TemplateCollectionModel values = hashExModel.values();
-            if (values == null) throw newNullPropertyException("values", hashExModel, env);
+            if (values == null) {
+                throw newWrongTemplateModelMethodReturnValueException("values", hashExModel, env);
+            }
             return values;
         }
     }
