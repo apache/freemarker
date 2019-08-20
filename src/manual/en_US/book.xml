@@ -17104,7 +17104,7 @@ Filer for positives:
 Filer for positives:
 1 2 4 6 </programlisting>
 
-          <para>As you can see, <literal>take_while</literal> has stopped
+          <para>As you can see, <literal>drop_while</literal> has stopped
           dropping the elements once it ran into the first element that didn't
           match the predicate (<literal>x &gt; 0</literal>). On the other
           hand, <literal>filter</literal> keeps the elements that match the
@@ -28690,8 +28690,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               These allow using lambda expressions, like
               <literal>users?filter(user -&gt; user.superuser)</literal> or
               <literal>users?map(user -&gt; user.name)</literal>, or accept a
-              functions/method as parameter. Lambda expressions are also new
-              in this release, but they can only be used in said built-ins, so
+              function/method as parameter. Lambda expressions are also new in
+              this release, but they can only be used in said built-ins, so
               they aren't like in Java for example, and also, unlike the
               similar Java methods, these built-ins aren't lazy in general,
               only in specific cases (see more <link
@@ -28742,9 +28742,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Extended big decimal format parameter
-              <quote>multiplier</quote> was incorrectly written as
-              <quote>multipier</quote>. Now both words are recognized.</para>
+              <para><link linkend="extendedJavaDecimalFormat">Extended decimal
+              format</link> parameter <quote>multiplier</quote> was
+              incorrectly written as <quote>multipier</quote>. Now both words
+              are recognized.</para>
             </listitem>
 
             <listitem>
