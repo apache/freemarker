@@ -28742,8 +28742,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><link linkend="extendedJavaDecimalFormat">Extended decimal
-              format</link> parameter <quote>multiplier</quote> was
+              <para><link linkend="topic.extendedJavaDecimalFormat">Extended
+              decimal format</link> parameter <quote>multiplier</quote> was
               incorrectly written as <quote>multipier</quote>. Now both words
               are recognized.</para>
             </listitem>
