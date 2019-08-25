@@ -2038,12 +2038,12 @@ public final class Environment extends Configurable {
      */
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         TemplateModel val = getNullableLocalVariable(name);
-        return val != NullTemplateModel.INSTANCE ? val : null;
+        return val != TemplateNullModel.INSTANCE ? val : null;
     }
 
     /**
-     * Similar to {@link #getLocalVariable(String)}, but might returns {@link NullTemplateModel}. Only used internally,
-     * as {@link NullTemplateModel} is internal.
+     * Similar to {@link #getLocalVariable(String)}, but might returns {@link TemplateNullModel}. Only used internally,
+     * as {@link TemplateNullModel} is internal.
      *
      * @since 2.3.29
      */
@@ -2080,7 +2080,7 @@ public final class Environment extends Configurable {
     public TemplateModel getVariable(String name) throws TemplateModelException {
         TemplateModel result = getNullableLocalVariable(name);
         if (result != null) {
-            return result != NullTemplateModel.INSTANCE ? result : null;
+            return result != TemplateNullModel.INSTANCE ? result : null;
         }
 
         result = currentNamespace.get(name);

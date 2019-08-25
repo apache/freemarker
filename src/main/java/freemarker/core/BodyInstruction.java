@@ -140,7 +140,7 @@ final class BodyInstruction extends TemplateElement {
                                 tm != null
                                         ? tm
                                         : getTemplate().getConfiguration().getFallbackOnNullLoopVariable()
-                                                ? null : NullTemplateModel.INSTANCE);
+                                                ? null : TemplateNullModel.INSTANCE);
                     }
                 }
             }
