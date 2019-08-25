@@ -3109,11 +3109,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Gets a shared variable. Shared sharedVariables are sharedVariables that are 
+     * Gets a shared variable. Shared shared variables are variables that are
      * available to all templates. When a template is processed, and an identifier
      * is undefined in the data model, a shared variable object with the same identifier
-     * is then looked up in the configuration. There are several predefined sharedVariables
-     * that are always available through this method, see the FreeMarker manual
+     * is then looked up in the configuration. There are several predefined shared variables
+     * that are always available through this method; see the FreeMarker manual
      * for a comprehensive list of them.
      *
      * @see #setSharedVariable(String,Object)
@@ -3125,7 +3125,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Removes all shared sharedVariables, except the predefined ones (compress, html_escape, etc.).
+     * Removes all shared variables, except the predefined ones (compress, html_escape, etc.).
      */
     public void clearSharedVariables() {
         sharedVariables.clear();
