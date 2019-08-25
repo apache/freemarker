@@ -31,6 +31,7 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 
@@ -157,8 +158,9 @@ class ASTExpDefault extends ASTExpression {
 		} else {
             left = lho.eval(env);
 		}
-		
-		if (left != null) return left;
+
+		// TODO [FM3][null] Later left == null will mean undefined, which we shouldn't handle with this operator
+		if (left != null && left != TemplateNullModel.INSTANCE) return left;
 		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE_AND_HASH;
 		else return rho.eval(env);
 	}

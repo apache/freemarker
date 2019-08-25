@@ -246,6 +246,15 @@ public class FMParser {
     }
 
     /**
+     * Throw an exception if the expression passed in is a null literal
+     */
+    private void notNullLiteral(ASTExpression exp, String expected) throws ParseException {
+        if (exp instanceof ASTExpNullLiteral) {
+            throw new ParseException("Found: " + exp.getCanonicalForm() + ". Expecting " + expected, exp);
+        }
+    }
+
+    /**
      * Throw an exception if the expression passed in is a Hash Literal
      */
     private void notHashLiteral(ASTExpression exp, String expected) throws ParseException {
@@ -277,6 +286,7 @@ public class FMParser {
         notListLiteral(exp, "number");
         notHashLiteral(exp, "number");
         notBooleanLiteral(exp, "number");
+        notNullLiteral(exp, "number");
     }
 
     /**
@@ -287,6 +297,7 @@ public class FMParser {
         notListLiteral(exp, "string");
         notHashLiteral(exp, "string");
         notBooleanLiteral(exp, "string");
+        notNullLiteral(exp, "number");
     }
 
     /**
@@ -297,6 +308,7 @@ public class FMParser {
         notListLiteral(exp, "boolean (true/false)");
         notHashLiteral(exp, "boolean (true/false)");
         notNumberLiteral(exp, "boolean (true/false)");
+        notNullLiteral(exp, "boolean (true/false)");
     }
 
     private ASTExpression escapedExpression(ASTExpression exp) {
@@ -959,6 +971,8 @@ TOKEN:
     |
     <RAW_STRING : "r" (("\"" (~["\""])* "\"") | ("'" (~["'"])* "'"))>
     |
+    <NULL : "null">
+    |
     <FALSE : "false">
     |
     <TRUE : "true">
@@ -1416,7 +1430,9 @@ ASTExpression AtomicExpression() :
         exp = HashLiteral()
         |   
         exp = StringLiteral(true)
-        |   
+        |
+        exp = NullLiteral()
+        |
         exp = BooleanLiteral()
         |   
         exp = ListLiteral()
@@ -1600,10 +1616,10 @@ ASTExpression EqualityExpression() :
         )
         rhs = RelationalExpression()
         {
-	        notHashLiteral(lhs, "string");
-	        notHashLiteral(rhs, "string");
-	        notListLiteral(lhs, "string");
-	        notListLiteral(rhs, "string");
+	        notHashLiteral(lhs, "different type for equality check");
+	        notHashLiteral(rhs, "different type for equality check");
+	        notListLiteral(lhs, "different type for equality check");
+	        notListLiteral(rhs, "different type for equality check");
 	        result = new ASTExpComparison(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
@@ -1637,12 +1653,8 @@ ASTExpression RelationalExpression() :
         )
         rhs = RangeExpression()
         {
-            notHashLiteral(lhs, "number");
-            notHashLiteral(rhs, "number");
-            notListLiteral(lhs, "number");
-            notListLiteral(rhs, "number");
-            notStringLiteral(lhs, "number");
-            notStringLiteral(rhs, "number");
+            numberLiteralOnly(lhs);
+            numberLiteralOnly(rhs);
             result = new ASTExpComparison(lhs, rhs, t.image);
             result.setLocation(template, lhs, rhs);
         }
@@ -1996,6 +2008,8 @@ ASTExpression DotVariable(ASTExpression exp) :
                 |
                 t = <ESCAPED_GTE>
                 |
+                t = <NULL>
+                |
                 t = <FALSE>
                 |
                 t = <TRUE>
@@ -2016,6 +2030,7 @@ ASTExpression DotVariable(ASTExpression exp) :
             notListLiteral(exp, "hash");
             notStringLiteral(exp, "hash");
             notBooleanLiteral(exp, "hash");
+            notNullLiteral(exp, "hash");
             ASTExpDot dot = new ASTExpDot(exp, t.image);
             dot.setLocation(template, exp, t);
             return dot;
@@ -2038,6 +2053,7 @@ ASTExpression DynamicKey(ASTExpression exp) :
     {
         notBooleanLiteral(exp, "list or hash");
         notNumberLiteral(exp, "list or hash");
+        notNullLiteral(exp, "list or hash");
         ASTExpDynamicKeyName dkn = new ASTExpDynamicKeyName(exp, arg);
         dkn.setLocation(template, exp, t);
         return dkn;
@@ -2187,6 +2203,19 @@ ASTExpStringLiteral StringLiteral(boolean interpolate) :
                 result.parseValue(token_source, outputFormat);
             }
         }
+        return result;
+    }
+}
+
+ASTExpression NullLiteral() :
+{
+    Token t;
+}
+{
+    t = <NULL>
+    {
+        ASTExpression result = new ASTExpNullLiteral();
+        result.setLocation(template, t, t);
         return result;
     }
 }

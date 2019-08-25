@@ -59,6 +59,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
@@ -468,7 +469,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 @Override
                 public TemplateModel getLocalVariable(String name) throws TemplateException {
                     int index = nestedContentParamNames.get(name);
-                    return index != -1 ? nestedContentParamValues[index] : null;
+                    if (index == -1) {
+                        return null;
+                    }
+                    TemplateModel paramValue = nestedContentParamValues[index];
+                    // TODO [FM3][null] Later paramValue == null will mean undefined, which should be an error
+                    return paramValue != null ? paramValue : TemplateNullModel.INSTANCE;
                 }
 
                 @Override
@@ -1971,7 +1977,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * (Note that the misnomer is kept for backward compatibility: nested content parameters are not local variables
      * according to our terminology.)
      */
-    // TODO [FM3] Don't return nested content params anymore (see JavaDoc)
+    // TODO [FM3] Should be called getBlockVariable (see JavaDoc)
     public TemplateModel getLocalVariable(String name) throws TemplateException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
@@ -2004,29 +2010,53 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public TemplateModel getVariable(String name) throws TemplateException {
         TemplateModel result = getLocalVariable(name);
-        if (result == null) {
-            result = currentNamespace.get(name);
+        if (result != null) {
+            return result != TemplateNullModel.INSTANCE ? result : null;
         }
-        if (result == null) {
-            result = getGlobalVariable(name);
+
+        result = currentNamespace.get(name);
+        if (result != null) {
+            return result;
         }
-        return result;
+
+        return getGlobalVariable(name);
     }
 
     /**
      * Returns the globally visible variable of the given name (or null). This is correspondent to FTL
      * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
-     * ...&gt; and then at the data model exposed to the template.
+     * ...&gt; and then at the data model exposed to the template, and then at the
+     * {@linkplain Configuration.Builder#setSharedVariables(Map)} shared variables} in the {@link Configuration}.
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateException {
-        TemplateModel result = globalNamespace.get(name);
-        if (result == null) {
-            result = rootDataModel.get(name);
+        TemplateModel globalVal = globalNamespace.get(name);
+        // Null model stops fallback, so <#global foo = null> will stop the fallback to the // data-model.
+        if (globalVal != null) {
+            return globalVal;
         }
-        if (result == null) {
-            result = configuration.getWrappedSharedVariable(name);
+
+        return getDataModelOrSharedVariable(name);
+    }
+
+    /**
+     * Returns the variable from the data-model, or if it's not there, then from the
+     * {@linkplain Configuration.Builder#setSharedVariables(Map)} shared variables}
+     */
+    public TemplateModel getDataModelOrSharedVariable(String name) throws TemplateException {
+        TemplateModel dataModelVal = rootDataModel.get(name);
+        // As the data-model is typically a Map, we fall back even if it returns a null model.
+        // TODO [FM3] What if this is a "strict" map (a bean), and so we want null model to not fall back?
+        if (dataModelVal != null && dataModelVal != TemplateNullModel.INSTANCE) {
+            return dataModelVal;
         }
-        return result;
+
+        TemplateModel sharedVal = configuration.getWrappedSharedVariable(name);
+        if (sharedVal != null) {
+            return sharedVal;
+        }
+
+        // If the data model was "strict", we stay strict, otherwise we mimic Map logic.
+        return dataModelVal == null ? null : TemplateNullModel.INSTANCE;
     }
 
     /**
@@ -2330,8 +2360,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     
                     @Override
                     public TemplateModel get(String key) throws TemplateException {
-                        TemplateModel value = rootDataModel.get(key);
-                        return value != null ? value : configuration.getWrappedSharedVariable(key);
+                        return getDataModelOrSharedVariable(key);
                     }
     
                     // NB: The methods below do not take into account

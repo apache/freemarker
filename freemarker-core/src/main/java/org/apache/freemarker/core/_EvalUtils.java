@@ -33,6 +33,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
@@ -454,13 +455,13 @@ public class _EvalUtils {
             throws TemplateException {
         if (tm instanceof TemplateStringModel) {
             return modelToString((TemplateStringModel) tm, exp);
-        } else if (tm == null) {
+        } else if (tm == null || tm == TemplateNullModel.INSTANCE) { // TODO [FM3][null] null shouldn't reach this
             throw InvalidReferenceException.getInstance(exp, env);
         } else if (tm instanceof TemplateBooleanModel) {
-            // TODO [FM3] It would be more logical if it's before TemplateStringModel (number etc. are before it as
+            // TODO [FM3][null] Handing booleans should be before TemplateStringModel (number etc. are before it as
             // well). But currently, in FM3, `exp!` returns a multi-typed value that's also a boolean `false`, and so
             // `${missing!}` wouldn't print `""` anymore if we reorder these. But, if and when `null` handling is
-            // reworked ("checked nulls"), this problem should go away, and so we should move this. 
+            // reworked ("checked nulls"), this problem should go away, and so we should move this.
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
             return env.formatBoolean(booleanValue);
         } else {

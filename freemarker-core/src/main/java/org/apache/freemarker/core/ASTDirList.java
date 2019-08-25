@@ -29,6 +29,8 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateNodeModel;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -353,8 +355,9 @@ final class ASTDirList extends ASTDirective {
             String nestedContentParamName = this.nestedContentParam1Name;
             if (name.startsWith(nestedContentParamName)) {
                 switch(name.length() - nestedContentParamName.length()) {
-                    case 0: 
-                        return nestedContentParam;
+                    case 0:
+                        // TODO [FM3][null] Later nestedContentParam == null will mean undefined, which should be an error
+                        return nestedContentParam != null ? nestedContentParam : TemplateNullModel.INSTANCE;
                     case 6: 
                         if (name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
@@ -369,7 +372,7 @@ final class ASTDirList extends ASTDirective {
             }
             
             if (name.equals(nestedContentParam2Name)) {
-                return nestedContentParam2;
+                return nestedContentParam2 != null ? nestedContentParam2 : TemplateNullModel.INSTANCE;
             }
             
             return null;

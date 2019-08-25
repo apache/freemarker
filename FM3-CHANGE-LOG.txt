@@ -365,6 +365,8 @@ Core / Configuration
 - Removed hasCustomFormats() from configuration related API-s (we don't need it anymore)
 - The tagSyntax and interpolationSyntax settings were moved inside the templateLanguage setting, as they are only
   applicable if the templateLanguage is a DefaultTemplateLanguage instance.
+- Removed Configuration.fallbackOnNullLoopVariable, FM3 never falls back on such loop variables (as if the FM2
+  setting was set to false)
 
   
 Core / Models and Object wrapping
@@ -488,6 +490,11 @@ Core / Models and Object wrapping
   Thus, `${obj.voidReturningMethod()}` still works (it prints nothing, just as in FM2), but things like
   `x + obj.voidReturningMethod()` now fail (unlike in FM2), as they are probably oversights.  This all applies to
   Java methods wrapped by the DefaultObjectWrapper (which, in FM3, is also used in place of the FM2 BeansWrapper).
+- Added `null` literal (so null is now a keyword), and TemplateNullModel (it wasn't public in FM2).
+  [TODO] This change is incomplete, and eventually it will mean that the only legal way of representing a
+  Java null where a TemplateModel is expected will be TemplateNullModel.INSTANCE, not a Java null.
+- Whem listing something that contains a null, reading the loop variable will never fall back to higher scopes
+  (like when configuration.fallbackOnNullLoopVariable was set to false in FM2)
       
 Core / Template loading and caching
 ...................................

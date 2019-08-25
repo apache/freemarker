@@ -22,6 +22,7 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateNullModel;
 
 /**
  * AST expression node: {@code ??} operator.
@@ -49,7 +50,8 @@ class ASTExpExists extends ASTExpression {
 	    } else {
             tm = exp.eval(env);
 	    }
-		return tm == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
+	    // TODO [FM3][null] null will mean undefined, which we shouldn't handle here
+		return tm == null || tm == TemplateNullModel.INSTANCE ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
 	}
 
 	@Override

@@ -64,6 +64,7 @@ import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
@@ -575,7 +576,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
                                final Map<Object, Object> recursionStops)
             throws TemplateException {
-        if (model == null) {
+        // TODO [FM3][null] Later model == null will mean undefined, which shouldn't get to here
+        if (model == null || model == TemplateNullModel.INSTANCE) {
             return null;
         }
 

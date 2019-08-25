@@ -38,6 +38,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
@@ -896,6 +897,10 @@ public final class TemplateLanguageUtils {
 
         if (TemplateMarkupOutputModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "markupOutput");
+        }
+
+        if (TemplateNullModel.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "null");
         }
 
         if (sb.length() == initialLength) {
