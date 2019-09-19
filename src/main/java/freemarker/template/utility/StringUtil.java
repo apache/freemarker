@@ -1424,9 +1424,9 @@ public class StringUtil {
                         escapeType = ESC_HEXA;
                     }
                 } else if (c == '"') {
-                    escapeType = ESC_BACKSLASH;
+                    escapeType = json ? ESC_BACKSLASH : ESC_HEXA;
                 } else if (c == '\'') {
-                    escapeType = json ? NO_ESC : ESC_BACKSLASH; 
+                    escapeType = json ? NO_ESC : ESC_HEXA;
                 } else if (c == '\\') {
                     escapeType = ESC_BACKSLASH; 
                 } else if (c == '/' && (i == 0 || s.charAt(i - 1) == '<')) {  // against closing elements

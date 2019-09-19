@@ -78,8 +78,8 @@ public class StringUtilTest {
 
     @Test
     public void testJSChars() {
-        assertEsc("\"", "\\\"", "\\\"");
-        assertEsc("'", "\\'", "'");
+        assertEsc("\"", "\\x22", "\\\"");
+        assertEsc("'", "\\x27", "'");
         assertEsc("\\", "\\\\", "\\\\");
     }
 
@@ -101,8 +101,8 @@ public class StringUtilTest {
 
     @Test
     public void testOneOffs() {
-        assertEsc("c\"c\"cc\"\"c", "c\\\"c\\\"cc\\\"\\\"c", "c\\\"c\\\"cc\\\"\\\"c");
-        assertEsc("\"c\"cc\"", "\\\"c\\\"cc\\\"", "\\\"c\\\"cc\\\"");
+        assertEsc("c\"c\"cc\"\"c", "c\\x22c\\x22cc\\x22\\x22c", "c\\\"c\\\"cc\\\"\\\"c");
+        assertEsc("\"c\"cc\"", "\\x22c\\x22cc\\x22", "\\\"c\\\"cc\\\"");
         assertEsc("c/c/cc//c", "c/c/cc//c", "c/c/cc//c");
         assertEsc("c<c<cc<<c", "c<c<cc<<c", "c<c<cc<<c");
         assertEsc("/<", "\\/\\x3C", "\\/\\u003C");

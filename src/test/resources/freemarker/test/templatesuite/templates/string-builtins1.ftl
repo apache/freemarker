@@ -113,7 +113,7 @@ ${c?eval}
 [${"\x1\x1A\x20"?j_string}] = [\u0001\u001a ]
 
 [${"a"?js_string}] = [a]
-[${"a\\'x'\nb"?js_string}] = [a\\\'x\'\nb]
+[${"a\\'x'\nb"?js_string}] = [a\\\x27x\x27\nb]
 [${"\x1\x1A\x20"?js_string}] = [\x01\x1A ]
 [${"<![CDATA["?js_string}] = [\x3C![CDATA[]
 [${"]]>"?js_string}] = []]\>]
