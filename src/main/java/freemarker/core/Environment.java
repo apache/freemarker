@@ -2099,13 +2099,26 @@ public final class Environment extends Configurable {
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
         TemplateModel result = globalNamespace.get(name);
-        if (result == null) {
-            result = rootDataModel.get(name);
+        if (result != null) {
+            return result;
         }
-        if (result == null) {
-            result = configuration.getSharedVariable(name);
+
+        return getDataModelOrSharedVariable(name);
+    }
+
+    /**
+     * Returns the variable from the data-model, or if it's not there, then from the
+     * {@linkplain Configuration#setSharedVariables(Map)} shared variables}
+     *
+     * @since 2.3.30
+     */
+    public TemplateModel getDataModelOrSharedVariable(String name) throws TemplateModelException {
+        TemplateModel dataModelVal = rootDataModel.get(name);
+        if (dataModelVal != null) {
+            return dataModelVal;
         }
-        return result;
+
+        return configuration.getSharedVariable(name);
     }
 
     /**
@@ -2406,8 +2419,7 @@ public final class Environment extends Configurable {
                     }
 
                     public TemplateModel get(String key) throws TemplateModelException {
-                        TemplateModel value = rootDataModel.get(key);
-                        return value != null ? value : configuration.getSharedVariable(key);
+                        return getDataModelOrSharedVariable(key);
                     }
 
                     // NB: The methods below do not take into account
