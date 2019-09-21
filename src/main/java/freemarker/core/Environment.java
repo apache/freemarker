@@ -2092,9 +2092,10 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the globally visible variable of the given name (or null). This is correspondent to FTL
+     * Returns the globally visible variable of the given name (or null). This is corresponds to FTL
      * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
-     * ...&gt; and then at the data model exposed to the template.
+     * ...&gt; and then at the data model exposed to the template, and then at the
+     * {@linkplain Configuration#setSharedVariables(Map)} shared variables} in the {@link Configuration}.
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
         TemplateModel result = globalNamespace.get(name);
