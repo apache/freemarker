@@ -1,4 +1,4 @@
-/*
+        /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -37,33 +37,32 @@ import freemarker.template.TemplateNodeModelEx;
 class BuiltInsForNodes {
     
     static class ancestorsBI extends BuiltInForNode {
-       @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
-           AncestorSequence result = new AncestorSequence(env);
-           TemplateNodeModel parent = nodeModel.getParentNode();
-           while (parent != null) {
-               result.add(parent);
-               parent = parent.getParentNode();
-           }
-           return result;
-       }
+        @Override
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+            AncestorSequence result = new AncestorSequence(env);
+            TemplateNodeModel parent = nodeModel.getParentNode();
+            while (parent != null) {
+                result.add(parent);
+                parent = parent.getParentNode();
+            }
+            return result;
+        }
     }
     
     static class childrenBI extends BuiltInForNode {
-       @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getChildNodes();
-       }
+        }
     }
     
     static class node_nameBI extends BuiltInForNode {
-       @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeName());
-       }
+        }
     }
-    
-    
+
     static class node_namespaceBI extends BuiltInForNode {
         @Override
         TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
@@ -73,22 +72,22 @@ class BuiltInsForNodes {
     }
     
     static class node_typeBI extends BuiltInForNode {
-       @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeType());
         }
     }
 
     static class parentBI extends BuiltInForNode {
        @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getParentNode();
-       }
+        }
     }
     
     static class rootBI extends BuiltInForNode {
-       @Override
-    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             TemplateNodeModel result = nodeModel;
             TemplateNodeModel parent = nodeModel.getParentNode();
             while (parent != null) {
@@ -96,7 +95,7 @@ class BuiltInsForNodes {
                 parent = result.getParentNode();
             }
             return result;
-       }
+        }
     }
 
     static class previousSiblingBI extends BuiltInForNodeEx {
@@ -106,7 +105,7 @@ class BuiltInsForNodes {
         }
     }
 
-    static class nextSiblingBI extends  BuiltInForNodeEx {
+    static class nextSiblingBI extends BuiltInForNodeEx {
         @Override
         TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getNextSibling();
@@ -119,7 +118,7 @@ class BuiltInsForNodes {
     static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
         
         @SuppressFBWarnings(value="SE_BAD_FIELD",
-                justification="Can't make this Serializable, and not extneding SimpleSequence would be non-BC.")
+                justification="Can't make this Serializable, and not extending SimpleSequence would be non-BC.")
         private Environment env;
         
         AncestorSequence(Environment env) {
