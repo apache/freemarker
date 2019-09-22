@@ -13057,6 +13057,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_spread_args">spread_args</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_rtf">rtf</link></para>
           </listitem>
 
@@ -19122,6 +19127,74 @@ Filer for positives:
           <literal>java.util.Date.getTime()</literal> would return. This is
           useful if you have to call a Java methods that expect a timestamp as
           a <literal>long</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_spread_args">
+          <title>spread_args</title>
+
+          <note>
+            <para>This built-in is available since 2.3.30</para>
+          </note>
+
+          <para>The goal of this built in is to add parameters dynamically to
+          the call of a directive (like a macro), function or method.
+          Dynamically means that parameters are added based on a hash value
+          (like <literal>{'a': 1, 'b': 2, 'c': 3}</literal>), or a sequence
+          value (like <literal>[1, 2, 3]</literal> or a Java
+          <literal>List</literal>), whose the actual content is might only
+          known when the call happens.</para>
+
+          <para>For example, we have this macro <literal>m</literal>:</para>
+
+          <programlisting role="template">&lt;#macro m a b c&gt;a=${a}, b=${b}, c=${c}&lt;/#macro&gt;</programlisting>
+
+          <para>Normally you call it like:</para>
+
+          <programlisting role="template">&lt;@m a=1 b=2 c=3 /&gt;</programlisting>
+
+          <para>This calls does the same, assuming <literal>dynArgs</literal>
+          is the hash <literal>{'a': 1, 'b': 2, 'c': 3}</literal>:</para>
+
+          <programlisting role="template">&lt;@m?spread_args(dynArgs) /&gt;</programlisting>
+
+          <programlisting role="output">a=1, b=1, c=1</programlisting>
+
+          <para>This call also does the same, but combines dynamic arguments
+          from <literal>dynArgsAB</literal>, assumed to be <literal>{'a': 1,
+          'b': 2}</literal>, and argument <literal>c</literal> specified
+          directly:</para>
+
+          <programlisting role="template">&lt;@m?spread_args(dynArgsAB) c=3 /&gt;</programlisting>
+
+          <programlisting role="output">a=1, b=1, c=1</programlisting>
+
+          <para>The way if works is this.
+          <literal>m?spread_args(<replaceable>dynArgs</replaceable>)</literal>
+          returns a macro (or what <literal>m</literal> is, like function
+          etc.) whose arguments defaults to the values specified in
+          <literal><replaceable>dynArgs</replaceable></literal>. For
+          example:</para>
+
+          <programlisting role="template">&lt;#assign mWithDefs = m?spread_args({'b': 22, 'c': 33})&gt;
+&lt;@myWithDefs a=1 c='overridden'/&gt;</programlisting>
+
+          <programlisting role="output">a=1, b=22, c=overridden</programlisting>
+
+          <para>So far we have only shown the case where the argument to
+          <literal>spread_args</literal> was a hash, which is supported for
+          all kind of directives, including macros. When this built-in is
+          applied on a function or method, the argument to
+          <literal>spread_args</literal> must be a sequence, as named
+          parameters aren't supported for those:</para>
+
+          <programlisting role="template">&lt;#function f(a, b, c)&gt;&lt;#return "a=${a}, b=${b}, c=${c}"&gt;&lt;/#function&gt;
+&lt;#assign dynArgs=[1, 2, 3]&gt;
+
+${f(1, 2, 3)()}
+Same as:
+${f?spread_args(dynArgs)()}</programlisting>
+
+          <para>[TODO] More details and edge cases...</para>
         </section>
 
         <section xml:id="ref_builtin_eval">
@@ -28675,7 +28748,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[TODO]</para>
+              <para>Added
+              <literal>?<replaceable>spread_args</replaceable>(dynamicArguments)</literal>
+              to add parameters dynamically to directive (like macro),
+              function and method calls. Actually, this built-in returns
+              directive or macro or function that has different parameter
+              defaults. <link linkend="ref_builtin_spread_args">See more
+              here...</link></para>
             </listitem>
           </itemizedlist>
         </section>

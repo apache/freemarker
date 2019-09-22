@@ -1,0 +1,226 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package freemarker.core;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.TemplateModelUtils;
+
+class BuiltInsForCallables {
+
+    static class spread_argsBI extends BuiltIn {
+
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof Macro) {
+                return new BIMethodForMacroAndFunction((Macro) model);
+            } else if (model instanceof TemplateDirectiveModel) {
+                return new BIMethodForDirective((TemplateDirectiveModel) model);
+            } else if (model instanceof TemplateMethodModel) {
+                return new BIMethodForMethod((TemplateMethodModel) model);
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "macro, function, directive, or method", new Class[] { Macro.class,
+                        TemplateDirectiveModel.class, TemplateMethodModel.class },
+                        env);
+            }
+        }
+
+        private class BIMethodForMacroAndFunction implements TemplateMethodModelEx {
+
+            private final Macro macroOrFunction;
+
+            private BIMethodForMacroAndFunction(Macro macroOrFunction) {
+                this.macroOrFunction = macroOrFunction;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args.size(), 1);
+                TemplateModel argTM = (TemplateModel) args.get(0);
+
+                Macro.SpreadArgs spreadArgs;
+                if (argTM instanceof TemplateSequenceModel) {
+                    spreadArgs = new Macro.SpreadArgs((TemplateSequenceModel) argTM);
+                } else if (argTM instanceof TemplateHashModelEx) {
+                    if (macroOrFunction.isFunction()) {
+                        throw new _TemplateModelException("When applied on a function, ?",  key,
+                                " can't have a hash argument. Use a sequence argument.");
+                    }
+                    spreadArgs = new Macro.SpreadArgs((TemplateHashModelEx) argTM);
+                } else {
+                    throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
+                }
+
+                return new Macro(macroOrFunction, spreadArgs);
+            }
+
+        }
+
+        private class BIMethodForMethod implements TemplateMethodModelEx {
+
+            private final TemplateMethodModel method;
+
+            public BIMethodForMethod(TemplateMethodModel method) {
+                this.method = method;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args.size(), 1);
+                TemplateModel argTM = (TemplateModel) args.get(0);
+
+                if (argTM instanceof TemplateSequenceModel) {
+                    final TemplateSequenceModel spreadArgs = (TemplateSequenceModel) argTM;
+                    if (method instanceof TemplateMethodModelEx) {
+                        return new TemplateMethodModelEx() {
+                            public Object exec(List origArgs) throws TemplateModelException {
+                                int spreadArgsSize = spreadArgs.size();
+                                List<TemplateModel> newArgs = new ArrayList<TemplateModel>(
+                                        spreadArgsSize + origArgs.size());
+
+                                for (int i = 0; i < spreadArgsSize; i++) {
+                                    newArgs.add(spreadArgs.get(i));
+                                }
+
+                                newArgs.addAll(origArgs);
+
+                                return method.exec(newArgs);
+                            }
+                        };
+                    } else {
+                        return new TemplateMethodModel() {
+                            public Object exec(List origArgs) throws TemplateModelException {
+                                int spreadArgsSize = spreadArgs.size();
+                                List<String> newArgs = new ArrayList<String>(
+                                        spreadArgsSize + origArgs.size());
+
+                                for (int i = 0; i < spreadArgsSize; i++) {
+                                    TemplateModel argVal = spreadArgs.get(i);
+                                    newArgs.add(argValueToString(argVal));
+                                }
+
+                                newArgs.addAll(origArgs);
+
+                                return method.exec(newArgs);
+                            }
+
+                            /**
+                             * Mimics the behavior of method call expression when it calls legacy method model.
+                             */
+                            private String argValueToString(TemplateModel argVal) throws TemplateModelException {
+                                String argValStr;
+                                if (argVal instanceof TemplateScalarModel) {
+                                    argValStr = ((TemplateScalarModel) argVal).getAsString();
+                                } else if (argVal == null) {
+                                    argValStr = null;
+                                } else {
+                                    try {
+                                        argValStr = EvalUtil.coerceModelToPlainText(argVal, null, null,
+                                                Environment.getCurrentEnvironment());
+                                    } catch (TemplateException e) {
+                                        throw new _TemplateModelException(e,
+                                                "Failed to convert method argument to string. Argument type was: ",
+                                                new _DelayedFTLTypeDescription(argVal));
+                                    }
+                                }
+                                return argValStr;
+                            }
+                        };
+                    }
+                } else if (argTM instanceof TemplateHashModelEx) {
+                    throw new _TemplateModelException("When applied on a method, ?",  key,
+                            " can't have a hash argument. Use a sequence argument.");
+                } else {
+                    throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
+                }
+            }
+
+        }
+
+        private class BIMethodForDirective implements TemplateMethodModelEx {
+
+            private final TemplateDirectiveModel directive;
+
+            public BIMethodForDirective(TemplateDirectiveModel directive) {
+                this.directive = directive;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args.size(), 1);
+                TemplateModel argTM = (TemplateModel) args.get(0);
+
+                if (argTM instanceof TemplateHashModelEx) {
+                    final TemplateHashModelEx spreadArgs = (TemplateHashModelEx) argTM;
+                    return new TemplateDirectiveModel() {
+                        public void execute(Environment env, Map origArgs, TemplateModel[] loopVars,
+                                TemplateDirectiveBody body) throws TemplateException, IOException {
+                            int spreadArgsSize = spreadArgs.size();
+                            Map<String, TemplateModel> newArgs = new LinkedHashMap<String, TemplateModel>(
+                                    (spreadArgsSize + origArgs.size()) * 4 / 3, 1f);
+
+                            TemplateHashModelEx2.KeyValuePairIterator spreadArgsIter =
+                                    TemplateModelUtils.getKeyValuePairIterator(spreadArgs);
+                            while (spreadArgsIter.hasNext()) {
+                                TemplateHashModelEx2.KeyValuePair spreadArgKVP = spreadArgsIter.next();
+
+                                TemplateModel argNameTM = spreadArgKVP.getKey();
+                                if (!(argNameTM instanceof TemplateScalarModel)) {
+                                    throw new _TemplateModelException(
+                                            "Expected string keys in the spread args hash, but one of the keys was ",
+                                            new _DelayedAOrAn(new _DelayedFTLTypeDescription(argNameTM)), ".");
+                                }
+                                String argName = EvalUtil.modelToString((TemplateScalarModel) argNameTM, null, null);
+
+                                newArgs.put(argName, spreadArgKVP.getValue());
+                            }
+
+                            newArgs.putAll(origArgs); // TODO Should null replace non-null?
+
+                            directive.execute(env, newArgs, loopVars, body);
+                        }
+                    };
+                } else if (argTM instanceof TemplateSequenceModel) {
+                    throw new _TemplateModelException("When applied on a directive, ?",  key,
+                            " can't have a sequence argument. Use a hash argument.");
+                } else {
+                    throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
+                }
+            }
+
+        }
+
+    }
+
+}

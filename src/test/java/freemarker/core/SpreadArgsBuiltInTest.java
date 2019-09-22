@@ -1,0 +1,442 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package freemarker.core;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Test;
+
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.test.TemplateTest;
+
+public class SpreadArgsBuiltInTest extends TemplateTest {
+
+    private static final String PRINT_O = "o=<#if o?isSequence>[${o?join(', ')}]" +
+            "<#else>{<#list o as k,v>${k}=${v!'null'}<#sep>, </#list>}" +
+            "</#if>";
+
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        Configuration cfg = super.createConfiguration();
+        StringTemplateLoader templateLoader = new StringTemplateLoader();
+        cfg.setTemplateLoader(templateLoader);
+        templateLoader.putTemplate("callables.ftl", "" +
+                // Macro with default:
+                "<#macro m a b c='d3'>" +
+                "a=${a}; b=${b}; c=${c}" +
+                "</#macro>" +
+                // Macro with Catch-All:
+                "<#macro mCA a b o...>" +
+                "a=${a}; b=${b}; " + PRINT_O +
+                "</#macro>" +
+                // Macro with Catch-All Only:
+                "<#macro mCAO o...>" + PRINT_O +
+                "</#macro>" +
+                // Function with default:
+                "<#function f(a, b, c='d3')>" +
+                "<#return 'a=${a}; b=${b}; c=${c}'>" +
+                "</#function>" +
+                // Function with Catch-All:
+                "<#function fCA(a, b, o...)>" +
+                "<#local r>" +
+                "a=${a}; b=${b}; " + PRINT_O +
+                "</#local>" +
+                "<#return r>" +
+                "</#function>" +
+                // Function with Catch-All Only:
+                "<#function fCAO(o...)>" +
+                "<#local r>" + PRINT_O +
+                "</#local>" +
+                "<#return r>" +
+                "</#function>"
+        );
+        cfg.setAutoIncludes(Collections.singletonList("callables.ftl"));
+        return cfg;
+    }
+
+    @Test
+    public void testMacroWithNamedSpreadArgs() throws Exception {
+        assertOutput("<@m b=2 a=1 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) a=11 />", "a=11; b=2; c=d3");
+        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) a=11 b=22 />", "a=11; b=22; c=d3");
+        assertOutput("<@m?spreadArgs({'b': 2, 'c': 3}) a=1 />", "a=1; b=2; c=3");
+        assertOutput("<@m?spreadArgs({}) b=2 c=3 a=1 />", "a=1; b=2; c=3");
+
+        assertOutput("<@mCA a=1 b=2 />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?spreadArgs({'a': 1}) b=2 />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?spreadArgs({}) a=1 b=2 />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3}) />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs({'a': 1}) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs({}) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA a=1 b=2 c=3 d=4 />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 />", "a=1; b=22; o={c=3, d=4}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 e=5 />", "a=1; b=22; o={c=3, d=4, e=5}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) 11 22 />", "a=11; b=22; o={c=3, d=4}");
+        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) 11 22 33 />", "a=11; b=22; o=[33]");
+        assertErrorContains("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3}) 11 22 33 />",
+                "both named and positional", "catch-all");
+
+        assertOutput("<@mCAO?spreadArgs({'a': 1, 'b': 2}) />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?spreadArgs({'a': 1}) b=2 />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?spreadArgs({}) a=1 b=2 />", "o={a=1, b=2}");
+        assertOutput("<@mCAO a=1 b=2 />", "o={a=1, b=2}");
+
+        assertOutput("<@mCAO />", "o=[]");
+        assertOutput("<@mCAO?spreadArgs({}) />", "o={}");
+
+        assertOutput("<@m b=2 a=1 c=null />", "a=1; b=2; c=d3");
+        Map<String, Integer> cNull = new HashMap<String, Integer>();
+        cNull.put("c", null);
+        addToDataModel("cNull", cNull);
+        assertOutput("<@m?spreadArgs(cNull) b=2 a=1 />", "a=1; b=2; c=d3");
+    }
+
+    @Test
+    public void testNullsWithMacroWithNamedSpreadArgs() throws Exception {
+        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+        assertOutput("<@mCAO a=null b=null />", "o={a=null, b=null}");
+        Map<String, Integer> aNullBNull = new LinkedHashMap<String, Integer>();
+        aNullBNull.put("a", null);
+        aNullBNull.put("b", null);
+        addToDataModel("aNullBNull", aNullBNull);
+        assertOutput("<@mCAO?spreadArgs(aNullBNull) />", "o={a=null, b=null}");
+
+        assertOutput("<@m?spreadArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=222 c=null />", "a=111; b=222; c=d3");
+        assertErrorContains("<@m?spreadArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=null c=333 />", "required", "\"b\"");
+        assertOutput("<@mCAO?spreadArgs({'a': 1, 'b': 2}) a=null b=22 c=33 />", "o={a=null, b=22, c=33}");
+    }
+
+    @Test
+    public void testMacroWithPositionalSpreadArgs() throws Exception {
+        assertOutput("<@m 1 2 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?spreadArgs([1, 2]) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?spreadArgs([1]) 2 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?spreadArgs([]) 1 2 />", "a=1; b=2; c=d3");
+        assertOutput("<@m 1 2 3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?spreadArgs([1, 2, 3]) />", "a=1; b=2; c=3");
+        assertOutput("<@m?spreadArgs([1, 2]) c=3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?spreadArgs([1, 2, 0]) c=3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?spreadArgs([1, 0, 3]) b=2 />", "a=1; b=2; c=3");
+
+        assertOutput("<@mCA 1 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?spreadArgs([1, 2]) />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?spreadArgs([1]) 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?spreadArgs([]) 1 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA 1 2 3 />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?spreadArgs([1, 2, 3]) />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?spreadArgs([1]) 2, 3 />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?spreadArgs([1, 2]) 3 />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?spreadArgs([1]) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs([]) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs([1, 2]) c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?spreadArgs([1, 0]) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertErrorContains("<@mCA?spreadArgs([1, 2, 3]) d=4 />",
+                "both named and positional", "catch-all");
+
+        assertOutput("<@mCAO?spreadArgs([1, 2]) />", "o=[1, 2]");
+        assertOutput("<@mCAO?spreadArgs([1]) 2 />", "o=[1, 2]");
+        assertOutput("<@mCAO 1, 2 />", "o=[1, 2]");
+
+        assertOutput("<@mCAO?spreadArgs([]) />", "o=[]");
+    }
+
+    @Test
+    public void testNullsWithMacroWithPositionalSpreadArgs() throws Exception {
+        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+        assertOutput("<@mCAO 1 null null 4 />", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
+        addToDataModel("args", Arrays.asList(1, null, null, 4));
+        assertOutput("<@mCAO?spreadArgs(args) />", "o=[1, 4]"); // [FM3] See above
+        assertOutput("<@mCAO?spreadArgs(args) null 5 6 />", "o=[1, 4, 5, 6]"); // [FM3] See above
+    }
+
+    @Test
+    public void testFunction() throws Exception {
+        assertOutput("${f(1, 2)}", "a=1; b=2; c=d3");
+        assertOutput("${f?spreadArgs([1, 2])()}", "a=1; b=2; c=d3");
+        assertOutput("${f?spreadArgs([1])(2)}", "a=1; b=2; c=d3");
+        assertOutput("${f?spreadArgs([])(1, 2)}", "a=1; b=2; c=d3");
+        assertOutput("${f(1, 2, 3)}", "a=1; b=2; c=3");
+        assertOutput("${f?spreadArgs([1, 2, 3])()}", "a=1; b=2; c=3");
+
+        assertOutput("${fCA(1, 2)}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?spreadArgs([1, 2])()}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?spreadArgs([1])(2)}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?spreadArgs([])(1, 2)}", "a=1; b=2; o=[]");
+        assertOutput("${fCA(1, 2, 3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?spreadArgs([1, 2, 3])()}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?spreadArgs([1])(2, 3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?spreadArgs([1, 2])(3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?spreadArgs([])(1, 2, 3)}", "a=1; b=2; o=[3]");
+
+        assertOutput("${fCAO(1, 2)}", "o=[1, 2]");
+        assertOutput("${fCAO?spreadArgs([1, 2])()}", "o=[1, 2]");
+        assertOutput("${fCAO?spreadArgs([1])(2)}", "o=[1, 2]");
+        assertOutput("${fCAO?spreadArgs([])(1, 2)}", "o=[1, 2]");
+
+        assertErrorContains("${f?spreadArgs({'a': 1, 'b': 2})}",
+                "function", "hash", "sequence", "?spreadArgs");
+    }
+
+    @Test
+    public void testNullsWithFunction() throws Exception {
+        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+        assertOutput("${fCAO(1, null, null, 4)}", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
+        addToDataModel("args", Arrays.asList(1, null, null, 4));
+        assertOutput("${fCAO?spreadArgs(args)()}", "o=[1, 4]"); // [FM3] See above
+        assertOutput("${fCAO?spreadArgs(args)(null, 5, 6)}", "o=[1, 4, 5, 6]"); // [FM3] See above
+    }
+
+    @Test
+    public void testCurrentNamespaceWorks() throws Exception {
+        addTemplate("ns1.ftl", "" +
+                "<#assign v = 'NS1'>" +
+                "<#macro m p>" +
+                "p=${p} " +
+                "v=${v} " +
+                "<#local v = 'L'>" +
+                "v=${v} " +
+                "{<#nested p>} " +
+                "v=${v}" +
+                "</#macro>");
+        assertOutput("" +
+                "<#import 'ns1.ftl' as ns1>" +
+                "<#assign v = 'NS0'>" +
+                "<@ns1.m 1; n>n=${n} v=${v}</@>; " +
+                "<#assign m2 = ns1.m?spreadArgs([2])>" +
+                "<@m2; n>n=${n} v=${v}</@>",
+        "p=1 v=NS1 v=L {n=1 v=NS0} v=L; " +
+                "p=2 v=NS1 v=L {n=2 v=NS0} v=L");
+    }
+
+    @Test
+    public void testArgCountCheck() throws Exception {
+        String macroDef = "<#macro m a b c>${a}, ${b}, ${c}</#macro>";
+
+        // No error:
+        assertOutput(macroDef + "<@m 1 2 3 />", "1, 2, 3");
+        assertOutput(macroDef + "<@m?spread_args([1, 2, 3]) />", "1, 2, 3");
+        assertOutput(macroDef + "<@m?spread_args([1, 2]) 3 />", "1, 2, 3");
+
+        // Too many args:
+        assertErrorContains(macroDef + "<@m 1 2 3 4 />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?spread_args([1, 2, 3, 4]) />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?spread_args([1, 2, 3]) 5 />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?spread_args([1]) 2 3 4 />", "accepts 3", "got 4");
+
+        // Too few args:
+        assertErrorContains(macroDef + "<@m 1 2 />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?spread_args([1, 2]) />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?spread_args([1]) 2 />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?spread_args([]) 1 2 />", "\"c\"", "was not specified");
+    }
+
+    @Test
+    public void testDefaultsThenCatchAll() throws IOException, TemplateException {
+        String macroDef = "<#macro m a=1 b=2 c=3 o...>a=${a} b=${b} c=${c} " + PRINT_O + "</#macro>";
+
+        assertOutput(macroDef + "<@m?spreadArgs([]) />", "a=1 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11]) />", "a=11 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22]) />", "a=11 b=22 c=3 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33]) />", "a=11 b=22 c=33 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44]) />", "a=11 b=22 c=33 o=[44]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44, 55]) />", "a=11 b=22 c=33 o=[44, 55]");
+
+        assertOutput(macroDef + "<@m?spreadArgs([]) 11 />", "a=11 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11]) 22 />", "a=11 b=22 c=3 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22]) 33 />", "a=11 b=22 c=33 o=[]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33]) 44 />", "a=11 b=22 c=33 o=[44]");
+        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44]) 55 />", "a=11 b=22 c=33 o=[44, 55]");
+
+        assertOutput(macroDef + "<@m?spreadArgs({}) />", "a=1 b=2 c=3 o={}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22}) />", "a=1 b=22 c=3 o={}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33}) />", "a=1 b=22 c=33 o={}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33, 'd':55}) />", "a=1 b=22 c=33 o={d=55}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'd':55, 'e':66}) />", "a=1 b=22 c=3 o={d=55, e=66}");
+
+        assertOutput(macroDef + "<@m?spreadArgs({}) b=22 />", "a=1 b=22 c=3 o={}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22}) c=33 />", "a=1 b=22 c=33 o={}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33}) d=55 />", "a=1 b=22 c=33 o={d=55}");
+        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'd':55}) e=66 />", "a=1 b=22 c=3 o={d=55, e=66}");
+    }
+
+    @Test
+    public void testMethod() throws IOException, TemplateException {
+        addToDataModel("obj", new MethodHolder());
+
+        assertOutput("${obj.m3p(1, 2, 3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?spreadArgs([1, 2, 3])()}", "1, 2, 3");
+        assertOutput("${obj.m3p?spreadArgs([1, 2])(3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?spreadArgs([1])(2, 3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?spreadArgs([])(1, 2, 3)}", "1, 2, 3");
+
+        assertOutput("${obj.m0p()}", "OK");
+        assertOutput("${obj.m0p?spreadArgs([])()}", "OK");
+
+        assertOutput("${obj.mVA(1, 2, 3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?spreadArgs([1, 2, 3, 4])()}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?spreadArgs([1, 2, 3])(4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?spreadArgs([1, 2])(3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?spreadArgs([1])(2, 3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?spreadArgs([])(1, 2, 3, 4)}", "1, 2, o=[3, 4]");
+
+        assertErrorContains("${obj.mVA?spreadArgs({})}", "hash", "sequence", "argument");
+
+        assertOutput("${obj.mNullable(null, 2, null)}", "null, 2, null");
+        addToDataModel("args", Arrays.asList(null, 2, null));
+        assertOutput("${obj.mNullable?spreadArgs(args)()}", "null, 2, null");
+    }
+
+    public static class MethodHolder {
+        public String m3p(int a, int b, int c) {
+            return a + ", " + b + ", " + c;
+        }
+
+        public String m0p() {
+            return "OK";
+        }
+
+        public String mVA(int a, int b, int... others) {
+            StringBuilder sb = new StringBuilder()
+                    .append(a).append(", ").append(b);
+            sb.append(", o=[");
+            for (int i = 0; i < others.length; i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(others[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
+        public String mNullable(Integer a, Integer b, Integer c) {
+            return a + ", " + b + ", " + c;
+        }
+    }
+
+    @Test
+    public void testLegacyMethod() throws IOException, TemplateException {
+        addToDataModel("legacyMethod", new LegacyMethodModel());
+        getConfiguration().setNumberFormat("0.00");
+        assertOutput("${legacyMethod(1, '2')}", "[1.00, 2]");
+        assertOutput("${legacyMethod?spreadArgs([1, '2'])()}", "[1.00, 2]");
+        assertOutput("${legacyMethod?spreadArgs([1])('2')}", "[1.00, 2]");
+        assertOutput("${legacyMethod?spreadArgs([])(1, '2')}", "[1.00, 2]");
+    }
+
+    private static class LegacyMethodModel implements TemplateMethodModel {
+        public Object exec(List arguments) throws TemplateModelException {
+            for (Object argument : arguments) {
+                if (!(argument instanceof String)) {
+                    throw new IllegalArgumentException("Arguments should be String-s");
+                }
+            }
+            return arguments.toString();
+        }
+    }
+
+    @Test
+    public void testTemplateDirectiveModel() throws IOException, TemplateException {
+        addToDataModel("directive", new TestTemplateDirectiveModel());
+
+        assertOutput("<@directive a=1 b=2 c=3; u, v>${u} ${v}</@>",
+                "{a=1, b=2, c=3}{11 22}");
+        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2, 'c': 3}); u, v>${u} ${v}</@>",
+                "{a=1, b=2, c=3}{11 22}");
+        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2}) c=3; u, v>${u} ${v}</@>",
+                "{a=1, b=2, c=3}{11 22}");
+        assertOutput("<@directive?spreadArgs({'a': 1}) b=2 c=3; u, v>${u} ${v}</@>",
+                "{a=1, b=2, c=3}{11 22}");
+        assertOutput("<@directive?spreadArgs({}) a=1 b=2 c=3; u, v>${u} ${v}</@>",
+                "{a=1, b=2, c=3}{11 22}");
+
+        assertOutput("<@directive?spreadArgs({}); u, v>${u} ${v}</@>",
+                "{}{11 22}");
+        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2}) b=22 c=3; u>${u}</@>",
+                "{a=1, b=22, c=3}{11}");
+        Map<String, Integer> args = new LinkedHashMap<String, Integer>();
+        args.put("a", null);
+        args.put("b", 2);
+        args.put("c", 3);
+        args.put("e", 6);
+        addToDataModel("args", args);
+        assertOutput("<@directive?spreadArgs(args) b=22 c=null d=55 />",
+                "{a=null, b=22, c=null, e=6, d=55}{}");
+    }
+
+    private static class TestTemplateDirectiveModel implements TemplateDirectiveModel {
+
+        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws
+                TemplateException, IOException {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{");
+            boolean first = true;
+            for (Map.Entry<String, TemplateModel> param : ((Map<String, TemplateModel>) params).entrySet()) {
+                if (!first) {
+                    sb.append(", ");
+                } else {
+                    first = false;
+                }
+                sb.append(param.getKey());
+                sb.append("=");
+                TemplateModel value = param.getValue();
+                sb.append(value != null ? EvalUtil.coerceModelToPlainText(value, null, null, env) : "null");
+            }
+            sb.append("}");
+            env.getOut().write(sb.toString());
+
+            if (loopVars.length > 0) {
+                loopVars[0] = new SimpleNumber(11);
+                if (loopVars.length > 1) {
+                    loopVars[1] = new SimpleNumber(22);
+                    if (loopVars.length > 2) {
+                        throw new TemplateModelException("Too many loop vars");
+                    }
+                }
+            }
+
+            env.getOut().write("{");
+            if (body != null) {
+                body.render(env.getOut());
+            }
+            env.getOut().write("}");
+        }
+    }
+
+}

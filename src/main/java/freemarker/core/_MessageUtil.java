@@ -252,7 +252,12 @@ public class _MessageUtil {
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash", arg);
     }
-    
+
+    public static TemplateModelException newMethodArgMustBeExtendedHashOrSequnceException(
+            String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash or sequence", arg);
+    }
+
     public static TemplateModelException newMethodArgMustBeSequenceException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence", arg);

@@ -33,14 +33,24 @@ import freemarker.template.Template;
  */
 @Deprecated
 public abstract class TemplateObject {
-    
+
+    // ATTENTION! If you add new fields, update #copyFieldsFrom!
     private Template template;
     int beginColumn, beginLine, endColumn, endLine;
-    
+    // ATTENTION! If you add new fields, update #copyFieldsFrom!
+
     /** This is needed for an ?eval hack; the expression AST nodes will be the descendants of the template, however,
      *  we can't give their position in the template, only in the dynamic string that's evaluated. That's signaled
      *  by a negative line numbers, starting from this constant as line 1. */
-    static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
+    static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;
+    
+    void copyFieldsFrom(TemplateObject that) {
+        this.template = that.template;
+        this.beginColumn = that.beginColumn;;
+        this.beginLine = that.beginLine;;
+        this.endColumn = that.endColumn;;
+        this.endLine = that.endLine;;
+    }
 
     final void setLocation(Template template, Token begin, Token end) {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);

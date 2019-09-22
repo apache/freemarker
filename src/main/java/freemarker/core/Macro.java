@@ -26,11 +26,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * An element representing a macro or function declaration.
@@ -50,26 +53,52 @@ public final class Macro extends TemplateElement implements TemplateModel {
     
     private final String name;
     private final String[] paramNames;
-    private final Map paramNamesWithDefault;
+    private final Map<String, Expression> paramNamesWithDefault;
+    private final SpreadArgs spreadArgs;
     private final String catchAllParamName;
     private final boolean function;
+    private final Object namespaceLookupKey;
 
     /**
      * @param paramNamesWithDefault Maps the parameter names to its default value expression, or to {@code null} if
      *      there's no default value. As parameter order is significant; use {@link LinkedHashMap} or similar.
      *      This doesn't include the catch-all parameter (as that can be specified by name on the caller side).
      */
-    Macro(String name, Map<String, Expression> paramNamesWithDefault,
+    Macro(String name,
+            Map<String, Expression> paramNamesWithDefault,
             String catchAllParamName, boolean function,
             TemplateElements children) {
+        // Attention! Keep this constructor in sync with the other constructor!
         this.name = name;
         this.paramNamesWithDefault = paramNamesWithDefault;
         this.paramNames = paramNamesWithDefault.keySet().toArray(new String[0]);
         this.catchAllParamName = catchAllParamName;
-
+        this.spreadArgs = null;
         this.function = function;
-
         this.setChildren(children);
+        this.namespaceLookupKey = this;
+        // Attention! Keep this constructor in sync with the other constructor!
+    }
+
+    /**
+     * Copy-constructor with replacing {@link #spreadArgs} (with the quirk that the parent of the
+     * child elements will stay the copied macro).
+     *
+     * @param spreadArgs Usually {@code null}; used by {@link BuiltInsForCallables.spread_argsBI} to
+     *      set arbitrary default value to parameters. Note that the defaults aren't
+     *      {@link Expression}-s, but {@link TemplateModel}-s.
+     */
+    Macro(Macro that, SpreadArgs spreadArgs) {
+        // Attention! Keep this constructor in sync with the other constructor!
+        this.name = that.name;
+        this.paramNamesWithDefault = that.paramNamesWithDefault;
+        this.paramNames = that.paramNames;
+        this.catchAllParamName = that.catchAllParamName;
+        this.spreadArgs = spreadArgs; // Using the argument value here
+        this.function = that.function;
+        this.namespaceLookupKey = that.namespaceLookupKey;
+        super.copyFieldsFrom(that);
+        // Attention! Keep this constructor in sync with the other constructor!
     }
 
     public String getCatchAll() {
@@ -92,6 +121,14 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return name;
     }
 
+    public SpreadArgs getSpreadArgs() {
+        return spreadArgs;
+    }
+
+    public Object getNamespaceLookupKey() {
+        return namespaceLookupKey;
+    }
+
     @Override
     TemplateElement[] accept(Environment env) {
         env.visitMacroDef(this);
@@ -103,6 +140,14 @@ public final class Macro extends TemplateElement implements TemplateModel {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
+        if (spreadArgs != null) {
+            // As such a node won't be part of a template, this is probably never needed.
+            sb.append('?')
+                    .append(getTemplate().getActualNamingConvention() == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                            ? BuiltIn.BI_NAME_CAMEL_CASE_SPREAD_ARGS
+                            : BuiltIn.BI_NAME_SNAKE_CASE_SPREAD_ARGS)
+                    .append("(...)");
+        }
         sb.append(' ');
         sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(name));
         if (function) sb.append('(');
@@ -115,15 +160,17 @@ public final class Macro extends TemplateElement implements TemplateModel {
             } else {
                 sb.append(' ');
             }
-            String argName = paramNames[i];
-            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(argName));
-            if (paramNamesWithDefault != null && paramNamesWithDefault.get(argName) != null) {
+
+            String paramName = paramNames[i];
+            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(paramName));
+
+            Expression paramDefaultExp = (Expression) paramNamesWithDefault.get(paramName);
+            if (paramDefaultExp != null) {
                 sb.append('=');
-                Expression defaultExpr = (Expression) paramNamesWithDefault.get(argName);
                 if (function) {
-                    sb.append(defaultExpr.getCanonicalForm());
+                    sb.append(paramDefaultExp.getCanonicalForm());
                 } else {
-                    _MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
+                    _MessageUtil.appendExpressionAsUntearable(sb, paramDefaultExp);
                 }
             }
         }
@@ -160,13 +207,13 @@ public final class Macro extends TemplateElement implements TemplateModel {
         final Environment.Namespace localVars; 
         final TemplateObject callPlace;
         final Environment.Namespace nestedContentNamespace;
-        final List nestedContentParameterNames;
+        final List<String> nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
                 TemplateObject callPlace,
-                List nestedContentParameterNames) {
+                List<String> nestedContentParameterNames) {
             this.localVars = env.new Namespace(); 
             this.callPlace = callPlace;
             this.nestedContentNamespace = env.getCurrentNamespace();
@@ -192,7 +239,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 for (int i = 0; i < paramNames.length; ++i) {
                     String argName = paramNames[i];
                     if (localVars.get(argName) == null) {
-                        Expression defaultValueExp = (Expression) paramNamesWithDefault.get(argName);
+                        Expression defaultValueExp = paramNamesWithDefault.get(argName);
                         if (defaultValueExp != null) {
                             try {
                                 TemplateModel tm = defaultValueExp.eval(env);
@@ -324,6 +371,29 @@ public final class Macro extends TemplateElement implements TemplateModel {
     boolean isNestedBlockRepeater() {
         // Because of recursive calls
         return true;
+    }
+
+    static final class SpreadArgs {
+        private final TemplateHashModelEx byName;
+        private final TemplateSequenceModel byPosition;
+
+        SpreadArgs(TemplateHashModelEx byName) {
+            this.byName = byName;
+            this.byPosition = null;
+        }
+
+        SpreadArgs(TemplateSequenceModel byPosition) {
+            this.byName = null;
+            this.byPosition = byPosition;
+        }
+
+        public TemplateHashModelEx getByName() {
+            return byName;
+        }
+
+        public TemplateSequenceModel getByPosition() {
+            return byPosition;
+        }
     }
     
 }
