@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * An element representing a macro declaration.
+ * An element representing a macro or function declaration.
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
@@ -40,7 +41,6 @@ import freemarker.template.TemplateScalarModel;
 public final class Macro extends TemplateElement implements TemplateModel {
 
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
-            Collections.EMPTY_LIST, 
             Collections.EMPTY_MAP,
             null, false,
             TemplateElements.EMPTY);
@@ -50,21 +50,25 @@ public final class Macro extends TemplateElement implements TemplateModel {
     
     private final String name;
     private final String[] paramNames;
-    private final Map paramDefaults;
+    private final Map paramNamesWithDefault;
     private final String catchAllParamName;
     private final boolean function;
 
-    Macro(String name, List argumentNames, Map args, 
+    /**
+     * @param paramNamesWithDefault Maps the parameter names to its default value expression, or to {@code null} if
+     *      there's no default value. As parameter order is significant; use {@link LinkedHashMap} or similar.
+     *      This doesn't include the catch-all parameter (as that can be specified by name on the caller side).
+     */
+    Macro(String name, Map<String, Expression> paramNamesWithDefault,
             String catchAllParamName, boolean function,
             TemplateElements children) {
         this.name = name;
-        this.paramNames = (String[]) argumentNames.toArray(
-                new String[argumentNames.size()]);
-        this.paramDefaults = args;
-        
+        this.paramNamesWithDefault = paramNamesWithDefault;
+        this.paramNames = paramNamesWithDefault.keySet().toArray(new String[0]);
+        this.catchAllParamName = catchAllParamName;
+
         this.function = function;
-        this.catchAllParamName = catchAllParamName; 
-        
+
         this.setChildren(children);
     }
 
@@ -81,7 +85,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     boolean hasArgNamed(String name) {
-        return paramDefaults.containsKey(name);
+        return paramNamesWithDefault.containsKey(name);
     }
     
     public String getName() {
@@ -113,9 +117,9 @@ public final class Macro extends TemplateElement implements TemplateModel {
             }
             String argName = paramNames[i];
             sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(argName));
-            if (paramDefaults != null && paramDefaults.get(argName) != null) {
+            if (paramNamesWithDefault != null && paramNamesWithDefault.get(argName) != null) {
                 sb.append('=');
-                Expression defaultExpr = (Expression) paramDefaults.get(argName);
+                Expression defaultExpr = (Expression) paramNamesWithDefault.get(argName);
                 if (function) {
                     sb.append(defaultExpr.getCanonicalForm());
                 } else {
@@ -177,7 +181,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         }
 
         // Set default parameters, check if all the required parameters are defined.
-        void sanityCheck(Environment env) throws TemplateException {
+        void checkParamsSetAndApplyDefaults(Environment env) throws TemplateException {
             boolean resolvedAnArg, hasUnresolvedArg;
             Expression firstUnresolvedExpression;
             InvalidReferenceException firstReferenceException;
@@ -188,13 +192,13 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 for (int i = 0; i < paramNames.length; ++i) {
                     String argName = paramNames[i];
                     if (localVars.get(argName) == null) {
-                        Expression valueExp = (Expression) paramDefaults.get(argName);
-                        if (valueExp != null) {
+                        Expression defaultValueExp = (Expression) paramNamesWithDefault.get(argName);
+                        if (defaultValueExp != null) {
                             try {
-                                TemplateModel tm = valueExp.eval(env);
+                                TemplateModel tm = defaultValueExp.eval(env);
                                 if (tm == null) {
                                     if (!hasUnresolvedArg) {
-                                        firstUnresolvedExpression = valueExp;
+                                        firstUnresolvedExpression = defaultValueExp;
                                         hasUnresolvedArg = true;
                                     }
                                 } else {
@@ -282,7 +286,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 if (idx % 2 != 0) {
                     return paramName;
                 } else {
-                    return paramDefaults.get(paramName);
+                    return paramNamesWithDefault.get(paramName);
                 }
             } else if (idx == argDescsEnd) {
                 return catchAllParamName;

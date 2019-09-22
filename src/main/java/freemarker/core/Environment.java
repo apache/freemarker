@@ -868,7 +868,7 @@ public final class Environment extends Configurable {
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macroOrFunction);
 
             try {
-                macroCtx.sanityCheck(this);
+                macroCtx.checkParamsSetAndApplyDefaults(this);
                 visit(macroOrFunction.getChildBuffer());
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>

@@ -37,7 +37,7 @@ import freemarker.template.utility.ObjectFactory;
 import freemarker.template.utility.StringUtil;
 
 /**
- * An element for the unified macro/transform syntax. 
+ * An element for calling a macro/directive/transform.
  */
 final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
