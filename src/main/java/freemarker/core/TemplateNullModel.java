@@ -27,13 +27,13 @@ import freemarker.template.TemplateModel;
  * doesn't exist at all in the current scope, and so we fall back to a higher scope. This distinction wasn is only
  * used for (and expected from) certain scopes, so be careful where you are using it. (As of this
  * writing, it's onlt for local variables, including loop variables). The user should never meet a
- * {@link NullTemplateModel}, it must not be returned from public API-s.
+ * {@link TemplateNullModel}, it must not be returned from public API-s.
  *
  * @see Environment#getNullableLocalVariable(String)
  *
  * @since 2.3.29
  */
-final class NullTemplateModel implements TemplateModel {
-    static final NullTemplateModel INSTANCE = new NullTemplateModel();
-    private NullTemplateModel() { }
+final class TemplateNullModel implements TemplateModel {
+    static final TemplateNullModel INSTANCE = new TemplateNullModel();
+    private TemplateNullModel() { }
 }

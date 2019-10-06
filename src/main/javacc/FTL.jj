@@ -419,7 +419,7 @@ public class FMParser {
      */
     private void notBooleanLiteral(Expression exp, String expected) throws ParseException {
         if (exp instanceof BooleanLiteral) {
-            throw new ParseException("Found: " + exp.getCanonicalForm() + ". Expecting " + expected, exp);
+            throw new ParseException("Found: " + exp.getCanonicalForm() + " literal. Expecting " + expected , exp);
         }
     }
 
@@ -1893,10 +1893,10 @@ Expression EqualityExpression() :
         )
         rhs = RelationalExpression()
         {
-	        notHashLiteral(lhs, "string");
-	        notHashLiteral(rhs, "string");
-	        notListLiteral(lhs, "string");
-	        notListLiteral(rhs, "string");
+	        notHashLiteral(lhs, "different type for equality check");
+	        notHashLiteral(rhs, "different type for equality check");
+	        notListLiteral(lhs, "different type for equality check");
+	        notListLiteral(rhs, "different type for equality check");
 	        result = new ComparisonExpression(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
@@ -1930,12 +1930,8 @@ Expression RelationalExpression() :
         )
         rhs = RangeExpression()
         {
-            notHashLiteral(lhs, "number");
-            notHashLiteral(rhs, "number");
-            notListLiteral(lhs, "number");
-            notListLiteral(rhs, "number");
-            notStringLiteral(lhs, "number");
-            notStringLiteral(rhs, "number");
+            numberLiteralOnly(lhs);
+            numberLiteralOnly(rhs);
             result = new ComparisonExpression(lhs, rhs, t.image);
             result.setLocation(template, lhs, rhs);
         }
@@ -3438,17 +3434,16 @@ Macro Macro() :
     Token arg, start, end;
     Expression nameExp;
     String name;
-    ArrayList argNames = new ArrayList();
-    HashMap args = new HashMap();
-    ArrayList defNames = new ArrayList();
+    Map<String, Expression> paramNamesWithDefault = new LinkedHashMap<String, Expression>();
     Expression defValue = null;
+    String catchAllParamName = null;
+    boolean isCatchAll = false;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
     int lastContiunableDirectiveNesting;
     TemplateElements children;
-    boolean isFunction = false, hasDefaults = false;
-    boolean isCatchAll = false;
-    String catchAll = null;
+    boolean isFunction = false;
+    boolean hasDefaults = false;
 }
 {
     (
@@ -3478,13 +3473,12 @@ Macro Macro() :
             <EQUALS>
             defValue = Expression()
             {
-                defNames.add(arg.image);
                 hasDefaults = true;
             }
         ]
         [<COMMA>]
         {
-            if (catchAll != null) {
+            if (catchAllParamName != null) {
                 throw new ParseException(
                 "There may only be one \"catch-all\" parameter in a macro declaration, and it must be the last parameter.",
                 template, arg);
@@ -3495,16 +3489,15 @@ Macro Macro() :
                     "\"Catch-all\" macro parameter may not have a default value.",
                     template, arg);
                 }
-                catchAll = arg.image;
+                catchAllParamName = arg.image;
             } else {
-                argNames.add(arg.image);
                 if (hasDefaults && defValue == null) {
                     throw new ParseException(
 		                    "In a macro declaration, parameters without a default value "
 		                    + "must all occur before the parameters with default values.",
                     template, arg);
                 }
-                args.put(arg.image, defValue);
+                paramNamesWithDefault.put(arg.image, defValue);
             }
         }
     )*
@@ -3544,7 +3537,7 @@ Macro Macro() :
         }
         
         inMacro = inFunction = false;
-        Macro result = new Macro(name, argNames, args, catchAll, isFunction, children);
+        Macro result = new Macro(name, paramNamesWithDefault, catchAllParamName, isFunction, children);
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;

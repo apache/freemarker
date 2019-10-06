@@ -69,6 +69,6 @@ public interface TemplateDirectiveModel extends TemplateModel {
      * @throws IOException When writing the template output fails. Other {@link IOException}-s should be catched in this
      *          method and wrapped into {@link TemplateException}.   
      */
-   public void execute(Environment env, Map params, TemplateModel[] loopVars, 
+   void execute(Environment env, Map params, TemplateModel[] loopVars,
             TemplateDirectiveBody body) throws TemplateException, IOException;
 }

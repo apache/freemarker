@@ -63,7 +63,7 @@ final class LocalLambdaExpression extends Expression {
      */
     TemplateModel invokeLambdaDefinedFunction(TemplateModel argValue, Environment env) throws TemplateException {
         return env.evaluateWithNewLocal(rho, lho.getParameters().get(0).getName(),
-                argValue != null ? argValue : NullTemplateModel.INSTANCE);
+                argValue != null ? argValue : TemplateNullModel.INSTANCE);
     }
 
     @Override

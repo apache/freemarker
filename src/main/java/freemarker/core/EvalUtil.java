@@ -441,7 +441,8 @@ class EvalUtil {
      * 
      * @param seqTip
      *            Tip to display if the value type is not coercable, but it's sequence or collection.
-     * 
+     * @param exp {@code null} is allowed, but may results in less helpful error messages
+     *
      * @return Never {@code null}
      */
     static String coerceModelToPlainText(TemplateModel tm, Expression exp, String seqTip,
@@ -461,7 +462,8 @@ class EvalUtil {
      * 
      * @param supportsTOM
      *            Whether the caller {@code coerceModelTo...} method could handle a {@link TemplateMarkupOutputModel}.
-     *            
+     * @param exp {@code null} is allowed, but may results in less helpful error messages
+     *
      * @return Never {@code null}
      */
     private static String coerceModelToTextualCommon(

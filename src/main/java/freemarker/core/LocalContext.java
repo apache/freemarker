@@ -35,7 +35,7 @@ public interface LocalContext {
 
     /**
      * @return {@code null} if the variable doesn't exit. Since 2.3.29, if this context represents loop variables, this
-     *     is possibly {@code freemarker.core.NullTemplateModel.INSTANCE} (an internal class) when
+     *     is possibly {@code freemarker.core.TemplateNullModel.INSTANCE} (an internal class) when
      *     {@link Configuration#setFallbackOnNullLoopVariable(boolean)} was set to {@code false}, in which
      *     case the caller must not fall back to higher scopes to find the variable, and treat the value as
      *     {@code null} in other respects. While this is in theory an incompatible change in 2.3.29, it's not a problem,

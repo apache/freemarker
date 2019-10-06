@@ -61,6 +61,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -75,6 +76,7 @@ import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.TemplateModelUtils;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -171,7 +173,7 @@ public final class Environment extends Configurable {
     private Throwable lastThrowable;
 
     private TemplateModel lastReturnValue;
-    private HashMap macroToNamespaceLookup = new HashMap();
+    private Map<Object, Namespace> macroToNamespaceLookup = new IdentityHashMap<Object, Namespace>();
 
     private TemplateNodeModel currentVisitorNode;
     private TemplateSequenceModel nodeNamespaces;
@@ -804,8 +806,8 @@ public final class Environment extends Configurable {
      * Calls a macro with the given arguments and nested block.
      */
     void invokeMacro(Macro macro,
-            Map namedArgs, List<? extends Expression> positionalArgs,
-            List bodyParameterNames, TemplateObject callPlace) throws TemplateException, IOException {
+            Map<String, ? extends Expression> namedArgs, List<? extends Expression> positionalArgs,
+            List<String> bodyParameterNames, TemplateObject callPlace) throws TemplateException, IOException {
         invokeMacroOrFunctionCommonPart(macro, namedArgs, positionalArgs, bodyParameterNames, callPlace);
     }
 
@@ -833,8 +835,9 @@ public final class Environment extends Configurable {
     }
 
     private void invokeMacroOrFunctionCommonPart(Macro macroOrFunction,
-            Map namedArgs, List<? extends Expression> positionalArgs,
-            List<Expression> bodyParameterNames, TemplateObject callPlace) throws TemplateException, IOException {
+            Map<String, ? extends Expression> namedArgs, List<? extends Expression> positionalArgs,
+            List<String> bodyParameterNames, TemplateObject callPlace) throws TemplateException,
+            IOException {
         if (macroOrFunction == Macro.DO_NOTHING_MACRO) {
             return;
         }
@@ -865,10 +868,10 @@ public final class Environment extends Configurable {
             localContextStack = null;
 
             final Namespace prevNamespace = currentNamespace;
-            currentNamespace = (Namespace) macroToNamespaceLookup.get(macroOrFunction);
+            currentNamespace = getMacroNamespace(macroOrFunction);
 
             try {
-                macroCtx.sanityCheck(this);
+                macroCtx.checkParamsSetAndApplyDefaults(this);
                 visit(macroOrFunction.getChildBuffer());
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>
@@ -892,62 +895,134 @@ public final class Environment extends Configurable {
     private void setMacroContextLocalsFromArguments(
             final Macro.Context macroCtx,
             final Macro macro,
-            final Map namedArgs, final List<? extends Expression> positionalArgs) throws TemplateException,
-            _MiscTemplateException {
+            final Map<String, ? extends Expression> namedArgs, final List<? extends Expression> positionalArgs)
+            throws TemplateException {
         String catchAllParamName = macro.getCatchAll();
+        SimpleHash namedCatchAllParamValue = null;
+        SimpleSequence positionalCatchAllParamValue = null;
+        int nextPositionalArgToAssignIdx = 0;
+
+        // Used for ?spread_args(...):
+        Macro.SpreadArgs spreadArgs = macro.getSpreadArgs();
+        if (spreadArgs != null) {
+            TemplateHashModelEx byNameSpreadArgs = spreadArgs.getByName();
+            TemplateSequenceModel byPositionSpreadArgs = spreadArgs.getByPosition();
+
+            if (byNameSpreadArgs != null) {
+                new HashMap<String, TemplateModel>(byNameSpreadArgs.size() * 4 / 3, 1f);
+                TemplateHashModelEx2.KeyValuePairIterator namedParamValueOverridesIter =
+                        TemplateModelUtils.getKeyValuePairIterator(byNameSpreadArgs);
+                while (namedParamValueOverridesIter.hasNext()) {
+                    TemplateHashModelEx2.KeyValuePair defaultArgHashKVP = namedParamValueOverridesIter.next();
+
+                    String argName;
+                    {
+                        TemplateModel argNameTM = defaultArgHashKVP.getKey();
+                        if (!(argNameTM instanceof TemplateScalarModel)) {
+                            throw new _TemplateModelException(
+                                    "Expected string keys in the spread args hash, but one of the keys was ",
+                                    new _DelayedAOrAn(new _DelayedFTLTypeDescription(argNameTM)), ".");
+                        }
+                        argName = EvalUtil.modelToString((TemplateScalarModel) argNameTM, null, null);
+                    }
+
+                    TemplateModel argValue = defaultArgHashKVP.getValue();
+                    // What if argValue is null? It still has to occur in the named catch-all parameter, to be similar
+                    // to <@macroWithCatchAll a=null b=null />, that will also add the keys to the catch-all hash.
+                    // Similarly, we also still fail if the name is not declared.
+                    final boolean isArgNameDeclared = macro.hasArgNamed(argName);
+                    if (isArgNameDeclared) {
+                        macroCtx.setLocalVar(argName, argValue);
+                    } else if (catchAllParamName != null) {
+                        if (namedCatchAllParamValue == null) {
+                            namedCatchAllParamValue = initNamedCatchAllParameter(macroCtx, catchAllParamName);
+                        }
+                        namedCatchAllParamValue.put(argName, argValue);
+                    } else {
+                        throw newUndeclaredParamNameException(macro, argName);
+                    }
+                }
+            } else if (byPositionSpreadArgs != null) {
+                String[] argNames = macro.getArgumentNamesInternal();
+                final int argsCnt = byPositionSpreadArgs.size();
+                if (argNames.length < argsCnt && catchAllParamName == null) {
+                    throw newTooManyArgumentsException(macro, argNames, argsCnt);
+                }
+                for (int i = 0; i < argsCnt; i++) {
+                    TemplateModel argValue = byPositionSpreadArgs.get(i);
+                    try {
+                        if (nextPositionalArgToAssignIdx < argNames.length) {
+                            String argName = argNames[nextPositionalArgToAssignIdx++];
+                            macroCtx.setLocalVar(argName, argValue);
+                        } else {
+                            if (positionalCatchAllParamValue == null) {
+                                positionalCatchAllParamValue = initPositionalCatchAllParameter(macroCtx, catchAllParamName);
+                            }
+                            positionalCatchAllParamValue.add(argValue);
+                        }
+                    } catch (RuntimeException re) {
+                        throw new _MiscTemplateException(re, this);
+                    }
+                }
+            }
+        }
+
         if (namedArgs != null) {
-            final SimpleHash catchAllParamValue;
-            if (catchAllParamName != null) {
-                catchAllParamValue = new SimpleHash((ObjectWrapper) null);
-                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
-            } else {
-                catchAllParamValue = null;
+            if (catchAllParamName != null && namedCatchAllParamValue == null && positionalCatchAllParamValue == null) {
+                if (namedArgs.isEmpty() && spreadArgs != null && spreadArgs.getByPosition() != null) {
+                    positionalCatchAllParamValue = initPositionalCatchAllParameter(macroCtx, catchAllParamName);
+                } else {
+                    namedCatchAllParamValue = initNamedCatchAllParameter(macroCtx, catchAllParamName);
+                }
             }
 
-            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
-                final Map.Entry argNameAndValExp = (Map.Entry) it.next();
-                final String argName = (String) argNameAndValExp.getKey();
+            for (Map.Entry<String, ? extends Expression> argNameAndValExp : namedArgs.entrySet()) {
+                final String argName = argNameAndValExp.getKey();
                 final boolean isArgNameDeclared = macro.hasArgNamed(argName);
-                if (isArgNameDeclared || catchAllParamName != null) {
-                    Expression argValueExp = (Expression) argNameAndValExp.getValue();
+                if (isArgNameDeclared || namedCatchAllParamValue != null) {
+                    final Expression argValueExp = argNameAndValExp.getValue();
                     TemplateModel argValue = argValueExp.eval(this);
                     if (isArgNameDeclared) {
                         macroCtx.setLocalVar(argName, argValue);
                     } else {
-                        catchAllParamValue.put(argName, argValue);
+                        namedCatchAllParamValue.put(argName, argValue);
                     }
                 } else {
-                    throw new _MiscTemplateException(this,
-                            (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                            " has no parameter with name ", new _DelayedJQuote(argName), ".");
+                    if (positionalCatchAllParamValue != null) {
+                        throw newBothNamedAndPositionalCatchAllParamsException(macro);
+                    } else {
+                        throw newUndeclaredParamNameException(macro, argName);
+                    }
                 }
             }
         } else if (positionalArgs != null) {
-            final SimpleSequence catchAllParamValue;
-            if (catchAllParamName != null) {
-                catchAllParamValue = new SimpleSequence((ObjectWrapper) null);
-                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
-            } else {
-                catchAllParamValue = null;
+            if (catchAllParamName != null && positionalCatchAllParamValue == null && namedCatchAllParamValue == null) {
+                if (positionalArgs.isEmpty() && spreadArgs != null && spreadArgs.getByName() != null) {
+                    namedCatchAllParamValue = initNamedCatchAllParameter(macroCtx, catchAllParamName);
+                } else {
+                    positionalCatchAllParamValue = initPositionalCatchAllParameter(macroCtx, catchAllParamName);
+                }
             }
 
             String[] argNames = macro.getArgumentNamesInternal();
             final int argsCnt = positionalArgs.size();
-            if (argNames.length < argsCnt && catchAllParamName == null) {
-                throw new _MiscTemplateException(this,
-                        (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                        " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
-                        new _DelayedToString(argsCnt), ".");
+            final int argsWithSpreadArgsCnt = argsCnt + nextPositionalArgToAssignIdx;
+            if (argNames.length < argsWithSpreadArgsCnt && positionalCatchAllParamValue == null) {
+                if (namedCatchAllParamValue != null) {
+                    throw newBothNamedAndPositionalCatchAllParamsException(macro);
+                } else {
+                    throw newTooManyArgumentsException(macro, argNames, argsWithSpreadArgsCnt);
+                }
             }
-            for (int i = 0; i < argsCnt; i++) {
-                Expression argValueExp = positionalArgs.get(i);
+            for (int srcPosArgIdx = 0; srcPosArgIdx < argsCnt; srcPosArgIdx++) {
+                Expression argValueExp = positionalArgs.get(srcPosArgIdx);
                 TemplateModel argValue = argValueExp.eval(this);
                 try {
-                    if (i < argNames.length) {
-                        String argName = argNames[i];
+                    if (nextPositionalArgToAssignIdx < argNames.length) {
+                        String argName = argNames[nextPositionalArgToAssignIdx++];
                         macroCtx.setLocalVar(argName, argValue);
                     } else {
-                        catchAllParamValue.add(argValue);
+                        positionalCatchAllParamValue.add(argValue);
                     }
                 } catch (RuntimeException re) {
                     throw new _MiscTemplateException(re, this);
@@ -956,16 +1031,49 @@ public final class Environment extends Configurable {
         }
     }
 
+    private _MiscTemplateException newTooManyArgumentsException(Macro macro, String[] argNames, int argsCnt) {
+        return new _MiscTemplateException(this,
+                (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
+                new _DelayedToString(argsCnt), ".");
+    }
+
+    private static SimpleSequence initPositionalCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
+        SimpleSequence positionalCatchAllParamValue;
+        positionalCatchAllParamValue = new SimpleSequence((ObjectWrapper) null);
+        macroCtx.setLocalVar(catchAllParamName, positionalCatchAllParamValue);
+        return positionalCatchAllParamValue;
+    }
+
+    private static SimpleHash initNamedCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
+        SimpleHash namedCatchAllParamValue;
+        namedCatchAllParamValue = new SimpleHash((ObjectWrapper) null);
+        macroCtx.setLocalVar(catchAllParamName, namedCatchAllParamValue);
+        return namedCatchAllParamValue;
+    }
+
+    private _MiscTemplateException newUndeclaredParamNameException(Macro macro, String argName) {
+        return new _MiscTemplateException(this,
+                (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                " has no parameter with name ", new _DelayedJQuote(argName), ".");
+    }
+
+    private _MiscTemplateException newBothNamedAndPositionalCatchAllParamsException(Macro macro) {
+        return new _MiscTemplateException(this,
+                (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                " call can't have both named and positional arguments that has to go into catch-all parameter.");
+    }
+
     /**
      * Defines the given macro in the current namespace (doesn't call it).
      */
     void visitMacroDef(Macro macro) {
-        macroToNamespaceLookup.put(macro, currentNamespace);
+        macroToNamespaceLookup.put(macro.getNamespaceLookupKey(), currentNamespace);
         currentNamespace.put(macro.getName(), macro);
     }
 
     Namespace getMacroNamespace(Macro macro) {
-        return (Namespace) macroToNamespaceLookup.get(macro);
+        return macroToNamespaceLookup.get(macro.getNamespaceLookupKey());
     }
 
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
@@ -2038,12 +2146,12 @@ public final class Environment extends Configurable {
      */
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         TemplateModel val = getNullableLocalVariable(name);
-        return val != NullTemplateModel.INSTANCE ? val : null;
+        return val != TemplateNullModel.INSTANCE ? val : null;
     }
 
     /**
-     * Similar to {@link #getLocalVariable(String)}, but might returns {@link NullTemplateModel}. Only used internally,
-     * as {@link NullTemplateModel} is internal.
+     * Similar to {@link #getLocalVariable(String)}, but might returns {@link TemplateNullModel}. Only used internally,
+     * as {@link TemplateNullModel} is internal.
      *
      * @since 2.3.29
      */
@@ -2080,7 +2188,7 @@ public final class Environment extends Configurable {
     public TemplateModel getVariable(String name) throws TemplateModelException {
         TemplateModel result = getNullableLocalVariable(name);
         if (result != null) {
-            return result != NullTemplateModel.INSTANCE ? result : null;
+            return result != TemplateNullModel.INSTANCE ? result : null;
         }
 
         result = currentNamespace.get(name);
@@ -2092,19 +2200,33 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the globally visible variable of the given name (or null). This is correspondent to FTL
+     * Returns the globally visible variable of the given name (or null). This is corresponds to FTL
      * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
-     * ...&gt; and then at the data model exposed to the template.
+     * ...&gt; and then at the data model exposed to the template, and then at the
+     * {@linkplain Configuration#setSharedVariables(Map)} shared variables} in the {@link Configuration}.
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
         TemplateModel result = globalNamespace.get(name);
-        if (result == null) {
-            result = rootDataModel.get(name);
+        if (result != null) {
+            return result;
         }
-        if (result == null) {
-            result = configuration.getSharedVariable(name);
+
+        return getDataModelOrSharedVariable(name);
+    }
+
+    /**
+     * Returns the variable from the data-model, or if it's not there, then from the
+     * {@linkplain Configuration#setSharedVariables(Map)} shared variables}
+     *
+     * @since 2.3.30
+     */
+    public TemplateModel getDataModelOrSharedVariable(String name) throws TemplateModelException {
+        TemplateModel dataModelVal = rootDataModel.get(name);
+        if (dataModelVal != null) {
+            return dataModelVal;
         }
-        return result;
+
+        return configuration.getSharedVariable(name);
     }
 
     /**
@@ -2405,8 +2527,7 @@ public final class Environment extends Configurable {
                     }
 
                     public TemplateModel get(String key) throws TemplateModelException {
-                        TemplateModel value = rootDataModel.get(key);
-                        return value != null ? value : configuration.getSharedVariable(key);
+                        return getDataModelOrSharedVariable(key);
                     }
 
                     // NB: The methods below do not take into account

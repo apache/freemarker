@@ -53,13 +53,13 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
      */
     @Override
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: " 
-                                         + obj.getClass().getName());
+        throw new TemplateModelException(this.getClass().getName() + " deliberately won't wrap this type: "
+                + obj.getClass().getName());
     }
 
     @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("SimpleObjectWrapper deliberately doesn't allow ?api.");
+        throw new TemplateModelException(this.getClass().getName() + " deliberately doesn't allow ?api.");
     }
     
 }

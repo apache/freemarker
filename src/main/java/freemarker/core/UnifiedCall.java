@@ -37,21 +37,22 @@ import freemarker.template.utility.ObjectFactory;
 import freemarker.template.utility.StringUtil;
 
 /**
- * An element for the unified macro/transform syntax. 
+ * An element for calling a macro/directive/transform.
  */
 final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     private Expression nameExp;
-    private Map namedArgs;
-    private List positionalArgs, bodyParameterNames;
+    private Map<String, ? extends Expression> namedArgs;
+    private List<? extends Expression> positionalArgs;
+    private List<String> bodyParameterNames;
     boolean legacySyntax;
     private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
     private CustomDataHolder customDataHolder;
 
     UnifiedCall(Expression nameExp,
-         Map namedArgs,
+         Map<String, ? extends Expression> namedArgs,
          TemplateElements children,
-         List bodyParameterNames) {
+         List<String> bodyParameterNames) {
         this.nameExp = nameExp;
         this.namedArgs = namedArgs;
         setChildren(children);
@@ -59,9 +60,9 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     UnifiedCall(Expression nameExp,
-         List positionalArgs,
+         List<? extends Expression> positionalArgs,
          TemplateElements children,
-         List bodyParameterNames) {
+         List<String> bodyParameterNames) {
         this.nameExp = nameExp;
         this.positionalArgs = positionalArgs;
         setChildren(children);

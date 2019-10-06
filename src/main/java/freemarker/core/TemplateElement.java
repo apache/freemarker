@@ -22,6 +22,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.swing.tree.TreeNode;
 
@@ -43,11 +44,18 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
 
     private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
 
+    // ATTENTION! If you add new fields, update #copyFieldsFrom!
+
+    /**
+     * The parent element of this element.
+     */
     private TemplateElement parent;
 
     /**
      * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there are
-     * no nested elements.
+     * no nested elements. Normally, the {@link #parent} of these is the {@code this}, however, in some exceptional
+     * cases it's not so, to avoid copying the whole descendant tree with a different parent (as in the result of
+     * {@link Macro#Macro(Macro, Map)}.
      */
     private TemplateElement[] childBuffer;
 
@@ -63,6 +71,8 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
      * @since 2.3.23
      */
     private int index;
+
+    // ATTENTION! If you add new fields, update #copyFieldsFrom too!
 
     /**
      * Executes this {@link TemplateElement}. Usually should not be called directly, but through
@@ -336,6 +346,17 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         }
         this.childBuffer = childBuffer;
         this.childCount = childCount;
+    }
+
+    /**
+     * Beware, parent node of child elements won't match this element.
+     */
+    final void copyFieldsFrom(TemplateElement that) {
+        super.copyFieldsFrom(that);
+        this.parent = that.parent;
+        this.index = that.index;
+        this.childBuffer = that.childBuffer;
+        this.childCount = that.childCount;
     }
 
     final int getIndex() {
