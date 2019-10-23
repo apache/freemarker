@@ -28783,6 +28783,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Bug fixed: AST traversal API now can properly traverse the
               inside of lambda expressions (such as the parameter list)</para>
             </listitem>
+
+            <listitem>
+              <para>Added a new <literal>SimpleHash</literal> constructor,
+              where the caller can provide the <literal>Map</literal> instance
+              used as the backing storage, thus allows controlling the
+              ordering, and other technical aspects (like the initial
+              capacity) of the underlying <literal>Map</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
