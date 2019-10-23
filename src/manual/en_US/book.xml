@@ -28860,8 +28860,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><link linkend="ref.directive.macro">Macro catch-all
               parameters</link> (aka. macro varargs), when capture arguments
-              passed by name (as opposed to by position), now keep the order
-              of arguments.</para>
+              passed by name (as opposed to by position), now keep the
+              original order of arguments. Earlier the order wasn't
+              predictable.</para>
             </listitem>
 
             <listitem>
