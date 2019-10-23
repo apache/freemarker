@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1047,7 +1048,7 @@ public final class Environment extends Configurable {
 
     private static SimpleHash initNamedCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleHash namedCatchAllParamValue;
-        namedCatchAllParamValue = new SimpleHash((ObjectWrapper) null);
+        namedCatchAllParamValue = new SimpleHash(new LinkedHashMap<String, Object>(), null, 0);
         macroCtx.setLocalVar(catchAllParamName, namedCatchAllParamValue);
         return namedCatchAllParamValue;
     }

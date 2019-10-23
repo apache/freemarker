@@ -115,6 +115,28 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     }
 
     /**
+     * Creates an instance that will use the specified {@link Map} directly as its backing store; beware, the
+     * {@link Map} will be possibly modified by {@link SimpleHash}, even if you only read the {@link SimpleHash}.
+     * That's because when a value is read, it's replaced with the corresponding {@link TemplateModel}.
+     *
+     * <p>The goal of this constructor is to allow you to control technical aspects, like the initial capacity, and
+     * ordering of the underlying {@link Map} implementation. The iteration order of the {@link SimpleHash} will be
+     * the same as of the underlying {@link Map}.
+     *
+     * @param directMap The map that the instance will use directly as backing storage; possibly will be modified,
+     *                  even when you only read the {@link SimpleHash}! Must allow any kind of object as value,
+     *                  including {@code null}! Supporting {@code null} keys is not needed.
+     *
+     * @param overloadDistinction To avoid ambiguity with other overloads; the value is unused.
+     *
+     * @since 2.3.30
+     */
+    public SimpleHash(Map<String, Object> directMap, ObjectWrapper wrapper, int overloadDistinction) {
+        super(wrapper);
+        this.map = directMap;
+    }
+
+    /**
      * Creates a new hash by shallow-coping (possibly cloning) the underlying map; in many applications you should use
      * {@link DefaultMapAdapter} instead.
      *

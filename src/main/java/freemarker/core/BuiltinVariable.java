@@ -78,8 +78,10 @@ final class BuiltinVariable extends Expression {
     static final String GET_OPTIONAL_TEMPLATE_CC = "getOptionalTemplate";
     static final String CALLER_TEMPLATE_NAME = "caller_template_name";
     static final String CALLER_TEMPLATE_NAME_CC = "callerTemplateName";
+    static final String ARGS = "args";
     static final String[] SPEC_VAR_NAMES = new String[] {
         // IMPORTANT! Keep this sorted alphabetically!
+        ARGS,
         AUTO_ESC_CC,
         AUTO_ESC,
         CALLER_TEMPLATE_NAME_CC,
@@ -256,19 +258,31 @@ final class BuiltinVariable extends Expression {
             return GetOptionalTemplateMethod.INSTANCE_CC;
         }
         if (name == CALLER_TEMPLATE_NAME || name == CALLER_TEMPLATE_NAME_CC) {
-            Context ctx = env.getCurrentMacroContext();
-            if (ctx == null) {
-                throw new TemplateException(
-                        "Can't get ." + name + " here, as there's no macro or function (that's "
-                        + "implemented in the template) call in context.", env);
-            }
-            TemplateObject callPlace = ctx.callPlace;
+            TemplateObject callPlace = getRequiredMacroContext(env).callPlace;
             String name = callPlace != null ? callPlace.getTemplate().getName() : null;
             return name != null ? new SimpleScalar(name) : TemplateScalarModel.EMPTY_STRING;
         }
-        
+        if (name == ARGS) {
+            TemplateModel args = getRequiredMacroContext(env).getArgsSpecialVariableValue();
+            if (args == null) {
+                // Should be impossible, as the parser checks this condition already.
+                throw new _MiscTemplateException(this, "The \"", ARGS, "\" special variable wasn't initialized.", name);
+            }
+            return args;
+        }
+
         throw new _MiscTemplateException(this,
                 "Invalid special variable: ", name);
+    }
+
+    private Context getRequiredMacroContext(Environment env) throws TemplateException {
+        Context ctx = env.getCurrentMacroContext();
+        if (ctx == null) {
+            throw new TemplateException(
+                    "Can't get ." + name + " here, as there's no macro or function (that's "
+                    + "implemented in the template) call in context.", env);
+        }
+        return ctx;
     }
 
     @Override

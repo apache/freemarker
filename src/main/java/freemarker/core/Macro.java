@@ -27,8 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import freemarker.template.Configuration;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -45,7 +48,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
             Collections.EMPTY_MAP,
-            null, false,
+            null, false, false,
             TemplateElements.EMPTY);
     
     final static int TYPE_MACRO = 0;
@@ -55,6 +58,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     private final String[] paramNames;
     private final Map<String, Expression> paramNamesWithDefault;
     private final SpreadArgs spreadArgs;
+    private boolean requireArgsSpecialVariable;
     private final String catchAllParamName;
     private final boolean function;
     private final Object namespaceLookupKey;
@@ -66,7 +70,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
      */
     Macro(String name,
             Map<String, Expression> paramNamesWithDefault,
-            String catchAllParamName, boolean function,
+            String catchAllParamName, boolean function, boolean requireArgsSpecialVariable,
             TemplateElements children) {
         // Attention! Keep this constructor in sync with the other constructor!
         this.name = name;
@@ -74,6 +78,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.paramNames = paramNamesWithDefault.keySet().toArray(new String[0]);
         this.catchAllParamName = catchAllParamName;
         this.spreadArgs = null;
+        this.requireArgsSpecialVariable = requireArgsSpecialVariable;
         this.function = function;
         this.setChildren(children);
         this.namespaceLookupKey = this;
@@ -82,7 +87,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     /**
      * Copy-constructor with replacing {@link #spreadArgs} (with the quirk that the parent of the
-     * child elements will stay the copied macro).
+     * child AST elements will stay the copied macro).
      *
      * @param spreadArgs Usually {@code null}; used by {@link BuiltInsForCallables.spread_argsBI} to
      *      set arbitrary default value to parameters. Note that the defaults aren't
@@ -95,10 +100,15 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.paramNames = that.paramNames;
         this.catchAllParamName = that.catchAllParamName;
         this.spreadArgs = spreadArgs; // Using the argument value here
+        this.requireArgsSpecialVariable = that.requireArgsSpecialVariable;
         this.function = that.function;
         this.namespaceLookupKey = that.namespaceLookupKey;
         super.copyFieldsFrom(that);
         // Attention! Keep this constructor in sync with the other constructor!
+    }
+
+    boolean getRequireArgsSpecialVariable() {
+        return requireArgsSpecialVariable;
     }
 
     public String getCatchAll() {
@@ -210,6 +220,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         final List<String> nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
+        TemplateModel argsSpecialVariableValue;
         
         Context(Environment env, 
                 TemplateObject callPlace,
@@ -221,41 +232,55 @@ public final class Macro extends TemplateElement implements TemplateModel {
             this.prevLocalContextStack = env.getLocalContextStack();
             this.prevMacroContext = env.getCurrentMacroContext();
         }
-                
-        
+
         Macro getMacro() {
             return Macro.this;
         }
 
-        // Set default parameters, check if all the required parameters are defined.
+        /**
+         * Set default parameters, check if all the required parameters are defined. Also sets the value of
+         * {@code .args}, if that was requested.
+         */
         void checkParamsSetAndApplyDefaults(Environment env) throws TemplateException {
-            boolean resolvedAnArg, hasUnresolvedArg;
-            Expression firstUnresolvedExpression;
-            InvalidReferenceException firstReferenceException;
-            do {
-                firstUnresolvedExpression = null;
-                firstReferenceException = null;
-                resolvedAnArg = hasUnresolvedArg = false;
-                for (int i = 0; i < paramNames.length; ++i) {
-                    String argName = paramNames[i];
-                    if (localVars.get(argName) == null) {
+            boolean resolvedADefaultValue, hasUnresolvedDefaultValue;
+            Expression firstUnresolvedDefaultValueExpression;
+            InvalidReferenceException firstInvalidReferenceExceptionForDefaultValue;
+
+            final TemplateModel[] argsSpecVarDraft;
+            if (Macro.this.requireArgsSpecialVariable) {
+                argsSpecVarDraft = new TemplateModel[paramNames.length];
+            } else {
+                argsSpecVarDraft = null;
+            }
+            do { // Retried if there are unresolved defaults left
+                firstUnresolvedDefaultValueExpression = null;
+                firstInvalidReferenceExceptionForDefaultValue = null;
+                resolvedADefaultValue = hasUnresolvedDefaultValue = false;
+                for (int paramIndex = 0; paramIndex < paramNames.length; ++paramIndex) {
+                    final String argName = paramNames[paramIndex];
+                    final TemplateModel argValue = localVars.get(argName);
+                    if (argValue == null) {
                         Expression defaultValueExp = paramNamesWithDefault.get(argName);
                         if (defaultValueExp != null) {
                             try {
-                                TemplateModel tm = defaultValueExp.eval(env);
-                                if (tm == null) {
-                                    if (!hasUnresolvedArg) {
-                                        firstUnresolvedExpression = defaultValueExp;
-                                        hasUnresolvedArg = true;
+                                TemplateModel defaultValue = defaultValueExp.eval(env);
+                                if (defaultValue == null) {
+                                    if (!hasUnresolvedDefaultValue) {
+                                        firstUnresolvedDefaultValueExpression = defaultValueExp;
+                                        hasUnresolvedDefaultValue = true;
                                     }
                                 } else {
-                                    localVars.put(argName, tm);
-                                    resolvedAnArg = true;
+                                    localVars.put(argName, defaultValue);
+                                    resolvedADefaultValue = true;
+
+                                    if (argsSpecVarDraft != null) {
+                                        argsSpecVarDraft[paramIndex] = defaultValue;
+                                    }
                                 }
                             } catch (InvalidReferenceException e) {
-                                if (!hasUnresolvedArg) {
-                                    hasUnresolvedArg = true;
-                                    firstReferenceException = e;
+                                if (!hasUnresolvedDefaultValue) {
+                                    hasUnresolvedDefaultValue = true;
+                                    firstInvalidReferenceExceptionForDefaultValue = e;
                                 }
                             }
                         } else if (!env.isClassicCompatible()) {
@@ -265,7 +290,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                             "When calling ", (isFunction() ? "function" : "macro"), " ",
                                             new _DelayedJQuote(name), 
                                             ", required parameter ", new _DelayedJQuote(argName),
-                                            " (parameter #", Integer.valueOf(i + 1), ") was ", 
+                                            " (parameter #", Integer.valueOf(paramIndex + 1), ") was ",
                                             (argWasSpecified
                                                     ? "specified, but had null/missing value."
                                                     : "not specified.") 
@@ -281,16 +306,79 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                                     + "for it, like ", "<#macro macroName paramName=defaultExpr>", ")" }
                                             ));
                         }
+                    } else if (argsSpecVarDraft != null) {
+                        // Minor performance problem here: If there are multiple iterations due to default value
+                        // dependencies, this will set many parameters for multiple times.
+                        argsSpecVarDraft[paramIndex] = argValue;
                     }
                 }
-            } while (resolvedAnArg && hasUnresolvedArg);
-            if (hasUnresolvedArg) {
-                if (firstReferenceException != null) {
-                    throw firstReferenceException;
+            } while (hasUnresolvedDefaultValue && resolvedADefaultValue);
+            if (hasUnresolvedDefaultValue) {
+                if (firstInvalidReferenceExceptionForDefaultValue != null) {
+                    throw firstInvalidReferenceExceptionForDefaultValue;
                 } else if (!env.isClassicCompatible()) {
-                    throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
+                    throw InvalidReferenceException.getInstance(firstUnresolvedDefaultValueExpression, env);
                 }
             }
+            
+            if (argsSpecVarDraft != null) {
+                final String catchAllParamName = getMacro().catchAllParamName;
+                final TemplateModel catchAllArgValue = catchAllParamName != null ? localVars.get(catchAllParamName) : null;
+
+                if (getMacro().isFunction()) {
+                    int lengthWithCatchAlls = argsSpecVarDraft.length;
+                    if (catchAllArgValue != null) {
+                        lengthWithCatchAlls += ((TemplateSequenceModel) catchAllArgValue).size();
+                    }
+
+                    SimpleSequence argsSpecVarValue = new SimpleSequence(lengthWithCatchAlls);
+                    for (int paramIndex = 0; paramIndex < argsSpecVarDraft.length; paramIndex++) {
+                        argsSpecVarValue.add(argsSpecVarDraft[paramIndex]);
+                    }
+                    if (catchAllParamName != null) {
+                        TemplateSequenceModel catchAllSeq = (TemplateSequenceModel) catchAllArgValue;
+                        int catchAllSize = catchAllSeq.size();
+                        for (int j = 0; j < catchAllSize; j++) {
+                            argsSpecVarValue.add(catchAllSeq.get(j));
+                        }
+                    }
+                    assert argsSpecVarValue.size() == lengthWithCatchAlls;
+
+                    this.argsSpecialVariableValue = argsSpecVarValue;
+                } else { // #macro
+                    int lengthWithCatchAlls = argsSpecVarDraft.length;
+                    TemplateHashModelEx2 catchAllHash;
+                    if (catchAllParamName != null) {
+                        if (catchAllArgValue instanceof TemplateSequenceModel) {
+                            throw new _MiscTemplateException("The macro can only by called with named arguments, " +
+                                    "because it uses both .", BuiltinVariable.ARGS, " and catch-all parameter.");
+                        }
+                        catchAllHash = (TemplateHashModelEx2) catchAllArgValue;
+                        lengthWithCatchAlls += catchAllHash.size();
+                    } else {
+                        catchAllHash = null;
+                    }
+
+                    SimpleHash argsSpecVarValue = new SimpleHash(
+                            new LinkedHashMap<String, Object>(lengthWithCatchAlls * 4 / 3, 1.0f),
+                            null, 0);
+                    for (int paramIndex = 0; paramIndex < argsSpecVarDraft.length; paramIndex++) {
+                        argsSpecVarValue.put(paramNames[paramIndex], argsSpecVarDraft[paramIndex]);
+                    }
+                    if (catchAllArgValue != null) {
+                        for (TemplateHashModelEx2.KeyValuePairIterator iter = catchAllHash.keyValuePairIterator();
+                                iter.hasNext(); ) {
+                            TemplateHashModelEx2.KeyValuePair kvp = iter.next();
+                            argsSpecVarValue.put(
+                                    ((TemplateScalarModel) kvp.getKey()).getAsString(),
+                                    kvp.getValue());
+                        }
+                    }
+                    assert argsSpecVarValue.size() == lengthWithCatchAlls;
+
+                    this.argsSpecialVariableValue = argsSpecVarValue;
+                }
+            } // if (argsSpecVarDraft != null)
         }
 
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
@@ -314,6 +402,14 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 result.add(((TemplateScalarModel) it.next()).getAsString());
             }
             return result;
+        }
+
+        TemplateModel getArgsSpecialVariableValue() {
+            return argsSpecialVariableValue;
+        }
+
+        void setArgsSpecialVariableValue(TemplateModel argsSpecialVariableValue) {
+            this.argsSpecialVariableValue = argsSpecialVariableValue;
         }
     }
 
