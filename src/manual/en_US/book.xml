@@ -28856,17 +28856,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               arguments uniformly, like for example to pass the arguments to
               <literal>?spread_args(<replaceable>...</replaceable>)</literal>.</para>
             </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Added
-              <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>
-            </listitem>
 
             <listitem>
               <para><link linkend="ref.directive.macro">Macro catch-all
@@ -28884,6 +28873,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>escExpression</replaceable></literal>.
               Fortunately it's very unlikely that anyone wanted to use lambdas
               there (given the few built-ins that accept lambdas).</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added
+              <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>
             </listitem>
 
             <listitem>
