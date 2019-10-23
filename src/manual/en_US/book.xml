@@ -22831,11 +22831,10 @@ or
       myns:bar=7</programlisting>
 
           <warning>
-            <para>Currently, named catch-all parameters are unordered, that
-            is, you don't know what order will they be enumerated. That is,
-            they aren't returned in the same order as they were passed in
-            (that above example output shows them in the same order for
-            understandability only).</para>
+            <para>Before FreeMarker 2.3.30, named catch-all parameters are
+            unordered, that is, you don't know what order will they be
+            enumerated. Only starting from 2.3.30 are they returned in the
+            same order as they were passed in.</para>
           </warning>
 
           <section>
@@ -28766,6 +28765,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added
               <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><link linkend="ref.directive.macro">Macro catch-all
+              parameters</link> (aka. macro varargs), when capture arguments
+              passed by name (as opposed to by position), now keep the order
+              of arguments.</para>
             </listitem>
 
             <listitem>
