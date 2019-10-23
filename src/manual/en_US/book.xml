@@ -24567,6 +24567,98 @@ There was no specific handler for node y
       <itemizedlist spacing="compact">
         <listitem>
           <para><indexterm>
+              <primary>args</primary>
+            </indexterm><literal>args</literal> (since 2.3.30): Used inside
+          the <link
+          linkend="ref.directive.macro"><literal>macro</literal></link> and
+          <link
+          linkend="ref.directive.function"><literal>function</literal></link>
+          directives, it returns all arguments of the current invocation of
+          the macro or function. This allows processing all the arguments in
+          an uniform way (like pass them to the <link
+          linkend="ref_builtin_spread_args"><literal>spread_args</literal>
+          built-in</link>). Further details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>When used inside a macro, <literal>.args</literal> is
+              always a hash that maps the parameter names to the parameter
+              values. That's so even if the macro was called with positional
+              arguments, as the parameter names are declared by the
+              <literal>macro</literal> directive. But when used inside a
+              function, <literal>.args</literal> is always a sequence of the
+              argument values. That's because functions can only be called
+              with positional arguments, so the parameter names declared
+              inside the <literal>function</literal> directive aren't
+              relevant.</para>
+            </listitem>
+
+            <listitem>
+              <para>For arguments that have a default value (as
+              <literal>b</literal> in <literal>&lt;#macro m1 a
+              b=0&gt;</literal>), if the caller of the macro or function has
+              omitted that argument (as in <literal>&lt;@m1 a=1
+              /&gt;</literal>), <literal>.args</literal> will contain the
+              default value for that argument (<literal>{'a': 1, 'b':
+              0}</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>If there's a catch-all argument, like
+              <literal>others</literal> in <literal>&lt;#macro m2 a, b,
+              others...&gt;</literal>, then <literal>.args</literal> will
+              contain the elements in the the catch-all parameter directly,
+              and won't contain the declared catch-all parameter
+              (<literal>others</literal>) itself. So for <literal>&lt;@m2 a=1
+              b=2 c=3 d=4 /&gt;</literal> it will be <literal>{'a': 1, 'b': 2,
+              'c': 3, 'd': 4}</literal>, and <emphasis>not</emphasis>
+              <literal>{'a': 1, 'b': 2, 'others': {'c':3, 'd':
+              4}}</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>If a macro has a catch-all argument, and the macro uses
+              <literal>.args</literal> somewhere, it can only be called with
+              named arguments (like <literal>&lt;@m a=1 b=2 /&gt;</literal>),
+              and not with positional arguments (like <literal>&lt;@m 1 2
+              /&gt;</literal>). That's because for macros
+              <literal>.args</literal> is always a hash, but if the arguments
+              are positional, the catch-all arguments won't have names.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>.args</literal> is initialized when the macro or
+              function is called, and so it doesn't reflect changes made later
+              on the local variables that correspond to the arguments.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>.args</literal> must occur inside a
+              <literal>macro</literal> or <literal>function</literal>
+              directive on the source code level, or else it's a template
+              parsing error. So you can't use it in a template fragment that
+              you insert dynamically into a macro or function (like via the
+              <link linkend="ref.directive.include"><literal>include</literal>
+              directive</link> or <link
+              linkend="ref_builtin_eval"><literal>eval</literal>
+              built-in</link>). That's because the <literal>macro</literal> or
+              <literal>function</literal> has to know if it contains
+              <literal>.args</literal> earlier than it's called.</para>
+            </listitem>
+
+            <listitem>
+              <para>For macros, the order of elements in the
+              <literal>.args</literal> hash corresponds to the order as the
+              parameters were declared in the <literal>macro</literal>
+              directive, not to the order the caller has used. Except,
+              catch-all arguments will use the order that the caller
+              used.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
               <primary>auto_esc</primary>
             </indexterm><literal>auto_esc</literal> (since 2.3.24): Boolean
           value that tells if auto-escaping (based on output format) is on or
@@ -28754,6 +28846,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               directive or macro or function that has different parameter
               defaults. <link linkend="ref_builtin_spread_args">See more
               here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new <link linkend="ref_specvar">special
+              variable</link>, <literal>.args</literal>. This evaluates to a
+              hash (in macros), or sequence (in functions) that contains all
+              the arguments. This is useful for operations that act on all the
+              arguments uniformly, like for example to pass the arguments to
+              <literal>?spread_args(<replaceable>...</replaceable>)</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>
