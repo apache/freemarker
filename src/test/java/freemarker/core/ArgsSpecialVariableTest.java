@@ -41,6 +41,12 @@ public class ArgsSpecialVariableTest extends TemplateTest {
     }
 
     @Test
+    public void macroZeroArgsTest() throws IOException, TemplateException {
+        assertOutput("<#macro m>${.args?size}</#macro><@m />", "0");
+        assertOutput("<#macro m others...>${.args?size}</#macro><@m />", "0");
+    }
+
+    @Test
     public void macroWithDefaultsTest() throws IOException, TemplateException {
         String macroDef = "<#macro m a b c=3><#list .args as k, v>${k}=${v}<#sep>, </#list></#macro>";
         String expectedOutput = "" +
@@ -80,8 +86,8 @@ public class ArgsSpecialVariableTest extends TemplateTest {
 
     @Test
     public void macroWithCatchAllTest() throws IOException, TemplateException {
-        assertOutput("" +
-                        "<#macro m a b=2 others...><#list .args as k, v>${k}=${v}<#sep>, </#list></#macro>" +
+        String macroDef = "<#macro m a b=2 others...><#list .args as k, v>${k}=${v}<#sep>, </#list></#macro>";
+        assertOutput(macroDef +
                         "<@m a=11 b=22 c=33 d=44 />; " +
                         "<@m a=11 b=22 />; " +
                         "<@m a=11 />; " +
@@ -91,9 +97,9 @@ public class ArgsSpecialVariableTest extends TemplateTest {
                         "a=11, b=2; " +
                         "a=11, b=2, c=33");
 
-        assertErrorContains("" +
-                "<#macro m a b=2 others...><#list .args as k, v>${k}=${v}<#sep>, </#list></#macro>" +
-                "<@m 1, 2 />",
+        assertOutput(macroDef + "<@m 1, 2 />",
+                "a=1, b=2");
+        assertErrorContains(macroDef + "<@m 1, 2, 3 />",
                 ".args", "catch-all");
     }
 
@@ -106,6 +112,13 @@ public class ArgsSpecialVariableTest extends TemplateTest {
                 expectedOutput);
     }
 
+
+    @Test
+    public void functionZeroArgsTest() throws IOException, TemplateException {
+        assertOutput("<#function f><#return .args?size></#function>${f()}", "0");
+        assertOutput("<#function f others...><#return .args?size></#function>${f()}", "0");
+    }
+    
     @Test
     public void functionWithDefaultsTest() throws IOException, TemplateException {
         String functionDef = "<#function f a b c=3><#return .args?join(', ')></#function>";
@@ -150,7 +163,7 @@ public class ArgsSpecialVariableTest extends TemplateTest {
                         "11, 2; " +
                         "11, 2, 33");
     }
-
+    
     @Test
     public void usedInWrongContextTest() throws IOException, TemplateException {
         assertErrorContains("${.args}", "args", "macro", "function");

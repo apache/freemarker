@@ -95,9 +95,14 @@ public class Constants {
         }
         
     }
-    
-    public static final TemplateHashModelEx EMPTY_HASH = new EmptyHashModel();
-    
+
+    /**
+     * @since 2.3.30
+     */
+    public static final TemplateHashModelEx2 EMPTY_HASH_EX2 = new EmptyHashModel();
+
+    public static final TemplateHashModelEx EMPTY_HASH = EMPTY_HASH_EX2;
+
     /**
      * An empty hash. Since 2.3.27, it implements {@link TemplateHashModelEx2}, before that it was only
      * {@link TemplateHashModelEx}.

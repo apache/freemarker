@@ -24617,7 +24617,8 @@ There was no specific handler for node y
             </listitem>
 
             <listitem>
-              <para>If a macro has a catch-all argument, and the macro uses
+              <para>If a macro has a catch-all parameter, and the actual
+              catch-all argument is not empty, and the macro uses
               <literal>.args</literal> somewhere, it can only be called with
               named arguments (like <literal>&lt;@m a=1 b=2 /&gt;</literal>),
               and not with positional arguments (like <literal>&lt;@m 1 2
