@@ -37,6 +37,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.Constants;
 
 /**
  * An element representing a macro or function declaration.
@@ -323,7 +324,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
             
             if (argsSpecVarDraft != null) {
                 final String catchAllParamName = getMacro().catchAllParamName;
-                final TemplateModel catchAllArgValue = catchAllParamName != null ? localVars.get(catchAllParamName) : null;
+                final TemplateModel catchAllArgValue = catchAllParamName != null
+                        ? localVars.get(catchAllParamName) : null;
 
                 if (getMacro().isFunction()) {
                     int lengthWithCatchAlls = argsSpecVarDraft.length;
@@ -350,10 +352,15 @@ public final class Macro extends TemplateElement implements TemplateModel {
                     TemplateHashModelEx2 catchAllHash;
                     if (catchAllParamName != null) {
                         if (catchAllArgValue instanceof TemplateSequenceModel) {
-                            throw new _MiscTemplateException("The macro can only by called with named arguments, " +
-                                    "because it uses both .", BuiltinVariable.ARGS, " and catch-all parameter.");
+                            if (((TemplateSequenceModel) catchAllArgValue).size() != 0) {
+                                throw new _MiscTemplateException("The macro can only by called with named arguments, " +
+                                        "because it uses both .", BuiltinVariable.ARGS, " and a non-empty catch-all " +
+                                        "parameter.");
+                            }
+                            catchAllHash = Constants.EMPTY_HASH_EX2;
+                        } else {
+                            catchAllHash = (TemplateHashModelEx2) catchAllArgValue;
                         }
-                        catchAllHash = (TemplateHashModelEx2) catchAllArgValue;
                         lengthWithCatchAlls += catchAllHash.size();
                     } else {
                         catchAllHash = null;
