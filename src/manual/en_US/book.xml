@@ -20,7 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:ns5="http://www.w3.org/2000/svg"
+      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns3="http://www.w3.org/1999/xhtml"
+      xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -19136,13 +19139,14 @@ Filer for positives:
             <para>This built-in is available since 2.3.30</para>
           </note>
 
-          <para>The goal of this built in is to add parameters dynamically to
-          the call of a directive (like a macro), function or method.
-          Dynamically means that parameters are added based on a hash value
-          (like <literal>{'a': 1, 'b': 2, 'c': 3}</literal>), or a sequence
-          value (like <literal>[1, 2, 3]</literal> or a Java
+          <para>The goal of this built-in is to add parameters
+          <emphasis>dynamically</emphasis> to the call of a directive (like a
+          macro), function or method. Dynamically means that parameters are
+          added based on a hash value (like <literal>{'a': 1, 'b': 2, 'c':
+          3}</literal> or a Java <literal>Map</literal>), or a sequence value
+          (like <literal>[1, 2, 3]</literal> or a Java
           <literal>List</literal>), whose the actual content is might only
-          known when the call happens.</para>
+          known at the moment when the call happens.</para>
 
           <para>For example, we have this macro <literal>m</literal>:</para>
 
@@ -19152,14 +19156,14 @@ Filer for positives:
 
           <programlisting role="template">&lt;@m a=1 b=2 c=3 /&gt;</programlisting>
 
-          <para>This calls does the same, assuming <literal>dynArgs</literal>
+          <para>Below call does the same, assuming <literal>dynArgs</literal>
           is the hash <literal>{'a': 1, 'b': 2, 'c': 3}</literal>:</para>
 
           <programlisting role="template">&lt;@m?spread_args(dynArgs) /&gt;</programlisting>
 
           <programlisting role="output">a=1, b=1, c=1</programlisting>
 
-          <para>This call also does the same, but combines dynamic arguments
+          <para>Below call also does the same, but combines dynamic arguments
           from <literal>dynArgsAB</literal>, assumed to be <literal>{'a': 1,
           'b': 2}</literal>, and argument <literal>c</literal> specified
           directly:</para>
@@ -19168,33 +19172,147 @@ Filer for positives:
 
           <programlisting role="output">a=1, b=1, c=1</programlisting>
 
-          <para>The way if works is this.
+          <para>To understand why this works, you need to realize that macros,
+          custom directives, functions, and methods in FreeMarker are just
+          values, just like numbers, strings, etc. <literal>&lt;#macro m
+          <replaceable>...</replaceable>&gt;</literal> just creates a value
+          that's a macro (as opposed to a number, or string, etc.), and then
+          assigns it to variable <literal>m</literal>. Thus,
+          <literal>m</literal> in itself is a valid expression, which
+          evaluates to the macro (but it doesn't <emphasis>call</emphasis> the
+          macro). <literal>&lt;@m <replaceable>...</replaceable>
+          /&gt;</literal> evaluates the expression <literal>m</literal> (and
+          you can use arbitrarily complex expressions there too, like
+          <literal>m?spread_args(<replaceable>...</replaceable>)</literal>),
+          and then <emphasis>calls</emphasis> the resulting macro.
           <literal>m?spread_args(<replaceable>dynArgs</replaceable>)</literal>
-          returns a macro (or what <literal>m</literal> is, like function
-          etc.) whose arguments defaults to the values specified in
-          <literal><replaceable>dynArgs</replaceable></literal>. For
-          example:</para>
+          returns a macro that's very similar to the original macro (that's
+          stored in <literal>m</literal>), but its arguments default to the
+          values specified in
+          <literal><replaceable>dynArgs</replaceable></literal>. So the result
+          of <literal>m?spread_args({'b': 22, 'c': 33})</literal> is similar
+          to a modified macro that was created as <literal>&lt;#macro
+          <replaceable>unspefiedName</replaceable> a b=22 c=33&gt;</literal>.
+          With an example:</para>
 
           <programlisting role="template">&lt;#assign mWithDefs = m?spread_args({'b': 22, 'c': 33})&gt;
 &lt;@myWithDefs a=1 c='overridden'/&gt;</programlisting>
 
           <programlisting role="output">a=1, b=22, c=overridden</programlisting>
 
-          <para>So far we have only shown the case where the argument to
-          <literal>spread_args</literal> was a hash, which is supported for
-          all kind of directives, including macros. When this built-in is
-          applied on a function or method, the argument to
-          <literal>spread_args</literal> must be a sequence, as named
-          parameters aren't supported for those:</para>
+          <para>Above we have created a new macro based on the value of
+          <literal>m</literal>, stored it in variable
+          <literal>mWithDefs</literal>, and then later we called it with
+          <literal>&lt;@myWithDefs <replaceable>...</replaceable>
+          /&gt;</literal>.</para>
+
+          <para><literal>spread_args</literal> can also be applied on
+          functions (crated with <literal>&lt;#function
+          <replaceable>...</replaceable>&gt;</literal>) and Java methods
+          (usually get from the data-model, like
+          <literal>myObject.myMethod</literal>). But because functions and
+          methods can only be called with positional arguments (like
+          <literal>f(1, 2, 3)</literal>, and <emphasis>not</emphasis> as
+          <literal>f(a=1, b=2, c=3)</literal>), the argument to
+          <literal>spread_args</literal> must be a sequence instead of a hash.
+          Other than that, the same tricks work as with macros:</para>
 
           <programlisting role="template">&lt;#function f(a, b, c)&gt;&lt;#return "a=${a}, b=${b}, c=${c}"&gt;&lt;/#function&gt;
 &lt;#assign dynArgs=[1, 2, 3]&gt;
 
-${f(1, 2, 3)()}
+${f(1, 2, 3)}
 Same as:
-${f?spread_args(dynArgs)()}</programlisting>
+${f?spread_args(dynArgs)()}
+or as:
+${f?spread_args([1, 2])(3)}
+or as:
+${f?spread_args([1])(2, 3)}
 
-          <para>[TODO] More details and edge cases...</para>
+&lt;#assign fWithOneAsFirstArg = f?spread_args([1])&gt;
+${fWithOneAsFirstArg(2, 3)} &lt;#-- same as f(1, 2, 3) --&gt;</programlisting>
+
+          <para>Note the double application of
+          <literal>(<replaceable>...</replaceable>)</literal> above, like in
+          <literal>f?spread_args(<replaceable>dynArgs</replaceable>)()</literal>.
+          That's because
+          <literal>f?spread_args(<replaceable>dynArgs</replaceable>)</literal>
+          just returns a new function (which is just a value), but doesn't
+          call it. So if you want to call that new function immediately (as
+          opposed to assigning it to a variable for example), you need the
+          second <literal>()</literal>.</para>
+
+          <para>Because macro calls support both named and positional
+          arguments, the <literal>spread_args</literal> argument can be a
+          sequence for macros as well (though using a hash is usually a better
+          practice):</para>
+
+          <programlisting role="template">&lt;#macro m a b c&gt;a=${a}, b=${b}, c=${c}&lt;/#macro&gt;
+
+&lt;#-- Called with named parameters: --&gt;
+&lt;@m a=1 b=2 c=3 /&gt;
+Same as:
+&lt;#-- Called with positional parameters: --&gt;
+&lt;@m 1 2 3 /&gt;
+Same as:
+&lt;@m?spread_args([1, 2, 3]) /&gt;
+Same as:
+&lt;#-- Sequence spread_args with positional c parameter: --&gt;
+&lt;@m?spread_args([1, 2]) 3 /&gt;
+Same as:
+&lt;#-- Sequence spread_args with named c parameter: --&gt;
+&lt;@m?spread_args([1, 2]) c=3 /&gt;</programlisting>
+
+          <para>To summarize, depending on the type of the value
+          <literal>spread_args</literal> is applied on, the type of argument
+          to <literal>spread_args</literal> can be:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Function or method: sequence. Note that WRONG
+              <literal>f?spread_args(1, 2)</literal> is WRONG, the correct
+              form is <literal>f?spread_args([1, 2])</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Macro: hash or sequence</para>
+            </listitem>
+
+            <listitem>
+              <para>Directive (user defined): hash</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>The return type of <literal>spread_args</literal> is the same
+          as the type of value it was applied on, like if it's applied on a
+          method (like
+          <literal>myObj.myMethod?spread_args(dynArgs)</literal>), then it
+          returns a method.</para>
+
+          <para>Note that it's not possible to apply
+          <literal>spread_args</literal> on built-in directives, like
+          <literal>&lt;#if <replaceable>...</replaceable>&gt;</literal>,
+          <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>,
+          etc., because they aren't available as values.</para>
+
+          <para>This built-in is often used together with the <link
+          linkend="specvar.args"><literal>.args</literal> special
+          variable</link>. For example:</para>
+
+          <programlisting role="template">&lt;#macro m1 a b c&gt;
+  m1 does things with ${a}, ${b}, ${c}
+&lt;/#macro&gt;
+
+&lt;#macro m2 a b c&gt;
+  m2 does things with ${a}, ${b}, ${c}
+  Delegate to m1:
+  &lt;@m1?spread_args(.args) /&gt;
+&lt;/#macro&gt;
+
+&lt;@m2 a=1 b=2 c=3 /&gt;</programlisting>
+
+          <programlisting role="output">  m2 does things with 1, 2, 3
+  Delegate to m1:
+  m1 does things with 1, 2, 3</programlisting>
         </section>
 
         <section xml:id="ref_builtin_eval">
@@ -24565,7 +24683,7 @@ There was no specific handler for node y
       <para>The supported special variables are:</para>
 
       <itemizedlist spacing="compact">
-        <listitem>
+        <listitem xml:id="specvar.args">
           <para><indexterm>
               <primary>args</primary>
             </indexterm><literal>args</literal> (since 2.3.30): Used inside
@@ -24624,13 +24742,19 @@ There was no specific handler for node y
               and not with positional arguments (like <literal>&lt;@m 1 2
               /&gt;</literal>). That's because for macros
               <literal>.args</literal> is always a hash, but if the arguments
-              are positional, the catch-all arguments won't have names.</para>
+              are positional, the catch-all arguments won't have names, so
+              it's impossible to put them into the hash.</para>
             </listitem>
 
             <listitem>
-              <para><literal>.args</literal> is initialized when the macro or
-              function is called, and so it doesn't reflect changes made later
-              on the local variables that correspond to the arguments.</para>
+              <para><literal>.args</literal> is initialized immediately when
+              the macro or function is called, and so it doesn't reflect
+              changes made later on the local variables that correspond to the
+              arguments. (However, if the argument value is a mutable object,
+              and the objects itself is mutated, <literal>.args</literal> will
+              contain the mutated object. Setting an argument variable with
+              the <link linkend="ref.directive.local"><literal>local</literal>
+              directive</link> doesn't mutate the object.)</para>
             </listitem>
 
             <listitem>
@@ -24640,8 +24764,10 @@ There was no specific handler for node y
               parsing error. So you can't use it in a template fragment that
               you insert dynamically into a macro or function (like via the
               <link linkend="ref.directive.include"><literal>include</literal>
-              directive</link> or <link
+              directive</link>, <link
               linkend="ref_builtin_eval"><literal>eval</literal>
+              built-in</link>, or <link
+              linkend="ref_builtin_interpret"><literal>interpret</literal>
               built-in</link>). That's because the <literal>macro</literal> or
               <literal>function</literal> has to know if it contains
               <literal>.args</literal> earlier than it's called.</para>
@@ -24649,11 +24775,14 @@ There was no specific handler for node y
 
             <listitem>
               <para>For macros, the order of elements in the
-              <literal>.args</literal> hash corresponds to the order as the
-              parameters were declared in the <literal>macro</literal>
-              directive, not to the order the caller has used. Except,
-              catch-all arguments will use the order that the caller
-              used.</para>
+              <literal>.args</literal> hash is the same as the order in which
+              the parameters were declared in the <literal>macro</literal>
+              directive, and not the order the caller has used. Except,
+              catch-all arguments will use the order that the caller used.
+              (For functions and methods, as it only support positional
+              arguments, the parameter order of on the caller side is the same
+              as the parameter order in the <literal>function</literal>
+              directive or Java method, so there's no doubt there.)</para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -28840,7 +28969,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-107">FREEMARKER-107</link>:
+              Added
               <literal>?<replaceable>spread_args</replaceable>(dynamicArguments)</literal>
               to add parameters dynamically to directive (like macro),
               function and method calls. Actually, this built-in returns
@@ -28850,19 +28981,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new <link linkend="ref_specvar">special
-              variable</link>, <literal>.args</literal>. This evaluates to a
-              hash (in macros), or sequence (in functions) that contains all
-              the arguments. This is useful for operations that act on all the
-              arguments uniformly, like for example to pass the arguments to
-              <literal>?spread_args(<replaceable>...</replaceable>)</literal>.</para>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-107">FREEMARKER-107</link>:
+              Added new special variable, <link
+              linkend="specvar.args"><literal>.args</literal></link>. This
+              evaluates to a hash in macros, and to a sequence in functions,
+              which contains all the arguments. This is useful for operations
+              that act on all the arguments uniformly, like for example to
+              pass the arguments to <link
+              linkend="ref_builtin_spread_args"><literal>?spread_args(<replaceable>...</replaceable>)</literal></link>.</para>
             </listitem>
 
             <listitem>
               <para><link linkend="ref.directive.macro">Macro catch-all
-              parameters</link> (aka. macro varargs), when capture arguments
-              passed by name (as opposed to by position), now keep the
-              original order of arguments. Earlier the order wasn't
+              parameters</link> (aka. varargs parameters), when capture
+              arguments passed by name (as opposed to by position), now keep
+              the original order of arguments. Earlier the order wasn't
               predictable.</para>
             </listitem>
 
