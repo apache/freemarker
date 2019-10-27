@@ -3449,7 +3449,7 @@ Macro Macro() :
     boolean isCatchAll = false;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
-    int lastContiunableDirectiveNesting;
+    int lastContinuableDirectiveNesting;
     TemplateElements children;
     boolean isFunction = false;
     boolean hasDefaults = false;
@@ -3519,12 +3519,12 @@ Macro Macro() :
         iteratorBlockContexts = null;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
 	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
-	        lastContiunableDirectiveNesting = continuableDirectiveNesting;
+	        lastContinuableDirectiveNesting = continuableDirectiveNesting;
 	        breakableDirectiveNesting = 0; 
 	        continuableDirectiveNesting = 0;
         } else {
             lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
-            lastContiunableDirectiveNesting = 0;
+            lastContinuableDirectiveNesting = 0;
         }
     }
     children = MixedContentElements()
@@ -3543,7 +3543,7 @@ Macro Macro() :
         iteratorBlockContexts = lastIteratorBlockContexts;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
             breakableDirectiveNesting = lastBreakableDirectiveNesting;
-            continuableDirectiveNesting = lastContiunableDirectiveNesting;
+            continuableDirectiveNesting = lastContinuableDirectiveNesting;
         }
         
         inMacro = inFunction = false;
