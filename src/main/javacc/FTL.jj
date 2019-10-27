@@ -2522,8 +2522,8 @@ HashLiteral HashLiteral() :
 {
     Token begin, end;
     Expression key, value;
-    ArrayList keys = new ArrayList();
-    ArrayList values = new ArrayList();
+    ArrayList<Expression> keys = new ArrayList<Expression>();
+    ArrayList<Expression> values = new ArrayList<Expression>();
 }
 {
     begin = <OPENING_CURLY_BRACKET>
@@ -2550,6 +2550,8 @@ HashLiteral HashLiteral() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
+        keys.trimToSize();
+        values.trimToSize();
         HashLiteral result = new HashLiteral(keys, values);
         result.setLocation(template, begin, end);
         return result;

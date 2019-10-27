@@ -22,7 +22,7 @@ package freemarker.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.ListIterator;
+import java.util.List;
 
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
@@ -33,17 +33,16 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template._TemplateAPI;
 
+@SuppressWarnings("deprecation")
 final class HashLiteral extends Expression {
 
-    private final ArrayList keys, values;
+    private final List<? extends Expression> keys, values;
     private final int size;
 
-    HashLiteral(ArrayList/*<Expression>*/ keys, ArrayList/*<Expression>*/ values) {
+    HashLiteral(List<? extends Expression> keys, List<? extends Expression> values) {
         this.keys = keys;
         this.values = values;
         this.size = keys.size();
-        keys.trimToSize();
-        values.trimToSize();
     }
 
     @Override
@@ -55,8 +54,8 @@ final class HashLiteral extends Expression {
     public String getCanonicalForm() {
         StringBuilder buf = new StringBuilder("{");
         for (int i = 0; i < size; i++) {
-            Expression key = (Expression) keys.get(i);
-            Expression value = (Expression) values.get(i);
+            Expression key = keys.get(i);
+            Expression value = values.get(i);
             buf.append(key.getCanonicalForm());
             buf.append(": ");
             buf.append(value.getCanonicalForm());
@@ -79,8 +78,8 @@ final class HashLiteral extends Expression {
             return true;
         }
         for (int i = 0; i < size; i++) {
-            Expression key = (Expression) keys.get(i);
-            Expression value = (Expression) values.get(i);
+            Expression key = keys.get(i);
+            Expression value = values.get(i);
             if (!key.isLiteral() || !value.isLiteral()) {
                 return false;
             }
@@ -92,30 +91,31 @@ final class HashLiteral extends Expression {
     @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-		ArrayList clonedKeys = (ArrayList) keys.clone();
-		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext(); ) {
-            iter.set(((Expression) iter.next()).deepCloneWithIdentifierReplaced(
-                    replacedIdentifier, replacement, replacementState));
+		List<Expression> clonedKeys = new ArrayList<Expression>(keys.size());
+        for (Expression key : keys) {
+            clonedKeys.add(key.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
         }
-		ArrayList clonedValues = (ArrayList) values.clone();
-		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext(); ) {
-            iter.set(((Expression) iter.next()).deepCloneWithIdentifierReplaced(
-                    replacedIdentifier, replacement, replacementState));
+
+        List<Expression> clonedValues = new ArrayList<Expression>(values.size());
+        for (Expression value : values) {
+            clonedValues.add(value.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
         }
+        
     	return new HashLiteral(clonedKeys, clonedValues);
     }
 
+    @SuppressWarnings("deprecation")
     private class SequenceHash implements TemplateHashModelEx2 {
 
-        private HashMap map; // maps keys to integer offset
+        private HashMap<String, TemplateModel> map; // maps keys to integer offset
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         SequenceHash(Environment env) throws TemplateException {
             if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _TemplateAPI.VERSION_INT_2_3_21) {
-                map = new LinkedHashMap();
+                map = new LinkedHashMap<String, TemplateModel>();
                 for (int i = 0; i < size; i++) {
-                    Expression keyExp = (Expression) keys.get(i);
-                    Expression valExp = (Expression) values.get(i);
+                    Expression keyExp = keys.get(i);
+                    Expression valExp = values.get(i);
                     String key = keyExp.evalAndCoerceToPlainText(env);
                     TemplateModel value = valExp.eval(env);
                     if (env == null || !env.isClassicCompatible()) {
@@ -126,12 +126,12 @@ final class HashLiteral extends Expression {
             } else {
                 // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
                 // doing hash[key].
-                map = new HashMap();
-                ArrayList keyList = new ArrayList(size);
-                ArrayList valueList = new ArrayList(size);
+                map = new HashMap<String, TemplateModel>();
+                List<String> keyList = new ArrayList<String>(size);
+                List<TemplateModel> valueList = new ArrayList<TemplateModel>(size);
                 for (int i = 0; i < size; i++) {
-                    Expression keyExp = (Expression) keys.get(i);
-                    Expression valExp = (Expression) values.get(i);
+                    Expression keyExp = keys.get(i);
+                    Expression valExp = values.get(i);
                     String key = keyExp.evalAndCoerceToPlainText(env);
                     TemplateModel value = valExp.eval(env);
                     if (env == null || !env.isClassicCompatible()) {
@@ -167,7 +167,7 @@ final class HashLiteral extends Expression {
         }
 
         public TemplateModel get(String key) {
-            return (TemplateModel) map.get(key);
+            return map.get(key);
         }
 
         public boolean isEmpty() {
@@ -193,11 +193,11 @@ final class HashLiteral extends Expression {
                         private final TemplateModel key = keyIterator.next();
                         private final TemplateModel value = valueIterator.next();
 
-                        public TemplateModel getKey() throws TemplateModelException {
+                        public TemplateModel getKey() {
                             return key;
                         }
 
-                        public TemplateModel getValue() throws TemplateModelException {
+                        public TemplateModel getValue() {
                             return value;
                         }
                         
