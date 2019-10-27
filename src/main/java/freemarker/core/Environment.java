@@ -1056,7 +1056,8 @@ public final class Environment extends Configurable {
     private _MiscTemplateException newUndeclaredParamNameException(Macro macro, String argName) {
         return new _MiscTemplateException(this,
                 (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                " has no parameter with name ", new _DelayedJQuote(argName), ".");
+                " has no parameter with name ", new _DelayedJQuote(argName), ". Valid parameter names are: "
+                , new _DelayedJoinWithComma(macro.getArgumentNames()));
     }
 
     private _MiscTemplateException newBothNamedAndPositionalCatchAllParamsException(Macro macro) {
