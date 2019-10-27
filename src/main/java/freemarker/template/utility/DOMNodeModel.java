@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import freemarker.ext.dom.NodeModel;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
@@ -40,8 +41,10 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * A convenient wrapper class for wrapping a Node in the W3C DOM API.
+ *
+ * @deprecated Use {@link NodeModel} instead
  */
-
+@Deprecated
 public class DOMNodeModel implements TemplateHashModel {
 
     static private HashMap equivalenceTable = new HashMap();
