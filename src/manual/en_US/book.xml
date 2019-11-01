@@ -19876,7 +19876,7 @@ Same as:
           <literal>?with_args(<replaceable>...</replaceable>)</literal> wasn't
           there:</para>
 
-          <programlisting>&lt;@myMacro?with_args({'a': 1})&gt;...&lt;/<emphasis>@myMacro</emphasis>&gt;</programlisting>
+          <programlisting role="template">&lt;@myMacro?with_args({'a': 1})&gt;...&lt;/<emphasis>@myMacro</emphasis>&gt;</programlisting>
         </section>
       </section>
     </chapter>
