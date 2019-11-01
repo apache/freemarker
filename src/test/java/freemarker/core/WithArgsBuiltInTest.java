@@ -40,7 +40,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
-public class SpreadArgsBuiltInTest extends TemplateTest {
+public class WithArgsBuiltInTest extends TemplateTest {
 
     private static final String PRINT_O = "o=<#if o?isSequence>[${o?join(', ')}]" +
             "<#else>{<#list o as k,v>${k}=${v!'null'}<#sep>, </#list>}" +
@@ -86,140 +86,140 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
     }
 
     @Test
-    public void testMacroWithNamedSpreadArgs() throws Exception {
+    public void testMacroWithNamedWithArgs() throws Exception {
         assertOutput("<@m b=2 a=1 />", "a=1; b=2; c=d3");
-        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) />", "a=1; b=2; c=d3");
-        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) a=11 />", "a=11; b=2; c=d3");
-        assertOutput("<@m?spreadArgs({'b': 2, 'a': 1}) a=11 b=22 />", "a=11; b=22; c=d3");
-        assertOutput("<@m?spreadArgs({'b': 2, 'c': 3}) a=1 />", "a=1; b=2; c=3");
-        assertOutput("<@m?spreadArgs({}) b=2 c=3 a=1 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs({'b': 2, 'a': 1}) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgs({'b': 2, 'a': 1}) a=11 />", "a=11; b=2; c=d3");
+        assertOutput("<@m?withArgs({'b': 2, 'a': 1}) a=11 b=22 />", "a=11; b=22; c=d3");
+        assertOutput("<@m?withArgs({'b': 2, 'c': 3}) a=1 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs({}) b=2 c=3 a=1 />", "a=1; b=2; c=3");
 
         assertOutput("<@mCA a=1 b=2 />", "a=1; b=2; o={}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) />", "a=1; b=2; o={}");
-        assertOutput("<@mCA?spreadArgs({'a': 1}) b=2 />", "a=1; b=2; o={}");
-        assertOutput("<@mCA?spreadArgs({}) a=1 b=2 />", "a=1; b=2; o={}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3}) />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) c=3 />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs({'a': 1}) b=2 c=3 />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs({}) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2}) />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?withArgs({'a': 1}) b=2 />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?withArgs({}) a=1 b=2 />", "a=1; b=2; o={}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3}) />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2}) c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs({'a': 1}) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs({}) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
         assertOutput("<@mCA a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
         assertOutput("<@mCA a=1 b=2 c=3 d=4 />", "a=1; b=2; o={c=3, d=4}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) />", "a=1; b=2; o={c=3, d=4}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 />", "a=1; b=22; o={c=3, d=4}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 e=5 />", "a=1; b=22; o={c=3, d=4, e=5}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) 11 22 />", "a=11; b=22; o={c=3, d=4}");
-        assertOutput("<@mCA?spreadArgs({'a': 1, 'b': 2}) 11 22 33 />", "a=11; b=22; o=[33]");
-        assertErrorContains("<@mCA?spreadArgs({'a': 1, 'b': 2, 'c': 3}) 11 22 33 />",
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 />", "a=1; b=22; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) b=22 e=5 />", "a=1; b=22; o={c=3, d=4, e=5}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3, 'd': 4}) 11 22 />", "a=11; b=22; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgs({'a': 1, 'b': 2}) 11 22 33 />", "a=11; b=22; o=[33]");
+        assertErrorContains("<@mCA?withArgs({'a': 1, 'b': 2, 'c': 3}) 11 22 33 />",
                 "both named and positional", "catch-all");
 
-        assertOutput("<@mCAO?spreadArgs({'a': 1, 'b': 2}) />", "o={a=1, b=2}");
-        assertOutput("<@mCAO?spreadArgs({'a': 1}) b=2 />", "o={a=1, b=2}");
-        assertOutput("<@mCAO?spreadArgs({}) a=1 b=2 />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?withArgs({'a': 1, 'b': 2}) />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?withArgs({'a': 1}) b=2 />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?withArgs({}) a=1 b=2 />", "o={a=1, b=2}");
         assertOutput("<@mCAO a=1 b=2 />", "o={a=1, b=2}");
 
         assertOutput("<@mCAO />", "o=[]");
-        assertOutput("<@mCAO?spreadArgs({}) />", "o={}");
+        assertOutput("<@mCAO?withArgs({}) />", "o={}");
 
         assertOutput("<@m b=2 a=1 c=null />", "a=1; b=2; c=d3");
         Map<String, Integer> cNull = new HashMap<String, Integer>();
         cNull.put("c", null);
         addToDataModel("cNull", cNull);
-        assertOutput("<@m?spreadArgs(cNull) b=2 a=1 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgs(cNull) b=2 a=1 />", "a=1; b=2; c=d3");
     }
 
     @Test
-    public void testNullsWithMacroWithNamedSpreadArgs() throws Exception {
-        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+    public void testNullsWithMacroWithNamedWithArgs() throws Exception {
+        // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
         assertOutput("<@mCAO a=null b=null />", "o={a=null, b=null}");
         Map<String, Integer> aNullBNull = new LinkedHashMap<String, Integer>();
         aNullBNull.put("a", null);
         aNullBNull.put("b", null);
         addToDataModel("aNullBNull", aNullBNull);
-        assertOutput("<@mCAO?spreadArgs(aNullBNull) />", "o={a=null, b=null}");
+        assertOutput("<@mCAO?withArgs(aNullBNull) />", "o={a=null, b=null}");
 
-        assertOutput("<@m?spreadArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=222 c=null />", "a=111; b=222; c=d3");
-        assertErrorContains("<@m?spreadArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=null c=333 />", "required", "\"b\"");
-        assertOutput("<@mCAO?spreadArgs({'a': 1, 'b': 2}) a=null b=22 c=33 />", "o={a=null, b=22, c=33}");
+        assertOutput("<@m?withArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=222 c=null />", "a=111; b=222; c=d3");
+        assertErrorContains("<@m?withArgs({'a': 11, 'b': 22, 'c': 33}) a=111 b=null c=333 />", "required", "\"b\"");
+        assertOutput("<@mCAO?withArgs({'a': 1, 'b': 2}) a=null b=22 c=33 />", "o={a=null, b=22, c=33}");
     }
 
     @Test
-    public void testMacroWithPositionalSpreadArgs() throws Exception {
+    public void testMacroWithPositionalWithArgs() throws Exception {
         assertOutput("<@m 1 2 />", "a=1; b=2; c=d3");
-        assertOutput("<@m?spreadArgs([1, 2]) />", "a=1; b=2; c=d3");
-        assertOutput("<@m?spreadArgs([1]) 2 />", "a=1; b=2; c=d3");
-        assertOutput("<@m?spreadArgs([]) 1 2 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgs([1, 2]) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgs([1]) 2 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgs([]) 1 2 />", "a=1; b=2; c=d3");
         assertOutput("<@m 1 2 3 />", "a=1; b=2; c=3");
-        assertOutput("<@m?spreadArgs([1, 2, 3]) />", "a=1; b=2; c=3");
-        assertOutput("<@m?spreadArgs([1, 2]) c=3 />", "a=1; b=2; c=3");
-        assertOutput("<@m?spreadArgs([1, 2, 0]) c=3 />", "a=1; b=2; c=3");
-        assertOutput("<@m?spreadArgs([1, 0, 3]) b=2 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs([1, 2, 3]) />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs([1, 2]) c=3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs([1, 2, 0]) c=3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgs([1, 0, 3]) b=2 />", "a=1; b=2; c=3");
 
         assertOutput("<@mCA 1 2 />", "a=1; b=2; o=[]");
-        assertOutput("<@mCA?spreadArgs([1, 2]) />", "a=1; b=2; o=[]");
-        assertOutput("<@mCA?spreadArgs([1]) 2 />", "a=1; b=2; o=[]");
-        assertOutput("<@mCA?spreadArgs([]) 1 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?withArgs([1, 2]) />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?withArgs([1]) 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?withArgs([]) 1 2 />", "a=1; b=2; o=[]");
         assertOutput("<@mCA 1 2 3 />", "a=1; b=2; o=[3]");
-        assertOutput("<@mCA?spreadArgs([1, 2, 3]) />", "a=1; b=2; o=[3]");
-        assertOutput("<@mCA?spreadArgs([1]) 2, 3 />", "a=1; b=2; o=[3]");
-        assertOutput("<@mCA?spreadArgs([1, 2]) 3 />", "a=1; b=2; o=[3]");
-        assertOutput("<@mCA?spreadArgs([1]) b=2 c=3 />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs([]) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs([1, 2]) c=3 />", "a=1; b=2; o={c=3}");
-        assertOutput("<@mCA?spreadArgs([1, 0]) b=2 c=3 />", "a=1; b=2; o={c=3}");
-        assertErrorContains("<@mCA?spreadArgs([1, 2, 3]) d=4 />",
+        assertOutput("<@mCA?withArgs([1, 2, 3]) />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?withArgs([1]) 2, 3 />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?withArgs([1, 2]) 3 />", "a=1; b=2; o=[3]");
+        assertOutput("<@mCA?withArgs([1]) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs([]) a=1 b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs([1, 2]) c=3 />", "a=1; b=2; o={c=3}");
+        assertOutput("<@mCA?withArgs([1, 0]) b=2 c=3 />", "a=1; b=2; o={c=3}");
+        assertErrorContains("<@mCA?withArgs([1, 2, 3]) d=4 />",
                 "both named and positional", "catch-all");
 
-        assertOutput("<@mCAO?spreadArgs([1, 2]) />", "o=[1, 2]");
-        assertOutput("<@mCAO?spreadArgs([1]) 2 />", "o=[1, 2]");
+        assertOutput("<@mCAO?withArgs([1, 2]) />", "o=[1, 2]");
+        assertOutput("<@mCAO?withArgs([1]) 2 />", "o=[1, 2]");
         assertOutput("<@mCAO 1, 2 />", "o=[1, 2]");
 
-        assertOutput("<@mCAO?spreadArgs([]) />", "o=[]");
+        assertOutput("<@mCAO?withArgs([]) />", "o=[]");
     }
 
     @Test
-    public void testNullsWithMacroWithPositionalSpreadArgs() throws Exception {
-        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+    public void testNullsWithMacroWithPositionalWithArgs() throws Exception {
+        // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
         assertOutput("<@mCAO 1 null null 4 />", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
         addToDataModel("args", Arrays.asList(1, null, null, 4));
-        assertOutput("<@mCAO?spreadArgs(args) />", "o=[1, 4]"); // [FM3] See above
-        assertOutput("<@mCAO?spreadArgs(args) null 5 6 />", "o=[1, 4, 5, 6]"); // [FM3] See above
+        assertOutput("<@mCAO?withArgs(args) />", "o=[1, 4]"); // [FM3] See above
+        assertOutput("<@mCAO?withArgs(args) null 5 6 />", "o=[1, 4, 5, 6]"); // [FM3] See above
     }
 
     @Test
     public void testFunction() throws Exception {
         assertOutput("${f(1, 2)}", "a=1; b=2; c=d3");
-        assertOutput("${f?spreadArgs([1, 2])()}", "a=1; b=2; c=d3");
-        assertOutput("${f?spreadArgs([1])(2)}", "a=1; b=2; c=d3");
-        assertOutput("${f?spreadArgs([])(1, 2)}", "a=1; b=2; c=d3");
+        assertOutput("${f?withArgs([1, 2])()}", "a=1; b=2; c=d3");
+        assertOutput("${f?withArgs([1])(2)}", "a=1; b=2; c=d3");
+        assertOutput("${f?withArgs([])(1, 2)}", "a=1; b=2; c=d3");
         assertOutput("${f(1, 2, 3)}", "a=1; b=2; c=3");
-        assertOutput("${f?spreadArgs([1, 2, 3])()}", "a=1; b=2; c=3");
+        assertOutput("${f?withArgs([1, 2, 3])()}", "a=1; b=2; c=3");
 
         assertOutput("${fCA(1, 2)}", "a=1; b=2; o=[]");
-        assertOutput("${fCA?spreadArgs([1, 2])()}", "a=1; b=2; o=[]");
-        assertOutput("${fCA?spreadArgs([1])(2)}", "a=1; b=2; o=[]");
-        assertOutput("${fCA?spreadArgs([])(1, 2)}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?withArgs([1, 2])()}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?withArgs([1])(2)}", "a=1; b=2; o=[]");
+        assertOutput("${fCA?withArgs([])(1, 2)}", "a=1; b=2; o=[]");
         assertOutput("${fCA(1, 2, 3)}", "a=1; b=2; o=[3]");
-        assertOutput("${fCA?spreadArgs([1, 2, 3])()}", "a=1; b=2; o=[3]");
-        assertOutput("${fCA?spreadArgs([1])(2, 3)}", "a=1; b=2; o=[3]");
-        assertOutput("${fCA?spreadArgs([1, 2])(3)}", "a=1; b=2; o=[3]");
-        assertOutput("${fCA?spreadArgs([])(1, 2, 3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?withArgs([1, 2, 3])()}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?withArgs([1])(2, 3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?withArgs([1, 2])(3)}", "a=1; b=2; o=[3]");
+        assertOutput("${fCA?withArgs([])(1, 2, 3)}", "a=1; b=2; o=[3]");
 
         assertOutput("${fCAO(1, 2)}", "o=[1, 2]");
-        assertOutput("${fCAO?spreadArgs([1, 2])()}", "o=[1, 2]");
-        assertOutput("${fCAO?spreadArgs([1])(2)}", "o=[1, 2]");
-        assertOutput("${fCAO?spreadArgs([])(1, 2)}", "o=[1, 2]");
+        assertOutput("${fCAO?withArgs([1, 2])()}", "o=[1, 2]");
+        assertOutput("${fCAO?withArgs([1])(2)}", "o=[1, 2]");
+        assertOutput("${fCAO?withArgs([])(1, 2)}", "o=[1, 2]");
 
-        assertErrorContains("${f?spreadArgs({'a': 1, 'b': 2})}",
-                "function", "hash", "sequence", "?spreadArgs");
+        assertErrorContains("${f?withArgs({'a': 1, 'b': 2})}",
+                "function", "hash", "sequence", "?withArgs");
     }
 
     @Test
     public void testNullsWithFunction() throws Exception {
-        // Null-s in ?spreadArgs should behave similarly as if they were given directly as argument.
+        // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
         assertOutput("${fCAO(1, null, null, 4)}", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
         addToDataModel("args", Arrays.asList(1, null, null, 4));
-        assertOutput("${fCAO?spreadArgs(args)()}", "o=[1, 4]"); // [FM3] See above
-        assertOutput("${fCAO?spreadArgs(args)(null, 5, 6)}", "o=[1, 4, 5, 6]"); // [FM3] See above
+        assertOutput("${fCAO?withArgs(args)()}", "o=[1, 4]"); // [FM3] See above
+        assertOutput("${fCAO?withArgs(args)(null, 5, 6)}", "o=[1, 4, 5, 6]"); // [FM3] See above
     }
 
     @Test
@@ -238,7 +238,7 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
                 "<#import 'ns1.ftl' as ns1>" +
                 "<#assign v = 'NS0'>" +
                 "<@ns1.m 1; n>n=${n} v=${v}</@>; " +
-                "<#assign m2 = ns1.m?spreadArgs([2])>" +
+                "<#assign m2 = ns1.m?withArgs([2])>" +
                 "<@m2; n>n=${n} v=${v}</@>",
         "p=1 v=NS1 v=L {n=1 v=NS0} v=L; " +
                 "p=2 v=NS1 v=L {n=2 v=NS0} v=L");
@@ -250,49 +250,49 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
 
         // No error:
         assertOutput(macroDef + "<@m 1 2 3 />", "1, 2, 3");
-        assertOutput(macroDef + "<@m?spread_args([1, 2, 3]) />", "1, 2, 3");
-        assertOutput(macroDef + "<@m?spread_args([1, 2]) 3 />", "1, 2, 3");
+        assertOutput(macroDef + "<@m?with_args([1, 2, 3]) />", "1, 2, 3");
+        assertOutput(macroDef + "<@m?with_args([1, 2]) 3 />", "1, 2, 3");
 
         // Too many args:
         assertErrorContains(macroDef + "<@m 1 2 3 4 />", "accepts 3", "got 4");
-        assertErrorContains(macroDef + "<@m?spread_args([1, 2, 3, 4]) />", "accepts 3", "got 4");
-        assertErrorContains(macroDef + "<@m?spread_args([1, 2, 3]) 5 />", "accepts 3", "got 4");
-        assertErrorContains(macroDef + "<@m?spread_args([1]) 2 3 4 />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?with_args([1, 2, 3, 4]) />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?with_args([1, 2, 3]) 5 />", "accepts 3", "got 4");
+        assertErrorContains(macroDef + "<@m?with_args([1]) 2 3 4 />", "accepts 3", "got 4");
 
         // Too few args:
         assertErrorContains(macroDef + "<@m 1 2 />", "\"c\"", "was not specified");
-        assertErrorContains(macroDef + "<@m?spread_args([1, 2]) />", "\"c\"", "was not specified");
-        assertErrorContains(macroDef + "<@m?spread_args([1]) 2 />", "\"c\"", "was not specified");
-        assertErrorContains(macroDef + "<@m?spread_args([]) 1 2 />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?with_args([1, 2]) />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?with_args([1]) 2 />", "\"c\"", "was not specified");
+        assertErrorContains(macroDef + "<@m?with_args([]) 1 2 />", "\"c\"", "was not specified");
     }
 
     @Test
     public void testDefaultsThenCatchAll() throws IOException, TemplateException {
         String macroDef = "<#macro m a=1 b=2 c=3 o...>a=${a} b=${b} c=${c} " + PRINT_O + "</#macro>";
 
-        assertOutput(macroDef + "<@m?spreadArgs([]) />", "a=1 b=2 c=3 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11]) />", "a=11 b=2 c=3 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22]) />", "a=11 b=22 c=3 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33]) />", "a=11 b=22 c=33 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44]) />", "a=11 b=22 c=33 o=[44]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44, 55]) />", "a=11 b=22 c=33 o=[44, 55]");
+        assertOutput(macroDef + "<@m?withArgs([]) />", "a=1 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11]) />", "a=11 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22]) />", "a=11 b=22 c=3 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22, 33]) />", "a=11 b=22 c=33 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22, 33, 44]) />", "a=11 b=22 c=33 o=[44]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22, 33, 44, 55]) />", "a=11 b=22 c=33 o=[44, 55]");
 
-        assertOutput(macroDef + "<@m?spreadArgs([]) 11 />", "a=11 b=2 c=3 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11]) 22 />", "a=11 b=22 c=3 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22]) 33 />", "a=11 b=22 c=33 o=[]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33]) 44 />", "a=11 b=22 c=33 o=[44]");
-        assertOutput(macroDef + "<@m?spreadArgs([11, 22, 33, 44]) 55 />", "a=11 b=22 c=33 o=[44, 55]");
+        assertOutput(macroDef + "<@m?withArgs([]) 11 />", "a=11 b=2 c=3 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11]) 22 />", "a=11 b=22 c=3 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22]) 33 />", "a=11 b=22 c=33 o=[]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22, 33]) 44 />", "a=11 b=22 c=33 o=[44]");
+        assertOutput(macroDef + "<@m?withArgs([11, 22, 33, 44]) 55 />", "a=11 b=22 c=33 o=[44, 55]");
 
-        assertOutput(macroDef + "<@m?spreadArgs({}) />", "a=1 b=2 c=3 o={}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22}) />", "a=1 b=22 c=3 o={}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33}) />", "a=1 b=22 c=33 o={}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33, 'd':55}) />", "a=1 b=22 c=33 o={d=55}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'd':55, 'e':66}) />", "a=1 b=22 c=3 o={d=55, e=66}");
+        assertOutput(macroDef + "<@m?withArgs({}) />", "a=1 b=2 c=3 o={}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22}) />", "a=1 b=22 c=3 o={}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22, 'c':33}) />", "a=1 b=22 c=33 o={}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22, 'c':33, 'd':55}) />", "a=1 b=22 c=33 o={d=55}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22, 'd':55, 'e':66}) />", "a=1 b=22 c=3 o={d=55, e=66}");
 
-        assertOutput(macroDef + "<@m?spreadArgs({}) b=22 />", "a=1 b=22 c=3 o={}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22}) c=33 />", "a=1 b=22 c=33 o={}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'c':33}) d=55 />", "a=1 b=22 c=33 o={d=55}");
-        assertOutput(macroDef + "<@m?spreadArgs({'b':22, 'd':55}) e=66 />", "a=1 b=22 c=3 o={d=55, e=66}");
+        assertOutput(macroDef + "<@m?withArgs({}) b=22 />", "a=1 b=22 c=3 o={}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22}) c=33 />", "a=1 b=22 c=33 o={}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22, 'c':33}) d=55 />", "a=1 b=22 c=33 o={d=55}");
+        assertOutput(macroDef + "<@m?withArgs({'b':22, 'd':55}) e=66 />", "a=1 b=22 c=3 o={d=55, e=66}");
     }
 
     @Test
@@ -300,26 +300,26 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
         addToDataModel("obj", new MethodHolder());
 
         assertOutput("${obj.m3p(1, 2, 3)}", "1, 2, 3");
-        assertOutput("${obj.m3p?spreadArgs([1, 2, 3])()}", "1, 2, 3");
-        assertOutput("${obj.m3p?spreadArgs([1, 2])(3)}", "1, 2, 3");
-        assertOutput("${obj.m3p?spreadArgs([1])(2, 3)}", "1, 2, 3");
-        assertOutput("${obj.m3p?spreadArgs([])(1, 2, 3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?withArgs([1, 2, 3])()}", "1, 2, 3");
+        assertOutput("${obj.m3p?withArgs([1, 2])(3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?withArgs([1])(2, 3)}", "1, 2, 3");
+        assertOutput("${obj.m3p?withArgs([])(1, 2, 3)}", "1, 2, 3");
 
         assertOutput("${obj.m0p()}", "OK");
-        assertOutput("${obj.m0p?spreadArgs([])()}", "OK");
+        assertOutput("${obj.m0p?withArgs([])()}", "OK");
 
         assertOutput("${obj.mVA(1, 2, 3, 4)}", "1, 2, o=[3, 4]");
-        assertOutput("${obj.mVA?spreadArgs([1, 2, 3, 4])()}", "1, 2, o=[3, 4]");
-        assertOutput("${obj.mVA?spreadArgs([1, 2, 3])(4)}", "1, 2, o=[3, 4]");
-        assertOutput("${obj.mVA?spreadArgs([1, 2])(3, 4)}", "1, 2, o=[3, 4]");
-        assertOutput("${obj.mVA?spreadArgs([1])(2, 3, 4)}", "1, 2, o=[3, 4]");
-        assertOutput("${obj.mVA?spreadArgs([])(1, 2, 3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?withArgs([1, 2, 3, 4])()}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?withArgs([1, 2, 3])(4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?withArgs([1, 2])(3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?withArgs([1])(2, 3, 4)}", "1, 2, o=[3, 4]");
+        assertOutput("${obj.mVA?withArgs([])(1, 2, 3, 4)}", "1, 2, o=[3, 4]");
 
-        assertErrorContains("${obj.mVA?spreadArgs({})}", "hash", "sequence", "argument");
+        assertErrorContains("${obj.mVA?withArgs({})}", "hash", "sequence", "argument");
 
         assertOutput("${obj.mNullable(null, 2, null)}", "null, 2, null");
         addToDataModel("args", Arrays.asList(null, 2, null));
-        assertOutput("${obj.mNullable?spreadArgs(args)()}", "null, 2, null");
+        assertOutput("${obj.mNullable?withArgs(args)()}", "null, 2, null");
     }
 
     public static class MethodHolder {
@@ -355,9 +355,9 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
         addToDataModel("legacyMethod", new LegacyMethodModel());
         getConfiguration().setNumberFormat("0.00");
         assertOutput("${legacyMethod(1, '2')}", "[1.00, 2]");
-        assertOutput("${legacyMethod?spreadArgs([1, '2'])()}", "[1.00, 2]");
-        assertOutput("${legacyMethod?spreadArgs([1])('2')}", "[1.00, 2]");
-        assertOutput("${legacyMethod?spreadArgs([])(1, '2')}", "[1.00, 2]");
+        assertOutput("${legacyMethod?withArgs([1, '2'])()}", "[1.00, 2]");
+        assertOutput("${legacyMethod?withArgs([1])('2')}", "[1.00, 2]");
+        assertOutput("${legacyMethod?withArgs([])(1, '2')}", "[1.00, 2]");
     }
 
     private static class LegacyMethodModel implements TemplateMethodModel {
@@ -377,18 +377,18 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
 
         assertOutput("<@directive a=1 b=2 c=3; u, v>${u} ${v}</@>",
                 "{a=1, b=2, c=3}{11 22}");
-        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2, 'c': 3}); u, v>${u} ${v}</@>",
+        assertOutput("<@directive?withArgs({'a': 1, 'b': 2, 'c': 3}); u, v>${u} ${v}</@>",
                 "{a=1, b=2, c=3}{11 22}");
-        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2}) c=3; u, v>${u} ${v}</@>",
+        assertOutput("<@directive?withArgs({'a': 1, 'b': 2}) c=3; u, v>${u} ${v}</@>",
                 "{a=1, b=2, c=3}{11 22}");
-        assertOutput("<@directive?spreadArgs({'a': 1}) b=2 c=3; u, v>${u} ${v}</@>",
+        assertOutput("<@directive?withArgs({'a': 1}) b=2 c=3; u, v>${u} ${v}</@>",
                 "{a=1, b=2, c=3}{11 22}");
-        assertOutput("<@directive?spreadArgs({}) a=1 b=2 c=3; u, v>${u} ${v}</@>",
+        assertOutput("<@directive?withArgs({}) a=1 b=2 c=3; u, v>${u} ${v}</@>",
                 "{a=1, b=2, c=3}{11 22}");
 
-        assertOutput("<@directive?spreadArgs({}); u, v>${u} ${v}</@>",
+        assertOutput("<@directive?withArgs({}); u, v>${u} ${v}</@>",
                 "{}{11 22}");
-        assertOutput("<@directive?spreadArgs({'a': 1, 'b': 2}) b=22 c=3; u>${u}</@>",
+        assertOutput("<@directive?withArgs({'a': 1, 'b': 2}) b=22 c=3; u>${u}</@>",
                 "{a=1, b=22, c=3}{11}");
         Map<String, Integer> args = new LinkedHashMap<String, Integer>();
         args.put("a", null);
@@ -396,7 +396,7 @@ public class SpreadArgsBuiltInTest extends TemplateTest {
         args.put("c", 3);
         args.put("e", 6);
         addToDataModel("args", args);
-        assertOutput("<@directive?spreadArgs(args) b=22 c=null d=55 />",
+        assertOutput("<@directive?withArgs(args) b=22 c=null d=55 />",
                 "{a=null, b=22, c=null, e=6, d=55}{}");
     }
 

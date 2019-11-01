@@ -58,7 +58,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     private final String name;
     private final String[] paramNames;
     private final Map<String, Expression> paramNamesWithDefault;
-    private final SpreadArgs spreadArgs;
+    private final WithArgs withArgs;
     private boolean requireArgsSpecialVariable;
     private final String catchAllParamName;
     private final boolean function;
@@ -78,7 +78,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.paramNamesWithDefault = paramNamesWithDefault;
         this.paramNames = paramNamesWithDefault.keySet().toArray(new String[0]);
         this.catchAllParamName = catchAllParamName;
-        this.spreadArgs = null;
+        this.withArgs = null;
         this.requireArgsSpecialVariable = requireArgsSpecialVariable;
         this.function = function;
         this.setChildren(children);
@@ -87,20 +87,20 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     /**
-     * Copy-constructor with replacing {@link #spreadArgs} (with the quirk that the parent of the
+     * Copy-constructor with replacing {@link #withArgs} (with the quirk that the parent of the
      * child AST elements will stay the copied macro).
      *
-     * @param spreadArgs Usually {@code null}; used by {@link BuiltInsForCallables.spread_argsBI} to
+     * @param withArgs Usually {@code null}; used by {@link BuiltInsForCallables.with_argsBI} to
      *      set arbitrary default value to parameters. Note that the defaults aren't
      *      {@link Expression}-s, but {@link TemplateModel}-s.
      */
-    Macro(Macro that, SpreadArgs spreadArgs) {
+    Macro(Macro that, WithArgs withArgs) {
         // Attention! Keep this constructor in sync with the other constructor!
         this.name = that.name;
         this.paramNamesWithDefault = that.paramNamesWithDefault;
         this.paramNames = that.paramNames;
         this.catchAllParamName = that.catchAllParamName;
-        this.spreadArgs = spreadArgs; // Using the argument value here
+        this.withArgs = withArgs; // Using the argument value here
         this.requireArgsSpecialVariable = that.requireArgsSpecialVariable;
         this.function = that.function;
         this.namespaceLookupKey = that.namespaceLookupKey;
@@ -132,8 +132,9 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return name;
     }
 
-    public SpreadArgs getSpreadArgs() {
-        return spreadArgs;
+    /** The arguments added via {@code ?with_args}; maybe {@code null}. */
+    public WithArgs getWithArgs() {
+        return withArgs;
     }
 
     public Object getNamespaceLookupKey() {
@@ -151,12 +152,12 @@ public final class Macro extends TemplateElement implements TemplateModel {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
-        if (spreadArgs != null) {
+        if (withArgs != null) {
             // As such a node won't be part of a template, this is probably never needed.
             sb.append('?')
                     .append(getTemplate().getActualNamingConvention() == Configuration.CAMEL_CASE_NAMING_CONVENTION
-                            ? BuiltIn.BI_NAME_CAMEL_CASE_SPREAD_ARGS
-                            : BuiltIn.BI_NAME_SNAKE_CASE_SPREAD_ARGS)
+                            ? BuiltIn.BI_NAME_CAMEL_CASE_WITH_ARGS
+                            : BuiltIn.BI_NAME_SNAKE_CASE_WITH_ARGS)
                     .append("(...)");
         }
         sb.append(' ');
@@ -476,16 +477,16 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return true;
     }
 
-    static final class SpreadArgs {
+    static final class WithArgs {
         private final TemplateHashModelEx byName;
         private final TemplateSequenceModel byPosition;
 
-        SpreadArgs(TemplateHashModelEx byName) {
+        WithArgs(TemplateHashModelEx byName) {
             this.byName = byName;
             this.byPosition = null;
         }
 
-        SpreadArgs(TemplateSequenceModel byPosition) {
+        WithArgs(TemplateSequenceModel byPosition) {
             this.byName = null;
             this.byPosition = byPosition;
         }

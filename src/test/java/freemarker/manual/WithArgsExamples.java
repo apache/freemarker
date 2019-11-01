@@ -25,11 +25,11 @@ import org.junit.Test;
 
 import freemarker.template.TemplateException;
 
-public class SpreadArgsExamples extends ExamplesTest {
+public class WithArgsExamples extends ExamplesTest {
 
     @Test
     public void usingWithArgsSpecialVariable() throws IOException, TemplateException {
-        assertOutputForNamed("SpreadArgsExamples-usingWithArgsSpecialVariable.ftl");
+        assertOutputForNamed("WithArgsExamples-usingWithArgsSpecialVariable.ftl");
     }
 
 }

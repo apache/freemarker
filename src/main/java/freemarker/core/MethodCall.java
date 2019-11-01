@@ -106,6 +106,10 @@ final class MethodCall extends Expression {
         return 1 + arguments.items.size();
     }
 
+    Expression getTarget() {
+        return target;
+    }
+
     @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {

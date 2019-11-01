@@ -40,7 +40,7 @@ import freemarker.template.utility.TemplateModelUtils;
 
 class BuiltInsForCallables {
 
-    static class spread_argsBI extends BuiltIn {
+    static class with_argsBI extends BuiltIn {
 
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -71,20 +71,20 @@ class BuiltInsForCallables {
                 checkMethodArgCount(args.size(), 1);
                 TemplateModel argTM = (TemplateModel) args.get(0);
 
-                Macro.SpreadArgs spreadArgs;
+                Macro.WithArgs withArgs;
                 if (argTM instanceof TemplateSequenceModel) {
-                    spreadArgs = new Macro.SpreadArgs((TemplateSequenceModel) argTM);
+                    withArgs = new Macro.WithArgs((TemplateSequenceModel) argTM);
                 } else if (argTM instanceof TemplateHashModelEx) {
                     if (macroOrFunction.isFunction()) {
                         throw new _TemplateModelException("When applied on a function, ?",  key,
                                 " can't have a hash argument. Use a sequence argument.");
                     }
-                    spreadArgs = new Macro.SpreadArgs((TemplateHashModelEx) argTM);
+                    withArgs = new Macro.WithArgs((TemplateHashModelEx) argTM);
                 } else {
                     throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
                 }
 
-                return new Macro(macroOrFunction, spreadArgs);
+                return new Macro(macroOrFunction, withArgs);
             }
 
         }
@@ -102,16 +102,16 @@ class BuiltInsForCallables {
                 TemplateModel argTM = (TemplateModel) args.get(0);
 
                 if (argTM instanceof TemplateSequenceModel) {
-                    final TemplateSequenceModel spreadArgs = (TemplateSequenceModel) argTM;
+                    final TemplateSequenceModel withArgs = (TemplateSequenceModel) argTM;
                     if (method instanceof TemplateMethodModelEx) {
                         return new TemplateMethodModelEx() {
                             public Object exec(List origArgs) throws TemplateModelException {
-                                int spreadArgsSize = spreadArgs.size();
+                                int withArgsSize = withArgs.size();
                                 List<TemplateModel> newArgs = new ArrayList<TemplateModel>(
-                                        spreadArgsSize + origArgs.size());
+                                        withArgsSize + origArgs.size());
 
-                                for (int i = 0; i < spreadArgsSize; i++) {
-                                    newArgs.add(spreadArgs.get(i));
+                                for (int i = 0; i < withArgsSize; i++) {
+                                    newArgs.add(withArgs.get(i));
                                 }
 
                                 newArgs.addAll(origArgs);
@@ -122,12 +122,12 @@ class BuiltInsForCallables {
                     } else {
                         return new TemplateMethodModel() {
                             public Object exec(List origArgs) throws TemplateModelException {
-                                int spreadArgsSize = spreadArgs.size();
+                                int withArgsSize = withArgs.size();
                                 List<String> newArgs = new ArrayList<String>(
-                                        spreadArgsSize + origArgs.size());
+                                        withArgsSize + origArgs.size());
 
-                                for (int i = 0; i < spreadArgsSize; i++) {
-                                    TemplateModel argVal = spreadArgs.get(i);
+                                for (int i = 0; i < withArgsSize; i++) {
+                                    TemplateModel argVal = withArgs.get(i);
                                     newArgs.add(argValueToString(argVal));
                                 }
 
@@ -182,18 +182,18 @@ class BuiltInsForCallables {
                 TemplateModel argTM = (TemplateModel) args.get(0);
 
                 if (argTM instanceof TemplateHashModelEx) {
-                    final TemplateHashModelEx spreadArgs = (TemplateHashModelEx) argTM;
+                    final TemplateHashModelEx withArgs = (TemplateHashModelEx) argTM;
                     return new TemplateDirectiveModel() {
                         public void execute(Environment env, Map origArgs, TemplateModel[] loopVars,
                                 TemplateDirectiveBody body) throws TemplateException, IOException {
-                            int spreadArgsSize = spreadArgs.size();
+                            int withArgsSize = withArgs.size();
                             Map<String, TemplateModel> newArgs = new LinkedHashMap<String, TemplateModel>(
-                                    (spreadArgsSize + origArgs.size()) * 4 / 3, 1f);
+                                    (withArgsSize + origArgs.size()) * 4 / 3, 1f);
 
-                            TemplateHashModelEx2.KeyValuePairIterator spreadArgsIter =
-                                    TemplateModelUtils.getKeyValuePairIterator(spreadArgs);
-                            while (spreadArgsIter.hasNext()) {
-                                TemplateHashModelEx2.KeyValuePair spreadArgKVP = spreadArgsIter.next();
+                            TemplateHashModelEx2.KeyValuePairIterator withArgsIter =
+                                    TemplateModelUtils.getKeyValuePairIterator(withArgs);
+                            while (withArgsIter.hasNext()) {
+                                TemplateHashModelEx2.KeyValuePair spreadArgKVP = withArgsIter.next();
 
                                 TemplateModel argNameTM = spreadArgKVP.getKey();
                                 if (!(argNameTM instanceof TemplateScalarModel)) {

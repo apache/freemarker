@@ -903,16 +903,16 @@ public final class Environment extends Configurable {
         SimpleSequence positionalCatchAllParamValue = null;
         int nextPositionalArgToAssignIdx = 0;
 
-        // Used for ?spread_args(...):
-        Macro.SpreadArgs spreadArgs = macro.getSpreadArgs();
-        if (spreadArgs != null) {
-            TemplateHashModelEx byNameSpreadArgs = spreadArgs.getByName();
-            TemplateSequenceModel byPositionSpreadArgs = spreadArgs.getByPosition();
+        // Used for ?with_args(...):
+        Macro.WithArgs withArgs = macro.getWithArgs();
+        if (withArgs != null) {
+            TemplateHashModelEx byNameWithArgs = withArgs.getByName();
+            TemplateSequenceModel byPositionWithArgs = withArgs.getByPosition();
 
-            if (byNameSpreadArgs != null) {
-                new HashMap<String, TemplateModel>(byNameSpreadArgs.size() * 4 / 3, 1f);
+            if (byNameWithArgs != null) {
+                new HashMap<String, TemplateModel>(byNameWithArgs.size() * 4 / 3, 1f);
                 TemplateHashModelEx2.KeyValuePairIterator namedParamValueOverridesIter =
-                        TemplateModelUtils.getKeyValuePairIterator(byNameSpreadArgs);
+                        TemplateModelUtils.getKeyValuePairIterator(byNameWithArgs);
                 while (namedParamValueOverridesIter.hasNext()) {
                     TemplateHashModelEx2.KeyValuePair defaultArgHashKVP = namedParamValueOverridesIter.next();
 
@@ -943,14 +943,14 @@ public final class Environment extends Configurable {
                         throw newUndeclaredParamNameException(macro, argName);
                     }
                 }
-            } else if (byPositionSpreadArgs != null) {
+            } else if (byPositionWithArgs != null) {
                 String[] argNames = macro.getArgumentNamesInternal();
-                final int argsCnt = byPositionSpreadArgs.size();
+                final int argsCnt = byPositionWithArgs.size();
                 if (argNames.length < argsCnt && catchAllParamName == null) {
                     throw newTooManyArgumentsException(macro, argNames, argsCnt);
                 }
                 for (int i = 0; i < argsCnt; i++) {
-                    TemplateModel argValue = byPositionSpreadArgs.get(i);
+                    TemplateModel argValue = byPositionWithArgs.get(i);
                     try {
                         if (nextPositionalArgToAssignIdx < argNames.length) {
                             String argName = argNames[nextPositionalArgToAssignIdx++];
@@ -970,7 +970,7 @@ public final class Environment extends Configurable {
 
         if (namedArgs != null) {
             if (catchAllParamName != null && namedCatchAllParamValue == null && positionalCatchAllParamValue == null) {
-                if (namedArgs.isEmpty() && spreadArgs != null && spreadArgs.getByPosition() != null) {
+                if (namedArgs.isEmpty() && withArgs != null && withArgs.getByPosition() != null) {
                     positionalCatchAllParamValue = initPositionalCatchAllParameter(macroCtx, catchAllParamName);
                 } else {
                     namedCatchAllParamValue = initNamedCatchAllParameter(macroCtx, catchAllParamName);
@@ -998,7 +998,7 @@ public final class Environment extends Configurable {
             }
         } else if (positionalArgs != null) {
             if (catchAllParamName != null && positionalCatchAllParamValue == null && namedCatchAllParamValue == null) {
-                if (positionalArgs.isEmpty() && spreadArgs != null && spreadArgs.getByName() != null) {
+                if (positionalArgs.isEmpty() && withArgs != null && withArgs.getByName() != null) {
                     namedCatchAllParamValue = initNamedCatchAllParameter(macroCtx, catchAllParamName);
                 } else {
                     positionalCatchAllParamValue = initPositionalCatchAllParameter(macroCtx, catchAllParamName);
@@ -1007,12 +1007,12 @@ public final class Environment extends Configurable {
 
             String[] argNames = macro.getArgumentNamesInternal();
             final int argsCnt = positionalArgs.size();
-            final int argsWithSpreadArgsCnt = argsCnt + nextPositionalArgToAssignIdx;
-            if (argNames.length < argsWithSpreadArgsCnt && positionalCatchAllParamValue == null) {
+            final int argsWithWithArgsCnt = argsCnt + nextPositionalArgToAssignIdx;
+            if (argNames.length < argsWithWithArgsCnt && positionalCatchAllParamValue == null) {
                 if (namedCatchAllParamValue != null) {
                     throw newBothNamedAndPositionalCatchAllParamsException(macro);
                 } else {
-                    throw newTooManyArgumentsException(macro, argNames, argsWithSpreadArgsCnt);
+                    throw newTooManyArgumentsException(macro, argNames, argsWithWithArgsCnt);
                 }
             }
             for (int srcPosArgIdx = 0; srcPosArgIdx < argsCnt; srcPosArgIdx++) {
@@ -1056,7 +1056,8 @@ public final class Environment extends Configurable {
     private _MiscTemplateException newUndeclaredParamNameException(Macro macro, String argName) {
         return new _MiscTemplateException(this,
                 (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                " has no parameter with name ", new _DelayedJQuote(argName), ".");
+                " has no parameter with name ", new _DelayedJQuote(argName), ". Valid parameter names are: "
+                , new _DelayedJoinWithComma(macro.getArgumentNames()));
     }
 
     private _MiscTemplateException newBothNamedAndPositionalCatchAllParamsException(Macro macro) {

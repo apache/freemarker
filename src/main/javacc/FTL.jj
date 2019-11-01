@@ -2522,8 +2522,8 @@ HashLiteral HashLiteral() :
 {
     Token begin, end;
     Expression key, value;
-    ArrayList keys = new ArrayList();
-    ArrayList values = new ArrayList();
+    ArrayList<Expression> keys = new ArrayList<Expression>();
+    ArrayList<Expression> values = new ArrayList<Expression>();
 }
 {
     begin = <OPENING_CURLY_BRACKET>
@@ -2550,6 +2550,8 @@ HashLiteral HashLiteral() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
+        keys.trimToSize();
+        values.trimToSize();
         HashLiteral result = new HashLiteral(keys, values);
         result.setLocation(template, begin, end);
         return result;
@@ -3447,7 +3449,7 @@ Macro Macro() :
     boolean isCatchAll = false;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
-    int lastContiunableDirectiveNesting;
+    int lastContinuableDirectiveNesting;
     TemplateElements children;
     boolean isFunction = false;
     boolean hasDefaults = false;
@@ -3517,12 +3519,12 @@ Macro Macro() :
         iteratorBlockContexts = null;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
 	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
-	        lastContiunableDirectiveNesting = continuableDirectiveNesting;
+	        lastContinuableDirectiveNesting = continuableDirectiveNesting;
 	        breakableDirectiveNesting = 0; 
 	        continuableDirectiveNesting = 0;
         } else {
             lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
-            lastContiunableDirectiveNesting = 0;
+            lastContinuableDirectiveNesting = 0;
         }
     }
     children = MixedContentElements()
@@ -3541,7 +3543,7 @@ Macro Macro() :
         iteratorBlockContexts = lastIteratorBlockContexts;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
             breakableDirectiveNesting = lastBreakableDirectiveNesting;
-            continuableDirectiveNesting = lastContiunableDirectiveNesting;
+            continuableDirectiveNesting = lastContinuableDirectiveNesting;
         }
         
         inMacro = inFunction = false;
@@ -3583,8 +3585,17 @@ TemplateElement UnifiedMacroTransform() :
     start = <UNIFIED_CALL>
     exp = Expression()
     {
-        if (exp instanceof Identifier || (exp instanceof Dot && ((Dot) exp).onlyHasIdentifiers())) {
-            startTagNameExp = exp;
+        // To allow <@foo.bar?withArgs(...)>...</@foo.bar>, but we also remove superfluous (...):
+        Expression cleanedExp = exp;
+        if (cleanedExp instanceof MethodCall) {
+            Expression methodCallTarget = ((MethodCall) cleanedExp).getTarget();
+            if (methodCallTarget instanceof BuiltInsForCallables.with_argsBI) {
+                cleanedExp = ((BuiltInsForCallables.with_argsBI) methodCallTarget).target;
+            }
+        }
+
+        if (cleanedExp instanceof Identifier || (cleanedExp instanceof Dot && ((Dot) cleanedExp).onlyHasIdentifiers())) {
+            startTagNameExp = cleanedExp;
         } else {
             startTagNameExp = null;
         }
