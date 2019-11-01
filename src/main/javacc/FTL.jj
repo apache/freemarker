@@ -3585,8 +3585,17 @@ TemplateElement UnifiedMacroTransform() :
     start = <UNIFIED_CALL>
     exp = Expression()
     {
-        if (exp instanceof Identifier || (exp instanceof Dot && ((Dot) exp).onlyHasIdentifiers())) {
-            startTagNameExp = exp;
+        // To allow <@foo.bar?withArgs(...)>...</@foo.bar>, but we also remove superfluous (...):
+        Expression cleanedExp = exp;
+        if (cleanedExp instanceof MethodCall) {
+            Expression methodCallTarget = ((MethodCall) cleanedExp).getTarget();
+            if (methodCallTarget instanceof BuiltInsForCallables.with_argsBI) {
+                cleanedExp = ((BuiltInsForCallables.with_argsBI) methodCallTarget).target;
+            }
+        }
+
+        if (cleanedExp instanceof Identifier || (cleanedExp instanceof Dot && ((Dot) cleanedExp).onlyHasIdentifiers())) {
+            startTagNameExp = cleanedExp;
         } else {
             startTagNameExp = null;
         }

@@ -19869,6 +19869,14 @@ Same as:
           <programlisting role="output">  m2 does things with 1, 2, 3
   Delegate to m1:
   m1 does things with 1, 2, 3</programlisting>
+
+          <para>FreeMarker syntax allows using the name before the
+          <literal>?with_args(<replaceable>...</replaceable>)</literal> in the
+          end-tag, just as if the
+          <literal>?with_args(<replaceable>...</replaceable>)</literal> wasn't
+          there:</para>
+
+          <programlisting>&lt;@myMacro?with_args({'a': 1})&gt;...&lt;/<emphasis>@myMacro</emphasis>&gt;</programlisting>
         </section>
       </section>
     </chapter>
@@ -24273,6 +24281,14 @@ Or all above but with positional parameter passing (<link
             But
             <literal>&lt;@a_hash.foo&gt;<replaceable>...</replaceable>&lt;/@a_hash.foo&gt;</literal>
             is OK.</para>
+
+            <para>There's also a special rule that says that if the
+            <literal><replaceable>user_def_dir_exp</replaceable></literal>
+            ends with <literal><link
+            linkend="ref_builtin_with_args">?with_args(<replaceable>...</replaceable>)</link></literal>,
+            then that's ignored when the end-tag is matched, so you can write
+            something like
+            <literal>&lt;@myMacro?with_args(args)&gt;<replaceable>...</replaceable>&lt;/@myMacro&gt;</literal>.</para>
           </section>
 
           <section xml:id="ref_directive_userDefined_loopVar">
