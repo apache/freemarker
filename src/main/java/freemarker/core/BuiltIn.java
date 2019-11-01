@@ -87,8 +87,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static final int NUMBER_OF_BIS = 287;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
-    static final String BI_NAME_SNAKE_CASE_SPREAD_ARGS = "spread_args";
-    static final String BI_NAME_CAMEL_CASE_SPREAD_ARGS = "spreadArgs";
+    static final String BI_NAME_SNAKE_CASE_WITH_ARGS = "with_args";
+    static final String BI_NAME_CAMEL_CASE_WITH_ARGS = "withArgs";
 
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -278,7 +278,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("sort_by", "sortBy", new sort_byBI());
         putBI("sort", new sortBI());
         putBI("split", new BuiltInsForStringsBasic.split_BI());
-        putBI(BI_NAME_SNAKE_CASE_SPREAD_ARGS, BI_NAME_CAMEL_CASE_SPREAD_ARGS, new BuiltInsForCallables.spread_argsBI());
         putBI("switch", new BuiltInsWithLazyConditionals.switch_BI());
         putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
@@ -301,6 +300,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("url_path", "urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
         putBI("web_safe", "webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
+        putBI(BI_NAME_SNAKE_CASE_WITH_ARGS, BI_NAME_CAMEL_CASE_WITH_ARGS, new BuiltInsForCallables.with_argsBI());
         putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
