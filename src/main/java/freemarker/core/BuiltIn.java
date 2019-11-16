@@ -84,11 +84,13 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    static final int NUMBER_OF_BIS = 287;
+    static final int NUMBER_OF_BIS = 289;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static final String BI_NAME_SNAKE_CASE_WITH_ARGS = "with_args";
     static final String BI_NAME_CAMEL_CASE_WITH_ARGS = "withArgs";
+    static final String BI_NAME_SNAKE_CASE_WITH_ARGS_LAST = "with_args_last";
+    static final String BI_NAME_CAMEL_CASE_WITH_ARGS_LAST = "withArgsLast";
 
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -300,7 +302,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("url_path", "urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
         putBI("web_safe", "webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
-        putBI(BI_NAME_SNAKE_CASE_WITH_ARGS, BI_NAME_CAMEL_CASE_WITH_ARGS, new BuiltInsForCallables.with_argsBI());
+        putBI(BI_NAME_SNAKE_CASE_WITH_ARGS, BI_NAME_CAMEL_CASE_WITH_ARGS,
+                new BuiltInsForCallables.with_argsBI());
+        putBI(BI_NAME_SNAKE_CASE_WITH_ARGS_LAST, BI_NAME_CAMEL_CASE_WITH_ARGS_LAST,
+                new BuiltInsForCallables.with_args_lastBI());
         putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());

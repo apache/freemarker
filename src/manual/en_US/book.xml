@@ -13183,6 +13183,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_with_args_last">with_args_last</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_word_list">word_list</link></para>
           </listitem>
 
@@ -19877,6 +19882,152 @@ Same as:
           there:</para>
 
           <programlisting role="template">&lt;@myMacro?with_args({'a': 1})&gt;...&lt;/<emphasis>@myMacro</emphasis>&gt;</programlisting>
+
+          <para>Note that as far as the order of arguments is concerned,
+          arguments coming from
+          <literal>with_args(<replaceable>...</replaceable>)</literal> are
+          added before the arguments specified in the call to the returned
+          directive/function/method. In some use cases it's more desirable to
+          add them at the end instead, in which case use the <link
+          linkend="ref_builtin_with_args_last"><literal>with_args_last</literal>
+          built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_with_args_last">
+          <title>with_args_last</title>
+
+          <note>
+            <para>This built-in is available since 2.3.30</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_with_args"><literal>with_args</literal></link>,
+          but if the order of the arguments in resulting final argument list
+          may differs (but not the values in it). This only matters if you
+          pass parameters by position (typically, when calling functions or
+          methods), or when there's catch-all argument.</para>
+
+          <para>A typical example with positional arguments is when you want
+          to add the dynamic argument to the end of the parameter list:</para>
+
+          <programlisting role="template">&lt;#function f a b c d&gt;
+  &lt;#return "a=${a}, b=${b}, c=${c}, d=${d}"&gt;
+&lt;/#function&gt;
+
+&lt;#assign dynamicArgs=[3, 4]&gt;
+
+with_args:
+${f?with_args(dynamicArgs)(1, 2)}
+
+with_args_last:
+${f?with_args_last(dynamicArgs)(1, 2)}</programlisting>
+
+          <programlisting role="output">with_args:
+a=3, b=4, c=1, d=2
+
+with_args_last:
+a=1, b=2, c=3, d=4</programlisting>
+
+          <para>In the case of name arguments, while the primary mean of
+          identifying an argument is the its name, catch-all arguments
+          (<literal>others...</literal> below) still have an order:</para>
+
+          <programlisting role="template">&lt;#macro m a b others...&gt;
+  a=${a}
+  b=${b}
+  others:
+  &lt;#list others as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'e': 5, 'f': 6}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 b=2 c=3 d=4 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 b=2 c=3 d=4 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+  a=1
+  b=2
+  others:
+    e = 5
+    f = 6
+    c = 3
+    d = 4
+
+with_args_last:
+  a=1
+  b=2
+  others:
+    c = 3
+    d = 4
+    e = 5
+    f = 6</programlisting>
+
+          <para>If you specify a named parameter that are not catch-all, so
+          they are declared in the <literal>macro</literal> tag (as
+          <literal>a</literal> and <literal>b</literal> below), then
+          <literal>with_args</literal> and <literal>with_args_last</literal>
+          are no different, since the argument order is specified by the macro
+          definition, not the macro call:</para>
+
+          <programlisting role="template">&lt;#macro m a=0 b=0&gt;
+  &lt;#-- We use .args to demonstrate the ordering of a and b: --&gt;
+  &lt;#list .args as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'b': 1}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+    a = 1
+    b = 1
+
+with_args_last:
+    a = 1
+    b = 1</programlisting>
+
+          <para>If both the macro or directive call, and the
+          <literal>with_args_last</literal> argument specifies named catch-all
+          argument with the same name (like <literal>b</literal> below), then
+          the placement of those parameters is decide by the macro/directive
+          call:</para>
+
+          <programlisting role="template">&lt;#macro m others...&gt;
+  &lt;#list others as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'b': 0, 'd': 4}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 b=2 c=3 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 b=2 c=3 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+<emphasis>    b = 2
+    d = 4
+</emphasis>    a = 1
+    c = 3
+
+with_args_last:
+    a = 1
+<emphasis>    b = 2
+</emphasis>    c = 3
+<emphasis>    d = 4</emphasis></programlisting>
         </section>
       </section>
     </chapter>
@@ -28988,8 +29139,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-107">FREEMARKER-107</link>:
               Added
               <literal>?<replaceable>with_args</replaceable>(dynamicArguments)</literal>
+              and
+              <literal>?<replaceable>with_args_last</replaceable>(dynamicArguments)</literal>
               to add parameters dynamically to directive (like macro),
-              function and method calls. Actually, this built-in returns
+              function and method calls. Actually, this built-in returns a
               directive or macro or function that has different parameter
               defaults. <link linkend="ref_builtin_with_args">See more
               here...</link></para>

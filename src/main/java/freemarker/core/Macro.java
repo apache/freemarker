@@ -115,16 +115,24 @@ public final class Macro extends TemplateElement implements TemplateModel {
     public String getCatchAll() {
         return catchAllParamName;
     }
-    
+
+    /**
+     * Returns a new copy of the array that stored the names of arguments declared in this macro or function.
+     */
     public String[] getArgumentNames() {
         return paramNames.clone();
     }
 
-    String[] getArgumentNamesInternal() {
+    String[] getArgumentNamesNoCopy() {
         return paramNames;
     }
 
-    boolean hasArgNamed(String name) {
+    /**
+     * Returns if the macro or function has a parameter called as the argument.
+     *
+     * @since 2.3.30
+     */
+    public boolean hasArgNamed(String name) {
         return paramNamesWithDefault.containsKey(name);
     }
     
@@ -480,15 +488,18 @@ public final class Macro extends TemplateElement implements TemplateModel {
     static final class WithArgs {
         private final TemplateHashModelEx byName;
         private final TemplateSequenceModel byPosition;
+        private final boolean orderLast;
 
-        WithArgs(TemplateHashModelEx byName) {
+        WithArgs(TemplateHashModelEx byName, boolean orderLast) {
             this.byName = byName;
             this.byPosition = null;
+            this.orderLast = orderLast;
         }
 
-        WithArgs(TemplateSequenceModel byPosition) {
+        WithArgs(TemplateSequenceModel byPosition, boolean orderLast) {
             this.byName = null;
             this.byPosition = byPosition;
+            this.orderLast = orderLast;
         }
 
         public TemplateHashModelEx getByName() {
@@ -497,6 +508,10 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
         public TemplateSequenceModel getByPosition() {
             return byPosition;
+        }
+
+        public boolean isOrderLast() {
+            return orderLast;
         }
     }
     
