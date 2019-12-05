@@ -22468,7 +22468,7 @@ All rights reserved.</emphasis></programlisting>
               cases, as it doesn't work well with
               <literal>&lt;#sep&gt;</literal>,
               <literal><replaceable>item</replaceable>?has_next</literal>,
-              <literal><replaceable>item</replaceable>?count</literal>,
+              <literal><replaceable>item</replaceable>?counter</literal>,
               <literal><replaceable>item</replaceable>?index</literal>,
               <literal><replaceable>item</replaceable>?item_parity</literal>,
               etc. Instead, use <link
@@ -22518,7 +22518,7 @@ All rights reserved.</emphasis></programlisting>
             <literal>sep</literal> directive will not be executed for that
             iteration. Using <literal>continue</literal> together with
             <literal>sep</literal> is generally a bad idea anyway, also
-            <literal>?has_next</literal>, <literal>?count</literal>,
+            <literal>?has_next</literal>, <literal>?counter</literal>,
             <literal>?index</literal>, <literal>?item_parity</literal>, etc.
             will not work as you certainly wanted if you completely skip
             items. To solve such situations see <link
@@ -22605,7 +22605,7 @@ All rights reserved.</emphasis></programlisting>
             linkend="ref.directive.if"><literal>if</literal> directive</link>
             for that, because then <literal>&lt;#sep&gt;</literal>,
             <literal><replaceable>item</replaceable>?has_next</literal>,
-            <literal><replaceable>item</replaceable>?count</literal>,
+            <literal><replaceable>item</replaceable>?counter</literal>,
             <literal><replaceable>item</replaceable>?index</literal>,
             <literal><replaceable>item</replaceable>?item_parity</literal>,
             etc., will not be usable, as FreeMarker doesn't know what items
