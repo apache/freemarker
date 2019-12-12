@@ -2880,7 +2880,7 @@ public final class Environment extends Configurable {
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {
-        if (isClassicCompatible() /* FM1 only had absolute names */ || baseName == null) {
+        if ((configuration.isPathClassicCompatible() && isClassicCompatible()) /* FM1 only had absolute names */ || baseName == null) {
             return targetName;
         }
 
