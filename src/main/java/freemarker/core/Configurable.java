@@ -157,6 +157,13 @@ public class Configurable {
     public static final String CLASSIC_COMPATIBLE_KEY_CAMEL_CASE = "classicCompatible";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String CLASSIC_COMPATIBLE_KEY = CLASSIC_COMPATIBLE_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.29 */
+    public static final String PATH_CLASSIC_COMPATIBLE_KEY_SNAKE_CASE = "path_classic_compatible";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.29 */
+    public static final String PATH_CLASSIC_COMPATIBLE_KEY_CAMEL_CASE = "pathClassicCompatible";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String PATH_CLASSIC_COMPATIBLE_KEY = PATH_CLASSIC_COMPATIBLE_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE = "template_exception_handler";
@@ -377,6 +384,7 @@ public class Configurable {
     private String trueStringValue;  // deduced from booleanFormat
     private String falseStringValue;  // deduced from booleanFormat
     private Integer classicCompatible;
+    private Boolean pathClassicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private AttemptExceptionReporter attemptExceptionReporter;
     private ArithmeticEngine arithmeticEngine;
@@ -444,6 +452,9 @@ public class Configurable {
         
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
+
+        pathClassicCompatible = true;
+        properties.setProperty(PATH_CLASSIC_COMPATIBLE_KEY, "true");
         
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
@@ -562,6 +573,15 @@ public class Configurable {
     }
 
     /**
+     * Toggles the "Path Classic Compatible" mode. For a comprehensive description
+     * of this mode, see {@link #isPathClassicCompatible()}.
+     */
+    public void setPathClassicCompatible(boolean pathClassicCompatibility) {
+        this.pathClassicCompatible = pathClassicCompatibility;
+        properties.setProperty(PATH_CLASSIC_COMPATIBLE_KEY, String.valueOf(pathClassicCompatible));
+    }
+
+    /**
      * Same as {@link #setClassicCompatible(boolean)}, but allows some extra values. 
      * 
      * @param classicCompatibility {@code 0} means {@code false}, {@code 1} means {@code true},
@@ -637,6 +657,10 @@ public class Configurable {
      */
     public boolean isClassicCompatible() {
         return classicCompatible != null ? classicCompatible.intValue() != 0 : parent.isClassicCompatible();
+    }
+
+    public boolean isPathClassicCompatible() {
+        return pathClassicCompatible != null ? pathClassicCompatible : parent.isPathClassicCompatible();
     }
 
     public int getClassicCompatibleAsInt() {
@@ -2664,6 +2688,9 @@ public class Configurable {
                 } else {
                     setClassicCompatible(value != null ? StringUtil.getYesNo(value) : false);
                 }
+            } else if (PATH_CLASSIC_COMPATIBLE_KEY_SNAKE_CASE.equals(name)
+                    || PATH_CLASSIC_COMPATIBLE_KEY_CAMEL_CASE.equals(name)) {
+                setPathClassicCompatible(value == null || StringUtil.getYesNo(value));
             } else if (TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) {
