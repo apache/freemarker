@@ -25,7 +25,7 @@ public class DefaultObjectWrapperInc extends DefaultObjectWrapper {
 
     public DefaultObjectWrapperInc() {
         super(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
-                .methodSorter(new AlphabeticalMethodSorter(false)), true);
+                .methodSorter(new AlphabeticalMethodSorter(false)));
     }
 
 }

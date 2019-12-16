@@ -83,7 +83,7 @@ public class Java7MembersOnlyDefaultObjectWrapper extends DefaultObjectWrapper {
     };
     
     public Java7MembersOnlyDefaultObjectWrapper(Version version) {
-        super(new DefaultObjectWrapper.Builder(version).methodAppearanceFineTuner(POST_JAVA_7_FILTER), true);
+        super(new DefaultObjectWrapper.Builder(version).methodAppearanceFineTuner(POST_JAVA_7_FILTER));
     }
 
     private static <T> Set<T> newHashSet(T... items) {

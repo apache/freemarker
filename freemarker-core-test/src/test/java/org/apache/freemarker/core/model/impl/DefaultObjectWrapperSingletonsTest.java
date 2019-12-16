@@ -309,11 +309,21 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     public void testClassInrospectorCache() throws TemplateException {
-        assertFalse(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
-                .usePrivateCaches(true).build().isClassIntrospectionCacheRestricted());
-        assertTrue(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
-                .build().isClassIntrospectionCacheRestricted());
-        
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .usePrivateCaches(true)
+                    .build();
+            assertFalse(ow.isClassIntrospectionCacheRestricted());
+            assertFalse(ow.getClassIntrospector().isShared());
+        }
+
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .build();
+            assertTrue(ow.isClassIntrospectionCacheRestricted());
+            assertTrue(ow.getClassIntrospector().isShared());
+        }
+
         ClassIntrospector.Builder.clearInstanceCache();
         DefaultObjectWrapper.Builder.clearInstanceCache();
         checkClassIntrospectorCacheSize(0);

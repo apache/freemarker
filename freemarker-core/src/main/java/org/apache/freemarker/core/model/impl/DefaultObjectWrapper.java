@@ -172,29 +172,16 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
     /**
      * Initializes the instance based on the the {@link ExtendableBuilder} specified.
-     *
-     * @param finalizeConstruction Decides if the construction is finalized now, or the caller will do some more
-     *     adjustments on the instance and then call {@link #finalizeConstruction()} itself.
      */
-    protected DefaultObjectWrapper(ExtendableBuilder<?, ?> builder, boolean finalizeConstruction) {
+    protected DefaultObjectWrapper(ExtendableBuilder<?, ?> builder) {
         incompatibleImprovements = builder.getIncompatibleImprovements();  // normalized
 
         defaultDateType = builder.getDefaultDateType();
         outerIdentity = builder.getOuterIdentity() != null ? builder.getOuterIdentity() : this;
         strict = builder.isStrict();
 
-        if (builder.getUsePrivateCaches()) {
-            // As this is not a read-only DefaultObjectWrapper, the classIntrospector will be possibly replaced for a few times,
-            // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
-            // synchronize on, even during the classIntrospector is being replaced.
-            sharedIntrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(builder.classIntrospectorBuilder, sharedIntrospectionLock);
-        } else {
-            // As this is a read-only DefaultObjectWrapper, the classIntrospector is never replaced, and since it's shared by
-            // other DefaultObjectWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = builder.classIntrospectorBuilder.build();
-            sharedIntrospectionLock = classIntrospector.getSharedLock();
-        }
+        classIntrospector = builder.classIntrospectorBuilder.build();
+        sharedIntrospectionLock = classIntrospector.getSharedLock();
 
         staticModels = new StaticModels(this);
         enumModels = new EnumModels(this);
@@ -227,21 +214,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             }
         }
 
-        finalizeConstruction();
-    }
-
-    /**
-     * Meant to be called after {@link DefaultObjectWrapper#DefaultObjectWrapper(ExtendableBuilder, boolean)} when
-     * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
-     * factories in the class introspector. No further changes should be done after calling this, if
-     * {@code writeProtected} was {@code true}.
-     */
-    protected void finalizeConstruction() {
-        // Attention! At this point, the DefaultObjectWrapper must be fully initialized, as when the model factories are
-        // registered below, the DefaultObjectWrapper can immediately get concurrent callbacks. That those other threads will
-        // see consistent image of the DefaultObjectWrapper is ensured that callbacks are always sync-ed on
-        // classIntrospector.sharedLock, and so is classIntrospector.registerModelFactory(...).
-
+        // Do this only when all fields were set, as this may causes calls to this instance:
         registerModelFactories();
     }
 
@@ -321,7 +294,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * will not be actually shared because there's no one to share with, but this will {@code true} even then.
      */
     public boolean isClassIntrospectionCacheRestricted() {
-        return classIntrospector.getHasSharedInstanceRestrictons();
+        return classIntrospector.getHasSharedInstanceRestrictions();
     }
 
     private void registerModelFactories() {
@@ -1368,7 +1341,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
             @Override
             public DefaultObjectWrapper invoke(Builder builder) {
-                return new DefaultObjectWrapper(builder, true);
+                return new DefaultObjectWrapper(builder);
             }
         }
 
@@ -1693,12 +1666,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         /**
-         * Tells if the instance creates should share caches with other {@link DefaultObjectWrapper} instances
-         * (where possible), or it should always invoke its own caches and not share that with anyone else.
-         * */
+         * Tells if the instance created should share caches with other {@link DefaultObjectWrapper} instances
+         * (where possible), or it should always use its own caches, and not share that with anyone else.
+         * In {@link DefaultObjectWrapper.Builder} this defaults to {@code false}, in order to have a single global
+         * (static) class introspection cache in the JVM.
+         */
         public void setUsePrivateCaches(boolean usePrivateCaches) {
             this.usePrivateCaches = usePrivateCaches;
             usePrivateCachesSet = true;
+            classIntrospectorBuilder.setSharingDisallowed(usePrivateCaches);
         }
 
         /**

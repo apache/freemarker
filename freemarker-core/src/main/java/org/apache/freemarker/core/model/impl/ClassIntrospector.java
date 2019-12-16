@@ -133,8 +133,8 @@ class ClassIntrospector {
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
 
-    /** See {@link #getHasSharedInstanceRestrictons()} */
-    final private boolean hasSharedInstanceRestrictons;
+    /** See {@link #getHasSharedInstanceRestrictions()} */
+    final private boolean hasSharedInstanceRestrictions;
 
     /** See {@link #isShared()} */
     final private boolean shared;
@@ -158,22 +158,14 @@ class ClassIntrospector {
     // Instantiation:
 
     /**
-     * Creates a new instance, that is hence surely not shared (singleton) instance.
-     * 
-     * @param pa
-     *            Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
-     */
-    ClassIntrospector(Builder pa, Object sharedLock) {
-        this(pa, sharedLock, false, false);
-    }
-
-    /**
-     * @param hasSharedInstanceRestrictons
-     *            {@code true} exactly if we are creating a new instance with {@link Builder}. Then
-     *            it's {@code true} even if it won't put the instance into the cache.
+     * @param hasSharedInstanceRestrictions
+     *            If the instance should behave as if it is shared, even if it we couldn't put
+     *            it into the shared cache.
+     * @param shared
+     *            If the instance is in the shared cache, and so is potentially shared.
      */
     ClassIntrospector(Builder builder, Object sharedLock,
-                      boolean hasSharedInstanceRestrictons, boolean shared) {
+                      boolean hasSharedInstanceRestrictions, boolean shared) {
         _NullArgumentException.check("sharedLock", sharedLock);
 
         exposureLevel = builder.getExposureLevel();
@@ -183,20 +175,12 @@ class ClassIntrospector {
 
         this.sharedLock = sharedLock;
 
-        this.hasSharedInstanceRestrictons = hasSharedInstanceRestrictons;
+        this.hasSharedInstanceRestrictions = hasSharedInstanceRestrictions;
         this.shared = shared;
 
         if (CLASS_CHANGE_NOTIFIER != null) {
             CLASS_CHANGE_NOTIFIER.subscribe(this);
         }
-    }
-
-    /**
-     * Returns a {@link Builder}-s that could be used to invoke an identical {@link #ClassIntrospector}
-     * . The returned {@link Builder} can be modified without interfering with anything.
-     */
-    Builder createBuilder() {
-        return new Builder(this);
     }
 
     // ------------------------------------------------------------------------------------------------------------------
@@ -829,7 +813,7 @@ class ClassIntrospector {
      * Corresponds to {@link DefaultObjectWrapper#clearClassIntrospectionCache()}.
      */
     void clearCache() {
-        if (getHasSharedInstanceRestrictons()) {
+        if (getHasSharedInstanceRestrictions()) {
             throw new IllegalStateException(
                     "It's not allowed to clear the whole cache in a read-only " + getClass().getName() +
                             "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
@@ -1008,14 +992,14 @@ class ClassIntrospector {
      * Returns {@code true} if this instance was created with {@link Builder}, even if it wasn't
      * actually put into the cache (as we reserve the right to do so in later versions).
      */
-    boolean getHasSharedInstanceRestrictons() {
-        return hasSharedInstanceRestrictons;
+    boolean getHasSharedInstanceRestrictions() {
+        return hasSharedInstanceRestrictions;
     }
 
     /**
      * Tells if this instance is (potentially) shared among {@link DefaultObjectWrapper} instances.
      * 
-     * @see #getHasSharedInstanceRestrictons()
+     * @see #getHasSharedInstanceRestrictions()
      */
     boolean isShared() {
         return shared;
@@ -1041,10 +1025,12 @@ class ClassIntrospector {
 
     static final class Builder implements CommonBuilder<ClassIntrospector>, Cloneable {
 
-        private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
-        private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
+        private static final Map<Builder, Reference<ClassIntrospector>> INSTANCE_CACHE = new HashMap<>();
+        private static final ReferenceQueue<ClassIntrospector> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
 
         // Properties and their *defaults*:
+        private boolean sharingDisallowed;
+        private boolean shardingDisallowedSet;
         private int exposureLevel = DefaultObjectWrapper.EXPOSE_SAFE;
         private boolean exposureLevelSet;
         private boolean exposeFields;
@@ -1059,13 +1045,6 @@ class ClassIntrospector {
         // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
 
         private boolean alreadyBuilt;
-
-        Builder(ClassIntrospector ci) {
-            exposureLevel = ci.exposureLevel;
-            exposeFields = ci.exposeFields;
-            methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
-            methodSorter = ci.methodSorter;
-        }
 
         Builder(Version incompatibleImprovements) {
             // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
@@ -1088,6 +1067,7 @@ class ClassIntrospector {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
+            result = prime * result + (sharingDisallowed ? 1231 : 1237);
             result = prime * result + (exposeFields ? 1231 : 1237);
             result = prime * result + exposureLevel;
             result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
@@ -1102,10 +1082,34 @@ class ClassIntrospector {
             if (getClass() != obj.getClass()) return false;
             Builder other = (Builder) obj;
 
+            if (sharingDisallowed != other.sharingDisallowed) return false;
             if (exposeFields != other.exposeFields) return false;
             if (exposureLevel != other.exposureLevel) return false;
             if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
             return methodSorter == other.methodSorter;
+        }
+
+        public boolean getShareable() {
+            return sharingDisallowed;
+        }
+
+        /**
+         * Can be used to prevent the sharing of the {@link ClassIntrospector} through the global cache. Setting this
+         * to {@code false} doesn't guarantee that it will be shared (as some other setting values can make that
+         * impossible), but setting this to {@code true} guarantees that it won't be shared. Defaults to {@code false}.
+         *
+         * @see DefaultObjectWrapper.ExtendableBuilder#setUsePrivateCaches(boolean)
+         */
+        public void setSharingDisallowed(boolean shareable) {
+            this.sharingDisallowed = shareable;
+            shardingDisallowedSet = true;
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isShardingDisallowedSet() {
+            return shardingDisallowedSet;
         }
 
         public int getExposureLevel() {
@@ -1171,10 +1175,11 @@ class ClassIntrospector {
         }
 
         private static void removeClearedReferencesFromInstanceCache() {
-            Reference clearedRef;
+            Reference<? extends ClassIntrospector> clearedRef;
             while ((clearedRef = INSTANCE_CACHE_REF_QUEUE.poll()) != null) {
                 synchronized (INSTANCE_CACHE) {
-                    findClearedRef: for (Iterator it = INSTANCE_CACHE.values().iterator(); it.hasNext(); ) {
+                    findClearedRef: for (Iterator<Reference<ClassIntrospector>> it = INSTANCE_CACHE.values().iterator();
+                             it.hasNext(); ) {
                         if (it.next() == clearedRef) {
                             it.remove();
                             break findClearedRef;
@@ -1192,7 +1197,7 @@ class ClassIntrospector {
         }
 
         /** For unit testing only */
-        static Map getInstanceCache() {
+        static Map<Builder, Reference<ClassIntrospector>> getInstanceCache() {
             return INSTANCE_CACHE;
         }
 
@@ -1207,16 +1212,17 @@ class ClassIntrospector {
             }
 
             ClassIntrospector instance;
-            if ((methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
+            if (!sharingDisallowed
+                    && (methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
                     && (methodSorter == null || methodSorter instanceof SingletonCustomizer)) {
                 // Instance can be cached.
                 synchronized (INSTANCE_CACHE) {
-                    Reference instanceRef = (Reference) INSTANCE_CACHE.get(this);
-                    instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
+                    Reference<ClassIntrospector> instanceRef = INSTANCE_CACHE.get(this);
+                    instance = instanceRef != null ? instanceRef.get() : null;
                     if (instance == null) {
                         Builder thisClone = (Builder) clone();  // prevent any aliasing issues
                         instance = new ClassIntrospector(thisClone, new Object(), true, true);
-                        INSTANCE_CACHE.put(thisClone, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
+                        INSTANCE_CACHE.put(thisClone, new WeakReference<>(instance, INSTANCE_CACHE_REF_QUEUE));
                     }
                 }
 
@@ -1225,7 +1231,7 @@ class ClassIntrospector {
                 // If methodAppearanceFineTuner or methodSorter is specified and isn't marked as a singleton, the
                 // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
                 // DefaultObjectWrapper.
-                instance = new ClassIntrospector(this, new Object(), true, false);
+                instance = new ClassIntrospector(this, new Object(), !sharingDisallowed, false);
             }
 
             alreadyBuilt = true;

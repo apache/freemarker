@@ -846,7 +846,7 @@ public class DefaultObjectWrapperTest {
     private static class CustomizedDefaultObjectWrapper extends DefaultObjectWrapper {
 
         private CustomizedDefaultObjectWrapper(Version incompatibleImprovements) {
-            super(new DefaultObjectWrapper.Builder(incompatibleImprovements), true);
+            super(new DefaultObjectWrapper.Builder(incompatibleImprovements));
         }
         
         @Override

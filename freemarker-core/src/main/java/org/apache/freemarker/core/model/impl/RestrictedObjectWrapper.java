@@ -36,8 +36,8 @@ import org.apache.freemarker.core.model.TemplateModel;
  */
 public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
-    protected RestrictedObjectWrapper(Builder builder, boolean finalizeConstruction) {
-        super(builder, finalizeConstruction);
+    protected RestrictedObjectWrapper(Builder builder) {
+        super(builder);
     }
 
     /**
@@ -97,7 +97,7 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
             @Override
             public RestrictedObjectWrapper invoke(Builder builder) {
-                return new RestrictedObjectWrapper(builder, true);
+                return new RestrictedObjectWrapper(builder);
             }
         }
 
