@@ -116,7 +116,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * matching the key name. If a method or property is found, it's wrapped
      * into {@link freemarker.template.TemplateMethodModelEx} (for a method or
      * indexed property), or evaluated on-the-fly and the return value wrapped
-     * into appropriate model (for a non-indexed property) Models for various
+     * into appropriate model (for a non-indexed property). Models for various
      * properties and methods are cached on a per-class basis, so the costly
      * introspection is performed only once per property or method of a class.
      * (Side-note: this also implies that any class whose method has been called

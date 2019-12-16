@@ -143,8 +143,8 @@ class ClassIntrospector {
     final boolean treatDefaultMethodsAsBeanMembers;
     final boolean bugfixed;
 
-    /** See {@link #getHasSharedInstanceRestrictons()} */
-    final private boolean hasSharedInstanceRestrictons;
+    /** See {@link #getHasSharedInstanceRestrictions()} */
+    final private boolean hasSharedInstanceRestrictions;
 
     /** See {@link #isShared()} */
     final private boolean shared;
@@ -168,22 +168,12 @@ class ClassIntrospector {
     // Instantiation:
 
     /**
-     * Creates a new instance, that is hence surely not shared (singleton) instance.
-     * 
-     * @param pa
-     *            Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
-     */
-    ClassIntrospector(ClassIntrospectorBuilder pa, Object sharedLock) {
-        this(pa, sharedLock, false, false);
-    }
-
-    /**
-     * @param hasSharedInstanceRestrictons
+     * @param hasSharedInstanceRestrictions
      *            {@code true} exactly if we are creating a new instance with {@link ClassIntrospectorBuilder}. Then
      *            it's {@code true} even if it won't put the instance into the cache.
      */
     ClassIntrospector(ClassIntrospectorBuilder builder, Object sharedLock,
-            boolean hasSharedInstanceRestrictons, boolean shared) {
+            boolean hasSharedInstanceRestrictions, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
 
         this.exposureLevel = builder.getExposureLevel();
@@ -195,7 +185,7 @@ class ClassIntrospector {
 
         this.sharedLock = sharedLock;
 
-        this.hasSharedInstanceRestrictons = hasSharedInstanceRestrictons;
+        this.hasSharedInstanceRestrictions = hasSharedInstanceRestrictions;
         this.shared = shared;
 
         if (CLASS_CHANGE_NOTIFIER != null) {
@@ -204,8 +194,9 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns a {@link ClassIntrospectorBuilder}-s that could be used to create an identical {@link #ClassIntrospector}
-     * . The returned {@link ClassIntrospectorBuilder} can be modified without interfering with anything.
+     * Returns a {@link ClassIntrospectorBuilder} that could be used to create an identical
+     * {@link #ClassIntrospector}. The returned {@link ClassIntrospectorBuilder} can be modified without interfering
+     * with anything.
      */
     ClassIntrospectorBuilder createBuilder() {
         return new ClassIntrospectorBuilder(this);
@@ -865,7 +856,7 @@ class ClassIntrospector {
      * @since 2.3.20
      */
     void clearCache() {
-        if (getHasSharedInstanceRestrictons()) {
+        if (getHasSharedInstanceRestrictions()) {
             throw new IllegalStateException(
                     "It's not allowed to clear the whole cache in a read-only " + this.getClass().getName() +
                             "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
@@ -1061,14 +1052,14 @@ class ClassIntrospector {
      * Returns {@code true} if this instance was created with {@link ClassIntrospectorBuilder}, even if it wasn't
      * actually put into the cache (as we reserve the right to do so in later versions).
      */
-    boolean getHasSharedInstanceRestrictons() {
-        return hasSharedInstanceRestrictons;
+    boolean getHasSharedInstanceRestrictions() {
+        return hasSharedInstanceRestrictions;
     }
 
     /**
      * Tells if this instance is (potentially) shared among {@link BeansWrapper} instances.
      * 
-     * @see #getHasSharedInstanceRestrictons()
+     * @see #getHasSharedInstanceRestrictions()
      */
     boolean isShared() {
         return shared;

@@ -351,7 +351,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
             classIntrospector = new ClassIntrospector(
-                    _BeansAPI.getClassIntrospectorBuilder(bwConf), sharedIntrospectionLock);
+                    _BeansAPI.getClassIntrospectorBuilder(bwConf), sharedIntrospectionLock, false, false);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
@@ -682,7 +682,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @since 2.3.21
      */
     public boolean isClassIntrospectionCacheRestricted() {
-        return classIntrospector.getHasSharedInstanceRestrictons();
+        return classIntrospector.getHasSharedInstanceRestrictions();
     }
     
     /** 
@@ -692,7 +692,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private void replaceClassIntrospector(ClassIntrospectorBuilder builder) {
         checkModifiable();
         
-        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock, false, false);
         final ClassIntrospector oldCI;
         
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
