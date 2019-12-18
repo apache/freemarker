@@ -53,6 +53,7 @@ import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
 import freemarker.log.Logger;
+import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -138,10 +139,11 @@ class ClassIntrospector {
 
     final int exposureLevel;
     final boolean exposeFields;
+    final MemberAccessPolicy memberAccessPolicy;
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
     final boolean treatDefaultMethodsAsBeanMembers;
-    final boolean bugfixed;
+    final Version incompatibleImprovements;
 
     /** See {@link #getHasSharedInstanceRestrictions()} */
     final private boolean hasSharedInstanceRestrictions;
@@ -178,10 +180,11 @@ class ClassIntrospector {
 
         this.exposureLevel = builder.getExposureLevel();
         this.exposeFields = builder.getExposeFields();
+        this.memberAccessPolicy = builder.getMemberAccessPolicy();
         this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         this.methodSorter = builder.getMethodSorter();
         this.treatDefaultMethodsAsBeanMembers = builder.getTreatDefaultMethodsAsBeanMembers();
-        this.bugfixed = builder.isBugfixed();
+        this.incompatibleImprovements = builder.getIncompatibleImprovements();
 
         this.sharedLock = sharedLock;
 
@@ -264,25 +267,26 @@ class ClassIntrospector {
      */
     private Map<Object, Object> createClassIntrospectionData(Class<?> clazz) {
         final Map<Object, Object> introspData = new HashMap<Object, Object>();
+        ClassMemberAccessPolicy classMemberAccessPolicy = getClassMemberAccessPolicyIfNotIgnored(clazz);
 
         if (exposeFields) {
-            addFieldsToClassIntrospectionData(introspData, clazz);
+            addFieldsToClassIntrospectionData(introspData, clazz, classMemberAccessPolicy);
         }
 
         final Map<MethodSignature, List<Method>> accessibleMethods = discoverAccessibleMethods(clazz);
 
-        addGenericGetToClassIntrospectionData(introspData, accessibleMethods);
+        addGenericGetToClassIntrospectionData(introspData, accessibleMethods, classMemberAccessPolicy);
 
         if (exposureLevel != BeansWrapper.EXPOSE_NOTHING) {
             try {
-                addBeanInfoToClassIntrospectionData(introspData, clazz, accessibleMethods);
+                addBeanInfoToClassIntrospectionData(introspData, clazz, accessibleMethods, classMemberAccessPolicy);
             } catch (IntrospectionException e) {
                 LOG.warn("Couldn't properly perform introspection for class " + clazz, e);
                 introspData.clear(); // FIXME NBC: Don't drop everything here.
             }
         }
 
-        addConstructorsToClassIntrospectionData(introspData, clazz);
+        addConstructorsToClassIntrospectionData(introspData, clazz, classMemberAccessPolicy);
 
         if (introspData.size() > 1) {
             return introspData;
@@ -294,28 +298,30 @@ class ClassIntrospector {
         }
     }
 
-    private void addFieldsToClassIntrospectionData(Map<Object, Object> introspData, Class<?> clazz)
-            throws SecurityException {
+    private void addFieldsToClassIntrospectionData(Map<Object, Object> introspData, Class<?> clazz,
+            ClassMemberAccessPolicy classMemberAccessPolicy) throws SecurityException {
         Field[] fields = clazz.getFields();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             if ((field.getModifiers() & Modifier.STATIC) == 0) {
-                introspData.put(field.getName(), field);
+                if (classMemberAccessPolicy == null || classMemberAccessPolicy.isFieldExposed(field)) {
+                    introspData.put(field.getName(), field);
+                }
             }
         }
     }
 
     private void addBeanInfoToClassIntrospectionData(
-            Map<Object, Object> introspData, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods)
-            throws IntrospectionException {
+            Map<Object, Object> introspData, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods,
+            ClassMemberAccessPolicy classMemberAccessPolicy) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         List<PropertyDescriptor> pdas = getPropertyDescriptors(beanInfo, clazz);
         int pdasLength = pdas.size();
         // Reverse order shouldn't mater, but we keep it to not risk backward incompatibility.
         for (int i = pdasLength - 1; i >= 0; --i) {
             addPropertyDescriptorToClassIntrospectionData(
-                    introspData, pdas.get(i), clazz,
-                    accessibleMethods);
+                    introspData, pdas.get(i),
+                    accessibleMethods, classMemberAccessPolicy);
         }
 
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
@@ -327,7 +333,7 @@ class ClassIntrospector {
             IdentityHashMap<Method, Void> argTypesUsedByIndexerPropReaders = null;
             for (int i = mdsSize - 1; i >= 0; --i) {
                 final Method method = getMatchingAccessibleMethod(mds.get(i).getMethod(), accessibleMethods);
-                if (method != null && isAllowedToExpose(method)) {
+                if (method != null && (isMethodExposed(classMemberAccessPolicy, method))) {
                     decision.setDefaults(method);
                     if (methodAppearanceFineTuner != null) {
                         if (decisionInput == null) {
@@ -344,7 +350,7 @@ class ClassIntrospector {
                             (decision.getReplaceExistingProperty()
                                     || !(introspData.get(propDesc.getName()) instanceof FastPropertyDescriptor))) {
                         addPropertyDescriptorToClassIntrospectionData(
-                                introspData, propDesc, clazz, accessibleMethods);
+                                introspData, propDesc, accessibleMethods, classMemberAccessPolicy);
                     }
 
                     String methodKey = decision.getExposeMethodAs();
@@ -352,7 +358,8 @@ class ClassIntrospector {
                         Object previous = introspData.get(methodKey);
                         if (previous instanceof Method) {
                             // Overloaded method - replace Method with a OverloadedMethods
-                            OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
+                            OverloadedMethods overloadedMethods =
+                                    new OverloadedMethods(is2321Bugfixed());
                             overloadedMethods.addMethod((Method) previous);
                             overloadedMethods.addMethod(method);
                             introspData.put(methodKey, overloadedMethods);
@@ -652,9 +659,10 @@ class ClassIntrospector {
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
-            PropertyDescriptor pd, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods) {
+            PropertyDescriptor pd,
+            Map<MethodSignature, List<Method>> accessibleMethods, ClassMemberAccessPolicy classMemberAccessPolicy) {
         Method readMethod = getMatchingAccessibleMethod(pd.getReadMethod(), accessibleMethods);
-        if (readMethod != null && !isAllowedToExpose(readMethod)) {
+        if (readMethod != null && !isMethodExposed(classMemberAccessPolicy, readMethod)) {
             readMethod = null;
         }
         
@@ -662,7 +670,7 @@ class ClassIntrospector {
         if (pd instanceof IndexedPropertyDescriptor) {
             indexedReadMethod = getMatchingAccessibleMethod(
                     ((IndexedPropertyDescriptor) pd).getIndexedReadMethod(), accessibleMethods);
-            if (indexedReadMethod != null && !isAllowedToExpose(indexedReadMethod)) {
+            if (indexedReadMethod != null && !isMethodExposed(classMemberAccessPolicy, indexedReadMethod)) {
                 indexedReadMethod = null;
             }
             if (indexedReadMethod != null) {
@@ -679,31 +687,42 @@ class ClassIntrospector {
     }
 
     private void addGenericGetToClassIntrospectionData(Map<Object, Object> introspData,
-            Map<MethodSignature, List<Method>> accessibleMethods) {
+            Map<MethodSignature, List<Method>> accessibleMethods, ClassMemberAccessPolicy classMemberAccessPolicy) {
         Method genericGet = getFirstAccessibleMethod(
                 MethodSignature.GET_STRING_SIGNATURE, accessibleMethods);
         if (genericGet == null) {
             genericGet = getFirstAccessibleMethod(
                     MethodSignature.GET_OBJECT_SIGNATURE, accessibleMethods);
         }
-        if (genericGet != null) {
+        if (genericGet != null && isMethodExposed(classMemberAccessPolicy, genericGet)) {
             introspData.put(GENERIC_GET_KEY, genericGet);
         }
     }
 
     private void addConstructorsToClassIntrospectionData(final Map<Object, Object> introspData,
-            Class<?> clazz) {
+            Class<?> clazz, ClassMemberAccessPolicy classMemberAccessPolicy) {
         try {
-            Constructor<?>[] ctors = clazz.getConstructors();
-            if (ctors.length == 1) {
-                Constructor<?> ctor = ctors[0];
-                introspData.put(CONSTRUCTORS_KEY, new SimpleMethod(ctor, ctor.getParameterTypes()));
-            } else if (ctors.length > 1) {
-                OverloadedMethods overloadedCtors = new OverloadedMethods(bugfixed);
-                for (int i = 0; i < ctors.length; i++) {
-                    overloadedCtors.addConstructor(ctors[i]);
+            Constructor<?>[] ctorsUnfiltered = clazz.getConstructors();
+            List<Constructor<?>> ctors = new ArrayList<Constructor<?>>(ctorsUnfiltered.length);
+            for (Constructor<?> ctor : ctorsUnfiltered) {
+                if (classMemberAccessPolicy == null || classMemberAccessPolicy.isConstructorExposed(ctor)) {
+                    ctors.add(ctor);
                 }
-                introspData.put(CONSTRUCTORS_KEY, overloadedCtors);
+            }
+
+            if (!ctors.isEmpty()) {
+                final Object ctorsIntrospData;
+                if (ctors.size() == 1) {
+                    Constructor<?> ctor = ctors.get(0);
+                    ctorsIntrospData = new SimpleMethod(ctor, ctor.getParameterTypes());
+                } else {
+                    OverloadedMethods overloadedCtors = new OverloadedMethods(is2321Bugfixed());
+                    for (Constructor<?> ctor : ctors) {
+                        overloadedCtors.addConstructor(ctor);
+                    }
+                    ctorsIntrospData = overloadedCtors;
+                }
+                introspData.put(CONSTRUCTORS_KEY, ctorsIntrospData);
             }
         } catch (SecurityException e) {
             LOG.warn("Can't discover constructors for class " + clazz.getName(), e);
@@ -800,8 +819,28 @@ class ClassIntrospector {
         }
     }
 
-    boolean isAllowedToExpose(Method method) {
-        return exposureLevel < BeansWrapper.EXPOSE_SAFE || !UnsafeMethods.isUnsafeMethod(method);
+    /**
+     * Returns the {@link ClassMemberAccessPolicy}, or {@code null} if it should be ignored because of other settings.
+     * (Ideally, all such rules should be contained in {@link ClassMemberAccessPolicy} alone, but that interface was
+     * added late in history.)
+     *
+     * @see #isMethodExposed(ClassMemberAccessPolicy, Method)
+     */
+    ClassMemberAccessPolicy getClassMemberAccessPolicyIfNotIgnored(Class containingClass) {
+        return exposureLevel < BeansWrapper.EXPOSE_SAFE ? null : memberAccessPolicy.forClass(containingClass);
+    }
+
+    /**
+     * @param classMemberAccessPolicyIfNotIgnored
+     *      The value returned by {@link #getClassMemberAccessPolicyIfNotIgnored(Class)}
+     */
+    static boolean isMethodExposed(ClassMemberAccessPolicy classMemberAccessPolicyIfNotIgnored, Method method) {
+        return classMemberAccessPolicyIfNotIgnored == null
+                || classMemberAccessPolicyIfNotIgnored.isMethodExposed(method);
+    }
+
+    private boolean is2321Bugfixed() {
+        return BeansWrapper.is2321Bugfixed(incompatibleImprovements);
     }
 
     private static Map<Method, Class<?>[]> getArgTypesByMethod(Map<Object, Object> classInfo) {
@@ -1035,7 +1074,11 @@ class ClassIntrospector {
     boolean getExposeFields() {
         return exposeFields;
     }
-    
+
+    MemberAccessPolicy getMemberAccessPolicy() {
+        return memberAccessPolicy;
+    }
+
     boolean getTreatDefaultMethodsAsBeanMembers() {
         return treatDefaultMethodsAsBeanMembers;
     }

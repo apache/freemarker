@@ -29187,6 +29187,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Added
+              <literal>freemarker.ext.beans.MemberAccessPolicy</literal>
+              interface, and the <literal>memberAccessPolicy</literal>
+              property to <literal>BeansWrapper</literal>, and subclasses like
+              <literal>DefaultObjectWrapper</literal>. This allows users to
+              implement their own program logic to decide what members of
+              classes will be exposed to the templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
               <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>
             </listitem>
 

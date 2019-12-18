@@ -96,7 +96,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * At this level of exposure, all methods and properties of the
-     * wrapped objects are exposed to the template.
+     * wrapped objects are exposed to the template, and the {@link MemberAccessPolicy}
+     * will be ignored.
      */
     public static final int EXPOSE_ALL = 0;
     
@@ -858,9 +859,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
-            throw new IllegalArgumentException("Version must be at least 2.3.0.");
-        }
         return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
                 : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24

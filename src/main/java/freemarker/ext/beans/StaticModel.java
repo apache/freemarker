@@ -126,12 +126,14 @@ final class StaticModel implements TemplateHashModelEx {
             }
         }
         if (wrapper.getExposureLevel() < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
+            ClassMemberAccessPolicy classMemberAccessPolicy =
+                    wrapper.getClassIntrospector().getClassMemberAccessPolicyIfNotIgnored(clazz);
             Method[] methods = clazz.getMethods();
             for (int i = 0; i < methods.length; ++i) {
                 Method method = methods[i];
                 int mod = method.getModifiers();
                 if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
-                        && wrapper.getClassIntrospector().isAllowedToExpose(method)) {
+                        && ClassIntrospector.isMethodExposed(classMemberAccessPolicy, method)) {
                     String name = method.getName();
                     Object obj = map.get(name);
                     if (obj instanceof Method) {
