@@ -93,7 +93,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
     /**
      * At this level of exposure, all methods and properties of the
-     * wrapped objects are exposed to the template.
+     * wrapped objects are exposed to the template, and the {@link MemberAccessPolicy}
+     * will be ignored.
      */
     public static final int EXPOSE_ALL = 0;
 
@@ -1187,7 +1188,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         return Configuration.VERSION_3_0_0;
     }
 
-
     /**
      * Returns the name-value pairs that describe the configuration of this {@link DefaultObjectWrapper}; called from
      * {@link #toString()}. The expected format is like {@code "foo=bar, baaz=wombat"}. When overriding this, you should
@@ -1801,6 +1801,21 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public boolean isExposeFieldsSet() {
             return classIntrospectorBuilder.isExposeFieldsSet();
+        }
+
+        public MemberAccessPolicy getMemberAccessPolicy() {
+            return classIntrospectorBuilder.getMemberAccessPolicy();
+        }
+
+        public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+            classIntrospectorBuilder.setMemberAccessPolicy(memberAccessPolicy);
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isMemberAccessPolicy() {
+            return classIntrospectorBuilder.isMemberAccessPolicySet();
         }
 
         /**
