@@ -479,7 +479,7 @@ class ExtendedDecimalFormatParser {
 
     private ExtendedDecimalFormatParser(String formatString, Locale locale) {
         src = formatString;
-        this.symbols = new DecimalFormatSymbols(locale);
+        this.symbols = DecimalFormatSymbols.getInstance(locale);
     }
 
     private ParseException newExpectedSgParseException(String expectedThing) {
