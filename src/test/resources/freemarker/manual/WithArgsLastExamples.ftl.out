@@ -17,6 +17,33 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+a=2, b=3, c=1, d=2
+a=1, b=2, c=2, d=3
+
+  a=1
+  b=2
+  others:
+    e = 5
+    f = 6
+    c = 3
+    d = 4
+  a=1
+  b=2
+  others:
+    c = 3
+    d = 4
+    e = 5
+    f = 6
+
+    a = 1
+    b = 2
+    e = 5
+    f = 6
+    c = 3
+    d = 4
+    a = 1
+    b = 2
+    c = 3
+    d = 4
+    e = 5
+    f = 6
