@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/2000/svg"
-      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns3="http://www.w3.org/1999/xhtml"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -28887,10 +28884,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <answer>
             <para>In general you shouldn't allow that, unless those users are
-            system administrators or other trusted personnel. Consider
-            templates as part of the source code just like
-            <literal>*.java</literal> files are. If you still want to allow
-            users to upload templates, here are what to consider:</para>
+            application developers, system administrators, or other highly
+            trusted personnel. Consider templates as part of the source code
+            just like <literal>*.java</literal> files are. If you still want
+            to allow users to upload templates, here's what to
+            consider:</para>
 
             <itemizedlist>
               <listitem>
@@ -28915,11 +28913,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
                 <literal>Boolean</literal>-s and <literal>Date</literal>-s.
-                For many application though that's too restrictive, and
-                instead you need to implement your own extremely restrictive
-                <literal>ObjectWrapper</literal>, which, for example, only
-                exposes those members of POJO-s that were explicitly marked to
-                be safe (opt-in approach).</para>
+                But for many application that's too restrictive, and instead
+                you have to create a
+                <literal>WhitelistMemberAccessPolicy</literal>, and create a
+                <literal>DefaultObjectWrapper</literal> (or other
+                <literal>BeansWrapper</literal> subclass that you would use)
+                that uses that. See the Java API documentation of
+                <literal>WhitelistMemberAccessPolicy</literal> for more. (Or,
+                you can roll your own <literal>MemberAccessPolicy</literal>
+                implementation, or even your own restrictive
+                <literal>ObjectWrapper</literal> implementation of
+                course.)</para>
 
                 <para>Also, don't forget about the <link
                 linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
@@ -28935,16 +28939,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 the <literal>ObjectWrapper</literal> is still in control, as
                 it decides what objects support <literal>?api</literal>, and
                 what will <literal>?api</literal> expose for them (it usually
-                exposes the same as for a generic POJO).</para>
+                exposes the same as for a generic POJO). Members not allowed
+                by the <literal>MemberAccessPolicy</literal> also won't be
+                visible with <literal>?api</literal> (assuming you are using a
+                well behaving <literal>ObjectWrapper</literal>, like
+                <literal>DefaultObjectWrapper</literal> is, hopefully.)
+                </para>
 
                 <para>Last not least, some maybe aware of that the standard
                 object wrappers filters out some well known
                 <quote>unsafe</quote> methods, like
-                <literal>System.exit</literal>. Do not ever rely on this as
-                your only line of defense, since it only blocks the methods
-                that's in a predefined list. Thus, for example, if a new Java
-                version adds a new problematic method, it won't be filtered
-                out.</para>
+                <literal>System.exit</literal>. Do not ever rely on that,
+                since it only blocks the methods that's in a small predefined
+                list (for some historical reasons). The standard Java API is
+                huge and ever growing, and then there are the 3rd party
+                libraries, and the API-s of your own application. Clearly it's
+                impossible to blacklist all the problematic members in
+                those.</para>
               </listitem>
 
               <listitem>
@@ -28986,7 +28997,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>TemplateClassResolver</literal> that restricts the
                 accessible classes (possibly based on which template asks for
                 them), such as
-                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
+                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.
+                Note that if, and only if your
+                <literal>ObjectWrapper</literal> is a
+                <literal>BeansWrapper</literal> or a subclass of it (typically
+                <literal>DefaultObjectWrapper</literal>), constructors not
+                allowed by the <literal>MemberAccessPolicy</literal> also
+                won't be accessible for <literal>?new</literal>. </para>
               </listitem>
 
               <listitem>
@@ -29193,6 +29210,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>DefaultObjectWrapper</literal>. This allows users to
               implement their own program logic to decide what members of
               classes will be exposed to the templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>freemarker.ext.beans.WhitelistMemberAccessPolicy</literal>,
+              which is a <literal>MemberAccessPolicy</literal> for use cases
+              where you want to allow editing templates to users who shouldn't
+              have the same rights as the developers (the same rights as the
+              Java application). Earlier, the only out of the box solution for
+              that was <literal>SimpleObjectWrapper</literal>, but that's too
+              restrictive for most applications where FreeMarker is used.
+              <literal>WhitelistMemberAccessPolicy</literal> works with
+              <literal>DefaultObjectWrapper</literal> (or any other
+              <literal>BeansWrapper</literal>), allowing you to use all
+              features of it, but it will only allow accessing members that
+              were explicitly listed by the developers, or was annotated with
+              <literal>@TemplateAccessible</literal>.</para>
             </listitem>
 
             <listitem>

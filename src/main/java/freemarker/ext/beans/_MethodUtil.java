@@ -18,7 +18,9 @@
  */
 package freemarker.ext.beans;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -315,6 +317,145 @@ public final class _MethodUtil {
                 ? name.substring(start) // getFOOBar => "FOOBar" (not lower case) according the JavaBeans spec.
                 : new StringBuilder(ln - start).append(Character.toLowerCase(c1)).append(name, start + 1, ln)
                         .toString();
+    }
+
+    /**
+     * Similar to {@link Method#getAnnotation(Class)}, but will also search the annotation in the implemented
+     * interfaces and in the ancestor classes.
+     */
+    public static <T extends Annotation> T getInheritableAnnotation(Class<?> contextClass, Method method, Class<T> annotationClass) {
+        T result = method.getAnnotation(annotationClass);
+        if (result != null) {
+            return result;
+        }
+        return getInheritableMethodAnnotation(
+                contextClass, method.getName(), method.getParameterTypes(), true, annotationClass);
+    }
+
+    private static <T extends Annotation> T getInheritableMethodAnnotation(
+            Class<?> contextClass, String methodName, Class<?>[] methodParamTypes,
+            boolean skipCheckingDirectMethod,
+            Class<T> annotationClass) {
+        if (!skipCheckingDirectMethod) {
+            Method similarMethod;
+            try {
+                similarMethod = contextClass.getMethod(methodName, methodParamTypes);
+            } catch (NoSuchMethodException e) {
+                similarMethod = null;
+            }
+            if (similarMethod != null) {
+                T result = similarMethod.getAnnotation(annotationClass);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        for (Class<?> anInterface : contextClass.getInterfaces()) {
+            if (!anInterface.getName().startsWith("java.")) {
+                Method similarInterfaceMethod;
+                try {
+                    similarInterfaceMethod = anInterface.getMethod(methodName, methodParamTypes);
+                } catch (NoSuchMethodException e) {
+                    similarInterfaceMethod = null;
+                }
+                if (similarInterfaceMethod != null) {
+                    T result = similarInterfaceMethod.getAnnotation(annotationClass);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        Class<?> superClass = contextClass.getSuperclass();
+        if (superClass == Object.class || superClass == null) {
+            return null;
+        }
+        return getInheritableMethodAnnotation(superClass, methodName, methodParamTypes, false, annotationClass);
+    }
+
+    /**
+     * Similar to {@link Constructor#getAnnotation(Class)}, but will also search the annotation in the implemented
+     * interfaces and in the ancestor classes.
+     */
+    public static <T extends Annotation> T getInheritableAnnotation(
+            Class<?> contextClass, Constructor<?> constructor, Class<T> annotationClass) {
+        T result = constructor.getAnnotation(annotationClass);
+        if (result != null) {
+            return result;
+        }
+
+        Class<?>[] paramTypes = constructor.getParameterTypes();
+        while (true) {
+            contextClass = contextClass.getSuperclass();
+            if (contextClass == Object.class || contextClass == null) {
+                return null;
+            }
+            try {
+                constructor = contextClass.getConstructor(paramTypes);
+            } catch (NoSuchMethodException e) {
+                constructor = null;
+            }
+            if (constructor != null) {
+                result = constructor.getAnnotation(annotationClass);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    /**
+     * Similar to {@link Field#getAnnotation(Class)}, but will also search the annotation in the implemented
+     * interfaces and in the ancestor classes.
+     */
+    public static <T extends Annotation> T getInheritableAnnotation(Class<?> contextClass, Field field, Class<T> annotationClass) {
+        T result = field.getAnnotation(annotationClass);
+        if (result != null) {
+            return result;
+        }
+        return getInheritableFieldAnnotation(
+                contextClass, field.getName(), true, annotationClass);
+    }
+
+    private static <T extends Annotation> T getInheritableFieldAnnotation(
+            Class<?> contextClass, String fieldName,
+            boolean skipCheckingDirectField,
+            Class<T> annotationClass) {
+        if (!skipCheckingDirectField) {
+            Field similarField;
+            try {
+                similarField = contextClass.getField(fieldName);
+            } catch (NoSuchFieldException e) {
+                similarField = null;
+            }
+            if (similarField != null) {
+                T result = similarField.getAnnotation(annotationClass);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        for (Class<?> anInterface : contextClass.getInterfaces()) {
+            if (!anInterface.getName().startsWith("java.")) {
+                Field similarInterfaceField;
+                try {
+                    similarInterfaceField = anInterface.getField(fieldName);
+                } catch (NoSuchFieldException e) {
+                    similarInterfaceField = null;
+                }
+                if (similarInterfaceField != null) {
+                    T result = similarInterfaceField.getAnnotation(annotationClass);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        Class<?> superClass = contextClass.getSuperclass();
+        if (superClass == Object.class || superClass == null) {
+            return null;
+        }
+        return getInheritableFieldAnnotation(superClass, fieldName, false, annotationClass);
     }
 
 }

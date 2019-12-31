@@ -658,6 +658,29 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         }
     }
 
+    /**
+     * @since 2.3.30
+     */
+    public MemberAccessPolicy getMemberAccessPolicy() {
+        return classIntrospector.getMemberAccessPolicy();
+    }
+
+    /**
+     * Used to customize what  members will be hidden;
+     * see {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)} for more.
+     *
+     * @since 2.3.30
+     */
+    public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+        checkModifiable();
+
+        if (classIntrospector.getMemberAccessPolicy() != memberAccessPolicy) {
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMemberAccessPolicy(memberAccessPolicy);
+            replaceClassIntrospector(builder);
+        }
+    }
+
     MethodSorter getMethodSorter() {
         return classIntrospector.getMethodSorter();
     }
@@ -1567,7 +1590,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if (ctors == null) {
                 throw new TemplateModelException("Class " + clazz.getName() + 
-                        " has no public constructors.");
+                        " has no exposed constructors.");
             }
             Constructor<?> ctor = null;
             Object[] objargs;

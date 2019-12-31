@@ -22,24 +22,32 @@ package freemarker.ext.beans;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.SimpleNumber;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
 
 public class DefaultObjectWrapperMemberAccessPolicyTest {
 
@@ -166,7 +174,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testMethodsWithCustomMemberAccessPolicy() throws TemplateModelException {
         DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
-            public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
                     public boolean isMethodExposed(Method method) {
                         String name = method.getName();
@@ -208,7 +216,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
         owb.setExposeFields(true);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
-            public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
                     public boolean isMethodExposed(Method method) {
                         return true;
@@ -238,7 +246,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testGenericGetWithCustomMemberAccessPolicy() throws TemplateModelException {
         DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
-            public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
                     public boolean isMethodExposed(Method method) {
                         return false;
@@ -264,7 +272,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testConstructorsWithCustomMemberAccessPolicy() throws TemplateModelException {
         DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
-            public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
                     public boolean isMethodExposed(Method method) {
                         return true;
@@ -303,6 +311,93 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         assertEquals(CWithOverloadedConstructor.class,
                 ow.newInstance(CWithOverloadedConstructor.class,
                         Collections.singletonList(new SimpleNumber(1))).getClass());
+    }
+
+    @Test
+    public void testMemberAccessPolicyAndApiBI() throws IOException, TemplateException {
+        DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
+        owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                return new ClassMemberAccessPolicy() {
+                    public boolean isMethodExposed(Method method) {
+                        return method.getName().equals("size");
+                    }
+
+                    public boolean isConstructorExposed(Constructor<?> constructor) {
+                        return true;
+                    }
+
+                    public boolean isFieldExposed(Field field) {
+                        return true;
+                    }
+                };
+            }
+        });
+        DefaultObjectWrapper ow = owb.build();
+
+        Map<String, Object> dataModel = ImmutableMap.<String, Object>of("m", ImmutableMap.of("k", "v"));
+
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        cfg.setObjectWrapper(ow);
+        cfg.setAPIBuiltinEnabled(true);
+        Template template = new Template(null, "size=${m?api.size()} get=${(m?api.get('k'))!'hidden'}", cfg);
+
+        {
+            StringWriter out = new StringWriter();
+            template.process(dataModel, out);
+            assertEquals("size=1 get=hidden", out.toString());
+        }
+
+        cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build());
+        {
+            StringWriter out = new StringWriter();
+            template.process(dataModel, out);
+            assertEquals("size=1 get=v", out.toString());
+        }
+    }
+
+    @Test
+    public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException {
+        DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
+        owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                return new ClassMemberAccessPolicy() {
+                    public boolean isMethodExposed(Method method) {
+                        return true;
+                    }
+
+                    public boolean isConstructorExposed(Constructor<?> constructor) {
+                        return constructor.getDeclaringClass().equals(CustomModel.class);
+                    }
+
+                    public boolean isFieldExposed(Field field) {
+                        return true;
+                    }
+                };
+            }
+        });
+        DefaultObjectWrapper ow = owb.build();
+
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        cfg.setObjectWrapper(ow);
+        cfg.setAPIBuiltinEnabled(true);
+        Template template = new Template(null,
+                "${'" + CustomModel.class.getName() + "'?new()} "
+                        + "<#attempt>${'" + OtherCustomModel.class.getName() + "'?new()}<#recover>failed</#attempt>",
+                cfg);
+
+        {
+            StringWriter out = new StringWriter();
+            template.process(null, out);
+            assertEquals("1 failed", out.toString());
+        }
+
+        cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build());
+        {
+            StringWriter out = new StringWriter();
+            template.process(null, out);
+            assertEquals("1 2", out.toString());
+        }
     }
 
     private static DefaultObjectWrapper createDefaultMemberAccessPolicyObjectWrapper() {
@@ -403,6 +498,18 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         }
 
         public CWithOverloadedConstructor(int x) {
+        }
+    }
+
+    public static class CustomModel implements TemplateNumberModel {
+        public Number getAsNumber() {
+            return 1;
+        }
+    }
+
+    public static class OtherCustomModel implements TemplateNumberModel {
+        public Number getAsNumber() {
+            return 2;
         }
     }
 

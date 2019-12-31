@@ -156,6 +156,12 @@ final class ClassIntrospectorBuilder implements Cloneable {
         return memberAccessPolicy;
     }
 
+    /**
+     * Sets the {@link MemberAccessPolicy}; default is {@link DefaultMemberAccessPolicy#getInstance(Version)}, which
+     * is not appropriate if template editors aren't trusted.
+     *
+     * @since 2.3.30
+     */
     public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
         NullArgumentException.check(memberAccessPolicy);
         this.memberAccessPolicy = memberAccessPolicy;
