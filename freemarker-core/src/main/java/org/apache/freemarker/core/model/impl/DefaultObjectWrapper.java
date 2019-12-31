@@ -282,6 +282,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         return classIntrospector.getMethodAppearanceFineTuner();
     }
 
+    public MemberAccessPolicy getMemberAccessPolicy() {
+        return classIntrospector.getMemberAccessPolicy();
+    }
+
     MethodSorter getMethodSorter() {
         return classIntrospector.getMethodSorter();
     }
@@ -1042,7 +1046,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         try {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if (ctors == null) {
-                throw new TemplateException("Class " + clazz.getName() + " has no public constructors.");
+                throw new TemplateException("Class " + clazz.getName() + " has no exposed constructors.");
             }
             Constructor<?> ctor = null;
             Object[] pojoArgs;
@@ -1807,14 +1811,26 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             return classIntrospectorBuilder.getMemberAccessPolicy();
         }
 
+        /**
+         * Sets the {@link MemberAccessPolicy}; default is {@link DefaultMemberAccessPolicy#getInstance(Version)}, which
+         * is not appropriate if template editors aren't trusted.
+         */
         public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
             classIntrospectorBuilder.setMemberAccessPolicy(memberAccessPolicy);
         }
 
         /**
+         * Fluent API equivalent of {@link #setMemberAccessPolicy(MemberAccessPolicy)}
+         */
+        public SelfT memberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+            setMemberAccessPolicy(memberAccessPolicy);
+            return self();
+        }
+
+        /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isMemberAccessPolicy() {
+        public boolean isMemberAccessPolicySet() {
             return classIntrospectorBuilder.isMemberAccessPolicySet();
         }
 

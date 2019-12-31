@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -131,10 +132,40 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testBuilder() throws Exception {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
-        assertSame(ow, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-        assertSame(ow.getClass(), DefaultObjectWrapper.class);
-        assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+            assertSame(ow, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
+            assertSame(ow.getClass(), DefaultObjectWrapper.class);
+            assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
+        }
+
+        {
+            DefaultObjectWrapper bwDefault = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+            assertSame(bwDefault, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
+
+            WhitelistMemberAccessPolicy memberAccessPolicy =
+                    new WhitelistMemberAccessPolicy(
+                            WhitelistMemberAccessPolicy.MemberSelector.parse(
+                                    Arrays.asList(SomeBean.class.getName() + ".getX()"),
+                                    DefaultObjectWrapperTest.class.getClassLoader()));
+
+            DefaultObjectWrapper bw = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .memberAccessPolicy(memberAccessPolicy)
+                    .build();
+            assertNotSame(bw, bwDefault);
+            assertSame(
+                    bw,
+                    new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                            .memberAccessPolicy(memberAccessPolicy)
+                            .build());
+            assertSame(bw.getMemberAccessPolicy(), memberAccessPolicy);
+
+            TemplateHashModel m = (TemplateHashModel) bw.wrap(new SomeBean());
+            assertNotNull(m.get("x"));
+            assertNotNull(m.get("getX"));
+            assertNull(m.get("y"));
+            assertNull(m.get("getY"));
+        }
     }
 
     @Test
@@ -899,6 +930,15 @@ public class DefaultObjectWrapperTest {
             return tuple;
         }
 
+    }
+
+    public static class SomeBean {
+        public int getX() {
+            return 1;
+        }
+        public int getY() {
+            return 1;
+        }
     }
     
 }

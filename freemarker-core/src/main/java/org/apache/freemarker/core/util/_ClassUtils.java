@@ -21,7 +21,10 @@ package org.apache.freemarker.core.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.freemarker.core.model.impl.BeanModel;
@@ -58,7 +61,35 @@ public class _ClassUtils {
         // Fall back to the defining class loader of the FreeMarker classes 
         return Class.forName(className);
     }
-    
+
+    private static final Map<String, Class<?>> PRIMITIVE_CLASSES_BY_NAME;
+    static {
+        PRIMITIVE_CLASSES_BY_NAME = new HashMap<>();
+        PRIMITIVE_CLASSES_BY_NAME.put("boolean", boolean.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("byte", byte.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("char", char.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("short", short.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("int", int.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("long", long.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("float", float.class);
+        PRIMITIVE_CLASSES_BY_NAME.put("double", double.class);
+    }
+
+    /**
+     * Returns the {@link Class} for a primitive type name, or {@code null} if it's not the name of a primitive type.
+     */
+    public static Class<?> resolveIfPrimitiveTypeName(String typeName) {
+        return PRIMITIVE_CLASSES_BY_NAME.get(typeName);
+    }
+
+    /**
+     * Returns the array type that corresponds to the element type and the given number of array dimensions.
+     * If the dimension is 0, it just returns the element type as is.
+     */
+    public static Class<?> getArrayClass(Class<?> elementType, int dimensions) {
+        return dimensions == 0 ? elementType : Array.newInstance(elementType, new int[dimensions]).getClass();
+    }
+
     /**
      * Same as {@link #getShortClassName(Class, boolean) getShortClassName(pClass, false)}.
      */

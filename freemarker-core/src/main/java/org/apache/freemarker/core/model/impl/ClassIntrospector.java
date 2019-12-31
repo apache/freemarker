@@ -78,6 +78,11 @@ class ClassIntrospector {
     private static final String JREBEL_INTEGRATION_ERROR_MSG
             = "Error initializing JRebel integration. JRebel integration disabled.";
 
+    private static final ExecutableMemberSignature GET_STRING_SIGNATURE =
+            new ExecutableMemberSignature("get", new Class[] { String.class });
+    private static final ExecutableMemberSignature GET_OBJECT_SIGNATURE =
+            new ExecutableMemberSignature("get", new Class[] { Object.class });
+
     private static final ClassChangeNotifier CLASS_CHANGE_NOTIFIER;
     static {
         boolean jRebelAvailable;
@@ -257,7 +262,7 @@ class ClassIntrospector {
             addFieldsToClassIntrospectionData(introspData, clazz, classMemberAccessPolicy);
         }
 
-        final Map<MethodSignature, List<Method>> accessibleMethods = discoverAccessibleMethods(clazz);
+        final Map<ExecutableMemberSignature, List<Method>> accessibleMethods = discoverAccessibleMethods(clazz);
 
         addGenericGetToClassIntrospectionData(introspData, accessibleMethods, classMemberAccessPolicy);
 
@@ -294,7 +299,7 @@ class ClassIntrospector {
     }
 
     private void addBeanInfoToClassIntrospectionData(
-            Map<Object, Object> introspData, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods,
+            Map<Object, Object> introspData, Class<?> clazz, Map<ExecutableMemberSignature, List<Method>> accessibleMethods,
             ClassMemberAccessPolicy classMemberAccessPolicy) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         List<PropertyDescriptor> pdas = getPropertyDescriptors(beanInfo, clazz);
@@ -641,7 +646,7 @@ class ClassIntrospector {
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
-            PropertyDescriptor pd, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods,
+            PropertyDescriptor pd, Class<?> clazz, Map<ExecutableMemberSignature, List<Method>> accessibleMethods,
             ClassMemberAccessPolicy classMemberAccessPolicy) {
         Method readMethod = getMatchingAccessibleMethod(pd.getReadMethod(), accessibleMethods);
         if (readMethod != null && isMethodExposed(classMemberAccessPolicy, readMethod)) {
@@ -650,12 +655,12 @@ class ClassIntrospector {
     }
 
     private void addGenericGetToClassIntrospectionData(Map<Object, Object> introspData,
-            Map<MethodSignature, List<Method>> accessibleMethods, ClassMemberAccessPolicy classMemberAccessPolicy) {
+            Map<ExecutableMemberSignature, List<Method>> accessibleMethods, ClassMemberAccessPolicy classMemberAccessPolicy) {
         Method genericGet = getFirstAccessibleMethod(
-                MethodSignature.GET_STRING_SIGNATURE, accessibleMethods);
+                GET_STRING_SIGNATURE, accessibleMethods);
         if (genericGet == null) {
             genericGet = getFirstAccessibleMethod(
-                    MethodSignature.GET_OBJECT_SIGNATURE, accessibleMethods);
+                    GET_OBJECT_SIGNATURE, accessibleMethods);
         }
         if (genericGet != null && isMethodExposed(classMemberAccessPolicy, genericGet)) {
             introspData.put(GENERIC_GET_KEY, genericGet);
@@ -693,22 +698,23 @@ class ClassIntrospector {
     }
 
     /**
-     * Retrieves mapping of {@link MethodSignature}-s to a {@link List} of accessible methods for a class. In case the
-     * class is not public, retrieves methods with same signature as its public methods from public superclasses and
-     * interfaces. Basically upcasts every method to the nearest accessible method.
+     * Retrieves mapping of {@link ExecutableMemberSignature}-s to a {@link List} of accessible methods for a class. In
+     * case the class is not public, retrieves methods with same signature as its public methods from public
+     * superclasses and interfaces. Basically upcasts every method to the nearest accessible method.
      */
-    private static Map<MethodSignature, List<Method>> discoverAccessibleMethods(Class<?> clazz) {
-        Map<MethodSignature, List<Method>> accessibles = new HashMap<>();
+    private static Map<ExecutableMemberSignature, List<Method>> discoverAccessibleMethods(Class<?> clazz) {
+        Map<ExecutableMemberSignature, List<Method>> accessibles = new HashMap<>();
         discoverAccessibleMethods(clazz, accessibles);
         return accessibles;
     }
 
-    private static void discoverAccessibleMethods(Class<?> clazz, Map<MethodSignature, List<Method>> accessibles) {
+    private static void discoverAccessibleMethods(
+            Class<?> clazz, Map<ExecutableMemberSignature, List<Method>> accessibles) {
         if (Modifier.isPublic(clazz.getModifiers())) {
             try {
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    MethodSignature sig = new MethodSignature(method);
+                    ExecutableMemberSignature sig = new ExecutableMemberSignature(method);
                     // Contrary to intuition, a class can actually have several
                     // different methods with same signature *but* different
                     // return types. These can't be constructed using Java the
@@ -746,11 +752,11 @@ class ClassIntrospector {
         }
     }
 
-    private static Method getMatchingAccessibleMethod(Method m, Map<MethodSignature, List<Method>> accessibles) {
+    private static Method getMatchingAccessibleMethod(Method m, Map<ExecutableMemberSignature, List<Method>> accessibles) {
         if (m == null) {
             return null;
         }
-        MethodSignature sig = new MethodSignature(m);
+        ExecutableMemberSignature sig = new ExecutableMemberSignature(m);
         List<Method> ams = accessibles.get(sig);
         if (ams == null) {
             return null;
@@ -763,7 +769,7 @@ class ClassIntrospector {
         return null;
     }
 
-    private static Method getFirstAccessibleMethod(MethodSignature sig, Map<MethodSignature, List<Method>> accessibles) {
+    private static Method getFirstAccessibleMethod(ExecutableMemberSignature sig, Map<ExecutableMemberSignature, List<Method>> accessibles) {
         List<Method> ams = accessibles.get(sig);
         if (ams == null || ams.isEmpty()) {
             return null;
@@ -808,39 +814,6 @@ class ClassIntrospector {
             classInfo.put(ARG_TYPES_BY_METHOD_KEY, argTypes);
         }
         return argTypes;
-    }
-
-    private static final class MethodSignature {
-        private static final MethodSignature GET_STRING_SIGNATURE =
-                new MethodSignature("get", new Class[] { String.class });
-        private static final MethodSignature GET_OBJECT_SIGNATURE =
-                new MethodSignature("get", new Class[] { Object.class });
-
-        private final String name;
-        private final Class<?>[] args;
-
-        private MethodSignature(String name, Class<?>[] args) {
-            this.name = name;
-            this.args = args;
-        }
-
-        MethodSignature(Method method) {
-            this(method.getName(), method.getParameterTypes());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof MethodSignature) {
-                MethodSignature ms = (MethodSignature) o;
-                return ms.name.equals(name) && Arrays.equals(args, ms.args);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return name.hashCode() ^ args.length; // TODO That's a poor quality hash... isn't this a problem?
-        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------
