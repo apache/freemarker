@@ -17,6 +17,18 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+package freemarker.ext.beans;
+
+import java.lang.reflect.Constructor;
+
+/**
+ * {@link MemberMatcher} for constructors.
+ *
+ * @since 2.3.30
+ */
+final class ConstructorMatcher extends MemberMatcher<Constructor<?>, ExecutableMemberSignature> {
+    @Override
+    protected ExecutableMemberSignature toMemberSignature(Constructor<?> member) {
+        return new ExecutableMemberSignature(member);
+    }
+}

@@ -96,7 +96,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * At this level of exposure, all methods and properties of the
-     * wrapped objects are exposed to the template.
+     * wrapped objects are exposed to the template, and the {@link MemberAccessPolicy}
+     * will be ignored.
      */
     public static final int EXPOSE_ALL = 0;
     
@@ -351,7 +352,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
             classIntrospector = new ClassIntrospector(
-                    _BeansAPI.getClassIntrospectorBuilder(bwConf), sharedIntrospectionLock);
+                    _BeansAPI.getClassIntrospectorBuilder(bwConf), sharedIntrospectionLock, false, false);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
@@ -657,6 +658,29 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         }
     }
 
+    /**
+     * @since 2.3.30
+     */
+    public MemberAccessPolicy getMemberAccessPolicy() {
+        return classIntrospector.getMemberAccessPolicy();
+    }
+
+    /**
+     * Used to customize what  members will be hidden;
+     * see {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)} for more.
+     *
+     * @since 2.3.30
+     */
+    public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+        checkModifiable();
+
+        if (classIntrospector.getMemberAccessPolicy() != memberAccessPolicy) {
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMemberAccessPolicy(memberAccessPolicy);
+            replaceClassIntrospector(builder);
+        }
+    }
+
     MethodSorter getMethodSorter() {
         return classIntrospector.getMethodSorter();
     }
@@ -682,7 +706,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @since 2.3.21
      */
     public boolean isClassIntrospectionCacheRestricted() {
-        return classIntrospector.getHasSharedInstanceRestrictons();
+        return classIntrospector.getHasSharedInstanceRestrictions();
     }
     
     /** 
@@ -692,7 +716,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private void replaceClassIntrospector(ClassIntrospectorBuilder builder) {
         checkModifiable();
         
-        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock, false, false);
         final ClassIntrospector oldCI;
         
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
@@ -858,9 +882,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
-            throw new IllegalArgumentException("Version must be at least 2.3.0.");
-        }
         return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
                 : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
@@ -1569,7 +1590,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if (ctors == null) {
                 throw new TemplateModelException("Class " + clazz.getName() + 
-                        " has no public constructors.");
+                        " has no exposed constructors.");
             }
             Constructor<?> ctor = null;
             Object[] objargs;

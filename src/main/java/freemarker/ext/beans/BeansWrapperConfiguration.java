@@ -225,10 +225,18 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         classIntrospectorBuilder.setExposeFields(exposeFields);
     }
 
+    public MemberAccessPolicy getMemberAccessPolicy() {
+        return classIntrospectorBuilder.getMemberAccessPolicy();
+    }
+
+    public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+        classIntrospectorBuilder.setMemberAccessPolicy(memberAccessPolicy);
+    }
+
     public boolean getTreatDefaultMethodsAsBeanMembers() {
         return classIntrospectorBuilder.getTreatDefaultMethodsAsBeanMembers();
     }
-    
+
     /** See {@link BeansWrapper#setTreatDefaultMethodsAsBeanMembers(boolean)} */
     public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
         classIntrospectorBuilder.setTreatDefaultMethodsAsBeanMembers(treatDefaultMethodsAsBeanMembers);

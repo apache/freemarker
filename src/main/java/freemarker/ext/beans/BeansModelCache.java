@@ -30,8 +30,8 @@ import freemarker.ext.util.ModelFactory;
 import freemarker.template.TemplateModel;
 
 public class BeansModelCache extends ModelCache {
-    private final Map classToFactory = new ConcurrentHashMap();
-    private final Set mappedClassNames = new HashSet();
+    private final Map<Class<?>, ModelFactory> classToFactory = new ConcurrentHashMap<Class<?>, ModelFactory>();
+    private final Set<String> mappedClassNames = new HashSet<String>();
 
     private final BeansWrapper wrapper;
     
@@ -49,7 +49,7 @@ public class BeansModelCache extends ModelCache {
     protected TemplateModel create(Object object) {
         Class clazz = object.getClass();
         
-        ModelFactory factory = (ModelFactory) classToFactory.get(clazz);
+        ModelFactory factory = classToFactory.get(clazz);
         
         if (factory == null) {
             // Synchronized so that we won't unnecessarily create the same factory for multiple times in parallel.

@@ -17,6 +17,22 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+package freemarker.ext.beans;
+
+import java.lang.reflect.Method;
+
+/**
+ * {@link MemberMatcher} for methods.
+ *
+ * <p>The return type (and visibility) of the methods will be ignored, only the method name and its parameter types
+ * matter. (The {@link MemberAccessPolicy}, and even {@link BeansWrapper} itself will still filter by visibility, it's
+ * just not the duty of the {@link MemberMatcher}.)
+ *
+ * @since 2.3.30
+ */
+final class MethodMatcher extends MemberMatcher<Method, ExecutableMemberSignature> {
+    @Override
+    protected ExecutableMemberSignature toMemberSignature(Method member) {
+        return new ExecutableMemberSignature(member);
+    }
+}

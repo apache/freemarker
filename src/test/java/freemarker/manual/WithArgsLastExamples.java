@@ -17,6 +17,19 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+package freemarker.manual;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
+import freemarker.template.TemplateException;
+
+public class WithArgsLastExamples extends ExamplesTest {
+
+    @Test
+    public void usingWithArgsSpecialVariable() throws IOException, TemplateException {
+        assertOutputForNamed("WithArgsLastExamples.ftl");
+    }
+
+}

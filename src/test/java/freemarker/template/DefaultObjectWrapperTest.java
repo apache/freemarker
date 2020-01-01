@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import com.google.common.collect.ImmutableMap;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.beans.HashAdapter;
+import freemarker.ext.beans.WhitelistMemberAccessPolicy;
 import freemarker.ext.util.WrapperTemplateModel;
 
 public class DefaultObjectWrapperTest {
@@ -315,6 +317,30 @@ public class DefaultObjectWrapperTest {
             assertTrue(bw.getIterableSupport());
 
             assertTrue(bw.wrap(new PureIterable()) instanceof DefaultIterableAdapter);
+        }
+
+        {
+            DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.getVersion());
+
+            DefaultObjectWrapper bwDefault = builder.build();
+            assertSame(bwDefault, builder.build());
+
+            WhitelistMemberAccessPolicy memberAccessPolicy =
+                    new WhitelistMemberAccessPolicy(
+                            WhitelistMemberAccessPolicy.MemberSelector.parse(
+                                    Arrays.asList(SomeBean.class.getName() + ".getX()"),
+                                    DefaultObjectWrapperTest.class.getClassLoader()));
+            builder.setMemberAccessPolicy(memberAccessPolicy);
+            DefaultObjectWrapper bw = builder.build();
+            assertNotSame(bw, bwDefault);
+            assertSame(bw, builder.build());
+            assertSame(bw.getMemberAccessPolicy(), memberAccessPolicy);
+
+            TemplateHashModel m = (TemplateHashModel) bw.wrap(new SomeBean());
+            assertNotNull(m.get("x"));
+            assertNotNull(m.get("getX"));
+            assertNull(m.get("y"));
+            assertNull(m.get("getY"));
         }
     }
     
@@ -1191,5 +1217,14 @@ public class DefaultObjectWrapperTest {
         }
         
     };
+
+    public static class SomeBean {
+        public int getX() {
+            return 1;
+        }
+        public int getY() {
+            return 1;
+        }
+    }
     
 }

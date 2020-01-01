@@ -19,6 +19,8 @@
 
 package freemarker.ext.beans;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,24 +29,26 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 
-class UnsafeMethods {
+/**
+ * Legacy black list based member access policy, used only to keep old behavior, as it can't provide meaningful safety.
+ * Do not use it if you allow untrusted users to edit templates!
+ *
+ * @since 2.3.30
+ */
+public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
 
     private static final String UNSAFE_METHODS_PROPERTIES = "unsafeMethods.properties";
-    private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
-    
-    private UnsafeMethods() { }
-    
-    static boolean isUnsafeMethod(Method method) {
-        return UNSAFE_METHODS.contains(method);        
-    }
-    
-    private static final Set createUnsafeMethodsSet() {
+    private static final Set<Method> UNSAFE_METHODS = createUnsafeMethodsSet();
+
+    private static Set<Method> createUnsafeMethodsSet() {
         try {
             Properties props = ClassUtil.loadProperties(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
-            Set set = new HashSet(props.size() * 4 / 3, 1f);
-            Map primClasses = createPrimitiveClassesMap();
+            Set<Method> set = new HashSet<Method>(props.size() * 4 / 3, 1f);
+            Map<String, Class<?>> primClasses = createPrimitiveClassesMap();
             for (Object key : props.keySet()) {
                 try {
                     set.add(parseMethodSpec((String) key, primClasses));
@@ -64,20 +68,20 @@ class UnsafeMethods {
         }
     }
 
-    private static Method parseMethodSpec(String methodSpec, Map primClasses)
+    private static Method parseMethodSpec(String methodSpec, Map<String, Class<?>> primClasses)
     throws ClassNotFoundException,
         NoSuchMethodException {
         int brace = methodSpec.indexOf('(');
         int dot = methodSpec.lastIndexOf('.', brace);
-        Class clazz = ClassUtil.forName(methodSpec.substring(0, dot));
+        Class<?> clazz = ClassUtil.forName(methodSpec.substring(0, dot));
         String methodName = methodSpec.substring(dot + 1, brace);
         String argSpec = methodSpec.substring(brace + 1, methodSpec.length() - 1);
         StringTokenizer tok = new StringTokenizer(argSpec, ",");
         int argcount = tok.countTokens();
-        Class[] argTypes = new Class[argcount];
+        Class<?>[] argTypes = new Class[argcount];
         for (int i = 0; i < argcount; i++) {
             String argClassName = tok.nextToken();
-            argTypes[i] = (Class) primClasses.get(argClassName);
+            argTypes[i] = primClasses.get(argClassName);
             if (argTypes[i] == null) {
                 argTypes[i] = ClassUtil.forName(argClassName);
             }
@@ -85,8 +89,8 @@ class UnsafeMethods {
         return clazz.getMethod(methodName, argTypes);
     }
 
-    private static Map createPrimitiveClassesMap() {
-        Map map = new HashMap();
+    private static Map<String, Class<?>> createPrimitiveClassesMap() {
+        Map<String, Class<?>> map = new HashMap<String, Class<?>>();
         map.put("boolean", Boolean.TYPE);
         map.put("byte", Byte.TYPE);
         map.put("char", Character.TYPE);
@@ -98,4 +102,39 @@ class UnsafeMethods {
         return map;
     }
 
+    private static final DefaultMemberAccessPolicy INSTANCE = new DefaultMemberAccessPolicy();
+
+    private DefaultMemberAccessPolicy() {
+    }
+
+    /**
+     * Returns the singleton that's compatible with the given incompatible improvements version.
+     */
+    public static DefaultMemberAccessPolicy getInstance(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        // All breakpoints here must occur in ClassIntrospectorBuilder.normalizeIncompatibleImprovementsVersion!
+        // Though currently we don't have any.
+        return INSTANCE;
+    }
+
+    public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
+        return CLASS_MEMBER_ACCESS_POLICY_INSTANCE;
+    }
+
+    private static final BacklistClassMemberAccessPolicy CLASS_MEMBER_ACCESS_POLICY_INSTANCE
+            = new BacklistClassMemberAccessPolicy();
+    private static class BacklistClassMemberAccessPolicy implements ClassMemberAccessPolicy {
+
+        public boolean isMethodExposed(Method method) {
+            return !UNSAFE_METHODS.contains(method);
+        }
+
+        public boolean isConstructorExposed(Constructor<?> constructor) {
+            return true;
+        }
+
+        public boolean isFieldExposed(Field field) {
+            return true;
+        }
+    }
 }

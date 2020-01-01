@@ -40,7 +40,9 @@ import freemarker.template.utility.TemplateModelUtils;
 
 class BuiltInsForCallables {
 
-    static class with_argsBI extends BuiltIn {
+    static abstract class AbstractWithArgsBI extends BuiltIn {
+
+        protected abstract boolean isOrderLast();
 
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -73,13 +75,13 @@ class BuiltInsForCallables {
 
                 Macro.WithArgs withArgs;
                 if (argTM instanceof TemplateSequenceModel) {
-                    withArgs = new Macro.WithArgs((TemplateSequenceModel) argTM);
+                    withArgs = new Macro.WithArgs((TemplateSequenceModel) argTM, isOrderLast());
                 } else if (argTM instanceof TemplateHashModelEx) {
                     if (macroOrFunction.isFunction()) {
                         throw new _TemplateModelException("When applied on a function, ?",  key,
                                 " can't have a hash argument. Use a sequence argument.");
                     }
-                    withArgs = new Macro.WithArgs((TemplateHashModelEx) argTM);
+                    withArgs = new Macro.WithArgs((TemplateHashModelEx) argTM, isOrderLast());
                 } else {
                     throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
                 }
@@ -110,11 +112,15 @@ class BuiltInsForCallables {
                                 List<TemplateModel> newArgs = new ArrayList<TemplateModel>(
                                         withArgsSize + origArgs.size());
 
+                                if (isOrderLast()) {
+                                    newArgs.addAll(origArgs);
+                                }
                                 for (int i = 0; i < withArgsSize; i++) {
                                     newArgs.add(withArgs.get(i));
                                 }
-
-                                newArgs.addAll(origArgs);
+                                if (!isOrderLast()) {
+                                    newArgs.addAll(origArgs);
+                                }
 
                                 return method.exec(newArgs);
                             }
@@ -126,12 +132,16 @@ class BuiltInsForCallables {
                                 List<String> newArgs = new ArrayList<String>(
                                         withArgsSize + origArgs.size());
 
+                                if (isOrderLast()) {
+                                    newArgs.addAll(origArgs);
+                                }
                                 for (int i = 0; i < withArgsSize; i++) {
                                     TemplateModel argVal = withArgs.get(i);
                                     newArgs.add(argValueToString(argVal));
                                 }
-
-                                newArgs.addAll(origArgs);
+                                if (!isOrderLast()) {
+                                    newArgs.addAll(origArgs);
+                                }
 
                                 return method.exec(newArgs);
                             }
@@ -187,33 +197,48 @@ class BuiltInsForCallables {
                         public void execute(Environment env, Map origArgs, TemplateModel[] loopVars,
                                 TemplateDirectiveBody body) throws TemplateException, IOException {
                             int withArgsSize = withArgs.size();
+                            // This is unnecessarily big if there are overridden arguments, but we care more about
+                            // avoiding rehashing.
                             Map<String, TemplateModel> newArgs = new LinkedHashMap<String, TemplateModel>(
                                     (withArgsSize + origArgs.size()) * 4 / 3, 1f);
 
                             TemplateHashModelEx2.KeyValuePairIterator withArgsIter =
                                     TemplateModelUtils.getKeyValuePairIterator(withArgs);
-                            while (withArgsIter.hasNext()) {
-                                TemplateHashModelEx2.KeyValuePair spreadArgKVP = withArgsIter.next();
-
-                                TemplateModel argNameTM = spreadArgKVP.getKey();
-                                if (!(argNameTM instanceof TemplateScalarModel)) {
-                                    throw new _TemplateModelException(
-                                            "Expected string keys in the spread args hash, but one of the keys was ",
-                                            new _DelayedAOrAn(new _DelayedFTLTypeDescription(argNameTM)), ".");
+                            if (isOrderLast()) {
+                                newArgs.putAll(origArgs);
+                                while (withArgsIter.hasNext()) {
+                                    TemplateHashModelEx2.KeyValuePair withArgsKVP = withArgsIter.next();
+                                    String argName = getArgumentName(withArgsKVP);
+                                    if (!newArgs.containsKey(argName)) {
+                                        newArgs.put(argName, withArgsKVP.getValue());
+                                    }
                                 }
-                                String argName = EvalUtil.modelToString((TemplateScalarModel) argNameTM, null, null);
-
-                                newArgs.put(argName, spreadArgKVP.getValue());
+                            } else {
+                                while (withArgsIter.hasNext()) {
+                                    TemplateHashModelEx2.KeyValuePair withArgsKVP = withArgsIter.next();
+                                    newArgs.put(getArgumentName(withArgsKVP), withArgsKVP.getValue());
+                                }
+                                newArgs.putAll(origArgs);
                             }
 
-                            newArgs.putAll(origArgs); // TODO Should null replace non-null?
-
                             directive.execute(env, newArgs, loopVars, body);
+                        }
+
+                        private String getArgumentName(TemplateHashModelEx2.KeyValuePair withArgsKVP) throws
+                                TemplateModelException {
+                            TemplateModel argNameTM = withArgsKVP.getKey();
+                            if (!(argNameTM instanceof TemplateScalarModel)) {
+                                throw new _TemplateModelException(
+                                        "Expected string keys in the ?", key, "(...) arguments, " +
+                                        "but one of the keys was ",
+                                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(argNameTM)), ".");
+                            }
+                            return EvalUtil.modelToString((TemplateScalarModel) argNameTM, null, null);
                         }
                     };
                 } else if (argTM instanceof TemplateSequenceModel) {
                     throw new _TemplateModelException("When applied on a directive, ?",  key,
-                            " can't have a sequence argument. Use a hash argument.");
+                            "(...) can't have a sequence argument. Use a hash argument.");
                 } else {
                     throw _MessageUtil.newMethodArgMustBeExtendedHashOrSequnceException("?" + key, 0, argTM);
                 }
@@ -221,6 +246,20 @@ class BuiltInsForCallables {
 
         }
 
+    }
+
+    static final class with_argsBI extends AbstractWithArgsBI {
+        @Override
+        protected boolean isOrderLast() {
+            return false;
+        }
+    }
+
+    static final class with_args_lastBI extends AbstractWithArgsBI {
+        @Override
+        protected boolean isOrderLast() {
+            return true;
+        }
     }
 
 }

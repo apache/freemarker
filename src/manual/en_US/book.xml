@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/2000/svg"
-      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns3="http://www.w3.org/1999/xhtml"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -13183,6 +13180,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_with_args_last">with_args_last</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_word_list">word_list</link></para>
           </listitem>
 
@@ -19877,6 +19879,152 @@ Same as:
           there:</para>
 
           <programlisting role="template">&lt;@myMacro?with_args({'a': 1})&gt;...&lt;/<emphasis>@myMacro</emphasis>&gt;</programlisting>
+
+          <para>Note that as far as the order of arguments is concerned,
+          arguments coming from
+          <literal>with_args(<replaceable>...</replaceable>)</literal> are
+          added before the arguments specified in the call to the returned
+          directive/function/method. In some use cases it's more desirable to
+          add them at the end instead, in which case use the <link
+          linkend="ref_builtin_with_args_last"><literal>with_args_last</literal>
+          built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_with_args_last">
+          <title>with_args_last</title>
+
+          <note>
+            <para>This built-in is available since 2.3.30</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_with_args"><literal>with_args</literal></link>,
+          but if the order of the arguments in resulting final argument list
+          may differs (but not the values in it). This only matters if you
+          pass parameters by position (typically, when calling functions or
+          methods), or when there's catch-all argument.</para>
+
+          <para>A typical example with positional arguments is when you want
+          to add the dynamic argument to the end of the parameter list:</para>
+
+          <programlisting role="template">&lt;#function f a b c d&gt;
+  &lt;#return "a=${a}, b=${b}, c=${c}, d=${d}"&gt;
+&lt;/#function&gt;
+
+&lt;#assign dynamicArgs=[3, 4]&gt;
+
+with_args:
+${f?with_args(dynamicArgs)(1, 2)}
+
+with_args_last:
+${f?with_args_last(dynamicArgs)(1, 2)}</programlisting>
+
+          <programlisting role="output">with_args:
+a=3, b=4, c=1, d=2
+
+with_args_last:
+a=1, b=2, c=3, d=4</programlisting>
+
+          <para>In the case of name arguments, while the primary mean of
+          identifying an argument is the its name, catch-all arguments
+          (<literal>others...</literal> below) still have an order:</para>
+
+          <programlisting role="template">&lt;#macro m a b others...&gt;
+  a=${a}
+  b=${b}
+  others:
+  &lt;#list others as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'e': 5, 'f': 6}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 b=2 c=3 d=4 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 b=2 c=3 d=4 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+  a=1
+  b=2
+  others:
+    e = 5
+    f = 6
+    c = 3
+    d = 4
+
+with_args_last:
+  a=1
+  b=2
+  others:
+    c = 3
+    d = 4
+    e = 5
+    f = 6</programlisting>
+
+          <para>If you specify a named parameter that are not catch-all, so
+          they are declared in the <literal>macro</literal> tag (as
+          <literal>a</literal> and <literal>b</literal> below), then
+          <literal>with_args</literal> and <literal>with_args_last</literal>
+          are no different, since the argument order is specified by the macro
+          definition, not the macro call:</para>
+
+          <programlisting role="template">&lt;#macro m a=0 b=0&gt;
+  &lt;#-- We use .args to demonstrate the ordering of a and b: --&gt;
+  &lt;#list .args as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'b': 1}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+    a = 1
+    b = 1
+
+with_args_last:
+    a = 1
+    b = 1</programlisting>
+
+          <para>If both the macro or directive call, and the
+          <literal>with_args_last</literal> argument specifies named catch-all
+          argument with the same name (like <literal>b</literal> below), then
+          the placement of those parameters is decide by the macro/directive
+          call:</para>
+
+          <programlisting role="template">&lt;#macro m others...&gt;
+  &lt;#list others as k, v&gt;
+    ${k} = ${v}
+  &lt;/#list&gt;
+&lt;/#macro&gt;
+
+&lt;#assign dynamicArgs={'b': 0, 'd': 4}&gt;
+
+with_args:
+&lt;@m?with_args(dynamicArgs) a=1 b=2 c=3 /&gt;
+
+with_args_last:
+&lt;@m?with_args_last(dynamicArgs) a=1 b=2 c=3 /&gt;</programlisting>
+
+          <programlisting role="output">with_args:
+<emphasis>    b = 2
+    d = 4
+</emphasis>    a = 1
+    c = 3
+
+with_args_last:
+    a = 1
+<emphasis>    b = 2
+</emphasis>    c = 3
+<emphasis>    d = 4</emphasis></programlisting>
         </section>
       </section>
     </chapter>
@@ -22317,7 +22465,7 @@ All rights reserved.</emphasis></programlisting>
               cases, as it doesn't work well with
               <literal>&lt;#sep&gt;</literal>,
               <literal><replaceable>item</replaceable>?has_next</literal>,
-              <literal><replaceable>item</replaceable>?count</literal>,
+              <literal><replaceable>item</replaceable>?counter</literal>,
               <literal><replaceable>item</replaceable>?index</literal>,
               <literal><replaceable>item</replaceable>?item_parity</literal>,
               etc. Instead, use <link
@@ -22367,7 +22515,7 @@ All rights reserved.</emphasis></programlisting>
             <literal>sep</literal> directive will not be executed for that
             iteration. Using <literal>continue</literal> together with
             <literal>sep</literal> is generally a bad idea anyway, also
-            <literal>?has_next</literal>, <literal>?count</literal>,
+            <literal>?has_next</literal>, <literal>?counter</literal>,
             <literal>?index</literal>, <literal>?item_parity</literal>, etc.
             will not work as you certainly wanted if you completely skip
             items. To solve such situations see <link
@@ -22454,7 +22602,7 @@ All rights reserved.</emphasis></programlisting>
             linkend="ref.directive.if"><literal>if</literal> directive</link>
             for that, because then <literal>&lt;#sep&gt;</literal>,
             <literal><replaceable>item</replaceable>?has_next</literal>,
-            <literal><replaceable>item</replaceable>?count</literal>,
+            <literal><replaceable>item</replaceable>?counter</literal>,
             <literal><replaceable>item</replaceable>?index</literal>,
             <literal><replaceable>item</replaceable>?item_parity</literal>,
             etc., will not be usable, as FreeMarker doesn't know what items
@@ -28736,10 +28884,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <answer>
             <para>In general you shouldn't allow that, unless those users are
-            system administrators or other trusted personnel. Consider
-            templates as part of the source code just like
-            <literal>*.java</literal> files are. If you still want to allow
-            users to upload templates, here are what to consider:</para>
+            application developers, system administrators, or other highly
+            trusted personnel. Consider templates as part of the source code
+            just like <literal>*.java</literal> files are. If you still want
+            to allow users to upload templates, here's what to
+            consider:</para>
 
             <itemizedlist>
               <listitem>
@@ -28764,11 +28913,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
                 <literal>Boolean</literal>-s and <literal>Date</literal>-s.
-                For many application though that's too restrictive, and
-                instead you need to implement your own extremely restrictive
-                <literal>ObjectWrapper</literal>, which, for example, only
-                exposes those members of POJO-s that were explicitly marked to
-                be safe (opt-in approach).</para>
+                But for many application that's too restrictive, and instead
+                you have to create a
+                <literal>WhitelistMemberAccessPolicy</literal>, and create a
+                <literal>DefaultObjectWrapper</literal> (or other
+                <literal>BeansWrapper</literal> subclass that you would use)
+                that uses that. See the Java API documentation of
+                <literal>WhitelistMemberAccessPolicy</literal> for more. (Or,
+                you can roll your own <literal>MemberAccessPolicy</literal>
+                implementation, or even your own restrictive
+                <literal>ObjectWrapper</literal> implementation of
+                course.)</para>
 
                 <para>Also, don't forget about the <link
                 linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
@@ -28784,16 +28939,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 the <literal>ObjectWrapper</literal> is still in control, as
                 it decides what objects support <literal>?api</literal>, and
                 what will <literal>?api</literal> expose for them (it usually
-                exposes the same as for a generic POJO).</para>
+                exposes the same as for a generic POJO). Members not allowed
+                by the <literal>MemberAccessPolicy</literal> also won't be
+                visible with <literal>?api</literal> (assuming you are using a
+                well behaving <literal>ObjectWrapper</literal>, like
+                <literal>DefaultObjectWrapper</literal> is, hopefully.)
+                </para>
 
                 <para>Last not least, some maybe aware of that the standard
                 object wrappers filters out some well known
                 <quote>unsafe</quote> methods, like
-                <literal>System.exit</literal>. Do not ever rely on this as
-                your only line of defense, since it only blocks the methods
-                that's in a predefined list. Thus, for example, if a new Java
-                version adds a new problematic method, it won't be filtered
-                out.</para>
+                <literal>System.exit</literal>. Do not ever rely on that,
+                since it only blocks the methods that's in a small predefined
+                list (for some historical reasons). The standard Java API is
+                huge and ever growing, and then there are the 3rd party
+                libraries, and the API-s of your own application. Clearly it's
+                impossible to blacklist all the problematic members in
+                those.</para>
               </listitem>
 
               <listitem>
@@ -28835,7 +28997,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>TemplateClassResolver</literal> that restricts the
                 accessible classes (possibly based on which template asks for
                 them), such as
-                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
+                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.
+                Note that if, and only if your
+                <literal>ObjectWrapper</literal> is a
+                <literal>BeansWrapper</literal> or a subclass of it (typically
+                <literal>DefaultObjectWrapper</literal>), constructors not
+                allowed by the <literal>MemberAccessPolicy</literal> also
+                won't be accessible for <literal>?new</literal>. </para>
               </listitem>
 
               <listitem>
@@ -28988,8 +29156,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-107">FREEMARKER-107</link>:
               Added
               <literal>?<replaceable>with_args</replaceable>(dynamicArguments)</literal>
+              and
+              <literal>?<replaceable>with_args_last</replaceable>(dynamicArguments)</literal>
               to add parameters dynamically to directive (like macro),
-              function and method calls. Actually, this built-in returns
+              function and method calls. Actually, this built-in returns a
               directive or macro or function that has different parameter
               defaults. <link linkend="ref_builtin_with_args">See more
               here...</link></para>
@@ -29032,6 +29202,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added
+              <literal>freemarker.ext.beans.MemberAccessPolicy</literal>
+              interface, and the <literal>memberAccessPolicy</literal>
+              property to <literal>BeansWrapper</literal>, and subclasses like
+              <literal>DefaultObjectWrapper</literal>. This allows users to
+              implement their own program logic to decide what members of
+              classes will be exposed to the templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>freemarker.ext.beans.WhitelistMemberAccessPolicy</literal>,
+              which is a <literal>MemberAccessPolicy</literal> for use cases
+              where you want to allow editing templates to users who shouldn't
+              have the same rights as the developers (the same rights as the
+              Java application). Earlier, the only out of the box solution for
+              that was <literal>SimpleObjectWrapper</literal>, but that's too
+              restrictive for most applications where FreeMarker is used.
+              <literal>WhitelistMemberAccessPolicy</literal> works with
+              <literal>DefaultObjectWrapper</literal> (or any other
+              <literal>BeansWrapper</literal>), allowing you to use all
+              features of it, but it will only allow accessing members that
+              were explicitly listed by the developers, or was annotated with
+              <literal>@TemplateAccessible</literal>.</para>
+            </listitem>
+
             <listitem>
               <para>Added
               <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>

@@ -17,6 +17,18 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+package freemarker.ext.beans;
+
+import java.lang.reflect.Field;
+
+/**
+ * {@link MemberMatcher} for fields.
+ *
+ * @since 2.3.30
+ */
+final class FieldMatcher extends MemberMatcher<Field, String> {
+    @Override
+    protected String toMemberSignature(Field member) {
+        return member.getName();
+    }
+}

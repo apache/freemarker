@@ -16,14 +16,28 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#macro m1 a b c>
-  m1 does things with ${a}, ${b}, ${c}
-</#macro>
+<#function f a b c d>
+  <#return "a=${a}, b=${b}, c=${c}, d=${d}">
+</#function>
 
-<#macro m2 a b c>
-  m2 does things with ${a}, ${b}, ${c}
-  Delegate to m1:
-  <@m1?with_args(.args) />
-</#macro>
+${f?with_args([2, 3])(1, 2)}
+${f?with_args_last([2, 3])(1, 2)}
 
-<@m2 a=1 b=2 c=3 />
+<#macro m a b others...>
+  a=${a}
+  b=${b}
+  others:
+  <#list others as k, v>
+    ${k} = ${v}
+  </#list>
+</#macro>
+<@m?with_args({'e': 5, 'f': 6}) a=1 b=2 c=3 d=4 />
+<@m?with_args_last({'e': 5, 'f': 6}) a=1 b=2 c=3 d=4 />
+
+<#macro m a b others...>
+  <#list .args as k, v>
+    ${k} = ${v}
+  </#list>
+</#macro>
+<@m?with_args({'e': 5, 'f': 6}) a=1 b=2 c=3 d=4 />
+<@m?with_args_last({'e': 5, 'f': 6}) a=1 b=2 c=3 d=4 />

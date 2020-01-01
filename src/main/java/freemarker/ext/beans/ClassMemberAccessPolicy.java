@@ -17,6 +17,22 @@
  * under the License.
  */
 
-  m2 does things with 1, 2, 3
-  Delegate to m1:
-  m1 does things with 1, 2, 3
+package freemarker.ext.beans;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+/**
+ * Returned by {@link MemberAccessPolicy#forClass(Class)}. The idea is that {@link MemberAccessPolicy#forClass(Class)}
+ * is called once per class, and then the methods of the resulting {@link ClassMemberAccessPolicy} object will be
+ * called for each member of the class. This can speed up the process as the class-specific lookups will be done only
+ * once per class, not once per member.
+ *
+ * @since 2.3.30
+ */
+public interface ClassMemberAccessPolicy {
+    boolean isMethodExposed(Method method);
+    boolean isConstructorExposed(Constructor<?> constructor);
+    boolean isFieldExposed(Field field);
+}

@@ -26,19 +26,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import freemarker.template.Configuration;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template.utility.NullArgumentException;
 
 final class ClassIntrospectorBuilder implements Cloneable {
-    
-    private final boolean bugfixed;
 
-    private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
-    private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue(); 
-    
+    private static final Map<ClassIntrospectorBuilder, Reference<ClassIntrospector>> INSTANCE_CACHE
+            = new HashMap<ClassIntrospectorBuilder, Reference<ClassIntrospector>>();
+    private static final ReferenceQueue<ClassIntrospector> INSTANCE_CACHE_REF_QUEUE
+            = new ReferenceQueue<ClassIntrospector>();
+
+    private final Version incompatibleImprovements;
+
     // Properties and their *defaults*:
     private int exposureLevel = BeansWrapper.EXPOSE_SAFE;
     private boolean exposeFields;
+    private MemberAccessPolicy memberAccessPolicy;
     private boolean treatDefaultMethodsAsBeanMembers;
     private MethodAppearanceFineTuner methodAppearanceFineTuner;
     private MethodSorter methodSorter;
@@ -49,23 +54,33 @@ final class ClassIntrospectorBuilder implements Cloneable {
     // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
     
     ClassIntrospectorBuilder(ClassIntrospector ci) {
-        bugfixed = ci.bugfixed;
+        incompatibleImprovements = ci.incompatibleImprovements;
         exposureLevel = ci.exposureLevel;
         exposeFields = ci.exposeFields;
+        memberAccessPolicy = ci.memberAccessPolicy;
         treatDefaultMethodsAsBeanMembers = ci.treatDefaultMethodsAsBeanMembers;
         methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
-        methodSorter = ci.methodSorter; 
+        methodSorter = ci.methodSorter;
     }
     
     ClassIntrospectorBuilder(Version incompatibleImprovements) {
         // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
         // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
-        // to some version changes that affects BeansWrapper, but not the other way around. 
-        bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
+        // to some version changes that affects BeansWrapper, but not the other way around.
+        this.incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         treatDefaultMethodsAsBeanMembers
                 = incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
+        memberAccessPolicy = DefaultMemberAccessPolicy.getInstance(this.incompatibleImprovements);
     }
-    
+
+    private static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        // All breakpoints here must occur in BeansWrapper.normalizeIncompatibleImprovements!
+        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_30 ? Configuration.VERSION_2_3_30
+                : incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_21 ? Configuration.VERSION_2_3_21
+                : Configuration.VERSION_2_3_0;
+    }
+
     @Override
     protected Object clone() {
         try {
@@ -79,10 +94,11 @@ final class ClassIntrospectorBuilder implements Cloneable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (bugfixed ? 1231 : 1237);
+        result = prime * result + incompatibleImprovements.hashCode();
         result = prime * result + (exposeFields ? 1231 : 1237);
         result = prime * result + (treatDefaultMethodsAsBeanMembers ? 1231 : 1237);
         result = prime * result + exposureLevel;
+        result = prime * result + memberAccessPolicy.hashCode();
         result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
         result = prime * result + System.identityHashCode(methodSorter);
         return result;
@@ -95,10 +111,11 @@ final class ClassIntrospectorBuilder implements Cloneable {
         if (getClass() != obj.getClass()) return false;
         ClassIntrospectorBuilder other = (ClassIntrospectorBuilder) obj;
         
-        if (bugfixed != other.bugfixed) return false;
+        if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
         if (exposeFields != other.exposeFields) return false;
         if (treatDefaultMethodsAsBeanMembers != other.treatDefaultMethodsAsBeanMembers) return false;
         if (exposureLevel != other.exposureLevel) return false;
+        if (!memberAccessPolicy.equals(other.memberAccessPolicy)) return false;
         if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
         if (methodSorter != other.methodSorter) return false;
         
@@ -135,6 +152,21 @@ final class ClassIntrospectorBuilder implements Cloneable {
         this.treatDefaultMethodsAsBeanMembers = treatDefaultMethodsAsBeanMembers;
     }
 
+    public MemberAccessPolicy getMemberAccessPolicy() {
+        return memberAccessPolicy;
+    }
+
+    /**
+     * Sets the {@link MemberAccessPolicy}; default is {@link DefaultMemberAccessPolicy#getInstance(Version)}, which
+     * is not appropriate if template editors aren't trusted.
+     *
+     * @since 2.3.30
+     */
+    public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
+        NullArgumentException.check(memberAccessPolicy);
+        this.memberAccessPolicy = memberAccessPolicy;
+    }
+
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
         return methodAppearanceFineTuner;
     }
@@ -151,11 +183,19 @@ final class ClassIntrospectorBuilder implements Cloneable {
         this.methodSorter = methodSorter;
     }
 
+    /**
+     * Returns the normalized incompatible improvements.
+     */
+    public Version getIncompatibleImprovements() {
+        return incompatibleImprovements;
+    }
+
     private static void removeClearedReferencesFromInstanceCache() {
-        Reference clearedRef;
+        Reference<? extends ClassIntrospector> clearedRef;
         while ((clearedRef = INSTANCE_CACHE_REF_QUEUE.poll()) != null) {
             synchronized (INSTANCE_CACHE) {
-                findClearedRef: for (Iterator it = INSTANCE_CACHE.values().iterator(); it.hasNext(); ) {
+                findClearedRef: for (Iterator<Reference<ClassIntrospector>> it = INSTANCE_CACHE.values().iterator();
+                         it.hasNext(); ) {
                     if (it.next() == clearedRef) {
                         it.remove();
                         break findClearedRef;
@@ -173,7 +213,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
     }
     
     /** For unit testing only */
-    static Map getInstanceCache() {
+    static Map<ClassIntrospectorBuilder, Reference<ClassIntrospector>> getInstanceCache() {
         return INSTANCE_CACHE;
     }
 
@@ -187,12 +227,12 @@ final class ClassIntrospectorBuilder implements Cloneable {
             // Instance can be cached.
             ClassIntrospector instance;
             synchronized (INSTANCE_CACHE) {
-                Reference instanceRef = (Reference) INSTANCE_CACHE.get(this);
-                instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
+                Reference<ClassIntrospector> instanceRef = INSTANCE_CACHE.get(this);
+                instance = instanceRef != null ? instanceRef.get() : null;
                 if (instance == null) {
                     ClassIntrospectorBuilder thisClone = (ClassIntrospectorBuilder) clone();  // prevent any aliasing issues
                     instance = new ClassIntrospector(thisClone, new Object(), true, true);
-                    INSTANCE_CACHE.put(thisClone, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
+                    INSTANCE_CACHE.put(thisClone, new WeakReference<ClassIntrospector>(instance, INSTANCE_CACHE_REF_QUEUE));
                 }
             }
             
@@ -207,8 +247,4 @@ final class ClassIntrospectorBuilder implements Cloneable {
         }
     }
 
-    public boolean isBugfixed() {
-        return bugfixed;
-    }
-    
 }

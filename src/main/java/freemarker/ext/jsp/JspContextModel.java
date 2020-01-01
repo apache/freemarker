@@ -26,6 +26,10 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
+/**
+ * @Deprecated This is used by the deprecated {@link FreemarkerTag}.
+ */
+@Deprecated
 class JspContextModel
 implements
     TemplateHashModel {

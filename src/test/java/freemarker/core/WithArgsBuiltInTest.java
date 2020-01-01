@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +43,7 @@ import freemarker.test.TemplateTest;
 
 public class WithArgsBuiltInTest extends TemplateTest {
 
-    private static final String PRINT_O = "o=<#if o?isSequence>[${o?join(', ')}]" +
+    private static final String PRINT_O = "o=<#if o?isSequence>[<#list o as v>${v!'null'}<#sep>, </#list>]" +
             "<#else>{<#list o as k,v>${k}=${v!'null'}<#sep>, </#list>}" +
             "</#if>";
 
@@ -179,10 +180,10 @@ public class WithArgsBuiltInTest extends TemplateTest {
     @Test
     public void testNullsWithMacroWithPositionalWithArgs() throws Exception {
         // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
-        assertOutput("<@mCAO 1 null null 4 />", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
+        assertOutput("<@mCAO 1 null null 4 />", "o=[1, null, null, 4]");
         addToDataModel("args", Arrays.asList(1, null, null, 4));
-        assertOutput("<@mCAO?withArgs(args) />", "o=[1, 4]"); // [FM3] See above
-        assertOutput("<@mCAO?withArgs(args) null 5 6 />", "o=[1, 4, 5, 6]"); // [FM3] See above
+        assertOutput("<@mCAO?withArgs(args) />", "o=[1, null, null, 4]");
+        assertOutput("<@mCAO?withArgs(args) null 5 6 />", "o=[1, null, null, 4, null, 5, 6]");
     }
 
     @Test
@@ -216,10 +217,10 @@ public class WithArgsBuiltInTest extends TemplateTest {
     @Test
     public void testNullsWithFunction() throws Exception {
         // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
-        assertOutput("${fCAO(1, null, null, 4)}", "o=[1, 4]"); // [FM3] Should be: 1, null, null, 4
+        assertOutput("${fCAO(1, null, null, 4)}", "o=[1, null, null, 4]");
         addToDataModel("args", Arrays.asList(1, null, null, 4));
-        assertOutput("${fCAO?withArgs(args)()}", "o=[1, 4]"); // [FM3] See above
-        assertOutput("${fCAO?withArgs(args)(null, 5, 6)}", "o=[1, 4, 5, 6]"); // [FM3] See above
+        assertOutput("${fCAO?withArgs(args)()}", "o=[1, null, null, 4]");
+        assertOutput("${fCAO?withArgs(args)(null, 5, 6)}", "o=[1, null, null, 4, null, 5, 6]");
     }
 
     @Test
@@ -322,6 +323,18 @@ public class WithArgsBuiltInTest extends TemplateTest {
         assertOutput("${obj.mNullable?withArgs(args)()}", "null, 2, null");
     }
 
+    @Test
+    public void testMethodWithArgsLast() throws IOException, TemplateException {
+        addToDataModel("obj", new MethodHolder());
+        assertOutput("${obj.m3p?withArgsLast([1, 2, 3])()}", "1, 2, 3");
+        assertOutput("${obj.m3p?withArgsLast([1, 2])(3)}", "3, 1, 2");
+        assertOutput("${obj.m3p?withArgsLast([1])(2, 3)}", "2, 3, 1");
+        assertOutput("${obj.m3p?withArgsLast([])(1, 2, 3)}", "1, 2, 3");
+
+        addToDataModel("args", Arrays.asList(null, 2));
+        assertOutput("${obj.mNullable?withArgsLast(args)(1)}", "1, null, 2");
+    }
+
     public static class MethodHolder {
         public String m3p(int a, int b, int c) {
             return a + ", " + b + ", " + c;
@@ -398,6 +411,126 @@ public class WithArgsBuiltInTest extends TemplateTest {
         addToDataModel("args", args);
         assertOutput("<@directive?withArgs(args) b=22 c=null d=55 />",
                 "{a=null, b=22, c=null, e=6, d=55}{}");
+    }
+
+    @Test
+    public void testTemplateDirectiveModelWithArgsLast() throws IOException, TemplateException {
+        addToDataModel("directive", new TestTemplateDirectiveModel());
+
+        Map<String, Integer> args = new LinkedHashMap<String, Integer>();
+        args.put("a", null);
+        args.put("b", 2);
+        args.put("c", 3);
+        args.put("e", 6);
+        args.put("f", 7);
+        args.put("g", null);
+        addToDataModel("args", args);
+
+        assertOutput("<@directive?withArgsLast(args) b=22 c=null d=55 />",
+                "{b=22, c=null, d=55, a=null, e=6, f=7, g=null}{}");
+
+        assertOutput("<@directive?withArgsLast({}) b=22 c=null d=55 />",
+                "{b=22, c=null, d=55}{}");
+
+        assertOutput("<@directive?withArgsLast(args) />",
+                "{a=null, b=2, c=3, e=6, f=7, g=null}{}");
+    }
+
+    @Test
+    public void testMacroWithArgsLastNamed() throws IOException, TemplateException {
+        assertOutput("<@m?withArgsLast({'a': 1, 'b': 2}) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgsLast({'b': 2}) a=1 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgsLast({}) a=1 b=2 />", "a=1; b=2; c=d3");
+
+        assertOutput("<@m?withArgsLast({'a': 1, 'b': 2, 'c': 3}) />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast({'b': 2}) a=1 c=3 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast({'c': 3}) a=1 b=2 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast({}) a=1 b=2 c=3 />", "a=1; b=2; c=3");
+
+        assertOutput("<@m?withArgsLast({'b': 2}) 1 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgsLast({'c': 3}) 1 2 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast({'b': 22, 'c': 3}) 1 2 />", "a=1; b=2; c=3");
+
+        assertOutput("<@mCA?withArgsLast({'a': 1, 'b': 2, 'c': 3, 'd': 4}) />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgsLast({'b': 2, 'c': 3, 'd': 4}) a=1 />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgsLast({'c': 3, 'd': 4}) a=1 b=2 />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgsLast({'d': 4}) a=1 b=2 c=3 />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgsLast({}) a=1 b=2 c=3 d=4 />", "a=1; b=2; o={c=3, d=4}");
+
+        assertOutput("<@mCA?withArgsLast({'a': 11}) 1 2 />", "a=1; b=2; o=[]");
+        assertOutput("<@mCA?withArgsLast({'a': 11, 'c': 3}) 1 2 />", "a=1; b=2; o={c=3}");
+        assertErrorContains("<@mCA?withArgsLast({'a': 11, 'c': 3}) 1 2 3 />", "both named and positional", "catch-all");
+        assertOutput("<@mCA?withArgsLast({'a': 11, 'b': 22}) 1 2 3 />", "a=1; b=2; o=[3]");
+
+        assertOutput("<@mCAO?withArgsLast({'a': 1, 'b': 2}) />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?withArgsLast({'b': 2}) a=1 />", "o={a=1, b=2}");
+        assertOutput("<@mCAO?withArgsLast({}) a=1 b=2 />", "o={a=1, b=2}");
+
+        assertOutput("<@mCAO?withArgsLast({}) />", "o={}");
+
+        // Ordering of "real" args win:
+        assertOutput("<@mCA?withArgsLast({'c': 3, 'd': 4}) a=1 b=2 />", "a=1; b=2; o={c=3, d=4}");
+        assertOutput("<@mCA?withArgsLast({'c': 3, 'd': 4}) a=1 d=44 b=2 />", "a=1; b=2; o={d=44, c=3}");
+    }
+
+    @Test
+    public void testMacroWithArgsLastNamedNullArgs() throws IOException, TemplateException {
+        assertOutput("<@mCA?withArgsLast({'c': 3, 'd': 4}) a=1 d=null b=2 />", "a=1; b=2; o={d=null, c=3}");
+        Map<String, Integer> cAndDNull = new LinkedHashMap<String, Integer>();
+        cAndDNull.put("c", 3);
+        cAndDNull.put("d", null);
+        addToDataModel("cAndDNull", cAndDNull);
+        assertOutput("<@mCA?withArgsLast(cAndDNull) a=1 b=2 />", "a=1; b=2; o={c=3, d=null}");
+        assertOutput("<@mCA?withArgsLast(cAndDNull) a=1 d=null b=2 />", "a=1; b=2; o={d=null, c=3}");
+    }
+
+    @Test
+    public void testMacroWithArgsLastPositional() throws IOException, TemplateException {
+        assertOutput("<@m?withArgsLast([1, 2, 3]) />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast([2, 3]) 1 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast([3]) 1 2 />", "a=1; b=2; c=3");
+        assertOutput("<@m?withArgsLast([]) 1 2 3 />", "a=1; b=2; c=3");
+
+        assertOutput("<@m?withArgsLast([]) a=1 b=2 />", "a=1; b=2; c=d3");
+        assertErrorContains("<@m?withArgsLast([3]) a=1 b=2 />", "by name", "by position", "last");
+
+        assertOutput("<@m?withArgsLast([1, 2]) />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgsLast([2]) 1 />", "a=1; b=2; c=d3");
+        assertOutput("<@m?withArgsLast([]) 1 2 />", "a=1; b=2; c=d3");
+
+        assertOutput("<@mCA?withArgsLast([1, 2, 3, 4]) />", "a=1; b=2; o=[3, 4]");
+        assertOutput("<@mCA?withArgsLast([2, 3, 4]) 1 />", "a=1; b=2; o=[3, 4]");
+        assertOutput("<@mCA?withArgsLast([3, 4]) 1 2 />", "a=1; b=2; o=[3, 4]");
+        assertOutput("<@mCA?withArgsLast([4]) 1 2 3 />", "a=1; b=2; o=[3, 4]");
+        assertOutput("<@mCA?withArgsLast([]) 1 2 3 4 />", "a=1; b=2; o=[3, 4]");
+
+        assertOutput("<@mCAO?withArgsLast([1, 2, 3, 4]) />", "o=[1, 2, 3, 4]");
+        assertOutput("<@mCAO?withArgsLast([3, 4]) 1 2 />", "o=[1, 2, 3, 4]");
+        assertOutput("<@mCAO?withArgsLast([]) 1 2 3 4 />", "o=[1, 2, 3, 4]");
+
+        assertOutput("<@mCAO?withArgsLast([]) a=1 b=2 />", "o={a=1, b=2}");
+        assertErrorContains("<@mCAO?withArgsLast([3]) a=1 b=2 />", "by name", "by position", "last");
+
+        assertOutput("<@mCAO?withArgsLast([]) />", "o=[]");
+
+        assertErrorContains("<@m?withArgsLast([0, 0, 0, 0]) />", "3", "4", "parameter");
+        assertErrorContains("<@m?withArgsLast([0, 0, 0]) 0 />", "3", "4", "parameter");
+        assertErrorContains("<@m?withArgsLast([]) 0 0 0 0 />", "3", "4", "parameter");
+    }
+
+    @Test
+    public void testMacroWithArgsLastPositionalNullArgs() throws IOException, TemplateException {
+        ArrayList<Object> twoAndNull = new ArrayList<Object>();
+        twoAndNull.add(2);
+        twoAndNull.add(null);
+        addToDataModel("twoAndNull", twoAndNull);
+
+        assertOutput("<@m?withArgsLast(twoAndNull) 1 />", "a=1; b=2; c=d3");
+        assertErrorContains("<@m?withArgsLast([3]) null 2 />", "\"a\"", "null");
+        assertOutput("<@m?withArgsLast([]) 1 2 null />", "a=1; b=2; c=d3");
+
+        assertOutput("<@mCAO?withArgsLast(twoAndNull) 1 />", "o=[1, 2, null]");
+        assertOutput("<@mCAO?withArgsLast([3]) null 2 />", "o=[null, 2, 3]");
     }
 
     private static class TestTemplateDirectiveModel implements TemplateDirectiveModel {
