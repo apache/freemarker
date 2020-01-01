@@ -28,6 +28,7 @@ import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
+import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 
@@ -35,7 +36,10 @@ import freemarker.template.Template;
  * Simple implementation of JSP tag to allow use of FreeMarker templates in
  * JSP. Inspired by similar class in Velocity template engine developed by
  * <a href="mailto:geirm@optonline.net">Geir Magnusson Jr.</a>
+ *
+ * @Deprecated This feature is not supported anymore, also, it uses the deprecated default {@link Configuration}.
  */
+@Deprecated
 public class FreemarkerTag implements BodyTag {
     private Tag parent;
     private BodyContent bodyContent;
