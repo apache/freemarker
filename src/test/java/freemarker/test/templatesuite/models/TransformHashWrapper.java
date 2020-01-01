@@ -24,6 +24,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.StandardCompress;
 
@@ -33,7 +34,7 @@ import freemarker.template.utility.StandardCompress;
 public class TransformHashWrapper implements TemplateHashModel,
         TemplateScalarModel {
 
-    private SimpleHash m_cHashModel = new SimpleHash();
+    private SimpleHash m_cHashModel = new SimpleHash(_TemplateAPI.SAFE_OBJECT_WRAPPER);
 
     /** Creates new TransformHashWrapper */
     public TransformHashWrapper() {

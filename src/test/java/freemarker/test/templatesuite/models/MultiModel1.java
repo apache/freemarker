@@ -19,6 +19,9 @@
 
 package freemarker.test.templatesuite.models;
 
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -34,19 +37,21 @@ import freemarker.template.TemplateSequenceModel;
 public class MultiModel1 implements TemplateHashModel,
         TemplateSequenceModel, TemplateScalarModel {
 
+    private static final DefaultObjectWrapper DEFAULT_OBJECT_WRAPPER =
+            new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build();
     private TemplateModel m_cSubModel = new MultiModel2();
     private TemplateModel m_cListHashModel1 = new MultiModel4();
     private TemplateModel m_cListHashModel2 = new MultiModel5();
-    private TemplateSequenceModel m_cListModel = new SimpleSequence();
-    private TemplateHashModel m_cHashModel = new SimpleHash();
+    private TemplateSequenceModel m_cListModel = new SimpleSequence(DEFAULT_OBJECT_WRAPPER);
+    private TemplateHashModel m_cHashModel = new SimpleHash(DEFAULT_OBJECT_WRAPPER);
 
     /** Creates new MultiModel1 */
     public MultiModel1() {
         for ( int i = 0; i < 10; i++ ) {
             ((SimpleSequence) m_cListModel).add( "Model1 value: " + Integer.toString( i ));
         }
-        ((SimpleSequence) m_cListModel).add( new MultiModel3() );
-        ((SimpleHash) m_cHashModel).put( "nested", new MultiModel3() );
+        ((SimpleSequence) m_cListModel).add(new MultiModel3());
+        ((SimpleHash) m_cHashModel).put("nested", new MultiModel3());
     }
 
     /**

@@ -37,6 +37,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.Constants;
 
 /**
@@ -342,7 +343,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
                         lengthWithCatchAlls += ((TemplateSequenceModel) catchAllArgValue).size();
                     }
 
-                    SimpleSequence argsSpecVarValue = new SimpleSequence(lengthWithCatchAlls);
+                    SimpleSequence argsSpecVarValue = new SimpleSequence(
+                            lengthWithCatchAlls, _TemplateAPI.SAFE_OBJECT_WRAPPER);
                     for (int paramIndex = 0; paramIndex < argsSpecVarDraft.length; paramIndex++) {
                         argsSpecVarValue.add(argsSpecVarDraft[paramIndex]);
                     }
@@ -377,7 +379,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
                     SimpleHash argsSpecVarValue = new SimpleHash(
                             new LinkedHashMap<String, Object>(lengthWithCatchAlls * 4 / 3, 1.0f),
-                            null, 0);
+                            _TemplateAPI.SAFE_OBJECT_WRAPPER, 0);
                     for (int paramIndex = 0; paramIndex < argsSpecVarDraft.length; paramIndex++) {
                         argsSpecVarValue.put(paramNames[paramIndex], argsSpecVarDraft[paramIndex]);
                     }

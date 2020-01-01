@@ -30,6 +30,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.NullArgumentException;
 
 /**
  * An extension of SimpleHash that looks up keys in the hash, then in the
@@ -51,13 +52,14 @@ public class AllHttpScopesHashModel extends SimpleHash {
     /**
      * Creates a new instance of AllHttpScopesHashModel for handling a single 
      * HTTP servlet request.
-     * @param wrapper the object wrapper to use
+     * @param objectWrapper the object wrapper to use; not {@code null}.
      * @param context the servlet context of the web application
      * @param request the HTTP servlet request being processed
      */
-    public AllHttpScopesHashModel(ObjectWrapper wrapper, 
+    public AllHttpScopesHashModel(ObjectWrapper objectWrapper,
             ServletContext context, HttpServletRequest request) {
-        setObjectWrapper(wrapper);
+        super(objectWrapper);
+        NullArgumentException.check("wrapper", objectWrapper);
         this.context = context;
         this.request = request;
     }

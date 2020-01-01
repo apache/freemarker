@@ -28925,6 +28925,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>ObjectWrapper</literal> implementation of
                 course.)</para>
 
+                <para>If you are creating <literal>TemplateModel</literal>-s
+                in custom code (instead of the
+                <literal>ObjectWrapper</literal> creating those), be sure you
+                avoid deprecated container constructors like <literal>new
+                SimpleSequence()</literal>, as those will use the also
+                deprecated default object wrapper instance, which doesn't have
+                the same restrictions than the
+                <literal>ObjectWrapper</literal> you have set on the
+                <literal>Configuration</literal>.</para>
+
                 <para>Also, don't forget about the <link
                 linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
                 built-in</link>, if you have enabled it (it's disabled by
@@ -29244,7 +29254,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               where the caller can provide the <literal>Map</literal> instance
               used as the backing storage, thus allows controlling the
               ordering, and other technical aspects (like the initial
-              capacity) of the underlying <literal>Map</literal>.</para>
+              capacity) of it.</para>
             </listitem>
           </itemizedlist>
         </section>

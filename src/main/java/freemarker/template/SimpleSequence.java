@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.utility.NullArgumentException;
 
 /**
  * A simple implementation of the {@link TemplateSequenceModel} interface, using its own underlying {@link List} for
@@ -91,7 +92,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * the default object wrapper set in 
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
      * 
-     * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
+     * @deprecated Use {@link #SimpleSequence(int, ObjectWrapper)}.
      */
     @Deprecated
     public SimpleSequence(int capacity) {
@@ -138,6 +139,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(ObjectWrapper wrapper) {
         super(wrapper);
+        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList();
     }
     
@@ -151,6 +153,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(int capacity, ObjectWrapper wrapper) {
         super(wrapper);
+        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList(capacity);
     }    
     
@@ -168,6 +171,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(Collection collection, ObjectWrapper wrapper) {
         super(wrapper);
+        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList(collection);
     }
 
@@ -264,6 +268,9 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
     }
 
     private class SynchronizedSequence extends SimpleSequence {
+        private SynchronizedSequence() {
+            super(SimpleSequence.this.getObjectWrapper());
+        }
 
         @Override
         public void add(Object obj) {
@@ -291,6 +298,11 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
             synchronized (SimpleSequence.this) {
                 return SimpleSequence.this.toList();
             }
+        }
+
+        @Override
+        public SimpleSequence synchronizedWrapper() {
+            return this;
         }
     }
     

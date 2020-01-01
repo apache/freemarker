@@ -127,8 +127,8 @@ final class HashLiteral extends Expression {
                 // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
                 // doing hash[key].
                 map = new HashMap<String, TemplateModel>();
-                List<String> keyList = new ArrayList<String>(size);
-                List<TemplateModel> valueList = new ArrayList<TemplateModel>(size);
+                SimpleSequence keyList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+                SimpleSequence valueList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
                 for (int i = 0; i < size; i++) {
                     Expression keyExp = keys.get(i);
                     Expression valExp = values.get(i);
@@ -141,8 +141,8 @@ final class HashLiteral extends Expression {
                     keyList.add(key);
                     valueList.add(value);
                 }
-                keyCollection = new CollectionAndSequence(new SimpleSequence(keyList));
-                valueCollection = new CollectionAndSequence(new SimpleSequence(valueList));
+                keyCollection = new CollectionAndSequence(keyList);
+                valueCollection = new CollectionAndSequence(valueList);
             }
         }
 
@@ -153,7 +153,8 @@ final class HashLiteral extends Expression {
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
-                keyCollection = new CollectionAndSequence(new SimpleSequence(map.keySet()));
+                keyCollection = new CollectionAndSequence(
+                        new SimpleSequence(map.keySet(), _TemplateAPI.SAFE_OBJECT_WRAPPER));
             }
             return keyCollection;
         }
@@ -161,7 +162,8 @@ final class HashLiteral extends Expression {
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
-                valueCollection = new CollectionAndSequence(new SimpleSequence(map.values()));
+                valueCollection = new CollectionAndSequence(
+                        new SimpleSequence(map.values(), _TemplateAPI.SAFE_OBJECT_WRAPPER));
             }
             return valueCollection;
         }

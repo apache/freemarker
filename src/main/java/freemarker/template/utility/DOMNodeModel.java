@@ -38,6 +38,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 
 /**
  * A convenient wrapper class for wrapping a Node in the W3C DOM API.
@@ -72,7 +73,7 @@ public class DOMNodeModel implements TemplateHashModel {
             if ("attributes".equals(key)) {
                 NamedNodeMap attributes = node.getAttributes();
                 if (attributes != null) {
-                    SimpleHash hash = new SimpleHash();
+                    SimpleHash hash = new SimpleHash(_TemplateAPI.SAFE_OBJECT_WRAPPER);
                     for (int i = 0; i < attributes.getLength(); i++) {
                         Attr att = (Attr) attributes.item(i);
                         hash.put(att.getName(), att.getValue());

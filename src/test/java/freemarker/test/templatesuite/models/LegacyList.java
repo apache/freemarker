@@ -24,6 +24,7 @@ import java.util.Iterator;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template._TemplateAPI;
 
 /**
  * A little bridge class that subclasses the new SimpleList
@@ -32,6 +33,10 @@ import freemarker.template.TemplateModelException;
 public class LegacyList extends SimpleSequence {
 
     private Iterator iterator;
+
+    public LegacyList() {
+        super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+    }
 
     /**
      * Resets the cursor to the beginning of the list.

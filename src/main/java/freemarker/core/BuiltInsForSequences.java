@@ -45,6 +45,7 @@ import freemarker.template.TemplateModelListSequence;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.Constants;
 import freemarker.template.utility.StringUtil;
 
@@ -805,7 +806,7 @@ class BuiltInsForSequences {
                 }
             }
 
-            // Sort tje List[KVP]:
+            // Sort the List[KVP]:
             try {
                 Collections.sort(res, keyComparator);
             } catch (Exception exc) {
@@ -870,8 +871,10 @@ class BuiltInsForSequences {
             if (!lazilyGeneratedResultEnabled) {
                 SimpleSequence seq =
                         coll instanceof TemplateCollectionModelEx
-                                ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
-                                : new SimpleSequence();
+                                ? new SimpleSequence(
+                                        ((TemplateCollectionModelEx) coll).size(),
+                                        _TemplateAPI.SAFE_OBJECT_WRAPPER)
+                                : new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
                 for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
                     seq.add(iter.next());
                 }

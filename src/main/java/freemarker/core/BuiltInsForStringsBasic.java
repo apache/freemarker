@@ -35,6 +35,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 class BuiltInsForStringsBasic {
@@ -804,7 +805,7 @@ class BuiltInsForStringsBasic {
     static class word_listBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            SimpleSequence result = new SimpleSequence();
+            SimpleSequence result = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
             StringTokenizer st = new StringTokenizer(s);
             while (st.hasMoreTokens()) {
                result.add(st.nextToken());

@@ -35,6 +35,7 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 
 /**
  * An operator for the + operator. Note that this is treated
@@ -266,7 +267,7 @@ final class AddConcatExpression extends Expression {
         throws TemplateModelException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
-                SimpleSequence keySeq = new SimpleSequence(32);
+                SimpleSequence keySeq = new SimpleSequence(32, _TemplateAPI.SAFE_OBJECT_WRAPPER);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.left);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) this.right);
                 keys = new CollectionAndSequence(keySeq);
@@ -289,7 +290,7 @@ final class AddConcatExpression extends Expression {
         private void initValues()
         throws TemplateModelException {
             if (values == null) {
-                SimpleSequence seq = new SimpleSequence(size());
+                SimpleSequence seq = new SimpleSequence(size(), _TemplateAPI.SAFE_OBJECT_WRAPPER);
                 // Note: size() invokes initKeys() if needed.
             
                 int ln = keys.size();

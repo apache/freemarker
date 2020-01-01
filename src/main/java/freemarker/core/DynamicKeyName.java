@@ -21,7 +21,6 @@ package freemarker.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import freemarker.template.SimpleScalar;
@@ -291,8 +290,8 @@ final class DynamicKeyName extends Expression {
                 resultList.add(targetSeq.get(srcIdx));
                 srcIdx += step;
             }
-            // List items are already wrapped, so the wrapper will be null:
-            return new SimpleSequence(resultList, null);
+            // List items are already wrapped:
+            return new SimpleSequence(resultList, _TemplateAPI.SAFE_OBJECT_WRAPPER);
         } else if (targetLazySeq != null) {
             // As a targetLazySeq can only occur if a new built-in like ?filter or ?map was used somewhere in the target
             // expression, in this case we can return lazily generated sequence without breaking backward compatibility.
@@ -384,8 +383,8 @@ final class DynamicKeyName extends Expression {
                 }
                 resultList.add(targetIter.next());
             }
-            // List items are already wrapped, so the wrapper will be null:
-            return new SimpleSequence(resultList, null);
+            // List items are already wrapped:
+            return new SimpleSequence(resultList, _TemplateAPI.SAFE_OBJECT_WRAPPER);
         }
     }
 
@@ -432,13 +431,13 @@ final class DynamicKeyName extends Expression {
                     "Range top index " + highIndex + " (0-based) is outside the sliced sequence of length " +
                     srcIdx + ".");
         }
-        return new SimpleSequence(Arrays.asList(resultElements), null);
+        return new SimpleSequence(Arrays.asList(resultElements), _TemplateAPI.SAFE_OBJECT_WRAPPER);
     }
 
     private TemplateModel emptyResult(boolean seq) {
         return seq
                 ? (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
-                        ? new SimpleSequence(Collections.EMPTY_LIST, null)
+                        ? new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER)
                         : Constants.EMPTY_SEQUENCE)
                 : TemplateScalarModel.EMPTY_STRING;
     }
