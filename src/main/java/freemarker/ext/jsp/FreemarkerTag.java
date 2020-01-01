@@ -37,7 +37,7 @@ import freemarker.template.Template;
  * JSP. Inspired by similar class in Velocity template engine developed by
  * <a href="mailto:geirm@optonline.net">Geir Magnusson Jr.</a>
  *
- * @Deprecated This feature is not supported anymore, also, it uses the deprecated default {@link Configuration}.
+ * @deprecated This feature is not supported anymore, also, it uses the deprecated default {@link Configuration}.
  */
 @Deprecated
 public class FreemarkerTag implements BodyTag {
