@@ -94,9 +94,7 @@ class GetOptionalTemplateFunction implements TemplateFunctionModel {
                         throws TemplateException {
                     try {
                         return env.importLib(template, null);
-                    } catch (IOException e) {
-                        throw new TemplateException(e, "Failed to import loaded template; see cause exception");
-                    } catch (TemplateException e) {
+                    } catch (IOException | TemplateException e) {
                         throw new TemplateException(e, "Failed to import loaded template; see cause exception");
                     }
                 }

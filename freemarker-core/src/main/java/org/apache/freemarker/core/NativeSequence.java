@@ -50,8 +50,7 @@ class NativeSequence implements TemplateSequenceModel, Serializable {
      * Copies the collection
      */
     public NativeSequence(Collection<TemplateModel> items) {
-        this.items = new ArrayList<>(items.size());
-        this.items.addAll(items);
+        this.items = new ArrayList<>(items);
     }
 
     void add(TemplateModel tm) {
