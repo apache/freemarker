@@ -22,7 +22,6 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Map;
 
 import javax.swing.tree.TreeNode;
 
@@ -55,7 +54,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
      * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there are
      * no nested elements. Normally, the {@link #parent} of these is the {@code this}, however, in some exceptional
      * cases it's not so, to avoid copying the whole descendant tree with a different parent (as in the result of
-     * {@link Macro#Macro(Macro, Map)}.
+     * {@link Macro#Macro(Macro, Macro.WithArgs)}.
      */
     private TemplateElement[] childBuffer;
 

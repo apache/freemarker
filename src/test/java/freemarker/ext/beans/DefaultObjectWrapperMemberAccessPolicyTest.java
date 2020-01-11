@@ -51,16 +51,18 @@ import freemarker.template.TemplateNumberModel;
 
 public class DefaultObjectWrapperMemberAccessPolicyTest {
 
+    private final DefaultObjectWrapper dow
+            = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build();
+
     @Test
     public void testMethodsWithDefaultMemberAccessPolicy() throws TemplateModelException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new C());
 
         assertNotNull(objM.get("m1"));
-        assertEquals("m2(true)", exec(ow, objM.get("m2"), true));
-        assertEquals("staticM()", exec(ow, objM.get("staticM")));
+        assertEquals("m2(true)", exec(dow, objM.get("m2"), true));
+        assertEquals("staticM()", exec(dow, objM.get("staticM")));
 
-        assertEquals("x", getHashValue(ow, objM, "x"));
+        assertEquals("x", getHashValue(dow, objM, "x"));
         assertNotNull(objM.get("getX"));
         assertNotNull(objM.get("setX"));
 
@@ -68,12 +70,9 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
         assertNull(objM.get("notify"));
 
-        // Because it was overridden, we allow it historically.
-        assertNotNull(objM.get("run"));
-
-        assertEquals("safe wait(1)", exec(ow, objM.get("wait"), 1L));
+        assertEquals("safe wait(1)", exec(dow, objM.get("wait"), 1L));
         try {
-            exec(ow, objM.get("wait")); // 0 arg overload is not visible, a it's "unsafe"
+            exec(dow, objM.get("wait")); // 0 arg overload is not visible, a it's "unsafe"
             fail();
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(), containsString("wait(int)"));
@@ -82,8 +81,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
     @Test
     public void testFieldsWithDefaultMemberAccessPolicy() throws TemplateModelException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new C());
         assertFieldsNotExposed(objM);
     }
 
@@ -103,27 +101,33 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
     @Test
     public void testGenericGetWithDefaultMemberAccessPolicy() throws TemplateModelException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new CWithGenericGet());
 
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new CWithGenericGet());
+        assertEquals("get(x)", getHashValue(dow, objM, "x"));
+    }
 
-        assertEquals("get(x)", getHashValue(ow, objM, "x"));
+    @Test
+    public void testBlacklistRuleWithDefaultMemberAccessPolicy() throws TemplateModelException {
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new CThread());
+
+        assertNull(getHashValue(dow, objM, "run")); // blacklisted in Thread
+        assertNotNull(getHashValue(dow, objM, "m1")); // As Thread doesn't use whitelisted rule
+        assertNotNull(getHashValue(dow, objM, "toString"));
     }
 
     @Test
     public void testConstructorsWithDefaultMemberAccessPolicy() throws TemplateModelException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        assertNonPublicConstructorNotExposed(ow);
+        assertNonPublicConstructorNotExposed(dow);
 
-        assertEquals(CWithConstructor.class, ow.newInstance(CWithConstructor.class, Collections.emptyList())
+        assertEquals(CWithConstructor.class, dow.newInstance(CWithConstructor.class, Collections.emptyList())
                 .getClass());
 
         assertEquals(CWithOverloadedConstructor.class,
-                ow.newInstance(CWithOverloadedConstructor.class, Collections.emptyList())
+                dow.newInstance(CWithOverloadedConstructor.class, Collections.emptyList())
                         .getClass());
 
         assertEquals(CWithOverloadedConstructor.class,
-                ow.newInstance(CWithOverloadedConstructor.class, Collections.singletonList(new SimpleNumber(1)))
+                dow.newInstance(CWithOverloadedConstructor.class, Collections.singletonList(new SimpleNumber(1)))
                         .getClass());
     }
 
@@ -357,7 +361,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     }
 
     @Test
-    public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException {
+    public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException, NoSuchMethodException {
         DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
             public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
@@ -392,16 +396,16 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
             assertEquals("1 failed", out.toString());
         }
 
-        cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build());
+        DefaultObjectWrapper dow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build();
+        MemberAccessPolicy pol = dow.getMemberAccessPolicy();
+        ClassMemberAccessPolicy cpol = pol.forClass(CustomModel.class);
+        assertTrue(cpol.isConstructorExposed(CustomModel.class.getConstructor()));
+        cfg.setObjectWrapper(dow);
         {
             StringWriter out = new StringWriter();
             template.process(null, out);
             assertEquals("1 2", out.toString());
         }
-    }
-
-    private static DefaultObjectWrapper createDefaultMemberAccessPolicyObjectWrapper() {
-        return new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30).build();
     }
 
     private static Object getHashValue(ObjectWrapperAndUnwrapper ow, TemplateHashModel objM, String key)
@@ -423,7 +427,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         return returnValue instanceof TemplateModel ? ow.unwrap((TemplateModel) returnValue) : returnValue;
     }
 
-    public static class C extends Thread {
+    public static class C {
         public static final int STATIC_FIELD = 1;
         public int publicField1 = 1;
         public int publicField2 = 2;
@@ -471,18 +475,13 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         public String wait(int otherOverload) {
             return "safe wait(" + otherOverload + ")";
         }
-
-        @Override
-        public void run() {
-            return;
-        }
     }
 
     public static class CExtended extends C {
         public int publicField3 = 3;
     }
 
-    public static class CWithGenericGet extends Thread {
+    public static class CWithGenericGet {
         public String get(String key) {
             return "get(" + key + ")";
         }
@@ -491,6 +490,13 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public static class CWithConstructor implements TemplateModel {
         public CWithConstructor() {
         }
+    }
+
+    public static class CThread extends Thread {
+        @Override
+        public void run() {}
+
+        public void m1() {}
     }
 
     public static class CWithOverloadedConstructor implements TemplateModel {

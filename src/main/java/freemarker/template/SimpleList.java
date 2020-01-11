@@ -25,7 +25,7 @@ package freemarker.template;
  *
  * <p>This class is thread-safe.
  *
- * @deprecated Use SimpleSequence instead.
+ * @deprecated Use {@link SimpleSequence} instead.
  * @see SimpleSequence
  */
 

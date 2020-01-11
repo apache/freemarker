@@ -52,6 +52,7 @@ import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.beans.MemberAccessPolicy;
 import freemarker.template.AttemptExceptionReporter;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -1565,6 +1566,10 @@ public class Configurable {
      * FreeMarker 2.3.x, and {@link TemplateClassResolver#SAFER_RESOLVER}
      * starting from FreeMarker 2.4.0. If you allow users to upload templates,
      * it's important to use a custom restrictive {@link TemplateClassResolver}.
+     *
+     * <p>Note that the {@link MemberAccessPolicy} used by the {@link ObjectWrapper} also influences what constructors
+     * are available. Allowing the resolution of the class here is not enough in itself, as the
+     * {@link MemberAccessPolicy} has to allow exposing the particular constructor you try to call as well.
      * 
      * @since 2.3.17
      */

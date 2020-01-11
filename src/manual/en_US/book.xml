@@ -28925,6 +28925,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>ObjectWrapper</literal> implementation of
                 course.)</para>
 
+                <para>If you are creating <literal>TemplateModel</literal>-s
+                in custom code (instead of the
+                <literal>ObjectWrapper</literal> creating those), be sure you
+                avoid deprecated container constructors like <literal>new
+                SimpleSequence()</literal>, as those will use the also
+                deprecated default object wrapper instance, which doesn't have
+                the same restrictions than the
+                <literal>ObjectWrapper</literal> you have set on the
+                <literal>Configuration</literal>.</para>
+
                 <para>Also, don't forget about the <link
                 linkend="ref_buitin_api_and_has_api"><literal>?api</literal>
                 built-in</link>, if you have enabled it (it's disabled by
@@ -28943,8 +28953,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 by the <literal>MemberAccessPolicy</literal> also won't be
                 visible with <literal>?api</literal> (assuming you are using a
                 well behaving <literal>ObjectWrapper</literal>, like
-                <literal>DefaultObjectWrapper</literal> is, hopefully.)
-                </para>
+                <literal>DefaultObjectWrapper</literal> is, hopefully.)</para>
 
                 <para>Last not least, some maybe aware of that the standard
                 object wrappers filters out some well known
@@ -29003,7 +29012,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>BeansWrapper</literal> or a subclass of it (typically
                 <literal>DefaultObjectWrapper</literal>), constructors not
                 allowed by the <literal>MemberAccessPolicy</literal> also
-                won't be accessible for <literal>?new</literal>. </para>
+                won't be accessible for <literal>?new</literal>.</para>
               </listitem>
 
               <listitem>
@@ -29203,6 +29212,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-124">FREEMARKER-124</link>:
+              Made the default filtering of class members more restrictive
+              (when you are using <literal>BeansWrapper</literal>, or its
+              subclasses like <literal>DefaultObjectWrapper</literal>). This
+              is not strictly backward compatible, but unlikely to break any
+              real-world applications; see
+              <literal>src/main/resources/freemarker/ext/beans/DefaultMemberAccessPolicy-rules</literal>
+              to see what was changed. This change was made for security
+              reasons, but the default behavior will never be safe enough if
+              untrusted users will edit templates; see <link
+              linkend="faq_template_uploading_security">in the FAQ</link>. In
+              the unlikely case this change breaks your application, then you
+              can still use the old behavior by setting the
+              <literal>memberAccessPolicy</literal> property of the object
+              wrapper to
+              <literal>LegacyDefaultMemberAccessPolicy.INSTANCE</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.ext.beans.MemberAccessPolicy</literal>
               interface, and the <literal>memberAccessPolicy</literal>
@@ -29244,7 +29273,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               where the caller can provide the <literal>Map</literal> instance
               used as the backing storage, thus allows controlling the
               ordering, and other technical aspects (like the initial
-              capacity) of the underlying <literal>Map</literal>.</para>
+              capacity) of it.</para>
             </listitem>
           </itemizedlist>
         </section>

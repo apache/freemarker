@@ -22,6 +22,7 @@ package freemarker.template;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -80,7 +81,11 @@ import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.beans.LegacyDefaultMemberAccessPolicy;
+import freemarker.ext.beans.MemberAccessPolicy;
+import freemarker.ext.beans.MemberSelectorListMemberAccessPolicy;
 import freemarker.ext.beans.StringModel;
+import freemarker.ext.beans.WhitelistMemberAccessPolicy;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
@@ -1894,6 +1899,39 @@ public class ConfigurationTest extends TestCase {
 
         cfg.setSetting("fallbackOnNullLoopVariable", "NO");
         assertFalse(cfg.getFallbackOnNullLoopVariable());
+    }
+
+    public static final MemberAccessPolicy CONFIG_TEST_MEMBER_ACCESS_POLICY =
+            new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                    ImmutableList.<String>of(
+                            File.class.getName() + ".getName()",
+                            File.class.getName() + ".isFile()"),
+                    ConfigurationTest.class.getClassLoader()));
+
+    @Test
+    public void testMemberAccessPolicySetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        cfg.setSetting(
+                "objectWrapper",
+                "DefaultObjectWrapper(2.3.30, "
+                        + "memberAccessPolicy="
+                        + ConfigurationTest.class.getName() + ".CONFIG_TEST_MEMBER_ACCESS_POLICY"
+                        + ")");
+        TemplateHashModel m = (TemplateHashModel) cfg.getObjectWrapper().wrap(new File("x"));
+        assertNotNull(m.get("getName"));
+        assertNotNull(m.get("isFile"));
+        assertNull(m.get("delete"));
+    }
+
+    @Test
+    public void testMemberAccessPolicySetting2() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        cfg.setSetting(
+                "objectWrapper",
+                "DefaultObjectWrapper(2.3.30, "
+                        + "memberAccessPolicy=" + LegacyDefaultMemberAccessPolicy.class.getName() + "())");
+        assertSame(((DefaultObjectWrapper) cfg.getObjectWrapper()).getMemberAccessPolicy(),
+                LegacyDefaultMemberAccessPolicy.INSTANCE);
     }
 
     @Test

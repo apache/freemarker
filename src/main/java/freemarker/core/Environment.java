@@ -725,7 +725,7 @@ public final class Environment extends Configurable {
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
             throws TemplateException, IOException {
         if (nodeNamespaces == null) {
-            SimpleSequence ss = new SimpleSequence(1);
+            SimpleSequence ss = new SimpleSequence(1, _TemplateAPI.SAFE_OBJECT_WRAPPER);
             ss.add(currentNamespace);
             nodeNamespaces = ss;
         }
@@ -1122,14 +1122,15 @@ public final class Environment extends Configurable {
 
     private static SimpleSequence initPositionalCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleSequence positionalCatchAllParamValue;
-        positionalCatchAllParamValue = new SimpleSequence((ObjectWrapper) null);
+        positionalCatchAllParamValue = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
         macroCtx.setLocalVar(catchAllParamName, positionalCatchAllParamValue);
         return positionalCatchAllParamValue;
     }
 
     private static SimpleHash initNamedCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleHash namedCatchAllParamValue;
-        namedCatchAllParamValue = new SimpleHash(new LinkedHashMap<String, Object>(), null, 0);
+        namedCatchAllParamValue = new SimpleHash(
+                new LinkedHashMap<String, Object>(), _TemplateAPI.SAFE_OBJECT_WRAPPER, 0);
         macroCtx.setLocalVar(catchAllParamName, namedCatchAllParamValue);
         return namedCatchAllParamValue;
     }
@@ -3230,10 +3231,12 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
+            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
             this.template = Environment.this.getTemplate();
         }
 
         Namespace(Template template) {
+            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
             this.template = template;
         }
 

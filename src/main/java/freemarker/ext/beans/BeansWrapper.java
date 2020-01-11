@@ -666,8 +666,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     /**
-     * Used to customize what  members will be hidden;
-     * see {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)} for more.
+     * Sets the {@link MemberAccessPolicy}; default is {@link DefaultMemberAccessPolicy#getInstance(Version)}, which
+     * is not appropriate if template editors aren't trusted.
      *
      * @since 2.3.30
      */
