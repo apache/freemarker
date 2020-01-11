@@ -28953,8 +28953,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 by the <literal>MemberAccessPolicy</literal> also won't be
                 visible with <literal>?api</literal> (assuming you are using a
                 well behaving <literal>ObjectWrapper</literal>, like
-                <literal>DefaultObjectWrapper</literal> is, hopefully.)
-                </para>
+                <literal>DefaultObjectWrapper</literal> is, hopefully.)</para>
 
                 <para>Last not least, some maybe aware of that the standard
                 object wrappers filters out some well known
@@ -29013,7 +29012,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>BeansWrapper</literal> or a subclass of it (typically
                 <literal>DefaultObjectWrapper</literal>), constructors not
                 allowed by the <literal>MemberAccessPolicy</literal> also
-                won't be accessible for <literal>?new</literal>. </para>
+                won't be accessible for <literal>?new</literal>.</para>
               </listitem>
 
               <listitem>
@@ -29212,6 +29211,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-124">FREEMARKER-124</link>:
+              Made the default filtering of class members more restrictive
+              (when you are using <literal>BeansWrapper</literal>, or its
+              subclasses like <literal>DefaultObjectWrapper</literal>). This
+              is not strictly backward compatible, but unlikely to break any
+              real-world applications; see
+              <literal>src/main/resources/freemarker/ext/beans/DefaultMemberAccessPolicy-rules</literal>
+              to see what was changed. This change was made for security
+              reasons, but the default behavior will never be safe enough if
+              untrusted users will edit templates; see <link
+              linkend="faq_template_uploading_security">in the FAQ</link>. In
+              the unlikely case this change breaks your application, then you
+              can still use the old behavior by setting the
+              <literal>memberAccessPolicy</literal> property of the object
+              wrapper to
+              <literal>LegacyDefaultMemberAccessPolicy.INSTANCE</literal>.</para>
+            </listitem>
+
             <listitem>
               <para>Added
               <literal>freemarker.ext.beans.MemberAccessPolicy</literal>

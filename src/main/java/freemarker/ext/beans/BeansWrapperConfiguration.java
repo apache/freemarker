@@ -229,6 +229,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         return classIntrospectorBuilder.getMemberAccessPolicy();
     }
 
+    /** See {@link BeansWrapper#setMemberAccessPolicy(MemberAccessPolicy)}. */
     public void setMemberAccessPolicy(MemberAccessPolicy memberAccessPolicy) {
         classIntrospectorBuilder.setMemberAccessPolicy(memberAccessPolicy);
     }

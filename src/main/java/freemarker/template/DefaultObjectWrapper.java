@@ -34,6 +34,8 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.beans.DefaultMemberAccessPolicy;
 import freemarker.ext.beans.EnumerationModel;
+import freemarker.ext.beans.LegacyDefaultMemberAccessPolicy;
+import freemarker.ext.beans.MemberAccessPolicy;
 import freemarker.ext.dom.NodeModel;
 import freemarker.log.Logger;
 
@@ -254,7 +256,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * or for a W3C DOM node. In its default implementation, W3C {@link Node}-s will be wrapped as {@link NodeModel}-s
      * (allows DOM tree traversal), Jython objects will be delegated to the {@code JythonWrapper}, others will be
      * wrapped using {@link BeansWrapper#wrap(Object)}. Note that if {@link #getMemberAccessPolicy()} doesn't return
-     * a {@link DefaultMemberAccessPolicy}, then Jython wrapper will be skipped for security reasons.
+     * a {@link DefaultMemberAccessPolicy} or {@link LegacyDefaultMemberAccessPolicy}, then Jython wrapper will be
+     * skipped for security reasons.
      * 
      * <p>
      * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
@@ -265,7 +268,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         if (obj instanceof Node) {
             return wrapDomNode(obj);
         }
-        if (getMemberAccessPolicy() instanceof DefaultMemberAccessPolicy) {
+        MemberAccessPolicy memberAccessPolicy = getMemberAccessPolicy();
+        if (memberAccessPolicy instanceof DefaultMemberAccessPolicy
+                || memberAccessPolicy instanceof LegacyDefaultMemberAccessPolicy) {
             if (JYTHON_WRAPPER != null && JYTHON_OBJ_CLASS.isInstance(obj)) {
                 return JYTHON_WRAPPER.wrap(obj);
             }

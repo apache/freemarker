@@ -19,26 +19,31 @@
 
 package freemarker.ext.beans;
 
+import freemarker.core.Environment;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateModel;
 
 /**
- * Implement this to specify what class members are accessible from templates.
+ * Implement this to restrict what class members (methods, fields, constructors) are accessible from templates.
+ * Note, however, that {@link BeansWrapper} and its subclasses doesn't discover all members on the first place, and the
+ * {@link MemberAccessPolicy} just removes from that set of members, never adds to it. Practically speaking, it's the
+ * last filter in the chain.
  *
- * <p>The instance is usually set via {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)} (or if
- * you use {@link DefaultObjectWrapper}, with
- * {@link DefaultObjectWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)}).
+ * <p>{@link MemberAccessPolicy}-s meant to be used inside {@link ObjectWrapper}-s, and their existence is transparent
+ * for the rest of the system. The instance is usually set via
+ * {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)} (or if you use {@link DefaultObjectWrapper},
+ * with {@link DefaultObjectWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)}).
  *
  * <p>As {@link BeansWrapper}, and its subclasses like {@link DefaultObjectWrapper}, only discover public
- * members, it's pointless to whitelist non-public members. An {@link MemberAccessPolicy} is a filter applied to
- * the set of members that {@link BeansWrapper} intends to expose on the first place. (Also, while public members
- * declared in non-public classes are discovered by {@link BeansWrapper}, Java reflection will not allow accessing those
- * normally, so generally it's not useful to whitelist those either.)
+ * members, it's pointless to whitelist non-public members. (Also, while public members declared in non-public classes
+ * are discovered by {@link BeansWrapper}, Java reflection will not allow accessing those normally, so generally it's
+ * not useful to whitelist those either.)
  *
  * <p>Note that if you add {@link TemplateModel}-s directly to the data-model, those are not wrapped by the
- * {@link ObjectWrapper}, and so the {@link MemberAccessPolicy} won't affect those.
+ * {@link ObjectWrapper} (from {@link Environment#getObjectWrapper()}), and so the {@link MemberAccessPolicy} won't
+ * affect those.
  *
  * <p>Implementations must be thread-safe, and instances generally should be singletons on JVM level. FreeMarker
  * caches its class metadata in a global (static, JVM-scope) cache for shared use, and the {@link MemberAccessPolicy}
