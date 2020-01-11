@@ -33,6 +33,8 @@ import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.impl.MemberAccessPolicy;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -508,6 +510,10 @@ public interface ProcessingConfiguration {
      * called to resolve the <code>"com.example.SomeClassName"</code> string to a class. The default value is {@link
      * TemplateClassResolver#UNRESTRICTED}. If you allow users to upload templates, it's important to use a
      * custom restrictive {@link TemplateClassResolver} or {@link TemplateClassResolver#ALLOW_NOTHING}.
+     *
+     * <p>Note that the {@link MemberAccessPolicy} used by the {@link ObjectWrapper} also influences what constructors
+     * are available. Allowing the resolution of the class here is not enough in itself, as the
+     * {@link MemberAccessPolicy} has to allow exposing the particular constructor you try to call as well.
      */
     TemplateClassResolver getNewBuiltinClassResolver();
 

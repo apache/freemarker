@@ -43,16 +43,18 @@ import com.google.common.collect.ImmutableMap;
 
 public class DefaultObjectWrapperMemberAccessPolicyTest {
 
+    private final DefaultObjectWrapper dow
+            = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+
     @Test
     public void testMethodsWithDefaultMemberAccessPolicy() throws TemplateException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new C());
 
         assertNotNull(objM.get("m1"));
-        assertEquals("m2(true)", exec(ow, objM.get("m2"), true));
-        assertEquals("staticM()", exec(ow, objM.get("staticM")));
+        assertEquals("m2(true)", exec(dow, objM.get("m2"), true));
+        assertEquals("staticM()", exec(dow, objM.get("staticM")));
 
-        assertEquals("x", getHashValue(ow, objM, "x"));
+        assertEquals("x", getHashValue(dow, objM, "x"));
         assertNotNull(objM.get("getX"));
         assertNotNull(objM.get("setX"));
 
@@ -60,12 +62,9 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
         assertNull(objM.get("notify"));
 
-        // Because it was overridden, we allow it historically.
-        assertNotNull(objM.get("run"));
-
-        assertEquals("safe wait(1)", exec(ow, objM.get("wait"), 1L));
+        assertEquals("safe wait(1)", exec(dow, objM.get("wait"), 1L));
         try {
-            exec(ow, objM.get("wait")); // 0 arg overload is not visible, a it's "unsafe"
+            exec(dow, objM.get("wait")); // 0 arg overload is not visible, a it's "unsafe"
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("wait(int)"));
@@ -74,8 +73,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
     @Test
     public void testFieldsWithDefaultMemberAccessPolicy() throws TemplateException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new C());
         assertFieldsNotExposed(objM);
     }
 
@@ -89,34 +87,39 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         assertNull(objM.get("nonPublicField1"));
         assertNull(objM.get("nonPublicField2"));
 
-        // Strangely, public static fields are banned historically, while static methods aren't.
+        // Strangely, static fields are banned historically, while static methods aren't.
         assertNull(objM.get("STATIC_FIELD"));
     }
 
     @Test
     public void testGenericGetWithDefaultMemberAccessPolicy() throws TemplateException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new CWithGenericGet());
 
-        TemplateHashModel objM = (TemplateHashModel) ow.wrap(new CWithGenericGet());
+        assertEquals("get(x)", getHashValue(dow, objM, "x"));
+    }
 
-        assertEquals("get(x)", getHashValue(ow, objM, "x"));
+    @Test
+    public void testBlacklistRuleWithDefaultMemberAccessPolicy() throws TemplateException {
+        TemplateHashModel objM = (TemplateHashModel) dow.wrap(new CThread());
+
+        assertNull(getHashValue(dow, objM, "run")); // blacklisted in Thread
+        assertNotNull(getHashValue(dow, objM, "m1")); // As Thread doesn't use whitelisted rule
+        assertNotNull(getHashValue(dow, objM, "toString"));
     }
 
     @Test
     public void testConstructorsWithDefaultMemberAccessPolicy() throws TemplateException {
-        DefaultObjectWrapper ow = createDefaultMemberAccessPolicyObjectWrapper();
-        assertNonPublicConstructorNotExposed(ow);
+        assertNonPublicConstructorNotExposed(dow);
 
-        assertEquals(CWithConstructor.class,
-                ow.newInstance(CWithConstructor.class, new TemplateModel[0], null)
+        assertEquals(CWithConstructor.class, dow.newInstance(CWithConstructor.class, new TemplateModel[0], null)
+                .getClass());
+
+        assertEquals(CWithOverloadedConstructor.class,
+                dow.newInstance(CWithOverloadedConstructor.class, new TemplateModel[0], null)
                         .getClass());
 
         assertEquals(CWithOverloadedConstructor.class,
-                ow.newInstance(CWithOverloadedConstructor.class, new TemplateModel[0], null)
-                        .getClass());
-
-        assertEquals(CWithOverloadedConstructor.class,
-                ow.newInstance(CWithOverloadedConstructor.class, new TemplateModel[] {new SimpleNumber(1)}, null)
+                dow.newInstance(CWithOverloadedConstructor.class, new TemplateModel[] { new SimpleNumber(1) }, null)
                         .getClass());
     }
 
@@ -167,8 +170,10 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testMethodsWithCustomMemberAccessPolicy() throws TemplateException {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
             public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
+                    @Override
                     public boolean isMethodExposed(Method method) {
                         String name = method.getName();
                         Class<?>[] paramTypes = method.getParameterTypes();
@@ -177,10 +182,12 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                                 && (paramTypes.length == 0 || paramTypes[0].equals(boolean.class)));
                     }
 
+                    @Override
                     public boolean isConstructorExposed(Constructor<?> constructor) {
                         return true;
                     }
 
+                    @Override
                     public boolean isFieldExposed(Field field) {
                         return true;
                     }
@@ -209,16 +216,20 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         owb.setExposeFields(true);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
             public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
+                    @Override
                     public boolean isMethodExposed(Method method) {
                         return true;
                     }
 
+                    @Override
                     public boolean isConstructorExposed(Constructor<?> constructor) {
                         return true;
                     }
 
+                    @Override
                     public boolean isFieldExposed(Field field) {
                         return field.getName().equals("publicField1")
                                 || field.getName().equals("nonPublicField1");
@@ -239,16 +250,20 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testGenericGetWithCustomMemberAccessPolicy() throws TemplateException {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
             public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
+                    @Override
                     public boolean isMethodExposed(Method method) {
                         return false;
                     }
 
+                    @Override
                     public boolean isConstructorExposed(Constructor<?> constructor) {
                         return true;
                     }
 
+                    @Override
                     public boolean isFieldExposed(Field field) {
                         return true;
                     }
@@ -265,17 +280,21 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testConstructorsWithCustomMemberAccessPolicy() throws TemplateException {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
             public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                 return new ClassMemberAccessPolicy() {
+                    @Override
                     public boolean isMethodExposed(Method method) {
                         return true;
                     }
 
+                    @Override
                     public boolean isConstructorExposed(Constructor<?> constructor) {
                         return constructor.getDeclaringClass() == CWithOverloadedConstructor.class
                                 && constructor.getParameterTypes().length == 1;
                     }
 
+                    @Override
                     public boolean isFieldExposed(Field field) {
                         return true;
                     }
@@ -302,54 +321,55 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         }
 
         assertEquals(CWithOverloadedConstructor.class,
-                ow.newInstance(CWithOverloadedConstructor.class,
-                        new TemplateModel[] {new SimpleNumber(1)}, null).getClass());
+                ow.newInstance(CWithOverloadedConstructor.class, new TemplateModel[] { new SimpleNumber(1) }, null)
+                        .getClass());
     }
 
     @Test
     public void testMemberAccessPolicyAndApiBI() throws IOException, TemplateException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
-                .memberAccessPolicy(new MemberAccessPolicy() {
+        DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+        owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                return new ClassMemberAccessPolicy() {
                     @Override
-                    public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
-                        return new ClassMemberAccessPolicy() {
-                            public boolean isMethodExposed(Method method) {
-                                return method.getName().equals("size");
-                            }
-
-                            public boolean isConstructorExposed(Constructor<?> constructor) {
-                                return true;
-                            }
-
-                            public boolean isFieldExposed(Field field) {
-                                return true;
-                            }
-                        };
+                    public boolean isMethodExposed(Method method) {
+                        return method.getName().equals("size");
                     }
-                })
-                .build();
 
-        Map<String, Object> dataModel = ImmutableMap.<String, Object>of("m", ImmutableMap.of("k", "v"));
+                    @Override
+                    public boolean isConstructorExposed(Constructor<?> constructor) {
+                        return true;
+                    }
 
-        String templateSource = "size=${m?api.size()} get=${(m?api.get('k'))!'hidden'}";
+                    @Override
+                    public boolean isFieldExposed(Field field) {
+                        return true;
+                    }
+                };
+            }
+        });
+        DefaultObjectWrapper ow = owb.build();
 
+        Map<String, Object> dataModel = ImmutableMap.of("m", ImmutableMap.of("k", "v"));
+
+        String templateSourceCode = "size=${m?api.size()} get=${(m?api.get('k'))!'hidden'}";
         {
             Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                     .objectWrapper(ow)
                     .apiBuiltinEnabled(true)
                     .build();
-            Template template = new Template(null, templateSource, cfg);
+            Template template = new Template(null, templateSourceCode, cfg);
             StringWriter out = new StringWriter();
             template.process(dataModel, out);
             assertEquals("size=1 get=hidden", out.toString());
         }
-
         {
             Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                     .objectWrapper(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build())
                     .apiBuiltinEnabled(true)
                     .build();
-            Template template = new Template(null, templateSource, cfg);
+            Template template = new Template(null, templateSourceCode, cfg);
             StringWriter out = new StringWriter();
             template.process(dataModel, out);
             assertEquals("size=1 get=v", out.toString());
@@ -357,51 +377,60 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     }
 
     @Test
-    public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
-                .memberAccessPolicy(new MemberAccessPolicy() {
-                        public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
-                            return new ClassMemberAccessPolicy() {
-                                public boolean isMethodExposed(Method method) {
-                                    return true;
-                                }
+    public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException, NoSuchMethodException {
+        DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+        owb.setMemberAccessPolicy(new MemberAccessPolicy() {
+            @Override
+            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                return new ClassMemberAccessPolicy() {
+                    @Override
+                    public boolean isMethodExposed(Method method) {
+                        return true;
+                    }
 
-                                public boolean isConstructorExposed(Constructor<?> constructor) {
-                                    return constructor.getDeclaringClass().equals(CustomModel.class);
-                                }
+                    @Override
+                    public boolean isConstructorExposed(Constructor<?> constructor) {
+                        return constructor.getDeclaringClass().equals(CustomModel.class);
+                    }
 
-                                public boolean isFieldExposed(Field field) {
-                                    return true;
-                                }
-                            };
-                        }
-                    })
-                .build();
+                    @Override
+                    public boolean isFieldExposed(Field field) {
+                        return true;
+                    }
+                };
+            }
+        });
+        DefaultObjectWrapper ow = owb.build();
 
-        String templateSource = "${'" + CustomModel.class.getName() + "'?new()} "
+        String templateSourceCode = "${'" + CustomModel.class.getName() + "'?new()} "
                 + "<#attempt>${'" + OtherCustomModel.class.getName() + "'?new()}<#recover>failed</#attempt>";
         {
             Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                     .objectWrapper(ow)
                     .apiBuiltinEnabled(true)
                     .build();
-            Template template = new Template(null, templateSource, cfg);
+            Template template = new Template(null, templateSourceCode, cfg);
+
             StringWriter out = new StringWriter();
             template.process(null, out);
             assertEquals("1 failed", out.toString());
         }
-
         {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
-            Template template = new Template(null, templateSource, cfg);
+            DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+            MemberAccessPolicy pol = dow.getMemberAccessPolicy();
+            ClassMemberAccessPolicy cpol = pol.forClass(CustomModel.class);
+            assertTrue(cpol.isConstructorExposed(CustomModel.class.getConstructor()));
+
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .objectWrapper(dow)
+                    .apiBuiltinEnabled(true)
+                    .build();
+            Template template = new Template(null, templateSourceCode, cfg);
+
             StringWriter out = new StringWriter();
             template.process(null, out);
             assertEquals("1 2", out.toString());
         }
-    }
-
-    private static DefaultObjectWrapper createDefaultMemberAccessPolicyObjectWrapper() {
-        return new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
     }
 
     private static Object getHashValue(ObjectWrapperAndUnwrapper ow, TemplateHashModel objM, String key)
@@ -413,7 +442,8 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         assertThat(objM, instanceOf(TemplateFunctionModel.class));
         TemplateModel[] argModels = new TemplateModel[args.length];
         for (int i = 0; i < args.length; i++) {
-            argModels[i] = ow.wrap(args[i]);
+            Object arg = args[i];
+            argModels[i] = ow.wrap(arg);
         }
         Object returnValue = ((TemplateFunctionModel) objM).execute(argModels, null, null);
         return unwrap(ow, returnValue);
@@ -423,7 +453,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         return returnValue instanceof TemplateModel ? ow.unwrap((TemplateModel) returnValue) : returnValue;
     }
 
-    public static class C extends Thread {
+    public static class C {
         public static final int STATIC_FIELD = 1;
         public int publicField1 = 1;
         public int publicField2 = 2;
@@ -471,18 +501,13 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         public String wait(int otherOverload) {
             return "safe wait(" + otherOverload + ")";
         }
-
-        @Override
-        public void run() {
-            return;
-        }
     }
 
     public static class CExtended extends C {
         public int publicField3 = 3;
     }
 
-    public static class CWithGenericGet extends Thread {
+    public static class CWithGenericGet {
         public String get(String key) {
             return "get(" + key + ")";
         }
@@ -491,6 +516,13 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public static class CWithConstructor implements TemplateModel {
         public CWithConstructor() {
         }
+    }
+
+    public static class CThread extends Thread {
+        @Override
+        public void run() {}
+
+        public void m1() {}
     }
 
     public static class CWithOverloadedConstructor implements TemplateModel {
@@ -502,14 +534,18 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     }
 
     public static class CustomModel implements TemplateNumberModel {
+        @Override
         public Number getAsNumber() {
             return 1;
         }
     }
 
     public static class OtherCustomModel implements TemplateNumberModel {
+        @Override
         public Number getAsNumber() {
             return 2;
         }
     }
+
 }
+

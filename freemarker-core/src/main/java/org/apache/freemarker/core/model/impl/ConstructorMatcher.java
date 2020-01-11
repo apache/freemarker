@@ -29,4 +29,9 @@ final class ConstructorMatcher extends MemberMatcher<Constructor<?>, ExecutableM
     protected ExecutableMemberSignature toMemberSignature(Constructor<?> member) {
         return new ExecutableMemberSignature(member);
     }
+
+    @Override
+    protected boolean matchInUpperBoundTypeSubtypes() {
+        return false;
+    }
 }

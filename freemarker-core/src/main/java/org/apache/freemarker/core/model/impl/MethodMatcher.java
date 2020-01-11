@@ -33,4 +33,9 @@ final class MethodMatcher extends MemberMatcher<Method, ExecutableMemberSignatur
     protected ExecutableMemberSignature toMemberSignature(Method member) {
         return new ExecutableMemberSignature(member);
     }
+
+    @Override
+    protected boolean matchInUpperBoundTypeSubtypes() {
+        return true;
+    }
 }

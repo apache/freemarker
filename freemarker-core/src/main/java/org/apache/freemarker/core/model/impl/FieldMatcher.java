@@ -29,4 +29,9 @@ final class FieldMatcher extends MemberMatcher<Field, String> {
     protected String toMemberSignature(Field member) {
         return member.getName();
     }
+
+    @Override
+    protected boolean matchInUpperBoundTypeSubtypes() {
+        return true;
+    }
 }

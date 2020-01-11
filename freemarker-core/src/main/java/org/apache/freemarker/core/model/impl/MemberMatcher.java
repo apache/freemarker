@@ -43,6 +43,8 @@ abstract class MemberMatcher<M extends Member, S> {
      */
     protected abstract S toMemberSignature(M member);
 
+    protected abstract boolean matchInUpperBoundTypeSubtypes();
+
     /**
      * Adds a member that this {@link MemberMatcher} will match.
      *
@@ -83,7 +85,17 @@ abstract class MemberMatcher<M extends Member, S> {
         S memberSignature = toMemberSignature(member);
         Types upperBoundTypes = signaturesToUpperBoundTypes.get(memberSignature);
 
-        return upperBoundTypes != null && containsTypeOrSuperType(upperBoundTypes, contextClass);
+        return upperBoundTypes != null
+                && (matchInUpperBoundTypeSubtypes()
+                ? containsTypeOrSuperType(upperBoundTypes, contextClass)
+                : containsExactType(upperBoundTypes, contextClass));
+    }
+
+    private static boolean containsExactType(Types types, Class<?> c) {
+        if (c == null) {
+            return false;
+        }
+        return types.set.contains(c);
     }
 
     private static boolean containsTypeOrSuperType(Types types, Class<?> c) {

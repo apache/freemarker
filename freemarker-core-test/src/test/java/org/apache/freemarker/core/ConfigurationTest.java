@@ -25,6 +25,7 @@ import static org.apache.freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -46,10 +47,14 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import org.apache.freemarker.core.Configuration.*;
+import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.MemberAccessPolicy;
+import org.apache.freemarker.core.model.impl.MemberSelectorListMemberAccessPolicy;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.impl.WhitelistMemberAccessPolicy;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -726,6 +731,29 @@ public class ConfigurationTest {
         assertEquals(1000L * 60 * 60, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "2h");
         assertEquals(1000L * 60 * 60 * 2, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
+    }
+
+    public static final MemberAccessPolicy CONFIG_TEST_MEMBER_ACCESS_POLICY =
+            new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                    ImmutableList.<String>of(
+                            File.class.getName() + ".getName()",
+                            File.class.getName() + ".isFile()"),
+                    ConfigurationTest.class.getClassLoader()));
+
+    @Test
+    public void testMemberAccessPolicySetting() throws TemplateException {
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .setting(
+                        "objectWrapper",
+                        "DefaultObjectWrapper(3.0.0, "
+                                + "memberAccessPolicy="
+                                + ConfigurationTest.class.getName() + ".CONFIG_TEST_MEMBER_ACCESS_POLICY"
+                                + ")")
+                .build();
+        TemplateHashModel m = (TemplateHashModel) cfg.getObjectWrapper().wrap(new File("x"));
+        assertNotNull(m.get("getName"));
+        assertNotNull(m.get("isFile"));
+        assertNull(m.get("delete"));
     }
 
     @Test

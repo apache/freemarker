@@ -19,87 +19,35 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
+import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core.util._ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.freemarker.core.model.impl.MemberSelectorListMemberAccessPolicy.MemberSelector;
 
 /**
- * Legacy black list based member access policy, used only to keep old behavior, as it can't provide meaningful safety.
- * Do not use it if you allow untrusted users to edit templates!
+ * Member access policy, used  to implement default behavior; it can't provide safety in practice, if you allow
+ * untrusted users to edit templates! Use {@link WhitelistMemberAccessPolicy} if you need stricter control.
  */
 public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultMemberAccessPolicy.class);
-    private static final String UNSAFE_METHODS_PROPERTIES = "unsafeMethods.properties";
-    private static final Set<Method> UNSAFE_METHODS = createUnsafeMethodsSet();
-
-    private static Set<Method> createUnsafeMethodsSet() {
-        try {
-            Properties props = _ClassUtils.loadProperties(DefaultObjectWrapper.class, UNSAFE_METHODS_PROPERTIES);
-            Set<Method> set = new HashSet<>(props.size() * 4 / 3, 1f);
-            Map<String, Class<?>> primClasses = createPrimitiveClassesMap();
-            for (Object key : props.keySet()) {
-                try {
-                    set.add(parseMethodSpec((String) key, primClasses));
-                } catch (ClassNotFoundException | NoSuchMethodException e) {
-                    LOG.debug("Failed to get unsafe method", e);
-                }
-            }
-            return set;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not load unsafe method set", e);
-        }
-    }
-
-    private static Method parseMethodSpec(String methodSpec, Map<String, Class<?>> primClasses)
-            throws ClassNotFoundException,
-            NoSuchMethodException {
-        int brace = methodSpec.indexOf('(');
-        int dot = methodSpec.lastIndexOf('.', brace);
-        Class<?> clazz = _ClassUtils.forName(methodSpec.substring(0, dot));
-        String methodName = methodSpec.substring(dot + 1, brace);
-        String argSpec = methodSpec.substring(brace + 1, methodSpec.length() - 1);
-        StringTokenizer tok = new StringTokenizer(argSpec, ",");
-        int argcount = tok.countTokens();
-        Class<?>[] argTypes = new Class[argcount];
-        for (int i = 0; i < argcount; i++) {
-            String argClassName = tok.nextToken();
-            argTypes[i] = primClasses.get(argClassName);
-            if (argTypes[i] == null) {
-                argTypes[i] = _ClassUtils.forName(argClassName);
-            }
-        }
-        return clazz.getMethod(methodName, argTypes);
-    }
-
-    private static Map<String, Class<?>> createPrimitiveClassesMap() {
-        Map<String, Class<?>> map = new HashMap<>();
-        map.put("boolean", Boolean.TYPE);
-        map.put("byte", Byte.TYPE);
-        map.put("char", Character.TYPE);
-        map.put("short", Short.TYPE);
-        map.put("int", Integer.TYPE);
-        map.put("long", Long.TYPE);
-        map.put("float", Float.TYPE);
-        map.put("double", Double.TYPE);
-        return map;
-    }
-
-    private DefaultMemberAccessPolicy() {
-    }
 
     private static final DefaultMemberAccessPolicy INSTANCE = new DefaultMemberAccessPolicy();
+
+    private final Set<Class<?>> whitelistRuleFinalClasses;
+    private final Set<Class<?>> whitelistRuleNonFinalClasses;
+    private final WhitelistMemberAccessPolicy whitelistMemberAccessPolicy;
+    private final BlacklistMemberAccessPolicy blacklistMemberAccessPolicy;
 
     /**
      * Returns the singleton that's compatible with the given incompatible improvements version.
@@ -111,24 +59,124 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
         return INSTANCE;
     }
 
-    public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
-        return CLASS_MEMBER_ACCESS_POLICY_INSTANCE;
+    private DefaultMemberAccessPolicy() {
+        try {
+            ClassLoader classLoader = DefaultMemberAccessPolicy.class.getClassLoader();
+
+            whitelistRuleFinalClasses = new HashSet<>();
+            whitelistRuleNonFinalClasses = new HashSet<>();
+            Set<Class<?>> typesWithBlacklistUnlistedRule = new HashSet<>();
+            List<MemberSelector> whitelistMemberSelectors = new ArrayList<>();
+            for (String line : loadMemberSelectorFileLines()) {
+                line = line.trim();
+                if (!MemberSelector.isIgnoredLine(line)) {
+                    if (line.startsWith("@")) {
+                        String[] lineParts = line.split("\\s+");
+                        if (lineParts.length != 2) {
+                            throw new IllegalStateException("Malformed @ line: " + line);
+                        }
+                        String typeName = lineParts[1];
+                        Class<?> upperBoundType;
+                        try {
+                            upperBoundType = classLoader.loadClass(typeName);
+                        } catch (ClassNotFoundException e) {
+                            upperBoundType = null;
+                        }
+                        String rule = lineParts[0].substring(1);
+                        if (rule.equals("whitelistPolicyIfAssignable")) {
+                            if (upperBoundType != null) {
+                                Set<Class<?>> targetSet =
+                                        (upperBoundType.getModifiers() & Modifier.FINAL) != 0
+                                                ? whitelistRuleFinalClasses
+                                                : whitelistRuleNonFinalClasses;
+                                targetSet.add(upperBoundType);
+                            }
+                        } else if (rule.equals("blacklistUnlistedMembers")) {
+                            if (upperBoundType != null) {
+                                typesWithBlacklistUnlistedRule.add(upperBoundType);
+                            }
+                        } else {
+                            throw new IllegalStateException("Unhandled rule: " + rule);
+                        }
+                    } else {
+                        MemberSelector memberSelector =
+                                MemberSelector.parse(line, classLoader);
+                        Class<?> upperBoundType = memberSelector.getUpperBoundType();
+                        if (upperBoundType != null) {
+                            if (!whitelistRuleFinalClasses.contains(upperBoundType)
+                                    && !whitelistRuleNonFinalClasses.contains(upperBoundType)
+                                    && !typesWithBlacklistUnlistedRule.contains(upperBoundType)) {
+                                throw new IllegalStateException("Type without rule: " + upperBoundType.getName());
+                            }
+                            // We always do the same, as "blacklistUnlistedMembers" is also defined via a whitelist:
+                            whitelistMemberSelectors.add(memberSelector);
+                        }
+                    }
+                }
+            }
+
+            whitelistMemberAccessPolicy = new WhitelistMemberAccessPolicy(whitelistMemberSelectors);
+
+            // Generate blacklists based on the whitelist and the members of "blacklistUnlistedMembers" types:
+            List<MemberSelector> blacklistMemberSelectors = new ArrayList<MemberSelector>();
+            for (Class<?> blacklistUnlistedRuleType : typesWithBlacklistUnlistedRule) {
+                ClassMemberAccessPolicy classPolicy = whitelistMemberAccessPolicy.forClass(blacklistUnlistedRuleType);
+                for (Method method : blacklistUnlistedRuleType.getMethods()) {
+                    if (!classPolicy.isMethodExposed(method)) {
+                        blacklistMemberSelectors.add(new MemberSelector(blacklistUnlistedRuleType, method));
+                    }
+                }
+                for (Constructor<?> constructor : blacklistUnlistedRuleType.getConstructors()) {
+                    if (!classPolicy.isConstructorExposed(constructor)) {
+                        blacklistMemberSelectors.add(new MemberSelector(blacklistUnlistedRuleType, constructor));
+                    }
+                }
+                for (Field field : blacklistUnlistedRuleType.getFields()) {
+                    if (!classPolicy.isFieldExposed(field)) {
+                        blacklistMemberSelectors.add(new MemberSelector(blacklistUnlistedRuleType, field));
+                    }
+                }
+            }
+            blacklistMemberAccessPolicy = new BlacklistMemberAccessPolicy(blacklistMemberSelectors);
+        } catch (Exception e) {
+            throw new IllegalStateException("Couldn't init " + this.getClass().getName() + " instance", e);
+        }
     }
 
-    private static final BacklistClassMemberAccessPolicy CLASS_MEMBER_ACCESS_POLICY_INSTANCE
-            = new BacklistClassMemberAccessPolicy();
-    private static class BacklistClassMemberAccessPolicy implements ClassMemberAccessPolicy {
-
-        public boolean isMethodExposed(Method method) {
-            return !UNSAFE_METHODS.contains(method);
+    private static List<String> loadMemberSelectorFileLines() throws IOException {
+        List<String> whitelist = new ArrayList<String>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        DefaultMemberAccessPolicy.class.getResourceAsStream("DefaultMemberAccessPolicy-rules"),
+                        StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                whitelist.add(line);
+            }
         }
 
-        public boolean isConstructorExposed(Constructor<?> constructor) {
-            return true;
-        }
+        return whitelist;
+    }
 
-        public boolean isFieldExposed(Field field) {
-            return true;
+    @Override
+    public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+        if (isTypeWithWhitelistRule(contextClass)) {
+            return whitelistMemberAccessPolicy.forClass(contextClass);
+        } else {
+            return blacklistMemberAccessPolicy.forClass(contextClass);
         }
     }
+
+    private boolean isTypeWithWhitelistRule(Class<?> contextClass) {
+        if (whitelistRuleFinalClasses.contains(contextClass)) {
+            return true;
+        }
+        for (Class<?> nonFinalClass : whitelistRuleNonFinalClasses) {
+            if (nonFinalClass.isAssignableFrom(contextClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

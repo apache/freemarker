@@ -25,12 +25,9 @@ import static org.junit.Assert.*;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateHashModel;
 import org.junit.Test;
 
-public class WhitelistMemberAccessPolicyTest {
+public class MemberSelectorListAccessPolicyTest {
 
     @Test
     public void testEmpty() throws NoSuchMethodException, NoSuchFieldException {
@@ -91,7 +88,7 @@ public class WhitelistMemberAccessPolicyTest {
 
         assertFalse(c1Policy.isConstructorExposed(C1.class.getConstructor(int.class)));
         assertTrue(c2Policy.isConstructorExposed(C2.class.getConstructor(int.class)));
-        assertTrue(c3Policy.isConstructorExposed(C3.class.getConstructor(int.class)));
+        assertFalse(c3Policy.isConstructorExposed(C3.class.getConstructor(int.class))); // Not inherited
 
         assertFalse(c1Policy.isMethodExposed(C1.class.getMethod("m1")));
         assertTrue(c2Policy.isMethodExposed(C2.class.getMethod("m1")));
@@ -262,6 +259,75 @@ public class WhitelistMemberAccessPolicyTest {
     }
 
     @Test
+    public void testBlacklist1() throws NoSuchMethodException, NoSuchFieldException {
+        BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
+                C1.class.getName() + ".m1()",
+                C1.class.getName() + ".f1",
+                C1.class.getName() + "." + C1.class.getSimpleName() + "()"
+        );
+
+        for (Class<?> cl : new Class[] { C1.class, C2.class, C3.class }) {
+            ClassMemberAccessPolicy classPolicy = policy.forClass(cl);
+            assertFalse(classPolicy.isMethodExposed(cl.getMethod("m1")));
+            assertTrue(classPolicy.isMethodExposed(cl.getMethod("m2", int.class)));
+            assertTrue(classPolicy.isMethodExposed(cl.getMethod("m3")));
+            assertFalse(classPolicy.isFieldExposed(cl.getField("f1")));
+            assertTrue(classPolicy.isFieldExposed(cl.getField("f2")));
+            if (cl != C2.class) {
+                assertEquals(cl != C1.class, classPolicy.isConstructorExposed(cl.getConstructor()));
+            }
+            assertTrue(classPolicy.isConstructorExposed(cl.getConstructor(int.class)));
+        }
+    }
+
+    @Test
+    public void testBlacklist2() throws NoSuchMethodException, NoSuchFieldException {
+        BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
+                C2.class.getName() + ".m1()",
+                C2.class.getName() + ".f1",
+                C2.class.getName() + "." + C2.class.getSimpleName() + "(int)"
+        );
+
+        {
+            Class<C1> lc = C1.class;
+            ClassMemberAccessPolicy classPolicy = policy.forClass(lc);
+            assertTrue(classPolicy.isMethodExposed(lc.getMethod("m1")));
+            assertTrue(classPolicy.isFieldExposed(lc.getField("f1")));
+            assertTrue(classPolicy.isConstructorExposed(lc.getConstructor(int.class)));
+        }
+
+        {
+            Class<C2> lc = C2.class;
+            ClassMemberAccessPolicy classPolicy = policy.forClass(lc);
+            assertFalse(classPolicy.isMethodExposed(lc.getMethod("m1")));
+            assertFalse(classPolicy.isFieldExposed(lc.getField("f1")));
+            assertFalse(classPolicy.isConstructorExposed(lc.getConstructor(int.class)));
+        }
+
+        {
+            Class<C3> lc = C3.class;
+            ClassMemberAccessPolicy classPolicy = policy.forClass(lc);
+            assertFalse(classPolicy.isMethodExposed(lc.getMethod("m1")));
+            assertFalse(classPolicy.isFieldExposed(lc.getField("f1")));
+            assertTrue(classPolicy.isConstructorExposed(lc.getConstructor(int.class)));
+        }
+    }
+
+    @Test
+    public void testBlacklistIgnoredAnnotation() throws NoSuchMethodException, NoSuchFieldException {
+        BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
+                CAnnotationsTest1.class.getName() + ".m5()",
+                CAnnotationsTest1.class.getName() + ".f5",
+                CAnnotationsTest1.class.getName() + "." + CAnnotationsTest1.class.getSimpleName() + "()"
+        );
+
+        ClassMemberAccessPolicy classPolicy = policy.forClass(CAnnotationsTest1.class);
+        assertFalse(classPolicy.isMethodExposed(CAnnotationsTest1.class.getMethod("m5")));
+        assertFalse(classPolicy.isFieldExposed(CAnnotationsTest1.class.getField("f5")));
+        assertFalse(classPolicy.isConstructorExposed(CAnnotationsTest1.class.getConstructor()));
+    }
+
+    @Test
     public void memberSelectorParserIgnoresWhitespace() throws NoSuchMethodException {
         WhitelistMemberAccessPolicy policy = newWhitelistMemberAccessPolicy(
                 (CArrayArgs.class.getName() + ".m1(java.lang.String)").replace(".", "\n\t. "),
@@ -306,7 +372,7 @@ public class WhitelistMemberAccessPolicyTest {
             newWhitelistMemberAccessPolicy("java.util.Date.toString(");
             fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("missing closing ')'"));
+            assertThat(e.getMessage(), containsString("should end with ')'"));
         }
         try {
             newWhitelistMemberAccessPolicy("java.util.Date.m(com.x-y)");
@@ -360,32 +426,18 @@ public class WhitelistMemberAccessPolicyTest {
                 CAnnotationsTest2.class.getConstructor(int.class, int.class, int.class, int.class)));
     }
 
-    public static final MemberAccessPolicy CONFIG_TEST_MEMBER_ACCESS_POLICY =
-            newWhitelistMemberAccessPolicy(
-                    C1.class.getName() + ".m1()",
-                    C1.class.getName() + ".m3()");
-
-    @Test
-    public void stringBasedConfigurationTest() throws TemplateException {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
-                .setting(
-                        "objectWrapper",
-                        "DefaultObjectWrapper(3.0.0, " +
-                                "memberAccessPolicy="
-                                + WhitelistMemberAccessPolicyTest.class.getName() + ".CONFIG_TEST_MEMBER_ACCESS_POLICY"
-                                + ")")
-                .build();
-        TemplateHashModel m = (TemplateHashModel) cfg.getObjectWrapper().wrap(new C1());
-        assertNotNull(m.get("m1"));
-        assertNull(m.get("m2"));
-        assertNotNull(m.get("m3"));
-    }
-
     private static WhitelistMemberAccessPolicy newWhitelistMemberAccessPolicy(String... memberSelectors) {
         return new WhitelistMemberAccessPolicy(
-                WhitelistMemberAccessPolicy.MemberSelector.parse(
+                MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
                         Arrays.asList(memberSelectors),
-                        WhitelistMemberAccessPolicyTest.class.getClassLoader()));
+                        MemberSelectorListAccessPolicyTest.class.getClassLoader()));
+    }
+
+    private static BlacklistMemberAccessPolicy newBlacklistMemberAccessPolicy(String... memberSelectors) {
+        return new BlacklistMemberAccessPolicy(
+                MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                        Arrays.asList(memberSelectors),
+                        MemberSelectorListAccessPolicyTest.class.getClassLoader()));
     }
 
     public static class C1 {
@@ -421,6 +473,10 @@ public class WhitelistMemberAccessPolicyTest {
             super(x);
         }
 
+        @Override
+        public void m2(int x) {
+        }
+
         public void m2(boolean x) {
         }
 
@@ -448,6 +504,7 @@ public class WhitelistMemberAccessPolicyTest {
     }
 
     public static class E1 implements I1Sub {
+        @Override
         public void m1() {
 
         }
@@ -550,6 +607,7 @@ public class WhitelistMemberAccessPolicyTest {
         @TemplateAccessible
         public void m4() {}
 
+        @Override
         public void m5() {}
 
         public void m6() {}
