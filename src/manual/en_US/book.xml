@@ -29259,6 +29259,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-120">FREEMARKER-120</link>:
+              <literal>BeansWrapper</literal> (and it's subclasses like
+              <literal>DefaultObjectWrapper</literal>) now has two protected
+              methods that can be overridden to monitor the accessing of
+              members: <literal>invokeMethod</literal> and
+              <literal>readField</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>Environment.getDataModelOrSharedVariable(String)</literal>.</para>
             </listitem>

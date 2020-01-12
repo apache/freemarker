@@ -24,6 +24,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -1500,12 +1501,23 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             }
         }
     }
-    
+
     /**
-     * Invokes the specified method, wrapping the return value. The specialty
-     * of this method is that if the return value is null, and the return type
-     * of the invoked method is void, {@link TemplateModel#NOTHING} is returned.
-     * @param object the object to invoke the method on
+     * Invokes the specified method, wrapping the return value. All method invocations done in templates should go
+     * through this (assuming the target object was wrapped with this {@link ObjectWrapper}).
+     *
+     * <p>This method is protected since 2.3.30; before that it was package private. The intended application of
+     * overriding this is monitoring what calls are made from templates. That can be useful to asses what will be needed
+     * in a {@link WhitelistMemberAccessPolicy} for example. Note that {@link Object#toString} calls caused by type
+     * conversion (like when you have <code>${myObject}</code>) will not go through here, as they aren't called by the
+     * template directly (and aren't called via reflection). On the other hand, <code>${myObject[key]}</code>,
+     * if {@code myObject} is not a {@link Map}, will go through here as a {@code get(String|Object)} method call, if
+     * there's a such method.
+     *
+     * <p>If the return value is null, and the return type of the invoked method is void,
+     * {@link TemplateModel#NOTHING} is returned.
+     *
+     * @param object the object to invoke the method on ({@code null} may be null for static methods)
      * @param method the method to invoke 
      * @param args the arguments to the method
      * @return the wrapped return value of the method.
@@ -1516,9 +1528,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * (this can happen if the wrapper has an outer identity or is subclassed,
      * and the outer identity or the subclass throws an exception. Plain
      * BeansWrapper never throws TemplateModelException).
+     *
+     * @see #readField(Object, Field)
+     *
+     * @since 2.3.30
      */
-    TemplateModel invokeMethod(Object object, Method method, Object[] args)
-    throws InvocationTargetException,
+    protected TemplateModel invokeMethod(Object object, Method method, Object[] args)
+            throws InvocationTargetException,
         IllegalAccessException,
         TemplateModelException {
         // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
@@ -1528,6 +1544,24 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             method.getReturnType() == void.class 
             ? TemplateModel.NOTHING
             : getOuterIdentity().wrap(retval); 
+    }
+
+    /**
+     * Reads the specified field, returns its value as {@link TemplateModel}.  All field reading done in templates
+     * should go through this (assuming the target object was wrapped with this {@link ObjectWrapper}).
+     *
+     * <p>Just like in the case of {@link #invokeMethod(Object, Method, Object[])}, overriding this can be useful if you
+     * want to monitor what members are accessed by templates. However, it has the caveat that final field values are
+     * possibly cached, so you won't see all reads. Furthermore, at least static models pre-read final fields, so
+     * they will be read even if the templates don't read them.
+     *
+     * @see #invokeMethod(Object, Method, Object[])
+     *
+     * @since 2.3.30
+     */
+    protected TemplateModel readField(Object object, Field field)
+            throws IllegalAccessException, TemplateModelException {
+        return getOuterIdentity().wrap(field.get(object));
     }
 
    /**
@@ -1546,8 +1580,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     public TemplateHashModel getStaticModels() {
         return staticModels;
     }
-    
-    
+
     /**
      * Returns a hash model that represents the so-called class enum models.
      * Every class' enum model is itself a hash through which you can access

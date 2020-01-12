@@ -75,9 +75,12 @@ import freemarker.template.Version;
  *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
  *     share their caches (as they don't share the same FreeMarker classes).
  *     Also, currently there's a separate cache for each permutation of the property values that influence class
- *     introspection: {@link BeansWrapperBuilder#setExposeFields(boolean) expose_fields} and
- *     {@link BeansWrapperBuilder#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
- *     properties are the same may share class introspection caches among each other.
+ *     introspection:
+ *     {@link BeansWrapperBuilder#setExposeFields(boolean) expose_fields}, and
+ *     {@link BeansWrapperBuilder#setExposureLevel(int) exposure_level}, and
+ *     {@link BeansWrapperBuilder#setMemberAccessPolicy(MemberAccessPolicy)}  member_access_policy}.
+ *     So only {@link BeansWrapper} where those properties are the same may share class introspection caches among each
+ *     other.
  *   </li>
  *   <li><p>Model caches: These are local to a {@link BeansWrapper}. {@link BeansWrapperBuilder} returns the same
  *     {@link BeansWrapper} instance for equivalent properties (unless the existing instance was garbage collected

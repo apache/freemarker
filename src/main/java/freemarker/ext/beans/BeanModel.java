@@ -232,7 +232,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
                 // cachedModel remains null, as we don't cache these
             }
         } else if (desc instanceof Field) {
-            resultModel = wrapper.wrap(((Field) desc).get(object));
+            resultModel = wrapper.readField(object, (Field) desc);
             // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Method) {
             Method method = (Method) desc;

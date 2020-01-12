@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.template.utility.NullArgumentException;
 
 /**
  * A simple implementation of the {@link TemplateHashModelEx} interface, using its own underlying {@link Map} or
@@ -112,7 +111,6 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      */
     public SimpleHash(ObjectWrapper wrapper) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         map = new HashMap();
     }
 
@@ -135,7 +133,6 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      */
     public SimpleHash(Map<String, Object> directMap, ObjectWrapper wrapper, int overloadDistinction) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         this.map = directMap;
     }
 
@@ -153,7 +150,6 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      */
     public SimpleHash(Map map, ObjectWrapper wrapper) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         Map mapCopy;
         try {
             mapCopy = copyMap(map);

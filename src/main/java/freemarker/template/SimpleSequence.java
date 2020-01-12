@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.template.utility.NullArgumentException;
 
 /**
  * A simple implementation of the {@link TemplateSequenceModel} interface, using its own underlying {@link List} for
@@ -139,7 +138,6 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(ObjectWrapper wrapper) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList();
     }
     
@@ -153,7 +151,6 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(int capacity, ObjectWrapper wrapper) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList(capacity);
     }    
     
@@ -171,7 +168,6 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(Collection collection, ObjectWrapper wrapper) {
         super(wrapper);
-        NullArgumentException.check(wrapper); //!!T
         list = new ArrayList(collection);
     }
 
