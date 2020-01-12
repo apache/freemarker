@@ -65,7 +65,7 @@ final class StaticModel implements TemplateHashModelEx {
         // Non-final field; this must be evaluated on each call.
         if (model instanceof Field) {
             try {
-                return wrapper.getOuterIdentity().wrap(((Field) model).get(null));
+                return wrapper.readField(null, (Field) model);
             } catch (IllegalAccessException e) {
                 throw new TemplateModelException(
                     "Illegal access for field " + key + " of class " + clazz.getName());
@@ -114,7 +114,7 @@ final class StaticModel implements TemplateHashModelEx {
                     try {
                         // public static final fields are evaluated once and
                         // stored in the map
-                        map.put(field.getName(), wrapper.getOuterIdentity().wrap(field.get(null)));
+                        map.put(field.getName(), wrapper.readField(null, field));
                     } catch (IllegalAccessException e) {
                         // Intentionally ignored
                     }
