@@ -36,8 +36,8 @@ import org.apache.freemarker.core.util._ClassUtils;
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final DefaultObjectWrapper wrapper;
     
-    private final Map/*<String,TemplateModel>*/ cache = new ConcurrentHashMap();
-    private final Set classIntrospectionsInProgress = new HashSet();
+    private final Map<String,TemplateModel> cache = new ConcurrentHashMap<>();
+    private final Set<String> classIntrospectionsInProgress = new HashSet<>();
     
     protected ClassBasedModelFactory(DefaultObjectWrapper wrapper) {
         this.wrapper = wrapper;
@@ -52,14 +52,14 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
                 throw (TemplateException) e;
             } else {
                 throw new TemplateException(e,
-                        "Failed to get valeu for key ", new _DelayedJQuote(key), "; see cause exception.");
+                        "Failed to get value for key ", new _DelayedJQuote(key), "; see cause exception.");
             }
         }
     }
 
     private TemplateModel getInternal(String key) throws TemplateException, ClassNotFoundException {
         {
-            TemplateModel model = (TemplateModel) cache.get(key);
+            TemplateModel model = cache.get(key);
             if (model != null) return model;
         }
 
@@ -67,7 +67,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         int classIntrospectorClearingCounter;
         final Object sharedLock = wrapper.getSharedIntrospectionLock();
         synchronized (sharedLock) {
-            TemplateModel model = (TemplateModel) cache.get(key);
+            TemplateModel model = cache.get(key);
             if (model != null) return model;
             
             while (model == null
@@ -76,10 +76,9 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
                 // waiting for its result.
                 try {
                     sharedLock.wait();
-                    model = (TemplateModel) cache.get(key);
+                    model = cache.get(key);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(
-                            "Class inrospection data lookup aborded: " + e);
+                    throw new RuntimeException("Class inrospection data lookup aborted: " + e);
                 }
             }
             if (model != null) return model;
@@ -93,7 +92,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             classIntrospectorClearingCounter = classIntrospector.getClearingCounter();
         }
         try {
-            final Class clazz = _ClassUtils.forName(key);
+            final Class<?> clazz = _ClassUtils.forName(key);
             
             // This is called so that we trigger the
             // class-reloading detector. If clazz is a reloaded class,
@@ -129,14 +128,13 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         }
     }
     
-    void removeFromCache(Class clazz) {
+    void removeFromCache(Class<?> clazz) {
         synchronized (wrapper.getSharedIntrospectionLock()) {
             cache.remove(clazz.getName());
         }
     }
     
-    protected abstract TemplateModel createModel(Class clazz) 
-    throws TemplateException;
+    protected abstract TemplateModel createModel(Class<?> clazz) throws TemplateException;
     
     protected DefaultObjectWrapper getWrapper() {
         return wrapper;

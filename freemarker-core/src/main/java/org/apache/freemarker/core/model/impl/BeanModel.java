@@ -181,7 +181,7 @@ public class BeanModel
             // Unlike in FreeMarker 2, we always use the normal read method, and ignore the indexed read method.
             resultModel = wrapper.invokeMethod(object, ((FastPropertyDescriptor) desc).getReadMethod(), null);
         } else if (desc instanceof Field) {
-            resultModel = wrapper.wrap(((Field) desc).get(object));
+            resultModel = wrapper.readField(object, (Field) desc);
             // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Method) {
             Method method = (Method) desc;

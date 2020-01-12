@@ -43,6 +43,11 @@ import org.apache.freemarker.core.model.TemplateModel;
  * {@link ObjectWrapper} (from {@link Environment#getObjectWrapper()}), and so the {@link MemberAccessPolicy} won't
  * affect those.
  *
+ * <p>The {@link MemberAccessPolicy} is only used during the class introspection phase (which discovers the members of a
+ * type, and decides if, and how will they be exposed to templates), and the result of that is cached. So, the speed of
+ * an {@link MemberAccessPolicy} implementation is usually not too important, as it won't play a role during template
+ * execution.
+ *
  * <p>Implementations must be thread-safe, and instances generally should be singletons on JVM level. FreeMarker
  * caches its class metadata in a global (static, JVM-scope) cache for shared use, and the {@link MemberAccessPolicy}
  * used is part of the cache key. Thus {@link MemberAccessPolicy} instances used at different places in the JVM

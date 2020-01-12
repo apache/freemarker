@@ -44,11 +44,11 @@ final class StaticModel implements TemplateHashModelEx {
     
     private static final Logger LOG = LoggerFactory.getLogger(StaticModel.class);
 
-    private final Class clazz;
+    private final Class<?> clazz;
     private final DefaultObjectWrapper wrapper;
-    private final Map map = new HashMap();
+    private final Map<String, Object> map = new HashMap<>();
 
-    StaticModel(Class clazz, DefaultObjectWrapper wrapper) throws TemplateException {
+    StaticModel(Class<?> clazz, DefaultObjectWrapper wrapper) throws TemplateException {
         this.clazz = clazz;
         this.wrapper = wrapper;
         populate();
@@ -68,7 +68,7 @@ final class StaticModel implements TemplateHashModelEx {
         // Non-final field; this must be evaluated on each call.
         if (model instanceof Field) {
             try {
-                return wrapper.getOuterIdentity().wrap(((Field) model).get(null));
+                return wrapper.readField(null, (Field) model);
             } catch (IllegalAccessException e) {
                 throw new TemplateException(
                     "Illegal access for field " + key + " of class " + clazz.getName());
@@ -122,19 +122,20 @@ final class StaticModel implements TemplateHashModelEx {
         for (Field field : fields) {
             int mod = field.getModifiers();
             if (Modifier.isPublic(mod) && Modifier.isStatic(mod)) {
-                if (Modifier.isFinal(mod))
+                if (Modifier.isFinal(mod)) {
                     try {
                         // public static final fields are evaluated once and
                         // stored in the map
-                        map.put(field.getName(), wrapper.getOuterIdentity().wrap(field.get(null)));
+                        map.put(field.getName(), wrapper.readField(null, field));
                     } catch (IllegalAccessException e) {
                         // Intentionally ignored
                     }
-                else
+                } else {
                     // This is a special flagging value: Field in the map means
                     // that this is a non-final field, and it must be evaluated
                     // on each get() call.
                     map.put(field.getName(), field);
+                }
             }
         }
         if (wrapper.getExposureLevel() < DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY) {
@@ -167,8 +168,8 @@ final class StaticModel implements TemplateHashModelEx {
                     }
                 }
             }
-            for (Iterator entries = map.entrySet().iterator(); entries.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) entries.next();
+            for (Iterator<Map.Entry<String, Object>> entries = map.entrySet().iterator(); entries.hasNext(); ) {
+                Map.Entry<String, Object> entry = entries.next();
                 Object value = entry.getValue();
                 if (value instanceof Method) {
                     Method method = (Method) value;

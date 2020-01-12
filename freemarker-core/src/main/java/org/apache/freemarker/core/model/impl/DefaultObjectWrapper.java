@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -970,10 +971,21 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     /**
-     * Invokes the specified method, wrapping the return value. The specialty
-     * of this method is that if the return value is null, and the return type
-     * of the invoked method is void, an empty string is returned.
-     * @param object the object to invoke the method on
+     * Invokes the specified method, wrapping the return value. All method invocations done in templates should go
+     * through this (assuming the target object was wrapped with this {@link ObjectWrapper}).
+     *
+     * <p>This method is protected since 2.3.30; before that it was package private. The intended application of
+     * overriding this is monitoring what calls are made from templates. That can be useful to asses what will be needed
+     * in a {@link WhitelistMemberAccessPolicy} for example. Note that {@link Object#toString} calls caused by type
+     * conversion (like when you have <code>${myObject}</code>) will not go through here, as they aren't called by the
+     * template directly (and aren't called via reflection). On the other hand, <code>${myObject[key]}</code>,
+     * if {@code myObject} is not a {@link Map}, will go through here as a {@code get(String|Object)} method
+     * call, if there's a such method.
+     *
+     * <p>If the return value is null, and the return type of the invoked method is void,
+     * {@link TemplateStringModel#EMPTY_STRING} is returned.
+     *
+     * @param object the object to invoke the method on ({@code null} may be null for static methods)
      * @param method the method to invoke
      * @param args the arguments to the method
      * @return the wrapped return value of the method.
@@ -983,9 +995,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @throws TemplateException if the return value couldn't be wrapped
      * (this can happen if the wrapper has an outer identity or is subclassed,
      * and the outer identity or the subclass throws an exception. Plain
-     * DefaultObjectWrapper never throws TemplateException).
+     * BeansWrapper never throws TemplateModelException).
      */
-    TemplateModel invokeMethod(Object object, Method method, Object[] args)
+    protected TemplateModel invokeMethod(Object object, Method method, Object[] args)
             throws InvocationTargetException, IllegalAccessException, TemplateException {
         // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
         // There should at least be an option to check this.
@@ -994,6 +1006,22 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 method.getReturnType() == void.class
                         ? TemplateStringModel.EMPTY_STRING
                         : getOuterIdentity().wrap(retval);
+    }
+
+    /**
+     * Reads the specified field, returns its value as {@link TemplateModel}.  All field reading done in templates
+     * should go through this (assuming the target object was wrapped with this {@link ObjectWrapper}).
+     *
+     * <p>Just like in the case of {@link #invokeMethod(Object, Method, Object[])}, overriding this can be useful if you
+     * want to monitor what members are accessed by templates. However, it has the caveat that final field values are
+     * possibly cached, so you won't see all reads. Furthermore, at least static models pre-read final fields, so
+     * they will be read even if the templates don't read them.
+     *
+     * @see #invokeMethod(Object, Method, Object[])
+     */
+    protected TemplateModel readField(Object object, Field field)
+            throws IllegalAccessException, TemplateException {
+        return getOuterIdentity().wrap(field.get(object));
     }
 
     /**
@@ -1262,9 +1290,12 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
      *     share their caches (as they don't share the same FreeMarker classes).
      *     Also, currently there's a separate cache for each permutation of the property values that influence class
-     *     introspection: {@link Builder#setExposeFields(boolean) expose_fields} and
-     *     {@link Builder#setExposureLevel(int) exposure_level}. So only {@link DefaultObjectWrapper} where those
-     *     properties are the same may share class introspection caches among each other.
+     *     introspection:
+     *     {@link Builder#setExposeFields(boolean) exposeFields}, and
+     *     {@link Builder#setExposureLevel(int) exposureLevel}, and
+     *     {@link Builder#setMemberAccessPolicy(MemberAccessPolicy)}  memberAccessPolicy}.
+     *     So only {@link DefaultObjectWrapper} where those properties are the same may share class introspection caches
+     *     among each other.
      *   </li>
      *   <li><p>Model caches: These are local to a {@link DefaultObjectWrapper}. {@link Builder} returns the same
      *     {@link DefaultObjectWrapper} instance for equivalent properties (unless the existing instance was garbage collected
