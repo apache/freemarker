@@ -41,7 +41,7 @@ public class BlacklistMemberAccessPolicy extends MemberSelectorListMemberAccessP
      *      List of member selectors; see {@link MemberSelectorListMemberAccessPolicy} class-level documentation for
      *      more.
      */
-    public BlacklistMemberAccessPolicy(Collection<MemberSelector> memberSelectors) {
+    public BlacklistMemberAccessPolicy(Collection<? extends MemberSelector> memberSelectors) {
         super(memberSelectors, ListType.BLACKLIST, null);
     }
 

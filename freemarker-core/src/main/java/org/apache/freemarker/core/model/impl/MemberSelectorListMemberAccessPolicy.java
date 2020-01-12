@@ -350,7 +350,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
      * @param matchAnnotation
      */
     MemberSelectorListMemberAccessPolicy(
-            Collection<MemberSelector> memberSelectors, ListType listType,
+            Collection<? extends MemberSelector> memberSelectors, ListType listType,
             Class<? extends Annotation> matchAnnotation) {
         this.listType = listType;
         this.matchAnnotation = matchAnnotation;
