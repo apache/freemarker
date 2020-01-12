@@ -37,8 +37,8 @@ import freemarker.template.utility.ClassUtil;
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;
     
-    private final Map/*<String,TemplateModel>*/ cache = new ConcurrentHashMap();
-    private final Set classIntrospectionsInProgress = new HashSet();
+    private final Map<String,TemplateModel> cache = new ConcurrentHashMap<String,TemplateModel>();
+    private final Set<String> classIntrospectionsInProgress = new HashSet<String>();
     
     protected ClassBasedModelFactory(BeansWrapper wrapper) {
         this.wrapper = wrapper;
@@ -59,7 +59,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
 
     private TemplateModel getInternal(String key) throws TemplateModelException, ClassNotFoundException {
         {
-            TemplateModel model = (TemplateModel) cache.get(key);
+            TemplateModel model = cache.get(key);
             if (model != null) return model;
         }
 
@@ -67,19 +67,17 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         int classIntrospectorClearingCounter;
         final Object sharedLock = wrapper.getSharedIntrospectionLock();
         synchronized (sharedLock) {
-            TemplateModel model = (TemplateModel) cache.get(key);
+            TemplateModel model = cache.get(key);
             if (model != null) return model;
             
-            while (model == null
-                    && classIntrospectionsInProgress.contains(key)) {
+            while (model == null && classIntrospectionsInProgress.contains(key)) {
                 // Another thread is already introspecting this class;
                 // waiting for its result.
                 try {
                     sharedLock.wait();
-                    model = (TemplateModel) cache.get(key);
+                    model = cache.get(key);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(
-                            "Class inrospection data lookup aborded: " + e);
+                    throw new RuntimeException("Class inrospection data lookup aborted: " + e);
                 }
             }
             if (model != null) return model;
@@ -93,7 +91,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             classIntrospectorClearingCounter = classIntrospector.getClearingCounter();
         }
         try {
-            final Class clazz = ClassUtil.forName(key);
+            final Class<?> clazz = ClassUtil.forName(key);
             
             // This is called so that we trigger the
             // class-reloading detector. If clazz is a reloaded class,
@@ -129,7 +127,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         }
     }
     
-    void removeFromCache(Class clazz) {
+    void removeFromCache(Class<?> clazz) {
         synchronized (wrapper.getSharedIntrospectionLock()) {
             cache.remove(clazz.getName());
         }
@@ -139,8 +137,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         return false;
     }
     
-    protected abstract TemplateModel createModel(Class clazz) 
-    throws TemplateModelException;
+    protected abstract TemplateModel createModel(Class<?> clazz) throws TemplateModelException;
     
     protected BeansWrapper getWrapper() {
         return wrapper;

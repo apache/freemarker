@@ -1546,8 +1546,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     public TemplateHashModel getStaticModels() {
         return staticModels;
     }
-    
-    
+
     /**
      * Returns a hash model that represents the so-called class enum models.
      * Every class' enum model is itself a hash through which you can access
