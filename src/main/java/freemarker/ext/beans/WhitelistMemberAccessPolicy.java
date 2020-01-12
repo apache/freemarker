@@ -47,7 +47,7 @@ public class WhitelistMemberAccessPolicy extends MemberSelectorListMemberAccessP
      *      List of member selectors; see {@link MemberSelectorListMemberAccessPolicy} class-level documentation for
      *      more.
      */
-    public WhitelistMemberAccessPolicy(Collection<MemberSelector> memberSelectors) {
+    public WhitelistMemberAccessPolicy(Collection<? extends MemberSelector> memberSelectors) {
         super(memberSelectors, ListType.WHITELIST, TemplateAccessible.class);
     }
 
