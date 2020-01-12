@@ -11191,9 +11191,8 @@ TemplateHashModel fileStatics =
 
           <para>The <literal>TemplateHashModel</literal> returned from
           <literal>BeansWrapper.getEnumModels()</literal> can be used to
-          create hash models for accessing values of enums on JRE 1.5 or
-          later. (An attempt to invoke this method on an earlier JRE will
-          result in an
+          create hash models for accessing values of enums. (An attempt to
+          invoke this method on an earlier JRE will result in an
           <literal>UnsupportedOperationException</literal>.)</para>
 
           <programlisting role="unspecified">BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
@@ -29381,6 +29380,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>The minimum required Java version was increased from Java
+              5 to Java 7.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-109">FREEMARKER-109</link>:

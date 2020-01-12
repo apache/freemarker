@@ -87,10 +87,6 @@ class ExtendedDecimalFormatParser {
                             + PARAM_VALUE_RND_HALF_EVEN + ", " + PARAM_VALUE_RND_UNNECESSARY);
                 }
 
-                if (_JavaVersions.JAVA_6 == null) {
-                    throw new InvalidParameterValueException("For setting the rounding mode you need Java 6 or later.");
-                }
-
                 parser.roundingMode = parsedValue;
             }
         });
@@ -136,11 +132,7 @@ class ExtendedDecimalFormatParser {
         m.put(PARAM_EXPONENT_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
-                if (_JavaVersions.JAVA_6 == null) {
-                    throw new InvalidParameterValueException(
-                            "For setting the exponent separator you need Java 6 or later.");
-                }
-                _JavaVersions.JAVA_6.setExponentSeparator(parser.symbols, value);
+                parser.symbols.setExponentSeparator(value);
             }
         });
         m.put(PARAM_MINUS_SIGN, new ParameterHandler() {
@@ -241,10 +233,7 @@ class ExtendedDecimalFormatParser {
         }
 
         if (roundingMode != null) {
-            if (_JavaVersions.JAVA_6 == null) {
-                throw new ParseException("Setting rounding mode needs Java 6 or later", 0);
-            }
-            _JavaVersions.JAVA_6.setRoundingMode(decimalFormat, roundingMode);
+            decimalFormat.setRoundingMode(roundingMode);
         }
 
         if (multiplier != null) {
