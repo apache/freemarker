@@ -27,7 +27,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public class MemberSelectorListAccessPolicyTest {
+public class MemberSelectorListMemberAccessPolicyTest {
 
     @Test
     public void testEmpty() throws NoSuchMethodException, NoSuchFieldException {
@@ -427,17 +427,25 @@ public class MemberSelectorListAccessPolicyTest {
     }
 
     private static WhitelistMemberAccessPolicy newWhitelistMemberAccessPolicy(String... memberSelectors) {
-        return new WhitelistMemberAccessPolicy(
-                MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
-                        Arrays.asList(memberSelectors),
-                        MemberSelectorListAccessPolicyTest.class.getClassLoader()));
+        try {
+            return new WhitelistMemberAccessPolicy(
+                    MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                            Arrays.asList(memberSelectors), false,
+                            MemberSelectorListMemberAccessPolicyTest.class.getClassLoader()));
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static BlacklistMemberAccessPolicy newBlacklistMemberAccessPolicy(String... memberSelectors) {
-        return new BlacklistMemberAccessPolicy(
-                MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
-                        Arrays.asList(memberSelectors),
-                        MemberSelectorListAccessPolicyTest.class.getClassLoader()));
+        try {
+            return new BlacklistMemberAccessPolicy(
+                    MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                            Arrays.asList(memberSelectors), false,
+                            MemberSelectorListMemberAccessPolicyTest.class.getClassLoader()));
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class C1 {
