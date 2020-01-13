@@ -30,8 +30,6 @@ import java.util.StringTokenizer;
 
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Superclass for member-selector-list-based member access policies, like {@link WhitelistMemberAccessPolicy}.
@@ -65,9 +63,10 @@ import org.slf4j.LoggerFactory;
  * with different return types (which is possible on the bytecode level) but the same parameter types, then all
  * variants of it is matched, or none is. Similarly, the type of fields isn't used either, only the name of the field
  * matters.
+ *
+ * @since 2.3.30
  */
 public abstract class MemberSelectorListMemberAccessPolicy implements MemberAccessPolicy {
-    private static final Logger LOG = LoggerFactory.getLogger(MemberSelectorListMemberAccessPolicy.class);
 
     enum ListType {
         /** Only matched members will be exposed. */
@@ -85,15 +84,15 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
     /**
      * A condition that matches some type members. See {@link MemberSelectorListMemberAccessPolicy} documentation for more.
      * Exactly one of these will be non-{@code null}:
-     * {@link #getMethod()}, {@link #getConstructor()}, {@link #getField()}, {@link #getException()}.
+     * {@link #getMethod()}, {@link #getConstructor()}, {@link #getField()}.
+     *
+     * @since 2.3.30
      */
     public final static class MemberSelector {
         private final Class<?> upperBoundType;
         private final Method method;
         private final Constructor<?> constructor;
         private final Field field;
-        private final Exception exception;
-        private final String exceptionMemberSelectorString;
 
         /**
          * Use if you want to match methods similar to the specified one, in types that are {@code instanceof} of
@@ -106,8 +105,6 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
             this.method = method;
             this.constructor = null;
             this.field = null;
-            this.exception = null;
-            this.exceptionMemberSelectorString = null;
         }
 
         /**
@@ -121,8 +118,6 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
             this.method = null;
             this.constructor = constructor;
             this.field = null;
-            this.exception = null;
-            this.exceptionMemberSelectorString = null;
         }
 
         /**
@@ -136,32 +131,10 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
             this.method = null;
             this.constructor = null;
             this.field = field;
-            this.exception = null;
-            this.exceptionMemberSelectorString = null;
         }
 
         /**
-         * Used to store the result of a parsing that's failed for a reason that we can skip on runtime (typically,
-         * when a missing class or member was referred).
-         *
-         * @param upperBoundType {@code null} if resolving the upper bound type itself failed.
-         * @param exception Not {@code null}
-         * @param exceptionMemberSelectorString Not {@code null}; the selector whose resolution has failed, used in
-         *      the log message.
-         */
-        public MemberSelector(Class<?> upperBoundType, Exception exception, String exceptionMemberSelectorString) {
-            _NullArgumentException.check("exception", exception);
-            _NullArgumentException.check("exceptionMemberSelectorString", exceptionMemberSelectorString);
-            this.upperBoundType = upperBoundType;
-            this.method = null;
-            this.constructor = null;
-            this.field = null;
-            this.exception = exception;
-            this.exceptionMemberSelectorString = exceptionMemberSelectorString;
-        }
-
-        /**
-         * Maybe {@code null} if {@link #getException()} is non-{@code null}.
+         * Not {@code null}.
          */
         public Class<?> getUpperBoundType() {
             return upperBoundType;
@@ -169,7 +142,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
 
         /**
          * Maybe {@code null};
-         * set if the selector matches methods similar to the returned one, and there was no exception.
+         * set if the selector matches methods similar to the returned one.
          */
         public Method getMethod() {
             return method;
@@ -177,7 +150,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
 
         /**
          * Maybe {@code null};
-         * set if the selector matches constructors similar to the returned one, and there was no exception.
+         * set if the selector matches constructors similar to the returned one.
          */
         public Constructor<?> getConstructor() {
             return constructor;
@@ -185,24 +158,10 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
 
         /**
          * Maybe {@code null};
-         * set if the selector matches fields similar to the returned one, and there was no exception.
+         * set if the selector matches fields similar to the returned one.
          */
         public Field getField() {
             return field;
-        }
-
-        /**
-         * Maybe {@code null}
-         */
-        public Exception getException() {
-            return exception;
-        }
-
-        /**
-         * Maybe {@code null}
-         */
-        public String getExceptionMemberSelectorString() {
-            return exceptionMemberSelectorString;
         }
 
         /**
@@ -223,9 +182,12 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
          *      {@code []}. In the member name, like {@code com.example.MyClass.myMember}, the class refers to the so
          *      called "upper bound class". Regarding that and inheritance rules see the class level documentation.
          *
-         * @return The {@link MemberSelector}, which might has non-{@code null} {@link MemberSelector#exception}.
+         * @throws ClassNotFoundException If a type referred in the member selector can't be found.
+         * @throws NoSuchMethodException If the method or constructor referred in the member selector can't be found.
+         * @throws NoSuchFieldException If the field referred in the member selector can't be found.
          */
-        public static MemberSelector parse(String memberSelectorString, ClassLoader classLoader) {
+        public static MemberSelector parse(String memberSelectorString, ClassLoader classLoader) throws
+                ClassNotFoundException, NoSuchMethodException, NoSuchFieldException {
             if (memberSelectorString.contains("<") || memberSelectorString.contains(">")
                     || memberSelectorString.contains("...") || memberSelectorString.contains(";")) {
                 throw new IllegalArgumentException(
@@ -253,11 +215,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
                 throw new IllegalArgumentException("Malformed whitelist entry (malformed upper bound class name): "
                         + memberSelectorString);
             }
-            try {
-                upperBoundClass = classLoader.loadClass(upperBoundClassStr);
-            } catch (ClassNotFoundException e) {
-                return new MemberSelector(null, e, cleanedStr);
-            }
+            upperBoundClass = classLoader.loadClass(upperBoundClassStr);
 
             String memberName = cleanedStr.substring(postClassDotIdx + 1, postMemberNameIdx);
             if (!isWellFormedJavaIdentifier(memberName)) {
@@ -290,27 +248,15 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
                             throw new IllegalArgumentException(
                                     "Malformed whitelist entry (malformed argument class name): " + memberSelectorString);
                         }
-                        try {
-                            argClass = classLoader.loadClass(argClassName);
-                        } catch (ClassNotFoundException | SecurityException e) {
-                            return new MemberSelector(upperBoundClass, e, cleanedStr);
-                        }
+                        argClass = classLoader.loadClass(argClassName);
                     }
                     argTypes[i] = _ClassUtils.getArrayClass(argClass, arrayDimensions);
                 }
-                try {
-                    return memberName.equals(upperBoundClass.getSimpleName())
-                            ? new MemberSelector(upperBoundClass, upperBoundClass.getConstructor(argTypes))
-                            : new MemberSelector(upperBoundClass, upperBoundClass.getMethod(memberName, argTypes));
-                } catch (NoSuchMethodException | SecurityException e) {
-                    return new MemberSelector(upperBoundClass, e, cleanedStr);
-                }
+                return memberName.equals(upperBoundClass.getSimpleName())
+                        ? new MemberSelector(upperBoundClass, upperBoundClass.getConstructor(argTypes))
+                        : new MemberSelector(upperBoundClass, upperBoundClass.getMethod(memberName, argTypes));
             } else {
-                try {
-                    return new MemberSelector(upperBoundClass, upperBoundClass.getField(memberName));
-                } catch (NoSuchFieldException | SecurityException e) {
-                    return new MemberSelector(upperBoundClass, e, cleanedStr);
-                }
+                return new MemberSelector(upperBoundClass, upperBoundClass.getField(memberName));
             }
         }
 
@@ -318,13 +264,24 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
          * Convenience method to parse all member selectors in the collection (see {@link #parse(String, ClassLoader)}),
          * while also filtering out blank and comment lines; see {@link #parse(String, ClassLoader)},
          * and {@link #isIgnoredLine(String)}.
+         *
+         * @param ignoreMissingClassOrMember If {@code true}, members selectors that throw exceptions because the
+         *      referred type or member can't be found will be silently ignored. If {@code true}, same exceptions
+         *      will be just thrown by this method.
          */
-        public static List<MemberSelector> parse(Collection<String> memberSelectors,
-                ClassLoader classLoader) {
-            List<MemberSelector> parsedMemberSelectors = new ArrayList<>(memberSelectors.size());
+        public static List<MemberSelector> parse(
+                Collection<String> memberSelectors, boolean ignoreMissingClassOrMember, ClassLoader classLoader)
+                throws ClassNotFoundException, NoSuchMethodException, NoSuchFieldException {
+            List<MemberSelector> parsedMemberSelectors = new ArrayList<MemberSelector>(memberSelectors.size());
             for (String memberSelector : memberSelectors) {
                 if (!isIgnoredLine(memberSelector)) {
-                    parsedMemberSelectors.add(parse(memberSelector, classLoader));
+                    try {
+                        parsedMemberSelectors.add(parse(memberSelector, classLoader));
+                    } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
+                        if (!ignoreMissingClassOrMember) {
+                            throw e;
+                        }
+                    }
                 }
             }
             return parsedMemberSelectors;
@@ -360,12 +317,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
         fieldMatcher = new FieldMatcher();
         for (MemberSelector memberSelector : memberSelectors) {
             Class<?> upperBoundClass = memberSelector.upperBoundType;
-            if (memberSelector.exception != null) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Member selector ignored due to error: " + memberSelector.getExceptionMemberSelectorString(),
-                            memberSelector.exception);
-                }
-            } else if (memberSelector.constructor != null) {
+            if (memberSelector.constructor != null) {
                 constructorMatcher.addMatching(upperBoundClass, memberSelector.constructor);
             } else if (memberSelector.method != null) {
                 methodMatcher.addMatching(upperBoundClass, memberSelector.method);
@@ -377,34 +329,30 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
         }
     }
 
-    @Override
     public final ClassMemberAccessPolicy forClass(final Class<?> contextClass) {
         return new ClassMemberAccessPolicy() {
-            @Override
             public boolean isMethodExposed(Method method) {
                 return matchResultToIsExposedResult(
                         methodMatcher.matches(contextClass, method)
                                 || matchAnnotation != null
                                 && _MethodUtils.getInheritableAnnotation(contextClass, method, matchAnnotation)
-                                != null);
+                                        != null);
             }
 
-            @Override
             public boolean isConstructorExposed(Constructor<?> constructor) {
                 return matchResultToIsExposedResult(
                         constructorMatcher.matches(contextClass, constructor)
                                 || matchAnnotation != null
                                 && _MethodUtils.getInheritableAnnotation(contextClass, constructor, matchAnnotation)
-                                != null);
+                                        != null);
             }
 
-            @Override
             public boolean isFieldExposed(Field field) {
                 return matchResultToIsExposedResult(
                         fieldMatcher.matches(contextClass, field)
                                 || matchAnnotation != null
                                 && _MethodUtils.getInheritableAnnotation(contextClass, field, matchAnnotation)
-                                != null);
+                                        != null);
             }
         };
     }

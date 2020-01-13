@@ -733,12 +733,19 @@ public class ConfigurationTest {
         assertEquals(1000L * 60 * 60 * 2, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
     }
 
-    public static final MemberAccessPolicy CONFIG_TEST_MEMBER_ACCESS_POLICY =
-            new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+    public static final MemberAccessPolicy CONFIG_TEST_MEMBER_ACCESS_POLICY;
+    static {
+        try {
+            CONFIG_TEST_MEMBER_ACCESS_POLICY = new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
                     ImmutableList.<String>of(
                             File.class.getName() + ".getName()",
                             File.class.getName() + ".isFile()"),
+                    false,
                     ConfigurationTest.class.getClassLoader()));
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void testMemberAccessPolicySetting() throws TemplateException {
