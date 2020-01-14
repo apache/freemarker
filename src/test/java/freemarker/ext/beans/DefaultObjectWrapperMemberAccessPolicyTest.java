@@ -48,6 +48,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
 
 public class DefaultObjectWrapperMemberAccessPolicyTest {
 
@@ -247,6 +248,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -286,6 +292,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -315,6 +326,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -341,6 +357,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                         return true;
                     }
                 };
+            }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
             }
         });
         DefaultObjectWrapper ow = owb.build();
@@ -386,6 +407,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -428,6 +454,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                         return true;
                     }
                 };
+            }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
             }
         });
         DefaultObjectWrapper ow = owb.build();
@@ -478,6 +509,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
         TemplateHashModel statics = (TemplateHashModel) ow.getStaticModels().get(Statics.class.getName());
@@ -527,6 +563,41 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsString("No such key"));
             }
+        }
+    }
+
+    @Test
+    public void testToString1() throws TemplateException, NoSuchMethodException, NoSuchFieldException,
+            ClassNotFoundException {
+        DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
+        owb.setMemberAccessPolicy(
+                new WhitelistMemberAccessPolicy(
+                        MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                                Collections.singleton(CExtended.class.getName() + ".toString()"),
+                                false,
+                                DefaultObjectWrapperMemberAccessPolicyTest.class.getClassLoader()
+                        )
+                )
+        );
+        DefaultObjectWrapper ow = owb.build();
+
+        assertEquals(StringModel.TO_STRING_NOT_EXPOSED, ((TemplateScalarModel) ow.wrap(new C())).getAsString());
+        assertEquals(CExtended.class.getSimpleName(), ((TemplateScalarModel) ow.wrap(new CExtended())).getAsString());
+    }
+
+    @Test
+    public void testToString2() throws TemplateException {
+        for (MemberAccessPolicy policy :
+                new MemberAccessPolicy[] {
+                        DefaultMemberAccessPolicy.getInstance(Configuration.VERSION_2_3_30),
+                        LegacyDefaultMemberAccessPolicy.INSTANCE
+                }) {
+            DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_30);
+            owb.setMemberAccessPolicy(policy);
+            DefaultObjectWrapper ow = owb.build();
+
+            assertEquals(
+                    C.class.getSimpleName(), ((TemplateScalarModel) ow.wrap(new C())).getAsString());
         }
     }
 
@@ -599,6 +670,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         }
 
         public static void M1() { }
+
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
     }
 
     public static class CExtended extends C {
@@ -677,6 +753,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     return false;
                 }
             };
+        }
+
+        @Override
+        public boolean isToStringAlwaysExposed() {
+            return false;
         }
     }
 }

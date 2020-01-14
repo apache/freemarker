@@ -39,6 +39,9 @@ implements TemplateScalarModel {
             }
         };
 
+    // Package visible for testing
+    static final String TO_STRING_NOT_EXPOSED = "[toString not exposed]";
+
     /**
      * Creates a new model that wraps the specified object with BeanModel + scalar
      * functionality.
@@ -56,7 +59,11 @@ implements TemplateScalarModel {
      * Returns the result of calling {@link Object#toString()} on the wrapped
      * object.
      */
+    @Override
     public String getAsString() {
-        return object.toString();
+        boolean exposeToString = wrapper.getMemberAccessPolicy().isToStringAlwaysExposed()
+                || !wrapper.getClassIntrospector().get(object.getClass())
+                        .containsKey(ClassIntrospector.TO_STRING_HIDDEN_FLAG_KEY);
+        return exposeToString ? object.toString() : TO_STRING_NOT_EXPOSED;
     }
 }

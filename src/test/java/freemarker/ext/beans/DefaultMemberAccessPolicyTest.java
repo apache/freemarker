@@ -81,6 +81,12 @@ public class DefaultMemberAccessPolicyTest {
     }
 
     @Test
+    public void testToString() throws NoSuchMethodException {
+        assertTrue(POLICY.isToStringAlwaysExposed());
+        assertTrue(POLICY.forClass(UserClass.class).isMethodExposed(Object.class.getMethod("toString")));
+    }
+
+    @Test
     public void testWellKnownUnsafeMethodsAreBanned() throws NoSuchMethodException {
         {
             ClassMemberAccessPolicy classPolicy = POLICY.forClass(Class.class);

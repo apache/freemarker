@@ -19,6 +19,7 @@
 
 package freemarker.ext.beans;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 import freemarker.template.ObjectWrapper;
@@ -42,6 +43,17 @@ import freemarker.template.ObjectWrapper;
  */
 public class WhitelistMemberAccessPolicy extends MemberSelectorListMemberAccessPolicy {
 
+    private static final Method TO_STRING_METHOD;
+    static {
+        try {
+            TO_STRING_METHOD = Object.class.getMethod("toString");
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private final boolean toStringAlwaysExposed;
+
     /**
      * @param memberSelectors
      *      List of member selectors; see {@link MemberSelectorListMemberAccessPolicy} class-level documentation for
@@ -49,6 +61,12 @@ public class WhitelistMemberAccessPolicy extends MemberSelectorListMemberAccessP
      */
     public WhitelistMemberAccessPolicy(Collection<? extends MemberSelector> memberSelectors) {
         super(memberSelectors, ListType.WHITELIST, TemplateAccessible.class);
+        toStringAlwaysExposed = forClass(Object.class).isMethodExposed(TO_STRING_METHOD);
+    }
+
+    @Override
+    public boolean isToStringAlwaysExposed() {
+        return toStringAlwaysExposed;
     }
 
 }
