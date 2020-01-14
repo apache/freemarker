@@ -82,6 +82,8 @@ class ClassIntrospector {
             new ExecutableMemberSignature("get", new Class[] { String.class });
     private static final ExecutableMemberSignature GET_OBJECT_SIGNATURE =
             new ExecutableMemberSignature("get", new Class[] { Object.class });
+    private static final ExecutableMemberSignature TO_STRING_SIGNATURE =
+            new ExecutableMemberSignature("toString", new Class[0]);
 
     private static final ClassChangeNotifier CLASS_CHANGE_NOTIFIER;
     static {
@@ -129,6 +131,8 @@ class ClassIntrospector {
     static final Object CONSTRUCTORS_KEY = new Object();
     /** Key in the class info Map to the get(String|Object) Method */
     static final Object GENERIC_GET_KEY = new Object();
+    /** Key in the class info Map to the toString() Method */
+    static final Object TO_STRING_HIDDEN_FLAG_KEY = new Object();
 
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection configuration properties:
@@ -256,13 +260,18 @@ class ClassIntrospector {
      */
     private Map<Object, Object> createClassIntrospectionData(Class<?> clazz) {
         final Map<Object, Object> introspData = new HashMap<>();
-        ClassMemberAccessPolicy effClassMemberAccessPolicy = getEffectiveClassMemberAccessPolicy(clazz);
+        MemberAccessPolicy effMemberAccessPolicy = getEffectiveMemberAccessPolicy();
+        ClassMemberAccessPolicy effClassMemberAccessPolicy = effMemberAccessPolicy.forClass(clazz);
 
         if (exposeFields) {
             addFieldsToClassIntrospectionData(introspData, clazz, effClassMemberAccessPolicy);
         }
 
         final Map<ExecutableMemberSignature, List<Method>> accessibleMethods = discoverAccessibleMethods(clazz);
+
+        if (!effMemberAccessPolicy.isToStringAlwaysExposed()) {
+            addToStringHiddenFlagToClassIntrospectionData(introspData, accessibleMethods, effClassMemberAccessPolicy);
+        }
 
         addGenericGetToClassIntrospectionData(introspData, accessibleMethods, effClassMemberAccessPolicy);
 
@@ -668,6 +677,19 @@ class ClassIntrospector {
         }
     }
 
+    private void addToStringHiddenFlagToClassIntrospectionData(Map<Object, Object> introspData,
+            Map<ExecutableMemberSignature, List<Method>> accessibleMethods,
+            ClassMemberAccessPolicy effClassMemberAccessPolicy) {
+        Method toStringMethod = getFirstAccessibleMethod(TO_STRING_SIGNATURE, accessibleMethods);
+        if (toStringMethod == null) {
+            throw new BugException("toString() method not found");
+        }
+        // toString() is pretty much always exposed, so we make the negative case to take extra memory:
+        if (!effClassMemberAccessPolicy.isMethodExposed(toStringMethod)) {
+            introspData.put(TO_STRING_HIDDEN_FLAG_KEY, true);
+        }
+    }
+
     private void addConstructorsToClassIntrospectionData(final Map<Object, Object> introspData,
             Class<?> clazz, ClassMemberAccessPolicy effClassMemberAccessPolicy) {
         try {
@@ -788,12 +810,14 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns the {@link ClassMemberAccessPolicy} to actually use, which is not just
-     * {@link DefaultObjectWrapper#getMemberAccessPolicy()} if {@link DefaultObjectWrapper#getExposureLevel()} is more allowing than
-     * {@link DefaultObjectWrapper#EXPOSE_SAFE}. {@link DefaultObjectWrapper#EXPOSE_NOTHING} though is not factored in here.
+     * Returns the {@link MemberAccessPolicy} to actually use, which is not just
+     * {@link DefaultObjectWrapper#getMemberAccessPolicy()} if {@link DefaultObjectWrapper#getExposureLevel()} is more
+     * allowing than {@link DefaultObjectWrapper#EXPOSE_SAFE}. {@link DefaultObjectWrapper#EXPOSE_NOTHING} though is
+     * not factored in here.
      */
-    ClassMemberAccessPolicy getEffectiveClassMemberAccessPolicy(Class<?> containingClass) {
-        return exposureLevel < DefaultObjectWrapper.EXPOSE_SAFE ? AllowAllMemberAccessPolicy.CLASS_POLICY_INSTANCE : memberAccessPolicy.forClass(containingClass);
+    MemberAccessPolicy getEffectiveMemberAccessPolicy() {
+        return exposureLevel < DefaultObjectWrapper.EXPOSE_SAFE ? AllowAllMemberAccessPolicy.INSTANCE
+                : memberAccessPolicy;
     }
 
     private static Map<Method, Class<?>[]> getArgTypesByMethod(Map<Object, Object> classInfo) {

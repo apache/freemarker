@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.freemarker.core.Configuration;
@@ -37,6 +38,7 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -243,6 +245,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -286,6 +293,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -319,6 +331,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     }
                 };
             }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
+            }
         });
         DefaultObjectWrapper ow = owb.build();
 
@@ -349,6 +366,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                         return true;
                     }
                 };
+            }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
             }
         });
         DefaultObjectWrapper ow = owb.build();
@@ -397,6 +419,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                         return true;
                     }
                 };
+            }
+
+            @Override
+            public boolean isToStringAlwaysExposed() {
+                return true;
             }
         });
         DefaultObjectWrapper ow = owb.build();
@@ -448,6 +475,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                                 return true;
                             }
                         };
+                    }
+
+                    @Override
+                    public boolean isToStringAlwaysExposed() {
+                        return true;
                     }
                 })
                 .build();
@@ -503,6 +535,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                             }
                         };
                     }
+
+                    @Override
+                    public boolean isToStringAlwaysExposed() {
+                        return true;
+                    }
                 })
                 .build();
         TemplateHashModel statics = (TemplateHashModel) ow.getStaticModels().get(Statics.class.getName());
@@ -546,6 +583,34 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("No such key"));
         }
+    }
+
+    @Test
+    public void testToString1()
+            throws TemplateException, NoSuchMethodException, NoSuchFieldException, ClassNotFoundException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .memberAccessPolicy(
+                        new WhitelistMemberAccessPolicy(
+                                MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
+                                        Collections.singleton(CExtended.class.getName() + ".toString()"),
+                                        false,
+                                        DefaultObjectWrapperMemberAccessPolicyTest.class.getClassLoader()
+                                )
+                        )
+                )
+                .build();
+
+        assertEquals(BeanAndStringModel.TO_STRING_NOT_EXPOSED, ((TemplateStringModel) ow.wrap(new C())).getAsString());
+        assertEquals(CExtended.class.getSimpleName(), ((TemplateStringModel) ow.wrap(new CExtended())).getAsString());
+    }
+
+    @Test
+    public void testToString2() throws TemplateException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .memberAccessPolicy(DefaultMemberAccessPolicy.getInstance(Configuration.VERSION_3_0_0))
+                    .build();
+
+        assertEquals(C.class.getSimpleName(), ((TemplateStringModel) ow.wrap(new C())).getAsString());
     }
 
     private static Object getHashValue(ObjectWrapperAndUnwrapper ow, TemplateHashModel objM, String key)
@@ -618,6 +683,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         }
 
         public static void M1() { }
+
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
     }
 
     public static class CExtended extends C {
@@ -698,6 +768,11 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
                     return false;
                 }
             };
+        }
+
+        @Override
+        public boolean isToStringAlwaysExposed() {
+            return false;
         }
     }
 }

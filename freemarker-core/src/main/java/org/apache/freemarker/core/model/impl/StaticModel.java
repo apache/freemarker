@@ -119,7 +119,7 @@ final class StaticModel implements TemplateHashModelEx {
         }
 
         ClassMemberAccessPolicy effClassMemberAccessPolicy =
-                wrapper.getClassIntrospector().getEffectiveClassMemberAccessPolicy(clazz);
+                wrapper.getClassIntrospector().getEffectiveMemberAccessPolicy().forClass(clazz);
 
         Field[] fields = clazz.getFields();
         for (Field field : fields) {

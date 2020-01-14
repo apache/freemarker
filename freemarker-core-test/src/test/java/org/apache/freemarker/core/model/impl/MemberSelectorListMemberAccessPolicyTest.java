@@ -314,7 +314,7 @@ public class MemberSelectorListMemberAccessPolicyTest {
     }
 
     @Test
-    public void testBlacklistIgnoredAnnotation() throws NoSuchMethodException, NoSuchFieldException {
+    public void testBlacklistIgnoresAnnotation() throws NoSuchMethodException, NoSuchFieldException {
         BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
                 CAnnotationsTest1.class.getName() + ".m5()",
                 CAnnotationsTest1.class.getName() + ".f5",
@@ -325,6 +325,49 @@ public class MemberSelectorListMemberAccessPolicyTest {
         assertFalse(classPolicy.isMethodExposed(CAnnotationsTest1.class.getMethod("m5")));
         assertFalse(classPolicy.isFieldExposed(CAnnotationsTest1.class.getField("f5")));
         assertFalse(classPolicy.isConstructorExposed(CAnnotationsTest1.class.getConstructor()));
+    }
+
+    @Test
+    public void testBlacklistAndToString() throws NoSuchMethodException {
+        {
+            BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
+                    C1.class.getName() + ".m1()",
+                    C1.class.getName() + ".m2()"
+            );
+            assertTrue(policy.isToStringAlwaysExposed());
+            assertTrue(policy.forClass(C1.class).isMethodExposed(Object.class.getMethod("toString")));
+        }
+        {
+            BlacklistMemberAccessPolicy policy = newBlacklistMemberAccessPolicy(
+                    C1.class.getName() + ".m1()",
+                    C2.class.getName() + ".toString()",
+                    C1.class.getName() + ".m2()"
+            );
+            assertFalse(policy.isToStringAlwaysExposed());
+            assertTrue(policy.forClass(C1.class).isMethodExposed(Object.class.getMethod("toString")));
+            assertFalse(policy.forClass(C2.class).isMethodExposed(Object.class.getMethod("toString")));
+            assertFalse(policy.forClass(C3.class).isMethodExposed(Object.class.getMethod("toString")));
+        }
+    }
+
+    @Test
+    public void testWhitelistAndToString() throws NoSuchMethodException {
+        {
+            WhitelistMemberAccessPolicy policy = newWhitelistMemberAccessPolicy(
+                    C2.class.getName() + ".toString()"
+            );
+            assertFalse(policy.isToStringAlwaysExposed());
+            assertFalse(policy.forClass(C1.class).isMethodExposed(Object.class.getMethod("toString")));
+            assertTrue(policy.forClass(C2.class).isMethodExposed(Object.class.getMethod("toString")));
+            assertTrue(policy.forClass(C3.class).isMethodExposed(Object.class.getMethod("toString")));
+        }
+        {
+            WhitelistMemberAccessPolicy policy = newWhitelistMemberAccessPolicy(
+                    Object.class.getName() + ".toString()"
+            );
+            assertTrue(policy.isToStringAlwaysExposed());
+            assertTrue(policy.forClass(C1.class).isMethodExposed(Object.class.getMethod("toString")));
+        }
     }
 
     @Test

@@ -50,4 +50,9 @@ final class AllowAllMemberAccessPolicy implements MemberAccessPolicy {
     public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
         return CLASS_POLICY_INSTANCE;
     }
+
+    @Override
+    public boolean isToStringAlwaysExposed() {
+        return true;
+    }
 }

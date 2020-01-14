@@ -66,4 +66,14 @@ public interface MemberAccessPolicy {
      *      The exact class of object from which members will be get in the templates.
      */
     ClassMemberAccessPolicy forClass(Class<?> contextClass);
+
+    /**
+     * If this returns {@code true}, we won't invoke the probably more expensive lookup to figure out if
+     * {@link Object#toString()} (including its overridden variants) is exposed for a given object. If this returns
+     * {@code false}, then no such optimization is made. This method was introduced as {@link Object#toString()} is
+     * called frequently, as it's used whenever an object is converted to string, like printed to the output, and it's
+     * not even a reflection-based call (we just call {@link Object#toString()} in Java). So we try to avoid the
+     * overhead of a more generic method call.
+     */
+    boolean isToStringAlwaysExposed();
 }

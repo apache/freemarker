@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
@@ -36,6 +37,8 @@ import java.util.Collection;
  */
 public class BlacklistMemberAccessPolicy extends MemberSelectorListMemberAccessPolicy {
 
+    private final boolean toStringAlwaysExposed;
+
     /**
      * @param memberSelectors
      *      List of member selectors; see {@link MemberSelectorListMemberAccessPolicy} class-level documentation for
@@ -43,6 +46,21 @@ public class BlacklistMemberAccessPolicy extends MemberSelectorListMemberAccessP
      */
     public BlacklistMemberAccessPolicy(Collection<? extends MemberSelector> memberSelectors) {
         super(memberSelectors, ListType.BLACKLIST, null);
+
+        boolean toStringBlacklistedAnywhere = false;
+        for (MemberSelector memberSelector : memberSelectors) {
+            Method method = memberSelector.getMethod();
+            if (method != null && method.getName().equals("toString") && method.getParameterTypes().length == 0) {
+                toStringBlacklistedAnywhere = true;
+                break;
+            }
+        }
+        toStringAlwaysExposed = !toStringBlacklistedAnywhere;
+    }
+
+    @Override
+    public boolean isToStringAlwaysExposed() {
+        return toStringAlwaysExposed;
     }
 
 }
