@@ -144,6 +144,56 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     }
 
     @Test
+    public void testExposeAllWithCustomMemberAccessPolicy() throws TemplateException {
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_ALL)
+                    .exposeFields(true)
+                    .memberAccessPolicy(AllowNothingMemberAccessPolicy.INSTANCE)
+                    .build();
+
+            TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+            // Because the MemberAccessPolicy is ignored:
+            assertNotNull(objM.get("publicField1"));
+            assertNotNull(objM.get("m1"));
+            assertNotNull(objM.get("M1"));
+            assertNotNull(objM.get("notify"));
+            assertNull(objM.get("STATIC_FIELD")); // Because it's static
+
+            TemplateHashModel staticModel = (TemplateHashModel) ow.getStaticModels().get(C.class.getName());
+            assertNotNull(staticModel.get("M1"));
+            assertNotNull(staticModel.get("STATIC_FIELD"));
+        }
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposeFields(true)
+                    .memberAccessPolicy(AllowNothingMemberAccessPolicy.INSTANCE)
+                    .build();
+
+            TemplateHashModel objM = (TemplateHashModel) ow.wrap(new C());
+            // Because the MemberAccessPolicy is ignored:
+            assertNull(objM.get("publicField1"));
+            assertNull(objM.get("m1"));
+            assertNull(objM.get("M1"));
+            assertNull(objM.get("notify"));
+            assertNull(objM.get("STATIC_FIELD"));
+
+            TemplateHashModel staticModel = (TemplateHashModel) ow.getStaticModels().get(C.class.getName());
+            try {
+                assertNull(staticModel.get("M1"));
+            } catch (TemplateException e) {
+                assertThat(e.getMessage(), containsString("No such key"));
+            }
+            try {
+                assertNull(staticModel.get("STATIC_FIELD"));
+                fail();
+            } catch (TemplateException e) {
+                assertThat(e.getMessage(), containsString("No such key"));
+            }
+        }
+    }
+
+    @Test
     public void testExposeFieldsWithDefaultMemberAccessPolicy() throws TemplateException {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         owb.setExposeFields(true);
@@ -378,29 +428,29 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
     @Test
     public void testMemberAccessPolicyAndNewBI() throws IOException, TemplateException, NoSuchMethodException {
-        DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-        owb.setMemberAccessPolicy(new MemberAccessPolicy() {
-            @Override
-            public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
-                return new ClassMemberAccessPolicy() {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .memberAccessPolicy(new MemberAccessPolicy() {
                     @Override
-                    public boolean isMethodExposed(Method method) {
-                        return true;
-                    }
+                    public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                        return new ClassMemberAccessPolicy() {
+                            @Override
+                            public boolean isMethodExposed(Method method) {
+                                return true;
+                            }
 
-                    @Override
-                    public boolean isConstructorExposed(Constructor<?> constructor) {
-                        return constructor.getDeclaringClass().equals(CustomModel.class);
-                    }
+                            @Override
+                            public boolean isConstructorExposed(Constructor<?> constructor) {
+                                return constructor.getDeclaringClass().equals(CustomModel.class);
+                            }
 
-                    @Override
-                    public boolean isFieldExposed(Field field) {
-                        return true;
+                            @Override
+                            public boolean isFieldExposed(Field field) {
+                                return true;
+                            }
+                        };
                     }
-                };
-            }
-        });
-        DefaultObjectWrapper ow = owb.build();
+                })
+                .build();
 
         String templateSourceCode = "${'" + CustomModel.class.getName() + "'?new()} "
                 + "<#attempt>${'" + OtherCustomModel.class.getName() + "'?new()}<#recover>failed</#attempt>";
@@ -430,6 +480,71 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
             StringWriter out = new StringWriter();
             template.process(null, out);
             assertEquals("1 2", out.toString());
+        }
+    }
+
+    @Test
+    public void testMemberAccessPolicyAndStatics() throws TemplateException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .memberAccessPolicy(new MemberAccessPolicy() {
+                    public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+                        return new ClassMemberAccessPolicy() {
+                            public boolean isMethodExposed(Method method) {
+                                return method.getName().equals("m1");
+                            }
+
+                            public boolean isConstructorExposed(Constructor<?> constructor) {
+                                return false;
+                            }
+
+                            public boolean isFieldExposed(Field field) {
+                                String name = field.getName();
+                                return name.equals("F1") || name.equals("V1");
+                            }
+                        };
+                    }
+                })
+                .build();
+        TemplateHashModel statics = (TemplateHashModel) ow.getStaticModels().get(Statics.class.getName());
+
+        assertEquals(1, ((TemplateNumberModel) statics.get("F1")).getAsNumber());
+        try {
+            statics.get("F2");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("No such key"));
+        }
+
+        assertEquals(1, ((TemplateNumberModel) statics.get("V1")).getAsNumber());
+        try {
+            statics.get("V2");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("No such key"));
+        }
+
+        assertEquals(1,
+                ((TemplateNumberModel) ((JavaMethodModel) statics.get("m1"))
+                        .execute(new TemplateModel[0], null))
+                        .getAsNumber());
+        try {
+            assertNull(statics.get("m2"));
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("No such key"));
+        }
+    }
+
+    @Test
+    public void testMemberAccessPolicyAndStatics2() throws TemplateException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+        TemplateHashModel sys = (TemplateHashModel) ow.getStaticModels().get(System.class.getName());
+        assertNotNull(sys.get("currentTimeMillis"));
+        try {
+            sys.get("exit");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("No such key"));
         }
     }
 
@@ -501,6 +616,8 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         public String wait(int otherOverload) {
             return "safe wait(" + otherOverload + ")";
         }
+
+        public static void M1() { }
     }
 
     public static class CExtended extends C {
@@ -547,5 +664,41 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
         }
     }
 
+    public static class Statics {
+        public static final int F1 = 1;
+        public static final int F2 = 2;
+        public static int V1 = 1;
+        public static int V2 = 2;
+        public static int m1() {
+            return 1;
+        }
+        public static int m2() {
+            return 2;
+        }
+    }
+
+    public static class AllowNothingMemberAccessPolicy implements MemberAccessPolicy {
+        private static final AllowNothingMemberAccessPolicy INSTANCE = new AllowNothingMemberAccessPolicy();
+
+        @Override
+        public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
+            return new ClassMemberAccessPolicy() {
+                @Override
+                public boolean isMethodExposed(Method method) {
+                    return false;
+                }
+
+                @Override
+                public boolean isConstructorExposed(Constructor<?> constructor) {
+                    return false;
+                }
+
+                @Override
+                public boolean isFieldExposed(Field field) {
+                    return false;
+                }
+            };
+        }
+    }
 }
 

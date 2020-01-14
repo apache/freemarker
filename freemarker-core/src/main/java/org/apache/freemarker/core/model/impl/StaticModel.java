@@ -118,10 +118,13 @@ final class StaticModel implements TemplateHashModelEx {
             return;
         }
 
+        ClassMemberAccessPolicy effClassMemberAccessPolicy =
+                wrapper.getClassIntrospector().getEffectiveClassMemberAccessPolicy(clazz);
+
         Field[] fields = clazz.getFields();
         for (Field field : fields) {
             int mod = field.getModifiers();
-            if (Modifier.isPublic(mod) && Modifier.isStatic(mod)) {
+            if (Modifier.isPublic(mod) && Modifier.isStatic(mod) && effClassMemberAccessPolicy.isFieldExposed(field)) {
                 if (Modifier.isFinal(mod)) {
                     try {
                         // public static final fields are evaluated once and
@@ -139,13 +142,11 @@ final class StaticModel implements TemplateHashModelEx {
             }
         }
         if (wrapper.getExposureLevel() < DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY) {
-            ClassMemberAccessPolicy classMemberAccessPolicy =
-                    wrapper.getClassIntrospector().getClassMemberAccessPolicyIfNotIgnored(clazz);
             Method[] methods = clazz.getMethods();
             for (Method method : methods) {
                 int mod = method.getModifiers();
                 if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
-                        && ClassIntrospector.isMethodExposed(classMemberAccessPolicy, method)) {
+                        && effClassMemberAccessPolicy.isMethodExposed(method)) {
                     String name = method.getName();
                     Object obj = map.get(name);
                     if (obj instanceof Method) {
