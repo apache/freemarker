@@ -328,7 +328,7 @@ public class DefaultObjectWrapperTest {
             WhitelistMemberAccessPolicy memberAccessPolicy =
                     new WhitelistMemberAccessPolicy(
                             WhitelistMemberAccessPolicy.MemberSelector.parse(
-                                    Arrays.asList(SomeBean.class.getName() + ".getX()"),
+                                    Arrays.asList(SomeBean.class.getName() + ".getX()"), false,
                                     DefaultObjectWrapperTest.class.getClassLoader()));
             builder.setMemberAccessPolicy(memberAccessPolicy);
             DefaultObjectWrapper bw = builder.build();

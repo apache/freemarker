@@ -83,7 +83,7 @@ dependency, as freemarker.ext.dom can't use the XPath support
 included in OpenJDK anymore. It's not needed on Oracle Java 9,
 or if FreeMarker is configured to use Jaxen for XPath.
 
-The minimum required Java version is currently Java SE 5. (The presence
+The minimum required Java version is currently Java SE 7. (The presence
 of a later version may be detected on runtime and utilized by
 FreeMarker.)
 
@@ -201,7 +201,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.5" (you will have to uncheck
+  - Set "Compiler Compliance Level" to "1.7" (you will have to uncheck
     "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
@@ -272,8 +272,8 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     - Test Resource Folders:  
       src/test/resources
       
-  - Still inside the "Sources" tab, change the "Language level" to "5". (Yes, we use Java 8 SDK with
-    language level 5 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
+  - Still inside the "Sources" tab, change the "Language level" to "7". (Yes, we use Java 8 SDK with
+    language level 7 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
     
   - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
     all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon

@@ -93,6 +93,11 @@ public final class LegacyDefaultMemberAccessPolicy implements MemberAccessPolicy
         return CLASS_MEMBER_ACCESS_POLICY_INSTANCE;
     }
 
+    @Override
+    public boolean isToStringAlwaysExposed() {
+        return true;
+    }
+
     private static final BlacklistClassMemberAccessPolicy CLASS_MEMBER_ACCESS_POLICY_INSTANCE
             = new BlacklistClassMemberAccessPolicy();
     private static class BlacklistClassMemberAccessPolicy implements ClassMemberAccessPolicy {

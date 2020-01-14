@@ -106,10 +106,13 @@ final class StaticModel implements TemplateHashModelEx {
             return;
         }
 
+        ClassMemberAccessPolicy effClassMemberAccessPolicy =
+                wrapper.getClassIntrospector().getEffectiveMemberAccessPolicy().forClass(clazz);
+
         Field[] fields = clazz.getFields();
         for (Field field : fields) {
             int mod = field.getModifiers();
-            if (Modifier.isPublic(mod) && Modifier.isStatic(mod)) {
+            if (Modifier.isPublic(mod) && Modifier.isStatic(mod) && effClassMemberAccessPolicy.isFieldExposed(field)) {
                 if (Modifier.isFinal(mod)) {
                     try {
                         // public static final fields are evaluated once and
@@ -127,14 +130,12 @@ final class StaticModel implements TemplateHashModelEx {
             }
         }
         if (wrapper.getExposureLevel() < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
-            ClassMemberAccessPolicy classMemberAccessPolicy =
-                    wrapper.getClassIntrospector().getClassMemberAccessPolicyIfNotIgnored(clazz);
             Method[] methods = clazz.getMethods();
             for (int i = 0; i < methods.length; ++i) {
                 Method method = methods[i];
                 int mod = method.getModifiers();
                 if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
-                        && ClassIntrospector.isMethodExposed(classMemberAccessPolicy, method)) {
+                        && effClassMemberAccessPolicy.isMethodExposed(method)) {
                     String name = method.getName();
                     Object obj = map.get(name);
                     if (obj instanceof Method) {
@@ -149,7 +150,7 @@ final class StaticModel implements TemplateHashModelEx {
                         if (obj != null) {
                             if (LOG.isInfoEnabled()) {
                                 LOG.info("Overwriting value [" + obj + "] for " +
-                                        " key '" + name + "' with [" + method + 
+                                        " key '" + name + "' with [" + method +
                                         "] in static model for " + clazz.getName());
                             }
                         }

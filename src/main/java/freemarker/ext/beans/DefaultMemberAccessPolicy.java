@@ -50,6 +50,7 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
     private final Set<Class<?>> whitelistRuleNonFinalClasses;
     private final WhitelistMemberAccessPolicy whitelistMemberAccessPolicy;
     private final BlacklistMemberAccessPolicy blacklistMemberAccessPolicy;
+    private final boolean toStringAlwaysExposed;
 
     /**
      * Returns the singleton that's compatible with the given incompatible improvements version.
@@ -101,17 +102,24 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
                             throw new IllegalStateException("Unhandled rule: " + rule);
                         }
                     } else {
-                        MemberSelector memberSelector =
-                                MemberSelector.parse(line, classLoader);
-                        Class<?> upperBoundType = memberSelector.getUpperBoundType();
-                        if (upperBoundType != null) {
-                            if (!whitelistRuleFinalClasses.contains(upperBoundType)
-                                    && !whitelistRuleNonFinalClasses.contains(upperBoundType)
-                                    && !typesWithBlacklistUnlistedRule.contains(upperBoundType)) {
-                                throw new IllegalStateException("Type without rule: " + upperBoundType.getName());
+                        MemberSelector memberSelector;
+                        try {
+                            memberSelector = MemberSelector.parse(line, classLoader);
+                        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
+                            // Can happen if we run on an older Java than the list was made for
+                            memberSelector = null;
+                        }
+                        if (memberSelector != null) {
+                            Class<?> upperBoundType = memberSelector.getUpperBoundType();
+                            if (upperBoundType != null) {
+                                if (!whitelistRuleFinalClasses.contains(upperBoundType)
+                                        && !whitelistRuleNonFinalClasses.contains(upperBoundType)
+                                        && !typesWithBlacklistUnlistedRule.contains(upperBoundType)) {
+                                    throw new IllegalStateException("Type without rule: " + upperBoundType.getName());
+                                }
+                                // We always do the same, as "blacklistUnlistedMembers" is also defined via a whitelist:
+                                whitelistMemberSelectors.add(memberSelector);
                             }
-                            // We always do the same, as "blacklistUnlistedMembers" is also defined via a whitelist:
-                            whitelistMemberSelectors.add(memberSelector);
                         }
                     }
                 }
@@ -140,6 +148,10 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
                 }
             }
             blacklistMemberAccessPolicy = new BlacklistMemberAccessPolicy(blacklistMemberSelectors);
+
+            toStringAlwaysExposed =
+                    whitelistMemberAccessPolicy.isToStringAlwaysExposed()
+                    && blacklistMemberAccessPolicy.isToStringAlwaysExposed();
         } catch (Exception e) {
             throw new IllegalStateException("Couldn't init " + this.getClass().getName() + " instance", e);
         }
@@ -170,6 +182,11 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
         } else {
             return blacklistMemberAccessPolicy.forClass(contextClass);
         }
+    }
+
+    @Override
+    public boolean isToStringAlwaysExposed() {
+        return toStringAlwaysExposed;
     }
 
     private boolean isTypeWithWhitelistRule(Class<?> contextClass) {

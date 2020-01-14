@@ -17,8 +17,7 @@
 
 # Copy this file to "build.properties" before editing!
 # These propeties should point to the rt.jar-s of the respective J2SE versions:
-boot.classpath.j2se1.5=C:/Program Files (x86)/Java/jdk1.5.0_16/jre/lib/rt.jar
-boot.classpath.j2se1.6=C:/Program Files/Java/jdk1.6.0_24/jre/lib/rt.jar
+boot.classpath.j2se1.7=c:/Program Files/Java/jre7/lib/rt.jar
 boot.classpath.j2se1.8=C:/Program Files/Java/jdk1.8.0_66/jre/lib/rt.jar
 mvnCommand=C:/Program Files (x86)/maven3/bin/mvn.bat
 gpgCommand=C:/Program Files (x86)/GNU/GnuPG/pub/gpg.exe
