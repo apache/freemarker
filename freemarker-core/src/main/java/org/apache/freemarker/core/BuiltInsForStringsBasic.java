@@ -809,6 +809,7 @@ class BuiltInsForStringsBasic {
     }
 
     static class truncateBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -816,12 +817,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncate(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_wBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -829,12 +832,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateW(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_cBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -842,12 +847,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateC(s, maxLength, (TemplateStringModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -855,12 +862,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }
     }
 
     static class truncate_w_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -868,12 +877,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateWM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }
     }
 
     static class truncate_c_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -881,6 +892,7 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateCM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }

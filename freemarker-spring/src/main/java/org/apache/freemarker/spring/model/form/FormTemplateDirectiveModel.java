@@ -282,6 +282,7 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
         return autocomplete;
     }
 
+    @Override
     public String getName() {
         return name;
     }

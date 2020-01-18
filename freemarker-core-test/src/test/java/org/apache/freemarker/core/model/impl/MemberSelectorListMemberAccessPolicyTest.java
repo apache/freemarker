@@ -547,6 +547,7 @@ public class MemberSelectorListMemberAccessPolicyTest {
 
     public static class D1 implements I1 {
         public int f1;
+        @Override
         public void m1() {
         }
     }
@@ -560,6 +561,7 @@ public class MemberSelectorListMemberAccessPolicyTest {
 
         }
 
+        @Override
         public void m2() {
         }
     }
@@ -568,6 +570,7 @@ public class MemberSelectorListMemberAccessPolicyTest {
     }
 
     public static class F1 implements J1 {
+        @Override
         public void m2() {
         }
     }
@@ -661,6 +664,7 @@ public class MemberSelectorListMemberAccessPolicyTest {
         @Override
         public void m5() {}
 
+        @Override
         public void m6() {}
     }
 

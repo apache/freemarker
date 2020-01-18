@@ -39,6 +39,7 @@ public class EchoTag extends TagSupport {
         this.message = message;
     }
 
+    @Override
     public int doEndTag() throws JspException {
         try {
             pageContext.getOut().print(message);
@@ -48,6 +49,7 @@ public class EchoTag extends TagSupport {
         return EVAL_PAGE;
     }
 
+    @Override
     public void release() {
         this.message = null;
     }

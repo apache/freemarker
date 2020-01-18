@@ -306,6 +306,7 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
         return true;
     }
 
+    @Override
     protected void writeDefaultAttributes(TagOutputter tagOut) throws TemplateException, IOException {
         super.writeDefaultAttributes(tagOut);
         writeOptionalAttributes(tagOut);

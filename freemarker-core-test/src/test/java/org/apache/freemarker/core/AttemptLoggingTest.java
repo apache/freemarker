@@ -65,6 +65,7 @@ public class AttemptLoggingTest extends TemplateTest {
         setConfiguration(newConfigurationBuilder()
                 .attemptExceptionReporter(new TestAttemptExceptionReporter(reports))
                 .templateExceptionHandler(new TemplateExceptionHandler() {
+                    @Override
                     public void handleTemplateException(TemplateException te, Environment env, Writer out)
                             throws TemplateException {
                         try {
@@ -87,6 +88,7 @@ public class AttemptLoggingTest extends TemplateTest {
             this.reports = reports;
         }
 
+        @Override
         public void report(TemplateException te, Environment env) {
             reports.add(te.getMessage());
         }

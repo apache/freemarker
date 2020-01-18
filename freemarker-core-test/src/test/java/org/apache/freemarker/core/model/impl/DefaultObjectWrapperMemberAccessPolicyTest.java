@@ -519,16 +519,20 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
     public void testMemberAccessPolicyAndStatics() throws TemplateException {
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .memberAccessPolicy(new MemberAccessPolicy() {
+                    @Override
                     public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
                         return new ClassMemberAccessPolicy() {
+                            @Override
                             public boolean isMethodExposed(Method method) {
                                 return method.getName().equals("m1");
                             }
 
+                            @Override
                             public boolean isConstructorExposed(Constructor<?> constructor) {
                                 return false;
                             }
 
+                            @Override
                             public boolean isFieldExposed(Field field) {
                                 String name = field.getName();
                                 return name.equals("F1") || name.equals("V1");

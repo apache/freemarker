@@ -43,6 +43,7 @@ import org.junit.Test;
  */
 public class GenericConverterTest extends ConverterTest {
 
+    @Override
     protected void createSourceFiles() throws IOException {
         write(new File(srcDir, "t1.txt"), "t1", UTF_8);
         write(new File(srcDir, "t2.txt"), "t2", UTF_8);

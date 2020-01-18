@@ -49,6 +49,7 @@ public class MethodMatcherTest {
     }
 
     public static class TestReturnTypeOverloadString extends TestReturnTypeOverloadGeneric<String> {
+        @Override
         public String m() {
             return "";
         };
@@ -136,16 +137,19 @@ public class MethodMatcherTest {
     }
 
     public static class TestInheritance2SafeRunnable1 implements Runnable {
+        @Override
         public void run() {
         }
     }
 
     public static class TestInheritance2SafeRunnable2 implements Runnable {
+        @Override
         public void run() {
         }
     }
 
     public static class TestInheritance2UnsafeRunnable implements Runnable {
+        @Override
         public void run() {
         }
     }

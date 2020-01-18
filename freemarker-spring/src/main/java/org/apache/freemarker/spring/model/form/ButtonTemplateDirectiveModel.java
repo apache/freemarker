@@ -140,6 +140,7 @@ class ButtonTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
         }
     }
 
+    @Override
     public String getName() {
         return name;
     }

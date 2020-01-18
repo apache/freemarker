@@ -56,6 +56,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     private AssertFailsDirective() {
     }
 
+    @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         String message = CallableUtils.getOptionalStringArgument(args, MESSAGE_ARG_IDX, this);

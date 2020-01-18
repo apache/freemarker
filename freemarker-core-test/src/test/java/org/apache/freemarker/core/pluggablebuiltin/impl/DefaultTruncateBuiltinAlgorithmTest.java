@@ -398,6 +398,7 @@ public class DefaultTruncateBuiltinAlgorithmTest {
                 EMPTY_TERMINATOR_INSTANCE, DOTS_INSTANCE, ASCII_NO_W_SPACE_INSTANCE, M_TERM_INSTANCE }) {
             for (TruncateCaller tc : new TruncateCaller[] {
                     new TruncateCaller() {
+                        @Override
                         public TemplateModel truncate(String s, int maxLength, TemplateModel terminator,
                                 Integer terminatorLength, Environment env) throws
                                 TemplateException {
@@ -405,6 +406,7 @@ public class DefaultTruncateBuiltinAlgorithmTest {
                         }
                     },
                     new TruncateCaller() {
+                        @Override
                         public TemplateModel truncate(String s, int maxLength, TemplateModel terminator,
                                 Integer terminatorLength, Environment env) throws
                                 TemplateException {
@@ -412,6 +414,7 @@ public class DefaultTruncateBuiltinAlgorithmTest {
                         }
                     },
                     new TruncateCaller() {
+                        @Override
                         public TemplateModel truncate(String s, int maxLength, TemplateModel terminator,
                                 Integer terminatorLength, Environment env) throws
                                 TemplateException {
