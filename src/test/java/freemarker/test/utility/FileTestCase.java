@@ -105,11 +105,8 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void saveString(File actualFile, String actualContents) throws IOException {
-        Writer w = new OutputStreamWriter(new FileOutputStream(actualFile), "UTF-8");
-        try {
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(actualFile), "UTF-8")) {
             w.write(actualContents);
-        } finally {
-            w.close();
         }
     }
 

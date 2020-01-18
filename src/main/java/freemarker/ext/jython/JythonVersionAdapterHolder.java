@@ -58,11 +58,7 @@ class JythonVersionAdapterHolder {
                         "freemarker.ext.jython._Jython20And21VersionAdapter")
                     .newInstance();
             }
-        } catch (ClassNotFoundException e) {
-            throw adapterCreationException(e);
-        } catch (IllegalAccessException e) {
-            throw adapterCreationException(e);
-        } catch (InstantiationException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw adapterCreationException(e);
         }
     }

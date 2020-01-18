@@ -85,7 +85,7 @@ public class DefaultObjectWrapperTest {
     
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
-        List<Version> expected = new ArrayList<Version>();
+        List<Version> expected = new ArrayList<>();
         for (int u = 0; u < 21; u++) {
             expected.add(Configuration.VERSION_2_3_0);
         }
@@ -100,7 +100,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.29
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.30
 
-        List<Version> actual = new ArrayList<Version>();
+        List<Version> actual = new ArrayList<>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
@@ -451,8 +451,8 @@ public class DefaultObjectWrapperTest {
         {
             // Check custom TM usage and round trip:
             final TemplateModel mr = (TemplateModel) ((TemplateMethodModelEx) bean.get("incTupple"))
-                    .exec(Collections.singletonList(ow.wrap(new Tupple<Integer, Integer>(1, 2))));
-            assertEquals(new Tupple<Integer, Integer>(2, 3), ow.unwrap(mr));
+                    .exec(Collections.singletonList(ow.wrap(new Tupple<>(1, 2))));
+            assertEquals(new Tupple<>(2, 3), ow.unwrap(mr));
             assertTrue(TuppleAdapter.class.isInstance(mr));
         }
     }
@@ -506,7 +506,7 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testMapAdapter() throws TemplateModelException {
-        HashMap<String, Object> testMap = new LinkedHashMap<String, Object>();
+        HashMap<String, Object> testMap = new LinkedHashMap<>();
         testMap.put("a", 1);
         testMap.put("b", null);
         testMap.put("c", "C");
@@ -861,7 +861,7 @@ public class DefaultObjectWrapperTest {
 
     private void testIteratorWrapping(DefaultObjectWrapper ow, Class<?> expectedTMClass, Class<?> expectedPOJOClass)
             throws TemplateModelException {
-        final List<String> list = ImmutableList.<String> of("a", "b", "c");
+        final List<String> list = ImmutableList.of("a", "b", "c");
         Iterator<String> it = list.iterator();
         TemplateCollectionModel coll = (TemplateCollectionModel) ow.wrap(it);
 
@@ -990,7 +990,7 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testNoEnumerationAdapter() throws TemplateModelException {
          DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25).build();
-         Vector<String> vector = new Vector<String>();
+         Vector<String> vector = new Vector<>();
          vector.add("a");
          vector.add("b");
          
@@ -1003,7 +1003,7 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testEnumerationAdapter() throws TemplateModelException {
          DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_26).build();
-         Vector<String> vector = new Vector<String>();
+         Vector<String> vector = new Vector<>();
          vector.add("a");
          vector.add("b");
          

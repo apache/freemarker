@@ -77,7 +77,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
 
     private void initSequence() throws TemplateModelException {
         if (data == null) {
-            data = new ArrayList<TemplateModel>();
+            data = new ArrayList<>();
             TemplateModelIterator it = collection.iterator();
             while (it.hasNext()) {
                 data.add(it.next());

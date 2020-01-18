@@ -174,7 +174,7 @@ public final class Environment extends Configurable {
     private Throwable lastThrowable;
 
     private TemplateModel lastReturnValue;
-    private Map<Object, Namespace> macroToNamespaceLookup = new IdentityHashMap<Object, Namespace>();
+    private Map<Object, Namespace> macroToNamespaceLookup = new IdentityHashMap<>();
 
     private TemplateNodeModel currentVisitorNode;
     private TemplateSequenceModel nodeNamespaces;
@@ -509,11 +509,7 @@ public final class Environment extends Configurable {
                     } else {
                         throw t;
                     }
-                } catch (TemplateException e) {
-                    throw e;
-                } catch (IOException e) {
-                    throw e;
-                } catch (Error e) {
+                } catch (TemplateException | IOException | Error e) {
                     throw e;
                 } catch (Throwable e) {
                     if (EvalUtil.shouldWrapUncheckedException(e, this)) {
@@ -942,7 +938,7 @@ public final class Environment extends Configurable {
                         } else {
                             List<NameValuePair> orderLastByNameCatchAll = withArgsState.orderLastByNameCatchAll;
                             if (orderLastByNameCatchAll == null) {
-                                orderLastByNameCatchAll = new ArrayList<NameValuePair>();
+                                orderLastByNameCatchAll = new ArrayList<>();
                                 withArgsState.orderLastByNameCatchAll = orderLastByNameCatchAll;
                             }
                             orderLastByNameCatchAll.add(new NameValuePair(argName, argValue));
@@ -1599,7 +1595,7 @@ public final class Environment extends Configurable {
             throws TemplateValueFormatException {
         if (cachedTemplateNumberFormats == null) {
             if (cacheResult) {
-                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+                cachedTemplateNumberFormats = new HashMap<>();
             }
         } else {
             TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
@@ -2073,7 +2069,7 @@ public final class Environment extends Configurable {
                 cachedFormatsByFormatString = cachedTempDateFormatsByFmtStrArray[cacheArrIdx];
                 if (cachedFormatsByFormatString == null) {
                     if (cacheResult) {
-                        cachedFormatsByFormatString = new HashMap<String, TemplateDateFormat>(4);
+                        cachedFormatsByFormatString = new HashMap<>(4);
                         cachedTempDateFormatsByFmtStrArray[cacheArrIdx] = cachedFormatsByFormatString;
                         format = null;
                     } else {
@@ -3196,7 +3192,7 @@ public final class Environment extends Configurable {
     public Object setCustomState(Object identityKey, Object value) {
         IdentityHashMap<Object, Object> customStateVariables = this.customStateVariables;
         if (customStateVariables == null) {
-            customStateVariables = new IdentityHashMap<Object, Object>();
+            customStateVariables = new IdentityHashMap<>();
             this.customStateVariables = customStateVariables;
         }
         return customStateVariables.put(identityKey, value);

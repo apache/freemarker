@@ -39,7 +39,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
 
     private final TemplateLoader[] templateLoaders;
     private final Map<String, TemplateLoader> lastTemplateLoaderForName
-            = new ConcurrentHashMap<String, TemplateLoader>();
+            = new ConcurrentHashMap<>();
     
     private boolean sticky = true;
 

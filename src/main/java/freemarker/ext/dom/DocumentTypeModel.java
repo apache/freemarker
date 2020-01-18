@@ -46,7 +46,7 @@ class DocumentTypeModel extends NodeModel {
     }
     
     public String getNodeName() {
-        return "@document_type$" + ((DocumentType) node).getNodeName();
+        return "@document_type$" + node.getNodeName();
     }
     
     public boolean isEmpty() {

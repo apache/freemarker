@@ -66,31 +66,31 @@ public class NumberUtil {
      */
     public static int getSignum(Number num) throws ArithmeticException {
         if (num instanceof Integer) {
-            int n = ((Integer) num).intValue();
+            int n = num.intValue();
             return n > 0 ? 1 : (n == 0 ? 0 : -1);
         } else if (num instanceof BigDecimal) {
             BigDecimal n = (BigDecimal) num;
             return n.signum();
         } else if (num instanceof Double) {
-            double n = ((Double) num).doubleValue();
+            double n = num.doubleValue();
             if (n > 0) return 1;
             else if (n == 0) return 0;
             else if (n < 0) return -1;
             else throw new ArithmeticException("The signum of " + n + " is not defined.");  // NaN
         } else if (num instanceof Float) {
-            float n = ((Float) num).floatValue();
+            float n = num.floatValue();
             if (n > 0) return 1;
             else if (n == 0) return 0;
             else if (n < 0) return -1;
             else throw new ArithmeticException("The signum of " + n + " is not defined.");  // NaN
         } else if (num instanceof Long) {
-            long n = ((Long) num).longValue();
+            long n = num.longValue();
             return n > 0 ? 1 : (n == 0 ? 0 : -1);
         } else if (num instanceof Short) {
-            short n = ((Short) num).shortValue();
+            short n = num.shortValue();
             return n > 0 ? 1 : (n == 0 ? 0 : -1);
         } else if (num instanceof Byte) {
-            byte n = ((Byte) num).byteValue();
+            byte n = num.byteValue();
             return n > 0 ? 1 : (n == 0 ? 0 : -1);
         } else if (num instanceof BigInteger) {
             BigInteger n = (BigInteger) num;

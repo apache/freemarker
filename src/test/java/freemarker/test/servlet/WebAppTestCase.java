@@ -59,7 +59,7 @@ public class WebAppTestCase {
 
     private static Server server;
     private static ContextHandlerCollection contextHandlers;
-    private static Map<String, WebAppContext> deployedWebApps = new HashMap<String, WebAppContext>();
+    private static Map<String, WebAppContext> deployedWebApps = new HashMap<>();
     private static volatile File testTempDirectory;
 
     @BeforeClass
@@ -123,11 +123,8 @@ public class WebAppTestCase {
 
             final String content;
             if (responseCode == 200) {
-                InputStream in = httpCon.getInputStream();
-                try {
+                try (InputStream in = httpCon.getInputStream()) {
                     content = IOUtils.toString(in, "UTF-8");
-                } finally {
-                    in.close();
                 }
             } else {
                 content = null;
@@ -184,12 +181,9 @@ public class WebAppTestCase {
         final String expected;
         {
             ClassPathResource cpResource = findWebAppDirectoryResource(webAppName);
-            final InputStream in = cpResource.resolverClass.getResourceAsStream(
-                    cpResource.path + EXPECTED_DIR + expectedFileName);
-            try {
+            try (InputStream in = cpResource.resolverClass.getResourceAsStream(
+                    cpResource.path + EXPECTED_DIR + expectedFileName)) {
                 expected = TestUtil.removeTxtCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
-            } finally {
-                in.close();
             }
         }
         assertEquals(maskIgnored(expected, ignoredParts), maskIgnored(actual, ignoredParts));

@@ -56,7 +56,7 @@ public class TemplateModelUtilTest {
     
     @Test
     public void testGetKeyValuePairIterator() throws Exception {
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> map = new LinkedHashMap<>();
         TemplateHashModelEx thme = new TemplateHashModelExOnly(map);
         
         assertetGetKeyValuePairIteratorContent("", thme);
@@ -92,7 +92,7 @@ public class TemplateModelUtilTest {
 
     @Test
     public void testGetKeyValuePairIteratorWithEx2() throws Exception {
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> map = new LinkedHashMap<>();
         TemplateHashModelEx thme = DefaultMapAdapter.adapt(map, ow);
         
         assertetGetKeyValuePairIteratorContent("", thme);
@@ -222,15 +222,15 @@ public class TemplateModelUtilTest {
             
             assertEquals(expected.size(), actualEx.size());
             
-            List<String> expectedKeys = new ArrayList<String>(expected.keySet());
-            List<String> actualKeys = new ArrayList<String>();
+            List<String> expectedKeys = new ArrayList<>(expected.keySet());
+            List<String> actualKeys = new ArrayList<>();
             for (TemplateModelIterator it = ((TemplateHashModelEx) actual).keys().iterator(); it.hasNext(); ) {
                 actualKeys.add(((TemplateScalarModel) it.next()).getAsString());
             }
             assertEquals(expectedKeys, actualKeys);
             
-            List<Integer> expectedValues = new ArrayList<Integer>(expected.values());
-            List<Integer> actualValues = new ArrayList<Integer>();
+            List<Integer> expectedValues = new ArrayList<>(expected.values());
+            List<Integer> actualValues = new ArrayList<>();
             for (TemplateModelIterator it = ((TemplateHashModelEx) actual).values().iterator(); it.hasNext(); ) {
                 actualValues.add((Integer) ((TemplateNumberModel) it.next()).getAsNumber());
             }

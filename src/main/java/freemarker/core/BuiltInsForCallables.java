@@ -109,7 +109,7 @@ class BuiltInsForCallables {
                         return new TemplateMethodModelEx() {
                             public Object exec(List origArgs) throws TemplateModelException {
                                 int withArgsSize = withArgs.size();
-                                List<TemplateModel> newArgs = new ArrayList<TemplateModel>(
+                                List<TemplateModel> newArgs = new ArrayList<>(
                                         withArgsSize + origArgs.size());
 
                                 if (isOrderLast()) {
@@ -129,7 +129,7 @@ class BuiltInsForCallables {
                         return new TemplateMethodModel() {
                             public Object exec(List origArgs) throws TemplateModelException {
                                 int withArgsSize = withArgs.size();
-                                List<String> newArgs = new ArrayList<String>(
+                                List<String> newArgs = new ArrayList<>(
                                         withArgsSize + origArgs.size());
 
                                 if (isOrderLast()) {
@@ -199,7 +199,7 @@ class BuiltInsForCallables {
                             int withArgsSize = withArgs.size();
                             // This is unnecessarily big if there are overridden arguments, but we care more about
                             // avoiding rehashing.
-                            Map<String, TemplateModel> newArgs = new LinkedHashMap<String, TemplateModel>(
+                            Map<String, TemplateModel> newArgs = new LinkedHashMap<>(
                                     (withArgsSize + origArgs.size()) * 4 / 3, 1f);
 
                             TemplateHashModelEx2.KeyValuePairIterator withArgsIter =

@@ -114,9 +114,8 @@ import freemarker.template.Version;
 public class BeansWrapperBuilder extends BeansWrapperConfiguration {
 
     private final static Map<ClassLoader, Map<BeansWrapperConfiguration, WeakReference<BeansWrapper>>>
-            INSTANCE_CACHE = new WeakHashMap<
-                    ClassLoader, Map<BeansWrapperConfiguration, WeakReference<BeansWrapper>>>();
-    private final static ReferenceQueue<BeansWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<BeansWrapper>();
+            INSTANCE_CACHE = new WeakHashMap<>();
+    private final static ReferenceQueue<BeansWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
    
     private static class BeansWrapperFactory
             implements _BeansAPI._BeansWrapperSubclassFactory<BeansWrapper, BeansWrapperConfiguration> {

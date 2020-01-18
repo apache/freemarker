@@ -544,11 +544,8 @@ public class TemplateCache {
         {
             if (parseAsFTL) {
                 try {
-                    final Reader reader = templateLoader.getReader(source, initialEncoding);
-                    try {
+                    try (Reader reader = templateLoader.getReader(source, initialEncoding)) {
                         template = new Template(name, sourceName, reader, config, tc, initialEncoding);
-                    } finally {
-                        reader.close();
                     }
                 } catch (Template.WrongEncodingException wee) {
                     String actualEncoding = wee.getTemplateSpecifiedEncoding();
@@ -556,21 +553,18 @@ public class TemplateCache {
                         LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
                                 + actualEncoding + "\". Template: " + sourceName);
                     }
-                    
-                    final Reader reader = templateLoader.getReader(source, actualEncoding);
-                    try {
+
+                    try (Reader reader = templateLoader.getReader(source, actualEncoding)) {
                         template = new Template(name, sourceName, reader, config, tc, actualEncoding);
-                    } finally {
-                        reader.close();
                     }
                 }
             } else {
                 // Read the contents into a StringWriter, then construct a single-text-block template from it.
                 final StringWriter sw = new StringWriter();
                 final char[] buf = new char[4096];
-                final Reader reader = templateLoader.getReader(source, initialEncoding);
-                try {
-                    fetchChars: while (true) {
+                try (Reader reader = templateLoader.getReader(source, initialEncoding)) {
+                    fetchChars:
+                    while (true) {
                         int charsRead = reader.read(buf);
                         if (charsRead > 0) {
                             sw.write(buf, 0, charsRead);
@@ -578,8 +572,6 @@ public class TemplateCache {
                             break fetchChars;
                         }
                     }
-                } finally {
-                    reader.close();
                 }
                 template = Template.getPlainTextTemplate(name, sourceName, sw.toString(), config);
                 template.setEncoding(initialEncoding);

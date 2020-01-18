@@ -165,13 +165,13 @@ class ClassIntrospector {
 
     private final Object sharedLock;
     private final Map<Class<?>, Map<Object, Object>> cache
-            = new ConcurrentHashMap<Class<?>, Map<Object, Object>>(0, 0.75f, 16);
-    private final Set<String> cacheClassNames = new HashSet<String>(0);
-    private final Set<Class<?>> classIntrospectionsInProgress = new HashSet<Class<?>>(0);
+            = new ConcurrentHashMap<>(0, 0.75f, 16);
+    private final Set<String> cacheClassNames = new HashSet<>(0);
+    private final Set<Class<?>> classIntrospectionsInProgress = new HashSet<>(0);
 
     private final List<WeakReference<Object/*ClassBasedModelFactory|ModelCache>*/>> modelFactories
-            = new LinkedList<WeakReference<Object>>();
-    private final ReferenceQueue<Object> modelFactoriesRefQueue = new ReferenceQueue<Object>();
+            = new LinkedList<>();
+    private final ReferenceQueue<Object> modelFactoriesRefQueue = new ReferenceQueue<>();
 
     private int clearingCounter;
 
@@ -275,7 +275,7 @@ class ClassIntrospector {
      * Creates a {@link Map} with the content as described for the return value of {@link #get(Class)}.
      */
     private Map<Object, Object> createClassIntrospectionData(Class<?> clazz) {
-        final Map<Object, Object> introspData = new HashMap<Object, Object>();
+        final Map<Object, Object> introspData = new HashMap<>();
         MemberAccessPolicy effMemberAccessPolicy = getEffectiveMemberAccessPolicy();
         ClassMemberAccessPolicy effClassMemberAccessPolicy = effMemberAccessPolicy.forClass(clazz);
 
@@ -394,7 +394,7 @@ class ClassIntrospector {
                                     method.getParameterTypes());
                             if (replaced != null) {
                                 if (argTypesUsedByIndexerPropReaders == null) {
-                                    argTypesUsedByIndexerPropReaders = new IdentityHashMap<Method, Void>();
+                                    argTypesUsedByIndexerPropReaders = new IdentityHashMap<>();
                                 }
                                 argTypesUsedByIndexerPropReaders.put(method, null);                                
                             }
@@ -444,7 +444,7 @@ class ClassIntrospector {
                     if (propName != null) {
                         if (mergedPRMPs == null) {
                             // Lazy initialization
-                            mergedPRMPs = new LinkedHashMap<String, Object>();
+                            mergedPRMPs = new LinkedHashMap<>();
                         }
                         if (paramTypes.length == 0) {
                             mergeInPropertyReaderMethod(mergedPRMPs, propName, method);
@@ -467,7 +467,7 @@ class ClassIntrospector {
         }
         
         // Now we convert the PRMPs to PDs, handling case where the normal and the indexed read methods contradict.
-        List<PropertyDescriptor> mergedPDs = new ArrayList<PropertyDescriptor>(mergedPRMPs.size());
+        List<PropertyDescriptor> mergedPDs = new ArrayList<>(mergedPRMPs.size());
         for (Entry<String, Object> entry : mergedPRMPs.entrySet()) {
             String propName = entry.getKey();
             Object propDescObj = entry.getValue();
@@ -616,11 +616,11 @@ class ClassIntrospector {
         for (Method method : clazz.getMethods()) {
             if (_JavaVersions.JAVA_8.isDefaultMethod(method) && !method.isBridge()) {
                 if (defaultMethodsToAddByName == null) {
-                    defaultMethodsToAddByName = new HashMap<String, List<Method>>();
+                    defaultMethodsToAddByName = new HashMap<>();
                 }
                 List<Method> overloads = defaultMethodsToAddByName.get(method.getName());
                 if (overloads == null) {
-                    overloads = new ArrayList<Method>(0);
+                    overloads = new ArrayList<>(0);
                     defaultMethodsToAddByName.put(method.getName(), overloads);
                 }
                 overloads.add(method);
@@ -634,7 +634,7 @@ class ClassIntrospector {
 
         // Recreate introspectionMDs so that its size can grow: 
         ArrayList<MethodDescriptor> newIntrospectionMDs
-                = new ArrayList<MethodDescriptor>(introspectionMDs.size() + 16);
+                = new ArrayList<>(introspectionMDs.size() + 16);
         for (MethodDescriptor introspectorMD : introspectionMDs) {
             Method introspectorM = introspectorMD.getMethod();
             // Prevent cases where the same method is added with different return types both from the list of default
@@ -731,7 +731,7 @@ class ClassIntrospector {
             Class<?> clazz, ClassMemberAccessPolicy effClassMemberAccessPolicy) {
         try {
             Constructor<?>[] ctorsUnfiltered = clazz.getConstructors();
-            List<Constructor<?>> ctors = new ArrayList<Constructor<?>>(ctorsUnfiltered.length);
+            List<Constructor<?>> ctors = new ArrayList<>(ctorsUnfiltered.length);
             for (Constructor<?> ctor : ctorsUnfiltered) {
                 if (effClassMemberAccessPolicy.isConstructorExposed(ctor)) {
                     ctors.add(ctor);
@@ -763,7 +763,7 @@ class ClassIntrospector {
      * superclasses and interfaces. Basically upcasts every method to the nearest accessible method.
      */
     private static Map<ExecutableMemberSignature, List<Method>> discoverAccessibleMethods(Class<?> clazz) {
-        Map<ExecutableMemberSignature, List<Method>> accessibles = new HashMap<ExecutableMemberSignature, List<Method>>();
+        Map<ExecutableMemberSignature, List<Method>> accessibles = new HashMap<>();
         discoverAccessibleMethods(clazz, accessibles);
         return accessibles;
     }
@@ -790,7 +790,7 @@ class ClassIntrospector {
                     List<Method> methodList = accessibles.get(sig);
                     if (methodList == null) {
                      // TODO Collection.singletonList is more efficient, though read only.
-                        methodList = new LinkedList<Method>();
+                        methodList = new LinkedList<>();
                         accessibles.put(sig, methodList);
                     }
                     methodList.add(method);
@@ -867,7 +867,7 @@ class ClassIntrospector {
         @SuppressWarnings("unchecked")
         Map<Method, Class<?>[]> argTypes = (Map<Method, Class<?>[]>) classInfo.get(ARG_TYPES_BY_METHOD_KEY);
         if (argTypes == null) {
-            argTypes = new HashMap<Method, Class<?>[]>();
+            argTypes = new HashMap<>();
             classInfo.put(ARG_TYPES_BY_METHOD_KEY, argTypes);
         }
         return argTypes;
@@ -978,7 +978,7 @@ class ClassIntrospector {
     private void registerModelFactory(Object mf) {
         // Note that this `synchronized (sharedLock)` is also need for the BeansWrapper constructor to work safely.
         synchronized (sharedLock) {
-            modelFactories.add(new WeakReference<Object>(mf, modelFactoriesRefQueue));
+            modelFactories.add(new WeakReference<>(mf, modelFactoriesRefQueue));
             removeClearedModelFactoryReferences();
         }
     }
@@ -1044,7 +1044,7 @@ class ClassIntrospector {
      * interface.
      */
     Set<Object> keySet(Class<?> clazz) {
-        Set<Object> set = new HashSet<Object>(get(clazz).keySet());
+        Set<Object> set = new HashSet<>(get(clazz).keySet());
         set.remove(CONSTRUCTORS_KEY);
         set.remove(GENERIC_GET_KEY);
         set.remove(ARG_TYPES_BY_METHOD_KEY);

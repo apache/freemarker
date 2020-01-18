@@ -42,7 +42,7 @@ class NodeOutputter {
     private String defaultNS;
     private boolean hasDefaultNS;
     private boolean explicitDefaultNSPrefix;
-    private LinkedHashMap<String, String> namespacesToPrefixLookup = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, String> namespacesToPrefixLookup = new LinkedHashMap<>();
     private String namespaceDecl;
     int nextGeneratedPrefixNumber = 1;
     

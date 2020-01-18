@@ -507,8 +507,8 @@ extends
 
                 // Process the template and write out
                 // the result as the outFile.
-                Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), encoding));
-                try {
+                try (Writer writer = new BufferedWriter(
+                        new OutputStreamWriter(new FileOutputStream(outFile), encoding))) {
                     if (parsedTemplate == null) {
                         throw new BuildException("No template file specified in build script or in XML file");
                     }
@@ -534,8 +534,6 @@ extends
                     }
                     env.process();
                     writer.flush();
-                } finally {
-                    writer.close();
                 }
 
                 log("Output: " + outFile, Project.MSG_INFO );

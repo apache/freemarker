@@ -172,9 +172,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
                     
                     try {
                         return env.importLib(template, null);
-                    } catch (IOException e) {
-                        throw new _TemplateModelException(e, "Failed to import loaded template; see cause exception");
-                    } catch (TemplateException e) {
+                    } catch (IOException | TemplateException e) {
                         throw new _TemplateModelException(e, "Failed to import loaded template; see cause exception");
                     }
                 }

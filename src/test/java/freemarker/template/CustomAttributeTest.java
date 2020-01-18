@@ -44,7 +44,7 @@ public class CustomAttributeTest {
     private static final Object VALUE_2 = new Object();
     private static final Object VALUE_3 = new Object();
     private static final Object VALUE_LIST = ImmutableList.<Object>of(
-            "s", BigDecimal.valueOf(2), Boolean.TRUE, ImmutableMap.<String, String>of("a", "A"));
+            "s", BigDecimal.valueOf(2), Boolean.TRUE, ImmutableMap.of("a", "A"));
     private static final Object VALUE_BIGDECIMAL = BigDecimal.valueOf(22);
 
     private static final CustomAttribute CUST_ATT_TMP_1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);

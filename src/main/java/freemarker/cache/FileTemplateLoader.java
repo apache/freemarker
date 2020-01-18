@@ -116,7 +116,7 @@ public class FileTemplateLoader implements TemplateLoader {
      */
     public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck) throws IOException {
         try {
-            Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
+            Object[] retval = AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
                 public Object[] run() throws IOException {
                     if (!baseDir.exists()) {
                         throw new FileNotFoundException(baseDir + " does not exist.");

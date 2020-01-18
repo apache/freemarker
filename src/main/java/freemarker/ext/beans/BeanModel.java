@@ -247,7 +247,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
         if (cachedModel != null) {
             synchronized (this) {
                 if (memberCache == null) {
-                    memberCache = new HashMap<Object, TemplateModel>();
+                    memberCache = new HashMap<>();
                 }
                 memberCache.put(desc, cachedModel);
             }
@@ -323,7 +323,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
     }
 
     public TemplateCollectionModel values() throws TemplateModelException {
-        List<Object> values = new ArrayList<Object>(size());
+        List<Object> values = new ArrayList<>(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
             String key = ((TemplateScalarModel) it.next()).getAsString();

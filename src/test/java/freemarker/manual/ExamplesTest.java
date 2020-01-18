@@ -36,11 +36,8 @@ public abstract class ExamplesTest extends TemplateTest {
 
     protected Properties loadPropertiesFile(String name) throws IOException {
         Properties props = new Properties();
-        InputStream in = this.getClass().getResourceAsStream(name);
-        try {
+        try (InputStream in = this.getClass().getResourceAsStream(name)) {
             props.load(in);
-        } finally {
-            in.close();
         }
         return props;
     }

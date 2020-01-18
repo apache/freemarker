@@ -291,7 +291,7 @@ public class LazilyGeneratedCollectionTest extends TemplateTest {
         protected final List<Number> elements;
 
         public ListContainingTemplateModel(Number... elements) {
-            this.elements = new ArrayList<Number>(Arrays.asList(elements));
+            this.elements = new ArrayList<>(Arrays.asList(elements));
         }
 
         public int size() {

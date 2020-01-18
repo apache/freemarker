@@ -318,8 +318,8 @@ public class _MessageUtil {
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, (Environment) null, desc)
-                : new _MiscTemplateException(e, (Environment) null, desc);
+                ? new _TemplateModelException(e, null, desc)
+                : new _MiscTemplateException(e, null, desc);
     }
     
     public static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
@@ -329,8 +329,8 @@ public class _MessageUtil {
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, (Environment) null, desc)
-                : new _MiscTemplateException(e, (Environment) null, desc);
+                ? new _TemplateModelException(e, null, desc)
+                : new _MiscTemplateException(e, null, desc);
     }
 
     public static TemplateModelException newKeyValuePairListingNonStringKeyExceptionMessage(

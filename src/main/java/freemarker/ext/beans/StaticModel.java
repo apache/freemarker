@@ -44,7 +44,7 @@ final class StaticModel implements TemplateHashModelEx {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
     private final Class<?> clazz;
     private final BeansWrapper wrapper;
-    private final Map<String, Object> map = new HashMap<String, Object>();
+    private final Map<String, Object> map = new HashMap<>();
 
     StaticModel(Class<?> clazz, BeansWrapper wrapper) throws TemplateModelException {
         this.clazz = clazz;

@@ -39,10 +39,9 @@ import freemarker.ext.beans._BeansAPI;
 public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfiguration {
 
     private final static Map<ClassLoader, Map<DefaultObjectWrapperConfiguration, WeakReference<DefaultObjectWrapper>>>
-            INSTANCE_CACHE = new WeakHashMap<
-                    ClassLoader, Map<DefaultObjectWrapperConfiguration, WeakReference<DefaultObjectWrapper>>>();
+            INSTANCE_CACHE = new WeakHashMap<>();
     private final static ReferenceQueue<DefaultObjectWrapper> INSTANCE_CACHE_REF_QUEUE
-            = new ReferenceQueue<DefaultObjectWrapper>();
+            = new ReferenceQueue<>();
     
     /**
      * Creates a builder that creates a {@link DefaultObjectWrapper} with the given {@code incompatibleImprovements};

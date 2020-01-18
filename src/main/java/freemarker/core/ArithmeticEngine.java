@@ -377,8 +377,8 @@ public abstract class ArithmeticEngine {
                     int n = n1 - n2;
                     return
                         ((n ^ n1) < 0 && (n ^ ~n2) < 0) // overflow check
-                        ? (Number) Long.valueOf(((long) n1) - n2)
-                        : (Number) Integer.valueOf(n);
+                        ? Long.valueOf(((long) n1) - n2)
+                        : Integer.valueOf(n);
                 }
                 case LONG: {
                     long n1 = first.longValue();
@@ -386,8 +386,8 @@ public abstract class ArithmeticEngine {
                     long n = n1 - n2;
                     return
                         ((n ^ n1) < 0 && (n ^ ~n2) < 0) // overflow check
-                        ? (Number) toBigInteger(first).subtract(toBigInteger(second))
-                        : (Number) Long.valueOf(n);
+                        ? toBigInteger(first).subtract(toBigInteger(second))
+                        : Long.valueOf(n);
                 }
                 case FLOAT: {
                     return Float.valueOf(first.floatValue() - second.floatValue());
@@ -420,8 +420,8 @@ public abstract class ArithmeticEngine {
                     int n = n1 * n2;
                     return
                         n1 == 0 || n / n1 == n2 // overflow check
-                        ? (Number) Integer.valueOf(n)
-                        : (Number) Long.valueOf(((long) n1) * n2);
+                        ? Integer.valueOf(n)
+                        : Long.valueOf(((long) n1) * n2);
                 }
                 case LONG: {
                     long n1 = first.longValue();
@@ -429,8 +429,8 @@ public abstract class ArithmeticEngine {
                     long n = n1 * n2;
                     return
                         n1 == 0L || n / n1 == n2 // overflow check
-                        ? (Number) Long.valueOf(n)
-                        : (Number) toBigInteger(first).multiply(toBigInteger(second));
+                        ? Long.valueOf(n)
+                        : toBigInteger(first).multiply(toBigInteger(second));
                 }
                 case FLOAT: {
                     return Float.valueOf(first.floatValue() * second.floatValue());

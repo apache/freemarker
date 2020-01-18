@@ -83,18 +83,15 @@ public class Execute implements freemarker.template.TemplateMethodModel {
             Process exec = Runtime.getRuntime().exec( aExecute );
 
             // stdout from the process comes in here
-            InputStream execOut = exec.getInputStream();
-            try {
-                Reader execReader = new InputStreamReader( execOut );
-    
-                char[] buffer = new char[ OUTPUT_BUFFER_SIZE ];
-                int bytes_read = execReader.read( buffer );
-                while ( bytes_read > 0 ) {
-                    aOutputBuffer.append( buffer, 0, bytes_read );
-                    bytes_read = execReader.read( buffer );
+            try (InputStream execOut = exec.getInputStream()) {
+                Reader execReader = new InputStreamReader(execOut);
+
+                char[] buffer = new char[OUTPUT_BUFFER_SIZE];
+                int bytes_read = execReader.read(buffer);
+                while (bytes_read > 0) {
+                    aOutputBuffer.append(buffer, 0, bytes_read);
+                    bytes_read = execReader.read(buffer);
                 }
-            } finally {
-                execOut.close();
             }
         } catch ( IOException ioe ) {
             throw new TemplateModelException( ioe.getMessage() );

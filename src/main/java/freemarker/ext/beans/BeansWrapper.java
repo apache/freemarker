@@ -1326,7 +1326,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap<Object, Object>();
+            recursionStops = new IdentityHashMap<>();
         }
         Class<?> componentType = arrayClass.getComponentType();
         final int size = seq.size();
@@ -1371,7 +1371,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap<Object, Object>();
+            recursionStops = new IdentityHashMap<>();
         }
         Class<?> componentType = arrayClass.getComponentType();
         Object array = Array.newInstance(componentType, list.size());

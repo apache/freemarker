@@ -117,9 +117,7 @@ public class FreemarkerTag implements BodyTag {
         } catch (Exception e) {
             try {
                 pageContext.handlePageException(e);
-            } catch (ServletException e2) {
-                throw new JspException(e2.getMessage());
-            } catch (IOException e2) {
+            } catch (ServletException | IOException e2) {
                 throw new JspException(e2.getMessage());
             }
         } finally {

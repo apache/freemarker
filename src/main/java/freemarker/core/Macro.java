@@ -185,7 +185,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             String paramName = paramNames[i];
             sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(paramName));
 
-            Expression paramDefaultExp = (Expression) paramNamesWithDefault.get(paramName);
+            Expression paramDefaultExp = paramNamesWithDefault.get(paramName);
             if (paramDefaultExp != null) {
                 sb.append('=');
                 if (function) {

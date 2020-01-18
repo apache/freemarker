@@ -256,8 +256,8 @@ public class CamelCaseTest extends TemplateTest {
         assertContainsBothNamingStyles(getConfiguration().getSupportedBuiltInNames(), new NamePairAssertion() {
 
             public void assertPair(String name1, String name2) {
-                BuiltIn bi1  = (BuiltIn) BuiltIn.BUILT_INS_BY_NAME.get(name1);
-                BuiltIn bi2 = (BuiltIn) BuiltIn.BUILT_INS_BY_NAME.get(name2);
+                BuiltIn bi1  = BuiltIn.BUILT_INS_BY_NAME.get(name1);
+                BuiltIn bi2 = BuiltIn.BUILT_INS_BY_NAME.get(name2);
                 assertTrue("\"" + name1 + "\" and \"" + name2 + "\" doesn't belong to the same BI object.",
                         bi1 == bi2);
             }
@@ -266,7 +266,7 @@ public class CamelCaseTest extends TemplateTest {
     }
 
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
-        Set<String> underscoredNamesWithCamelCasePair = new HashSet<String>();
+        Set<String> underscoredNamesWithCamelCasePair = new HashSet<>();
         for (String name : names) {
             if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                 String underscoredName = correctIsoBIExceptions(_CoreStringUtils.camelCaseToUnderscored(name)); 

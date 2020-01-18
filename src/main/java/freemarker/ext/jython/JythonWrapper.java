@@ -221,11 +221,10 @@ public class JythonWrapper implements ObjectWrapper {
                     for (int i = 0; i < args.length; ++i) {
                         list.add(
                             isEx 
-                            ? (Object) wrap(args[i]) 
-                            : (Object) (
-                                args[i] == null 
-                                ? null 
-                                : args[i].toString()));
+                            ? wrap(args[i])
+                            : args[i] == null
+                            ? null
+                            : args[i].toString());
                     }
                     return unwrap((TemplateModel) ((TemplateMethodModelEx) model).exec(list));
                 } catch (TemplateModelException e) {

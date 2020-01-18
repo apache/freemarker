@@ -155,7 +155,7 @@ public final class TemplateModelUtils {
             throws TemplateModelException {
         NullArgumentException.check("hashLikeObjects", hashLikeObjects);
         
-        List<TemplateHashModel> hashes = new ArrayList<TemplateHashModel>(hashLikeObjects.size());
+        List<TemplateHashModel> hashes = new ArrayList<>(hashLikeObjects.size());
         
         boolean allTHMEx = true;
         for (Object hashLikeObject : hashLikeObjects) {
@@ -248,7 +248,7 @@ public final class TemplateModelUtils {
 
         private void initKeys() throws TemplateModelException {
             if (keys == null) {
-                Set<String> keySet = new HashSet<String>();
+                Set<String> keySet = new HashSet<>();
                 SimpleSequence keySeq = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
                 for (TemplateHashModelEx hash : hashes) {
                     addKeys(keySet, keySeq, hash);

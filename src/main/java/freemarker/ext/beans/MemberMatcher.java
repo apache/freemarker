@@ -33,10 +33,10 @@ import java.util.Set;
  * @since 2.3.30
  */
 abstract class MemberMatcher<M extends Member, S> {
-    private final Map<S, Types> signaturesToUpperBoundTypes = new HashMap<S, Types>();
+    private final Map<S, Types> signaturesToUpperBoundTypes = new HashMap<>();
 
     private static class Types {
-        private final Set<Class<?>> set = new HashSet<Class<?>>();
+        private final Set<Class<?>> set = new HashSet<>();
         private boolean containsInterfaces;
     }
 

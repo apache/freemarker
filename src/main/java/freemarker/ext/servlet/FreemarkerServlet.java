@@ -1061,9 +1061,7 @@ public class FreemarkerServlet extends HttpServlet {
                     ATTR_REQUEST_PARAMETERS_MODEL);
             params.putUnlistedModel(KEY_REQUEST_PARAMETERS, requestParametersModel);
             return params;
-        } catch (ServletException e) {
-            throw new TemplateModelException(e);
-        } catch (IOException e) {
+        } catch (ServletException | IOException e) {
             throw new TemplateModelException(e);
         }
     }

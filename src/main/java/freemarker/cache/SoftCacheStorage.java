@@ -105,9 +105,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
             if (concurrent) {
                 try {
                     atomicRemove.invoke(map, new Object[] { key, ref });
-                } catch (IllegalAccessException e) {
-                    throw new UndeclaredThrowableException(e);
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             } else if (map.get(key) == ref) {

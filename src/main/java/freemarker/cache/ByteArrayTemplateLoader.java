@@ -36,7 +36,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class ByteArrayTemplateLoader implements TemplateLoader {
 
-    private final Map<String, ByteArrayTemplateSource> templates = new HashMap<String, ByteArrayTemplateSource>();
+    private final Map<String, ByteArrayTemplateSource> templates = new HashMap<>();
     
     /**
      * Adds a template to this template loader; see {@link StringTemplateLoader#putTemplate(String, String)} for more.

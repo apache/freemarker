@@ -66,7 +66,7 @@ public class MonitoredTemplateLoader extends StringTemplateLoader {
     }
     
     public List<String> getNamesSearched() {
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> result = new ArrayList<>();
         for (AbstractTemplateLoaderEvent event : events) {
             if (event instanceof FindTemplateSourceEvent) {
                 result.add(((FindTemplateSourceEvent) event).getName());

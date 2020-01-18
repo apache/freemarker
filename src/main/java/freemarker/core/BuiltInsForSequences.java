@@ -1043,7 +1043,7 @@ class BuiltInsForSequences {
                     throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(filterBI.this);
                 }
 
-                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                List<TemplateModel> resultList = new ArrayList<>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
                     if (elementMatches(element, elementTransformer, env)) {
@@ -1118,7 +1118,7 @@ class BuiltInsForSequences {
                     throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(take_whileBI.this);
                 }
 
-                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                List<TemplateModel> resultList = new ArrayList<>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
                     if (elementMatches(element, elementTransformer, env)) {
@@ -1192,7 +1192,7 @@ class BuiltInsForSequences {
                     throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(mapBI.this);
                 }
 
-                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                List<TemplateModel> resultList = new ArrayList<>();
                 while (lhoIterator.hasNext()) {
                     resultList.add(fetchAndMapNextElement(lhoIterator, elementTransformer, env));
                 }
@@ -1248,7 +1248,7 @@ class BuiltInsForSequences {
                     throw _MessageUtil.newLazilyGeneratedCollectionMustBeSequenceException(drop_whileBI.this);
                 }
 
-                List<TemplateModel> resultList = new ArrayList<TemplateModel>();
+                List<TemplateModel> resultList = new ArrayList<>();
                 while (lhoIterator.hasNext()) {
                     TemplateModel element = lhoIterator.next();
                     if (!elementMatches(element, elementTransformer, env)) {

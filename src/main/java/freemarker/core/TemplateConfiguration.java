@@ -709,7 +709,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (list1.isEmpty()) return list2;
         if (list2.isEmpty()) return list1;
         
-        ArrayList<String> mergedList = new ArrayList<String>(list1.size() + list2.size());
+        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
         mergedList.addAll(list1);
         mergedList.addAll(list2);
         return mergedList;

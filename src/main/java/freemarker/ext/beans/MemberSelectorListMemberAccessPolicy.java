@@ -271,7 +271,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
         public static List<MemberSelector> parse(
                 Collection<String> memberSelectors, boolean ignoreMissingClassOrMember, ClassLoader classLoader)
                 throws ClassNotFoundException, NoSuchMethodException, NoSuchFieldException {
-            List<MemberSelector> parsedMemberSelectors = new ArrayList<MemberSelector>(memberSelectors.size());
+            List<MemberSelector> parsedMemberSelectors = new ArrayList<>(memberSelectors.size());
             for (String memberSelector : memberSelectors) {
                 if (!isIgnoredLine(memberSelector)) {
                     try {

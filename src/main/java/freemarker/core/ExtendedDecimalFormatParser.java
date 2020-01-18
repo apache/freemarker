@@ -59,7 +59,7 @@ class ExtendedDecimalFormatParser {
     
     private static final HashMap<String, ? extends ParameterHandler> PARAM_HANDLERS;
     static {
-        HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
+        HashMap<String, ParameterHandler> m = new HashMap<>();
         m.put(PARAM_ROUNDING_MODE, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {

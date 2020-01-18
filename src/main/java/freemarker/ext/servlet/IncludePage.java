@@ -226,7 +226,7 @@ public class IncludePage implements TemplateDirectiveModel {
         @Override
         public String[] getParameterValues(String name) {
             String[] value = ((String[]) paramsMap.get(name));
-            return value != null ? (String[]) value.clone() : null;
+            return value != null ? value.clone() : null;
         }
 
         @Override

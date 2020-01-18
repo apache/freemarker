@@ -66,7 +66,7 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections.singletonList(((Expression) items.get(0)).evalAndCoerceToPlainText(env));
+                return Collections.singletonList(items.get(0).evalAndCoerceToPlainText(env));
             }
             default: {
                 List result = new ArrayList(items.size());
@@ -89,7 +89,7 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections.singletonList(((Expression) items.get(0)).eval(env));
+                return Collections.singletonList(items.get(0).eval(env));
             }
             default: {
                 List result = new ArrayList(items.size());
@@ -107,7 +107,7 @@ final class ListLiteral extends Expression {
         StringBuilder buf = new StringBuilder("[");
         int size = items.size();
         for (int i = 0; i < size; i++) {
-            Expression value = (Expression) items.get(i);
+            Expression value = items.get(i);
             buf.append(value.getCanonicalForm());
             if (i != size - 1) {
                 buf.append(", ");
@@ -128,7 +128,7 @@ final class ListLiteral extends Expression {
             return true;
         }
         for (int i = 0; i < items.size(); i++) {
-            Expression exp = (Expression) items.get(i);
+            Expression exp = items.get(i);
             if (!exp.isLiteral()) {
                 return false;
             }

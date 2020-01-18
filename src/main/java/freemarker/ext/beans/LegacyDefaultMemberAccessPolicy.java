@@ -45,15 +45,11 @@ public final class LegacyDefaultMemberAccessPolicy implements MemberAccessPolicy
     private static Set<Method> createUnsafeMethodsSet() {
         try {
             Properties props = ClassUtil.loadProperties(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
-            Set<Method> set = new HashSet<Method>(props.size() * 4 / 3, 1f);
+            Set<Method> set = new HashSet<>(props.size() * 4 / 3, 1f);
             for (Object key : props.keySet()) {
                 try {
                     set.add(parseMethodSpec((String) key));
-                } catch (ClassNotFoundException e) {
-                    if (ClassIntrospector.DEVELOPMENT_MODE) {
-                        throw e;
-                    }
-                } catch (NoSuchMethodException e) {
+                } catch (ClassNotFoundException | NoSuchMethodException e) {
                     if (ClassIntrospector.DEVELOPMENT_MODE) {
                         throw e;
                     }

@@ -49,12 +49,9 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
     }
 
     public Reader getReader(Object templateSource, String encoding) throws IOException {
-        Reader reader = innerTemplateLoader.getReader(templateSource, encoding);
-        try {
+        try (Reader reader = innerTemplateLoader.getReader(templateSource, encoding)) {
             String content = IOUtils.toString(reader);
             return new StringReader(TestUtil.removeFTLCopyrightComment(content));
-        } finally {
-            reader.close();
         }
     }
 

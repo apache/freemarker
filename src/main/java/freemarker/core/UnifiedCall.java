@@ -121,7 +121,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
             for (int i = 0; i < positionalArgs.size(); i++) {
-                Expression argExp = (Expression) positionalArgs.get(i);
+                Expression argExp = positionalArgs.get(i);
                 if (i != 0) {
                     sb.append(',');
                 }
@@ -145,7 +145,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 if (i != 0) {
                     sb.append(", ");
                 }
-                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
+                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(bodyParameterNames.get(i)));
             }
         }
         if (canonical) {

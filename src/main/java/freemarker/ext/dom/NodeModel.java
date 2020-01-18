@@ -643,9 +643,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
                 useJaxenXPathSupport();
             } catch (ClassNotFoundException e) {
                 // Expected
-            } catch (Exception e) {
-                LOG.debug("Failed to use Jaxen XPath support.", e);
-            } catch (IllegalAccessError e) {
+            } catch (Exception | IllegalAccessError e) {
                 LOG.debug("Failed to use Jaxen XPath support.", e);
             }
         }
