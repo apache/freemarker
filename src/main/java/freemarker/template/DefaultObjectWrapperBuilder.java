@@ -73,6 +73,7 @@ public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfigurati
     
         private static final DefaultObjectWrapperFactory INSTANCE = new DefaultObjectWrapperFactory(); 
         
+        @Override
         public DefaultObjectWrapper create(DefaultObjectWrapperConfiguration bwConf) {
             return new DefaultObjectWrapper(bwConf, true);
         }

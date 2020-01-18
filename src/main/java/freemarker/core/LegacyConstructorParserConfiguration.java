@@ -57,30 +57,37 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         this.arithmeticEngine = arithmeticEngine;
     }
 
+    @Override
     public int getTagSyntax() {
         return tagSyntax;
     }
     
+    @Override
     public int getInterpolationSyntax() {
         return interpolationSyntax;
     }
 
+    @Override
     public int getNamingConvention() {
         return namingConvention;
     }
 
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping;
     }
 
+    @Override
     public boolean getStrictSyntaxMode() {
         return strictSyntaxMode;
     }
 
+    @Override
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
     }
 
+    @Override
     public ArithmeticEngine getArithmeticEngine() {
         if (arithmeticEngine == null) {
             throw new IllegalStateException();
@@ -94,6 +101,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
+    @Override
     public int getAutoEscapingPolicy() {
         if (autoEscapingPolicy == null) {
             throw new IllegalStateException();
@@ -107,6 +115,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
+    @Override
     public OutputFormat getOutputFormat() {
         if (outputFormat == null) {
             throw new IllegalStateException();
@@ -120,6 +129,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         if (recognizeStandardFileExtensions == null) {
             throw new IllegalStateException();
@@ -133,6 +143,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
+    @Override
     public int getTabSize() {
         if (tabSize == null) {
             throw new IllegalStateException();

@@ -626,14 +626,17 @@ public class IdentityHashMap
 
         // Map.Entry Ops
 
+        @Override
         public Object getKey() {
             return key;
         }
 
+        @Override
         public Object getValue() {
             return value;
         }
 
+        @Override
         public Object setValue(Object value) {
             Object oldValue = this.value;
             this.value = value;
@@ -677,14 +680,17 @@ public class IdentityHashMap
 
         }
 
+        @Override
         public boolean hasNext() {
             return false;
         }
 
+        @Override
         public Object next() {
             throw new NoSuchElementException();
         }
 
+        @Override
         public void remove() {
             throw new IllegalStateException();
         }
@@ -709,6 +715,7 @@ public class IdentityHashMap
             this.type = type;
         }
 
+        @Override
         public boolean hasNext() {
             Entry e = entry;
             int i = index;
@@ -721,6 +728,7 @@ public class IdentityHashMap
             return e != null;
         }
 
+        @Override
         public Object next() {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
@@ -743,6 +751,7 @@ public class IdentityHashMap
             throw new NoSuchElementException();
         }
 
+        @Override
         public void remove() {
             if (lastReturned == null)
                 throw new IllegalStateException();

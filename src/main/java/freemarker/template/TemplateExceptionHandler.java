@@ -59,6 +59,7 @@ public interface TemplateExceptionHandler {
     * other {@link TemplateExceptionHandler}-s.
     */
     TemplateExceptionHandler IGNORE_HANDLER = new TemplateExceptionHandler() {
+        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out) {
             // Do nothing
         }
@@ -69,6 +70,7 @@ public interface TemplateExceptionHandler {
      * in most production systems.
      */
     TemplateExceptionHandler RETHROW_HANDLER = new TemplateExceptionHandler() {
+        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
             throw te;
@@ -80,6 +82,7 @@ public interface TemplateExceptionHandler {
      * handler outputs the stack trace information to the client and then re-throws the exception.
      */
     TemplateExceptionHandler DEBUG_HANDLER = new TemplateExceptionHandler() {
+        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
             if (!env.isInAttemptBlock()) {
@@ -99,6 +102,7 @@ public interface TemplateExceptionHandler {
      * well readable in the browser, and then re-throws the exception.
      */
     TemplateExceptionHandler HTML_DEBUG_HANDLER = new TemplateExceptionHandler() {
+        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
             if (!env.isInAttemptBlock()) {

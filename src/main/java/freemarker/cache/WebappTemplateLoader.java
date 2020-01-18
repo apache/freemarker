@@ -91,6 +91,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         this.servletContext = servletContext;
     }
 
+    @Override
     public Object findTemplateSource(String name) throws IOException {
         String fullPath = subdirPath + name;
 
@@ -121,6 +122,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
 
+    @Override
     public long getLastModified(Object templateSource) {
         if (templateSource instanceof File) {
             return ((File) templateSource).lastModified();
@@ -129,6 +131,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         }
     }
 
+    @Override
     public Reader getReader(Object templateSource, String encoding)
             throws IOException {
         if (templateSource instanceof File) {
@@ -142,6 +145,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         }
     }
 
+    @Override
     public void closeTemplateSource(Object templateSource) throws IOException {
         if (templateSource instanceof File) {
             // Do nothing.

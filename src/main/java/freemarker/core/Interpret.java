@@ -119,6 +119,7 @@ class Interpret extends OutputFormatBoundBuiltIn {
             this.template = template;
         }
         
+        @Override
         public Writer getWriter(final Writer out, Map args) throws TemplateModelException, IOException {
             try {
                 Environment env = Environment.getCurrentEnvironment();

@@ -88,6 +88,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
         }
     }
 
+    @Override
     public Class resolve(String className, Environment env, Template template)
     throws TemplateException {
         String templateName = safeGetTemplateName(template);

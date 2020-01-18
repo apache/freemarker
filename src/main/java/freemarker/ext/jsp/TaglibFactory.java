@@ -175,6 +175,7 @@ public class TaglibFactory implements TemplateHashModel {
      *         custom tag or EL function from the library, implemented as a {@link TemplateTransformModel} or
      *         {@link TemplateMethodModelEx}, respectively.
      */
+    @Override
     public TemplateModel get(final String taglibUri) throws TemplateModelException {
         synchronized (lock) {
             {
@@ -287,6 +288,7 @@ public class TaglibFactory implements TemplateHashModel {
     /**
      * Returns false.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -742,6 +744,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
             File[] tldFiles = dir.listFiles(new FilenameFilter() {
     
+                @Override
                 public boolean accept(File urlAsFile, String name) {
                     return isTldFileNameIgnoreCase(name);
                 }
@@ -1201,6 +1204,7 @@ public class TaglibFactory implements TemplateHashModel {
             this.fileResourcePath = fileResourcePath;
         }
     
+        @Override
         public InputStream getInputStream() throws IOException {
             final InputStream in = servletContext.getResourceAsStream(fileResourcePath);
             if (in == null) {
@@ -1209,6 +1213,7 @@ public class TaglibFactory implements TemplateHashModel {
             return in;
         }
     
+        @Override
         public String getXmlSystemId() throws IOException {
             final URL url = servletContext.getResource(fileResourcePath);
             return url != null ? url.toExternalForm() : null;
@@ -1245,6 +1250,7 @@ public class TaglibFactory implements TemplateHashModel {
             return "classpath:" + resourcePath;
         }
     
+        @Override
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
@@ -1257,6 +1263,7 @@ public class TaglibFactory implements TemplateHashModel {
             return ClassUtil.getReasourceAsStream(getClass(), resourcePath, false);
         }
 
+        @Override
         public String getXmlSystemId() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
@@ -1294,6 +1301,7 @@ public class TaglibFactory implements TemplateHashModel {
             this.entryPath = entryPath != null ? normalizeJarEntryPath(entryPath, false) : null;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             if (entryUrl != null) {
                 try {
@@ -1368,6 +1376,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
     
+        @Override
         public String getXmlSystemId() {
             return entryUrl != null ? entryUrl.toExternalForm() : null;
         }
@@ -1403,6 +1412,7 @@ public class TaglibFactory implements TemplateHashModel {
             super(
                     tryCreateServletContextJarEntryUrl(servletContext, servletContextJarFilePath, entryPath),
                     new InputStreamFactory() {
+                        @Override
                         public InputStream getInputStream() {
                             return servletContext.getResourceAsStream(servletContextJarFilePath);
                         }
@@ -1425,10 +1435,12 @@ public class TaglibFactory implements TemplateHashModel {
             this.file = file;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return new FileInputStream(file);
         }
 
+        @Override
         public String getXmlSystemId() throws IOException {
             return file.toURI().toURL().toExternalForm();
         }
@@ -1447,10 +1459,12 @@ public class TaglibFactory implements TemplateHashModel {
             tagsAndFunctions = parseToTagsAndFunctions(ctx, tldPath, wrapper);
         }
 
+        @Override
         public TemplateModel get(String key) {
             return (TemplateModel) tagsAndFunctions.get(key);
         }
 
+        @Override
         public boolean isEmpty() {
             return tagsAndFunctions.isEmpty();
         }
@@ -1844,6 +1858,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     private static final class EmptyContentEntityResolver implements EntityResolver {
         
+        @Override
         public InputSource resolveEntity(String publicId, String systemId) {
             InputSource is = new InputSource(new ByteArrayInputStream(new byte[0]));
             is.setPublicId(publicId);
@@ -1961,6 +1976,7 @@ public class TaglibFactory implements TemplateHashModel {
             return "URLWithExternalForm(" + externalForm + ")";
         }
 
+        @Override
         public int compareTo(Object that) {
             return this.getExternalForm().compareTo(((URLWithExternalForm) that).getExternalForm());
         }

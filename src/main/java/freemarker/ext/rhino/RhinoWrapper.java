@@ -43,6 +43,7 @@ public class RhinoWrapper extends BeansWrapper {
     static {
         try {
             UNDEFINED_INSTANCE = AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                @Override
                 public Object run() throws Exception {
                     return Undefined.class.getField("instance").get(null);
                 }

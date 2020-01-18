@@ -27,6 +27,7 @@ public class _NullLoggerFactory implements LoggerFactory {
     _NullLoggerFactory() {
     }
     
+    @Override
     public Logger getLogger(String category) {
         return INSTANCE;
     }

@@ -38,6 +38,7 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
         this.wrapper = wrapper;
     }
     
+    @Override
     public TemplateModel getTemplateModel() {
         return model;
     }

@@ -148,6 +148,7 @@ implements
      * Returns the number of nodes in this model's nodelist.
      * @see freemarker.template.TemplateSequenceModel#size()
      */
+    @Override
     public int size() {
         return nodes.size();
     }
@@ -160,6 +161,7 @@ implements
      * expression to this model's nodelist.
      * @see freemarker.template.TemplateMethodModel#exec(List)
      */
+    @Override
     public Object exec(List arguments) throws TemplateModelException {
         if (arguments.size() != 1) {
             throw new TemplateModelException(
@@ -179,6 +181,7 @@ implements
      * XML"). 
      * @see freemarker.template.TemplateScalarModel#getAsString()
      */
+    @Override
     public String getAsString() throws TemplateModelException {
         StringWriter sw = new StringWriter(size() * 128);
         for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
@@ -198,6 +201,7 @@ implements
      * @param index the ordinal number of the selected node 
      * @see freemarker.template.TemplateSequenceModel#get(int)
      */
+    @Override
     public TemplateModel get(int index) {
         return deriveModel(Collections.singletonList(nodes.get(index)));
     }
@@ -380,6 +384,7 @@ implements
      * the operator to this model's nodes.
      * @see freemarker.template.TemplateHashModel#get(String)
      */
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         // Try a built-in navigator operator
         NodeOperator op = navigator.getOperator(key);
@@ -434,6 +439,7 @@ implements
      * Returns true if this NodeListModel contains no nodes. 
      * @see freemarker.template.TemplateHashModel#isEmpty()
      */
+    @Override
     public boolean isEmpty() {
         return nodes.isEmpty();
     }
@@ -454,6 +460,7 @@ implements
     private class FilterByType
     implements
         TemplateMethodModel {
+        @Override
         public Object exec(List arguments) {
             List filteredNodes = new ArrayList();
             for (Iterator iter = arguments.iterator(); iter.hasNext(); ) {
@@ -503,21 +510,26 @@ implements
         }
     }
 
+    @Override
     public TemplateSequenceModel getChildNodes() throws TemplateModelException {
         return (TemplateSequenceModel) get("_content");
     }
 
+    @Override
     public String getNodeName() throws TemplateModelException {
         return getUniqueText((NodeListModel) get("_name"), "name");
     }
 
+    @Override
     public String getNodeNamespace() throws TemplateModelException {
         return getUniqueText((NodeListModel) get("_nsuri"), "namespace");
     }
 
+    @Override
     public String getNodeType() throws TemplateModelException {
         return getUniqueText((NodeListModel) get("_type"), "type");
     }
+    @Override
     public TemplateNodeModel getParentNode() throws TemplateModelException {
         return (TemplateNodeModel) get("_parent"); 
     }

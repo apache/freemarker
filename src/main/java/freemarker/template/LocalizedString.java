@@ -44,7 +44,8 @@ import freemarker.core.Environment;
 abstract public class LocalizedString implements TemplateScalarModel {
 	
 	
-	public String getAsString() throws TemplateModelException {
+	@Override
+    public String getAsString() throws TemplateModelException {
 		Environment env = Environment.getCurrentEnvironment();
 		Locale locale = env.getLocale();
 		return getLocalizedString(locale);

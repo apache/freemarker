@@ -30,10 +30,12 @@ class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
         super(att);
     }
     
+    @Override
     public String getAsString() {
         return ((Attr) node).getValue();
     }
     
+    @Override
     public String getNodeName() {
         String result = node.getLocalName();
         if (result == null || result.equals("")) {
@@ -42,6 +44,7 @@ class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
+    @Override
     public boolean isEmpty() {
         return true;
     }

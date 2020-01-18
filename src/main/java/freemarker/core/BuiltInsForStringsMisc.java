@@ -139,11 +139,13 @@ class BuiltInsForStringsMisc {
                 this.env = env;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return resolvePath(getStringMethodArg(args, 0));
             }
 
+            @Override
             public String getAsString() throws TemplateModelException {
                 return resolvePath(getTemplate().getName());
             }

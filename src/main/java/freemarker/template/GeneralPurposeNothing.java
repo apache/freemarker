@@ -41,42 +41,52 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
         return instance;
     }
 
+    @Override
     public String getAsString() {
         return "";
     }
 
+    @Override
     public boolean getAsBoolean() {
         return false;
     }
 
+    @Override
     public boolean isEmpty() {
         return true;
     }
 
+    @Override
     public int size() {
         return 0;
     }
 
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         throw new TemplateModelException("Can't get item from an empty sequence.");
     }
 
+    @Override
     public TemplateModel get(String key) {
         return null;
     }
 
+    @Override
     public Object exec(List args) {
         return null;
     }
     
+    @Override
     public TemplateCollectionModel keys() {
         return Constants.EMPTY_COLLECTION;
     }
 
+    @Override
     public TemplateCollectionModel values() {
         return Constants.EMPTY_COLLECTION;
     }
 
+    @Override
     public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
         return Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }

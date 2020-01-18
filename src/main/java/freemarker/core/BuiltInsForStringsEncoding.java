@@ -49,10 +49,12 @@ class BuiltInsForStringsEncoding {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
     
+        @Override
         public int getMinimumICIVersion() {
             return _TemplateAPI.VERSION_INT_2_3_20;
         }
     
+        @Override
         public Object getPreviousICIChainMember() {
             return prevICIObj;
         }
@@ -164,6 +166,7 @@ class BuiltInsForStringsEncoding {
         
         protected abstract String encodeWithCharset(String cs) throws UnsupportedEncodingException;
     
+        @Override
         public Object exec(List args) throws TemplateModelException {
             parent.checkMethodArgCount(args.size(), 1);
             try {
@@ -173,6 +176,7 @@ class BuiltInsForStringsEncoding {
             }
         }
         
+        @Override
         public String getAsString() throws TemplateModelException {
             if (cachedResult == null) {
                 String cs = env.getEffectiveURLEscapingCharset();

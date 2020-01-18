@@ -36,18 +36,22 @@ public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageW
     /**
      * Always returns {@code true}.
      */
+    @Override
     public boolean isConcurrent() {
         return true;
     }
     
+    @Override
     public Object get(Object key) {
         return map.get(key);
     }
 
+    @Override
     public void put(Object key, Object value) {
         map.put(key, value);
     }
 
+    @Override
     public void remove(Object key) {
         map.remove(key);
     }
@@ -57,10 +61,12 @@ public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageW
      * 
      * @since 2.3.21
      */
+    @Override
     public int getSize() {
         return map.size();
     }
     
+    @Override
     public void clear() {
         map.clear();
     }

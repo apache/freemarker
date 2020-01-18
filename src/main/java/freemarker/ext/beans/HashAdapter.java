@@ -45,6 +45,7 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
         this.wrapper = wrapper;
     }
     
+    @Override
     public TemplateModel getTemplateModel() {
         return model;
     }
@@ -100,6 +101,7 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                     throw new UndeclaredThrowableException(e);
                 }
                 return new Iterator() {
+                    @Override
                     public boolean hasNext() {
                         try {
                             return i.hasNext();
@@ -108,6 +110,7 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                         }
                     }
                     
+                    @Override
                     public Object next() {
                         final Object key;
                         try {
@@ -116,14 +119,17 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                             throw new UndeclaredThrowableException(e);
                         }
                         return new Map.Entry() {
+                            @Override
                             public Object getKey() {
                                 return key;
                             }
                             
+                            @Override
                             public Object getValue() {
                                 return get(key);
                             }
                             
+                            @Override
                             public Object setValue(Object value) {
                                 throw new UnsupportedOperationException();
                             }
@@ -153,6 +159,7 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                         };
                     }
                     
+                    @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }

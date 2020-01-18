@@ -85,6 +85,7 @@ public final class LegacyDefaultMemberAccessPolicy implements MemberAccessPolicy
     private LegacyDefaultMemberAccessPolicy() {
     }
 
+    @Override
     public ClassMemberAccessPolicy forClass(Class<?> containingClass) {
         return CLASS_MEMBER_ACCESS_POLICY_INSTANCE;
     }
@@ -98,14 +99,17 @@ public final class LegacyDefaultMemberAccessPolicy implements MemberAccessPolicy
             = new BlacklistClassMemberAccessPolicy();
     private static class BlacklistClassMemberAccessPolicy implements ClassMemberAccessPolicy {
 
+        @Override
         public boolean isMethodExposed(Method method) {
             return !UNSAFE_METHODS.contains(method);
         }
 
+        @Override
         public boolean isConstructorExposed(Constructor<?> constructor) {
             return true;
         }
 
+        @Override
         public boolean isFieldExposed(Field field) {
             return true;
         }

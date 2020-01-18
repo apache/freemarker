@@ -37,6 +37,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new NumberModel((Number) object, (BeansWrapper) wrapper);
             }
@@ -53,6 +54,7 @@ implements
         super(number, wrapper);
     }
 
+    @Override
     public Number getAsNumber() {
         return (Number) object;
     }

@@ -49,6 +49,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new JythonModel((PyObject) object, (JythonWrapper) wrapper);
             }
@@ -62,6 +63,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     /**
      * Returns the value of {@link PyObject#__nonzero__()}.
      */
+    @Override
     public boolean getAsBoolean() throws TemplateModelException {
         try {
             return object.__nonzero__();
@@ -73,6 +75,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     /**
      * Returns the value of {@link Object#toString()}.
      */
+    @Override
     public String getAsString() throws TemplateModelException {
         try {
             return object.toString();
@@ -88,6 +91,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
      * with <code>false</code>, the order of calls is reversed (that is, item
      * lookup takes precedence over attribute lookup).
      */
+    @Override
     public TemplateModel get(String key)
     throws TemplateModelException {
         if (key != null) {
@@ -118,6 +122,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     /**
      * Returns {@link PyObject#__len__()}<code> == 0</code>.
      */
+    @Override
     public boolean isEmpty() throws TemplateModelException {
         try {
             return object.__len__() == 0;
@@ -129,6 +134,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     /**
      * @see freemarker.template.TemplateMethodModel#exec(List)
      */
+    @Override
     public Object exec(List arguments) throws TemplateModelException {
         int size = arguments.size();
         try {
@@ -159,6 +165,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
         }
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         if (object == null) {
             return null;
@@ -170,6 +177,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
         return view;
     }
     
+    @Override
     public Object getWrappedObject() {
         return object == null ? null : object.__tojava__(Object.class);
     }

@@ -67,6 +67,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
         try {
             Class type = ((ClassLoader) AccessController.doPrivileged(
                     new PrivilegedAction() {
+                        @Override
                         public Object run() {
                             return Thread.currentThread().getContextClassLoader();
                         }
@@ -90,6 +91,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
         final PageContext ctx = this;
 
         return new VariableResolver() {
+            @Override
             public Object resolveVariable(String name) throws ELException {
                 return ctx.findAttribute(name);
             }

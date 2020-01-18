@@ -64,6 +64,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
         this.methodName = "." + builtInVarName;
     }
 
+    @Override
     public Object exec(List args) throws TemplateModelException {
         final int argCnt = args.size();
         if (argCnt < 1 || argCnt > 2) {
@@ -149,6 +150,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
         // conveniently provided like in <@optTemp.include!myDefaultMacro />.
         if (template != null) {
             result.put(RESULT_INCLUDE, new TemplateDirectiveModel() {
+                @Override
                 public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                         throws TemplateException, IOException {
                     if (!params.isEmpty()) {
@@ -165,6 +167,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
                 }
             });
             result.put(RESULT_IMPORT, new TemplateMethodModelEx() {
+                @Override
                 public Object exec(List args) throws TemplateModelException {
                     if (!args.isEmpty()) {
                         throw new TemplateModelException("This method supports no parameters.");

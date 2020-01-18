@@ -78,10 +78,12 @@ public final class TemplateModelUtils {
             keyIter = hash.keys().iterator();
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             return keyIter.hasNext();
         }
 
+        @Override
         public KeyValuePair next() throws TemplateModelException {
             final TemplateModel key = keyIter.next();
             if (!(key instanceof TemplateScalarModel)) {
@@ -90,10 +92,12 @@ public final class TemplateModelUtils {
 
             return new KeyValuePair() {
 
+                @Override
                 public TemplateModel getKey() throws TemplateModelException {
                     return key;
                 }
 
+                @Override
                 public TemplateModel getValue() throws TemplateModelException {
                     return hash.get(((TemplateScalarModel) key).getAsString());
                 }
@@ -195,6 +199,7 @@ public final class TemplateModelUtils {
             this.hashes = hashes;
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             for (int i = hashes.size() - 1; i >= 0; i--) {
                 TemplateModel value = hashes.get(i).get(key);
@@ -205,6 +210,7 @@ public final class TemplateModelUtils {
             return null;
         }
 
+        @Override
         public boolean isEmpty() throws TemplateModelException {
             for (TemplateHashModel hash : hashes) {
                 if (!hash.isEmpty()) {
@@ -231,16 +237,19 @@ public final class TemplateModelUtils {
             super(hashes);
         }
         
+        @Override
         public int size() throws TemplateModelException {
             initKeys();
             return keys.size();
         }
 
+        @Override
         public TemplateCollectionModel keys() throws TemplateModelException {
             initKeys();
             return keys;
         }
 
+        @Override
         public TemplateCollectionModel values() throws TemplateModelException {
             initValues();
             return values;

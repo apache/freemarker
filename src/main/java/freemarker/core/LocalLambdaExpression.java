@@ -52,6 +52,7 @@ final class LocalLambdaExpression extends Expression {
         return "->";
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         throw new TemplateException("Can't get lambda expression as a value: Lambdas currently can only be used on a " +
                 "few special places.",

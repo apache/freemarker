@@ -250,6 +250,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return res;
     }
 
+    @Override
     @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
     public Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
@@ -299,6 +300,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return customDataHolder;
     }
 
+    @Override
     public boolean isNestedOutputCacheable() {
         return isChildrenOutputCacheable();
     }

@@ -335,6 +335,7 @@ final class DynamicKeyName extends Expression {
                 private boolean elementsBeforeFirsIndexWereSkipped;
                 private int nextIdx;
 
+                @Override
                 public TemplateModel next() throws TemplateModelException {
                     ensureElementsBeforeFirstIndexWereSkipped();
                     if (!rightUnbounded && nextIdx > lastIdx) {
@@ -351,6 +352,7 @@ final class DynamicKeyName extends Expression {
                     return result;
                 }
 
+                @Override
                 public boolean hasNext() throws TemplateModelException {
                     ensureElementsBeforeFirstIndexWereSkipped();
                     return (rightUnbounded || nextIdx <= lastIdx) && (!rightAdaptive || targetIter.hasNext());

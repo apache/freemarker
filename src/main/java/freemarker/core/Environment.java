@@ -435,11 +435,13 @@ public final class Environment extends Configurable {
         if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
 
+                @Override
                 public TemplateModel getLocalVariable(String name) {
                     int index = bodyParameterNames.indexOf(name);
                     return index != -1 ? outArgs[index] : null;
                 }
 
+                @Override
                 public Collection getLocalVariableNames() {
                     return bodyParameterNames;
                 }
@@ -706,10 +708,12 @@ public final class Environment extends Configurable {
             this.lambdaArgValue = lambdaArgValue;
         }
 
+        @Override
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
             return name.equals(lambdaArgName) ? lambdaArgValue : null;
         }
 
+        @Override
         public Collection getLocalVariableNames() throws TemplateModelException {
             return Collections.singleton(lambdaArgName);
         }
@@ -2602,10 +2606,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getDataModel() {
         return rootDataModel instanceof TemplateHashModelEx
                 ? new TemplateHashModelEx() {
+                    @Override
                     public boolean isEmpty() throws TemplateModelException {
                         return false;
                     }
 
+                    @Override
                     public TemplateModel get(String key) throws TemplateModelException {
                         return getDataModelOrSharedVariable(key);
                     }
@@ -2613,23 +2619,28 @@ public final class Environment extends Configurable {
                     // NB: The methods below do not take into account
                     // configuration shared variables even though
                     // the hash will return them, if only for BWC reasons
+                    @Override
                     public TemplateCollectionModel values() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).values();
                     }
 
+                    @Override
                     public TemplateCollectionModel keys() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).keys();
                     }
 
+                    @Override
                     public int size() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).size();
                     }
                 }
             : new TemplateHashModel() {
+                @Override
                 public boolean isEmpty() {
                     return false;
                 }
 
+                @Override
                 public TemplateModel get(String key) throws TemplateModelException {
                     TemplateModel value = rootDataModel.get(key);
                     return value != null ? value : configuration.getSharedVariable(key);
@@ -2645,10 +2656,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getGlobalVariables() {
         return new TemplateHashModel() {
 
+            @Override
             public boolean isEmpty() {
                 return false;
             }
 
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel result = globalNamespace.get(key);
                 if (result == null) {
@@ -3206,6 +3219,7 @@ public final class Environment extends Configurable {
             this.childBuffer = childBuffer;
         }
 
+        @Override
         public void render(Writer newOut) throws TemplateException, IOException {
             Writer prevOut = out;
             out = newOut;

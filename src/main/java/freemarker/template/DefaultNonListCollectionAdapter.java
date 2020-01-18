@@ -69,22 +69,27 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
         this.collection = collection;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new IteratorToTemplateModelIteratorAdapter(collection.iterator(), getObjectWrapper());
     }
 
+    @Override
     public int size() {
         return collection.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return collection.isEmpty();
     }
 
+    @Override
     public Object getWrappedObject() {
         return collection;
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
     }
@@ -101,6 +106,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
         }
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(collection);
     }

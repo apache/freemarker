@@ -87,6 +87,7 @@ public class StandardCompress implements TemplateTransformModel {
         this.defaultBufferSize = defaultBufferSize;
     }
 
+    @Override
     public Writer getWriter(final Writer out, Map args)
     throws TemplateModelException {
         int bufferSize = defaultBufferSize;

@@ -34,14 +34,17 @@ class ExpressionWithFixedResult extends Expression {
         this.sourceExpression = sourceExpression;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return fixedResult;
     }
 
+    @Override
     boolean isLiteral() {
         return sourceExpression.isLiteral();
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement,
             ReplacemenetState replacementState) {
         return new ExpressionWithFixedResult(
@@ -49,22 +52,27 @@ class ExpressionWithFixedResult extends Expression {
                 sourceExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
+    @Override
     public String getCanonicalForm() {
         return sourceExpression.getCanonicalForm();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return sourceExpression.getNodeTypeSymbol();
     }
 
+    @Override
     int getParameterCount() {
         return sourceExpression.getParameterCount();
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return sourceExpression.getParameterValue(idx);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return sourceExpression.getParameterRole(idx);
     }

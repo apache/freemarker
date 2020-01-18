@@ -42,6 +42,7 @@ final class BoundedRangeModel extends RangeModel {
         this.affectedByStringSlicingBug = inclusiveEnd;
     }
 
+    @Override
     public int size() {
         return size;
     }

@@ -82,6 +82,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         this.softSizeLimit = softSizeLimit;
     }
     
+    @Override
     public Object get(Object key) {
         removeClearedReferences();
         MruEntry entry = (MruEntry) map.get(key);
@@ -97,6 +98,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         return value;
     }
 
+    @Override
     public void put(Object key, Object value) {
         removeClearedReferences();
         MruEntry entry = (MruEntry) map.get(key);
@@ -110,6 +112,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         
     }
 
+    @Override
     public void remove(Object key) {
         removeClearedReferences();
         removeInternal(key);
@@ -122,6 +125,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         }
     }
 
+    @Override
     public void clear() {
         strongHead.makeHead();
         softHead.linkAfter(strongHead);
@@ -247,6 +251,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
      * @see #getSoftSize()
      * @since 2.3.21
      */
+    @Override
     public int getSize() {
         return getSoftSize() + getStrongSize();
     }

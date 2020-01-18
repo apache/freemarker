@@ -67,18 +67,22 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
         this.iterable = iterable;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new IteratorToTemplateModelIteratorAdapter(iterable.iterator(), getObjectWrapper());
     }
 
+    @Override
     public Object getWrappedObject() {
         return iterable;
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterable);
     }

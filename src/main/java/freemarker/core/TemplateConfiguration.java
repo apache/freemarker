@@ -411,6 +411,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setTagSyntax(int)}.
      */
+    @Override
     public int getTagSyntax() {
         return tagSyntax != null ? tagSyntax.intValue() : getNonNullParentConfiguration().getTagSyntax();
     }
@@ -433,6 +434,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setInterpolationSyntax(int)}.
      */
+    @Override
     public int getInterpolationSyntax() {
         return interpolationSyntax != null ? interpolationSyntax.intValue()
                 : getNonNullParentConfiguration().getInterpolationSyntax();
@@ -456,6 +458,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setNamingConvention(int)}.
      */
+    @Override
     public int getNamingConvention() {
         return namingConvention != null ? namingConvention.intValue()
                 : getNonNullParentConfiguration().getNamingConvention();
@@ -478,6 +481,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #getWhitespaceStripping()}.
      */
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping != null ? whitespaceStripping.booleanValue()
                 : getNonNullParentConfiguration().getWhitespaceStripping();
@@ -501,6 +505,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setAutoEscapingPolicy(int)}.
      */
+    @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
                 : getNonNullParentConfiguration().getAutoEscapingPolicy();
@@ -524,6 +529,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setOutputFormat(OutputFormat)}.
      */
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : getNonNullParentConfiguration().getOutputFormat();
     }
@@ -545,6 +551,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
      */
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
                 : getNonNullParentConfiguration().getRecognizeStandardFileExtensions();
@@ -567,6 +574,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setStrictSyntaxMode(boolean)}.
      */
+    @Override
     public boolean getStrictSyntaxMode() {
         return strictSyntaxMode != null ? strictSyntaxMode.booleanValue()
                 : getNonNullParentConfiguration().getStrictSyntaxMode();
@@ -625,6 +633,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * 
      * @since 2.3.25
      */
+    @Override
     public int getTabSize() {
         return tabSize != null ? tabSize.intValue()
                 : getNonNullParentConfiguration().getTabSize();
@@ -646,6 +655,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
      */
+    @Override
     public Version getIncompatibleImprovements() {
         return getNonNullParentConfiguration().getIncompatibleImprovements();
     }

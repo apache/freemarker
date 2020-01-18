@@ -125,10 +125,12 @@ class BuiltInsForMultipleTypes {
             return new SimpleScalar(env.getCNumberFormat().format(num));
         }
 
+        @Override
         public int getMinimumICIVersion() {
             return _TemplateAPI.VERSION_INT_2_3_21;
         }
         
+        @Override
         public Object getPreviousICIChainMember() {
             return prevICIObj;
         }
@@ -153,11 +155,13 @@ class BuiltInsForMultipleTypes {
                 this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target, false);
             }
             
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 0, 1);
                 return args.size() == 0 ? getAsDateModel() : get((String) args.get(0));
             }
             
+            @Override
             public TemplateModel get(String pattern) throws TemplateModelException {
                 TemplateDateFormat format;
                 try {
@@ -188,14 +192,17 @@ class BuiltInsForMultipleTypes {
                 return cachedValue;
             }
             
+            @Override
             public Date getAsDate() throws TemplateModelException {
                 return getAsDateModel().getAsDate();
             }
     
+            @Override
             public int getDateType() {
                 return dateType;
             }
     
+            @Override
             public boolean isEmpty() {
                 return false;
             }
@@ -577,11 +584,13 @@ class BuiltInsForMultipleTypes {
                 this.env = env;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 2);
                 return new SimpleScalar((String) args.get(bool.getAsBoolean() ? 0 : 1));
             }
     
+            @Override
             public String getAsString() throws TemplateModelException {
                 // Boolean should have come first... but that change would be non-BC. 
                 if (bool instanceof TemplateScalarModel) {
@@ -618,11 +627,13 @@ class BuiltInsForMultipleTypes {
                                 dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return formatWith((String) args.get(0));
             }
 
+            @Override
             public TemplateModel get(String key)
             throws TemplateModelException {
                 return formatWith(key);
@@ -638,6 +649,7 @@ class BuiltInsForMultipleTypes {
                 }
             }
             
+            @Override
             public String getAsString()
             throws TemplateModelException {
                 if (cachedValue == null) {
@@ -662,6 +674,7 @@ class BuiltInsForMultipleTypes {
                 return cachedValue;
             }
     
+            @Override
             public boolean isEmpty() {
                 return false;
             }
@@ -692,11 +705,13 @@ class BuiltInsForMultipleTypes {
                 }
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return get((String) args.get(0));
             }
     
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateNumberFormat format;
                 try {
@@ -721,6 +736,7 @@ class BuiltInsForMultipleTypes {
                 return new SimpleScalar(result);
             }
             
+            @Override
             public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
                     try {
@@ -738,6 +754,7 @@ class BuiltInsForMultipleTypes {
                 return cachedValue;
             }
     
+            @Override
             public boolean isEmpty() {
                 return false;
             }

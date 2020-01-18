@@ -76,6 +76,7 @@ class JaxenXPathSupport implements XPathSupport {
         // [2.4] Can't we just use Collections.emptyList()? 
     private final static ArrayList EMPTY_ARRAYLIST = new ArrayList();
 
+    @Override
     public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         try {
             BaseXPath xpath;
@@ -111,6 +112,7 @@ class JaxenXPathSupport implements XPathSupport {
 
     static private final NamespaceContext customNamespaceContext = new NamespaceContext() {
         
+        @Override
         public String translateNamespacePrefixToUri(String prefix) {
             if (prefix.equals(Template.DEFAULT_NAMESPACE_PREFIX)) {
                 return Environment.getCurrentEnvironment().getDefaultNS();
@@ -120,6 +122,7 @@ class JaxenXPathSupport implements XPathSupport {
     };
 
     private static final VariableContext FM_VARIABLE_CONTEXT = new VariableContext() {
+        @Override
         public Object getVariableValue(String namespaceURI, String prefix, String localName)
         throws UnresolvableException {
             try {
@@ -222,6 +225,7 @@ class JaxenXPathSupport implements XPathSupport {
     private static class FmEntityResolver implements EntityResolver {
         private int callCount = 0;
         
+        @Override
         public InputSource resolveEntity(String publicId, String systemId)
         throws SAXException, IOException {
             ++callCount;

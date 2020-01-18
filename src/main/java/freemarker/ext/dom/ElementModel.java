@@ -40,6 +40,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         super(element);
     }
     
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -127,6 +128,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         }
     }
 
+    @Override
     public String getAsString() throws TemplateModelException {
         NodeList nl = node.getChildNodes();
         String result = "";
@@ -146,6 +148,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
+    @Override
     public String getNodeName() {
         String result = node.getLocalName();
         if (result == null || result.equals("")) {

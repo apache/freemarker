@@ -42,6 +42,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new JythonSequenceModel((PyObject) object, (JythonWrapper) wrapper);
             }
@@ -54,6 +55,7 @@ implements
     /**
      * Returns {@link PyObject#__finditem__(int)}.
      */
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         try {
             return wrapper.wrap(object.__finditem__(index));
@@ -65,6 +67,7 @@ implements
     /**
      * Returns {@link PyObject#__len__()}.
      */
+    @Override
     public int size() throws TemplateModelException {
         try {
             return object.__len__();
@@ -73,15 +76,18 @@ implements
         }
     }
 
+    @Override
     public TemplateModelIterator iterator() {
         return new TemplateModelIterator()
         {
             int i = 0;
             
+            @Override
             public boolean hasNext() throws TemplateModelException {
                 return i < size();
             }
 
+            @Override
             public TemplateModel next() throws TemplateModelException {
                 return get(i++);
             }

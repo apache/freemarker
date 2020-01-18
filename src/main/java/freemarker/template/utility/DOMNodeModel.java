@@ -61,6 +61,7 @@ public class DOMNodeModel implements TemplateHashModel {
         this.node = node;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         TemplateModel result = null;
         if (equivalenceTable.containsKey(key)) {
@@ -128,6 +129,7 @@ public class DOMNodeModel implements TemplateHashModel {
         return result;
     }
 
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -216,6 +218,7 @@ public class DOMNodeModel implements TemplateHashModel {
 
 
     class AncestorByName implements TemplateMethodModel {
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             if (arguments.size() != 1) {
                 throw new TemplateModelException("Expecting exactly one string argument here");
@@ -243,6 +246,7 @@ public class DOMNodeModel implements TemplateHashModel {
             nodes = new TemplateModel[nodeList.getLength()];
         }
 
+        @Override
         public TemplateModel get(int index) {
             DOMNodeModel result = (DOMNodeModel) nodes[index];
             if (result == null) {
@@ -253,10 +257,12 @@ public class DOMNodeModel implements TemplateHashModel {
             return result;
         }
 
+        @Override
         public int size() {
             return nodes.length;
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             if (arguments.size() != 1) {
                 throw new TemplateModelException("Expecting exactly one string argument here");

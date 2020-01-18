@@ -63,17 +63,21 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
         return templates.remove(name) != null;
     }
     
+    @Override
     public void closeTemplateSource(Object templateSource) {
     }
     
+    @Override
     public Object findTemplateSource(String name) {
         return templates.get(name);
     }
     
+    @Override
     public long getLastModified(Object templateSource) {
         return ((ByteArrayTemplateSource) templateSource).lastModified;
     }
     
+    @Override
     public Reader getReader(Object templateSource, String encoding) throws UnsupportedEncodingException {
         return new InputStreamReader(
                 new ByteArrayInputStream(((ByteArrayTemplateSource) templateSource).templateContent),

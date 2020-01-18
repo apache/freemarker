@@ -73,6 +73,7 @@ class NewBI extends BuiltIn {
             }
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             ObjectWrapper ow = env.getObjectWrapper();
             BeansWrapper bw = 

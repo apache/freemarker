@@ -36,11 +36,13 @@ class LazyCollectionTemplateModelIterator implements TemplateModelIterator {
         this.templateCollectionModel = templateCollectionModel;
     }
 
+    @Override
     public TemplateModel next() throws TemplateModelException {
         ensureIteratorInitialized();
         return iterator.next();
     }
 
+    @Override
     public boolean hasNext() throws TemplateModelException {
         ensureIteratorInitialized();
         return iterator.hasNext();

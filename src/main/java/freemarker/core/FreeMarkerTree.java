@@ -76,38 +76,47 @@ public class FreeMarkerTree extends JTree {
             this.element = element;
         }
 
+        @Override
         public Enumeration children() {
             final Enumeration e = element.children();
             return new Enumeration() {
+                @Override
                 public boolean hasMoreElements() {
                     return e.hasMoreElements();
                 }
+                @Override
                 public Object nextElement() {
                     return getNode((TemplateElement) e.nextElement());
                 }
             };
         }
 
+        @Override
         public boolean getAllowsChildren() {
             return element.getAllowsChildren();
         }
 
+        @Override
         public TreeNode getChildAt(int childIndex) {
             return getNode(element.getChildAt(childIndex));
         }
 
+        @Override
         public int getChildCount() {
             return element.getChildCount();
         }
 
+        @Override
         public int getIndex(TreeNode node) {
             return element.getIndex(((TemplateElementTreeNode) node).element);
         }
 
+        @Override
         public TreeNode getParent() {
             return getNode(element.getParentElement());
         }
 
+        @Override
         public boolean isLeaf() {
             return element.isLeaf();
         }

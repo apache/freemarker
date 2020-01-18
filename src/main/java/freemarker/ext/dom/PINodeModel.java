@@ -29,14 +29,17 @@ class PINodeModel extends NodeModel implements TemplateScalarModel {
         super(pi);
     }
     
+    @Override
     public String getAsString() {
         return ((ProcessingInstruction) node).getData();
     }
     
+    @Override
     public String getNodeName() {
         return "@pi$" + ((ProcessingInstruction) node).getTarget();
     }
     
+    @Override
     public boolean isEmpty() {
         return true;
     }

@@ -84,14 +84,17 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
         target.enableLazilyGeneratedResult();
     }
 
+    @Override
     protected List<Expression> getArgumentsAsList() {
         return Collections.singletonList(elementTransformerExp);
     }
 
+    @Override
     protected int getArgumentsCount() {
         return 1;
     }
 
+    @Override
     protected Expression getArgumentParameterValue(int argIdx) {
         if (argIdx != 0) {
             throw new IndexOutOfBoundsException();
@@ -103,6 +106,7 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
         return elementTransformerExp;
     }
 
+    @Override
     protected void cloneArguments(
             Expression clone, String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         try {
@@ -114,6 +118,7 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
         }
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetValue = target.eval(env);
 
@@ -186,6 +191,7 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
             this.elementTransformerExp = elementTransformerExp;
         }
 
+        @Override
         public TemplateModel transformElement(TemplateModel element, Environment env) throws TemplateException {
             return elementTransformerExp.invokeLambdaDefinedFunction(element, env);
         }
@@ -199,6 +205,7 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
             this.elementTransformer = elementTransformer;
         }
 
+        @Override
         public TemplateModel transformElement(TemplateModel element, Environment env)
                 throws TemplateModelException {
             Object result = elementTransformer.exec(Collections.singletonList(element));
@@ -216,6 +223,7 @@ abstract class IntermediateStreamOperationLikeBuiltIn extends BuiltInWithParseTi
             this.elementTransformerExp = elementTransformerExp;
         }
 
+        @Override
         public TemplateModel transformElement(TemplateModel element, Environment env) throws
                 TemplateException {
             // #function-s were originally designed to be called from templates directly, so they expect an

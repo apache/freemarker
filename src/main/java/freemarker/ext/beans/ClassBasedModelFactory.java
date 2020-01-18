@@ -44,6 +44,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         this.wrapper = wrapper;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         try {
             return getInternal(key);
@@ -133,6 +134,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         }
     }
 
+    @Override
     public boolean isEmpty() {
         return false;
     }

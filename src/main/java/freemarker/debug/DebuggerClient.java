@@ -91,11 +91,13 @@ public class DebuggerClient {
             this.remoteDebugger = remoteDebugger;
         }
 
+        @Override
         public void addBreakpoint(Breakpoint breakpoint) throws RemoteException {
             remoteDebugger.addBreakpoint(breakpoint);
         }
 
-        public Object addDebuggerListener(DebuggerListener listener) 
+        @Override
+        public Object addDebuggerListener(DebuggerListener listener)
         throws RemoteException {
             if (listener instanceof RemoteObject) {
                 return remoteDebugger.addDebuggerListener(listener);
@@ -106,30 +108,37 @@ public class DebuggerClient {
             }
         }
 
+        @Override
         public List getBreakpoints() throws RemoteException {
             return remoteDebugger.getBreakpoints();
         }
 
+        @Override
         public List getBreakpoints(String templateName) throws RemoteException {
             return remoteDebugger.getBreakpoints(templateName);
         }
 
+        @Override
         public Collection getSuspendedEnvironments() throws RemoteException {
             return remoteDebugger.getSuspendedEnvironments();
         }
 
+        @Override
         public void removeBreakpoint(Breakpoint breakpoint) throws RemoteException {
             remoteDebugger.removeBreakpoint(breakpoint);
         }
 
+        @Override
         public void removeBreakpoints(String templateName) throws RemoteException {
             remoteDebugger.removeBreakpoints(templateName);
         }
 
+        @Override
         public void removeBreakpoints() throws RemoteException {
             remoteDebugger.removeBreakpoints();
         }
 
+        @Override
         public void removeDebuggerListener(Object id) throws RemoteException {
             remoteDebugger.removeDebuggerListener(id);
         }

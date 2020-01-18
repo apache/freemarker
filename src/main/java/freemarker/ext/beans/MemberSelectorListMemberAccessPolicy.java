@@ -328,8 +328,10 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
         }
     }
 
+    @Override
     public final ClassMemberAccessPolicy forClass(final Class<?> contextClass) {
         return new ClassMemberAccessPolicy() {
+            @Override
             public boolean isMethodExposed(Method method) {
                 return matchResultToIsExposedResult(
                         methodMatcher.matches(contextClass, method)
@@ -338,6 +340,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
                                         != null);
             }
 
+            @Override
             public boolean isConstructorExposed(Constructor<?> constructor) {
                 return matchResultToIsExposedResult(
                         constructorMatcher.matches(contextClass, constructor)
@@ -346,6 +349,7 @@ public abstract class MemberSelectorListMemberAccessPolicy implements MemberAcce
                                         != null);
             }
 
+            @Override
             public boolean isFieldExposed(Field field) {
                 return matchResultToIsExposedResult(
                         fieldMatcher.matches(contextClass, field)

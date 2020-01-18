@@ -28,6 +28,7 @@ import org.slf4j.spi.LocationAwareLogger;
 @Deprecated
 public class SLF4JLoggerFactory implements LoggerFactory {
 
+    @Override
     public Logger getLogger(String category) {
             org.slf4j.Logger slf4jLogger = org.slf4j.LoggerFactory.getLogger(category);
             if (slf4jLogger instanceof LocationAwareLogger) {

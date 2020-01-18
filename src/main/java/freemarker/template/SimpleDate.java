@@ -64,10 +64,12 @@ public class SimpleDate implements TemplateDateModel {
         this.type = type;
     }
     
+    @Override
     public java.util.Date getAsDate() {
         return date;
     }
 
+    @Override
     public int getDateType() {
         return type;
     }

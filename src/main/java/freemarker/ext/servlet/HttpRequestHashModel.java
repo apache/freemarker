@@ -59,14 +59,17 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         this.wrapper = wrapper;
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         return wrapper.wrap(request.getAttribute(key));
     }
 
+    @Override
     public boolean isEmpty() {
         return !request.getAttributeNames().hasMoreElements();
     }
     
+    @Override
     public int size() {
         int result = 0;
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
@@ -76,6 +79,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         return result;
     }
     
+    @Override
     public TemplateCollectionModel keys() {
         ArrayList keys = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
@@ -84,6 +88,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         return new SimpleCollection(keys.iterator());
     }
     
+    @Override
     public TemplateCollectionModel values() {
         ArrayList values = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {

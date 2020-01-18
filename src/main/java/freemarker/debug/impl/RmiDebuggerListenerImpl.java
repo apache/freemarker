@@ -44,6 +44,7 @@ implements
 
     private final DebuggerListener listener;
 
+    @Override
     public void unreferenced() {
         try {
             UnicastRemoteObject.unexportObject(this, false);
@@ -57,7 +58,8 @@ implements
         this.listener = listener;
     }
 
-    public void environmentSuspended(EnvironmentSuspendedEvent e) 
+    @Override
+    public void environmentSuspended(EnvironmentSuspendedEvent e)
     throws RemoteException {
         listener.environmentSuspended(e);
     }

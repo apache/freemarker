@@ -38,10 +38,12 @@ class LazySequenceIterator implements TemplateModelIterator {
         this.sequence = sequence;
 
     }
+    @Override
     public TemplateModel next() throws TemplateModelException {
         return sequence.get(index++);
     }
 
+    @Override
     public boolean hasNext() {
         if (size == null) {
             try {

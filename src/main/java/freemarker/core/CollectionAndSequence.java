@@ -47,6 +47,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
         this.sequence = sequence;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         if (collection != null) {
             return collection.iterator();
@@ -55,6 +56,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
         }
     }
 
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         if (sequence != null) {
             return sequence.get(i);
@@ -64,6 +66,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
         }
     }
 
+    @Override
     public int size() throws TemplateModelException {
         if (sequence != null) {
             return sequence.size();

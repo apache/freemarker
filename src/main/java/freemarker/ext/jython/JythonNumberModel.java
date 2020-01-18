@@ -41,6 +41,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new JythonNumberModel((PyObject) object, (JythonWrapper) wrapper);
             }
@@ -55,6 +56,7 @@ implements
      * {@link java.lang.Number}.class as argument. If that fails, returns 
      * {@link PyObject#__float__()}.
      */
+    @Override
     public Number getAsNumber() throws TemplateModelException {
         try {
             Object value = object.__tojava__(java.lang.Number.class);

@@ -1633,6 +1633,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }
@@ -1650,6 +1651,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }
@@ -1665,6 +1667,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }

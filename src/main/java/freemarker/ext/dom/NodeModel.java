@@ -297,6 +297,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return node;
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.startsWith("@@")) {
             if (key.equals(AtAtKey.TEXT.getKey())) {
@@ -343,6 +344,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         }
     }
     
+    @Override
     public TemplateNodeModel getParentNode() {
         if (parent == null) {
             Node parentNode = node.getParentNode();
@@ -356,14 +358,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return parent;
     }
 
+    @Override
     public TemplateNodeModelEx getPreviousSibling() throws TemplateModelException {
         return wrap(node.getPreviousSibling());
     }
 
+    @Override
     public TemplateNodeModelEx getNextSibling() throws TemplateModelException {
         return wrap(node.getNextSibling());
     }
 
+    @Override
     public TemplateSequenceModel getChildNodes() {
         if (children == null) {
             children = new NodeListModel(node.getChildNodes(), this);
@@ -371,6 +376,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return children;
     }
     
+    @Override
     public final String getNodeType() throws TemplateModelException {
         short nodeType = node.getNodeType();
         switch (nodeType) {
@@ -406,14 +412,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     /**
      * Always returns 1.
      */
+    @Override
     public final int size() {
         return 1;
     }
     
+    @Override
     public final TemplateModel get(int i) {
         return i == 0 ? this : null;
     }
     
+    @Override
     public String getNodeNamespace() {
         int nodeType = node.getNodeType();
         if (nodeType != Node.ATTRIBUTE_NODE && nodeType != Node.ELEMENT_NODE) { 
@@ -756,14 +765,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return getNodeName();
     }
     
+    @Override
     public Object getAdaptedObject(Class hint) {
         return node;
     }
     
+    @Override
     public Object getWrappedObject() {
         return node;
     }
     
+    @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
         for (int i = 0; i < expectedClasses.length; i++) {
             Class expectedClass = expectedClasses[i];

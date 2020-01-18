@@ -81,6 +81,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return s.indexOf(getStringMethodArg(args, 0)) != -1
@@ -104,6 +105,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return s.endsWith(getStringMethodArg(args, 0)) ?
@@ -126,6 +128,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 String suffix = getStringMethodArg(args, 0);
@@ -148,6 +151,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1, 3);
                 
@@ -197,6 +201,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
             
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -231,6 +236,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -276,6 +282,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -328,6 +335,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -371,6 +379,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -438,6 +447,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt  = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -487,6 +497,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 String prefix = getStringMethodArg(args, 0);
@@ -509,6 +520,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 String suffix = getStringMethodArg(args, 0);
@@ -530,6 +542,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -564,6 +577,7 @@ class BuiltInsForStringsBasic {
                 this.s = s;
             }
     
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 return s.startsWith(getStringMethodArg(args, 0)) ?
@@ -583,6 +597,7 @@ class BuiltInsForStringsBasic {
         TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
             return new TemplateMethodModelEx() {
                 
+                @Override
                 public Object exec(java.util.List args) throws TemplateModelException {
                     int argCount = args.size();
                     checkMethodArgCount(argCount, 1, 2);
@@ -647,6 +662,7 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel calculateResult(final String s, final Environment env) {
             return new TemplateMethodModelEx() {
+                @Override
                 public Object exec(java.util.List args) throws TemplateModelException {
                     int argCount = args.size();
                     checkMethodArgCount(argCount, 1, 3);
@@ -701,6 +717,7 @@ class BuiltInsForStringsBasic {
     }
 
     static class truncateBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -708,12 +725,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncate(s, maxLength, (TemplateScalarModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_wBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -721,12 +740,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateW(s, maxLength, (TemplateScalarModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_cBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -734,12 +755,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateC(s, maxLength, (TemplateScalarModel) terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return false;
         }
     }
 
     static class truncate_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -747,12 +770,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }
     }
 
     static class truncate_w_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -760,12 +785,14 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateWM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }
     }
 
     static class truncate_c_mBI extends AbstractTruncateBI {
+        @Override
         protected TemplateModel truncate(
                 TruncateBuiltinAlgorithm algorithm, String s, int maxLength,
                 TemplateModel terminator, Integer terminatorLength, Environment env)
@@ -773,6 +800,7 @@ class BuiltInsForStringsBasic {
             return algorithm.truncateCM(s, maxLength, terminator, terminatorLength, env);
         }
 
+        @Override
         protected boolean allowMarkupTerminator() {
             return true;
         }

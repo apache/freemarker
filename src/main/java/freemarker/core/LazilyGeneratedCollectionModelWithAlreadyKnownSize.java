@@ -30,10 +30,12 @@ final class LazilyGeneratedCollectionModelWithAlreadyKnownSize extends LazilyGen
         this.size = size;
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return size;
     }
 
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }

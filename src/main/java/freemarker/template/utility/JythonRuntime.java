@@ -35,6 +35,7 @@ import freemarker.template.TemplateTransformModel;
 
 public class JythonRuntime extends PythonInterpreter
     implements TemplateTransformModel {
+    @Override
     public Writer getWriter(final Writer out,
                             final Map args) {
         final StringBuilder buf = new StringBuilder();

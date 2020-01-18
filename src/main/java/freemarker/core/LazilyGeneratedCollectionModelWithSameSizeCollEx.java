@@ -38,10 +38,12 @@ class LazilyGeneratedCollectionModelWithSameSizeCollEx extends LazilyGeneratedCo
         this.sizeSourceCollEx = sizeSourceCollEx;
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return sizeSourceCollEx.size();
     }
 
+    @Override
     public boolean isEmpty() throws TemplateModelException {
         return sizeSourceCollEx.isEmpty();
     }

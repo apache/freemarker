@@ -133,6 +133,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
 
+    @Override
     public String getAsString() {
         return value;
     }

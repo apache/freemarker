@@ -55,6 +55,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         this.templateLoaders = templateLoaders.clone();
     }
 
+    @Override
     public Object findTemplateSource(String name)
             throws IOException {
         TemplateLoader lastTemplateLoader = null;
@@ -93,15 +94,18 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         return null;
     }
 
+    @Override
     public long getLastModified(Object templateSource) {
         return ((MultiSource) templateSource).getLastModified();
     }
 
+    @Override
     public Reader getReader(Object templateSource, String encoding)
             throws IOException {
         return ((MultiSource) templateSource).getReader(encoding);
     }
 
+    @Override
     public void closeTemplateSource(Object templateSource)
             throws IOException {
         ((MultiSource) templateSource).close();
@@ -110,6 +114,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     /**
      * Clears the sickiness memory, also resets the state of all enclosed {@link StatefulTemplateLoader}-s.
      */
+    @Override
     public void resetState() {
         lastTemplateLoaderForName.clear();
         for (TemplateLoader loader : templateLoaders) {

@@ -106,6 +106,7 @@ public class JythonWrapper implements ObjectWrapper {
      * #unwrap(TemplateModel)}, the template model that was passed to
      * <code>unwrap</code> is returned.
      */
+    @Override
     public TemplateModel wrap(Object obj) {
         if (obj == null) {
             return null;
@@ -176,6 +177,7 @@ public class JythonWrapper implements ObjectWrapper {
             this.model = model;
         }
         
+        @Override
         public TemplateModel getTemplateModel() {
             return model;
         }

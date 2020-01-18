@@ -47,11 +47,13 @@ implements
         this.scope = scope;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object bean = scope == ANY_SCOPE ? pageContext.findAttribute(key) : pageContext.getAttribute(key, scope);
         return BeansWrapper.getDefaultInstance().wrap(bean);
     }
 
+    @Override
     public boolean isEmpty() {
         return false;
     }

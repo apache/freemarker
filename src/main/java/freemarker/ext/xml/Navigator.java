@@ -153,18 +153,21 @@ abstract class Navigator {
     }
 
     private class ChildrenOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             getChildren(node, localName, namespaceUri, result);
         }
     }
 
     private class AttributesOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             getAttributes(node, localName, namespaceUri, result);
         }
     }
 
     private class DescendantOrSelfOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(node);
             getDescendants(node, result);
@@ -172,12 +175,14 @@ abstract class Navigator {
     }
 
     private class DescendantOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             getDescendants(node, result);
         }
     }
 
     private class AncestorOrSelfOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(node);
             getAncestors(node, result);
@@ -185,12 +190,14 @@ abstract class Navigator {
     }
 
     private class AncestorOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             getAncestors(node, result);
         }
     }
 
     private class ParentOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             Object parent = getParent(node);
             if (parent != null) {
@@ -200,6 +207,7 @@ abstract class Navigator {
     }
 
     private class DocumentOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             Object document = getDocument(node);
             if (document != null) {
@@ -209,6 +217,7 @@ abstract class Navigator {
     }
 
     private class DocumentTypeOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             Object documentType = getDocumentType(node);
             if (documentType != null) {
@@ -218,12 +227,14 @@ abstract class Navigator {
     }
 
     private class ContentOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             getContent(node, result);
         }
     }
 
     private class TextOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getText(node);
             if (text != null) {
@@ -233,6 +244,7 @@ abstract class Navigator {
     }
 
     private class LocalNameOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getLocalName(node);
             if (text != null) {
@@ -242,6 +254,7 @@ abstract class Navigator {
     }
 
     private class QualifiedNameOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             String qname = getQualifiedName(node);
             if (qname != null) {
@@ -251,6 +264,7 @@ abstract class Navigator {
     }
 
     private class NamespacePrefixOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getNamespacePrefix(node);
             if (text != null) {
@@ -260,6 +274,7 @@ abstract class Navigator {
     }
 
     private class NamespaceUriOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getNamespaceUri(node);
             if (text != null) {
@@ -269,6 +284,7 @@ abstract class Navigator {
     }
 
     private class TypeOp implements NodeOperator {
+        @Override
         public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(getType(node));
         }

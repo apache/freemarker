@@ -26,6 +26,7 @@ import org.apache.log4j.Level;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
 public class _Log4jLoggerFactory implements LoggerFactory {
+    @Override
     public Logger getLogger(String category) {
         return new Log4jLogger(org.apache.log4j.Logger.getLogger(category));
     }

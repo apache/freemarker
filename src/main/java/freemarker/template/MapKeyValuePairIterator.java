@@ -43,18 +43,22 @@ public class MapKeyValuePairIterator implements KeyValuePairIterator {
         this.objectWrapper = objectWrapper;
     }
 
+    @Override
     public boolean hasNext() {
         return entrySetIterator.hasNext();
     }
 
+    @Override
     public KeyValuePair next() {
         final Entry<?, ?> entry = entrySetIterator.next();
         return new KeyValuePair() {
 
+            @Override
             public TemplateModel getKey() throws TemplateModelException {
                 return wrap(entry.getKey());
             }
 
+            @Override
             public TemplateModel getValue() throws TemplateModelException {
                 return wrap(entry.getValue());
             }

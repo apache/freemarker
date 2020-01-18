@@ -172,6 +172,7 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
         return whitelist;
     }
 
+    @Override
     public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
         if (isTypeWithWhitelistRule(contextClass)) {
             return whitelistMemberAccessPolicy.forClass(contextClass);

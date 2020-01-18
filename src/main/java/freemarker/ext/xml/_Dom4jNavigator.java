@@ -232,6 +232,7 @@ public class _Dom4jNavigator extends Navigator {
             super(path);
         }
 
+        @Override
         public List selectNodes(Object object, NamespaceContext namespaces)
         throws TemplateModelException {
             Context context = getContext(object);
