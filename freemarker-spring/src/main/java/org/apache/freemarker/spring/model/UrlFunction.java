@@ -145,7 +145,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                             this);
                 }
 
-                params.add(new _KeyValuePair<String, String>(paramName, paramValue));
+                params.add(new _KeyValuePair<>(paramName, paramValue));
             }
         }
 

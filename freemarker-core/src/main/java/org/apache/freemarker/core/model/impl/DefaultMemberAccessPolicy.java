@@ -126,7 +126,7 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
             whitelistMemberAccessPolicy = new WhitelistMemberAccessPolicy(whitelistMemberSelectors);
 
             // Generate blacklists based on the whitelist and the members of "blacklistUnlistedMembers" types:
-            List<MemberSelector> blacklistMemberSelectors = new ArrayList<MemberSelector>();
+            List<MemberSelector> blacklistMemberSelectors = new ArrayList<>();
             for (Class<?> blacklistUnlistedRuleType : typesWithBlacklistUnlistedRule) {
                 ClassMemberAccessPolicy classPolicy = whitelistMemberAccessPolicy.forClass(blacklistUnlistedRuleType);
                 for (Method method : blacklistUnlistedRuleType.getMethods()) {
@@ -156,7 +156,7 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
     }
 
     private static List<String> loadMemberSelectorFileLines() throws IOException {
-        List<String> whitelist = new ArrayList<String>();
+        List<String> whitelist = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(
                         DefaultMemberAccessPolicy.class.getResourceAsStream("DefaultMemberAccessPolicy-rules"),

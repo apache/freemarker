@@ -375,7 +375,7 @@ public class DefaultObjectWrapperTest {
 
             assertCollectionTMEquals(seq, 1, null, "c");
 
-            TemplateModelIterator it = ((TemplateIterableModel) seq).iterator();
+            TemplateModelIterator it = seq.iterator();
             it.next();
             it.next();
             it.next();
@@ -685,7 +685,7 @@ public class DefaultObjectWrapperTest {
 
     @Test
     public void testEnumerationAdapter() throws TemplateException {
-        Vector<String> vector = new Vector<String>();
+        Vector<String> vector = new Vector<>();
         vector.add("a");
         vector.add("b");
 

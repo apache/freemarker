@@ -60,15 +60,14 @@ public class DebuggerClient {
     public static Debugger getDebugger(InetAddress host, int port, String password)
     throws IOException {
         try {
-            Socket s = new Socket(host, port);
-            try {
+            try (Socket s = new Socket(host, port)) {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(s.getInputStream());
                 int protocolVersion = in.readInt();
                 if (protocolVersion > 220) {
                     throw new IOException(
-                        "Incompatible protocol version " + protocolVersion + 
-                        ". At most 220 was expected.");
+                            "Incompatible protocol version " + protocolVersion +
+                                    ". At most 220 was expected.");
                 }
                 byte[] challenge = (byte[]) in.readObject();
                 MessageDigest md = MessageDigest.getInstance("SHA");
@@ -77,8 +76,6 @@ public class DebuggerClient {
                 out.writeObject(md.digest());
                 return new LocalDebuggerProxy((Debugger) in.readObject());
                 //return (Debugger)in.readObject();
-            } finally {
-                s.close();
             }
         } catch (IOException e) {
             throw e;

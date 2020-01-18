@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,15 +33,15 @@ public class NullTransparencyTest extends TemplateTest {
 
     @Override
     protected Object createDataModel() {
-        Map<String, Object> dataModel = new HashMap<String, Object>();
+        Map<String, Object> dataModel = new HashMap<>();
 
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("a");
         list.add(null);
         list.add("b");
         dataModel.put("list", list);
 
-        Map<String, String> map = new LinkedHashMap<String, String>();
+        Map<String, String> map = new LinkedHashMap<>();
         map.put("ak", "av");
         map.put(null, "bv");
         map.put("ck", null);

@@ -152,7 +152,7 @@ class ErrorsTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
             return;
         }
 
-        List<String> messages = new ArrayList<String>();
+        List<String> messages = new ArrayList<>();
         messages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
         SimpleCollection messagesModel = new SimpleCollection(messages, objectWrapperAndUnwrapper);
         final TemplateModel[] nestedContentArgs = new TemplateModel[] { messagesModel };

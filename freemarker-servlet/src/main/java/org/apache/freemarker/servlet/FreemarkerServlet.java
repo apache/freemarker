@@ -983,9 +983,7 @@ public class FreemarkerServlet extends HttpServlet {
                     ATTR_REQUEST_PARAMETERS_MODEL);
             params.putUnlistedModel(KEY_REQUEST_PARAMETERS, requestParametersModel);
             return params;
-        } catch (ServletException e) {
-            throw new TemplateException(e);
-        } catch (IOException e) {
+        } catch (ServletException | IOException e) {
             throw new TemplateException(e);
         }
     }
@@ -1028,7 +1026,7 @@ public class FreemarkerServlet extends HttpServlet {
         try {
             final String prop = _SecurityUtils.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
             classpathTldsFromSysProp = (prop != null) ? InitParamParser.parseCommaSeparatedList(prop)
-                    : Collections.<String>emptyList();
+                    : Collections.emptyList();
         } catch (ParseException e) {
             throw new TemplateException(
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);

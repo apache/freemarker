@@ -137,7 +137,7 @@ abstract class ASTElement extends ASTNode {
             public Iterator<ASTElement> iterator() {
                 return new _ChildIterator();
             }
-        } : Collections.<ASTElement>emptyList();
+        } : Collections.emptyList();
     }
 
     public final int getChildCount() {

@@ -758,7 +758,7 @@ public final class TemplateLanguageUtils {
      */
     public static String getTypeName(Class<? extends TemplateModel> cl) {
         StringBuilder sb = new StringBuilder();
-        appendTemplateModelTypeName(sb, new HashSet<String>(4), cl);
+        appendTemplateModelTypeName(sb, new HashSet<>(4), cl);
         return sb.toString();
     }
 

@@ -36,7 +36,7 @@ final class ASTDirSetting extends ASTDirective {
     private final String key;
     private final ASTExpression value;
     
-    static final Set<String> SETTING_NAMES = new _SortedArraySet<String>(
+    static final Set<String> SETTING_NAMES = new _SortedArraySet<>(
             // Must be sorted alphabetically!
             MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
             MutableProcessingConfiguration.DATE_FORMAT_KEY,

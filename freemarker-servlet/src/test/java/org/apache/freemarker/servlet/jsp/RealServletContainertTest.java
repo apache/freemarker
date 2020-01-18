@@ -281,8 +281,8 @@ public class RealServletContainertTest extends WebAppTestCase {
 
         @Override
         public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-            req.setAttribute("linkedList", initTestCollection(new LinkedList<Integer>()));
-            req.setAttribute("arrayList", initTestCollection(new ArrayList<Integer>()));
+            req.setAttribute("linkedList", initTestCollection(new LinkedList<>()));
+            req.setAttribute("arrayList", initTestCollection(new ArrayList<>()));
             req.setAttribute("myList", new MyList());
             
             req.setAttribute("linkedHashMap", initTestMap(new LinkedHashMap()));
@@ -310,7 +310,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
         @Override
         public Set<Map.Entry<String, Integer>> entrySet() {
-            return ImmutableSet.<Map.Entry<String, Integer>>of(
+            return ImmutableSet.of(
                     new MyEntry("a", 1), new MyEntry("b", 2), new MyEntry("c", 3));
         }
         

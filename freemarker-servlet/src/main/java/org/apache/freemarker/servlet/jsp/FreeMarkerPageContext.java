@@ -105,7 +105,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             session = request.getSession(false);
             response = reqHash.getResponse();
             ObjectWrapperAndUnwrapper ow = reqHash.getObjectWrapper();
-            wrapper = (ObjectWrapperAndUnwrapper) ow;
+            wrapper = ow;
         } else {
             throw new  TemplateException("Could not find an instance of " +
                     HttpRequestHashModel.class.getName() + 

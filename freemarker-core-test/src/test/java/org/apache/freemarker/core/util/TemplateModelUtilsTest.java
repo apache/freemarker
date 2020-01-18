@@ -82,9 +82,9 @@ public class TemplateModelUtilsTest {
                 TemplateModelUtils.wrapAsHashUnion(ow, th1, th4));
         assertUnionResult(ImmutableMap.of("a", 1, "b", 2), false,
                 TemplateModelUtils.wrapAsHashUnion(ow, th4, th1));
-        assertUnionResult(Collections.<String, Integer>emptyMap(), true,
+        assertUnionResult(Collections.emptyMap(), true,
                 TemplateModelUtils.wrapAsHashUnion(ow, thEx4, thEx4));
-        assertUnionResult(Collections.<String, Integer>emptyMap(), false,
+        assertUnionResult(Collections.emptyMap(), false,
                 TemplateModelUtils.wrapAsHashUnion(ow, th4, th4));
     }
 
@@ -135,15 +135,15 @@ public class TemplateModelUtilsTest {
             
             assertEquals(expected.size(), actualEx.getHashSize());
             
-            List<String> expectedKeys = new ArrayList<String>(expected.keySet());
-            List<String> actualKeys = new ArrayList<String>();
+            List<String> expectedKeys = new ArrayList<>(expected.keySet());
+            List<String> actualKeys = new ArrayList<>();
             for (TemplateModelIterator it = ((TemplateHashModelEx) actual).keys().iterator(); it.hasNext(); ) {
                 actualKeys.add(((TemplateStringModel) it.next()).getAsString());
             }
             assertEquals(expectedKeys, actualKeys);
             
-            List<Integer> expectedValues = new ArrayList<Integer>(expected.values());
-            List<Integer> actualValues = new ArrayList<Integer>();
+            List<Integer> expectedValues = new ArrayList<>(expected.values());
+            List<Integer> actualValues = new ArrayList<>();
             for (TemplateModelIterator it = ((TemplateHashModelEx) actual).values().iterator(); it.hasNext(); ) {
                 actualValues.add((Integer) ((TemplateNumberModel) it.next()).getAsNumber());
             }

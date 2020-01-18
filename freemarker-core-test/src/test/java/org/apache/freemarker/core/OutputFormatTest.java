@@ -260,11 +260,11 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.f3ah", "a&amp;x");
 
         setConfiguration(newConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(CustomHTMLOutputFormat.INSTANCE)));
+                .registeredCustomOutputFormats(Collections.singleton(CustomHTMLOutputFormat.INSTANCE)));
         assertOutputForNamed("t.f3ah", "a&amp;X");
 
         setConfiguration(newConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>emptyList()));
+                .registeredCustomOutputFormats(Collections.emptyList()));
         assertOutputForNamed("t.f3ah", "a&amp;x");
     }
     
@@ -624,7 +624,7 @@ public class OutputFormatTest extends TemplateTest {
                 "<#outputFormat 'dummy'></#outputFormat>",
                 "dummy", "nregistered");
         setConfiguration(newConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(DummyOutputFormat.INSTANCE)));
+                .registeredCustomOutputFormats(Collections.singleton(DummyOutputFormat.INSTANCE)));
         assertOutput(
                 "<#outputFormat 'dummy'>${.outputFormat}</#outputFormat>",
                 "dummy");
@@ -804,7 +804,7 @@ public class OutputFormatTest extends TemplateTest {
             OutputFormat outpoutFormat)
             throws TemplateException {
         return super.newConfigurationBuilder()
-                .registeredCustomOutputFormats(ImmutableList.<OutputFormat>of(
+                .registeredCustomOutputFormats(ImmutableList.of(
                         SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE))
                 .autoEscapingPolicy(autoEscPolicy)
                 .outputFormat(outpoutFormat)

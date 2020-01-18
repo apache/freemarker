@@ -87,7 +87,7 @@ public class TemplateModelUtils {
             throws TemplateException {
         _NullArgumentException.check("hashLikeObjects", hashLikeObjects);
         
-        List<TemplateHashModel> hashes = new ArrayList<TemplateHashModel>(hashLikeObjects.size());
+        List<TemplateHashModel> hashes = new ArrayList<>(hashLikeObjects.size());
         
         boolean allTHMEx = true;
         for (Object hashLikeObject : hashLikeObjects) {

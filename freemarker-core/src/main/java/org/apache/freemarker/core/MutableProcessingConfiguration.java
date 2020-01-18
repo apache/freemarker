@@ -1258,7 +1258,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     uniqueItems.add(templateName);
                 }
             }
-            this.autoIncludes = Collections.<String>unmodifiableList(new ArrayList<>(uniqueItems));
+            this.autoIncludes = Collections.unmodifiableList(new ArrayList<>(uniqueItems));
         } else {
             this.autoIncludes = autoIncludes;
         }

@@ -117,10 +117,10 @@ public class _CollectionUtils {
 
     private static final Class<?> UNMODIFIABLE_MAP_CLASS_1 = Collections.emptyMap().getClass();
     private static final Class<?> UNMODIFIABLE_MAP_CLASS_2 = Collections.unmodifiableMap(
-            new HashMap<Object, Object> (1)).getClass();
+            new HashMap<>(1)).getClass();
     private static final Class<?> UNMODIFIABLE_LIST_CLASS_1 = Collections.emptyList().getClass();
     private static final Class<?> UNMODIFIABLE_LIST_CLASS_2 = Collections.unmodifiableList(
-            new ArrayList<Object>(1)).getClass();
+            new ArrayList<>(1)).getClass();
 
     public static boolean isMapKnownToBeUnmodifiable(Map<?, ?> map) {
         if (map == null) {
@@ -158,8 +158,8 @@ public class _CollectionUtils {
         if (m2.isEmpty()) return m1;
 
         Map<K, V> mergedM = keepOriginalOrder
-                ? new LinkedHashMap<K, V>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f)
-                : new HashMap<K, V>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
+                ? new LinkedHashMap<>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f)
+                : new HashMap<>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
         mergedM.putAll(m1);
         if (keepOriginalOrder) {
             for (K m2Key : m2.keySet()) {

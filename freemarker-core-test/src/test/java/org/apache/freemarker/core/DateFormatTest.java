@@ -228,7 +228,7 @@ public class DateFormatTest extends TemplateTest {
         assertOutput("${d}", "@@1970");
 
         setConfiguration(newConfigurationBuilder()
-                .customDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap())
+                .customDateFormats(Collections.emptyMap())
                 .dateTimeFormat("@epoch"));
         assertErrorContains("${d}", "custom", "\"epoch\"");
     }

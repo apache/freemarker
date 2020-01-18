@@ -374,7 +374,7 @@ class ClassIntrospector {
                                     method.getParameterTypes());
                             if (replaced != null) {
                                 if (argTypesUsedByIndexerPropReaders == null) {
-                                    argTypesUsedByIndexerPropReaders = new IdentityHashMap<Method, Void>();
+                                    argTypesUsedByIndexerPropReaders = new IdentityHashMap<>();
                                 }
                                 argTypesUsedByIndexerPropReaders.put(method, null);
                             }
@@ -392,7 +392,7 @@ class ClassIntrospector {
     private List<PropertyDescriptor> getPropertyDescriptors(BeanInfo beanInfo, Class<?> clazz) {
         PropertyDescriptor[] introspectorPDsArray = beanInfo.getPropertyDescriptors();
         List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
-                : Collections.<PropertyDescriptor>emptyList();
+                : Collections.emptyList();
 
         if (_JavaVersions.JAVA_8 == null) {
             // java.beans.Introspector was good enough then.
@@ -425,7 +425,7 @@ class ClassIntrospector {
                     if (propName != null) {
                         if (mergedPRMPs == null) {
                             // Lazy initialization
-                            mergedPRMPs = new LinkedHashMap<String, Object>();
+                            mergedPRMPs = new LinkedHashMap<>();
                         }
                         if (paramTypes.length == 0) {
                             mergeInPropertyReaderMethod(mergedPRMPs, propName, method);
@@ -448,7 +448,7 @@ class ClassIntrospector {
         }
 
         // Now we convert the PRMPs to PDs, handling case where the normal and the indexed read methods contradict.
-        List<PropertyDescriptor> mergedPDs = new ArrayList<PropertyDescriptor>(mergedPRMPs.size());
+        List<PropertyDescriptor> mergedPDs = new ArrayList<>(mergedPRMPs.size());
         for (Entry<String, Object> entry : mergedPRMPs.entrySet()) {
             String propName = entry.getKey();
             Object propDescObj = entry.getValue();
@@ -586,7 +586,7 @@ class ClassIntrospector {
     private List<MethodDescriptor> getMethodDescriptors(BeanInfo beanInfo, Class<?> clazz) {
         MethodDescriptor[] introspectorMDArray = beanInfo.getMethodDescriptors();
         List<MethodDescriptor> introspectionMDs = introspectorMDArray != null && introspectorMDArray.length != 0
-                ? Arrays.asList(introspectorMDArray) : Collections.<MethodDescriptor>emptyList();
+                ? Arrays.asList(introspectorMDArray) : Collections.emptyList();
 
         if (_JavaVersions.JAVA_8 == null) {
             // java.beans.Introspector was good enough then.
@@ -597,11 +597,11 @@ class ClassIntrospector {
         for (Method method : clazz.getMethods()) {
             if (_JavaVersions.JAVA_8.isDefaultMethod(method) && !method.isBridge()) {
                 if (defaultMethodsToAddByName == null) {
-                    defaultMethodsToAddByName = new HashMap<String, List<Method>>();
+                    defaultMethodsToAddByName = new HashMap<>();
                 }
                 List<Method> overloads = defaultMethodsToAddByName.get(method.getName());
                 if (overloads == null) {
-                    overloads = new ArrayList<Method>(0);
+                    overloads = new ArrayList<>(0);
                     defaultMethodsToAddByName.put(method.getName(), overloads);
                 }
                 overloads.add(method);
@@ -615,7 +615,7 @@ class ClassIntrospector {
 
         // Recreate introspectionMDs so that its size can grow:
         ArrayList<MethodDescriptor> newIntrospectionMDs
-                = new ArrayList<MethodDescriptor>(introspectionMDs.size() + 16);
+                = new ArrayList<>(introspectionMDs.size() + 16);
         for (MethodDescriptor introspectorMD : introspectionMDs) {
             Method introspectorM = introspectorMD.getMethod();
             // Prevent cases where the same method is added with different return types both from the list of default
@@ -694,7 +694,7 @@ class ClassIntrospector {
             Class<?> clazz, ClassMemberAccessPolicy effClassMemberAccessPolicy) {
         try {
             Constructor<?>[] ctorsUnfiltered = clazz.getConstructors();
-            List<Constructor<?>> ctors = new ArrayList<Constructor<?>>(ctorsUnfiltered.length);
+            List<Constructor<?>> ctors = new ArrayList<>(ctorsUnfiltered.length);
             for (Constructor<?> ctor : ctorsUnfiltered) {
                 if (effClassMemberAccessPolicy.isConstructorExposed(ctor)) {
                     ctors.add(ctor);

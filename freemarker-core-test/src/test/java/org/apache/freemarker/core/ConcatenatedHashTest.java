@@ -66,14 +66,14 @@ public class ConcatenatedHashTest {
                 getConcatenatedModel(toHashModelNonEx(CD_MAP), toHashModelNonEx(ABC33_MAP)));
         assertHashModelContent(AB_MAP,
                 getConcatenatedModel(
-                        toHashModelNonEx(AB_MAP), toHashModelNonEx(Collections.<String, Object>emptyMap())));
+                        toHashModelNonEx(AB_MAP), toHashModelNonEx(Collections.emptyMap())));
         assertHashModelContent(AB_MAP,
                 getConcatenatedModel(
-                        toHashModelNonEx(Collections.<String, Object>emptyMap()), toHashModelNonEx(AB_MAP)));
-        assertHashModelContent(Collections.<String, Object>emptyMap(),
+                        toHashModelNonEx(Collections.emptyMap()), toHashModelNonEx(AB_MAP)));
+        assertHashModelContent(Collections.emptyMap(),
                 getConcatenatedModel(
-                        toHashModelNonEx(Collections.<String, Object>emptyMap()),
-                        toHashModelNonEx(Collections.<String, Object>emptyMap())));
+                        toHashModelNonEx(Collections.emptyMap()),
+                        toHashModelNonEx(Collections.emptyMap())));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ConcatenatedHashTest {
         assertHashModelContent(AB_MAP,
                 getConcatenatedModel(
                         toHashModelEx(Collections.<String, Object>emptyMap()), toHashModelEx(AB_MAP)));
-        assertHashModelContent(Collections.<String, Object>emptyMap(),
+        assertHashModelContent(Collections.emptyMap(),
                 getConcatenatedModel(
                         toHashModelEx(Collections.<String, Object>emptyMap()),
                         toHashModelEx(Collections.<String, Object>emptyMap())));

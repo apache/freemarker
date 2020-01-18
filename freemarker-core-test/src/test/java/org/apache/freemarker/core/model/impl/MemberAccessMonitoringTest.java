@@ -90,7 +90,7 @@ public class MemberAccessMonitoringTest extends TemplateTest {
 
         public MonitoredDefaultObjectWrapper() {
             super(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).exposeFields(true));
-            this.accessedMembers = Collections.synchronizedSet(new HashSet<String>());
+            this.accessedMembers = Collections.synchronizedSet(new HashSet<>());
         }
 
         @Override

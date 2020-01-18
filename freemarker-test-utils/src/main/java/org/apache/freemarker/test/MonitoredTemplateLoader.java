@@ -42,7 +42,7 @@ import com.google.common.base.Objects;
 public class MonitoredTemplateLoader implements TemplateLoader {
 
     private final List<AbstractTemplateLoader2Event> events
-            = Collections.synchronizedList(new ArrayList<AbstractTemplateLoader2Event>());
+            = Collections.synchronizedList(new ArrayList<>());
     
     private Map<String, StoredTemplate> templates
             = new ConcurrentHashMap<>();

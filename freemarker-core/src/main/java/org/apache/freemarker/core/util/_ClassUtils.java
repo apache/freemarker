@@ -53,9 +53,7 @@ public class _ClassUtils {
             if (ctcl != null) {  // not null: we don't want to fall back to the bootstrap class loader
                 return Class.forName(className, true, ctcl);
             }
-        } catch (ClassNotFoundException e) {
-            // Intentionally ignored
-        } catch (SecurityException e) {
+        } catch (ClassNotFoundException | SecurityException e) {
             // Intentionally ignored
         }
         // Fall back to the defining class loader of the FreeMarker classes 

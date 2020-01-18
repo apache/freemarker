@@ -619,18 +619,14 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             try {
-                ZipInputStream zipIn = new ZipInputStream(in);
-
-                try {
+                try (ZipInputStream zipIn = new ZipInputStream(in)) {
                     for (ZipEntry entry = zipIn.getNextEntry(); entry != null; entry = zipIn.getNextEntry()) {
                         String curEntryPath = normalizeJarEntryPath(entry.getName(), false);
                         if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
                             addTldLocationFromTld(zipIn,
-                                    new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath)); 
+                                    new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath));
                         }
                     }
-                } finally {
-                    zipIn.close();
                 }
             } finally {
                 in.close();
@@ -714,9 +710,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             try {
-                ZipInputStream zipIn = new ZipInputStream(in);
-
-                try {
+                try (ZipInputStream zipIn = new ZipInputStream(in)) {
                     for (ZipEntry entry = zipIn.getNextEntry(); entry != null; entry = zipIn.getNextEntry()) {
                         String curEntryPath = normalizeJarEntryPath(entry.getName(), false);
                         if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
@@ -725,8 +719,6 @@ public class TaglibFactory implements TemplateHashModel {
                             addTldLocationFromTld(zipIn, new JarEntryUrlTldLocation(tldUrl, null));
                         }
                     }
-                } finally {
-                    zipIn.close();
                 }
             } catch (ZipException e) {
                 // ZipException messages miss the zip URL 
@@ -774,7 +766,6 @@ public class TaglibFactory implements TemplateHashModel {
      */
     private void addTldLocationFromTld(TldLocation tldLocation) throws IOException, SAXException {
         InputStream in = null;
-
         try {
             in = tldLocation.getInputStream();
             addTldLocationFromTld(in, tldLocation);
@@ -1865,9 +1856,7 @@ public class TaglibFactory implements TemplateHashModel {
                 throws TldParsingSAXException {
             try {
                 return _ClassUtils.forName(className);
-            } catch (LinkageError e) {
-                throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
-            } catch (ClassNotFoundException e) {
+            } catch (LinkageError | ClassNotFoundException e) {
                 throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
             }
         }
@@ -2100,7 +2089,7 @@ public class TaglibFactory implements TemplateHashModel {
          * Getter pair of {@link #setClasspathTlds(List)}
          */
         public List<? extends MetaInfTldSource> getMetaInfTldSources() {
-            return (metaInfTldSources != null) ? metaInfTldSources : Collections.<MetaInfTldSource> emptyList();
+            return (metaInfTldSources != null) ? metaInfTldSources : Collections.emptyList();
         }
 
         /**
@@ -2137,7 +2126,7 @@ public class TaglibFactory implements TemplateHashModel {
          * Getter pair of {@link #setClasspathTlds(List)}.
          */
         public List<String> getClasspathTlds() {
-            return (classpathTlds != null) ? classpathTlds : Collections.<String> emptyList();
+            return (classpathTlds != null) ? classpathTlds : Collections.emptyList();
         }
 
         /**

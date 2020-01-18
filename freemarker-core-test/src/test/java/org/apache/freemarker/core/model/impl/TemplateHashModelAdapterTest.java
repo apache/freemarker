@@ -36,7 +36,7 @@ public class TemplateHashModelAdapterTest {
 
     @Test
     public void testNonEmpty() throws ObjectWrappingException {
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> map = new LinkedHashMap<>();
         map.put("k1", "v1");
         map.put("k2", 2);
         map.put("k3", null);
@@ -47,7 +47,7 @@ public class TemplateHashModelAdapterTest {
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel model = (TemplateHashModel) dow.wrap(map);
 
-        TemplateHashModelAdapter<Object, Object> adapted = new TemplateHashModelAdapter<Object, Object>(model, dow);
+        TemplateHashModelAdapter<Object, Object> adapted = new TemplateHashModelAdapter<>(model, dow);
 
         assertEquals("v1", adapted.get("k1"));
         assertEquals(2, adapted.get("k2"));
@@ -80,7 +80,7 @@ public class TemplateHashModelAdapterTest {
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel model = (TemplateHashModel) dow.wrap(map);
 
-        TemplateHashModelAdapter<Object, Object> adapted = new TemplateHashModelAdapter<Object, Object>(model, dow);
+        TemplateHashModelAdapter<Object, Object> adapted = new TemplateHashModelAdapter<>(model, dow);
 
         assertNull(adapted.get("k1"));
 

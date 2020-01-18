@@ -229,15 +229,15 @@ public class NumberFormatTest extends TemplateTest {
         assertOutput("${10}", "@@10");
 
         setConfigurationWithNumberFormat(
-                "@hex", Collections.<String, TemplateNumberFormatFactory>emptyMap());
+                "@hex", Collections.emptyMap());
         assertErrorContains("${10}", "custom", "\"hex\"");
 
         setConfigurationWithNumberFormat(
-                "'@'0", Collections.<String, TemplateNumberFormatFactory>emptyMap());
+                "'@'0", Collections.emptyMap());
         assertOutput("${10}", "@10");
 
         setConfigurationWithNumberFormat(
-                "@@0", Collections.<String, TemplateNumberFormatFactory>emptyMap());
+                "@@0", Collections.emptyMap());
         assertOutput("${10}", "@@10");
     }
 
@@ -271,7 +271,7 @@ public class NumberFormatTest extends TemplateTest {
     public void testAlieses2() throws Exception {
         setConfigurationWithNumberFormat(
                 "@n",
-                ImmutableMap.<String, TemplateNumberFormatFactory>of(
+                ImmutableMap.of(
                         "n", new AliasTemplateNumberFormatFactory("0.0",
                                 ImmutableMap.of(
                                         new Locale("en"), "0.0'_en'",

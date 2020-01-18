@@ -82,7 +82,7 @@ public class FreeMarkerViewResolverTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         FreeMarkerView view = resolveFreemarkerView("hello", null);//Locale.ENGLISH);
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         view.render(model, request, response);
 
         assertEquals("Hello, World!", response.getContentAsString());

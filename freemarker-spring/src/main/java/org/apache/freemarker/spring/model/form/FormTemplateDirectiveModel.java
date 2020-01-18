@@ -383,7 +383,7 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
         HttpServletRequest request = getRequest();
 
         if (processor != null && request != null) {
-            action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
+            action = processor.processAction(request, action, getHttpMethod());
         }
 
         return action;

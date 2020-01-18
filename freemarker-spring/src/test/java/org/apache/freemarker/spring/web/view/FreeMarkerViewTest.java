@@ -95,7 +95,7 @@ public class FreeMarkerViewTest {
         FreeMarkerView view = createFreemarkerView("hello.f3ah");
 
         int visitCount = 0;
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
 
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
@@ -128,7 +128,7 @@ public class FreeMarkerViewTest {
 
         FreeMarkerView view = createFreemarkerView("default-model.f3ah");
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         model.put("name", "Dan");
 
         final long count = visitorCount.incrementAndGet();
@@ -151,7 +151,7 @@ public class FreeMarkerViewTest {
 
         FreeMarkerView view = createFreemarkerView("taglibs.f3ah");
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
         assertEquals("Hello!", response.getContentAsString());

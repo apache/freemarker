@@ -102,7 +102,7 @@ class SelectableValueComparisonUtils {
     private static boolean isValueInCollectionComparingWithEditorValue(Collection<?> collection, Object value,
             BindStatus bindStatus) {
 
-        final Map<PropertyEditor, Object> convertedValueCache = new HashMap<PropertyEditor, Object>(1);
+        final Map<PropertyEditor, Object> convertedValueCache = new HashMap<>(1);
         PropertyEditor editor = null;
         final boolean isValueString = (value instanceof String);
 

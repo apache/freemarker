@@ -145,7 +145,7 @@ public class DeepUnwrap {
             if (hash.isEmptyHash()) {
                 return Collections.emptyMap();
             }
-            Map<Object, Object> map = new LinkedHashMap<Object, Object>((hash.getHashSize() + 1) * 4 / 3, 0.75f);
+            Map<Object, Object> map = new LinkedHashMap<>((hash.getHashSize() + 1) * 4 / 3, 0.75f);
             KeyValuePairIterator kvps = hash.keyValuePairIterator();
             while (kvps.hasNext()) {
                 KeyValuePair kvp = kvps.next();

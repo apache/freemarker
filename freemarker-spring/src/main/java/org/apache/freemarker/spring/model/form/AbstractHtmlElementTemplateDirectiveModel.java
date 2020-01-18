@@ -295,7 +295,7 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
         }
 
         if (dynamicAttributes == null) {
-            dynamicAttributes = new LinkedHashMap<String, Object>();
+            dynamicAttributes = new LinkedHashMap<>();
             unmodifiableDynamicAttributes = Collections.unmodifiableMap(dynamicAttributes);
         }
 

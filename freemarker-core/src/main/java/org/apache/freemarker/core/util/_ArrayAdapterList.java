@@ -32,7 +32,7 @@ public class _ArrayAdapterList<E> extends AbstractList<E> {
     private final E[] array;
 
     public static <E> _ArrayAdapterList<E> adapt(E[] array) {
-        return  array != null ? new _ArrayAdapterList<E>(array) : null;
+        return  array != null ? new _ArrayAdapterList<>(array) : null;
     }
 
     private _ArrayAdapterList(E[] array) {
@@ -51,7 +51,7 @@ public class _ArrayAdapterList<E> extends AbstractList<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new _ArrayIterator<E>(array);
+        return new _ArrayIterator<>(array);
     }
 
     @Override

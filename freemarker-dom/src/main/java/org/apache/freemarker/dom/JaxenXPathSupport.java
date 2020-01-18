@@ -67,7 +67,7 @@ class JaxenXPathSupport implements XPathSupport {
             = new CustomStateKey<Map<String, BaseXPath>>() {
         @Override
         protected Map<String, BaseXPath> create() {
-            return new HashMap<String, BaseXPath>();
+            return new HashMap<>();
         }
     };
 

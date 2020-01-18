@@ -47,11 +47,11 @@ abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactor
     protected ISOLikeTemplateDateFormatFactory() { }
 
     public DateToISO8601CalendarFactory getISOBuiltInCalendar(Environment env) {
-        return (DateToISO8601CalendarFactory) env.getCustomState(DATE_TO_CAL_CONVERTER_KEY);
+        return env.getCustomState(DATE_TO_CAL_CONVERTER_KEY);
     }
 
     public CalendarFieldsToDateConverter getCalendarFieldsToDateCalculator(Environment env) {
-        return (CalendarFieldsToDateConverter) env.getCustomState(CAL_TO_DATE_CONVERTER_KEY);
+        return env.getCustomState(CAL_TO_DATE_CONVERTER_KEY);
     }
     
 }

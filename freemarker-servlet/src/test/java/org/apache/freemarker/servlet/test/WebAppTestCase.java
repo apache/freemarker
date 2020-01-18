@@ -124,11 +124,8 @@ public class WebAppTestCase {
 
             final String content;
             if (responseCode == 200) {
-                InputStream in = httpCon.getInputStream();
-                try {
+                try (InputStream in = httpCon.getInputStream()) {
                     content = IOUtils.toString(in, StandardCharsets.UTF_8.name());
-                } finally {
-                    in.close();
                 }
             } else {
                 content = null;

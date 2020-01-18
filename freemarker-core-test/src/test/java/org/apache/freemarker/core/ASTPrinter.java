@@ -165,8 +165,7 @@ public class ASTPrinter {
             throw new IOException("Failed to get the length of " + file);
         }
         byte[] buffer = new byte[(int) ln];
-        InputStream in = new FileInputStream(file);
-        try {
+        try (InputStream in = new FileInputStream(file)) {
             int offset = 0;
             int bytesRead;
             while (offset < buffer.length) {
@@ -176,8 +175,6 @@ public class ASTPrinter {
                 }
                 offset += bytesRead;
             }
-        } finally {
-            in.close();
         }
         
         try {
@@ -198,12 +195,9 @@ public class ASTPrinter {
         if (!parentDir.isDirectory() && !parentDir.mkdirs()) {
             throw new IOException("Failed to invoke parent directory: " + parentDir);
         }
-        
-        Writer w = new BufferedWriter(new FileWriter(file));
-        try {
+
+        try (Writer w = new BufferedWriter(new FileWriter(file))) {
             w.write(astStr);
-        } finally {
-            w.close();
         }
     }
 

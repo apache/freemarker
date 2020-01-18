@@ -311,7 +311,7 @@ public class ConfigurationTest {
             assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         }
         {
-            Template t = cfg.getTemplate(tFtl, (Locale) null);
+            Template t = cfg.getTemplate(tFtl, null);
             assertEquals(tFtl, t.getLookupName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
@@ -737,7 +737,7 @@ public class ConfigurationTest {
     static {
         try {
             CONFIG_TEST_MEMBER_ACCESS_POLICY = new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
-                    ImmutableList.<String>of(
+                    ImmutableList.of(
                             File.class.getName() + ".getName()",
                             File.class.getName() + ".isFile()"),
                     false,
@@ -995,13 +995,13 @@ public class ConfigurationTest {
 
         @Override
         protected Map<String, TemplateNumberFormatFactory> getImpliedCustomNumberFormats() {
-            return ImmutableMap.<String, TemplateNumberFormatFactory>of(
+            return ImmutableMap.of(
                     "hex", HexTemplateNumberFormatFactory.INSTANCE);
         }
 
         @Override
         protected Map<String, TemplateDateFormatFactory> getImpliedCustomDateFormats() {
-            return ImmutableMap.<String, TemplateDateFormatFactory>of(
+            return ImmutableMap.of(
                     "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE);
         }
 
@@ -1017,12 +1017,12 @@ public class ConfigurationTest {
 
         @Override
         protected Map<String, Object> getImpliedSharedVariables() {
-            return ImmutableMap.<String, Object>of("v", 1);
+            return ImmutableMap.of("v", 1);
         }
 
         @Override
         protected Collection<OutputFormat> getImpliedRegisteredCustomOutputFormats() {
-            return ImmutableList.<OutputFormat>of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE);
+            return ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE);
         }
     }
 

@@ -132,11 +132,8 @@ public class FM2ASTToFM3SourceConverter {
                 throw new FileNotFoundException("Template not found: " + template.getName());
             }
 
-            Reader reader = templateLoader.getReader(templateSource, template.getEncoding());
-            try {
+            try (Reader reader = templateLoader.getReader(templateSource, template.getEncoding())) {
                 this.src = IOUtils.toString(reader);
-            } finally {
-                reader.close();
             }
         } catch (IOException e) {
             throw new ConverterException("Failed to load template source", e);
@@ -1544,7 +1541,7 @@ public class FM2ASTToFM3SourceConverter {
     private static final Map<String, String> COMPARATOR_OP_MAP;
 
     static {
-        COMPARATOR_OP_MAP = new HashMap<String, String>();
+        COMPARATOR_OP_MAP = new HashMap<>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         COMPARATOR_OP_MAP.put("==", "==");
         COMPARATOR_OP_MAP.put("=", "==");
@@ -1574,7 +1571,7 @@ public class FM2ASTToFM3SourceConverter {
     private static final Map<String, String> AND_OP_MAP;
 
     static {
-        AND_OP_MAP = new HashMap<String, String>();
+        AND_OP_MAP = new HashMap<>();
         AND_OP_MAP.put("&&", "&&");
         AND_OP_MAP.put("&", "&&");
         AND_OP_MAP.put("\\and", "and");
@@ -1588,7 +1585,7 @@ public class FM2ASTToFM3SourceConverter {
     private static final Map<String, String> OR_OP_MAP;
 
     static {
-        OR_OP_MAP = new HashMap<String, String>();
+        OR_OP_MAP = new HashMap<>();
         OR_OP_MAP.put("||", "||");
         OR_OP_MAP.put("|", "||");
     }

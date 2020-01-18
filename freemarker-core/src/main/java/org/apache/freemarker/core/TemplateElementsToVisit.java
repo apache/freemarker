@@ -32,7 +32,7 @@ class TemplateElementsToVisit {
     private final Collection<ASTElement> templateElements;
 
     TemplateElementsToVisit(Collection<ASTElement> templateElements) {
-        this.templateElements = null != templateElements ? templateElements : Collections.<ASTElement> emptyList();
+        this.templateElements = null != templateElements ? templateElements : Collections.emptyList();
     }
 
     TemplateElementsToVisit(ASTElement nestedBlock) {

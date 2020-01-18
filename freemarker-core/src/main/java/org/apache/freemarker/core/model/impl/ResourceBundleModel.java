@@ -161,7 +161,7 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
         // consequences, and we avoid a performance hit.
         /* synchronized(formats) */
         {
-            format = (MessageFormat) formats.get(key);
+            format = formats.get(key);
             if (format == null) {
                 format = new MessageFormat(((ResourceBundle) object).getString(key));
                 format.setLocale(getBundle().getLocale());

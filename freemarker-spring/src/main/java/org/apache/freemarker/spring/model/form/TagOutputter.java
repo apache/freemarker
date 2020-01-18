@@ -36,7 +36,7 @@ class TagOutputter {
 
     private final Writer out;
 
-    private final Stack<TagEntry> tagStack = new Stack<TagEntry>();
+    private final Stack<TagEntry> tagStack = new Stack<>();
 
     public TagOutputter(final Environment env, final Writer out) {
         this.env = env;

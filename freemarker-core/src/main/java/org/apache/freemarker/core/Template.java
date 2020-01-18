@@ -1136,7 +1136,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         }
 
         Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomSettings(true)
-                : Collections.<Serializable, Object>emptyMap();
+                : Collections.emptyMap();
 
         LinkedHashMap<Serializable, Object> mergedAttrs;
         if (nonInheritedAttrs.isEmpty()) {

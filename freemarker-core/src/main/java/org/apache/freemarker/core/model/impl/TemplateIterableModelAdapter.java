@@ -48,7 +48,7 @@ class TemplateIterableModelAdapter<T> implements TemplateModelAdapter, Iterable<
     @Override
     public Iterator<T> iterator() {
         try {
-            return new TemplateModelIteratorAdapter<T>(model.iterator(), wrapper);
+            return new TemplateModelIteratorAdapter<>(model.iterator(), wrapper);
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
