@@ -284,7 +284,7 @@ final class DynamicKeyName extends Expression {
             // In principle we should take lazilyGeneratedResultEnabled into account, but that wouldn't be backward
             // compatible. For example, with lazily generated sequence result <#list xs[b..e] as x> would behave
             // differently if xs is modified inside the #list nested content.
-            ArrayList<TemplateModel> resultList = new ArrayList<TemplateModel>(resultSize);
+            ArrayList<TemplateModel> resultList = new ArrayList<>(resultSize);
             int srcIdx = firstIdx;
             for (int i = 0; i < resultSize; i++) {
                 resultList.add(targetSeq.get(srcIdx));
@@ -335,6 +335,7 @@ final class DynamicKeyName extends Expression {
                 private boolean elementsBeforeFirsIndexWereSkipped;
                 private int nextIdx;
 
+                @Override
                 public TemplateModel next() throws TemplateModelException {
                     ensureElementsBeforeFirstIndexWereSkipped();
                     if (!rightUnbounded && nextIdx > lastIdx) {
@@ -351,6 +352,7 @@ final class DynamicKeyName extends Expression {
                     return result;
                 }
 
+                @Override
                 public boolean hasNext() throws TemplateModelException {
                     ensureElementsBeforeFirstIndexWereSkipped();
                     return (rightUnbounded || nextIdx <= lastIdx) && (!rightAdaptive || targetIter.hasNext());

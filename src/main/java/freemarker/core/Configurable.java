@@ -501,7 +501,7 @@ public class Configurable {
     public Configurable(Configurable parent) {
         this.parent = parent;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap<Object, Object>(0);
+        customAttributes = new HashMap<>(0);
     }
     
     @Override
@@ -1934,7 +1934,7 @@ public class Configurable {
     }
 
     private void initAutoImportsMap() {
-        autoImports = new LinkedHashMap<String, String>(4);
+        autoImports = new LinkedHashMap<>(4);
     }
     
     /**
@@ -2074,7 +2074,7 @@ public class Configurable {
     }
 
     private void initAutoIncludesList() {
-        autoIncludes = new ArrayList<String>(4);
+        autoIncludes = new ArrayList<>(4);
     }
     
     /**
@@ -2860,7 +2860,7 @@ public class Configurable {
      * @since 2.3.24
      */
     public Set<String> getSettingNames(boolean camelCase) {
-        return new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
+        return new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE);
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {
@@ -2959,7 +2959,7 @@ public class Configurable {
             super(env,
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
-                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
+                            ? "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
         }
         
     }

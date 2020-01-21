@@ -26,6 +26,7 @@ package freemarker.log;
 @Deprecated
 public class CommonsLoggingLoggerFactory implements LoggerFactory {
 
+    @Override
     public Logger getLogger(String category) {
             return new CommonsLoggingLogger(
                             org.apache.commons.logging.LogFactory.getLog(category));

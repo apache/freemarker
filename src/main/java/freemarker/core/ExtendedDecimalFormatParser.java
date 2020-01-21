@@ -59,8 +59,9 @@ class ExtendedDecimalFormatParser {
     
     private static final HashMap<String, ? extends ParameterHandler> PARAM_HANDLERS;
     static {
-        HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
+        HashMap<String, ParameterHandler> m = new HashMap<>();
         m.put(PARAM_ROUNDING_MODE, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 RoundingMode parsedValue;
@@ -91,6 +92,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         ParameterHandler multiplierParamHandler = new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 try {
@@ -103,6 +105,7 @@ class ExtendedDecimalFormatParser {
         m.put(PARAM_MULTIPLIER, multiplierParamHandler);
         m.put(PARAM_MULTIPIER, multiplierParamHandler);
         m.put(PARAM_DECIMAL_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -112,6 +115,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_MONETARY_DECIMAL_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -121,6 +125,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_GROUP_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -130,12 +135,14 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_EXPONENT_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setExponentSeparator(value);
             }
         });
         m.put(PARAM_MINUS_SIGN, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -145,18 +152,21 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_INFINITY, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setInfinity(value);
             }
         });
         m.put(PARAM_NAN, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setNaN(value);
             }
         });
         m.put(PARAM_PERCENT, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -166,6 +176,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_PER_MILL, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -175,6 +186,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_ZERO_DIGIT, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -184,6 +196,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_CURRENCY_CODE, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 Currency currency;

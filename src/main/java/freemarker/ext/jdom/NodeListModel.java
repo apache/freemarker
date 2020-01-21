@@ -182,6 +182,7 @@ implements
     /**
      * Returns true if this model contains no nodes.
      */
+    @Override
     public boolean isEmpty() {
         return nodes.isEmpty();
     }
@@ -193,6 +194,7 @@ implements
      * simplifies creating XML-transformation templates, as to output a node contained
      * in variable x as XML fragment, you simply write ${x} in the template.
      */
+    @Override
     public String getAsString()
     throws TemplateModelException {
         if (isEmpty())
@@ -347,6 +349,7 @@ implements
      * @param key a key that identifies a required set of nodes
      * @return a new NodeListModel that represents the requested set of nodes.
      */
+    @Override
     public TemplateModel get(String key)
     throws TemplateModelException {
         if (isEmpty())
@@ -483,15 +486,18 @@ implements
         return new SimpleScalar(buf.toString());
     }
 
+    @Override
     public TemplateModelIterator iterator() {
         return new TemplateModelIterator()
         {
             private final Iterator it = nodes.iterator();
 
+            @Override
             public TemplateModel next() {
                 return it.hasNext() ? new NodeListModel(it.next(), namespaces) : null;
             }
 
+            @Override
             public boolean hasNext() {
                 return it.hasNext();
             }
@@ -501,6 +507,7 @@ implements
     /**
      * Retrieves the i-th element of the node list.
      */
+    @Override
     public TemplateModel get(int i)
     throws TemplateModelException {
         try {
@@ -510,6 +517,7 @@ implements
         }
     }
     
+    @Override
     public int size() {
         return nodes.size();
     }
@@ -531,6 +539,7 @@ implements
      * @return a NodeListModel representing the nodes that are the result of application
      * of the XPath to the current node list.
      */
+    @Override
     public Object exec(List arguments)
     throws TemplateModelException {
         if (arguments == null || arguments.size() != 1)
@@ -594,6 +603,7 @@ implements
     }
 
     private static final class AllChildrenOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return((Element) node).getChildren();
@@ -612,6 +622,7 @@ implements
     }
 
     private static final class NamedChildrenOp implements NamedNodeOperator {
+        @Override
         public List operate(Object node, String localName, Namespace namespace) {
             if (node instanceof Element) {
                 return((Element) node).getChildren(localName, namespace);
@@ -635,6 +646,7 @@ implements
     }
 
     private static final class AllAttributesOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
  // With 2.1 semantics it  makes more sense to just return a null and let the core 
  // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -650,6 +662,7 @@ implements
     }
 
     private static final class NamedAttributeOp implements NamedNodeOperator {
+        @Override
         public List operate(Object node, String localName, Namespace namespace) {
             Attribute attr = null;
             if (node instanceof Element) {
@@ -686,6 +699,7 @@ implements
     }
 
     private static final class NameOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return Collections.singletonList(((Element) node).getName());
@@ -706,6 +720,7 @@ implements
     }
 
     private static final class QNameOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return Collections.singletonList(((Element) node).getQualifiedName());
@@ -719,6 +734,7 @@ implements
     }
 
     private static final class NamespaceUriOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return Collections.singletonList(((Element) node).getNamespace().getURI());
@@ -732,6 +748,7 @@ implements
     }
 
     private static final class NamespacePrefixOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return Collections.singletonList(((Element) node).getNamespace().getPrefix());
@@ -745,6 +762,7 @@ implements
     }
 
     private static final class CanonicalNameOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element) {
                 Element element = (Element) node;
@@ -782,6 +800,7 @@ implements
     }
 
     private static final class ParentOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             Element parent = getParent(node);
             return parent == null ? Collections.EMPTY_LIST : Collections.singletonList(parent);
@@ -789,6 +808,7 @@ implements
     }
 
     private static final class AncestorOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             Element parent = getParent(node);
             if (parent == null) return Collections.EMPTY_LIST;
@@ -802,6 +822,7 @@ implements
     }
 
     private static final class AncestorOrSelfOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             Element parent = getParent(node);
             if (parent == null) return Collections.singletonList(node);
@@ -816,6 +837,7 @@ implements
     }
 
     private static class DescendantOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             LinkedList list = new LinkedList();
             if (node instanceof Element) {
@@ -854,6 +876,7 @@ implements
     }
 
     private static final class DocumentOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             Document doc = null;
             if (node instanceof Element)
@@ -883,6 +906,7 @@ implements
     }
 
     private static final class DocTypeOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Document) {
                 DocType doctype = ((Document) node).getDocType();
@@ -896,6 +920,7 @@ implements
     }
 
     private static final class ContentOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return((Element) node).getContent();
@@ -909,6 +934,7 @@ implements
     }
 
     private static final class TextOp implements NodeOperator {
+        @Override
         public List operate(Object node) {
             if (node instanceof Element)
                 return Collections.singletonList(((Element) node).getTextTrim());
@@ -1043,6 +1069,7 @@ implements
             return false;
         }
 
+        @Override
         public Object exec(List arguments)
         throws TemplateModelException {
             if (arguments.size() != 2)
@@ -1059,6 +1086,7 @@ implements
             return false;
         }
 
+        @Override
         public Object exec(List arguments) {
             Set names = new HashSet(arguments);
             List list = new LinkedList(nodes);
@@ -1089,6 +1117,7 @@ implements
             return false;
         }
 
+        @Override
         public Object exec(List arguments)
         throws TemplateModelException {
             if (arguments == null || arguments.size() == 0)
@@ -1186,6 +1215,7 @@ implements
                 this.namespaces = namespaces;
             }
             
+            @Override
             public String translateNamespacePrefixToUri(String prefix) {
                 // Empty prefix always maps to empty URL in XPath
                 if (prefix.length() == 0) {

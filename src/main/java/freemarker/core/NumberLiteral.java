@@ -46,6 +46,7 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         return env.formatNumberToPlainText(this, this, false);
     }
 
+    @Override
     public Number getAsNumber() {
         return value;
     }

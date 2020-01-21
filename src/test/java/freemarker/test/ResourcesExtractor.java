@@ -101,14 +101,11 @@ public final class ResourcesExtractor {
             deleteDstRootDir = !dstRootDir.exists();
         }
         try {
-            BufferedReader contR = new BufferedReader(new InputStreamReader(contIn, "UTF-8"));
-            try {
+            try (BufferedReader contR = new BufferedReader(new InputStreamReader(contIn, "UTF-8"))) {
                 String contLine;
                 while ((contLine = contR.readLine()) != null) {
                     processLine(contLine, resolverClass, srcDirResourcePath, dstRootDir, contResource);
                 }
-            } finally {
-                contR.close();
             }
             jarMarkedSubdirectories(dstRootDir);
             deleteDstRootDir = false;
@@ -231,16 +228,13 @@ public final class ResourcesExtractor {
     private static void jarDirectory(File srcDir, File jarFile) throws FileNotFoundException, IOException {
         boolean finished = false;
         try {
-            FileOutputStream fileOut = new FileOutputStream(jarFile);
-            try {
+            try (FileOutputStream fileOut = new FileOutputStream(jarFile)) {
                 JarOutputStream jarOut = new JarOutputStream(fileOut);
                 try {
                     addFilesToJar("", srcDir, jarOut);
                 } finally {
                     jarOut.close();
                 }
-            } finally {
-                fileOut.close();
             }
             finished = true;
         } finally {
@@ -275,11 +269,8 @@ public final class ResourcesExtractor {
         for (File entry : entries) {
             if (entry.isFile()) {
                 jarOut.putNextEntry(new ZipEntry(entryBasePath + entry.getName()));
-                FileInputStream fileIn = new FileInputStream(entry);
-                try {
+                try (FileInputStream fileIn = new FileInputStream(entry)) {
                     IOUtils.copy(fileIn, jarOut);
-                } finally {
-                    fileIn.close();
                 }
                 jarOut.closeEntry();
             } else if (entry.isDirectory()) {

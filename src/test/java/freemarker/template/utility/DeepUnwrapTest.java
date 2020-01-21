@@ -39,7 +39,7 @@ public class DeepUnwrapTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testHashEx2Unwrapping() throws Exception {
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> map = new LinkedHashMap<>();
         map.put("k1", "v1");
         map.put("k2", null);
         map.put(3, "v3");

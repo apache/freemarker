@@ -383,6 +383,7 @@ class OverloadedNumberUtil {
 
         // We have to implement this, so that if a potential matching method expects a Comparable, which is implemented
         // by all the supported numerical types, the "Or" type will be a match. 
+        @Override
         public int compareTo(Object o) {
             Number n = getSourceNumber();
             if (n instanceof Comparable) {

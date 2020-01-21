@@ -57,6 +57,7 @@ public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
      * to work you <b>must</b> have the Apache Commons-EL package in the classpath. If
      * Commons-EL is not available, this method will throw an UnsupportedOperationException. 
      */
+    @Override
     public ExpressionEvaluator getExpressionEvaluator() {
         try {
             Class type = Thread.currentThread().getContextClassLoader().loadClass
@@ -74,10 +75,12 @@ public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
      * the page scope, request scope, session scope and application scope for an
      * attribute with a matching name.
      */
+    @Override
     public VariableResolver getVariableResolver() {
         final PageContext ctx = this;
 
         return new VariableResolver() {
+            @Override
             public Object resolveVariable(String name) throws ELException {
                 return ctx.findAttribute(name);
             }
@@ -87,6 +90,7 @@ public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
     /**
      * Includes the specified path. The flush argument is ignored!
      */
+    @Override
     public void include(String path, boolean flush) throws IOException, ServletException {
         super.include(path);
     }

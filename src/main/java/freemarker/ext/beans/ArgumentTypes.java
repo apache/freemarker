@@ -118,7 +118,7 @@ final class ArgumentTypes {
             return applicables.getFirst();
         }
         
-        LinkedList<CallableMemberDescriptor> maximals = new LinkedList<CallableMemberDescriptor>();
+        LinkedList<CallableMemberDescriptor> maximals = new LinkedList<>();
         for (CallableMemberDescriptor applicable : applicables) {
             boolean lessSpecific = false;
             for (Iterator<CallableMemberDescriptor> maximalsIter = maximals.iterator(); 
@@ -453,7 +453,7 @@ final class ArgumentTypes {
      */
     LinkedList<CallableMemberDescriptor> getApplicables(
             List<ReflectionCallableMemberDescriptor> memberDescs, boolean varArg) {
-        LinkedList<CallableMemberDescriptor> applicables = new LinkedList<CallableMemberDescriptor>();
+        LinkedList<CallableMemberDescriptor> applicables = new LinkedList<>();
         for (ReflectionCallableMemberDescriptor memberDesc : memberDescs) {
             int difficulty = isApplicable(memberDesc, varArg);
             if (difficulty != CONVERSION_DIFFICULTY_IMPOSSIBLE) {

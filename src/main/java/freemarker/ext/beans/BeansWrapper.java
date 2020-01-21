@@ -330,6 +330,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 bwConf = (BeansWrapperConfiguration) bwConf.clone(false);
                 bwConf.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
+                    @Override
                     public void process(
                             MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                         BeansWrapper.this.finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
@@ -403,6 +404,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @since 2.3.21
      */
+    @Override
     public void writeProtect() {
         writeProtected = true;
     }
@@ -410,6 +412,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.21
      */
+    @Override
     public boolean isWriteProtected() {
         return writeProtected;
     }
@@ -929,6 +932,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * <li>otherwise, returns a generic {@link StringModel} for it.
      * </ul>
      */
+    @Override
     public TemplateModel wrap(Object object) throws TemplateModelException {
         if (object == null) return nullModel;
         return modelCache.getInstance(object);
@@ -955,6 +959,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.22
      */
+    @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         return new APIModel(obj, this);
     }
@@ -972,18 +977,21 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return ((Boolean) object).booleanValue() ? trueModel : falseModel; 
         }
     };
 
     private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return new IteratorModel((Iterator<?>) object, (BeansWrapper) wrapper); 
         }
     };
 
     private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return new EnumerationModel((Enumeration<?>) object, (BeansWrapper) wrapper); 
         }
@@ -1033,6 +1041,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * returned unchanged.
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
+    @Override
     public Object unwrap(TemplateModel model) throws TemplateModelException {
         return unwrap(model, Object.class);
     }
@@ -1063,6 +1072,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.22
      */
+    @Override
     public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateModelException {
         return tryUnwrapTo(model, targetClass, 0);
     }
@@ -1326,7 +1336,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap<Object, Object>();
+            recursionStops = new IdentityHashMap<>();
         }
         Class<?> componentType = arrayClass.getComponentType();
         final int size = seq.size();
@@ -1371,7 +1381,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap<Object, Object>();
+            recursionStops = new IdentityHashMap<>();
         }
         Class<?> componentType = arrayClass.getComponentType();
         Object array = Array.newInstance(componentType, list.size());

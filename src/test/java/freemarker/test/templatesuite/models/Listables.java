@@ -49,7 +49,7 @@ public class Listables {
     
     private static final List<Integer> LIST;
     static {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         list.add(11);
         list.add(22);
         list.add(33);
@@ -58,7 +58,7 @@ public class Listables {
 
     private static final List<Integer> LINKED_LIST;
     static {
-        List<Integer> list = new LinkedList<Integer>();
+        List<Integer> list = new LinkedList<>();
         list.add(11);
         list.add(22);
         list.add(33);
@@ -67,13 +67,13 @@ public class Listables {
 
     private static final List<Integer> EMPTY_LINKED_LIST;
     static {
-        List<Integer> list = new LinkedList<Integer>();
+        List<Integer> list = new LinkedList<>();
         EMPTY_LINKED_LIST = list;
     }
     
     private static final Set<Integer> SET;
     static {
-        Set<Integer> set = new TreeSet<Integer>();
+        Set<Integer> set = new TreeSet<>();
         set.add(11);
         set.add(22);
         set.add(33);
@@ -114,7 +114,7 @@ public class Listables {
     
     public List<TemplateHashModelEx2> getHashEx2s() throws TemplateModelException {
         Map<Object, Object> map;
-        map = new LinkedHashMap<Object, Object>();
+        map = new LinkedHashMap<>();
         map.put("k1", "v1");
         map.put(2, "v2");
         map.put("k3", "v3");
@@ -126,7 +126,7 @@ public class Listables {
     }
 
     public List<? extends TemplateHashModelEx> getEmptyHashes() throws TemplateModelException {
-        List<TemplateHashModelEx> emptyMaps = new ArrayList<TemplateHashModelEx>();
+        List<TemplateHashModelEx> emptyMaps = new ArrayList<>();
         emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
         emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build()
                 .wrap(Collections.emptyMap()));
@@ -137,7 +137,7 @@ public class Listables {
      * Returns the map wrapped on various ways.
      */
     private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws TemplateModelException {
-        List<TemplateHashModelEx2> maps = new ArrayList<TemplateHashModelEx2>();
+        List<TemplateHashModelEx2> maps = new ArrayList<>();
         
         maps.add((SimpleHash) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build().wrap(map));
         

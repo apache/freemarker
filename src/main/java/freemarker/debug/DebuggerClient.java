@@ -60,15 +60,14 @@ public class DebuggerClient {
     public static Debugger getDebugger(InetAddress host, int port, String password)
     throws IOException {
         try {
-            Socket s = new Socket(host, port);
-            try {
+            try (Socket s = new Socket(host, port)) {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(s.getInputStream());
                 int protocolVersion = in.readInt();
                 if (protocolVersion > 220) {
                     throw new IOException(
-                        "Incompatible protocol version " + protocolVersion + 
-                        ". At most 220 was expected.");
+                            "Incompatible protocol version " + protocolVersion +
+                                    ". At most 220 was expected.");
                 }
                 byte[] challenge = (byte[]) in.readObject();
                 MessageDigest md = MessageDigest.getInstance("SHA");
@@ -77,8 +76,6 @@ public class DebuggerClient {
                 out.writeObject(md.digest());
                 return new LocalDebuggerProxy((Debugger) in.readObject());
                 //return (Debugger)in.readObject();
-            } finally {
-                s.close();
             }
         } catch (IOException e) {
             throw e;
@@ -94,11 +91,13 @@ public class DebuggerClient {
             this.remoteDebugger = remoteDebugger;
         }
 
+        @Override
         public void addBreakpoint(Breakpoint breakpoint) throws RemoteException {
             remoteDebugger.addBreakpoint(breakpoint);
         }
 
-        public Object addDebuggerListener(DebuggerListener listener) 
+        @Override
+        public Object addDebuggerListener(DebuggerListener listener)
         throws RemoteException {
             if (listener instanceof RemoteObject) {
                 return remoteDebugger.addDebuggerListener(listener);
@@ -109,30 +108,37 @@ public class DebuggerClient {
             }
         }
 
+        @Override
         public List getBreakpoints() throws RemoteException {
             return remoteDebugger.getBreakpoints();
         }
 
+        @Override
         public List getBreakpoints(String templateName) throws RemoteException {
             return remoteDebugger.getBreakpoints(templateName);
         }
 
+        @Override
         public Collection getSuspendedEnvironments() throws RemoteException {
             return remoteDebugger.getSuspendedEnvironments();
         }
 
+        @Override
         public void removeBreakpoint(Breakpoint breakpoint) throws RemoteException {
             remoteDebugger.removeBreakpoint(breakpoint);
         }
 
+        @Override
         public void removeBreakpoints(String templateName) throws RemoteException {
             remoteDebugger.removeBreakpoints(templateName);
         }
 
+        @Override
         public void removeBreakpoints() throws RemoteException {
             remoteDebugger.removeBreakpoints();
         }
 
+        @Override
         public void removeDebuggerListener(Object id) throws RemoteException {
             remoteDebugger.removeDebuggerListener(id);
         }

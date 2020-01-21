@@ -38,16 +38,19 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     
     private Boolean urlConnectionUsesCaches;
     
+    @Override
     public Object findTemplateSource(String name)
     throws IOException {
         URL url = getURL(name);
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
     
+    @Override
     public long getLastModified(Object templateSource) {
         return ((URLTemplateSource) templateSource).lastModified();
     }
     
+    @Override
     public Reader getReader(Object templateSource, String encoding)
     throws IOException {
         return new InputStreamReader(
@@ -55,6 +58,7 @@ public abstract class URLTemplateLoader implements TemplateLoader {
                 encoding);
     }
     
+    @Override
     public void closeTemplateSource(Object templateSource)
     throws IOException {
         ((URLTemplateSource) templateSource).close();

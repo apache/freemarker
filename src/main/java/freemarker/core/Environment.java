@@ -174,7 +174,7 @@ public final class Environment extends Configurable {
     private Throwable lastThrowable;
 
     private TemplateModel lastReturnValue;
-    private Map<Object, Namespace> macroToNamespaceLookup = new IdentityHashMap<Object, Namespace>();
+    private Map<Object, Namespace> macroToNamespaceLookup = new IdentityHashMap<>();
 
     private TemplateNodeModel currentVisitorNode;
     private TemplateSequenceModel nodeNamespaces;
@@ -435,11 +435,13 @@ public final class Environment extends Configurable {
         if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
 
+                @Override
                 public TemplateModel getLocalVariable(String name) {
                     int index = bodyParameterNames.indexOf(name);
                     return index != -1 ? outArgs[index] : null;
                 }
 
+                @Override
                 public Collection getLocalVariableNames() {
                     return bodyParameterNames;
                 }
@@ -509,11 +511,7 @@ public final class Environment extends Configurable {
                     } else {
                         throw t;
                     }
-                } catch (TemplateException e) {
-                    throw e;
-                } catch (IOException e) {
-                    throw e;
-                } catch (Error e) {
+                } catch (TemplateException | IOException | Error e) {
                     throw e;
                 } catch (Throwable e) {
                     if (EvalUtil.shouldWrapUncheckedException(e, this)) {
@@ -710,10 +708,12 @@ public final class Environment extends Configurable {
             this.lambdaArgValue = lambdaArgValue;
         }
 
+        @Override
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
             return name.equals(lambdaArgName) ? lambdaArgValue : null;
         }
 
+        @Override
         public Collection getLocalVariableNames() throws TemplateModelException {
             return Collections.singleton(lambdaArgName);
         }
@@ -942,7 +942,7 @@ public final class Environment extends Configurable {
                         } else {
                             List<NameValuePair> orderLastByNameCatchAll = withArgsState.orderLastByNameCatchAll;
                             if (orderLastByNameCatchAll == null) {
-                                orderLastByNameCatchAll = new ArrayList<NameValuePair>();
+                                orderLastByNameCatchAll = new ArrayList<>();
                                 withArgsState.orderLastByNameCatchAll = orderLastByNameCatchAll;
                             }
                             orderLastByNameCatchAll.add(new NameValuePair(argName, argValue));
@@ -1599,7 +1599,7 @@ public final class Environment extends Configurable {
             throws TemplateValueFormatException {
         if (cachedTemplateNumberFormats == null) {
             if (cacheResult) {
-                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+                cachedTemplateNumberFormats = new HashMap<>();
             }
         } else {
             TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
@@ -2073,7 +2073,7 @@ public final class Environment extends Configurable {
                 cachedFormatsByFormatString = cachedTempDateFormatsByFmtStrArray[cacheArrIdx];
                 if (cachedFormatsByFormatString == null) {
                     if (cacheResult) {
-                        cachedFormatsByFormatString = new HashMap<String, TemplateDateFormat>(4);
+                        cachedFormatsByFormatString = new HashMap<>(4);
                         cachedTempDateFormatsByFmtStrArray[cacheArrIdx] = cachedFormatsByFormatString;
                         format = null;
                     } else {
@@ -2606,10 +2606,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getDataModel() {
         return rootDataModel instanceof TemplateHashModelEx
                 ? new TemplateHashModelEx() {
+                    @Override
                     public boolean isEmpty() throws TemplateModelException {
                         return false;
                     }
 
+                    @Override
                     public TemplateModel get(String key) throws TemplateModelException {
                         return getDataModelOrSharedVariable(key);
                     }
@@ -2617,23 +2619,28 @@ public final class Environment extends Configurable {
                     // NB: The methods below do not take into account
                     // configuration shared variables even though
                     // the hash will return them, if only for BWC reasons
+                    @Override
                     public TemplateCollectionModel values() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).values();
                     }
 
+                    @Override
                     public TemplateCollectionModel keys() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).keys();
                     }
 
+                    @Override
                     public int size() throws TemplateModelException {
                         return ((TemplateHashModelEx) rootDataModel).size();
                     }
                 }
             : new TemplateHashModel() {
+                @Override
                 public boolean isEmpty() {
                     return false;
                 }
 
+                @Override
                 public TemplateModel get(String key) throws TemplateModelException {
                     TemplateModel value = rootDataModel.get(key);
                     return value != null ? value : configuration.getSharedVariable(key);
@@ -2649,10 +2656,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getGlobalVariables() {
         return new TemplateHashModel() {
 
+            @Override
             public boolean isEmpty() {
                 return false;
             }
 
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel result = globalNamespace.get(key);
                 if (result == null) {
@@ -3196,7 +3205,7 @@ public final class Environment extends Configurable {
     public Object setCustomState(Object identityKey, Object value) {
         IdentityHashMap<Object, Object> customStateVariables = this.customStateVariables;
         if (customStateVariables == null) {
-            customStateVariables = new IdentityHashMap<Object, Object>();
+            customStateVariables = new IdentityHashMap<>();
             this.customStateVariables = customStateVariables;
         }
         return customStateVariables.put(identityKey, value);
@@ -3210,6 +3219,7 @@ public final class Environment extends Configurable {
             this.childBuffer = childBuffer;
         }
 
+        @Override
         public void render(Writer newOut) throws TemplateException, IOException {
             Writer prevOut = out;
             out = newOut;

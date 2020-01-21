@@ -135,12 +135,12 @@ final class OverloadedMethods {
                 tmArgs != null
                         ? new Object[] {
                                 "\nThe FTL type of the argument values were: ", getTMActualParameterTypes(tmArgs), "." }
-                        : (Object) "",
+                        : "",
                 unwrappedArgs != null
                         ? new Object[] {
                                 "\nThe Java type of the argument values were: ",
                                 getUnwrappedActualParameterTypes(unwrappedArgs) + "." }
-                        : (Object) ""};
+                        : ""};
     }
 
     private _DelayedConversionToString memberListToString() {

@@ -30,8 +30,8 @@ import freemarker.ext.util.ModelFactory;
 import freemarker.template.TemplateModel;
 
 public class BeansModelCache extends ModelCache {
-    private final Map<Class<?>, ModelFactory> classToFactory = new ConcurrentHashMap<Class<?>, ModelFactory>();
-    private final Set<String> mappedClassNames = new HashSet<String>();
+    private final Map<Class<?>, ModelFactory> classToFactory = new ConcurrentHashMap<>();
+    private final Set<String> mappedClassNames = new HashSet<>();
 
     private final BeansWrapper wrapper;
     
@@ -54,7 +54,7 @@ public class BeansModelCache extends ModelCache {
         if (factory == null) {
             // Synchronized so that we won't unnecessarily create the same factory for multiple times in parallel.
             synchronized (classToFactory) {
-                factory = (ModelFactory) classToFactory.get(clazz);
+                factory = classToFactory.get(clazz);
                 if (factory == null) {
                     String className = clazz.getName();
                     // clear mappings when class reloading is detected

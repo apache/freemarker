@@ -185,7 +185,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             String paramName = paramNames[i];
             sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(paramName));
 
-            Expression paramDefaultExp = (Expression) paramNamesWithDefault.get(paramName);
+            Expression paramDefaultExp = paramNamesWithDefault.get(paramName);
             if (paramDefaultExp != null) {
                 sb.append('=');
                 if (function) {
@@ -399,6 +399,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             } // if (argsSpecVarDraft != null)
         }
 
+        @Override
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
              return localVars.get(name);
         }
@@ -414,6 +415,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             localVars.put(name, var);
         }
 
+        @Override
         public Collection getLocalVariableNames() throws TemplateModelException {
             HashSet result = new HashSet();
             for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {

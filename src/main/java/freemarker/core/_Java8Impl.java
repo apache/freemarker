@@ -34,6 +34,7 @@ public class _Java8Impl implements _Java8 {
         // Not meant to be instantiated
     }    
 
+    @Override
     public boolean isDefaultMethod(Method method) {
         return method.isDefault();
     }

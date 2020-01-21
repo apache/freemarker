@@ -121,7 +121,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
             for (int i = 0; i < positionalArgs.size(); i++) {
-                Expression argExp = (Expression) positionalArgs.get(i);
+                Expression argExp = positionalArgs.get(i);
                 if (i != 0) {
                     sb.append(',');
                 }
@@ -145,7 +145,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 if (i != 0) {
                     sb.append(", ");
                 }
-                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
+                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(bodyParameterNames.get(i)));
             }
         }
         if (canonical) {
@@ -250,6 +250,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return res;
     }
 
+    @Override
     @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
     public Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
@@ -299,6 +300,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return customDataHolder;
     }
 
+    @Override
     public boolean isNestedOutputCacheable() {
         return isChildrenOutputCacheable();
     }

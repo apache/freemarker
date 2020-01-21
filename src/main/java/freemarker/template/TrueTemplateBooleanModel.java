@@ -24,6 +24,7 @@ package freemarker.template;
  */
 final class TrueTemplateBooleanModel implements SerializableTemplateBooleanModel {
 
+    @Override
     public boolean getAsBoolean() {
         return true;
     }

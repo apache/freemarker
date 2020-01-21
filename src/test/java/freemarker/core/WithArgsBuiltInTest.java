@@ -122,7 +122,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
         assertOutput("<@mCAO?withArgs({}) />", "o={}");
 
         assertOutput("<@m b=2 a=1 c=null />", "a=1; b=2; c=d3");
-        Map<String, Integer> cNull = new HashMap<String, Integer>();
+        Map<String, Integer> cNull = new HashMap<>();
         cNull.put("c", null);
         addToDataModel("cNull", cNull);
         assertOutput("<@m?withArgs(cNull) b=2 a=1 />", "a=1; b=2; c=d3");
@@ -132,7 +132,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
     public void testNullsWithMacroWithNamedWithArgs() throws Exception {
         // Null-s in ?withArgs should behave similarly as if they were given directly as argument.
         assertOutput("<@mCAO a=null b=null />", "o={a=null, b=null}");
-        Map<String, Integer> aNullBNull = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> aNullBNull = new LinkedHashMap<>();
         aNullBNull.put("a", null);
         aNullBNull.put("b", null);
         addToDataModel("aNullBNull", aNullBNull);
@@ -403,7 +403,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
                 "{}{11 22}");
         assertOutput("<@directive?withArgs({'a': 1, 'b': 2}) b=22 c=3; u>${u}</@>",
                 "{a=1, b=22, c=3}{11}");
-        Map<String, Integer> args = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> args = new LinkedHashMap<>();
         args.put("a", null);
         args.put("b", 2);
         args.put("c", 3);
@@ -417,7 +417,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
     public void testTemplateDirectiveModelWithArgsLast() throws IOException, TemplateException {
         addToDataModel("directive", new TestTemplateDirectiveModel());
 
-        Map<String, Integer> args = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> args = new LinkedHashMap<>();
         args.put("a", null);
         args.put("b", 2);
         args.put("c", 3);
@@ -476,7 +476,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
     @Test
     public void testMacroWithArgsLastNamedNullArgs() throws IOException, TemplateException {
         assertOutput("<@mCA?withArgsLast({'c': 3, 'd': 4}) a=1 d=null b=2 />", "a=1; b=2; o={d=null, c=3}");
-        Map<String, Integer> cAndDNull = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> cAndDNull = new LinkedHashMap<>();
         cAndDNull.put("c", 3);
         cAndDNull.put("d", null);
         addToDataModel("cAndDNull", cAndDNull);
@@ -520,7 +520,7 @@ public class WithArgsBuiltInTest extends TemplateTest {
 
     @Test
     public void testMacroWithArgsLastPositionalNullArgs() throws IOException, TemplateException {
-        ArrayList<Object> twoAndNull = new ArrayList<Object>();
+        ArrayList<Object> twoAndNull = new ArrayList<>();
         twoAndNull.add(2);
         twoAndNull.add(null);
         addToDataModel("twoAndNull", twoAndNull);

@@ -77,7 +77,7 @@ public class TemplateException extends Exception {
      * or underlying cause.
      */
     public TemplateException(Environment env) {
-        this((String) null, null, env);
+        this(null, null, env);
     }
 
     /**
@@ -95,7 +95,7 @@ public class TemplateException extends Exception {
      * backward-compatibility.
      */
     public TemplateException(Exception cause, Environment env) {
-        this((String) null, cause, env);
+        this(null, cause, env);
     }
 
     /**
@@ -108,7 +108,7 @@ public class TemplateException extends Exception {
      * @since 2.3.20
      */
     public TemplateException(Throwable cause, Environment env) {
-        this((String) null, cause, env);
+        this(null, cause, env);
     }
     
     /**
@@ -195,7 +195,7 @@ public class TemplateException extends Exception {
             if (!positionsCalculated) {
                 // The expressions is the argument of the template element, so we prefer it as it's more specific. 
                 TemplateObject templateObject = blamedExpression != null
-                        ? (TemplateObject) blamedExpression
+                        ? blamedExpression
                         : (
                                 ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length != 0
                                 ? ftlInstructionStackSnapshot[0] : null);
@@ -606,18 +606,22 @@ public class TemplateException extends Exception {
             this.out = out;
         }
 
+        @Override
         public void print(Object obj) {
             out.print(obj);
         }
 
+        @Override
         public void println(Object obj) {
             out.println(obj);
         }
 
+        @Override
         public void println() {
             out.println();
         }
 
+        @Override
         public void printStandardStackTrace(Throwable exception) {
             if (exception instanceof TemplateException) {
                 ((TemplateException) exception).printStandardStackTrace(out);
@@ -636,18 +640,22 @@ public class TemplateException extends Exception {
             this.out = out;
         }
 
+        @Override
         public void print(Object obj) {
             out.print(obj);
         }
 
+        @Override
         public void println(Object obj) {
             out.println(obj);
         }
 
+        @Override
         public void println() {
             out.println();
         }
 
+        @Override
         public void printStandardStackTrace(Throwable exception) {
             if (exception instanceof TemplateException) {
                 ((TemplateException) exception).printStandardStackTrace(out);

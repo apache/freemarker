@@ -44,6 +44,7 @@ public interface TemplateClassResolver {
      */
     TemplateClassResolver UNRESTRICTED_RESOLVER = new TemplateClassResolver() {
 
+        @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             try {
@@ -61,6 +62,7 @@ public interface TemplateClassResolver {
      */
     TemplateClassResolver SAFER_RESOLVER =  new TemplateClassResolver() {
 
+        @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             if (className.equals(ObjectConstructor.class.getName())
@@ -82,6 +84,7 @@ public interface TemplateClassResolver {
      */
     TemplateClassResolver ALLOWS_NOTHING_RESOLVER =  new TemplateClassResolver() {
 
+        @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             throw _MessageUtil.newInstantiatingClassNotAllowedException(className, env);

@@ -209,6 +209,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         put(key, b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE);
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object result;
         try {
@@ -345,22 +346,27 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         return map.toString();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return map == null || map.isEmpty();
     }
 
+    @Override
     public TemplateCollectionModel keys() {
         return new SimpleCollection(map.keySet(), getObjectWrapper());
     }
 
+    @Override
     public TemplateCollectionModel values() {
         return new SimpleCollection(map.values(), getObjectWrapper());
     }
 
+    @Override
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }

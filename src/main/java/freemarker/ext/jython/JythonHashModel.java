@@ -53,6 +53,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new JythonHashModel((PyObject) object, (JythonWrapper) wrapper);
             }
@@ -65,6 +66,7 @@ implements
     /**
      * Returns {@link PyObject#__len__()}.
      */
+    @Override
     public int size() throws TemplateModelException {
         try {
             return object.__len__();
@@ -77,6 +79,7 @@ implements
      * Returns either <code>object.__findattr__("keys").__call__()</code>
      * or <code>object.__findattr__("keySet").__call__()</code>.
      */
+    @Override
     public TemplateCollectionModel keys() throws TemplateModelException {
         try {
             PyObject method = object.__findattr__(KEYS);
@@ -97,6 +100,7 @@ implements
     /**
      * Returns <code>object.__findattr__("values").__call__()</code>.
      */
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         try {
             PyObject method = object.__findattr__(VALUES);

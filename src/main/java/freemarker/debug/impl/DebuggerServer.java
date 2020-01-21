@@ -62,6 +62,7 @@ class DebuggerServer {
     public void start() {
         new Thread(new Runnable()
         {
+            @Override
             public void run() {
                 startInternal();
             }
@@ -87,6 +88,7 @@ class DebuggerServer {
             this.s = s;
         }
         
+        @Override
         public void run() {
             try {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());

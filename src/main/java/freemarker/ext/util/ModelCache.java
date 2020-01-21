@@ -47,8 +47,8 @@ public abstract class ModelCache {
     public synchronized void setUseCache(boolean useCache) {
         this.useCache = useCache;
         if (useCache) {
-            modelCache = new IdentityHashMap<Object, ModelReference>();
-            refQueue = new ReferenceQueue<TemplateModel>();
+            modelCache = new IdentityHashMap<>();
+            refQueue = new ReferenceQueue<>();
         } else {
             modelCache = null;
             refQueue = null;
@@ -136,7 +136,7 @@ public abstract class ModelCache {
         }
 
         TemplateModel getModel() {
-            return (TemplateModel) this.get();
+            return this.get();
         }
     }
 

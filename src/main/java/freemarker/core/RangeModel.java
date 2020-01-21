@@ -36,6 +36,7 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
         return begin;
     }
     
+    @Override
     final public TemplateModel get(int index) throws TemplateModelException {
         if (index < 0 || index >= size()) {
             throw new _TemplateModelException("Range item index ", Integer.valueOf(index), " is out of bounds.");

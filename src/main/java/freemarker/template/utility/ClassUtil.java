@@ -94,7 +94,7 @@ public class ClassUtil {
 
     private static final Map<String, Class<?>> PRIMITIVE_CLASSES_BY_NAME;
     static {
-        PRIMITIVE_CLASSES_BY_NAME = new HashMap<String, Class<?>>();
+        PRIMITIVE_CLASSES_BY_NAME = new HashMap<>();
         PRIMITIVE_CLASSES_BY_NAME.put("boolean", boolean.class);
         PRIMITIVE_CLASSES_BY_NAME.put("byte", byte.class);
         PRIMITIVE_CLASSES_BY_NAME.put("char", char.class);

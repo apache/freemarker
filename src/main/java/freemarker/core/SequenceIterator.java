@@ -34,10 +34,12 @@ class SequenceIterator implements TemplateModelIterator {
         this.size = sequence.size();
 
     }
+    @Override
     public TemplateModel next() throws TemplateModelException {
         return sequence.get(index++);
     }
 
+    @Override
     public boolean hasNext() {
         return index < size;
     }

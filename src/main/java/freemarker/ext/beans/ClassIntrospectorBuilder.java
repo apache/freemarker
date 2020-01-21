@@ -34,9 +34,9 @@ import freemarker.template.utility.NullArgumentException;
 final class ClassIntrospectorBuilder implements Cloneable {
 
     private static final Map<ClassIntrospectorBuilder, Reference<ClassIntrospector>> INSTANCE_CACHE
-            = new HashMap<ClassIntrospectorBuilder, Reference<ClassIntrospector>>();
+            = new HashMap<>();
     private static final ReferenceQueue<ClassIntrospector> INSTANCE_CACHE_REF_QUEUE
-            = new ReferenceQueue<ClassIntrospector>();
+            = new ReferenceQueue<>();
 
     private final Version incompatibleImprovements;
 
@@ -232,7 +232,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
                 if (instance == null) {
                     ClassIntrospectorBuilder thisClone = (ClassIntrospectorBuilder) clone();  // prevent any aliasing issues
                     instance = new ClassIntrospector(thisClone, new Object(), true, true);
-                    INSTANCE_CACHE.put(thisClone, new WeakReference<ClassIntrospector>(instance, INSTANCE_CACHE_REF_QUEUE));
+                    INSTANCE_CACHE.put(thisClone, new WeakReference<>(instance, INSTANCE_CACHE_REF_QUEUE));
                 }
             }
             

@@ -40,6 +40,7 @@ public class StringArraySequence implements TemplateSequenceModel {
         this.stringArray = stringArray;
     }
 
+    @Override
     public TemplateModel get(int index) {
         if (array == null) {
             array = new TemplateScalarModel[stringArray.length];
@@ -52,6 +53,7 @@ public class StringArraySequence implements TemplateSequenceModel {
         return result;
     }
 
+    @Override
     public int size() {
         return stringArray.length;
     }

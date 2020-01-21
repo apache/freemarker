@@ -62,10 +62,12 @@ public class Constants {
     
     private static class EmptyIteratorModel implements TemplateModelIterator, Serializable {
 
+        @Override
         public TemplateModel next() throws TemplateModelException {
             throw new TemplateModelException("The collection has no more elements.");
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             return false;
         }
@@ -76,6 +78,7 @@ public class Constants {
     
     private static class EmptyCollectionModel implements TemplateCollectionModel, Serializable {
 
+        @Override
         public TemplateModelIterator iterator() throws TemplateModelException {
             return EMPTY_ITERATOR;
         }
@@ -86,10 +89,12 @@ public class Constants {
     
     private static class EmptySequenceModel implements TemplateSequenceModel, Serializable {
         
+        @Override
         public TemplateModel get(int index) throws TemplateModelException {
             return null;
         }
     
+        @Override
         public int size() throws TemplateModelException {
             return 0;
         }
@@ -109,26 +114,32 @@ public class Constants {
      */
     private static class EmptyHashModel implements TemplateHashModelEx2, Serializable {
         
+        @Override
         public int size() throws TemplateModelException {
             return 0;
         }
 
+        @Override
         public TemplateCollectionModel keys() throws TemplateModelException {
             return EMPTY_COLLECTION;
         }
 
+        @Override
         public TemplateCollectionModel values() throws TemplateModelException {
             return EMPTY_COLLECTION;
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             return null;
         }
 
+        @Override
         public boolean isEmpty() throws TemplateModelException {
             return true;
         }
 
+        @Override
         public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
             return EMPTY_KEY_VALUE_PAIR_ITERATOR;
         }
@@ -145,10 +156,12 @@ public class Constants {
             //
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             return false;
         }
 
+        @Override
         public TemplateHashModelEx2.KeyValuePair next() throws TemplateModelException {
             throw new NoSuchElementException("Can't retrieve element from empty key-value pair iterator.");
         }

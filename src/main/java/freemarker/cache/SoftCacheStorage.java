@@ -55,6 +55,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     /**
      * Returns true if the underlying Map is a {@code ConcurrentMap}.
      */
+    @Override
     public boolean isConcurrent() {
         return concurrent;
     }
@@ -64,22 +65,26 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
         this.concurrent = map instanceof ConcurrentMap;
     }
     
+    @Override
     public Object get(Object key) {
         processQueue();
         Reference ref = (Reference) map.get(key);
         return ref == null ? null : ref.get();
     }
 
+    @Override
     public void put(Object key, Object value) {
         processQueue();
         map.put(key, new SoftValueReference(key, value, queue));
     }
 
+    @Override
     public void remove(Object key) {
         processQueue();
         map.remove(key);
     }
 
+    @Override
     public void clear() {
         map.clear();
         processQueue();
@@ -90,6 +95,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
      * 
      * @since 2.3.21
      */
+    @Override
     public int getSize() {
         processQueue();
         return map.size();
@@ -105,9 +111,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
             if (concurrent) {
                 try {
                     atomicRemove.invoke(map, new Object[] { key, ref });
-                } catch (IllegalAccessException e) {
-                    throw new UndeclaredThrowableException(e);
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             } else if (map.get(key) == ref) {

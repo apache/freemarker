@@ -65,18 +65,22 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         this.iterator = iterator;
     }
 
+    @Override
     public Object getWrappedObject() {
         return iterator;
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new SimpleTemplateModelIterator();
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterator);
     }
@@ -88,6 +92,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
 
         private boolean iteratorOwnedByMe;
 
+        @Override
         public TemplateModel next() throws TemplateModelException {
             if (!iteratorOwnedByMe) {
                 checkNotOwner();
@@ -103,6 +108,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {

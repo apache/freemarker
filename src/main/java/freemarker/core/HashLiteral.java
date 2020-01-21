@@ -91,12 +91,12 @@ final class HashLiteral extends Expression {
     @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-		List<Expression> clonedKeys = new ArrayList<Expression>(keys.size());
+		List<Expression> clonedKeys = new ArrayList<>(keys.size());
         for (Expression key : keys) {
             clonedKeys.add(key.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
         }
 
-        List<Expression> clonedValues = new ArrayList<Expression>(values.size());
+        List<Expression> clonedValues = new ArrayList<>(values.size());
         for (Expression value : values) {
             clonedValues.add(value.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
         }
@@ -112,7 +112,7 @@ final class HashLiteral extends Expression {
 
         SequenceHash(Environment env) throws TemplateException {
             if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _TemplateAPI.VERSION_INT_2_3_21) {
-                map = new LinkedHashMap<String, TemplateModel>();
+                map = new LinkedHashMap<>();
                 for (int i = 0; i < size; i++) {
                     Expression keyExp = keys.get(i);
                     Expression valExp = values.get(i);
@@ -126,7 +126,7 @@ final class HashLiteral extends Expression {
             } else {
                 // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
                 // doing hash[key].
-                map = new HashMap<String, TemplateModel>();
+                map = new HashMap<>();
                 SimpleSequence keyList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
                 SimpleSequence valueList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
                 for (int i = 0; i < size; i++) {
@@ -146,10 +146,12 @@ final class HashLiteral extends Expression {
             }
         }
 
+        @Override
         public int size() {
             return size;
         }
 
+        @Override
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
@@ -159,6 +161,7 @@ final class HashLiteral extends Expression {
             return keyCollection;
         }
 
+        @Override
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
@@ -168,10 +171,12 @@ final class HashLiteral extends Expression {
             return valueCollection;
         }
 
+        @Override
         public TemplateModel get(String key) {
             return map.get(key);
         }
 
+        @Override
         public boolean isEmpty() {
             return size == 0;
         }
@@ -181,24 +186,29 @@ final class HashLiteral extends Expression {
             return getCanonicalForm();
         }
 
+        @Override
         public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
             return new KeyValuePairIterator() {
                 private final TemplateModelIterator keyIterator = keys().iterator();
                 private final TemplateModelIterator valueIterator = values().iterator();
 
+                @Override
                 public boolean hasNext() throws TemplateModelException {
                     return keyIterator.hasNext();
                 }
 
+                @Override
                 public KeyValuePair next() throws TemplateModelException {
                     return new KeyValuePair() {
                         private final TemplateModel key = keyIterator.next();
                         private final TemplateModel value = valueIterator.next();
 
+                        @Override
                         public TemplateModel getKey() {
                             return key;
                         }
 
+                        @Override
                         public TemplateModel getValue() {
                             return value;
                         }

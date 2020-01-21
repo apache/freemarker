@@ -37,13 +37,14 @@ import freemarker.template.utility.ClassUtil;
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;
     
-    private final Map<String,TemplateModel> cache = new ConcurrentHashMap<String,TemplateModel>();
-    private final Set<String> classIntrospectionsInProgress = new HashSet<String>();
+    private final Map<String,TemplateModel> cache = new ConcurrentHashMap<>();
+    private final Set<String> classIntrospectionsInProgress = new HashSet<>();
     
     protected ClassBasedModelFactory(BeansWrapper wrapper) {
         this.wrapper = wrapper;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         try {
             return getInternal(key);
@@ -133,6 +134,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         }
     }
 
+    @Override
     public boolean isEmpty() {
         return false;
     }

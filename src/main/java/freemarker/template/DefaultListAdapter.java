@@ -72,18 +72,22 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
         this.list = list;
     }
 
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         return index >= 0 && index < list.size() ? wrap(list.get(index)) : null;
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return list.size();
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
     }
 
+    @Override
     public Object getWrappedObject() {
         return list;
     }
@@ -95,12 +99,14 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
             super(list, wrapper);
         }
 
+        @Override
         public TemplateModelIterator iterator() throws TemplateModelException {
             return new IteratorToTemplateModelIteratorAdapter(list.iterator(), getObjectWrapper());
         }
 
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(list);
     }

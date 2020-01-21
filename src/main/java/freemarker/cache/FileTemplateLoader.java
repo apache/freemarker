@@ -116,7 +116,8 @@ public class FileTemplateLoader implements TemplateLoader {
      */
     public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck) throws IOException {
         try {
-            Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
+            Object[] retval = AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
+                @Override
                 public Object[] run() throws IOException {
                     if (!baseDir.exists()) {
                         throw new FileNotFoundException(baseDir + " does not exist.");
@@ -150,9 +151,11 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
+    @Override
     public Object findTemplateSource(final String name) throws IOException {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+                @Override
                 public File run() throws IOException {
                     File source = new File(baseDir, SEP_IS_SLASH ? name : 
                         name.replace('/', File.separatorChar));
@@ -183,17 +186,21 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
+    @Override
     public long getLastModified(final Object templateSource) {
         return (AccessController.doPrivileged(new PrivilegedAction<Long>() {
+            @Override
             public Long run() {
                 return Long.valueOf(((File) templateSource).lastModified());
             }
         })).longValue();
     }
     
+    @Override
     public Reader getReader(final Object templateSource, final String encoding) throws IOException {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<Reader>() {
+                @Override
                 public Reader run() throws IOException {
                     if (!(templateSource instanceof File)) {
                         throw new IllegalArgumentException(
@@ -258,6 +265,7 @@ public class FileTemplateLoader implements TemplateLoader {
         return true;
     }
 
+    @Override
     public void closeTemplateSource(Object templateSource) {
         // Do nothing.
     }

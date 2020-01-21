@@ -66,10 +66,10 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
         try {
             ClassLoader classLoader = DefaultMemberAccessPolicy.class.getClassLoader();
 
-            whitelistRuleFinalClasses = new HashSet<Class<?>>();
-            whitelistRuleNonFinalClasses = new HashSet<Class<?>>();
-            Set<Class<?>> typesWithBlacklistUnlistedRule = new HashSet<Class<?>>();
-            List<MemberSelector> whitelistMemberSelectors = new ArrayList<MemberSelector>();
+            whitelistRuleFinalClasses = new HashSet<>();
+            whitelistRuleNonFinalClasses = new HashSet<>();
+            Set<Class<?>> typesWithBlacklistUnlistedRule = new HashSet<>();
+            List<MemberSelector> whitelistMemberSelectors = new ArrayList<>();
             for (String line : loadMemberSelectorFileLines()) {
                 line = line.trim();
                 if (!MemberSelector.isIgnoredLine(line)) {
@@ -128,7 +128,7 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
             whitelistMemberAccessPolicy = new WhitelistMemberAccessPolicy(whitelistMemberSelectors);
 
             // Generate blacklists based on the whitelist and the members of "blacklistUnlistedMembers" types:
-            List<MemberSelector> blacklistMemberSelectors = new ArrayList<MemberSelector>();
+            List<MemberSelector> blacklistMemberSelectors = new ArrayList<>();
             for (Class<?> blacklistUnlistedRuleType : typesWithBlacklistUnlistedRule) {
                 ClassMemberAccessPolicy classPolicy = whitelistMemberAccessPolicy.forClass(blacklistUnlistedRuleType);
                 for (Method method : blacklistUnlistedRuleType.getMethods()) {
@@ -158,24 +158,21 @@ public final class DefaultMemberAccessPolicy implements MemberAccessPolicy {
     }
 
     private static List<String> loadMemberSelectorFileLines() throws IOException {
-        List<String> whitelist = new ArrayList<String>();
-        BufferedReader reader =
-                new BufferedReader(
-                        new InputStreamReader(
-                                DefaultMemberAccessPolicy.class.getResourceAsStream("DefaultMemberAccessPolicy-rules"),
-                                "UTF-8"));
-        try {
+        List<String> whitelist = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        DefaultMemberAccessPolicy.class.getResourceAsStream("DefaultMemberAccessPolicy-rules"),
+                        "UTF-8"))) {
             String line;
-            while ((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 whitelist.add(line);
             }
-        } finally {
-            reader.close();
         }
 
         return whitelist;
     }
 
+    @Override
     public ClassMemberAccessPolicy forClass(Class<?> contextClass) {
         if (isTypeWithWhitelistRule(contextClass)) {
             return whitelistMemberAccessPolicy.forClass(contextClass);

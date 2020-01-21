@@ -34,6 +34,7 @@ implements TemplateScalarModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new StringModel(object, (BeansWrapper) wrapper);
             }

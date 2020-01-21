@@ -48,7 +48,7 @@ public class AttemptLoggingTest extends TemplateTest {
 
     @Test
     public void customConfigTest() throws IOException, TemplateException {
-        List<String> reports = new ArrayList<String>();
+        List<String> reports = new ArrayList<>();
         getConfiguration().setAttemptExceptionReporter(new TestAttemptExceptionReporter(reports));
         
         assertOutput(
@@ -62,7 +62,7 @@ public class AttemptLoggingTest extends TemplateTest {
 
     @Test
     public void dontReportSuppressedExceptionsTest() throws IOException, TemplateException {
-        List<String> reports = new ArrayList<String>();
+        List<String> reports = new ArrayList<>();
         getConfiguration().setAttemptExceptionReporter(new TestAttemptExceptionReporter(reports));
         
         getConfiguration().setTemplateExceptionHandler(new TemplateExceptionHandler() {

@@ -63,6 +63,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
         elResolver.add(new ScopedAttributeELResolver());
     }
     
+    @Override
     public void addELContextListener(ELContextListener listener) {
         synchronized (listeners) {
             listeners.addLast(listener);
@@ -99,10 +100,12 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
         return null;
     }
 
+    @Override
     public void addELResolver(ELResolver resolver) {
         additionalResolvers.add(resolver);
     }
 
+    @Override
     public ExpressionFactory getExpressionFactory() {
         return expressionFactoryImpl;
     }

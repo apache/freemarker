@@ -44,6 +44,7 @@ class BuiltInsForCallables {
 
         protected abstract boolean isOrderLast();
 
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof Macro) {
@@ -69,6 +70,7 @@ class BuiltInsForCallables {
                 this.macroOrFunction = macroOrFunction;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args.size(), 1);
                 TemplateModel argTM = (TemplateModel) args.get(0);
@@ -99,6 +101,7 @@ class BuiltInsForCallables {
                 this.method = method;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args.size(), 1);
                 TemplateModel argTM = (TemplateModel) args.get(0);
@@ -107,9 +110,10 @@ class BuiltInsForCallables {
                     final TemplateSequenceModel withArgs = (TemplateSequenceModel) argTM;
                     if (method instanceof TemplateMethodModelEx) {
                         return new TemplateMethodModelEx() {
+                            @Override
                             public Object exec(List origArgs) throws TemplateModelException {
                                 int withArgsSize = withArgs.size();
-                                List<TemplateModel> newArgs = new ArrayList<TemplateModel>(
+                                List<TemplateModel> newArgs = new ArrayList<>(
                                         withArgsSize + origArgs.size());
 
                                 if (isOrderLast()) {
@@ -127,9 +131,10 @@ class BuiltInsForCallables {
                         };
                     } else {
                         return new TemplateMethodModel() {
+                            @Override
                             public Object exec(List origArgs) throws TemplateModelException {
                                 int withArgsSize = withArgs.size();
-                                List<String> newArgs = new ArrayList<String>(
+                                List<String> newArgs = new ArrayList<>(
                                         withArgsSize + origArgs.size());
 
                                 if (isOrderLast()) {
@@ -187,6 +192,7 @@ class BuiltInsForCallables {
                 this.directive = directive;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args.size(), 1);
                 TemplateModel argTM = (TemplateModel) args.get(0);
@@ -194,12 +200,13 @@ class BuiltInsForCallables {
                 if (argTM instanceof TemplateHashModelEx) {
                     final TemplateHashModelEx withArgs = (TemplateHashModelEx) argTM;
                     return new TemplateDirectiveModel() {
+                        @Override
                         public void execute(Environment env, Map origArgs, TemplateModel[] loopVars,
                                 TemplateDirectiveBody body) throws TemplateException, IOException {
                             int withArgsSize = withArgs.size();
                             // This is unnecessarily big if there are overridden arguments, but we care more about
                             // avoiding rehashing.
-                            Map<String, TemplateModel> newArgs = new LinkedHashMap<String, TemplateModel>(
+                            Map<String, TemplateModel> newArgs = new LinkedHashMap<>(
                                     (withArgsSize + origArgs.size()) * 4 / 3, 1f);
 
                             TemplateHashModelEx2.KeyValuePairIterator withArgsIter =

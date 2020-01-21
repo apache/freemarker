@@ -26,6 +26,7 @@ import java.util.logging.Level;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
 public class _JULLoggerFactory implements LoggerFactory {
+    @Override
     public Logger getLogger(String category) {
         return new JULLogger(java.util.logging.Logger.getLogger(category));
     }

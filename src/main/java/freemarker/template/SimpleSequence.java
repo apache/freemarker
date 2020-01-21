@@ -233,6 +233,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * Returns the item at the specified index of the list. If the item isn't yet an {@link TemplateModel}, it will wrap
      * it to one now, and writes it back into the backing list.
      */
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         try {
             Object value = list.get(index);
@@ -247,6 +248,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
         }
     }
 
+    @Override
     public int size() {
         return list.size();
     }

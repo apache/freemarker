@@ -65,6 +65,7 @@ implements
      * This allows the iterator to be used in a <tt>&lt;#list&gt;</tt> block.
      * @return "this"
      */
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         synchronized (this) {
             if (accessed) {
@@ -80,6 +81,7 @@ implements
     /**
      * Calls underlying {@link Iterator#hasNext()}.
      */
+    @Override
     public boolean hasNext() {
         return ((Iterator) object).hasNext();
     }
@@ -88,6 +90,7 @@ implements
     /**
      * Calls underlying {@link Iterator#next()} and wraps the result.
      */
+    @Override
     public TemplateModel next()
     throws TemplateModelException {
         try {

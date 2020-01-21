@@ -66,6 +66,7 @@ public final class SimpleMethodModel extends SimpleMethod
     /**
      * Invokes the method, passing it the arguments from the list.
      */
+    @Override
     public Object exec(List arguments)
         throws TemplateModelException {
         try {
@@ -78,11 +79,13 @@ public final class SimpleMethodModel extends SimpleMethod
         }
     }
     
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         return (TemplateModel) exec(Collections.singletonList(
                 new SimpleNumber(Integer.valueOf(index))));
     }
 
+    @Override
     public int size() throws TemplateModelException {
         throw new _TemplateModelException(
                 new _ErrorDescriptionBuilder(
@@ -103,6 +106,7 @@ public final class SimpleMethodModel extends SimpleMethod
     /**
      * Implementation of experimental interface; don't use it, no backward compatibility guarantee!
      */
+    @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
         final Member member = getMember();
         if (!(member instanceof Method)) {

@@ -78,7 +78,7 @@ final class Dot extends Expression {
 
     @Override
     Object getParameterValue(int idx) {
-        return idx == 0 ? (Object) target : (Object) key;
+        return idx == 0 ? target : key;
     }
 
     @Override

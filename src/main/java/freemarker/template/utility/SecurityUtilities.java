@@ -36,6 +36,7 @@ public class SecurityUtilities {
         return (String) AccessController.doPrivileged(
             new PrivilegedAction()
             {
+                @Override
                 public Object run() {
                     return System.getProperty(key);
                 }
@@ -47,6 +48,7 @@ public class SecurityUtilities {
             return (String) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
+                    @Override
                     public Object run() {
                         return System.getProperty(key, defValue);
                     }
@@ -64,6 +66,7 @@ public class SecurityUtilities {
             return (Integer) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
+                    @Override
                     public Object run() {
                         return Integer.getInteger(key, defValue);
                     }

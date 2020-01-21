@@ -33,6 +33,7 @@ public class BooleanModel extends BeanModel implements TemplateBooleanModel {
         value = bool.booleanValue();
     }
 
+    @Override
     public boolean getAsBoolean() {
         return value;
     }

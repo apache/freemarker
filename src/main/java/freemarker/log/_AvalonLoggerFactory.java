@@ -26,6 +26,7 @@ import org.apache.log.Hierarchy;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
 public class _AvalonLoggerFactory implements LoggerFactory {
+    @Override
     public Logger getLogger(String category) {
         return new AvalonLogger(Hierarchy.getDefaultHierarchy().getLoggerFor(category));
     }

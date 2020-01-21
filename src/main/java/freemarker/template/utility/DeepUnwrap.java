@@ -151,7 +151,7 @@ public class DeepUnwrap {
         }
         if (model instanceof TemplateHashModelEx) {
             TemplateHashModelEx hash = (TemplateHashModelEx) model;
-            Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+            Map<Object, Object> map = new LinkedHashMap<>();
             if (model instanceof TemplateHashModelEx2) {
                 KeyValuePairIterator kvps = ((TemplateHashModelEx2) model).keyValuePairIterator();
                 while (kvps.hasNext()) {

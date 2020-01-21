@@ -68,7 +68,8 @@ public class IncludePage implements TemplateDirectiveModel {
         this.response = response;
     }
     
-    public void execute(final Environment env, Map params, 
+    @Override
+    public void execute(final Environment env, Map params,
             TemplateModel[] loopVars, TemplateDirectiveBody body)
     throws TemplateException, IOException {
         // Determine the path
@@ -226,7 +227,7 @@ public class IncludePage implements TemplateDirectiveModel {
         @Override
         public String[] getParameterValues(String name) {
             String[] value = ((String[]) paramsMap.get(name));
-            return value != null ? (String[]) value.clone() : null;
+            return value != null ? value.clone() : null;
         }
 
         @Override

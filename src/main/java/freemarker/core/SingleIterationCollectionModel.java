@@ -39,6 +39,7 @@ class SingleIterationCollectionModel implements TemplateCollectionModel {
         this.iterator = iterator;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         if (iterator == null) {
             throw new IllegalStateException(

@@ -106,6 +106,7 @@ implements
     }
 
     // TODO See in SuppressFBWarnings
+    @Override
     @SuppressFBWarnings(value="NN_NAKED_NOTIFY", justification="Will have to be re-desigend; postponed.")
     public void resume() {
         synchronized (this) {
@@ -113,11 +114,13 @@ implements
         }
     }
 
+    @Override
     public void stop() {
         stopped = true;
         resume();
     }
 
+    @Override
     public long getId() {
         return id;
     }
@@ -127,14 +130,17 @@ implements
     }
     
     private abstract static class DebugMapModel implements TemplateHashModelEx {
+        @Override
         public int size() {
             return keySet().size();
         }
 
+        @Override
         public TemplateCollectionModel keys() {
             return new SimpleCollection(keySet());
         }
 
+        @Override
         public TemplateCollectionModel values() throws TemplateModelException {
             Collection keys = keySet();
             List list = new ArrayList(keys.size());
@@ -145,6 +151,7 @@ implements
             return new SimpleCollection(list);
         }
 
+        @Override
         public boolean isEmpty() {
             return size() == 0;
         }
@@ -182,6 +189,7 @@ implements
             return KEYS;
         }
         
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             String s = configurable.getSetting(key);
             return s == null ? null : new SimpleScalar(s);
@@ -199,6 +207,7 @@ implements
                 return ((Configuration) configurable).getSharedVariableNames();
             }
         
+            @Override
             public TemplateModel get(String key) {
                 return ((Configuration) configurable).getSharedVariable(key);
             }
@@ -280,6 +289,7 @@ implements
                 }
             }
         
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 return ((Environment) configurable).getVariable(key);
             }

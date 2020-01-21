@@ -452,6 +452,7 @@ final class IteratorBlock extends TemplateElement {
             return visibleLoopVarName.equals(visibleLoopVar1Name) || visibleLoopVarName.equals(loopVar2Name);
         }
 
+        @Override
         public TemplateModel getLocalVariable(String name) {
             String visibleLoopVar1Name = this.visibleLoopVar1Name; // Not this.loopVar1Name!
             if (visibleLoopVar1Name == null) {
@@ -487,6 +488,7 @@ final class IteratorBlock extends TemplateElement {
             return null;
         }
         
+        @Override
         public Collection<String> getLocalVariableNames() {
             String visibleLoopVar1Name = this.visibleLoopVar1Name; // Not this.loopVar1Name!
             if (visibleLoopVar1Name != null) {

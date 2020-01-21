@@ -332,6 +332,7 @@ public class _JdomNavigator extends Navigator {
             super(path);
         }
 
+        @Override
         public List selectNodes(Object object, NamespaceContext namespaces)
         throws TemplateModelException {
             Context context = getContext(object);

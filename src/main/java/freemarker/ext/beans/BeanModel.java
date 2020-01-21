@@ -72,6 +72,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new BeanModel(object, (BeansWrapper) wrapper);
             }
@@ -137,6 +138,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * @throws TemplateModelException if there was no property nor method nor
      * a generic <tt>get</tt> method to invoke.
      */
+    @Override
     public TemplateModel get(String key)
         throws TemplateModelException {
         Class<?> clazz = object.getClass();
@@ -247,7 +249,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
         if (cachedModel != null) {
             synchronized (this) {
                 if (memberCache == null) {
-                    memberCache = new HashMap<Object, TemplateModel>();
+                    memberCache = new HashMap<>();
                 }
                 memberCache.put(desc, cachedModel);
             }
@@ -286,6 +288,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * Tells whether the model is empty. It is empty if either the wrapped 
      * object is null, or it's a Boolean with false value.
      */
+    @Override
     public boolean isEmpty() {
         if (object instanceof String) {
             return ((String) object).length() == 0;
@@ -306,24 +309,29 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * Returns the same as {@link #getWrappedObject()}; to ensure that, this method will be final starting from 2.4.
      * This behavior of {@link BeanModel} is assumed by some FreeMarker code. 
      */
+    @Override
     public Object getAdaptedObject(Class<?> hint) {
         return object;  // return getWrappedObject(); starting from 2.4
     }
 
+    @Override
     public Object getWrappedObject() {
         return object;
     }
     
+    @Override
     public int size() {
         return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
+    @Override
     public TemplateCollectionModel keys() {
         return new CollectionAndSequence(new SimpleSequence(keySet(), wrapper));
     }
 
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
-        List<Object> values = new ArrayList<Object>(size());
+        List<Object> values = new ArrayList<>(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
             String key = ((TemplateScalarModel) it.next()).getAsString();
@@ -363,6 +371,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
         return wrapper.getClassIntrospector().keySet(object.getClass());
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return wrapper.wrapAsAPI(object);
     }

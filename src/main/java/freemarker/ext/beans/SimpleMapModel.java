@@ -50,6 +50,7 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new SimpleMapModel((Map) object, (BeansWrapper) wrapper);
             }
@@ -62,6 +63,7 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
         this.map = map;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object val = map.get(key);
         if (val == null) {
@@ -79,6 +81,7 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
         return wrap(val);
     }
     
+    @Override
     public Object exec(List args) throws TemplateModelException {
         Object key = ((BeansWrapper) getObjectWrapper()).unwrap((TemplateModel) args.get(0));
         Object value = map.get(key);
@@ -88,34 +91,42 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
         return wrap(value);
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public TemplateCollectionModel keys() {
         return new CollectionAndSequence(new SimpleSequence(map.keySet(), getObjectWrapper()));
     }
 
+    @Override
     public TemplateCollectionModel values() {
         return new CollectionAndSequence(new SimpleSequence(map.values(), getObjectWrapper()));
     }
     
+    @Override
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return map;
     }
     
+    @Override
     public Object getWrappedObject() {
         return map;
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((RichObjectWrapper) getObjectWrapper()).wrapAsAPI(map);
     }

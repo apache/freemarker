@@ -66,7 +66,7 @@ final class BuiltInsWithLazyConditionals {
         
         @Override
         protected List<Expression> getArgumentsAsList() {
-            ArrayList<Expression> args = new ArrayList<Expression>(2);
+            ArrayList<Expression> args = new ArrayList<>(2);
             args.add(whenTrueExp);
             args.add(whenFalseExp);
             return args;
@@ -110,13 +110,13 @@ final class BuiltInsWithLazyConditionals {
 
         @Override
         protected Expression getArgumentParameterValue(int argIdx) {
-            return (Expression) parameters.get(argIdx);
+            return parameters.get(argIdx);
         }
 
         @Override
         protected void cloneArguments(Expression clone, String replacedIdentifier, Expression replacement,
                 ReplacemenetState replacementState) {
-            List<Expression> parametersClone = new ArrayList<Expression>(parameters.size());
+            List<Expression> parametersClone = new ArrayList<>(parameters.size());
             for (Expression parameter : parameters) {
                 parametersClone.add(parameter
                         .deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));

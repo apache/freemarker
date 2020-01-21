@@ -36,7 +36,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
     private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
-            = new ConcurrentHashMap<CacheKey, DateFormat>();
+            = new ConcurrentHashMap<>();
     private static final int LEAK_ALERT_DATE_FORMAT_CACHE_SIZE = 1024;
     
     private JavaTemplateDateFormatFactory() {

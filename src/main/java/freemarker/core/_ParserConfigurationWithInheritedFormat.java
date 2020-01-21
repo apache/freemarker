@@ -36,46 +36,57 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         this.wrappedPCfg = wrappedPCfg;
     }
 
+    @Override
     public boolean getWhitespaceStripping() {
         return wrappedPCfg.getWhitespaceStripping();
     }
 
+    @Override
     public int getTagSyntax() {
         return wrappedPCfg.getTagSyntax();
     }
 
+    @Override
     public int getInterpolationSyntax() {
         return wrappedPCfg.getInterpolationSyntax();
     }
 
+    @Override
     public boolean getStrictSyntaxMode() {
         return wrappedPCfg.getStrictSyntaxMode();
     }
 
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : wrappedPCfg.getOutputFormat();
     }
 
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return false;
     }
 
+    @Override
     public int getNamingConvention() {
         return wrappedPCfg.getNamingConvention();
     }
 
+    @Override
     public Version getIncompatibleImprovements() {
         return wrappedPCfg.getIncompatibleImprovements();
     }
 
+    @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy != null ? autoEscapingPolicy.intValue() : wrappedPCfg.getAutoEscapingPolicy();
     }
 
+    @Override
     public ArithmeticEngine getArithmeticEngine() {
         return wrappedPCfg.getArithmeticEngine();
     }
 
+    @Override
     public int getTabSize() {
         return wrappedPCfg.getTabSize();
     }

@@ -317,6 +317,7 @@ public class _DomNavigator extends Navigator {
             super(path);
         }
 
+        @Override
         public List selectNodes(Object object, NamespaceContext namespaces)
         throws TemplateModelException {
             Context context = getContext(object);

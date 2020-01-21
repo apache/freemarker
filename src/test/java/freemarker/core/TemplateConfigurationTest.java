@@ -152,7 +152,7 @@ public class TemplateConfigurationTest {
     private static final Map<String, Object> SETTING_ASSIGNMENTS;
 
     static {
-        SETTING_ASSIGNMENTS = new HashMap<String, Object>();
+        SETTING_ASSIGNMENTS = new HashMap<>();
 
         // "Configurable" settings:
         SETTING_ASSIGNMENTS.put("APIBuiltinEnabled", true);
@@ -214,7 +214,7 @@ public class TemplateConfigurationTest {
     public static List<PropertyDescriptor> getTemplateConfigurationSettingPropDescs(
             boolean includeCompilerSettings, boolean includeSpecialSettings)
             throws IntrospectionException {
-        List<PropertyDescriptor> settingPropDescs = new ArrayList<PropertyDescriptor>();
+        List<PropertyDescriptor> settingPropDescs = new ArrayList<>();
 
         BeanInfo beanInfo = Introspector.getBeanInfo(TemplateConfiguration.class);
         for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
@@ -254,7 +254,7 @@ public class TemplateConfigurationTest {
 
     private static final Set<String> CONFIGURABLE_PROP_NAMES;
     static {
-        CONFIGURABLE_PROP_NAMES = new HashSet<String>();
+        CONFIGURABLE_PROP_NAMES = new HashSet<>();
         try {
             for (PropertyDescriptor propDesc : Introspector.getBeanInfo(Configurable.class).getPropertyDescriptors()) {
                 String propName = propDesc.getName();
@@ -269,7 +269,7 @@ public class TemplateConfigurationTest {
     
     private static final Set<String> PARSER_PROP_NAMES;
     static {
-        PARSER_PROP_NAMES = new HashSet<String>();
+        PARSER_PROP_NAMES = new HashSet<>();
         // It's an interface; can't use standard Inrospector
         for (Method m : ParserConfiguration.class.getMethods()) {
             String propertyName;
@@ -291,7 +291,7 @@ public class TemplateConfigurationTest {
 
     private static final Set<String> SPECIAL_PROP_NAMES;
     static {
-        SPECIAL_PROP_NAMES = new HashSet<String>();
+        SPECIAL_PROP_NAMES = new HashSet<>();
         SPECIAL_PROP_NAMES.add("encoding");
     }
     
@@ -510,7 +510,7 @@ public class TemplateConfigurationTest {
         }
         assertEquals("Y,N", t.getBooleanFormat());
         assertEquals(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("a", "b", "c"), new ArrayList<String>(t.getAutoImports().keySet()));
+        assertEquals(ImmutableList.of("a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
         assertEquals(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
         
         {
@@ -527,7 +527,7 @@ public class TemplateConfigurationTest {
         }
         assertEquals("Y,N", t.getBooleanFormat());
         assertEquals(ImmutableMap.of("d", "d.ftl", "a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<String>(t.getAutoImports().keySet()));
+        assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
         assertEquals(ImmutableList.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
         assertEquals(ImmutableMap.of( //
                 "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, //
@@ -597,7 +597,7 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testConfigureParser() throws Exception {
-        Set<String> testedProps = new HashSet<String>();
+        Set<String> testedProps = new HashSet<>();
         
         {
             TemplateConfiguration tc = new TemplateConfiguration();
@@ -890,11 +890,7 @@ public class TemplateConfigurationTest {
             if (expectedConfiguredOutput == null) {
                 fail("Template should have fail.");
             }
-        } catch (TemplateException e) {
-            if (expectedConfiguredOutput != null) {
-                throw e;
-            }
-        } catch (ParseException e) {
+        } catch (TemplateException | ParseException e) {
             if (expectedConfiguredOutput != null) {
                 throw e;
             }

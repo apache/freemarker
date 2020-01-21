@@ -99,9 +99,7 @@ abstract public class Expression extends TemplateObject {
     final TemplateModel eval(Environment env) throws TemplateException {
         try {
             return constantValue != null ? constantValue : _eval(env);
-        } catch (FlowControlException e) {
-            throw e;
-        } catch (TemplateException e) {
+        } catch (FlowControlException | TemplateException e) {
             throw e;
         } catch (Exception e) {
             if (env != null && EvalUtil.shouldWrapUncheckedException(e, env)) {

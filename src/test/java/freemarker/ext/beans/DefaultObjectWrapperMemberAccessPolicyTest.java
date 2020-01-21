@@ -608,7 +608,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
 
     private static Object exec(ObjectWrapperAndUnwrapper ow, TemplateModel objM, Object... args) throws TemplateModelException {
         assertThat(objM, instanceOf(TemplateMethodModelEx.class));
-        List<TemplateModel> argModels = new ArrayList<TemplateModel>();
+        List<TemplateModel> argModels = new ArrayList<>();
         for (Object arg : args) {
             argModels.add(ow.wrap(arg));
         }

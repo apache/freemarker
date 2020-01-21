@@ -66,11 +66,8 @@ public class ToCanonical {
         File convertedFile = new File(dir, filename + ".canonical");
         config.setDirectoryForTemplateLoading(dir);
         Template template = config.getTemplate(filename);
-        FileWriter output = new FileWriter(convertedFile);
-        try {
+        try (FileWriter output = new FileWriter(convertedFile)) {
             template.dump(output);
-        } finally {
-            output.close();
         }
     }
 

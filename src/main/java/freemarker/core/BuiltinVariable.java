@@ -319,10 +319,12 @@ final class BuiltinVariable extends Expression {
             this.env = env;
         }
         
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             return env.getVariable(key);
         }
         
+        @Override
         public boolean isEmpty() {
             return false;
         }

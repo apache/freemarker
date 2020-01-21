@@ -59,6 +59,7 @@ implements
         }   
     }
     
+    @Override
     public Object exec(List arguments) throws TemplateModelException {
         if (arguments.size() != 2) {
             throw new TemplateModelException("_registerNamespace(prefix, uri) requires two arguments");

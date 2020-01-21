@@ -71,6 +71,7 @@ class BuiltInsForExistenceHandling {
                 this.constant = constant;
             }
 
+            @Override
             public Object exec(List args) {
                 return constant;
             }
@@ -82,6 +83,7 @@ class BuiltInsForExistenceHandling {
          */
         private static final TemplateMethodModelEx FIRST_NON_NULL_METHOD =
             new TemplateMethodModelEx() {
+                @Override
                 public Object exec(List args) throws TemplateModelException {
                     int argCnt = args.size();
                     if (argCnt == 0) throw _MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);

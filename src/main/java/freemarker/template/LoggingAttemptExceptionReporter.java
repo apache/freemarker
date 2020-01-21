@@ -35,6 +35,7 @@ class LoggingAttemptExceptionReporter implements AttemptExceptionReporter {
         this.logAsWarn = logAsWarn;
     }
 
+    @Override
     public void report(TemplateException te, Environment env) {
         String message = "Error executing FreeMarker template part in the #attempt block";
         if (!logAsWarn) {

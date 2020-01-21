@@ -60,6 +60,7 @@ public class ResourceBundleModel
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new ResourceBundleModel((ResourceBundle) object, (BeansWrapper) wrapper);
             }
@@ -116,6 +117,7 @@ public class ResourceBundleModel
      * with this key, then applies a MessageFormat.format on the string with the
      * rest of the arguments. The created MessageFormats are cached for later reuse.
      */
+    @Override
     public Object exec(List arguments)
         throws TemplateModelException {
         // Must have at least one argument - the key

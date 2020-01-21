@@ -69,22 +69,27 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
         this.collection = collection;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new IteratorToTemplateModelIteratorAdapter(collection.iterator(), getObjectWrapper());
     }
 
+    @Override
     public int size() {
         return collection.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return collection.isEmpty();
     }
 
+    @Override
     public Object getWrappedObject() {
         return collection;
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
     }
@@ -96,11 +101,12 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
         } catch (ClassCastException e) {
             throw new _TemplateModelException(e,
                     "Failed to check if the collection contains the item. Probably the item's Java type, ",
-                    itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : (Object) "Null",
+                    itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : "Null",
                     ", doesn't match the type of (some of) the collection items; see cause exception.");
         }
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(collection);
     }

@@ -175,6 +175,7 @@ public class TaglibFactory implements TemplateHashModel {
      *         custom tag or EL function from the library, implemented as a {@link TemplateTransformModel} or
      *         {@link TemplateMethodModelEx}, respectively.
      */
+    @Override
     public TemplateModel get(final String taglibUri) throws TemplateModelException {
         synchronized (lock) {
             {
@@ -238,9 +239,9 @@ public class TaglibFactory implements TemplateHashModel {
                     }
 
                     tldLocation = isJarPath(normalizedTaglibUri)
-                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                ? new ServletContextJarEntryTldLocation(
                                         normalizedTaglibUri, DEFAULT_TLD_RESOURCE_PATH)
-                                : (TldLocation) new ServletContextTldLocation(normalizedTaglibUri);
+                                : new ServletContextTldLocation(normalizedTaglibUri);
                 }
             } catch (Exception e) {
                 String failedTLDsList = failedTldListAlreadyIncluded ? null : getFailedTLDsList();
@@ -287,6 +288,7 @@ public class TaglibFactory implements TemplateHashModel {
     /**
      * Returns false.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -624,20 +626,17 @@ public class TaglibFactory implements TemplateHashModel {
                 throw new IOException("ServletContext resource not found: " + jarResourcePath);
             }
             try {
-                ZipInputStream zipIn = new ZipInputStream(in);
-                try {
+                try (ZipInputStream zipIn = new ZipInputStream(in)) {
                     while (true) {
                         ZipEntry curEntry = zipIn.getNextEntry();
                         if (curEntry == null) break;
-        
+
                         String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
                         if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
                             addTldLocationFromTld(zipIn,
-                                    new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath)); 
+                                    new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath));
                         }
                     }
-                } finally {
-                    zipIn.close();
                 }
             } finally {
                 in.close();
@@ -706,15 +705,14 @@ public class TaglibFactory implements TemplateHashModel {
                 LOG.debug("Scanning for " + META_INF_ABS_PATH + "**/*.tld-s in stream mode (slow): "
                         + rawJarContentUrlEF);
             }
-        
-            final InputStream in = new URL(rawJarContentUrlEF).openStream();
-            try {
+
+            try (InputStream in = new URL(rawJarContentUrlEF).openStream()) {
                 ZipInputStream zipIn = new ZipInputStream(in);
                 try {
                     while (true) {
                         ZipEntry curEntry = zipIn.getNextEntry();
                         if (curEntry == null) break;
-        
+
                         String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
                         if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
                             final String curEntryBaseRelativePath = curEntryPath.substring(baseEntryPath.length());
@@ -726,17 +724,15 @@ public class TaglibFactory implements TemplateHashModel {
                     zipIn.close();
                 }
             } catch (ZipException e) {
-                // ZipException messages miss the zip URL 
+                // ZipException messages miss the zip URL
                 IOException ioe = new IOException("Error reading ZIP (see cause excepetion) from: "
-                            + rawJarContentUrlEF);
+                        + rawJarContentUrlEF);
                 try {
                     ioe.initCause(e);
                 } catch (Exception e2) {
                     throw e;
                 }
                 throw ioe;
-            } finally {
-                in.close();
             }
         }
     }
@@ -748,6 +744,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
             File[] tldFiles = dir.listFiles(new FilenameFilter() {
     
+                @Override
                 public boolean accept(File urlAsFile, String name) {
                     return isTldFileNameIgnoreCase(name);
                 }
@@ -769,11 +766,8 @@ public class TaglibFactory implements TemplateHashModel {
      * Adds the TLD location mapping from the TLD itself.
      */
     private void addTldLocationFromTld(TldLocation tldLocation) throws IOException, SAXException {
-        InputStream in = tldLocation.getInputStream();
-        try {
+        try (InputStream in = tldLocation.getInputStream()) {
             addTldLocationFromTld(in, tldLocation);
-        } finally {
-            in.close();
         }
     }
 
@@ -1210,6 +1204,7 @@ public class TaglibFactory implements TemplateHashModel {
             this.fileResourcePath = fileResourcePath;
         }
     
+        @Override
         public InputStream getInputStream() throws IOException {
             final InputStream in = servletContext.getResourceAsStream(fileResourcePath);
             if (in == null) {
@@ -1218,6 +1213,7 @@ public class TaglibFactory implements TemplateHashModel {
             return in;
         }
     
+        @Override
         public String getXmlSystemId() throws IOException {
             final URL url = servletContext.getResource(fileResourcePath);
             return url != null ? url.toExternalForm() : null;
@@ -1254,6 +1250,7 @@ public class TaglibFactory implements TemplateHashModel {
             return "classpath:" + resourcePath;
         }
     
+        @Override
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
@@ -1266,6 +1263,7 @@ public class TaglibFactory implements TemplateHashModel {
             return ClassUtil.getReasourceAsStream(getClass(), resourcePath, false);
         }
 
+        @Override
         public String getXmlSystemId() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
@@ -1303,6 +1301,7 @@ public class TaglibFactory implements TemplateHashModel {
             this.entryPath = entryPath != null ? normalizeJarEntryPath(entryPath, false) : null;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             if (entryUrl != null) {
                 try {
@@ -1377,6 +1376,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
     
+        @Override
         public String getXmlSystemId() {
             return entryUrl != null ? entryUrl.toExternalForm() : null;
         }
@@ -1412,6 +1412,7 @@ public class TaglibFactory implements TemplateHashModel {
             super(
                     tryCreateServletContextJarEntryUrl(servletContext, servletContextJarFilePath, entryPath),
                     new InputStreamFactory() {
+                        @Override
                         public InputStream getInputStream() {
                             return servletContext.getResourceAsStream(servletContextJarFilePath);
                         }
@@ -1434,10 +1435,12 @@ public class TaglibFactory implements TemplateHashModel {
             this.file = file;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return new FileInputStream(file);
         }
 
+        @Override
         public String getXmlSystemId() throws IOException {
             return file.toURI().toURL().toExternalForm();
         }
@@ -1456,10 +1459,12 @@ public class TaglibFactory implements TemplateHashModel {
             tagsAndFunctions = parseToTagsAndFunctions(ctx, tldPath, wrapper);
         }
 
+        @Override
         public TemplateModel get(String key) {
             return (TemplateModel) tagsAndFunctions.get(key);
         }
 
+        @Override
         public boolean isEmpty() {
             return tagsAndFunctions.isEmpty();
         }
@@ -1467,12 +1472,9 @@ public class TaglibFactory implements TemplateHashModel {
         private static final Map parseToTagsAndFunctions(
                 ServletContext ctx, TldLocation tldLocation, ObjectWrapper objectWrapper) throws IOException, SAXException {
             final TldParserForTaglibBuilding tldParser = new TldParserForTaglibBuilding(objectWrapper);
-            
-            InputStream in = tldLocation.getInputStream();
-            try {
+
+            try (InputStream in = tldLocation.getInputStream()) {
                 parseXml(in, tldLocation.getXmlSystemId(), tldParser);
-            } finally {
-                in.close();
             }
             
             EventForwarding eventForwarding = EventForwarding.getInstance(ctx);
@@ -1547,9 +1549,9 @@ public class TaglibFactory implements TemplateHashModel {
             } else if (E_TAGLIB.equals(qName)) {
                 addTldLocation(
                         isJarPath(taglibLocationCData)
-                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                ? new ServletContextJarEntryTldLocation(
                                         taglibLocationCData, DEFAULT_TLD_RESOURCE_PATH)
-                                : (TldLocation) new ServletContextTldLocation(taglibLocationCData),
+                                : new ServletContextTldLocation(taglibLocationCData),
                         taglibUriCData);
             }
         }
@@ -1610,7 +1612,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         private final BeansWrapper beansWrapper;
 
-        private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<String, TemplateModel>();
+        private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<>();
         private final List listeners = new ArrayList();
 
         private Locator locator;
@@ -1823,9 +1825,7 @@ public class TaglibFactory implements TemplateHashModel {
                 throws TldParsingSAXException {
             try {
                 return ClassUtil.forName(className);
-            } catch (LinkageError e) {
-                throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
-            } catch (ClassNotFoundException e) {
+            } catch (LinkageError | ClassNotFoundException e) {
                 throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
             }
         }
@@ -1858,6 +1858,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     private static final class EmptyContentEntityResolver implements EntityResolver {
         
+        @Override
         public InputSource resolveEntity(String publicId, String systemId) {
             InputSource is = new InputSource(new ByteArrayInputStream(new byte[0]));
             is.setPublicId(publicId);
@@ -1975,6 +1976,7 @@ public class TaglibFactory implements TemplateHashModel {
             return "URLWithExternalForm(" + externalForm + ")";
         }
 
+        @Override
         public int compareTo(Object that) {
             return this.getExternalForm().compareTo(((URLWithExternalForm) that).getExternalForm());
         }

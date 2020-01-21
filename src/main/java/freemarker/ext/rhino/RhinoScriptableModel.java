@@ -45,6 +45,7 @@ public class RhinoScriptableModel implements TemplateHashModelEx,
 TemplateSequenceModel, AdapterTemplateModel, TemplateScalarModel, 
 TemplateBooleanModel, TemplateNumberModel {
     static final ModelFactory FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return new RhinoScriptableModel((Scriptable) object, 
                     (BeansWrapper) wrapper);
@@ -59,6 +60,7 @@ TemplateBooleanModel, TemplateNumberModel {
         this.wrapper = wrapper;
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object retval = ScriptableObject.getProperty(scriptable, key);
         if (retval instanceof Function) {
@@ -68,6 +70,7 @@ TemplateBooleanModel, TemplateNumberModel {
         }
     }
     
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         Object retval = ScriptableObject.getProperty(scriptable, index);
         if (retval instanceof Function) {
@@ -77,18 +80,22 @@ TemplateBooleanModel, TemplateNumberModel {
         }
     }
     
+    @Override
     public boolean isEmpty() {
         return scriptable.getIds().length == 0;
     }
     
+    @Override
     public TemplateCollectionModel keys() throws TemplateModelException {
         return (TemplateCollectionModel) wrapper.wrap(scriptable.getIds());
     }
     
+    @Override
     public int size() {
         return scriptable.getIds().length;
     }
     
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         Object[] ids = scriptable.getIds();
         Object[] values = new Object[ids.length];
@@ -105,14 +112,17 @@ TemplateBooleanModel, TemplateNumberModel {
         return (TemplateCollectionModel) wrapper.wrap(values);
     }
     
+    @Override
     public boolean getAsBoolean() {
         return Context.toBoolean(scriptable);
     }
     
+    @Override
     public Number getAsNumber() {
         return Double.valueOf(Context.toNumber(scriptable));
     }
     
+    @Override
     public String getAsString() {
         return Context.toString(scriptable);
     }
@@ -125,6 +135,7 @@ TemplateBooleanModel, TemplateNumberModel {
         return wrapper;
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         // FIXME: This does LS3 conversion, which is not very useful for us. Like it won't convert to List, Map, etc.  
         try {

@@ -373,7 +373,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
     static {
-        STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat>();
+        STANDARD_OUTPUT_FORMATS = new HashMap<>();
         STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(XHTMLOutputFormat.INSTANCE.getName(), XHTMLOutputFormat.INSTANCE);
@@ -1919,6 +1919,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * The getter pair of {@link #setStrictSyntaxMode}.
      */
+    @Override
     public boolean getStrictSyntaxMode() {
         return strictSyntax;
     }
@@ -2002,6 +2003,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @return Never {@code null}. 
      * @since 2.3.20
      */
+    @Override
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
     }
@@ -2045,6 +2047,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * @see #setWhitespaceStripping
      */
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping;
     }
@@ -2113,6 +2116,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy;
     }
@@ -2161,6 +2165,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat;
     }
@@ -2236,7 +2241,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 sb.append(StringUtil.jQuote(name));
                 sb.append(". The output formats registered in the Configuration are: ");
                 
-                Set<String> registeredNames = new TreeSet<String>();
+                Set<String> registeredNames = new TreeSet<>();
                 registeredNames.addAll(STANDARD_OUTPUT_FORMATS.keySet());
                 registeredNames.addAll(registeredCustomOutputFormats.keySet());
                 
@@ -2296,7 +2301,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat> registeredCustomOutputFormats) {
         NullArgumentException.check(registeredCustomOutputFormats);
-        Map<String, OutputFormat> m = new LinkedHashMap<String, OutputFormat>(
+        Map<String, OutputFormat> m = new LinkedHashMap<>(
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
         for (OutputFormat outputFormat : registeredCustomOutputFormats) {
             String name = outputFormat.getName();
@@ -2413,6 +2418,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions == null
                 ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
@@ -2456,6 +2462,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * The getter pair of {@link #setTagSyntax(int)}.
      */
+    @Override
     public int getTagSyntax() {
         return tagSyntax;
     }
@@ -2484,6 +2491,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.28
      */
+    @Override
     public int getInterpolationSyntax() {
         return interpolationSyntax;
     }
@@ -2549,6 +2557,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.23
      */
+    @Override
     public int getNamingConvention() {
         return namingConvention;
     }
@@ -2583,6 +2592,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.25
      */
+    @Override
     public int getTabSize() {
         return tabSize;
     }
@@ -3476,9 +3486,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     @Override
     public Set<String> getSettingNames(boolean camelCase) {
-        return new _UnmodifiableCompositeSet<String>(
+        return new _UnmodifiableCompositeSet<>(
                 super.getSettingNames(camelCase),
-                new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE)); 
+                new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE));
     }
     
     @Override

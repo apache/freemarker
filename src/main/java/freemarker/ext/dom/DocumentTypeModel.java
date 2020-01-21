@@ -45,10 +45,12 @@ class DocumentTypeModel extends NodeModel {
         throw new TemplateModelException("accessing properties of a DTD is not currently supported");
     }
     
+    @Override
     public String getNodeName() {
-        return "@document_type$" + ((DocumentType) node).getNodeName();
+        return "@document_type$" + node.getNodeName();
     }
     
+    @Override
     public boolean isEmpty() {
         return true;
     }

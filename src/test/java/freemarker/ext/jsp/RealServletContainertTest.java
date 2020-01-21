@@ -105,7 +105,7 @@ public class RealServletContainertTest extends WebAppTestCase {
                 + "?action=" + AllKindOfContainersModel2Action.class.getName()
                 + "&view=attributes.ftl&viewServlet=freemarker-2.3.0",
                 true,
-                ImmutableList.<Pattern>of(
+                ImmutableList.of(
                         Pattern.compile("(?<=^Date-time: ).*", Pattern.MULTILINE), // Uses Date.toString, so plat. dep.
                         Pattern.compile("(?<=^MyMap: ).*", Pattern.MULTILINE)  // Uses HashMap, so order unknown
                         ));

@@ -131,7 +131,7 @@ public class ParseException extends IOException implements FMParserConstants {
      */
     @Deprecated
     public ParseException(String description, int lineNumber, int columnNumber) {
-        this(description, (Template) null, lineNumber, columnNumber, null);
+        this(description, null, lineNumber, columnNumber, null);
     }
 
     /**

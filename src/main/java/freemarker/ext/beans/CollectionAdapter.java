@@ -42,6 +42,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
         this.wrapper = wrapper;
     }
     
+    @Override
     public TemplateModel getTemplateModel() {
         return model;
     }
@@ -57,6 +58,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
             return new Iterator() {
                 final TemplateModelIterator i = model.iterator();
     
+                @Override
                 public boolean hasNext() {
                     try {
                         return i.hasNext();
@@ -65,6 +67,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                     }
                 }
                 
+                @Override
                 public Object next() {
                     try {
                         return wrapper.unwrap(i.next());
@@ -73,6 +76,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                     }
                 }
                 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }

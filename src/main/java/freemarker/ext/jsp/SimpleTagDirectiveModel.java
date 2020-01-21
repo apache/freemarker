@@ -52,7 +52,8 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
         }
     }
 
-    public void execute(Environment env, Map args, TemplateModel[] outArgs, 
+    @Override
+    public void execute(Environment env, Map args, TemplateModel[] outArgs,
             final TemplateDirectiveBody body) 
     throws TemplateException, IOException {
         try {
@@ -107,6 +108,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
             super("Nested content has thrown template exception", cause);
         }
         
+        @Override
         public TemplateException getCause() {
             return (TemplateException) super.getCause();
         }

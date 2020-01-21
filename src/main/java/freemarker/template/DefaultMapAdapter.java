@@ -67,6 +67,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         this.map = map;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object val;
         try {
@@ -118,34 +119,42 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         return wrap(val);
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public TemplateCollectionModel keys() {
         return new SimpleCollection(map.keySet(), getObjectWrapper());
     }
 
+    @Override
     public TemplateCollectionModel values() {
         return new SimpleCollection(map.values(), getObjectWrapper());
     }
 
+    @Override
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
 
+    @Override
     public Object getAdaptedObject(Class hint) {
         return map;
     }
 
+    @Override
     public Object getWrappedObject() {
         return map;
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(map);
     }
