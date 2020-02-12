@@ -137,7 +137,11 @@ public class Configurable {
     public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
-    
+
+    public static final String TEMPORAL_FORMAT_KEY_SNAKE_CASE = "temporal_format";
+    public static final String TEMPORAL_FORMAT_KEY_CAMEL_CASE = "temporalFormat";
+    public static final String TEMPORAL_FORMAT_KEY = TEMPORAL_FORMAT_KEY_SNAKE_CASE;
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -322,6 +326,7 @@ public class Configurable {
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
         STRICT_BEAN_MODELS_KEY,
         TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
+        TEMPORAL_FORMAT_KEY_SNAKE_CASE,
         TIME_FORMAT_KEY_SNAKE_CASE,
         TIME_ZONE_KEY_SNAKE_CASE,
         TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE,
@@ -355,6 +360,7 @@ public class Configurable {
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
         STRICT_BEAN_MODELS_KEY_CAMEL_CASE,
         TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
+        TEMPORAL_FORMAT_KEY_CAMEL_CASE,
         TIME_FORMAT_KEY_CAMEL_CASE,
         TIME_ZONE_KEY_CAMEL_CASE,
         TRUNCATE_BUILTIN_ALGORITHM_KEY_CAMEL_CASE,
@@ -371,6 +377,7 @@ public class Configurable {
     private String timeFormat;
     private String dateFormat;
     private String dateTimeFormat;
+    private String temporalFormat;
     private TimeZone timeZone;
     private TimeZone sqlDataAndTimeTimeZone;
     private boolean sqlDataAndTimeTimeZoneSet;
@@ -443,6 +450,9 @@ public class Configurable {
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         
+        temporalFormat = "";
+        properties.setProperty(TEMPORAL_FORMAT_KEY, temporalFormat);
+
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
@@ -1268,6 +1278,9 @@ public class Configurable {
         return dateTimeFormat != null;
     }
     
+    public String getTemporalFormat() {
+        return temporalFormat != null ? temporalFormat : parent.getTemporalFormat();
+    }
     /**
      * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
      * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
@@ -2644,6 +2657,8 @@ public class Configurable {
                 setDateFormat(value);
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
+            } else if (TEMPORAL_FORMAT_KEY_SNAKE_CASE.equals(name) || TEMPORAL_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.temporalFormat = value;
             } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
                     || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(

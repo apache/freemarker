@@ -29,6 +29,7 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,6 +71,7 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 import freemarker.template._TemplateAPI;
@@ -1765,6 +1767,28 @@ public final class Environment extends Configurable {
     }
 
     /**
+     * @param blamedDateSourceExp
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    String formatTemporalToPlainText(TemplateTemporalModel ttm, String formatString, Expression blamedDateSourceExp) throws TemplateException, TemplateValueFormatException {
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(formatString);
+        try {
+            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatDateException(ttf, blamedDateSourceExp, e, true);
+        }
+    }
+
+    String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression tdmSourceExpr) throws TemplateException {
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat());
+        try {
+            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatDateException(ttf, tdmSourceExpr, e, false);
+        }
+    }
+
+    /**
      * Gets a {@link TemplateDateFormat} using the date/time/datetime format settings and the current locale and time
      * zone. (The current locale is the locale returned by {@link #getLocale()}. The current time zone is
      * {@link #getTimeZone()} or {@link #getSQLDateAndTimeTimeZone()}).
@@ -2193,6 +2217,14 @@ public final class Environment extends Configurable {
         return dateType
                 + (zonelessInput ? CACHED_TDFS_ZONELESS_INPUT_OFFS : 0)
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
+    }
+
+    TemplateTemporalFormat getTemplateTemporalFormat() {
+        return new TemplateTemporalFormat(getTemporalFormat(), getLocale(), getTimeZone());
+    }
+
+    private TemplateTemporalFormat getTemplateTemporalFormat(String format) {
+        return new TemplateTemporalFormat(format, getLocale(), getTimeZone());
     }
 
     /**

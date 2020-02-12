@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.temporal.Temporal;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
@@ -33,6 +34,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template._TemplateAPI;
 
 /**
@@ -79,7 +81,7 @@ class EvalUtil {
     }
 
     /**
-     * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param expr {@code null} is allowed, but may result in less helpful error messages
      */
     static Date modelToDate(TemplateDateModel model, Expression expr)
         throws TemplateModelException {
@@ -88,6 +90,16 @@ class EvalUtil {
         return value;
     }
     
+    /**
+     * @param expr {@code null} is allowed, but may result in less helpful error messages
+     */
+    static Temporal modelToTemporal(TemplateTemporalModel model, Expression expr)
+            throws TemplateModelException {
+        Temporal value = model.getAsTemporal();
+        if (value == null) throw newModelHasStoredNullException(Date.class, model, expr);
+        return value;
+    }
+
     /** Signals the buggy case where we have a non-null model, but it wraps a null. */
     static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
@@ -395,6 +407,14 @@ class EvalUtil {
             } catch (TemplateValueFormatException e) {
                 throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
+        } else if (tm instanceof TemplateTemporalModel) {
+            TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat();
+            try {
+                return assertFormatResultNotNull(format.format(ttm));
+            } catch (TemplateValueFormatException e) {
+                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
+            }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
         } else { 
@@ -430,7 +450,15 @@ class EvalUtil {
             } catch (TemplateValueFormatException e) {
                 throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
-        } else { 
+        } else if (tm instanceof TemplateTemporalModel) {
+            TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat();
+            try {
+                return ensureFormatResultString(format.format(ttm), exp, env);
+            } catch (TemplateValueFormatException e) {
+                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
+            }
+        } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }
     }
@@ -451,6 +479,8 @@ class EvalUtil {
             return assertFormatResultNotNull(env.formatNumberToPlainText((TemplateNumberModel) tm, exp, false));
         } else if (tm instanceof TemplateDateModel) {
             return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp, false));
+        } else if (tm instanceof TemplateTemporalModel) {
+            return assertFormatResultNotNull(env.formatTemporalToPlainText((TemplateTemporalModel) tm, exp));
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }

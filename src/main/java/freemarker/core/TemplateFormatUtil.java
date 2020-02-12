@@ -18,12 +18,14 @@
  */
 package freemarker.core;
 
+import java.time.temporal.Temporal;
 import java.util.Date;
 
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateTemporalModel;
 
 /**
  * Utility classes for implementing {@link TemplateValueFormat}-s.
@@ -69,6 +71,14 @@ public final class TemplateFormatUtil {
         Date date = dateModel.getAsDate();
         if (date == null) {
             throw EvalUtil.newModelHasStoredNullException(Date.class, dateModel, null);
+        }
+        return date;
+    }
+
+    public static Temporal getNonNullTemporal(TemplateTemporalModel temporalModel) throws TemplateModelException {
+        Temporal date = temporalModel.getAsTemporal();
+        if (date == null) {
+            throw EvalUtil.newModelHasStoredNullException(Date.class, temporalModel, null);
         }
         return date;
     }

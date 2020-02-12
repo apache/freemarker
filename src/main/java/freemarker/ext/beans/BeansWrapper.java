@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -65,6 +66,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
@@ -1233,6 +1235,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                     return date;
                 }
             }
+
+            if (Temporal.class.isAssignableFrom(targetClass) && model instanceof TemplateTemporalModel) {
+                Temporal temporal = ((TemplateTemporalModel) model).getAsTemporal();
+                if (targetClass.isInstance(temporal)) {
+                    return temporal;
+                }
+            }
         }  //  End: if (targetClass != Object.class)
         
         // Since the targetClass was of no help initially, now we use
@@ -1255,6 +1264,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 Date date = ((TemplateDateModel) model).getAsDate();
                 if (itf != 0 || targetClass.isInstance(date)) {
                     return date;
+                }
+            }
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_DATE) != 0)
+                    && model instanceof TemplateTemporalModel) {
+                Temporal temporal = ((TemplateTemporalModel) model).getAsTemporal();
+                if (itf != 0 || targetClass.isInstance(temporal)) {
+                    return temporal;
                 }
             }
             if ((itf == 0 || (itf & (TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER)) != 0)

@@ -19,6 +19,8 @@
 
 package freemarker.test.templatesuite.models;
 
+import java.time.Instant;
+import java.time.temporal.Temporal;
 import java.util.Date;
 
 import freemarker.template.SimpleScalar;
@@ -32,13 +34,14 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 
 /**
  * Implements all template models that are interesting when calling overloaded Java methods.
  */
 public class AllTemplateModels implements
-        TemplateScalarModel, TemplateNumberModel, TemplateDateModel, TemplateBooleanModel,
-        TemplateHashModelEx, TemplateSequenceModel, TemplateCollectionModel {
+        TemplateScalarModel, TemplateNumberModel, TemplateDateModel, TemplateTemporalModel,
+        TemplateBooleanModel, TemplateHashModelEx, TemplateSequenceModel, TemplateCollectionModel {
 
     public static final AllTemplateModels INSTANCE = new AllTemplateModels();
     
@@ -95,6 +98,10 @@ public class AllTemplateModels implements
 
     public Date getAsDate() throws TemplateModelException {
         return new Date(0);
+    }
+
+    public Temporal getAsTemporal() throws TemplateModelException {
+        return Instant.ofEpochMilli(0);
     }
 
     public int getDateType() {

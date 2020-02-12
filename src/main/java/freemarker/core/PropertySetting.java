@@ -56,6 +56,7 @@ final class PropertySetting extends TemplateElement {
             Configurable.OUTPUT_ENCODING_KEY_SNAKE_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
+            Configurable.TEMPORAL_FORMAT_KEY_CAMEL_CASE,
             Configurable.TIME_FORMAT_KEY_CAMEL_CASE,
             Configurable.TIME_ZONE_KEY_CAMEL_CASE,
             Configurable.TIME_FORMAT_KEY_SNAKE_CASE,
