@@ -29262,7 +29262,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               property to <literal>BeansWrapper</literal>, and subclasses like
               <literal>DefaultObjectWrapper</literal>. This allows users to
               implement their own program logic to decide what members of
-              classes will be exposed to the templates.</para>
+              classes will be exposed to the templates. See See the <olink
+              targetdoc="api">FreeMarker Java API documentation</olink> for
+              more details.</para>
             </listitem>
 
             <listitem>
@@ -29312,10 +29314,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>BeansWrapper</literal>. The typical bad pattern is
               this: <literal>new
               Configuration(Configuration.getVersion())</literal>. Doing that
-              defeats the purpose of incompatibleImprovements, and makes
-              upgrading FreeMarker a potentially breaking change. Furthermore,
-              doing this probably won't be allowed starting from 2.4.0, and
-              will throw exception. So if above mistake is present in your
+              defeats the purpose of
+              <literal>incompatibleImprovements</literal>, and makes upgrading
+              FreeMarker a potentially breaking change. Furthermore, doing
+              this probably won't be allowed starting from 2.4.0, and will
+              throw exception. So if above mistake is present in your
               application, it should be fixed by setting
               <literal>incompatibleImprovements</literal> to the highest
               concrete version that's known to be compatible with the
