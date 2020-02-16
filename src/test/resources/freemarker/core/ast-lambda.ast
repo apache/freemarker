@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- #mixed_content  // f.c.MixedContent
+#mixed_content  // f.c.MixedContent
     #text  // f.c.TextBlock
         - content: "1 "  // String
     ${...}  // f.c.DollarVariable
