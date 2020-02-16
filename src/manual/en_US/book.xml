@@ -29170,7 +29170,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_30">
         <title>2.3.30</title>
 
-        <para>Release date: [FIXME]</para>
+        <para>Release date: 2020-02-16 + release process</para>
 
         <para>Please note that with this version the minimum required Java
         version was increased from Java 5 to Java 7.</para>
