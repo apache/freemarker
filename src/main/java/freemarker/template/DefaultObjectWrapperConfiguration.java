@@ -38,6 +38,9 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
+        _TemplateAPI.checkCurrentVersionNotRecycled(
+                incompatibleImprovements,
+                "freemarker.configuration", "DefaultObjectWrapper");
         useAdaptersForContainers = getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22;
         forceLegacyNonListCollections = true; // [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
     }

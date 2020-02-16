@@ -76,6 +76,13 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      */
     protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+
+        // We can't do this in the BeansWrapper constructor, as by that time the version is normalized.
+        if (!isIncompImprsAlreadyNormalized) {
+            _TemplateAPI.checkCurrentVersionNotRecycled(
+                    incompatibleImprovements,
+                    "freemarker.beans", "BeansWrapper");
+        }
         
         incompatibleImprovements = isIncompImprsAlreadyNormalized
                 ? incompatibleImprovements

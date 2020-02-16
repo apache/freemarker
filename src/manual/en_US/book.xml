@@ -11389,6 +11389,13 @@ TemplateHashModel roundingModeEnums =
 
                 <td>Logs messages of the FreeMarker JSP support.</td>
               </tr>
+
+              <tr>
+                <td><literal>freemarker.configuration</literal></td>
+
+                <td>Logs messages related to configuring FreeMarker, and not
+                fitting any other categories.</td>
+              </tr>
             </tbody>
           </informaltable>
 
@@ -29285,6 +29292,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               methods that can be overridden to monitor the accessing of
               members: <literal>invokeMethod</literal> and
               <literal>readField</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Setting <literal>incompatibleImprovements</literal> to the
+              instance returned by
+              <literal>Configuration.getVersion()</literal> will now be logged
+              as an error, but for backward compatibility it will still work.
+              This applies to said setting of
+              <literal>Configuration</literal>,
+              <literal>DefaultObjectWrapper</literal>, and
+              <literal>BeansWrapper</literal>. The typical bad pattern is
+              this: <literal>new
+              Configuration(Configuration.getVersion())</literal>. Doing that
+              defeats the purpose of incompatibleImprovements, and makes
+              upgrading FreeMarker a potentially breaking change. Furthermore,
+              doing this probably won't be allowed starting from 2.4.0, and
+              will throw exception. So if above mistake is present in your
+              application, it should be fixed by setting
+              <literal>incompatibleImprovements</literal> to the highest
+              concrete version that's known to be compatible with the
+              application.</para>
             </listitem>
 
             <listitem>
