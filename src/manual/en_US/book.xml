@@ -9260,9 +9260,10 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <para>The same configuring is also doable if you don't have access
           to the configuring Java code, but only to a Java
-          <literal>*.properties</literal> file or other kind of string-string
+          <literal>*.properties</literal> file, or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format for multi-line values):</para>
+          Java Properties file format for multi-line values, so omit them
+          elsewhere):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -9291,7 +9292,13 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           <literal>Configuration</literal> singleton, you set this up like
           this:</para>
 
-          <programlisting role="unspecified">cfg.setTemplateConfigurations(
+          <programlisting role="unspecified">TemplateConfiguration tcSubject = new TemplateConfiguration();
+tcSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        
+TemplateConfiguration tcBody = new TemplateConfiguration();
+tcBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurations(
         new ConditionalTemplateConfigurationFactory(
                 new PathGlobMatcher("mail/**"),
                 new FirstMatchTemplateConfigurationFactory(
@@ -9309,7 +9316,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           <para>The equivalent configuration using a Java
           <literal>*.properties</literal> file or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format only):</para>
+          Java Properties file format only, so omit them elsewhere):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -9359,9 +9366,9 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <para>Here we have 3 independent concerns, and possibly multiple (or
           none) of those apply to a template; that's when you need a
-          <literal>MergingTemplateConfigurationFactory</literal>. The last
-          point describes a rule where you have mutually exclusive choices;
-          that's when you need a
+          <literal>MergingTemplateConfigurationFactory</literal>. In file
+          extension related rule above you have mutually exclusive choices, so
+          you need a
           <literal>FirstMatchTemplateConfigurationFactory</literal>, but this
           time no choice is also allowed. Here's the source code, assuming
           <literal>cfg</literal> stores the shared
@@ -11388,6 +11395,13 @@ TemplateHashModel roundingModeEnums =
                 <td><literal>freemarker.jsp</literal></td>
 
                 <td>Logs messages of the FreeMarker JSP support.</td>
+              </tr>
+
+              <tr>
+                <td><literal>freemarker.configuration</literal></td>
+
+                <td>Logs messages related to configuring FreeMarker, and not
+                fitting any other categories.</td>
               </tr>
             </tbody>
           </informaltable>
@@ -29156,7 +29170,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_30">
         <title>2.3.30</title>
 
-        <para>Release date: [FIXME]</para>
+        <para>Release date: 2020-02-16 + release process</para>
 
         <para>Please note that with this version the minimum required Java
         version was increased from Java 5 to Java 7.</para>
@@ -29248,7 +29262,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               property to <literal>BeansWrapper</literal>, and subclasses like
               <literal>DefaultObjectWrapper</literal>. This allows users to
               implement their own program logic to decide what members of
-              classes will be exposed to the templates.</para>
+              classes will be exposed to the templates. See See the <olink
+              targetdoc="api">FreeMarker Java API documentation</olink> for
+              more details.</para>
             </listitem>
 
             <listitem>
@@ -29285,6 +29301,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               methods that can be overridden to monitor the accessing of
               members: <literal>invokeMethod</literal> and
               <literal>readField</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Setting <literal>incompatibleImprovements</literal> to the
+              instance returned by
+              <literal>Configuration.getVersion()</literal> will now be logged
+              as an error, but for backward compatibility it will still work.
+              This applies to said setting of
+              <literal>Configuration</literal>,
+              <literal>DefaultObjectWrapper</literal>, and
+              <literal>BeansWrapper</literal>. The typical bad pattern is
+              this: <literal>new
+              Configuration(Configuration.getVersion())</literal>. Doing that
+              defeats the purpose of
+              <literal>incompatibleImprovements</literal>, and makes upgrading
+              FreeMarker a potentially breaking change. Furthermore, doing
+              this probably won't be allowed starting from 2.4.0, and will
+              throw exception. So if above mistake is present in your
+              application, it should be fixed by setting
+              <literal>incompatibleImprovements</literal> to the highest
+              concrete version that's known to be compatible with the
+              application.</para>
             </listitem>
 
             <listitem>

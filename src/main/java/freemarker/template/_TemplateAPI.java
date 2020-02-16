@@ -30,6 +30,7 @@ import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Expression;
 import freemarker.core.OutputFormat;
 import freemarker.core.TemplateObject;
+import freemarker.log.Logger;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -94,7 +95,26 @@ public class _TemplateAPI {
             throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 2.3.0.");
         }
     }
-    
+
+    /**
+     * Checks if the object return by {@link Configuration#getVersion()} was used for setting
+     * "incompatibleImprovements", which shouldn't be done.
+     *
+     * @since 2.3.30
+     */
+    public static void checkCurrentVersionNotRecycled(
+            Version incompatibleImprovements,
+            String logCategory, String configuredClassShortName) {
+        if (incompatibleImprovements == Configuration.getVersion()) {
+            Logger.getLogger(logCategory)
+                    .error(configuredClassShortName + ".incompatibleImprovements was set to the object returned by " +
+                            "Configuration.getVersion(). That defeats the purpose of incompatibleImprovements, " +
+                            "and makes upgrading FreeMarker a potentially breaking change. Also, this " +
+                            "probably won't be allowed starting from 2.4.0. Instead, set incompatibleImprovements to " +
+                            "the highest concrete version that's known to be compatible with your application.");
+        }
+    }
+
     public static int getTemplateLanguageVersionAsInt(TemplateObject to) {
         return getTemplateLanguageVersionAsInt(to.getTemplate());
     }

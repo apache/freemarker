@@ -97,7 +97,7 @@
 <@assertEquals actual=obj.mDecimalLoss(1.5) expected="mDecimalLoss(int a1 = 1)" /><#-- Yes, buggy... -->
 <@assertEquals actual=obj.mDecimalLoss(1.5?double) expected="mDecimalLoss(double a1 = 1.5)" />
 
-<#-- BigDecimal conversions chose the smallest target type before IcI 2.3.31, increasing the risk of overflows: -->
+<#-- BigDecimal conversions chose the smallest target type before IcI 2.3.21, increasing the risk of overflows: -->
 <@assertEquals actual=obj.nIntAndLong(1) expected="nIntAndLong(int 1)" />
 <@assertEquals actual=obj.nIntAndLong(1?long) expected="nIntAndLong(long 1)" />
 <@assertEquals actual=obj.nIntAndShort(1) expected="nIntAndShort(short 1)" />
