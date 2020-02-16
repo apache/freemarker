@@ -9260,9 +9260,10 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <para>The same configuring is also doable if you don't have access
           to the configuring Java code, but only to a Java
-          <literal>*.properties</literal> file or other kind of string-string
+          <literal>*.properties</literal> file, or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format for multi-line values):</para>
+          Java Properties file format for multi-line values, so omit them
+          elsewhere):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -9291,7 +9292,13 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           <literal>Configuration</literal> singleton, you set this up like
           this:</para>
 
-          <programlisting role="unspecified">cfg.setTemplateConfigurations(
+          <programlisting role="unspecified">TemplateConfiguration tcSubject = new TemplateConfiguration();
+tcSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        
+TemplateConfiguration tcBody = new TemplateConfiguration();
+tcBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurations(
         new ConditionalTemplateConfigurationFactory(
                 new PathGlobMatcher("mail/**"),
                 new FirstMatchTemplateConfigurationFactory(
@@ -9309,7 +9316,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           <para>The equivalent configuration using a Java
           <literal>*.properties</literal> file or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format only):</para>
+          Java Properties file format only, so omit them elsewhere):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -9359,9 +9366,9 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <para>Here we have 3 independent concerns, and possibly multiple (or
           none) of those apply to a template; that's when you need a
-          <literal>MergingTemplateConfigurationFactory</literal>. The last
-          point describes a rule where you have mutually exclusive choices;
-          that's when you need a
+          <literal>MergingTemplateConfigurationFactory</literal>. In file
+          extension related rule above you have mutually exclusive choices, so
+          you need a
           <literal>FirstMatchTemplateConfigurationFactory</literal>, but this
           time no choice is also allowed. Here's the source code, assuming
           <literal>cfg</literal> stores the shared
