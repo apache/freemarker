@@ -70,6 +70,13 @@ public final class _CoreAPI {
             throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 3.0.0, but was "
                     + incompatibleImprovements);
         }
+        if (incompatibleImprovements == Configuration.getVersion()) {
+            throw new IllegalArgumentException("The incompatibleImprovements setting can't be set to the object " +
+                    "returned by Configuration.getVersion(). That would defeat the purpose of " +
+                    "incompatibleImprovements, and make upgrading FreeMarker a potentially breaking change. Instead, " +
+                    "set incompatibleImprovements to the highest concrete version that's known to be compatible with " +
+                    "your application.");
+        }
     }
 
 }

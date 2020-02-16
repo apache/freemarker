@@ -582,7 +582,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     public void testBuiltInNameConversion()
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException,
             ConverterException {
-        Configuration cfg = new Configuration(Configuration.getVersion());
+        Configuration cfg = new Configuration(new freemarker.template.Version(Configuration.getVersion().toString()));
 
         StringBuilder sb = new StringBuilder();
         sb.append("<#outputformat 'HTML'><#list xs as x>");

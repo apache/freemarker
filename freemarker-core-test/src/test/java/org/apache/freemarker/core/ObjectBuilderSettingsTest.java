@@ -356,7 +356,7 @@ public class ObjectBuilderSettingsTest {
 
     @Test
     public void configurationPropertiesTest() throws Exception {
-        final Configuration.Builder cfgB = new Configuration.Builder(Configuration.getVersion());
+        final Configuration.Builder cfgB = new Configuration.Builder(new Version(Configuration.getVersion().toString()));
         
         {
             Properties props = new Properties();

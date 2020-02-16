@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.freemarker.converter.ConversionMarkers.Type;
+import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +194,8 @@ public class FM2ToFM3Converter extends Converter {
         if (validateOutput) {
             try {
                 org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
-                        .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
+                        // Uses highest possible version by design:
+                        .Builder(new Version(org.apache.freemarker.core.Configuration.getVersion().toString()))
                         .outputFormat(converOutputFormat(result.getFM2Template().getOutputFormat()))
                         .build();
                 new org.apache.freemarker.core.Template(null, result.getFM3Content(), fm3Config);

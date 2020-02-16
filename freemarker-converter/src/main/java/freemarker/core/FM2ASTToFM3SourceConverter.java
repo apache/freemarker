@@ -36,6 +36,7 @@ import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
 import org.apache.freemarker.converter._ConverterUtils;
+import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -95,7 +96,8 @@ public class FM2ASTToFM3SourceConverter {
     private final char tagBeginChar;
     private final char tagEndChar;
     private final Set<String> fm3BuiltInNames = new org.apache.freemarker.core.Configuration
-            .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
+            // Uses highest possible by design:
+            .Builder(new Version(org.apache.freemarker.core.Configuration.getVersion().toString()))
             .build().getSupportedBuiltInNames();
 
     private boolean printNextCustomDirAsFtlDir;

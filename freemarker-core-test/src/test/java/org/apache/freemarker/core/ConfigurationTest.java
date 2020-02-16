@@ -226,16 +226,26 @@ public class ConfigurationTest {
         assertTrue(v.intValue() >= _CoreAPI.VERSION_INT_3_0_0);
         
         try {
-            new Builder(new Version(999, 1, 2));
+            new Builder(new Version(999, 1, 2)).build();
+            fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));
         }
         
         try {
-            new Builder(new Version(2, 3, 0));
+            new Builder(new Version(2, 3, 0)).build();
+            fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("3.0.0"));
         }
+
+        try {
+            new Builder(Configuration.getVersion()).build();
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("getVersion()"));
+        }
+        new Builder(new Version(Configuration.getVersion().toString()));
     }
 
     @Test
