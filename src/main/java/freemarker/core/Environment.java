@@ -1780,7 +1780,7 @@ public final class Environment extends Configurable {
     }
 
     String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression tdmSourceExpr) throws TemplateException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat());
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat(ttm.getAsTemporal()));
         try {
             return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
         } catch (TemplateValueFormatException e) {
@@ -2219,8 +2219,8 @@ public final class Environment extends Configurable {
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
     }
 
-    TemplateTemporalFormat getTemplateTemporalFormat() {
-        return new TemplateTemporalFormat(getTemporalFormat(), getLocale(), getTimeZone());
+    TemplateTemporalFormat getTemplateTemporalFormat(Temporal temporal) {
+        return new TemplateTemporalFormat(getTemporalFormat(temporal), getLocale(), getTimeZone());
     }
 
     private TemplateTemporalFormat getTemplateTemporalFormat(String format) {

@@ -49,21 +49,39 @@ final class PropertySetting extends TemplateElement {
             Configurable.DATE_FORMAT_KEY_SNAKE_CASE,
             Configurable.DATETIME_FORMAT_KEY_CAMEL_CASE,
             Configurable.DATETIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.INSTANT_FORMAT_KEY_CAMEL_CASE,
+            Configurable.INSTANT_FORMAT_KEY_SNAKE_CASE,
+            Configurable.LOCALDATE_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCALDATE_FORMAT_KEY_SNAKE_CASE,
+            Configurable.LOCALDATETIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCALDATETIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.LOCALE_KEY,
+            Configurable.LOCALTIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCALTIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.NUMBER_FORMAT_KEY_CAMEL_CASE,
             Configurable.NUMBER_FORMAT_KEY_SNAKE_CASE,
+            Configurable.OFFSETDATETIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.OFFSETDATETIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.OFFSETTIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.OFFSETTIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.OUTPUT_ENCODING_KEY_CAMEL_CASE,
             Configurable.OUTPUT_ENCODING_KEY_SNAKE_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
-            Configurable.TEMPORAL_FORMAT_KEY_CAMEL_CASE,
             Configurable.TIME_FORMAT_KEY_CAMEL_CASE,
             Configurable.TIME_ZONE_KEY_CAMEL_CASE,
             Configurable.TIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.TIME_ZONE_KEY_SNAKE_CASE,
             Configurable.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
-            Configurable.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+            Configurable.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
+            Configurable.YEAR_FORMAT_KEY_CAMEL_CASE,
+            Configurable.YEAR_FORMAT_KEY_SNAKE_CASE,
+            Configurable.YEARMONTH_FORMAT_KEY_CAMEL_CASE,
+            Configurable.YEARMONTH_FORMAT_KEY_SNAKE_CASE,
+            Configurable.ZONEDDATETIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.ZONEDDATETIME_FORMAT_KEY_SNAKE_CASE
     };
+
 
     PropertySetting(Token keyTk, FMParserTokenManager tokenManager, Expression value, Configuration cfg)
             throws ParseException {

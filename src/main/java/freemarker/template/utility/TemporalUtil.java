@@ -19,8 +19,6 @@
 package freemarker.template.utility;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.Year;
@@ -111,7 +109,7 @@ public class TemporalUtil {
 			.appendValue(ChronoField.YEAR)
 			.toFormatter();
 
-	private static DateTimeFormatter toISO8601String(Temporal temporal, TimeZone timeZone) {
+	private static DateTimeFormatter getISO8601Formatter(Temporal temporal, TimeZone timeZone) {
 		if (temporal instanceof LocalTime)
 			return ISO8601_TIME_FORMAT;
 		else if (temporal instanceof Year)
@@ -122,7 +120,7 @@ public class TemporalUtil {
 			return ISO8601_FORMAT;
 	}
 
-	private static DateTimeFormatter toXSString(Temporal temporal, TimeZone timeZone) {
+	private static DateTimeFormatter getXSFormatter(Temporal temporal, TimeZone timeZone) {
 		if (temporal instanceof LocalTime)
 			return XSD_TIME_FORMAT;
 		else if (temporal instanceof Year)
@@ -141,9 +139,9 @@ public class TemporalUtil {
 		String[] formatSplt = format.split("_");
 		DateTimeFormatter dtf;
 		if ("xs".equals(format))
-			dtf = toXSString(temporal, timeZone);
+			dtf = getXSFormatter(temporal, timeZone);
 		else if ("iso".equals(format))
-			dtf =  toISO8601String(temporal, timeZone);
+			dtf =  getISO8601Formatter(temporal, timeZone);
 		else if (FORMAT_STYLE_PATTERN.matcher(format).matches()) {
 			boolean isYear = temporal instanceof Year;
 			boolean isYearMonth = temporal instanceof YearMonth;
@@ -163,8 +161,10 @@ public class TemporalUtil {
 				dtf = FULL_FORMAT;
 			else
 				dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.valueOf(formatSplt[0].toUpperCase()), FormatStyle.valueOf(formatSplt[1].toUpperCase()));
-		} else
+		} else if (!"".equals(format))
 			dtf = DateTimeFormatter.ofPattern(format);
+		else
+			return temporal.toString();
 
 		dtf = dtf.withLocale(locale);
 		if (temporal instanceof OffsetDateTime)

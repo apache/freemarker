@@ -409,7 +409,7 @@ class EvalUtil {
             }
         } else if (tm instanceof TemplateTemporalModel) {
             TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat();
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal());
             try {
                 return assertFormatResultNotNull(format.format(ttm));
             } catch (TemplateValueFormatException e) {
@@ -452,7 +452,7 @@ class EvalUtil {
             }
         } else if (tm instanceof TemplateTemporalModel) {
             TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat();
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal());
             try {
                 return ensureFormatResultString(format.format(ttm), exp, env);
             } catch (TemplateValueFormatException e) {

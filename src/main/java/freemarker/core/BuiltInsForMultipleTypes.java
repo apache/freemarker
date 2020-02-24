@@ -616,7 +616,7 @@ class BuiltInsForMultipleTypes {
             TemporalFormatter(TemplateTemporalModel temporalModel, Environment env) throws TemplateException {
                 this.temporalModel = temporalModel;
                 this.env = env;
-                this.defaultFormat = env.getTemplateTemporalFormat();
+                this.defaultFormat = env.getTemplateTemporalFormat(temporalModel.getAsTemporal());
             }
 
             @Override

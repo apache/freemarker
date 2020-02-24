@@ -16,34 +16,43 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<@assertEquals expected="2003-04-05T07:07:08+01:00[GMT+01:00]" actual=instant?string />
+<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string />
+<@assertEquals expected="2003-04-05" actual=localDate?string />
+<@assertEquals expected="06:07:08" actual=localTime?string />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=offsetDateTime?string />
+<@assertEquals expected="2003" actual=year?string />
+<@assertEquals expected="2003-04" actual=yearMonth?string />
+<@assertEquals expected="2003-04-05T06:07:08Z[UTC]" actual=zonedDateTime?string />
+
 <#setting timeZone="America/New_York">
-<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
 <@assertEquals expected="2003-04-05T01:07:08-05:00" actual=instant?string.iso />
+<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
 <@assertEquals expected="2003-04-05" actual=localDate?string.iso />
 <@assertEquals expected="06:07:08" actual=localTime?string.iso />
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.iso />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=offsetDateTime?string.iso />
 <@assertEquals expected="2003" actual=year?string.iso />
 <@assertEquals expected="2003-04" actual=yearMonth?string.iso />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.iso />
 
 <#setting timeZone="UTC">
-<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=instant?string.iso />
+<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
 <@assertEquals expected="2003-04-05" actual=localDate?string.iso />
 <@assertEquals expected="06:07:08" actual=localTime?string.iso />
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.iso />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=offsetDateTime?string.iso />
 <@assertEquals expected="2003" actual=year?string.iso />
 <@assertEquals expected="2003-04" actual=yearMonth?string.iso />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.iso />
 
-<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.xs />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=instant?string.xs />
+<@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.xs />
 <@assertEquals expected="2003-04-05" actual=localDate?string.xs />
 <@assertEquals expected="06:07:08" actual=localTime?string.xs />
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.xs />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=offsetDateTime?string.xs />
 <@assertEquals expected="2003" actual=year?string.xs />
 <@assertEquals expected="2003-04" actual=yearMonth?string.xs />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=zonedDateTime?string.xs />
 
 <#setting timeZone="America/New_York">
 <#setting locale="fr_FR">
@@ -51,11 +60,6 @@
 <@assertEquals expected="5 avr. 2003 01:07:08" actual=instant?string.medium />
 <@assertEquals expected="5 avril 2003 01:07:08 EST" actual=instant?string.long />
 <@assertEquals expected="samedi 5 avril 2003 01 h 07 EST" actual=instant?string.full />
-
-<@assertEquals expected="05/04/03 06:07" actual=zonedDateTime?string.short />
-<@assertEquals expected="5 avr. 2003 06:07:08" actual=zonedDateTime?string.medium />
-<@assertEquals expected="5 avril 2003 06:07:08 UTC" actual=zonedDateTime?string.long />
-<@assertEquals expected="samedi 5 avril 2003 06 h 07 UTC" actual=zonedDateTime?string.full />
 
 <@assertEquals expected="05/04/03 06:07" actual=offsetDateTime?string.short />
 <@assertEquals expected="5 avr. 2003 06:07:08" actual=offsetDateTime?string.medium />
@@ -80,6 +84,11 @@
 <@assertEquals expected="abril de 2003" actual=yearMonth?string.full />
 <#setting locale="fr_FR">
 
+<@assertEquals expected="05/04/03 06:07" actual=zonedDateTime?string.short />
+<@assertEquals expected="5 avr. 2003 06:07:08" actual=zonedDateTime?string.medium />
+<@assertEquals expected="5 avril 2003 06:07:08 UTC" actual=zonedDateTime?string.long />
+<@assertEquals expected="samedi 5 avril 2003 06 h 07 UTC" actual=zonedDateTime?string.full />
+
 <@assertEquals expected="05/04/03 06:07" actual=localDateTime?string.short_short />
 <@assertEquals expected="05/04/03 06:07:08" actual=localDateTime?string.short_medium />
 <@assertEquals expected="05/04/03 06:07:08 ET" actual=localDateTime?string.short_long />
@@ -98,6 +107,20 @@
 <@assertEquals expected="2003-04-05 06:07:08" actual=localDateTime?string('yyyy-MM-dd HH:mm:ss') />
 
 
-<#setting temporalFormat="yyyy MMM dd HH:mm:ss">
 <#setting locale="en_US">
+<#setting instantFormat="yyyy MMM dd HH:mm:ss">
+<@assertEquals expected="2003 Apr 05 01:07:08" actual=instant?string />
+<#setting localdatetimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 06:07:08" actual=localDateTime?string />
+<#setting localdateFormat="yyyy MMM dd">
+<@assertEquals expected="2003 Apr 05" actual=localDate?string />
+<#setting localdatetimeFormat="HH:mm:ss">
+<@assertEquals expected="06:07:08" actual=localTime?string />
+<#setting offsetdatetimeFormat="yyyy MMM dd HH:mm:ss">
+<@assertEquals expected="2003 Apr 05 06:07:08" actual=offsetDateTime?string />
+<#setting yearFormat="yyyy">
+<@assertEquals expected="2003" actual=year?string />
+<#setting yearmonthFormat="yyyy MMM">
+<@assertEquals expected="2003 Apr" actual=yearMonth?string />
+<#setting zoneddatetimeFormat="yyyy MMM dd HH:mm:ss">
+<@assertEquals expected="2003 Apr 05 06:07:08" actual=zonedDateTime?string />
