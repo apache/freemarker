@@ -1780,7 +1780,7 @@ public final class Environment extends Configurable {
     }
 
     String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression tdmSourceExpr) throws TemplateException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat(ttm.getAsTemporal()));
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat(ttm.getAsTemporal().getClass()));
         try {
             return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
         } catch (TemplateValueFormatException e) {
@@ -2220,7 +2220,7 @@ public final class Environment extends Configurable {
     }
 
     TemplateTemporalFormat getTemplateTemporalFormat(Temporal temporal) {
-        return new TemplateTemporalFormat(getTemporalFormat(temporal), getLocale(), getTimeZone());
+        return new TemplateTemporalFormat(getTemporalFormat(temporal.getClass()), getLocale(), getTimeZone());
     }
 
     private TemplateTemporalFormat getTemplateTemporalFormat(String format) {

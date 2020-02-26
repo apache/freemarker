@@ -1404,24 +1404,24 @@ public class Configurable {
         return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
     }
 
-    public String getTemporalFormat(Temporal temporal) {
-        if (temporal instanceof Instant) {
+    public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
+        if (temporalClass == Instant.class) {
             return getInstantFormat();
-        } else if (temporal instanceof LocalDate) {
+        } else if (temporalClass == LocalDate.class) {
             return getLocalDateFormat();
-        } else if (temporal instanceof LocalDateTime) {
+        } else if (temporalClass == LocalDateTime.class) {
             return getLocalDateTimeFormat();
-        } else if (temporal instanceof LocalTime) {
+        } else if (temporalClass == LocalTime.class) {
             return getLocalTimeFormat();
-        } else if (temporal instanceof OffsetDateTime) {
+        } else if (temporalClass == OffsetDateTime.class) {
             return getOffsetDateTimeFormat();
-        } else if (temporal instanceof OffsetTime) {
+        } else if (temporalClass == OffsetTime.class) {
             return getOffsetTimeFormat();
-        } else if (temporal instanceof Year) {
+        } else if (temporalClass == Year.class) {
             return getYearFormat();
-        } else if (temporal instanceof YearMonth) {
+        } else if (temporalClass == YearMonth.class) {
             return getYearMonthFormat();
-        } else if (temporal instanceof ZonedDateTime) {
+        } else if (temporalClass == ZonedDateTime.class) {
             return getZonedDateTimeFormat();
         } else {
             return "";
