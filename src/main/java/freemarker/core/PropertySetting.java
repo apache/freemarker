@@ -51,19 +51,19 @@ final class PropertySetting extends TemplateElement {
             Configurable.DATETIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.INSTANT_FORMAT_KEY_CAMEL_CASE,
             Configurable.INSTANT_FORMAT_KEY_SNAKE_CASE,
-            Configurable.LOCALDATE_FORMAT_KEY_CAMEL_CASE,
-            Configurable.LOCALDATE_FORMAT_KEY_SNAKE_CASE,
-            Configurable.LOCALDATETIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.LOCALDATETIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.LOCAL_DATE_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCAL_TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.LOCAL_DATE_FORMAT_KEY_SNAKE_CASE,
+            Configurable.LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.LOCAL_TIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.LOCALE_KEY,
-            Configurable.LOCALTIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.LOCALTIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.NUMBER_FORMAT_KEY_CAMEL_CASE,
             Configurable.NUMBER_FORMAT_KEY_SNAKE_CASE,
-            Configurable.OFFSETDATETIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.OFFSETDATETIME_FORMAT_KEY_SNAKE_CASE,
-            Configurable.OFFSETTIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.OFFSETTIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.OFFSET_TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.OFFSET_TIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.OUTPUT_ENCODING_KEY_CAMEL_CASE,
             Configurable.OUTPUT_ENCODING_KEY_SNAKE_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
@@ -75,11 +75,11 @@ final class PropertySetting extends TemplateElement {
             Configurable.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
             Configurable.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
             Configurable.YEAR_FORMAT_KEY_CAMEL_CASE,
+            Configurable.YEAR_MONTH_FORMAT_KEY_CAMEL_CASE,
             Configurable.YEAR_FORMAT_KEY_SNAKE_CASE,
-            Configurable.YEARMONTH_FORMAT_KEY_CAMEL_CASE,
-            Configurable.YEARMONTH_FORMAT_KEY_SNAKE_CASE,
-            Configurable.ZONEDDATETIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.ZONEDDATETIME_FORMAT_KEY_SNAKE_CASE
+            Configurable.YEAR_MONTH_FORMAT_KEY_SNAKE_CASE,
+            Configurable.ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE
     };
 
 
@@ -90,7 +90,7 @@ final class PropertySetting extends TemplateElement {
             StringBuilder sb = new StringBuilder();
             if (_TemplateAPI.getConfigurationSettingNames(cfg, true).contains(key)
                     || _TemplateAPI.getConfigurationSettingNames(cfg, false).contains(key)) {
-                sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
+                sb.append("The setting name '" + key + "' is recognized, but changing this setting from inside a template isn't "
                         + "supported.");                
             } else {
                 sb.append("Unknown setting name: ");

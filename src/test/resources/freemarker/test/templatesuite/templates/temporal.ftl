@@ -110,17 +110,17 @@
 <#setting locale="en_US">
 <#setting instantFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 01:07:08" actual=instant?string />
-<#setting localdatetimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting localDateTimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 06:07:08" actual=localDateTime?string />
-<#setting localdateFormat="yyyy MMM dd">
+<#setting localDateFormat="yyyy MMM dd">
 <@assertEquals expected="2003 Apr 05" actual=localDate?string />
-<#setting localdatetimeFormat="HH:mm:ss">
+<#setting localDateTimeFormat="HH:mm:ss">
 <@assertEquals expected="06:07:08" actual=localTime?string />
-<#setting offsetdatetimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting offsetDateTimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 06:07:08" actual=offsetDateTime?string />
 <#setting yearFormat="yyyy">
 <@assertEquals expected="2003" actual=year?string />
-<#setting yearmonthFormat="yyyy MMM">
+<#setting yearMonthFormat="yyyy MMM">
 <@assertEquals expected="2003 Apr" actual=yearMonth?string />
-<#setting zoneddatetimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting zonedDateTimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 06:07:08" actual=zonedDateTime?string />
