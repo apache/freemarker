@@ -28903,7 +28903,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             application developers, system administrators, or other highly
             trusted personnel. Consider templates as part of the source code
             just like <literal>*.java</literal> files are. If you still want
-            to allow users to upload templates, here's what to
+            to allow untrusted users to upload templates, here's what to
             consider:</para>
 
             <itemizedlist>
@@ -28912,7 +28912,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 (<literal>Configuration.setObjectWrapper</literal>): The
                 data-model might gives access to the public Java API of some
                 objects that you have put into the data-model. By default, for
-                objects that aren't instances of a the bunch of specially
+                objects that aren't instances of the bunch of specially
                 handled types (<literal>String</literal>,
                 <literal>Number</literal>, <literal>Boolean</literal>,
                 <literal>Date</literal>, <literal>Map</literal>,
@@ -28929,7 +28929,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
                 <literal>Boolean</literal>-s and <literal>Date</literal>-s.
-                But for many application that's too restrictive, and instead
+                But for many applications that's too restrictive, and instead
                 you have to create a
                 <literal>WhitelistMemberAccessPolicy</literal>, and create a
                 <literal>DefaultObjectWrapper</literal> (or other
@@ -28941,10 +28941,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>ObjectWrapper</literal> implementation of
                 course.)</para>
 
+                <para>Always expect that templates may get some objects that
+                you haven't put into the data-model yourself. Notably,
+                templates can always get a <literal>Locale</literal> object
+                with the <literal>.locale_object</literal> expression. Or the
+                web application framework you are using may exposes some
+                objects, like attributes from the Servlet scopes. Such objects
+                will be still wrapped with the
+                <literal>ObjectWrapper</literal> that you set in the
+                <literal>Configuration</literal>, and this is why it's
+                important to ensure safety on that level. Controlling what
+                objects the template will have access is hard, but you can
+                control centrally what members of any object they have access
+                to.</para>
+
                 <para>If you are creating <literal>TemplateModel</literal>-s
                 in custom code (instead of the
-                <literal>ObjectWrapper</literal> creating those), be sure you
-                avoid deprecated container constructors like <literal>new
+                <literal>ObjectWrapper</literal> creating those), be sure that
+                you avoid deprecated container constructors like <literal>new
                 SimpleSequence()</literal>, as those will use the also
                 deprecated default object wrapper instance, which doesn't have
                 the same restrictions than the
@@ -28969,18 +28983,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 by the <literal>MemberAccessPolicy</literal> also won't be
                 visible with <literal>?api</literal> (assuming you are using a
                 well behaving <literal>ObjectWrapper</literal>, like
-                <literal>DefaultObjectWrapper</literal> is, hopefully.)</para>
+                <literal>DefaultObjectWrapper</literal>.)</para>
 
-                <para>Last not least, some maybe aware of that the standard
-                object wrappers filters out some well known
-                <quote>unsafe</quote> methods, like
+                <para>Last not least, some maybe aware of the historical
+                legacy that standard object wrappers filter out some well
+                known <quote>unsafe</quote> methods, like
                 <literal>System.exit</literal>. Do not ever rely on that,
-                since it only blocks the methods that's in a small predefined
-                list (for some historical reasons). The standard Java API is
-                huge and ever growing, and then there are the 3rd party
-                libraries, and the API-s of your own application. Clearly it's
-                impossible to blacklist all the problematic members in
-                those.</para>
+                since it only blocks the methods from a small predefined list.
+                The standard Java API is huge and ever growing, and then there
+                are the 3rd party libraries, and the API-s of your own
+                application. Clearly it's impossible to blacklist all the
+                problematic members in those.</para>
               </listitem>
 
               <listitem>
