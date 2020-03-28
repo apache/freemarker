@@ -28951,7 +28951,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>ObjectWrapper</literal> that you set in the
                 <literal>Configuration</literal>, and this is why it's
                 important to ensure safety on that level. Controlling what
-                objects the template will have access is hard, but you can
+                objects the template will have access to is hard, but you can
                 control centrally what members of any object they have access
                 to.</para>
 
