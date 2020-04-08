@@ -109,7 +109,7 @@ public class TemporalUtil {
 			.appendValue(ChronoField.YEAR)
 			.toFormatter();
 
-	private static DateTimeFormatter getISO8601Formatter(Temporal temporal, TimeZone timeZone) {
+	private static DateTimeFormatter getISO8601Formatter(Temporal temporal) {
 		if (temporal instanceof LocalTime)
 			return ISO8601_TIME_FORMAT;
 		else if (temporal instanceof Year)
@@ -120,7 +120,7 @@ public class TemporalUtil {
 			return ISO8601_FORMAT;
 	}
 
-	private static DateTimeFormatter getXSFormatter(Temporal temporal, TimeZone timeZone) {
+	private static DateTimeFormatter getXSFormatter(Temporal temporal) {
 		if (temporal instanceof LocalTime)
 			return XSD_TIME_FORMAT;
 		else if (temporal instanceof Year)
@@ -139,9 +139,9 @@ public class TemporalUtil {
 		String[] formatSplt = format.split("_");
 		DateTimeFormatter dtf;
 		if ("xs".equals(format))
-			dtf = getXSFormatter(temporal, timeZone);
+			dtf = getXSFormatter(temporal);
 		else if ("iso".equals(format))
-			dtf =  getISO8601Formatter(temporal, timeZone);
+			dtf =  getISO8601Formatter(temporal);
 		else if (FORMAT_STYLE_PATTERN.matcher(format).matches()) {
 			boolean isYear = temporal instanceof Year;
 			boolean isYearMonth = temporal instanceof YearMonth;
