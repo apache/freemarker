@@ -29,6 +29,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
 @Ignore
@@ -44,7 +45,7 @@ public abstract class ExamplesTest extends TemplateTest {
     
     @Override
     protected final Configuration createConfiguration() {
-        Configuration cfg = new Configuration(Configuration.getVersion());
+        Configuration cfg = new Configuration(new Version(Configuration.getVersion().toString()));
         setupTemplateLoaders(cfg);
         return cfg;
     }

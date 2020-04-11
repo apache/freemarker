@@ -2256,9 +2256,9 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the loop or macro local variable corresponding to this variable name. Possibly null. (Note that the
-     * misnomer is kept for backward compatibility: loop variables are not local variables according to our
-     * terminology.)
+     * Returns the loop or macro local variable corresponding to this variable name.
+     * Returns {@code null} if no such variable exists with the given name, or the variable was set to
+     * {@code null}. Doesn't read namespace or global variables.
      */
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         TemplateModel val = getNullableLocalVariable(name);
@@ -2316,9 +2316,9 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the globally visible variable of the given name (or null). This is corresponds to FTL
-     * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
-     * ...&gt; and then at the data model exposed to the template, and then at the
+     * Returns the globally visible variable of the given name, or {@code null}. This corresponds to FTL
+     * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via:
+     * {@code <#global ...>} and then at the data model exposed to the template, and then at the
      * {@linkplain Configuration#setSharedVariables(Map)} shared variables} in the {@link Configuration}.
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
@@ -2346,39 +2346,56 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets a variable that is visible globally. This is correspondent to FTL
-     * <code>&lt;#global <i>name</i>=<i>model</i>&gt;</code>. This can be considered a convenient shorthand for:
-     * getGlobalNamespace().put(name, model)
-     */
-    public void setGlobalVariable(String name, TemplateModel model) {
-        globalNamespace.put(name, model);
-    }
-
-    /**
-     * Sets a variable in the current namespace. This is correspondent to FTL
-     * <code>&lt;#assign <i>name</i>=<i>model</i>&gt;</code>. This can be considered a convenient shorthand for:
-     * getCurrentNamespace().put(name, model)
-     */
-    public void setVariable(String name, TemplateModel model) {
-        currentNamespace.put(name, model);
-    }
-
-    /**
-     * Sets a local variable (one effective only during a macro invocation). This is correspondent to FTL
-     * <code>&lt;#local <i>name</i>=<i>model</i>&gt;</code>.
-     * 
+     * Sets a variable in the global namespace, like {@code <#global name=value>}.
+     * This can be considered a convenient shorthand for {@code getGlobalNamespace().put(name, model)}.
+     *
+     * <p>Note that this is not an exact pair of {@link #getGlobalVariable(String)}, as that falls back to higher scopes
+     * if the variable is not in the global namespace.
+     *
      * @param name
-     *            the identifier of the variable
-     * @param model
-     *            the value of the variable.
+     *            The name of the variable.
+     * @param value
+     *            The new value of the variable. {@code null} in effect removes the local variable (reading it will fall
+     *            back to higher scope).
+     */
+    public void setGlobalVariable(String name, TemplateModel value) {
+        globalNamespace.put(name, value);
+    }
+
+    /**
+     * Sets a variable in the current namespace, like {@code <#assign name=value>}.
+     * This can be considered a convenient shorthand for: {@code getCurrentNamespace().put(name, model)}.
+     *
+     * @param name
+     *            The name of the variable.
+     * @param value
+     *            The new value of the variable. {@code null} in effect removes the local variable (reading it will fall
+     *            back to higher scope).
+     */
+    public void setVariable(String name, TemplateModel value) {
+        currentNamespace.put(name, value);
+    }
+
+    /**
+     * Sets a local variable that's on the top-level inside a macro or function invocation, like
+     * {@code <#local name=value>}.
+     * Note that just like {@code <#local name=value>}, this will not set loop variables; it will totally ignore
+     * them, and might sets a local variable that a loop variable currently "shadows". As such, it's not exactly the
+     * pair of {@link #getLocalVariable(String)}, which also reads loop variables.
+     *
+     * @param name
+     *            The name of the variable.
+     * @param value
+     *            The new value of the variable. {@code null} in effect removes the local variable (reading it will fall
+     *            back to higher scope).
      * @throws IllegalStateException
      *             if the environment is not executing a macro body.
      */
-    public void setLocalVariable(String name, TemplateModel model) {
+    public void setLocalVariable(String name, TemplateModel value) {
         if (currentMacroContext == null) {
             throw new IllegalStateException("Not executing macro body");
         }
-        currentMacroContext.setLocalVar(name, model);
+        currentMacroContext.setLocalVar(name, value);
     }
 
     /**

@@ -339,12 +339,14 @@ public class ConfigurationTest extends TestCase {
         
         try {
             new Configuration(new Version(999, 1, 2));
+            fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));
         }
         
         try {
             new Configuration(new Version(2, 2, 2));
+            fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("2.3.0"));
         }

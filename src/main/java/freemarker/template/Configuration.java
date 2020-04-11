@@ -609,9 +609,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
-     * 
+     *
      * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
-     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
+     * {@link #VERSION_2_3_30}. Otherwise your application can break as you upgrade FreeMarker. (As of 2.3.30, doing
+     * this will be logged as an error. As of 2.4.0, it will be probably disallowed, by throwing exception.)
      * 
      * <p>An important consequence of setting this setting is that now your application will check if the stated minimum
      * FreeMarker version requirement is met. Like if you set this setting to 2.3.22, but accidentally the application
@@ -944,6 +945,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         checkFreeMarkerVersionClash();
         
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        checkCurrentVersionNotRecycled(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         createTemplateCache();
@@ -1928,7 +1930,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
      * 
      * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
-     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
+     * {@link #VERSION_2_3_30}. Otherwise your application can break as you upgrade FreeMarker. (As of 2.3.30, doing
+     * this will be logged as an error. As of 2.4.0, it will be probably disallowed, by throwing exception.)
      * 
      * <p>If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
      * was never set in this {@link Configuration} object through the public API, its value will be set to the default
@@ -1947,6 +1950,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         if (!this.incompatibleImprovements.equals(incompatibleImprovements)) {
+            checkCurrentVersionNotRecycled(incompatibleImprovements);
+
             this.incompatibleImprovements = incompatibleImprovements;
             
             if (!templateLoaderExplicitlySet) {
@@ -1996,6 +2001,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             
             recreateTemplateCache();
         }
+    }
+
+    private static void checkCurrentVersionNotRecycled(Version incompatibleImprovements) {
+        _TemplateAPI.checkCurrentVersionNotRecycled(
+                incompatibleImprovements,
+                "freemarker.configuration", "Configuration");
     }
 
     /**

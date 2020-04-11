@@ -421,7 +421,7 @@
   <target name="test" depends="compileTest" description="Run test cases">
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
-    <junit haltonfailure="off" logfailedtests="true" fork="true" forkmode="once">
+    <junit haltonfailure="on" logfailedtests="true" fork="true" forkmode="once">
       <classpath>
         <pathelement path="build/test-classes" />
         <pathelement path="build/classes" />
