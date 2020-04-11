@@ -472,6 +472,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** FreeMarker version 2.3.30 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_30 = new Version(2, 3, 30);
 
+    /** FreeMarker version 2.3.31 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_31 = new Version(2, 3, 31);
+
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
