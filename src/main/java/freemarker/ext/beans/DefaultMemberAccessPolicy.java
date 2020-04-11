@@ -36,7 +36,7 @@ import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 
 /**
- * Member access policy, used  to implement default behavior that's mostly compatible with pre-2.3.30 versions, but is
+ * Member access policy to implement the default behavior that's mostly compatible with pre-2.3.30 versions, but is
  * somewhat safer; it still can't provide safety in practice, if you allow untrusted users to edit templates! Use
  * {@link WhitelistMemberAccessPolicy} if you need stricter control.
  *

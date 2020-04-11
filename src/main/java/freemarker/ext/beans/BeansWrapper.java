@@ -98,8 +98,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * At this level of exposure, all methods and properties of the
-     * wrapped objects are exposed to the template, and the {@link MemberAccessPolicy}
-     * will be ignored.
+     * wrapped objects are exposed to the template, and even the {@link MemberAccessPolicy}
+     * is ignored.
      */
     public static final int EXPOSE_ALL = 0;
     
@@ -113,6 +113,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * java.lang.Thread and java.lang.ThreadGroup methods that can change its 
      * state, as well as the usual suspects in java.lang.System and
      * java.lang.Runtime.
+     *
+     * <p>Note that the {@link MemberAccessPolicy} will further restrict what's visible. That mechanism was introduced
+     * much later than "exposure levels", and it's the primary place to look at if you are concerned with safety.
      */
     public static final int EXPOSE_SAFE = 1;
     
@@ -120,6 +123,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * At this level of exposure, only property getters are exposed.
      * Additionally, property getters that map to unsafe methods are not
      * exposed (i.e. Class.classLoader and Thread.contextClassLoader).
+     *
+     * <p>Note that the {@link MemberAccessPolicy} will further restrict what's visible.
      */
     public static final int EXPOSE_PROPERTIES_ONLY = 2;
 
@@ -564,6 +569,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
      * constants.
+     * Note that {@link #setMemberAccessPolicy(MemberAccessPolicy)} further restricts what's visible, unless this is
+     * set to {@link #EXPOSE_ALL}.
      */
     public void setExposureLevel(int exposureLevel) {
         checkModifiable();
