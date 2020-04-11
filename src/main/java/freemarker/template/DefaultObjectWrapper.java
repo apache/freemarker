@@ -20,6 +20,7 @@
 package freemarker.template;
 
 import java.lang.reflect.Array;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -205,6 +206,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 return new SimpleDate((java.sql.Timestamp) obj);
             }
             return new SimpleDate((java.util.Date) obj, getDefaultDateType());
+        }
+        if (obj instanceof Temporal) {
+            return new SimpleTemporal((Temporal) obj);
         }
         final Class<?> objClass = obj.getClass();
         if (objClass.isArray()) {

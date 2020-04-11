@@ -24,6 +24,16 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,7 +147,43 @@ public class Configurable {
     public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
-    
+
+    public static final String INSTANT_FORMAT_KEY_SNAKE_CASE = "instant_format";
+    public static final String INSTANT_FORMAT_KEY_CAMEL_CASE = "instantFormat";
+    public static final String INSTANT_FORMAT_KEY = INSTANT_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String LOCAL_DATE_FORMAT_KEY_SNAKE_CASE = "local_date_format";
+    public static final String LOCAL_DATE_FORMAT_KEY_CAMEL_CASE = "localDateFormat";
+    public static final String LOCAL_DATE_FORMAT_KEY = LOCAL_DATE_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "local_date_time_format";
+    public static final String LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "localDateTimeFormat";
+    public static final String LOCAL_DATE_TIME_FORMAT_KEY = LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String LOCAL_TIME_FORMAT_KEY_SNAKE_CASE = "local_time_format";
+    public static final String LOCAL_TIME_FORMAT_KEY_CAMEL_CASE = "localTimeFormat";
+    public static final String LOCAL_TIME_FORMAT_KEY = LOCAL_TIME_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "offset_date_time_format";
+    public static final String OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "offsetDateTimeFormat";
+    public static final String OFFSET_DATE_TIME_FORMAT_KEY = OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String OFFSET_TIME_FORMAT_KEY_SNAKE_CASE = "offset_time_format";
+    public static final String OFFSET_TIME_FORMAT_KEY_CAMEL_CASE = "offsetTimeFormat";
+    public static final String OFFSET_TIME_FORMAT_KEY = OFFSET_TIME_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String YEAR_FORMAT_KEY_SNAKE_CASE = "year_format";
+    public static final String YEAR_FORMAT_KEY_CAMEL_CASE = "yearFormat";
+    public static final String YEAR_FORMAT_KEY = YEAR_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String YEAR_MONTH_FORMAT_KEY_SNAKE_CASE = "year_month_format";
+    public static final String YEAR_MONTH_FORMAT_KEY_CAMEL_CASE = "yearMonthFormat";
+    public static final String YEAR_MONTH_FORMAT_KEY = YEAR_MONTH_FORMAT_KEY_SNAKE_CASE;
+
+    public static final String ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "zoned_date_time_format";
+    public static final String ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "zonedDateTimeFormat";
+    public static final String ZONED_DATE_TIME_FORMAT_KEY = ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -310,13 +356,19 @@ public class Configurable {
         CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
+        INSTANT_FORMAT_KEY_SNAKE_CASE,
         LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
         LAZY_IMPORTS_KEY_SNAKE_CASE,
+        LOCAL_DATE_FORMAT_KEY_SNAKE_CASE,
+        LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
+        LOCAL_TIME_FORMAT_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
         NUMBER_FORMAT_KEY_SNAKE_CASE,
         OBJECT_WRAPPER_KEY_SNAKE_CASE,
+        OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
+        OFFSET_TIME_FORMAT_KEY_SNAKE_CASE,
         OUTPUT_ENCODING_KEY_SNAKE_CASE,
         SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
@@ -326,9 +378,12 @@ public class Configurable {
         TIME_ZONE_KEY_SNAKE_CASE,
         TRUNCATE_BUILTIN_ALGORITHM_KEY_SNAKE_CASE,
         URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
-        WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE
+        WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE,
+        YEAR_FORMAT_KEY_SNAKE_CASE,
+        YEAR_MONTH_FORMAT_KEY_SNAKE_CASE,
+        ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE
     };
-    
+
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
@@ -343,13 +398,19 @@ public class Configurable {
         CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
+        INSTANT_FORMAT_KEY_CAMEL_CASE,
         LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
         LAZY_IMPORTS_KEY_CAMEL_CASE,
+        LOCAL_DATE_FORMAT_KEY_CAMEL_CASE,
+        LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
+        LOCAL_TIME_FORMAT_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
         NUMBER_FORMAT_KEY_CAMEL_CASE,
         OBJECT_WRAPPER_KEY_CAMEL_CASE,
+        OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
+        OFFSET_TIME_FORMAT_KEY_CAMEL_CASE,
         OUTPUT_ENCODING_KEY_CAMEL_CASE,
         SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
@@ -359,7 +420,10 @@ public class Configurable {
         TIME_ZONE_KEY_CAMEL_CASE,
         TRUNCATE_BUILTIN_ALGORITHM_KEY_CAMEL_CASE,
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
-        WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE
+        WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE,
+        YEAR_FORMAT_KEY_CAMEL_CASE,
+        YEAR_MONTH_FORMAT_KEY_CAMEL_CASE,
+        ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE
     };
 
     private Configurable parent;
@@ -371,6 +435,15 @@ public class Configurable {
     private String timeFormat;
     private String dateFormat;
     private String dateTimeFormat;
+    private String instantFormat;
+    private String localDateFormat;
+    private String localDateTimeFormat;
+    private String localTimeFormat;
+    private String offsetDateTimeFormat;
+    private String offsetTimeFormat;
+    private String yearFormat;
+    private String yearMonthFormat;
+    private String zonedDateTimeFormat;
     private TimeZone timeZone;
     private TimeZone sqlDataAndTimeTimeZone;
     private boolean sqlDataAndTimeTimeZoneSet;
@@ -443,6 +516,33 @@ public class Configurable {
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         
+        instantFormat = "";
+        properties.setProperty(INSTANT_FORMAT_KEY, instantFormat);
+
+        localDateFormat = "";
+        properties.setProperty(LOCAL_DATE_FORMAT_KEY, localDateFormat);
+
+        localDateTimeFormat = "";
+        properties.setProperty(LOCAL_DATE_TIME_FORMAT_KEY, localDateTimeFormat);
+
+        localTimeFormat = "";
+        properties.setProperty(LOCAL_TIME_FORMAT_KEY, localTimeFormat);
+
+        offsetDateTimeFormat = "";
+        properties.setProperty(OFFSET_DATE_TIME_FORMAT_KEY, offsetDateTimeFormat);
+
+        offsetTimeFormat = "";
+        properties.setProperty(OFFSET_TIME_FORMAT_KEY, offsetTimeFormat);
+
+        yearFormat = "";
+        properties.setProperty(YEAR_FORMAT_KEY, yearFormat);
+
+        yearMonthFormat = "";
+        properties.setProperty(YEAR_MONTH_FORMAT_KEY, yearMonthFormat);
+
+        zonedDateTimeFormat = "";
+        properties.setProperty(ZONED_DATE_TIME_FORMAT_KEY, zonedDateTimeFormat);
+
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
@@ -1267,7 +1367,67 @@ public class Configurable {
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
     }
-    
+
+    public String getInstantFormat() {
+       return instantFormat == null ? parent.getInstantFormat() : instantFormat;
+    }
+
+    public String getLocalDateFormat() {
+        return localDateFormat == null ? parent.getLocalDateFormat() : localDateFormat;
+    }
+
+    public String getLocalDateTimeFormat() {
+        return localDateTimeFormat == null ? parent.getLocalDateTimeFormat() : localDateTimeFormat;
+    }
+
+    public String getLocalTimeFormat() {
+        return localTimeFormat == null ? parent.getLocalTimeFormat() : localTimeFormat;
+    }
+
+    public String getOffsetDateTimeFormat() {
+        return offsetDateTimeFormat == null ? parent.getOffsetDateTimeFormat() : offsetDateTimeFormat;
+    }
+
+    public String getOffsetTimeFormat() {
+        return offsetTimeFormat == null ? parent.getOffsetTimeFormat() : offsetTimeFormat;
+    }
+
+    public String getYearFormat() {
+        return yearFormat == null ? parent.getYearFormat() : yearFormat;
+    }
+
+    public String getYearMonthFormat() {
+        return yearMonthFormat == null ? parent.getYearMonthFormat() : yearMonthFormat;
+    }
+
+    public String getZonedDateTimeFormat() {
+        return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
+    }
+
+    public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
+        if (temporalClass == Instant.class) {
+            return getInstantFormat();
+        } else if (temporalClass == LocalDate.class) {
+            return getLocalDateFormat();
+        } else if (temporalClass == LocalDateTime.class) {
+            return getLocalDateTimeFormat();
+        } else if (temporalClass == LocalTime.class) {
+            return getLocalTimeFormat();
+        } else if (temporalClass == OffsetDateTime.class) {
+            return getOffsetDateTimeFormat();
+        } else if (temporalClass == OffsetTime.class) {
+            return getOffsetTimeFormat();
+        } else if (temporalClass == Year.class) {
+            return getYearFormat();
+        } else if (temporalClass == YearMonth.class) {
+            return getYearMonthFormat();
+        } else if (temporalClass == ZonedDateTime.class) {
+            return getZonedDateTimeFormat();
+        } else {
+            return "";
+        }
+    }
+
     /**
      * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
      * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
@@ -2644,6 +2804,24 @@ public class Configurable {
                 setDateFormat(value);
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
+            } else if (INSTANT_FORMAT_KEY_SNAKE_CASE.equals(name) || INSTANT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.instantFormat = value;
+            } else if (LOCAL_DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.localDateFormat = value;
+            } else if (LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.localDateTimeFormat = value;
+            } else if (LOCAL_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.localTimeFormat = value;
+            } else if (OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.offsetDateTimeFormat = value;
+            } else if (OFFSET_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || OFFSET_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.offsetTimeFormat = value;
+            } else if (YEAR_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.yearFormat = value;
+            } else if (YEAR_MONTH_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_MONTH_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.yearMonthFormat = value;
+            } else if (ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                this.zonedDateTimeFormat = value;
             } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
                     || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(

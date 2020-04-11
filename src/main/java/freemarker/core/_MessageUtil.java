@@ -322,6 +322,17 @@ public class _MessageUtil {
                 : new _MiscTemplateException(e, null, desc);
     }
     
+    public static TemplateException newCantFormatDateException(TemplateTemporalFormat format, Expression dataSrcExp,
+            TemplateValueFormatException e, boolean useTempModelExc) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                e.getMessage())
+                .blame(dataSrcExp);
+        return useTempModelExc
+                ? new _TemplateModelException(e, null, desc)
+                : new _MiscTemplateException(e, null, desc);
+    }
+
     public static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
             TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(

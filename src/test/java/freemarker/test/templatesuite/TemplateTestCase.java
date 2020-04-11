@@ -26,6 +26,13 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -347,6 +354,18 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("timeOnly", new java.sql.Time(d.getTime()));
             dataModel.put("dateOnly", new java.sql.Date(d.getTime()));
             dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
+        } else if (simpleTestName.equals("temporal")) {
+            LocalDateTime ldt = LocalDateTime.of(2003, 4, 5, 6, 7, 8);
+            dataModel.put("dateTime", new java.sql.Timestamp(103, 4 - 1, 5, 8, 7, 8, 0));
+            dataModel.put("instant", ldt.toInstant(ZoneOffset.UTC));
+            dataModel.put("localDateTime", ldt);
+            dataModel.put("localDate", ldt.toLocalDate());
+            dataModel.put("localTime", ldt.toLocalTime());
+            dataModel.put("year", Year.from(ldt));
+            dataModel.put("yearMonth", YearMonth.from(ldt));
+            ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
+            dataModel.put("offsetDateTime", zdt.toOffsetDateTime());
+            dataModel.put("zonedDateTime", zdt);
         } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));

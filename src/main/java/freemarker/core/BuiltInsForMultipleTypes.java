@@ -46,6 +46,7 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NumberUtil;
@@ -605,6 +606,69 @@ class BuiltInsForMultipleTypes {
             }
         }
     
+
+        private class TemporalFormatter implements TemplateScalarModel, TemplateHashModel, TemplateMethodModel {
+            private final TemplateTemporalModel temporalModel;
+            private final Environment env;
+            private final TemplateTemporalFormat defaultFormat;
+            private String cachedValue;
+
+            TemporalFormatter(TemplateTemporalModel temporalModel, Environment env) throws TemplateException {
+                this.temporalModel = temporalModel;
+                this.env = env;
+                this.defaultFormat = env.getTemplateTemporalFormat(temporalModel.getAsTemporal());
+            }
+
+            @Override
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                return formatWith((String) args.get(0));
+            }
+
+            @Override
+            public TemplateModel get(String key) throws TemplateModelException {
+                return formatWith(key);
+            }
+
+            private TemplateModel formatWith(String key)
+                    throws TemplateModelException {
+                try {
+                    return new SimpleScalar(env.formatTemporalToPlainText(temporalModel, key, target));
+                } catch (TemplateException e) {
+                    // `e` should always be a TemplateModelException here, but to be sure:
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e);
+                } catch (TemplateValueFormatException e) {
+                    throw new _TemplateModelException("Failed to format value", e);
+                }
+            }
+
+            @Override
+            public String getAsString() throws TemplateModelException {
+                if (cachedValue == null) {
+                    if (defaultFormat == null) {
+                        throw new BugException();
+                    }
+                    try {
+                        cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.format(temporalModel));
+                    } catch (TemplateValueFormatException e) {
+                        try {
+                            throw _MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
+                        } catch (TemplateException e2) {
+                            // `e` should always be a TemplateModelException here, but to be sure:
+                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2);
+                        }
+                    }
+                }
+                return cachedValue;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+        }
+
+
         private class DateFormatter
         implements
             TemplateScalarModel,
@@ -768,6 +832,9 @@ class BuiltInsForMultipleTypes {
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);
+            } else if (model instanceof TemplateTemporalModel) {
+                TemplateTemporalModel tm = (TemplateTemporalModel) model;
+                return new TemporalFormatter(tm, env);
             } else if (model instanceof SimpleScalar) {
                 return model;
             } else if (model instanceof TemplateBooleanModel) {

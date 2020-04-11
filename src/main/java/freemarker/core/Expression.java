@@ -32,6 +32,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -238,6 +239,7 @@ abstract public class Expression extends TemplateObject {
             return ((TemplateHashModel) model).isEmpty();
         } else if (model instanceof TemplateNumberModel
                 || model instanceof TemplateDateModel
+                || model instanceof TemplateTemporalModel
                 || model instanceof TemplateBooleanModel) {
             return false;
         } else {
