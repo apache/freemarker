@@ -28985,6 +28985,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 well behaving <literal>ObjectWrapper</literal>, like
                 <literal>DefaultObjectWrapper</literal>.)</para>
 
+                <para>If you are using the default object wrapper class
+                (<literal>freemarker.template.DefaultObjectWrapper</literal>),
+                or a subclass of it, you should disable the XML (DOM) wrapping
+                feature of it, by overriding <literal>wrapDomNode(Object
+                obj)</literal> so that it does this: <literal>return
+                getModelFactory(obj.getClass()).create(obj, this);</literal>.
+                The problem with the XML wrapping feature, which wraps
+                <literal>org.w3c.dom.Node</literal> objects on special way to
+                make them easier to work with in templates, is that this
+                facility by design lets template authors evaluate arbitrary
+                XPath expressions, and XPath can do too much in certain
+                setups. If you really need the XML wrapping facility, review
+                carefully what XPath expressions are possible in your setup.
+                Also, be sure you don't use the long deprecated, and more
+                dangerous <literal>freemarker.ext.xml</literal> package, only
+                <literal>freemarker.ext.dom</literal>. Also, note that when
+                using the XML wrapping feature, not allowing
+                <literal>org.w3c.dom.Node</literal> methods in the
+                <literal>MemberAccessPolicy</literal> has no effect, since it
+                doesn't expose Java <literal>Node</literal> members to
+                templates directly.</para>
+
                 <para>Last not least, some maybe aware of the historical
                 legacy that standard object wrappers filter out some well
                 known <quote>unsafe</quote> methods, like
@@ -29033,11 +29055,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>TemplateModel</literal>, its static initialization
                 will be run. To avoid these, you should use a
                 <literal>TemplateClassResolver</literal> that restricts the
-                accessible classes (possibly based on which template asks for
-                them), such as
+                accessible classes to the absolute minimum (possibly based on
+                which template asks for them), such as
                 <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.
-                Note that if, and only if your
-                <literal>ObjectWrapper</literal> is a
+                Do <emphasis>not</emphasis> use
+                <literal>TemplateClassResolver.SAFER_RESOLVER</literal>, it's
+                not restrictive enough for this purpose! Note that if, and
+                only if your <literal>ObjectWrapper</literal> is a
                 <literal>BeansWrapper</literal> or a subclass of it (typically
                 <literal>DefaultObjectWrapper</literal>), constructors not
                 allowed by the <literal>MemberAccessPolicy</literal> also
