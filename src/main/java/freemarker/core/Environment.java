@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -186,6 +187,11 @@ public final class Environment extends Configurable {
     private boolean cachedURLEscapingCharsetSet;
 
     private boolean fastInvalidReferenceExceptions;
+
+    /**
+     * The list of templates which should not be included again
+     */
+    private Set<Template> onlyIncludeOnceTemplates;
 
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
@@ -2911,6 +2917,13 @@ public final class Environment extends Configurable {
      */
     public void include(Template includedTemplate)
             throws TemplateException, IOException {
+        if (includedTemplate.getOnlyIncludeOnce()) {
+            if (onlyIncludeOnceTemplates == null)
+                onlyIncludeOnceTemplates = new HashSet<>();
+            if (!onlyIncludeOnceTemplates.add(includedTemplate))
+                return;
+        }
+
         final Template prevTemplate;
         final boolean parentReplacementOn = isBeforeIcI2322();
         prevTemplate = getTemplate();

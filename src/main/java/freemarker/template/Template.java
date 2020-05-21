@@ -90,6 +90,7 @@ public class Template extends Configurable {
     private int actualTagSyntax;
     private int actualNamingConvention;
     private boolean autoEscaping;
+    private boolean onlyIncludeOnce;
     private OutputFormat outputFormat;
     private final String name;
     private final String sourceName;
@@ -732,6 +733,18 @@ public class Template extends Configurable {
      */
     public void dump(Writer out) throws IOException {
         out.write(rootElement.getCanonicalForm());
+    }
+
+    /**
+     * @return true if this template should only be included once in a
+     * template execution run
+     */
+    public boolean getOnlyIncludeOnce() {
+        return onlyIncludeOnce;
+    }
+
+    void setOnlyIncludeOnce(boolean onlyIncludeOnce) {
+        this.onlyIncludeOnce = onlyIncludeOnce;
     }
 
     /**

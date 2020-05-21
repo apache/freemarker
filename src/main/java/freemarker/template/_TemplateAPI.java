@@ -178,6 +178,10 @@ public class _TemplateAPI {
         t.setOutputFormat(outputFormat);
     }
 
+    public static void setOnlyIncludeOnce(Template t, boolean onlyExecuteOnce) {
+        t.setOnlyIncludeOnce(onlyExecuteOnce);
+    }
+
     public static void validateAutoEscapingPolicyValue(int autoEscaping) {
         if (autoEscaping != Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
                 && autoEscaping != Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY

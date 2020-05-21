@@ -4592,6 +4592,8 @@ void HeaderElement() :
                                 }
                             } catch (TemplateModelException tme) {
                             }
+                        } else if (ks.equalsIgnoreCase("ONLY_INCLUDE_ONCE") || ks.equals("onlyIncludeOnce")) {
+                            _TemplateAPI.setOnlyIncludeOnce(template, getBoolean(exp, false));
                         } else {
                             String correctName;
 	                        if (ks.equals("charset")) {
