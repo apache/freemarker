@@ -21602,37 +21602,59 @@ or
         <section>
           <title>Description</title>
 
-          <para>Imports a library. That is, it creates a new empty namespace,
-          and then executes the template given with
-          <literal><replaceable>path</replaceable></literal> parameter in that
-          namespace so the template populates the namespace with variables
-          (macros, functions, ...etc.). Then it makes the newly created
-          namespace available to the caller with a hash variable. The hash
-          variable will be created as a plain variable in the namespace used
-          by the caller of <literal>import</literal> (as if you would create
-          it with <literal>assign</literal> directive), with the name given
-          with the <literal><replaceable>hash</replaceable></literal>
-          parameter. If the import happens in the namespace of the main
+          <para>Used for making a collection of macros, functions, and other
+          variables available for the importing template, which were defined
+          in the imported template. For example, let's say you have written
+          macros to generate some commonly needed pieces output, and you have
+          put them into <literal>/libs/commons.ftl</literal>. Then, in the
+          template where you want to use them, do this (near the top of the
+          the template by convention, next to any other
+          <literal>import</literal>-s):</para>
+
+          <programlisting role="template">&lt;#import "/libs/commons.ftl" as com&gt;
+</programlisting>
+
+          <para>Later in same template, let's say you want to use the
+          <literal>copyright</literal> macro defined in
+          <literal>/libs/commons.ftl</literal>. Then you can call that macro
+          like this:</para>
+
+          <programlisting role="template">&lt;@com.copyright date="1999-2002"/&gt;</programlisting>
+
+          <para>Note the <literal>com.</literal> before the macro name above.
+          All that was defined in <literal>/libs/commons.ftl</literal> will be
+          inside <literal>com</literal>.</para>
+
+          <para>Described more technically, <literal>import</literal> first
+          creates a new empty <link
+          linkend="dgui_misc_namespace">namespace</link>, and then executes
+          the template given with
+          <literal><replaceable>path</replaceable></literal> parameter inside
+          that namespace, so the template populates the namespace with
+          variables (macros, functions, ...etc.). Then the namespace is
+          assigned to the variable specified with the
+          <literal><replaceable>hash</replaceable></literal> parameter, and
+          you can access its contents through that. A namespace is <link
+          linkend="dgui_datamodel_container">a hash</link>, hence <link
+          linkend="dgui_template_exp_var_hash">the dot operator</link> worked
+          above. The assignment is like the <literal>assign</literal>
+          directive, that is, it sets the variable in the current namespace.
+          Except, if the import happens in the namespace of the main (topmost)
           template, the hash variable is also created in the global
           namespace.</para>
 
           <para>If you call <literal>import</literal> with the same
           <literal><replaceable>path</replaceable></literal> for multiple
           times, it will create the namespace and run the template for the
-          very first call of <literal>import</literal> only. The later calls
-          will just create a hash by which you can access the
-          <emphasis>same</emphasis> namespace.</para>
+          first call of <literal>import</literal> only. The later calls will
+          just give back the namespace that was created and initialized when
+          the template was imported for the first time, and will not execute
+          the imported template.</para>
 
-          <para>The output printed by the imported template will be ignored
-          (will not be inserted at the place of importing). The template is
-          executed to populate the namespace with variables, and not to write
-          to the output.</para>
-
-          <para>Example:</para>
-
-          <programlisting role="template">&lt;#import "/libs/mylib.ftl" as my&gt;
-
-&lt;@my.copyright date="1999-2002"/&gt;</programlisting>
+          <para>Any output printed by the imported template will be ignored
+          (will not be inserted at the place of <literal>import</literal>
+          directive invocation). An imported template is executed to populate
+          its namespace with variables, and not to write to the output.</para>
 
           <para>The <literal><replaceable>path</replaceable></literal>
           parameter can be a relative path like <literal>"foo.ftl"</literal>
@@ -21641,26 +21663,34 @@ or
           directory of the template that uses the <literal>import</literal>
           directive. Absolute paths are relative to a base (often referred as
           the ''root directory of the templates'') that the programmer defines
-          when he configures FreeMarker.</para>
+          when configuring FreeMarker.</para>
 
           <para>Always use <literal>/</literal> (slash) to separate path
           components, never <literal>\</literal> (backslash). If you are
           loading templates from your local file system and it uses
-          backslashes (like under. Windows), FreeMarker will convert them
-          automatically.</para>
+          backslashes (like under Windows), FreeMarker will do the necessary
+          conversions automatically.</para>
 
           <para>Like with the <literal>include</literal> directive, <link
           linkend="ref_directive_include_acquisition">acquisition</link> and
           <link linkend="ref_directive_include_localized">localized
           lookup</link> may be used for resolving the path.</para>
 
-          <para><phrase role="forProgrammers">Note, that it is possible to
+          <para><phrase role="forProgrammers">Note that it's possible to
           automatically do the commonly used imports for all templates, with
-          the "auto imports" setting of
+          the "auto imports" setting of <literal>Configuration</literal>.
+          Because templates may not use all the automatically imported
+          namespaces, it's also possible to make imports lazy (on demand),
+          with the <quote>lazy auto imports</quote> setting of
           <literal>Configuration</literal>.</phrase></para>
 
           <para>If you are new to namespaces, you should read: <xref
           linkend="dgui_misc_namespace"/></para>
+
+          <para>In case you are not sure if you should use the
+          <literal>import</literal>, or the somewhat similar
+          <literal>include</literal> directive, <link
+          linkend="topic.import_vs_include">then see this</link>.</para>
         </section>
       </section>
 
@@ -21722,6 +21752,16 @@ or
 
         <section>
           <title>Description</title>
+
+          <note>
+            <para><emphasis>Using <literal>include</literal> directive is
+            almost always a bad practice</emphasis>, and you should consider
+            using <link linkend="ref.directive.import">the
+            <literal>import</literal> directive</link> instead! Even if using
+            <literal>import</literal> adds some verbosity, on the long run it
+            can pay off. See <link linkend="topic.import_vs_include">the
+            reasons here...</link></para>
+          </note>
 
           <para>You can use it to insert another FreeMarker template file
           (specified by the <literal><replaceable>path</replaceable></literal>
@@ -22052,6 +22092,73 @@ All rights reserved.</emphasis></programlisting>
 
               <listitem>
                 <para><literal>/footer.ftl</literal></para>
+              </listitem>
+            </itemizedlist>
+          </section>
+
+          <section xml:id="topic.import_vs_include">
+            <title>Why <literal>import</literal> should be used instead of
+            <literal>include</literal></title>
+
+            <para>Generally, using <link linkend="ref.directive.import">the
+            <literal>import</literal> directive</link> is a better practice
+            than using <literal>include</literal>.</para>
+
+            <para>At first glance, import is only fitting if you have a
+            collection of commonly used macros, functions, and other
+            variables, which you put into a template for reuse. But, people
+            often use <literal>include</literal> to insert a common fragment
+            of output (e.g. page footer) into multiple templates. The
+            <literal>import</literal> directive has no output, so it's clearly
+            not a direct replacement. But, it's usually a better practice to
+            <link linkend="dgui_misc_userdefdir">put those output fragments
+            into macros</link>, as macros can have parameters, or even nested
+            content. If you do that, you have a collection of macros in a
+            template, that you can <literal>import</literal>.</para>
+
+            <para>So if you have collection of macros, functions and other
+            variables in a template, this is why <literal>import</literal> is
+            generally a better choice:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Imported templates are processed only when first
+                requested. To compare with <literal>include</literal>, let's
+                say template <literal>top.ftl</literal> includes
+                <literal>commons.ftl</literal>, and
+                <literal>tables.ftl</literal>. If
+                <literal>tables.ftl</literal> also includes
+                <literal>commons.ftl</literal>, then now
+                <literal>commons.ftl</literal> will be processed twice. On the
+                other hand, importing <literal>commons.ftl</literal> for the
+                second time just gives back the namespace that was already
+                initialized during the first import.</para>
+              </listitem>
+
+              <listitem>
+                <para>With imports, each imported template has its own
+                namespace. As they don't just drop everything into a common
+                shared namespace, it's easier to see in templates where a
+                referred variable, or macro/function is coming from.
+                Accidental name clashes are also avoided.</para>
+              </listitem>
+
+              <listitem>
+                <para>If you have several collections of useful
+                macros/functions/constants (say,
+                <literal>commons.ftl</literal>, <literal>form.ftl</literal>,
+                <literal>report.ftl</literal>, etc.), and you decide to
+                auto-import them, but a top-level template usually only uses
+                some of them, you can configure auto-imports to be lazy (i.e.,
+                they on happen when something in their namespace is actually
+                accessed). This is not possible with auto-includes.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>import</literal> never prints to the output,
+                while <literal>include</literal> might prints unwanted output,
+                like some whitespace that wasn't removed by the automatic
+                whitespace removal.</para>
               </listitem>
             </itemizedlist>
           </section>
