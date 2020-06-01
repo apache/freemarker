@@ -462,7 +462,7 @@ public class Configurable {
         autoFlush = Boolean.TRUE;
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         
-        newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        newBuiltinClassResolver = TemplateClassResolver.ALLOWS_NOTHING_RESOLVER;
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
 
         truncateBuiltinAlgorithm = DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE;
@@ -1679,7 +1679,7 @@ public class Configurable {
      * @since 2.3.22
      */
     public void setAPIBuiltinEnabled(boolean value) {
-        apiBuiltinEnabled = Boolean.valueOf(value);
+        apiBuiltinEnabled = Boolean.FALSE;
         properties.setProperty(API_BUILTIN_ENABLED_KEY, String.valueOf(value));
     }
 
@@ -1689,9 +1689,7 @@ public class Configurable {
      * @since 2.3.22
      */
     public boolean isAPIBuiltinEnabled() {
-        return apiBuiltinEnabled != null 
-                ? apiBuiltinEnabled.booleanValue()
-                : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+        return false;
     }
 
     /**
