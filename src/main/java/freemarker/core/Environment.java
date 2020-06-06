@@ -1771,7 +1771,7 @@ public final class Environment extends Configurable {
      *            The blamed expression if an error occurs; only used for error messages.
      */
     String formatTemporalToPlainText(TemplateTemporalModel ttm, String formatString, Expression blamedDateSourceExp) throws TemplateException, TemplateValueFormatException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(formatString);
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(ttm.getAsTemporal().getClass(), formatString, true);
         try {
             return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
         } catch (TemplateValueFormatException e) {
@@ -1780,7 +1780,7 @@ public final class Environment extends Configurable {
     }
 
     String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression tdmSourceExpr) throws TemplateException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(configuration.getTemporalFormat(ttm.getAsTemporal().getClass()));
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(ttm.getAsTemporal().getClass());
         try {
             return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
         } catch (TemplateValueFormatException e) {
@@ -2219,11 +2219,13 @@ public final class Environment extends Configurable {
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
     }
 
-    TemplateTemporalFormat getTemplateTemporalFormat(Temporal temporal) {
-        return new TemplateTemporalFormat(getTemporalFormat(temporal.getClass()), getLocale(), getTimeZone());
+    TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass) {
+        // TODO [FREEMARKER-35] Temporal class keyed cache, invalidated by temporalFormat (instantFormat, localDateFormat, etc.), locale and timeZone change.
+        return getTemplateTemporalFormat(temporalClass, getTemporalFormat(temporalClass), true);
     }
 
-    private TemplateTemporalFormat getTemplateTemporalFormat(String format) {
+    private TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass, String format, boolean cache) {
+        // TODO [FREEMARKER-35] format keyed cache, invalidated by local and timeZone change.
         return new TemplateTemporalFormat(format, getLocale(), getTimeZone());
     }
 

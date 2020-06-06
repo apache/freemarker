@@ -18,9 +18,13 @@
  */
 package freemarker.template.utility;
 
+import java.lang.reflect.Modifier;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
@@ -34,6 +38,7 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class TemporalUtil {
 	private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile("^(short|medium|long|full)(_(short|medium|long|full))?$");
@@ -136,7 +141,6 @@ public class TemporalUtil {
 		if (temporal instanceof Instant)
 			temporal = ((Instant) temporal).atZone(timeZone == null ? ZoneOffset.UTC : timeZone.toZoneId());
 
-		String[] formatSplt = format.split("_");
 		DateTimeFormatter dtf;
 		if ("xs".equals(format))
 			dtf = getXSFormatter(temporal);
@@ -145,6 +149,7 @@ public class TemporalUtil {
 		else if (FORMAT_STYLE_PATTERN.matcher(format).matches()) {
 			boolean isYear = temporal instanceof Year;
 			boolean isYearMonth = temporal instanceof YearMonth;
+			String[] formatSplt = format.split("_");
 			if (isYear || isYearMonth) {
 				String reducedPattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.valueOf(formatSplt[0].toUpperCase()), null, IsoChronology.INSTANCE, locale);
 				if (isYear)
@@ -188,4 +193,5 @@ public class TemporalUtil {
 		}
 		return newPattern.toString();
 	}
+
 }

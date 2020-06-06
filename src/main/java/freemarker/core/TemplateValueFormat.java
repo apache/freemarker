@@ -26,7 +26,8 @@ package freemarker.core;
 public abstract class TemplateValueFormat {
 
     /**
-     * Meant to be used in error messages to tell what format the parsed string didn't fit.
+     * Meant to be used in error messages to tell what format the parsed string didn't fit, or rarely, what format the
+     * value to format wasn't compatible with.
      */
     public abstract String getDescription();
     

@@ -52,7 +52,9 @@ public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFac
      *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
-     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}. The
+     *            result shouldn't depend on setting values in the {@link Environment}, as changing other setting
+     *            will not necessarily invalidate the result.
      *            
      * @throws TemplateValueFormatException
      *             if any problem occurs while parsing/getting the format. Notable subclasses:

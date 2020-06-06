@@ -1404,6 +1404,20 @@ public class Configurable {
         return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
     }
 
+    /**
+     * Gets the temporal format string for a given {@link Temporal} subclass.
+     *
+     * @param temporalClass The class of the object to format. Can't be {@code null}. Currently, the supported classes
+     *      are these: {@link Instant}, {@link LocalDate}, {@link LocalDateTime}, {@link LocalTime},
+     *      {@link OffsetDateTime}, {@link OffsetTime}, {@link Year}, {@link YearMonth}, {@link ZonedDateTime}.
+     *
+     * @return Never {@code null}, maybe {@code ""} though.
+     *
+     * @throws NullPointerException If {@link temporalClass} was {@code null}
+     * @throws IllegalArgumentException If {@link temporalClass} was not a supported {@link Temporal} subclass.
+     *
+     * @since 2.3.31
+     */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
         if (temporalClass == Instant.class) {
             return getInstantFormat();
@@ -1417,14 +1431,20 @@ public class Configurable {
             return getOffsetDateTimeFormat();
         } else if (temporalClass == OffsetTime.class) {
             return getOffsetTimeFormat();
+        } else if (temporalClass == ZonedDateTime.class) {
+            return getZonedDateTimeFormat();
         } else if (temporalClass == Year.class) {
             return getYearFormat();
         } else if (temporalClass == YearMonth.class) {
             return getYearMonthFormat();
-        } else if (temporalClass == ZonedDateTime.class) {
-            return getZonedDateTimeFormat();
         } else {
-            return "";
+            Class<? extends Temporal> normTemporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+            if (normTemporalClass == temporalClass) {
+                throw new IllegalArgumentException("There's no temporal format seting for this class: "
+                        + temporalClass.getName());
+            } else {
+                return getTemporalFormat(normTemporalClass);
+            }
         }
     }
 

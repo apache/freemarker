@@ -31,7 +31,7 @@ import freemarker.template.TemplateModelException;
  * formats that can't be represented with Java's existing {@link DateFormat} implementations.
  * 
  * <p>
- * Implementations need not be thread-safe if the {@link TemplateNumberFormatFactory} doesn't recycle them among
+ * Implementations need not be thread-safe if the {@link TemplateDateFormatFactory} doesn't recycle them among
  * different {@link Environment}-s. As far as FreeMarker's concerned, instances are bound to a single
  * {@link Environment}, and {@link Environment}-s are thread-local objects.
  * 
@@ -87,7 +87,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * 
      * @return The interpretation of the text either as a {@link Date} or {@link TemplateDateModel}. Typically, a
      *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
-     *         meta-information thats also extracted during {@link #formatToPlainText(TemplateDateModel)} (so if you format
+     *         meta-information that's also extracted during {@link #formatToPlainText(TemplateDateModel)} (so if you format
      *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
      *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
      *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional
@@ -101,7 +101,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
     public abstract boolean isLocaleBound();
 
     /**
-     * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
+     * Tells if this formatter should be re-created if the time zone changes.
      */
     public abstract boolean isTimeZoneBound();
         

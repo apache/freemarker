@@ -53,7 +53,7 @@ public class TemplateTemporalFormat extends TemplateValueFormat {
     }
 
     /**
-     * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
+     * Tells if this formatter should be re-created if the time zone changes.
      */
     public boolean isTimeZoneBound() {
         return true;
