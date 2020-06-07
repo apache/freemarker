@@ -1637,13 +1637,7 @@ public final class Environment extends Configurable {
             final String name;
             final String params;
             {
-                int endIdx;
-                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
-                    char c = formatString.charAt(endIdx);
-                    if (c == ' ' || c == '_') {
-                        break findParamsStart;
-                    }
-                }
+                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
                 name = formatString.substring(1, endIdx);
                 params = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
@@ -1729,62 +1723,37 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * @param tdmSourceExpr
+     * @param blamedTdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDateToPlainText(TemplateDateModel tdm, Expression tdmSourceExpr,
+    String formatDateToPlainText(TemplateDateModel tdm, Expression blamedTdmSourceExpr,
             boolean useTempModelExc) throws TemplateException {
-        TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
-        
+        TemplateDateFormat format = getTemplateDateFormat(tdm, blamedTdmSourceExpr, useTempModelExc);
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
+            throw _MessageUtil.newCantFormatDateException(format, blamedTdmSourceExpr, e, useTempModelExc);
         }
     }
 
     /**
-     * @param blamedDateSourceExp
+     * @param blamedTdmSourceExp
      *            The blamed expression if an error occurs; only used for error messages.
      * @param blamedFormatterExp
      *            The blamed expression if an error occurs; only used for error messages.
      */
     String formatDateToPlainText(TemplateDateModel tdm, String formatString,
-            Expression blamedDateSourceExp, Expression blamedFormatterExp,
+            Expression blamedTdmSourceExp, Expression blamedFormatterExp,
             boolean useTempModelExc) throws TemplateException {
-        Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
-        
         TemplateDateFormat format = getTemplateDateFormat(
-                formatString, tdm.getDateType(), date.getClass(),
-                blamedDateSourceExp, blamedFormatterExp,
+                formatString, tdm.getDateType(), EvalUtil.modelToDate(tdm, blamedTdmSourceExp).getClass(),
+                blamedTdmSourceExp, blamedFormatterExp,
                 useTempModelExc);
         
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
-        }
-    }
-
-    /**
-     * @param blamedDateSourceExp
-     *            The blamed expression if an error occurs; only used for error messages.
-     */
-    String formatTemporalToPlainText(TemplateTemporalModel ttm, String formatString, Expression blamedDateSourceExp) throws TemplateException, TemplateValueFormatException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(ttm.getAsTemporal().getClass(), formatString, true);
-        try {
-            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
-        } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatDateException(ttf, blamedDateSourceExp, e, true);
-        }
-    }
-
-    String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression tdmSourceExpr) throws TemplateException {
-        TemplateTemporalFormat ttf = getTemplateTemporalFormat(ttm.getAsTemporal().getClass());
-        try {
-            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
-        } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatDateException(ttf, tdmSourceExpr, e, false);
+            throw _MessageUtil.newCantFormatDateException(format, blamedTdmSourceExp, e, useTempModelExc);
         }
     }
 
@@ -1963,7 +1932,8 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to {@link TemplateException}-s.
+     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to moer informative
+     * {@link TemplateException}-s.
      */
     TemplateDateFormat getTemplateDateFormat(
             int dateType, Class<? extends Date> dateClass, Expression blamedDateSourceExp, boolean useTempModelExc)
@@ -2003,7 +1973,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Same as {@link #getTemplateDateFormat(String, int, Class)}, but translates the exceptions to
+     * Same as {@link #getTemplateDateFormat(String, int, Class)}, but translates the exceptions to more informative
      * {@link TemplateException}-s.
      */
     TemplateDateFormat getTemplateDateFormat(
@@ -2164,13 +2134,7 @@ public final class Environment extends Configurable {
                 && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
-                int endIdx;
-                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
-                    char c = formatString.charAt(endIdx);
-                    if (c == ' ' || c == '_') {
-                        break findParamsStart;
-                    }
-                }
+                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
                 name = formatString.substring(1, endIdx);
                 formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
@@ -2219,14 +2183,192 @@ public final class Environment extends Configurable {
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
     }
 
-    TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass) {
-        // TODO [FREEMARKER-35] Temporal class keyed cache, invalidated by temporalFormat (instantFormat, localDateFormat, etc.), locale and timeZone change.
-        return getTemplateTemporalFormat(temporalClass, getTemporalFormat(temporalClass), true);
+    /**
+     * @param blamedTtmSourceExp
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    String formatTemporalToPlainText(TemplateTemporalModel ttm, String formatString,
+            Expression blamedTtmSourceExp, Expression blamedFormatterSourceExp,
+            boolean useTempModelExc)
+            throws TemplateException {
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(
+                formatString, ttm,
+                blamedTtmSourceExp, blamedFormatterSourceExp,
+                useTempModelExc);
+        try {
+            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatTemporalException(ttf, blamedTtmSourceExp, e, true);
+        }
     }
 
-    private TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass, String format, boolean cache) {
-        // TODO [FREEMARKER-35] format keyed cache, invalidated by local and timeZone change.
-        return new TemplateTemporalFormat(format, getLocale(), getTimeZone());
+    String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression blamedTtmSourceExp,
+            boolean useTempModelExc) throws TemplateException {
+        TemplateTemporalFormat ttf = getTemplateTemporalFormat(
+                ttm, blamedTtmSourceExp, useTempModelExc);
+        try {
+            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatTemporalException(ttf, blamedTtmSourceExp, e, false);
+        }
+    }
+
+    /**
+     * Convenience overload of {@link #getTemplateTemporalFormat(Class, Expression, boolean)}.
+     */
+    TemplateTemporalFormat getTemplateTemporalFormat(
+            TemplateTemporalModel ttm, Expression blamedTemporalSourceExp, boolean useTempModelExc)
+            throws TemplateException {
+        return getTemplateTemporalFormat(
+                EvalUtil.modelToTemporal(
+                        ttm, blamedTemporalSourceExp).getClass(), blamedTemporalSourceExp, useTempModelExc);
+    }
+
+    /**
+     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to moer informative
+     * {@link TemplateException}-s.
+     */
+    TemplateTemporalFormat getTemplateTemporalFormat(
+            Class<? extends Temporal> temporalClass, Expression blamedTemporalSourceExp, boolean useTempModelExc)
+            throws TemplateException {
+        try {
+            return getTemplateTemporalFormat(temporalClass);
+        } catch (TemplateValueFormatException e) {
+            String settingName;
+            String settingValue;
+            try {
+                settingName = _CoreTemporalUtils.temporalClassToFormatSettingName(temporalClass);
+                settingValue = getTemporalFormat(temporalClass);
+            } catch (IllegalArgumentException e2) {
+                settingName = "???";
+                settingValue = "???";
+            }
+
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "The value of the \"", settingName,
+                    "\" FreeMarker configuration setting is a malformed temporal format string: ",
+                    new _DelayedJQuote(settingValue), ". Reason given: ",
+                    e.getMessage());
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+        }
+    }
+
+    TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass)
+            throws TemplateValueFormatException {
+        // TODO [FREEMARKER-35] Temporal class keyed cache, invalidated by temporalFormat (instantFormat, localDateFormat, etc.), locale, and timeZone change.
+        return getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+    }
+
+    /**
+     * Convenience overload of {@link #getTemplateTemporalFormat(String, Class, Expression, Expression, boolean)}.
+     */
+    TemplateTemporalFormat getTemplateTemporalFormat(
+            String formatString, TemplateTemporalModel ttm,
+            Expression blamedTemporalSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc)
+            throws TemplateException {
+        return getTemplateTemporalFormat(
+                formatString, EvalUtil.modelToTemporal(ttm, blamedFormatterExp).getClass(),
+                blamedTemporalSourceExp, blamedFormatterExp,
+                useTempModelExc);
+    }
+
+    /**
+     * Same as {@link #getTemplateTemporalFormat(String, Class)}, but translates the exceptions to more informative
+     * {@link TemplateException}-s.
+     */
+    TemplateTemporalFormat getTemplateTemporalFormat(
+            String formatString, Class<? extends Temporal> temporalClass,
+            Expression blamedTemporalSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc)
+            throws TemplateException {
+        try {
+            return getTemplateTemporalFormat(formatString, temporalClass);
+        } catch (TemplateValueFormatException e) {
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "Can't create temporal format based on format string ",
+                    new _DelayedJQuote(formatString), ". Reason given: ",
+                    e.getMessage())
+                    .blame(blamedFormatterExp);
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+        }
+    }
+
+    private TemplateTemporalFormat getTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass)
+            throws TemplateValueFormatException {
+        // TODO [FREEMARKER-35] format keyed cache, invalidated by locale, and timeZone change.
+        return getTemplateTemporalFormatWithoutCache(formatString, temporalClass, getLocale(), getTimeZone());
+    }
+
+    /**
+     * Returns the {@link TemplateTemporalFormat} for the given parameters without using the {@link Environment}-level
+     * cache. Of course, the {@link TemplateTemporalFormatFactory} involved might still uses its own cache, which can be
+     * global (class-loader-level) or {@link Environment}-level.
+     *
+     * @param formatString
+     *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
+     * @param dateType
+     *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
+     * @param zonelessInput
+     *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
+     */
+    private TemplateTemporalFormat getTemplateTemporalFormatWithoutCache(
+            String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
+            throws TemplateValueFormatException {
+        final int formatStringLen = formatString.length();
+        final String formatParams;
+
+        TemplateTemporalFormatFactory formatFactory;
+        char firstChar = formatStringLen != 0 ? formatString.charAt(0) : 0;
+
+        if (firstChar == 'x'
+                && formatStringLen > 1
+                && formatString.charAt(1) == 's') {
+            formatFactory = XSTemplateTemporalFormatFactory.INSTANCE;
+            formatParams = formatString.substring(2);
+        } else if (firstChar == 'i'
+                && formatStringLen > 2
+                && formatString.charAt(1) == 's'
+                && formatString.charAt(2) == 'o') {
+            formatFactory = ISOTemplateTemporalFormatFactory.INSTANCE;
+            formatParams = formatString.substring(3);
+        } else if (firstChar == '@'
+                && formatStringLen > 1
+                && Character.isLetter(formatString.charAt(1))) {
+            final String name;
+            {
+                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
+                name = formatString.substring(1, endIdx);
+                formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
+            }
+
+            formatFactory = getCustomTemporalFormat(name);
+            if (formatFactory == null) {
+                throw new UndefinedCustomFormatException(
+                        "No custom temporal format was defined with name " + StringUtil.jQuote(name));
+            }
+        } else if (formatStringLen == 0) {
+            // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did
+            formatParams = formatString;
+            formatFactory = ToStringTemplateTemporalFormatFactory.INSTANCE;
+        } else {
+            formatParams = formatString;
+            formatFactory = JavaTemplateTemporalFormatFactory.INSTANCE;
+        }
+
+        return formatFactory.get(formatParams, temporalClass, locale, timeZone, this);
+    }
+
+    private static int getCustomFormatStringNameEnd(String formatString, int formatStringLen) {
+        int endIdx;
+        findParamsStart:
+        for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
+            char c = formatString.charAt(endIdx);
+            if (c == ' ' || c == '_') {
+                break findParamsStart;
+            }
+        }
+        return endIdx;
     }
 
     /**

@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -365,6 +366,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("yearMonth", YearMonth.from(ldt));
             ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
             dataModel.put("offsetDateTime", zdt.toOffsetDateTime());
+            dataModel.put("offsetTime", zdt.toOffsetDateTime().toOffsetTime());
             dataModel.put("zonedDateTime", zdt);
         } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));

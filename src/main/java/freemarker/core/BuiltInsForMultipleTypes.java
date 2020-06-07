@@ -606,7 +606,6 @@ class BuiltInsForMultipleTypes {
             }
         }
     
-
         private class TemporalFormatter implements TemplateScalarModel, TemplateHashModel, TemplateMethodModel {
             private final TemplateTemporalModel temporalModel;
             private final Environment env;
@@ -616,7 +615,7 @@ class BuiltInsForMultipleTypes {
             TemporalFormatter(TemplateTemporalModel temporalModel, Environment env) throws TemplateException {
                 this.temporalModel = temporalModel;
                 this.env = env;
-                this.defaultFormat = env.getTemplateTemporalFormat(temporalModel.getAsTemporal().getClass());
+                this.defaultFormat = env.getTemplateTemporalFormat(temporalModel, target, false);
             }
 
             @Override
@@ -633,12 +632,10 @@ class BuiltInsForMultipleTypes {
             private TemplateModel formatWith(String key)
                     throws TemplateModelException {
                 try {
-                    return new SimpleScalar(env.formatTemporalToPlainText(temporalModel, key, target));
+                    return new SimpleScalar(env.formatTemporalToPlainText(temporalModel, key, target, stringBI.this, true));
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure:
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e);
-                } catch (TemplateValueFormatException e) {
-                    throw new _TemplateModelException("Failed to format value", e);
                 }
             }
 
@@ -652,7 +649,7 @@ class BuiltInsForMultipleTypes {
                         cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.format(temporalModel));
                     } catch (TemplateValueFormatException e) {
                         try {
-                            throw _MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
+                            throw _MessageUtil.newCantFormatTemporalException(defaultFormat, target, e, true);
                         } catch (TemplateException e2) {
                             // `e` should always be a TemplateModelException here, but to be sure:
                             throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2);
@@ -688,7 +685,7 @@ class BuiltInsForMultipleTypes {
                 this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
                         ? null  // Lazy unknown type error in getAsString()
                         : env.getTemplateDateFormat(
-                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
+                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, false);
             }
     
             @Override

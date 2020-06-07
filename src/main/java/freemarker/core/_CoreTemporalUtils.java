@@ -28,11 +28,14 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import freemarker.template.Configuration;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -85,15 +88,44 @@ public class _CoreTemporalUtils {
                 return OffsetDateTime.class;
             } else if (OffsetTime.class.isAssignableFrom(temporalClass)) {
                 return OffsetTime.class;
-            } else if (Year.class.isAssignableFrom(temporalClass)) {
-                return Year.class;
-            } else if (YearMonth.class.isAssignableFrom(temporalClass)) {
-                return YearMonth.class;
             } else if (ZonedDateTime.class.isAssignableFrom(temporalClass)) {
                 return ZonedDateTime.class;
+            } else if (YearMonth.class.isAssignableFrom(temporalClass)) {
+                return YearMonth.class;
+            } else if (Year.class.isAssignableFrom(temporalClass)) {
+                return Year.class;
             } else {
                 return temporalClass;
             }
         }
     }
+
+    /**
+     * @throws IllegalArgumentException If {@link temporalClass} is not a supported {@link Temporal} subclass.
+     */
+    public static String temporalClassToFormatSettingName(Class<? extends Temporal> temporalClass) {
+        temporalClass = normalizeSupportedTemporalClass(temporalClass);
+        if (temporalClass == Instant.class) {
+            return Configuration.INSTANT_FORMAT_KEY;
+        } else if (temporalClass == LocalDate.class) {
+            return Configuration.LOCAL_DATE_FORMAT_KEY;
+        } else if (temporalClass == LocalDateTime.class) {
+            return Configuration.LOCAL_DATE_TIME_FORMAT_KEY;
+        } else if (temporalClass == LocalTime.class) {
+            return Configuration.LOCAL_TIME_FORMAT_KEY;
+        } else if (temporalClass == OffsetDateTime.class) {
+            return Configuration.OFFSET_DATE_TIME_FORMAT_KEY;
+        } else if (temporalClass == OffsetTime.class) {
+            return Configuration.OFFSET_TIME_FORMAT_KEY;
+        } else if (temporalClass == ZonedDateTime.class) {
+            return Configuration.ZONED_DATE_TIME_FORMAT_KEY;
+        } else if (temporalClass == YearMonth.class) {
+            return Configuration.YEAR_MONTH_FORMAT_KEY;
+        } else if (temporalClass == Year.class) {
+            return Configuration.YEAR_FORMAT_KEY;
+        } else {
+            throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
+        }
+    }
+    
 }

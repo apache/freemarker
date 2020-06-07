@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -1414,11 +1415,12 @@ public class Configurable {
      * @return Never {@code null}, maybe {@code ""} though.
      *
      * @throws NullPointerException If {@link temporalClass} was {@code null}
-     * @throws IllegalArgumentException If {@link temporalClass} was not a supported {@link Temporal} subclass.
+     * @throws IllegalArgumentException If {@link temporalClass} is not a supported {@link Temporal} subclass.
      *
      * @since 2.3.31
      */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
+        Objects.requireNonNull(temporalClass);
         if (temporalClass == Instant.class) {
             return getInstantFormat();
         } else if (temporalClass == LocalDate.class) {
@@ -1524,7 +1526,17 @@ public class Configurable {
         }
         return parent != null ? parent.getCustomDateFormat(name) : null;
     }
-    
+
+    /**
+     * Gets the custom name format registered for the name.
+     *
+     * @since 2.3.31
+     */
+    public TemplateTemporalFormatFactory getCustomTemporalFormat(String name) {
+        // TODO [FREEMARKER-35]
+        return null;
+    }
+
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:

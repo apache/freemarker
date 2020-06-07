@@ -409,11 +409,11 @@ class EvalUtil {
             }
         } else if (tm instanceof TemplateTemporalModel) {
             TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal().getClass());
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal().getClass(), exp, false);
             try {
                 return assertFormatResultNotNull(format.format(ttm));
             } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatTemporalException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
@@ -424,7 +424,7 @@ class EvalUtil {
 
     /**
      * Like {@link #coerceModelToStringOrMarkup(TemplateModel, Expression, String, Environment)}, but gives error
-     * if the result is markup. This is what you normally use where markup results can't be used.
+     * if the result is markup. This is what you normally used where markup results can't be used.
      *
      * @param seqTip
      *            Tip to display if the value type is not coercable, but it's sequence or collection.
@@ -452,11 +452,11 @@ class EvalUtil {
             }
         } else if (tm instanceof TemplateTemporalModel) {
             TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal().getClass());
+            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm, exp, false);
             try {
                 return ensureFormatResultString(format.format(ttm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatTemporalException(format, exp, e, false);
             }
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
@@ -480,7 +480,7 @@ class EvalUtil {
         } else if (tm instanceof TemplateDateModel) {
             return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp, false));
         } else if (tm instanceof TemplateTemporalModel) {
-            return assertFormatResultNotNull(env.formatTemporalToPlainText((TemplateTemporalModel) tm, exp));
+            return assertFormatResultNotNull(env.formatTemporalToPlainText((TemplateTemporalModel) tm, exp, false));
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }

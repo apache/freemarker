@@ -322,10 +322,10 @@ public class _MessageUtil {
                 : new _MiscTemplateException(e, null, desc);
     }
     
-    public static TemplateException newCantFormatDateException(TemplateTemporalFormat format, Expression dataSrcExp,
+    public static TemplateException newCantFormatTemporalException(TemplateTemporalFormat format, Expression dataSrcExp,
             TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                "Failed to format temporal value with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp);
         return useTempModelExc

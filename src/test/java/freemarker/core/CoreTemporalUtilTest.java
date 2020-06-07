@@ -21,15 +21,16 @@ package freemarker.core;
 
 import static org.junit.Assert.*;
 
-import java.time.Instant;
 import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.Temporal;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
 import freemarker.template.Configuration;
 
-public class TemporalConfigurableTest {
+public class CoreTemporalUtilTest {
 
     @Test
     public void testSupportedTemporalClassAreFinal() {
@@ -42,12 +43,31 @@ public class TemporalConfigurableTest {
     @Test
     public void testGetTemporalFormat() {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
+
         for (Class<? extends Temporal> supportedTemporalClass : _CoreTemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
             assertNotNull(cfg.getTemporalFormat(supportedTemporalClass));
         }
 
         try {
-            assertNotNull(cfg.getTemporalFormat(ChronoLocalDate.class));
+            cfg.getTemporalFormat(ChronoLocalDate.class);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testTemporalClassToFormatSettingName() {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
+
+        Set<String> uniqueSettingNames = new HashSet<>();
+        for (Class<? extends Temporal> supportedTemporalClass : _CoreTemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
+            assertTrue(uniqueSettingNames.add(_CoreTemporalUtils.temporalClassToFormatSettingName(supportedTemporalClass)));
+        }
+        assertTrue(uniqueSettingNames.stream().allMatch(it -> cfg.getSettingNames(false).contains(it)));
+
+        try {
+            _CoreTemporalUtils.temporalClassToFormatSettingName(ChronoLocalDate.class);
             fail();
         } catch (IllegalArgumentException e) {
             // Expected
