@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -456,6 +457,87 @@ public final class _MethodUtil {
             return null;
         }
         return getInheritableFieldAnnotation(superClass, fieldName, false, annotationClass);
+    }
+
+    public static Method getMethodWithClosestNonSubReturnType(
+            Class<?> returnType, Collection<Method> methods) {
+        // Exact match:
+        for (Method method : methods) {
+            if (method.getReturnType() == returnType) {
+                return method;
+            }
+        }
+
+        if (returnType == Object.class || returnType.isPrimitive()) {
+            // We can't go wider than these types, so we give up. Note that void is primitive.
+            return null;
+        }
+
+        // Super-class match, which we prefer over Interface match, except if the match is just Object:
+        Class<?> superClass = returnType.getSuperclass();
+        while (superClass != null && superClass != Object.class) {
+            for (Method method : methods) {
+                if (method.getReturnType() == superClass) {
+                    return method;
+                }
+            }
+            superClass = superClass.getSuperclass();
+        }
+
+        // Interface match:
+        Method result = getMethodWithClosestNonSubInterfaceReturnType(returnType, methods);
+        if (result != null) {
+            return result;
+        }
+
+        // As the returnType is non-primitive, Object return type will do, as a last resort:
+        for (Method method : methods) {
+            if (method.getReturnType() == Object.class) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
+    private static Method getMethodWithClosestNonSubInterfaceReturnType(
+            Class<?> returnType, Collection<Method> methods) {
+        HashSet<Class<?>> nullResultReturnTypeInterfaces = new HashSet<>();
+        do {
+            Method result
+                    = getMethodWithClosestNonSubInterfaceReturnType(returnType, methods, nullResultReturnTypeInterfaces);
+            if (result != null) {
+                return result;
+            }
+            // As Class.getInterfaces() doesn't return the inherited interfaces, we have to do this.
+            returnType = returnType.getSuperclass();
+        } while (returnType != null);
+        return null;
+    }
+
+    private static Method getMethodWithClosestNonSubInterfaceReturnType(
+            Class<?> returnType, Collection<Method> methods, Set<Class<?>> nullResultReturnTypeInterfaces) {
+        boolean returnTypeIsInterface = returnType.isInterface();
+        if (returnTypeIsInterface) {
+            if (nullResultReturnTypeInterfaces.contains(returnType)) {
+                return null;
+            }
+            for (Method method : methods) {
+                if (method.getReturnType() == returnType) {
+                    return method;
+                }
+            }
+        }
+        for (Class<?> subInterface : returnType.getInterfaces()) {
+            Method result = getMethodWithClosestNonSubInterfaceReturnType(subInterface, methods, nullResultReturnTypeInterfaces);
+            if (result != null) {
+                return result;
+            }
+        }
+        if (returnTypeIsInterface) {
+            nullResultReturnTypeInterfaces.add(returnType);
+        }
+        return null;
     }
 
 }
