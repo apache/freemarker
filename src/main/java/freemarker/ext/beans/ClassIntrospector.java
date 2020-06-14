@@ -775,25 +775,27 @@ class ClassIntrospector {
                 Method[] methods = clazz.getMethods();
                 for (int i = 0; i < methods.length; i++) {
                     Method method = methods[i];
-                    ExecutableMemberSignature sig = new ExecutableMemberSignature(method);
-                    // Contrary to intuition, a class can actually have several
-                    // different methods with same signature *but* different
-                    // return types. These can't be constructed using Java the
-                    // language, as this is illegal on source code level, but
-                    // the compiler can emit synthetic methods as part of
-                    // generic type reification that will have same signature
-                    // yet different return type than an existing explicitly
-                    // declared method. Consider:
-                    // public interface I<T> { T m(); }
-                    // public class C implements I<Integer> { Integer m() { return 42; } }
-                    // C.class will have both "Object m()" and "Integer m()" methods.
-                    List<Method> methodList = accessibles.get(sig);
-                    if (methodList == null) {
-                     // TODO Collection.singletonList is more efficient, though read only.
-                        methodList = new LinkedList<>();
-                        accessibles.put(sig, methodList);
+                    if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+                        ExecutableMemberSignature sig = new ExecutableMemberSignature(method);
+                        // Contrary to intuition, a class can actually have several
+                        // different methods with same signature *but* different
+                        // return types. These can't be constructed using Java the
+                        // language, as this is illegal on source code level, but
+                        // the compiler can emit synthetic methods as part of
+                        // generic type reification that will have same signature
+                        // yet different return type than an existing explicitly
+                        // declared method. Consider:
+                        // public interface I<T> { T m(); }
+                        // public class C implements I<Integer> { Integer m() { return 42; } }
+                        // C.class will have both "Object m()" and "Integer m()" methods.
+                        List<Method> methodList = accessibles.get(sig);
+                        if (methodList == null) {
+                            // TODO Collection.singletonList is more efficient, though read only.
+                            methodList = new LinkedList<>();
+                            accessibles.put(sig, methodList);
+                        }
+                        methodList.add(method);
                     }
-                    methodList.add(method);
                 }
                 return;
             } catch (SecurityException e) {

@@ -29329,6 +29329,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.beans.Introspector</literal> behavior has changed
               with Java 9.)</para>
             </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-133">FREEMARKER-133</link>:
+              Fixed bug where FreeMarker sometimes tries to expose public
+              methods that are defined or overridden in a non-public class, if
+              the non-public class was then extended by a public class.
+              Calling such method just ends up with
+              <literal>IllegalAccessException</literal>, but they shouldn't be
+              exposed on the first place. Furthermore, such a wrong method
+              sometimes replaces the good version of the method, which would
+              be callable. When this glitch happens is somewhat unpredictable,
+              as it also depends on what methods
+              <literal>java.beans.Introspector</literal> exposes (which at
+              very least can depend on the Java version), and in what
+              order.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
