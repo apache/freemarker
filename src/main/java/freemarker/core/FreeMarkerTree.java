@@ -19,13 +19,8 @@
 
 package freemarker.core;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 
 import freemarker.template.Template;
 
@@ -36,26 +31,13 @@ import freemarker.template.Template;
  */
 @Deprecated
 public class FreeMarkerTree extends JTree {
-    private static final long serialVersionUID = 1L;
 
-    private final Map nodeMap = new HashMap();
-    
     public FreeMarkerTree(Template template) {
-        setTemplate(template);
-    }
-
-    private TreeNode getNode(TemplateElement element) {
-        TreeNode n = (TreeNode) nodeMap.get(element);
-        if (n != null) {
-            return n;
-        }
-        n = new TemplateElementTreeNode(element);
-        nodeMap.put(element, n);
-        return n;
+        super(template.getRootTreeNode());
     }
 
     public void setTemplate(Template template) {
-        this.setModel(new DefaultTreeModel(getNode(template.getRootTreeNode())));
+        this.setModel(new DefaultTreeModel(template.getRootTreeNode()));
         this.invalidate();
     }
 
@@ -63,64 +45,10 @@ public class FreeMarkerTree extends JTree {
     public String convertValueToText(Object value, boolean selected,
                                      boolean expanded, boolean leaf, int row,
                                      boolean hasFocus) {
-        if (value instanceof TemplateElementTreeNode) {
-            return ((TemplateElementTreeNode) value).element.getDescription();
+        if (value instanceof TemplateElement) {
+            return ((TemplateElement) value).getDescription();
         }
         return value.toString();
     }
     
-    private class TemplateElementTreeNode implements TreeNode {
-        private final TemplateElement element;
-        
-        TemplateElementTreeNode(TemplateElement element) {
-            this.element = element;
-        }
-
-        @Override
-        public Enumeration children() {
-            final Enumeration e = element.children();
-            return new Enumeration() {
-                @Override
-                public boolean hasMoreElements() {
-                    return e.hasMoreElements();
-                }
-                @Override
-                public Object nextElement() {
-                    return getNode((TemplateElement) e.nextElement());
-                }
-            };
-        }
-
-        @Override
-        public boolean getAllowsChildren() {
-            return element.getAllowsChildren();
-        }
-
-        @Override
-        public TreeNode getChildAt(int childIndex) {
-            return getNode(element.getChildAt(childIndex));
-        }
-
-        @Override
-        public int getChildCount() {
-            return element.getChildCount();
-        }
-
-        @Override
-        public int getIndex(TreeNode node) {
-            return element.getIndex(((TemplateElementTreeNode) node).element);
-        }
-
-        @Override
-        public TreeNode getParent() {
-            return getNode(element.getParentElement());
-        }
-
-        @Override
-        public boolean isLeaf() {
-            return element.isLeaf();
-        }
-        
-        
-    }
 }
