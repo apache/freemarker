@@ -400,7 +400,41 @@ public class Configurable {
     private Boolean lazyImports;
     private Boolean lazyAutoImports;
     private boolean lazyAutoImportsSet;
+
+    private static TemplateClassResolver defaultNewBuiltinClassResolver;
+    /**
+     * set a default TemplateClassResolver for the default constructor of Configuration. 
+     * @param newBuiltinClassResolver  a custom TemplateClassResolver or existing ALLOWS_NOTHING_RESOLVER, SAFER_RESOLVER etc.  
+     */
+    public static void setDefaultNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
+
+        NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
+        defaultNewBuiltinClassResolver = newBuiltinClassResolver;
+    }
+
+    private static Boolean defaultApiBuiltinEnabled;
+    /**
+     * set the default APIBuiltEnabled value for the default constructor of Configuration.
+     * @param value a true or false value
+     */
+    public static void setDefaultAPIBuiltinEnabled(boolean value) {
+        defaultApiBuiltinEnabled = Boolean.valueOf(value);
+    }
     
+    private static boolean externalCommandsAllowed=true;
+
+    public static boolean isExternalCommandsAllowed() {
+        return externalCommandsAllowed;
+    }
+
+    /**
+     * Disable or enable the code to allow to execute external commands
+     * @param externalCommandsAllowed
+     */
+    public static void setExternalCommandsAllowed(boolean externalCommandsAllowed) {
+        Configurable.externalCommandsAllowed = externalCommandsAllowed;
+    }
+
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
      * 
@@ -463,6 +497,9 @@ public class Configurable {
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        if(defaultNewBuiltinClassResolver!=null){
+            newBuiltinClassResolver=defaultNewBuiltinClassResolver;
+        }
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
 
         truncateBuiltinAlgorithm = DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE;
@@ -471,6 +508,9 @@ public class Configurable {
         properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
         
         apiBuiltinEnabled = Boolean.FALSE;
+        if(defaultApiBuiltinEnabled!=null){
+            apiBuiltinEnabled=defaultApiBuiltinEnabled;
+        }
         properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
         
         logTemplateExceptions = Boolean.valueOf(

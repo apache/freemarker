@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 
+import freemarker.core.Configurable;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -71,6 +72,9 @@ public class Execute implements freemarker.template.TemplateMethodModel {
      */
     @Override
     public Object exec (List arguments) throws TemplateModelException {
+        if(!Configurable.isExternalCommandsAllowed()){
+            throw new TemplateModelException("Execute commands has been disabled.");
+        }
         String aExecute;
         StringBuilder    aOutputBuffer = new StringBuilder();
 
