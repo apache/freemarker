@@ -27,7 +27,7 @@ import org.junit.Test;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
-public class Java9InstrospectorBugWorkaround extends TemplateTest {
+public class Java9InstrospectorBugWorkaroundTest extends TemplateTest {
 
     @Test
     public void test() throws IOException, TemplateException {

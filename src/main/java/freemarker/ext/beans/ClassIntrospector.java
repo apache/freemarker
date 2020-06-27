@@ -819,21 +819,21 @@ class ClassIntrospector {
     // This is needed as java.bean.Introspector sometimes gives back a method that's actually not accessible,
     // as it's an override of an accessible method in a non-public subclass. While that's still a public method, calling
     // it directly via reflection will throw java.lang.IllegalAccessException, and we are supposed to call the overidden
-    // accessible method instead. Like, we migth get two PropertyDescriptor-s for the same property name, and only one
+    // accessible method instead. Like, we might get two PropertyDescriptor-s for the same property name, and only one
     // will have a reader method that we can actually call. So we have to find that method here.
-    // Furthermore, the return type of the inaccisable method is possibly different (more specific) than the return type
-    // of the overidden accessible method. Also Introspector behavior changed with Java 9, as earlier in such case the
-    // Introspector returned all variants of the method (so the accessible one was amongst them at least), while in
-    // Java 9 it apparently always returns one variant only, but that's sometimes (not sure if it's predictable) the
-    // inaccessbile one.
+    // Furthermore, the return type of the inaccessible method is possibly different (more specific) than the return
+    // type of the overridden accessible method. Also Introspector behavior changed with Java 9, as earlier in such
+    // case the Introspector returned all variants of the method (so the accessible one was amongst them at least),
+    // while in Java 9 it apparently always returns one variant only, but that's sometimes (not sure if it's
+    // predictable) the inaccessible one.
     private static Method getMatchingAccessibleMethod(Method m, Map<ExecutableMemberSignature, List<Method>> accessibles) {
         if (m == null) {
             return null;
         }
         List<Method> ams = accessibles.get(new ExecutableMemberSignature(m));
-        // Certainly we could return any of the accessbiles, as Java reflection will call the correct override of the
+        // Certainly we could return any of the accessibles, as Java reflection will call the correct override of the
         // method anyway. There's an ambiguity when the return type is "overloaded", but in practice it probably doesn't
-        // matter which variant we call. Though, technically, they could do totaly different things. So, to avoid any
+        // matter which variant we call. Though, technically, they could do totally different things. So, to avoid any
         // corner cases that cause problems after an upgrade, we make an effort to give same result as before 2.3.31.
         return ams != null ? _MethodUtil.getMethodWithClosestNonSubReturnType(m.getReturnType(), ams) : null;
     }
