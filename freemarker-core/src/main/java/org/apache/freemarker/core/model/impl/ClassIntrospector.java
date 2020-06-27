@@ -775,6 +775,16 @@ class ClassIntrospector {
         }
     }
 
+    // This is needed as java.bean.Introspector sometimes gives back a method that's actually not accessible,
+    // as it's an override of an accessible method in a non-public subclass. While that's still a public method, calling
+    // it directly via reflection will throw java.lang.IllegalAccessException, and we are supposed to call the overidden
+    // accessible method instead. Like, we might get two PropertyDescriptor-s for the same property name, and only one
+    // will have a reader method that we can actually call. So we have to find that method here.
+    // Furthermore, the return type of the inaccessible method is possibly different (more specific) than the return
+    // type of the overridden accessible method. Also Introspector behavior changed with Java 9, as earlier in such
+    // case the Introspector returned all variants of the method (so the accessible one was amongst them at least),
+    // while in Java 9 it apparently always returns one variant only, but that's sometimes (not sure if it's
+    // predictable) the inaccessible one.
     private static Method getMatchingAccessibleMethod(Method m, Map<ExecutableMemberSignature, List<Method>> accessibles) {
         if (m == null) {
             return null;
@@ -784,8 +794,26 @@ class ClassIntrospector {
         if (ams == null) {
             return null;
         }
+        // Note that this algorithm was different, and more involved in 2.3.31+, as it was paranoid about breaking
+        // applications that worked before. Here we just go for the simplest solution, that should work with sanely
+        // generated classes.
         for (Method am : ams) {
-            if (am.getReturnType() == m.getReturnType()) {
+            if (m == am) {
+                return am;
+            }
+        }
+        Class<?> mReturnType = m.getReturnType();
+        for (Method am : ams) {
+            if (am.getReturnType() == mReturnType) {
+                return am;
+            }
+        }
+        for (Method am : ams) {
+            // An overriding method might narrows the return type. The inaccessible method can be either the overrider,
+            // or the overridden. But fore example none of Number m() and String m() could override the other, as
+            // neither return type is a subtype of the other.
+            Class<?> amReturnType = am.getReturnType();
+            if (amReturnType.isAssignableFrom(mReturnType) || mReturnType.isAssignableFrom(amReturnType)) {
                 return am;
             }
         }
