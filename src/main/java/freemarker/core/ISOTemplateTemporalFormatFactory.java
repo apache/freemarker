@@ -19,11 +19,11 @@
 
 package freemarker.core;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -34,6 +34,15 @@ import java.util.TimeZone;
 class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     static final ISOTemplateTemporalFormatFactory INSTANCE = new ISOTemplateTemporalFormatFactory();
+
+    private ISOTemplateTemporalFormatFactory() {
+        // Not meant to be called from outside
+    }
+
+    private static final DateTimeFormatter ISO8601_DATE_FORMAT = new DateTimeFormatterBuilder()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .toFormatter()
+            .withLocale(Locale.US);
 
     private static final DateTimeFormatter ISO8601_DATE_TIME_FORMAT = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -50,7 +59,6 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             .optionalEnd()
             .optionalEnd()
             .toFormatter()
-            .withZone(ZoneOffset.UTC)
             .withLocale(Locale.US);
 
     private static final DateTimeFormatter ISO8601_TIME_FORMAT = new DateTimeFormatterBuilder()
@@ -60,8 +68,10 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             .appendLiteral(":")
             .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
             .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
+            .optionalStart()
+            .appendOffsetId()
+            .optionalEnd()
             .toFormatter()
-            .withZone(ZoneOffset.UTC)
             .withLocale(Locale.US);
 
     private static final DateTimeFormatter ISO8601_YEARMONTH_FORMAT = new DateTimeFormatterBuilder()
@@ -69,13 +79,11 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             .appendLiteral("-")
             .appendValue(ChronoField.MONTH_OF_YEAR, 2)
             .toFormatter()
-            .withZone(ZoneOffset.UTC)
             .withLocale(Locale.US);
 
     static final DateTimeFormatter ISO8601_YEAR_FORMAT = new DateTimeFormatterBuilder()
             .appendValue(ChronoField.YEAR)
             .toFormatter()
-            .withZone(ZoneOffset.UTC)
             .withLocale(Locale.US);
 
     @Override
@@ -86,13 +94,13 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             throw new InvalidFormatParametersException("xs currently doesn't support parameters");
         }
 
-        return getXSFormatter(temporalClass, timeZone.toZoneId());
+        return getISOFormatter(temporalClass, timeZone);
     }
 
-    private static ISOLikeTemplateTemporalFormat getXSFormatter(Class<? extends Temporal> temporalClass, ZoneId timeZone) {
+    private static ISOLikeTemplateTemporalTemporalFormat getISOFormatter(Class<? extends Temporal> temporalClass, TimeZone timeZone) {
         final DateTimeFormatter dateTimeFormatter;
         final String description;
-        if (temporalClass == LocalTime.class) {
+        if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
             dateTimeFormatter = ISO8601_TIME_FORMAT;
             description = "ISO 8601 (subset) time";
         } else if (temporalClass == Year.class) {
@@ -101,18 +109,21 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         } else if (temporalClass == YearMonth.class) {
             dateTimeFormatter = ISO8601_YEARMONTH_FORMAT;
             description = "ISO 8601 (subset) year-month";
+        } else if (temporalClass == LocalDate.class) {
+            dateTimeFormatter = ISO8601_DATE_FORMAT;
+            description = "ISO 8601 (subset) date";
         } else {
             Class<? extends Temporal> normTemporalClass =
                     _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
             if (normTemporalClass != temporalClass) {
-                return getXSFormatter(normTemporalClass, timeZone);
+                return getISOFormatter(normTemporalClass, timeZone);
             } else {
                 dateTimeFormatter = ISO8601_DATE_TIME_FORMAT;
                 description = "ISO 8601 (subset) date-time";
             }
         }
         // TODO [FREEMARKER-35] What about date-only?
-        return new ISOLikeTemplateTemporalFormat(dateTimeFormatter.withZone(timeZone), description);
+        return new ISOLikeTemplateTemporalTemporalFormat(dateTimeFormatter, temporalClass, timeZone, description);
     }
 
 }

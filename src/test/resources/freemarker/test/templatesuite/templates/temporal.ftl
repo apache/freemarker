@@ -72,21 +72,20 @@
 
 <@assertEquals expected="05/04/03 06:07" actual=localDateTime?string.short />
 <@assertEquals expected="5 avr. 2003 06:07:08" actual=localDateTime?string.medium />
+<#-- TODO [FREEMARKER-35] These combinations are not supported by Java in practice. What should FM do?
 <@assertEquals expected="5 avril 2003 06:07:08 ET" actual=localDateTime?string.long />
 <@assertEquals expected="samedi 5 avril 2003 06 h 07 ET" actual=localDateTime?string.full />
+-->
 
-<@assertEquals expected="03" actual=year?string.short />
-<@assertEquals expected="2003" actual=year?string.medium />
-<@assertEquals expected="2003" actual=year?string.long />
-<@assertEquals expected="2003" actual=year?string.full />
-
-<@assertEquals expected="04/03" actual=yearMonth?string.short />
-<@assertEquals expected="avr. 2003" actual=yearMonth?string.medium />
-<@assertEquals expected="avril 2003" actual=yearMonth?string.long />
-<@assertEquals expected="avril 2003" actual=yearMonth?string.full />
-<#setting locale="es_ES">
-<@assertEquals expected="abril de 2003" actual=yearMonth?string.full />
-<#setting locale="fr_FR">
+<#-- There combinations are clearly not supported by the "localized pattern" API. -->
+<@assertFails message="not supported for java.time.Year">${year?string.short}</@>
+<@assertFails message="not supported for java.time.Year">${year?string.medium}</@>
+<@assertFails message="not supported for java.time.Year">${year?string.long}</@>
+<@assertFails message="not supported for java.time.Year">${year?string.full}</@>
+<@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.short}</@>
+<@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.medium}</@>
+<@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.long}</@>
+<@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.full}</@>
 
 <@assertEquals expected="05/04/03 06:07" actual=zonedDateTime?string.short />
 <@assertEquals expected="5 avr. 2003 06:07:08" actual=zonedDateTime?string.medium />
@@ -95,17 +94,23 @@
 
 <@assertEquals expected="05/04/03 06:07" actual=localDateTime?string.short_short />
 <@assertEquals expected="05/04/03 06:07:08" actual=localDateTime?string.short_medium />
+<#-- TODO [FREEMARKER-35] These combinations are not supported by Java in practice. What should FM do?
 <@assertEquals expected="05/04/03 06:07:08 ET" actual=localDateTime?string.short_long />
 <@assertEquals expected="05/04/03 06 h 07 ET" actual=localDateTime?string.short_full />
+-->
 
 <@assertEquals expected="5 avr. 2003 06:07:08" actual=localDateTime?string.medium_medium />
 <@assertEquals expected="5 avril 2003 06:07:08" actual=localDateTime?string.long_medium />
 <@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full_medium />
 
+<#-- TODO [FREEMARKER-35] These combinations are not supported by Java in practice. What should FM do?
 <@assertEquals expected="5 avril 2003 06:07:08 ET" actual=localDateTime?string.long_long />
 <@assertEquals expected="samedi 5 avril 2003 06:07:08 ET" actual=localDateTime?string.full_long />
+-->
 
+<#-- TODO [FREEMARKER-35] These combinations are not supported by Java in practice. What should FM do?
 <@assertEquals expected="samedi 5 avril 2003 06 h 07 ET" actual=localDateTime?string.full_full />
+-->
 
 <@assertEquals expected="2003-04-05" actual=localDateTime?string('yyyy-MM-dd') />
 <@assertEquals expected="2003-04-05 06:07:08" actual=localDateTime?string('yyyy-MM-dd HH:mm:ss') />

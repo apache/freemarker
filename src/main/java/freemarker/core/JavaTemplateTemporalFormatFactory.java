@@ -19,12 +19,9 @@
 
 package freemarker.core;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 
 class JavaTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
     public static final JavaTemplateTemporalFormatFactory INSTANCE = new JavaTemplateTemporalFormatFactory();

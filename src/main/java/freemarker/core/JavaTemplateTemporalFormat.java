@@ -18,75 +18,113 @@
  */
 package freemarker.core;
 
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.chrono.IsoChronology;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 
-final class JavaTemplateTemporalFormat extends BaseJavaTemplateTemporalFormatTemplateFormat {
-    private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile("^(short|medium|long|full)(_(short|medium|long|full))?$");
+class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
-    // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did
-    private static final DateTimeFormatter SHORT_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
-    private static final DateTimeFormatter MEDIUM_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
-    private static final DateTimeFormatter LONG_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
-    private static final DateTimeFormatter FULL_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL);
+    enum FormatTimeConversion {
+        INSTANT_TO_ZONED_DATE_TIME,
+        SET_ZONE_FROM_OFFSET
+    }
 
+    private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile("(short|medium|long|full)(?:_(short|medium|long|full))?");
+
+    private final DateTimeFormatter dateTimeFormatter;
+    private final ZoneId zoneId;
     private final String formatString;
+    private final FormatTimeConversion formatTimeConversion;
 
     JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
             throws InvalidFormatParametersException {
-        super(getDateTimeFormat(formatString, temporalClass, locale, timeZone));
         this.formatString = formatString;
-    }
 
-    private static DateTimeFormatter getDateTimeFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone) throws
-            InvalidFormatParametersException {
-        DateTimeFormatter result;
-        if (FORMAT_STYLE_PATTERN.matcher(formatString).matches()) {
-            // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did
-            boolean isYear = Year.class.isAssignableFrom(temporalClass);
-            boolean isYearMonth = YearMonth.class.isAssignableFrom(temporalClass);
-            String[] formatSplt = formatString.split("_");
-            if (isYear || isYearMonth) {
-                String reducedPattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.valueOf(formatSplt[0].toUpperCase()), null, IsoChronology.INSTANCE, locale);
-                if (isYear)
-                    result = DateTimeFormatter.ofPattern(removeNonYM(reducedPattern, false));
-                else
-                    result = DateTimeFormatter.ofPattern(removeNonYM(reducedPattern, true));
-            } else if ("short".equals(formatString))
-                result =  SHORT_FORMAT;
-            else if ("medium".equals(formatString))
-                result =  MEDIUM_FORMAT;
-            else if ("long".equals(formatString))
-                result =  LONG_FORMAT;
-            else if ("full".equals(formatString))
-                result = FULL_FORMAT;
-            else
-                result = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.valueOf(formatSplt[0].toUpperCase()), FormatStyle.valueOf(formatSplt[1].toUpperCase()));
+        temporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+
+        Matcher localizedPatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
+        boolean isLocalizedPattern = localizedPatternMatcher.matches();
+        if (temporalClass == Instant.class) {
+            this.formatTimeConversion = FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME;
+        } else if (isLocalizedPattern && (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
+            this.formatTimeConversion = FormatTimeConversion.SET_ZONE_FROM_OFFSET;
+        } else {
+            this.formatTimeConversion = null;
+        }
+
+        DateTimeFormatter dateTimeFormatter;
+        if (isLocalizedPattern) {
+            FormatStyle datePartFormatStyle = FormatStyle.valueOf(localizedPatternMatcher.group(1).toUpperCase(Locale.ROOT));
+            String group2 = localizedPatternMatcher.group(2);
+            FormatStyle timePartFormatStyle = group2 != null
+                    ? FormatStyle.valueOf(group2.toUpperCase(Locale.ROOT))
+                    : datePartFormatStyle;
+            if (temporalClass == LocalDateTime.class || temporalClass == ZonedDateTime.class
+                    || temporalClass == OffsetDateTime.class || temporalClass == Instant.class) {
+                dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(datePartFormatStyle, timePartFormatStyle);
+            } else if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
+                dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(timePartFormatStyle);
+            } else if (temporalClass == LocalDate.class) {
+                dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(datePartFormatStyle);
+            } else {
+                throw new InvalidFormatParametersException(
+                        "Format " + StringUtil.jQuote(formatString) + " is not supported for "
+                        + temporalClass.getName());
+            }
         } else {
             try {
-                result = DateTimeFormatter.ofPattern(formatString);
+                dateTimeFormatter = DateTimeFormatter.ofPattern(formatString);
             } catch (IllegalArgumentException e) {
                 throw new InvalidFormatParametersException(e.getMessage(), e);
             }
         }
-        return result.withLocale(locale).withZone(timeZone.toZoneId());
+        this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
+
+        this.zoneId = timeZone.toZoneId();
     }
 
-    // TODO [FREEMARKER-35] This override should be unecessary. Move logic here into getDateTimeFormat somehow.
     @Override
     public String format(TemplateTemporalModel tm) throws TemplateValueFormatException, TemplateModelException {
-        return super.format(tm);
+        DateTimeFormatter dateTimeFormatter = this.dateTimeFormatter;
+        Temporal temporal = TemplateFormatUtil.getNonNullTemporal(tm);
+
+        if (formatTimeConversion == FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME) {
+            temporal = ((Instant) temporal).atZone(zoneId);
+        } else if (formatTimeConversion == FormatTimeConversion.SET_ZONE_FROM_OFFSET) {
+            if (temporal instanceof OffsetDateTime) {
+                dateTimeFormatter = dateTimeFormatter.withZone(((OffsetDateTime) temporal).getOffset());
+            } else if (temporal instanceof OffsetTime) {
+                dateTimeFormatter = dateTimeFormatter.withZone(((OffsetTime) temporal).getOffset());
+            } else {
+                throw new IllegalArgumentException(
+                        "Formatter was created for OffsetTime and OffsetDateTime, but value was a "
+                                + ClassUtil.getShortClassNameOfObject(temporal));
+            }
+        }
+
+        try {
+            return dateTimeFormatter.format(temporal);
+        } catch (DateTimeException e) {
+            throw new UnformattableValueException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -108,22 +146,6 @@ final class JavaTemplateTemporalFormat extends BaseJavaTemplateTemporalFormatTem
     @Override
     public boolean isTimeZoneBound() {
         return true;
-    }
-
-    // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did
-    private static String removeNonYM(String pattern, boolean withMonth) {
-        boolean separator = false;
-        boolean copy = true;
-        StringBuilder newPattern = new StringBuilder();
-        for (char c : pattern.toCharArray()) {
-            if (c == '\'')
-                separator = !separator;
-            if (!separator && Character.isAlphabetic(c))
-                copy = c == 'y' || c == 'u' || (withMonth && (c == 'M' || c == 'L'));
-            if (copy)
-                newPattern.append(c);
-        }
-        return newPattern.toString();
     }
 
 }

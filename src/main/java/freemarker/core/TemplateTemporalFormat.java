@@ -49,4 +49,6 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
      */
     public abstract boolean isTimeZoneBound();
 
+    // TODO [FREEMARKER-35] Add parse method
+
 }

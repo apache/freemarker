@@ -1442,7 +1442,7 @@ public class Configurable {
         } else {
             Class<? extends Temporal> normTemporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
             if (normTemporalClass == temporalClass) {
-                throw new IllegalArgumentException("There's no temporal format seting for this class: "
+                throw new IllegalArgumentException("There's no temporal format setting for this class: "
                         + temporalClass.getName());
             } else {
                 return getTemporalFormat(normTemporalClass);
