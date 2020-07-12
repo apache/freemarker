@@ -107,7 +107,7 @@ the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
 You need JDK 8 (not JDK 9!), Apache Ant (tested with 1.9.6) and Ivy (tested
-with 2.4.0) to be installed. To install Ivy (but be sure it's not already
+with 2.5.0) to be installed. To install Ivy (but be sure it's not already
 installed), issue `ant download-ivy`; it will copy Ivy under `~/.ant/lib`.
 (Alternatively, you can copy `ivy-<version>.jar` into the Ant home `lib`
 subfolder manually.)
@@ -118,10 +118,7 @@ succeeds without the build.properties file too.)
 
 To build `freemarker.jar`, just issue `ant` in the project root directory, and
 it should download all dependencies automatically and build `freemarker.jar`. 
-
-If later you change the dependencies in `ivy.xml`, or otherwise want to
-re-download some of them, it will not happen automatically anymore, and you
-must issue `ant update-deps`.
+(Depencies will be cached into the `.ivy/cache` subdirectory of the project.)
 
 To test your build, issue `ant test`.
 
