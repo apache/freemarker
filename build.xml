@@ -602,9 +602,9 @@
   </target>
   
 
-  <!-- ====================== -->
-  <!-- Distributuion building -->
-  <!-- ====================== -->
+  <!-- ===================== -->
+  <!-- Distribution building -->
+  <!-- ===================== -->
 
   <target name="dist"
     description="Build the FreeMarker distribution files"
@@ -956,7 +956,7 @@ Proceed? </input>
   />
   
   <!-- ================================================================== -->
-  <!-- Dependency management (keep it exactly identical for all projects) -->
+  <!-- Dependency management                                              -->
   <!-- ================================================================== -->
   
   <target name="report-deps"
@@ -993,28 +993,11 @@ Proceed? </input>
       -->the ide-dependencies Ant task, because Eclipse OSGi support expects them to be here.<!--
     --></echo>
   </target>
-  
-  <!--
-    This meant to be called on the Continuous Integration server, so the
-    integration builds appear in the freemarker.org public Ivy repository.
-    The artifacts must be already built.
-  -->
-  <target name="server-publish-last-build"
-    description="(For the Continuous Integration server only)"
-  >
-    <delete dir="build/dummy-server-ivy-repo" />
-    <ivy:resolve />
-    <ivy:publish
-      pubrevision="${moduleBranch}-branch-head"
-      artifactspattern="build/[artifact].[ext]"
-      overwrite="true" forcedeliver="true"
-      resolver="server-publishing-target"
-    >
-      <artifact name="freemarker" type="jar" ext="jar" />
-    </ivy:publish>
-    <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
-  </target>
-  
+
+  <!-- ================================================================== -->
+  <!-- Misc.                                                              -->
+  <!-- ================================================================== -->
+
   <target name="rat" description="Generates Apache RAT report">
     <ivy:cachepath conf="rat" pathid="ivy.dep" />
     <taskdef
@@ -1035,25 +1018,6 @@ Proceed? </input>
     <echo level="info"><!--
     -->Rat reports were written into build/rat-report-*.txt<!--
     --></echo>
-  </target>
-
-  <target name="archive" depends=""
-    description='Archives project with Git repo into the "archive" directory.'
-  >
-    <mkdir dir="archive" />
-    <tstamp>
-      <format property="tstamp" pattern="yyyyMMdd-HHmm" />
-    </tstamp>
-    <delete file="archive/freemarker-git-${tstamp}.tar" />
-    <delete file="archive/freemarker-git-${tstamp}.tar.bz2" />
-    <tar tarfile="archive/freemarker-git-${tstamp}.tar"
-      basedir="."
-      longfile="gnu"
-      excludes="build/** .build/** .bin/** .ivy/**  archive/**"
-    />
-    <bzip2 src="archive/freemarker-git-${tstamp}.tar"
-        zipfile="archive/freemarker-git-${tstamp}.tar.bz2" />
-    <delete file="archive/freemarker-git-${tstamp}.tar" />
   </target>
     
 </project>
