@@ -29346,6 +29346,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               very least can depend on the Java version), and in what
               order.</para>
             </listitem>
+
+            <listitem>
+              <para>Fixed bug where OSGi
+              <literal>Bundle-RequiredExecutionEnvironment</literal> in
+              <literal>META-INF/MANIFEST.FM</literal> has incorrectly
+              contained JavaSE-1.6, J2SE-1.5</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-159">FREEMARKER-159</link>:
+              Set <literal>Automatic-Module-Name</literal> to
+              <literal>freemarker</literal> in
+              <literal>META-INF/MANIFEST.FM</literal>. In most cases this was
+              the deduced Java 9 module name earlier, but that was fragile, as
+              Java has deduced it from the jar file name.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
