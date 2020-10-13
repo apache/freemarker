@@ -12795,6 +12795,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_eval_json">eval_json</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_filter">filter</link></para>
           </listitem>
 
@@ -19168,6 +19173,16 @@ Filer for positives:
           linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link> instead.)</para>
 
+          <important>
+            <para>Do not use this to evaluate JSON! For that use the <link
+            linkend="ref_builtin_eval_json"><literal>eval_json</literal>
+            built-in</link> instead. While FTL expression language looks
+            similar to JSON, not all JSON is valid FTL expression. Also, FTL
+            expressions can access variables, and call Java methods on them,
+            so if you <literal>?eval</literal> strings coming from untrusted
+            source, it can become an attack vector.</para>
+          </important>
+
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
           <literal>eval</literal>. That is, it behaves similarly as if in
@@ -19182,6 +19197,75 @@ Filer for positives:
           (like syntax) and evaluation the rules are the same as with the
           <link linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_eval_json">
+          <title>eval_json</title>
+
+          <indexterm>
+            <primary>eval_json</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>evaluate string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>JSON</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.31.</para>
+          </note>
+
+          <para>This built-in evaluates a string as a JSON
+          <emphasis>expression</emphasis>, so that you can extract data from
+          inside it. For example, if you receive data in the
+          <literal>dataJson</literal> variable, but it's unfortunately just a
+          flat string that contains <literal>{"name": "foo", "ids": [11,
+          22]}</literal>, then you can extract data from it like this:</para>
+
+          <programlisting role="template">&lt;#assign data = dataJson<emphasis>?eval_json</emphasis>&gt;
+&lt;p&gt;Name: ${data.name}
+&lt;p&gt;Ids:
+&lt;ul&gt;
+  &lt;#list data.ids as id&gt;
+    &lt;li&gt;${id}
+  &lt;/#list&gt;
+&lt;/ul&gt;</programlisting>
+
+          <para>Ideally, you shouldn't need <literal>eval_json</literal>,
+          since the template should receive data already parsed (to
+          <literal>List</literal>-s, <literal>Map</literal>-s, Java beans,
+          etc.). This built-in is there as a workaround, if you can't improve
+          the data-model.</para>
+
+          <para>The evaluated JSON expression doesn't have to be a JSON object
+          (key-value pairs), it can be any kind of JSON value, like JSON
+          array, JSON number, etc.</para>
+
+          <para>The syntax understood by this built-in is a superset of
+          JSON:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Java-style comments are supported
+              (<literal>/*<replaceable>...</replaceable>*/</literal> and
+              <literal>//<replaceable>...</replaceable></literal>)</para>
+            </listitem>
+
+            <listitem>
+              <para>BOM (byte order mark) and non-breaking space
+              (<quote>nbsp</quote>) are treated as whitespace (in a stricter
+              JSON parser they are errors of occurring around tokens).</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>No other non-JSON extras are implemented, notably, it's
+          impossible to refer to variables (unlike in the <link
+          linkend="ref_builtin_eval"><literal>eval</literal> built-in</link>).
+          This is important for safety, when receiving JSON from untrusted
+          sources.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -29315,6 +29399,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <title>2.3.31</title>
 
         <para>Release date: FIXME</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added <literal>?eval_json</literal> to evaluate JSON given
+              as flat string. This was added as <literal>?eval</literal> is
+              routinely misused for the same purpose, which not only doesn't
+              work for all JSON-s, but can be a security problem. <link
+              linkend="ref_builtin_eval_json">See more here...</link></para>
+            </listitem>
+          </itemizedlist>
+        </section>
 
         <section>
           <title>Changes on the Java side</title>
