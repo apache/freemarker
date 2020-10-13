@@ -24,10 +24,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
@@ -36,6 +34,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateNullModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
@@ -88,25 +87,13 @@ public class DeepUnwrap {
     }
     
     private static Object unwrap(TemplateModel model, boolean permissive) throws TemplateException {
-        Environment env = Environment.getCurrentEnvironment();
-        TemplateModel nullModel = null;
-        if (env != null) {
-            ObjectWrapper wrapper = env.getObjectWrapper();
-            if (wrapper != null) {
-                nullModel = wrapper.wrap(null);
-            }
-        }
-        return unwrap(model, nullModel, permissive);
-    }
-
-    private static Object unwrap(TemplateModel model, TemplateModel nullModel, boolean permissive) throws TemplateException {
         if (model instanceof AdapterTemplateModel) {
             return ((AdapterTemplateModel) model).getAdaptedObject(Object.class);
         }
         if (model instanceof WrapperTemplateModel) {
             return ((WrapperTemplateModel) model).getWrappedObject();
         }
-        if (model == nullModel) {
+        if (model == TemplateNullModel.INSTANCE || model == null) {
             return null;
         }
         if (model instanceof TemplateStringModel) {
@@ -127,7 +114,7 @@ public class DeepUnwrap {
             ArrayList list = new ArrayList(size);
             TemplateModelIterator iter = seq.iterator();
             for (int i = 0; i < size; ++i) {
-                list.add(unwrap(iter.next(), nullModel, permissive));
+                list.add(unwrap(iter.next(), permissive));
             }
             return list;
         }
@@ -136,7 +123,7 @@ public class DeepUnwrap {
             ArrayList list = new ArrayList();
             TemplateModelIterator it = coll.iterator();            
             while (it.hasNext()) {
-                list.add(unwrap(it.next(), nullModel, permissive));
+                list.add(unwrap(it.next(), permissive));
             }
             return list;
         }
@@ -150,8 +137,8 @@ public class DeepUnwrap {
             while (kvps.hasNext()) {
                 KeyValuePair kvp = kvps.next();
                 map.put(
-                        unwrap(kvp.getKey(), nullModel, permissive),
-                        unwrap(kvp.getValue(), nullModel, permissive));
+                        unwrap(kvp.getKey(), permissive),
+                        unwrap(kvp.getValue(), permissive));
             }
             return map;
         }
