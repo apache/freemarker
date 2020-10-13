@@ -19173,7 +19173,7 @@ Filer for positives:
           linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link> instead.)</para>
 
-          <important>
+          <warning>
             <para>Do not use this to evaluate JSON! For that use the <link
             linkend="ref_builtin_eval_json"><literal>eval_json</literal>
             built-in</link> instead. While FTL expression language looks
@@ -19181,7 +19181,7 @@ Filer for positives:
             expressions can access variables, and call Java methods on them,
             so if you <literal>?eval</literal> strings coming from untrusted
             source, it can become an attack vector.</para>
-          </important>
+          </warning>
 
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
