@@ -24,9 +24,9 @@ import freemarker.template.TemplateModel;
 /**
  * Represents a {@code null} value; if we get this as the value of a variable from a scope, we do not fall back
  * to a higher scope to get the same variable again. If instead we get a {@code null}, that means that the variable
- * doesn't exist at all in the current scope, and so we fall back to a higher scope. This distinction wasn is only
+ * doesn't exist at all in the current scope, and so we fall back to a higher scope. This distinction is only
  * used for (and expected from) certain scopes, so be careful where you are using it. (As of this
- * writing, it's onlt for local variables, including loop variables). The user should never meet a
+ * writing, it's only for local variables, including loop variables). The user should never meet a
  * {@link TemplateNullModel}, it must not be returned from public API-s.
  *
  * @see Environment#getNullableLocalVariable(String)
