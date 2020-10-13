@@ -61,6 +61,7 @@ import org.apache.freemarker.core.BuiltInsForSequences.seq_index_ofBI;
 import org.apache.freemarker.core.BuiltInsForSequences.sortBI;
 import org.apache.freemarker.core.BuiltInsForSequences.sort_byBI;
 import org.apache.freemarker.core.BuiltInsForStringsMisc.evalBI;
+import org.apache.freemarker.core.BuiltInsForStringsMisc.evalJsonBI;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
@@ -75,7 +76,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 271;
+    static final int NUMBER_OF_BIS = 272;
     static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -104,6 +105,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
+        putBI("evalJson", new evalJsonBI());
         putBI("first", new firstBI());
         putBI("float", new floatBI());
         putBI("floor", new floorBI());

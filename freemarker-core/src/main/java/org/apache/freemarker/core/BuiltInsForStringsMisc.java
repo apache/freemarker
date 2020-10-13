@@ -72,14 +72,14 @@ class BuiltInsForStringsMisc {
     }
 
     static class evalBI extends OutputFormatBoundBuiltIn {
-        
+
         private ParsingConfiguration pCfg;
-        
+
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             return calculateResult(BuiltInForString.getTargetString(target, env), env);
         }
-        
+
         @Override
         void bindToOutputFormat(OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
             super.bindToOutputFormat(outputFormat, autoEscapingPolicy);
@@ -89,12 +89,12 @@ class BuiltInsForStringsMisc {
                 pCfg = new FinalParsingConfiguration(pCfg, pCfg.getTemplateLanguage(), outputFormat, autoEscapingPolicy,
                         template.getConfiguration());
             }
-            this.pCfg = pCfg; 
+            this.pCfg = pCfg;
         }
 
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             Template parentTemplate = getTemplate();
-            
+
             ASTExpression exp;
             try {
                 try {
@@ -112,7 +112,7 @@ class BuiltInsForStringsMisc {
                             parentTemplate, false, tkMan,
                             pCfg,
                             null);
-                    
+
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
                     throw e.toParseException(parentTemplate);
@@ -136,21 +136,37 @@ class BuiltInsForStringsMisc {
                         "\n\nThe failing expression:");
             }
         }
-        
+
     }
-    
+
+    static class evalJsonBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            try {
+                return JSONParser.parse(s);
+            } catch (JSONParser.JSONParseException e) {
+                throw new TemplateException(e, this, env,
+                        "Failed to \"?", key, "\" string with this error:\n\n",
+                        MessageUtils.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtils.EMBEDDED_MESSAGE_END,
+                        "\n\nThe failing expression:");
+            }
+        }
+    }
+
     /**
      * A method that takes a parameter and evaluates it as a string,
      * then treats that string as template source code and returns a
      * transform model that evaluates the template in place.
      * The template inherits the configuration and environment of the executing
-     * template. By default, its name will be equal to 
+     * template. By default, its name will be equal to
      * <tt>executingTemplate.getLookupName() + "$anonymous_interpreted"</tt>. You can
      * specify another parameter to the method call in which case the
      * template name suffix is the specified id instead of "anonymous_interpreted".
      */
     static class interpretBI extends OutputFormatBoundBuiltIn {
-        
+
         /**
          * Constructs a template on-the-fly and returns it embedded in a
          * {@link TemplateDirectiveModel}.
@@ -372,5 +388,5 @@ class BuiltInsForStringsMisc {
         }
         
     }
-    
+
 }
