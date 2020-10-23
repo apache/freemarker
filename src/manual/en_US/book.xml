@@ -29179,18 +29179,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <para>If you are using the default object wrapper class
                 (<literal>freemarker.template.DefaultObjectWrapper</literal>),
                 or a subclass of it, you should disable the XML (DOM) wrapping
-                feature of it, by overriding <literal>wrapDomNode(Object
-                obj)</literal> so that it does this: <literal>return
-                getModelFactory(obj.getClass()).create(obj, this);</literal>.
-                The problem with the XML wrapping feature, which wraps
-                <literal>org.w3c.dom.Node</literal> objects on special way to
-                make them easier to work with in templates, is that this
-                facility by design lets template authors evaluate arbitrary
-                XPath expressions, and XPath can do too much in certain
-                setups. If you really need the XML wrapping facility, review
-                carefully what XPath expressions are possible in your setup.
-                Also, be sure you don't use the long deprecated, and more
-                dangerous <literal>freemarker.ext.xml</literal> package, only
+                feature of it, by setting its
+                <literal>DOMNodeSupport</literal> property to
+                <literal>false</literal>. The problem with the XML wrapping
+                feature, which wraps <literal>org.w3c.dom.Node</literal>
+                objects on special way to make them easier to work with in
+                templates, is that this facility by design lets template
+                authors evaluate arbitrary XPath expressions, and XPath can do
+                too much in certain setups. If you really need the XML
+                wrapping facility, review carefully what XPath expressions are
+                possible in your setup. Also, be sure you don't use the long
+                deprecated, and more dangerous
+                <literal>freemarker.ext.xml</literal> package, only
                 <literal>freemarker.ext.dom</literal>. Also, note that when
                 using the XML wrapping feature, not allowing
                 <literal>org.w3c.dom.Node</literal> methods in the
@@ -29418,6 +29418,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added <literal>DOMNodeSupport</literal> and
+              <literal>JythonSupport</literal> <literal>boolean</literal>
+              properties to <literal>DefaultObjectWrapper</literal>. This
+              allows disabling the special wrapping of DOM nodes and Jython
+              classes. This might be desirable <link
+              linkend="faq_template_uploading_security">for security
+              reasons</link>.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-145">FREEMARKER-145</link>:
