@@ -33,6 +33,7 @@
       </filesystem>
       <ibiblio name="mavenCentral" m2compatible="true" />
       <ibiblio name="mavenApacheStaging" m2compatible="true" root="https://repository.apache.org/content/repositories/staging/" />
-    </chain>  
+      <ibiblio name="mavenApacheSnapshot" m2compatible="true" root="https://repository.apache.org/content/repositories/snapshots/" />
+    </chain>
   </resolvers>
 </ivysettings>
