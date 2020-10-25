@@ -37,7 +37,7 @@ public class ParameterListPreferabilityTest extends TestCase {
         super(name);
     }
     
-    public void testNumberical() {
+    public void testNumerical() {
         // Note: the signature lists consists of the same elements, only their order changes depending on the type
         // of the argument value.
         
