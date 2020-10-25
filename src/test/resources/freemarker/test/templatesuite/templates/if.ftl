@@ -103,7 +103,7 @@
 </#list></#list>
 
 <#-- parsing errors -->
-<@assertFails message="valid #if-#elseif-#else"><@"<#if t><#else><#elseif t2></#if>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else"><@"<#if t><#else><#else></#if>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else"><@"<#else></#else>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else"><@"<#elseif t></#elseif>"?interpret /></@>
+<@assertFails message="<#elseif"><@"<#if t><#else><#elseif t2></#if>"?interpret /></@>
+<@assertFails message="<#else>"><@"<#if t><#else><#else></#if>"?interpret /></@>
+<@assertFails message="<#else>"><@"<#else></#else>"?interpret /></@>
+<@assertFails message="<#elseif"><@"<#elseif t></#elseif>"?interpret /></@>

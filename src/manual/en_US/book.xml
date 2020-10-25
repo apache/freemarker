@@ -29419,6 +29419,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>More helpful parser error messages for nesting problems
+              (caused by missed or malformed end-tags usually).</para>
+            </listitem>
+
+            <listitem>
               <para>Added <literal>DOMNodeSupport</literal> and
               <literal>JythonSupport</literal> <literal>boolean</literal>
               properties to <literal>DefaultObjectWrapper</literal>. This
