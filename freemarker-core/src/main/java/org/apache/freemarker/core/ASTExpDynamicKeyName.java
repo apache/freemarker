@@ -91,7 +91,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                     "sequence or " + MessageUtils.STRING_COERCABLE_TYPES_DESC,
                     NUMERICAL_KEY_LHO_EXPECTED_TYPES,
                     (targetModel instanceof TemplateHashModel
-                            ? new Object[] { "You had a numberical value inside the []. Currently that's only "
+                            ? new Object[] { "You had a numerical value inside the []. Currently that's only "
                                     + "supported for sequences (lists) and strings. To get a Map item with a "
                                     + "non-string key, use myMap?api.get(myKey)." }
                             : null),
