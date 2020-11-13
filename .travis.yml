@@ -15,12 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 
-language: java
-before_install:
-- sudo apt-get -qq update
-# ant-optional is needed for ant junit
-- sudo apt-get install ant-optional
-install: ant download-ivy
-script: ant ci
-jdk:
-  - openjdk8
+os: linux
+dist: focal
+
+arch:
+  - amd64
+  - arm64
+
+install:
+  - lscpu
+  - ARCH=`uname -p`
+  - echo $ARCH
+  - JDK_X64="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u272-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u272b10.tar.gz"
+  - JDK_ARM64="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u272-b10/OpenJDK8U-jdk_aarch64_linux_hotspot_8u272b10.tar.gz"
+  - if test "X$ARCH" = "Xaarch64"; then JDK_URL=$JDK_ARM64; else JDK_URL=$JDK_X64; fi
+  - wget -q $JDK_URL && tar xzf OpenJDK*.tar.gz
+  - mv jdk8* jdk
+  - export JAVA_HOME=`pwd`/jdk
+  - wget -q https://mirrors.netix.net/apache/ant/binaries/apache-ant-1.10.9-bin.tar.gz && tar xzf apache-ant-*-bin.tar.gz
+  - export ANT_HOME=`pwd`/apache-ant-1.10.9
+  - export PATH="$JAVA_HOME/bin:$ANT_HOME/bin:$PATH"
+  - java -version
+  - ant -version
+  - ant download-ivy  
+
+script: 
+  - ant ci  
