@@ -59,7 +59,17 @@ final class BlockAssignment extends TemplateElement {
         }
         
         if (namespaceExp != null) {
-            ((Environment.Namespace) namespaceExp.eval(env)).put(varName, value);
+            final Environment.Namespace namespace;
+            TemplateModel uncheckedNamespace = namespaceExp.eval(env);
+            try {
+                namespace = (Environment.Namespace) uncheckedNamespace;
+            } catch (ClassCastException e) {
+                throw new NonNamespaceException(namespaceExp, uncheckedNamespace, env);
+            }
+            if (namespace == null) {
+                throw InvalidReferenceException.getInstance(namespaceExp, env);
+            }
+            namespace.put(varName, value);
         } else if (scope == Assignment.NAMESPACE) {
             env.setVariable(varName, value);
         } else if (scope == Assignment.GLOBAL) {

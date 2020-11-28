@@ -118,11 +118,11 @@ final class Assignment extends TemplateElement {
                 throw new BugException("Unexpected scope type: " + scope);
             }
         } else {
-            TemplateModel namespaceTM = namespaceExp.eval(env);
+            TemplateModel uncheckedNamespace = namespaceExp.eval(env);
             try {
-                namespace = (Environment.Namespace) namespaceTM;
+                namespace = (Environment.Namespace) uncheckedNamespace;
             } catch (ClassCastException e) {
-                throw new NonNamespaceException(namespaceExp, namespaceTM, env);
+                throw new NonNamespaceException(namespaceExp, uncheckedNamespace, env);
             }
             if (namespace == null) {
                 throw InvalidReferenceException.getInstance(namespaceExp, env);

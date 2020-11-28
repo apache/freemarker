@@ -29476,6 +29476,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               the deduced Java 9 module name earlier, but that was fragile, as
               Java has deduced it from the jar file name.</para>
             </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-165">FREEMARKER-165</link>:
+              Fixed bug where where if the namespace expression in a block
+              assignment (like <literal>&lt;#assign
+              <replaceable>x</replaceable> in
+              <replaceable>someNamespace</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>)
+              refers to a missing variable, or has the wrong type, FreeMarker
+              has thrown <literal>NullPounterException</literal> or
+              <literal>ClassCastException</literal>, instead of
+              <literal>InvalidReferenceException</literal> and
+              <literal>NonNamespaceException</literal> with proper helpful
+              message.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
