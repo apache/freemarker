@@ -29485,7 +29485,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <replaceable>x</replaceable> in
               <replaceable>someNamespace</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>)
               refers to a missing variable, or has the wrong type, FreeMarker
-              has thrown <literal>NullPounterException</literal> or
+              has thrown <literal>NullPointerException</literal> or
               <literal>ClassCastException</literal>, instead of
               <literal>InvalidReferenceException</literal> and
               <literal>NonNamespaceException</literal> with proper helpful
