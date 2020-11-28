@@ -119,12 +119,12 @@ final class ASTDirAssignment extends ASTDirective {
                 throw new BugException("Unexpected scope type: " + scope);
             }
         } else {
-            TemplateModel namespaceTM = namespaceExp.eval(env);
+            TemplateModel uncheckedNamespace = namespaceExp.eval(env);
             try {
-                namespace = (Environment.Namespace) namespaceTM;
+                namespace = (Environment.Namespace) uncheckedNamespace;
             } catch (ClassCastException e) {
                 throw MessageUtils.newUnexpectedOperandTypeException(
-                        namespaceExp, namespaceTM,
+                        namespaceExp, uncheckedNamespace,
                         "namespace",
                         new Class[] { Environment.Namespace.class },
                         null, env);

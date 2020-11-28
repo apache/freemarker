@@ -60,5 +60,17 @@ public class MiscErrorMessagesTest extends TemplateTest {
         assertErrorContains("<#global x += 2>", "\"x\"", "+=", "global scope");
         assertErrorContains("<#macro m><#local x--></#macro><@m/>", "\"x\"", "--", "local scope");
     }
-    
+
+    @Test
+    public void assignmentNamespaceChecks() {
+        assertErrorContains("<#assign x = 1 in noSuchVar>", InvalidReferenceException.class, "noSuchVar");
+        assertErrorContains("<#assign x =1 in 'notANamespace'>", "namespace", "string", "notANamespace");
+    }
+
+    @Test
+    public void blockAssignmentNamespaceChecks() {
+        assertErrorContains("<#assign x in noSuchVar>1</#assign>", InvalidReferenceException.class, "noSuchVar");
+        assertErrorContains("<#assign x in 'notANamespace'>1</#assign>", "namespace", "string", "notANamespace");
+    }
+
 }

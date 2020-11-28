@@ -66,8 +66,21 @@ final class ASTDirCapturingAssignment extends ASTDirective {
         }
 
         if (namespaceExp != null) {
-            Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
-            ns.put(varName, capturedValue);
+            final Environment.Namespace namespace;
+            TemplateModel uncheckedNamespace = namespaceExp.eval(env);
+            try {
+                namespace = (Environment.Namespace) uncheckedNamespace;
+            } catch (ClassCastException e) {
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        namespaceExp, uncheckedNamespace,
+                        "namespace",
+                        new Class[] { Environment.Namespace.class },
+                        null, env);
+            }
+            if (namespace == null) {
+                throw InvalidReferenceException.getInstance(namespaceExp, env);
+            }
+            namespace.put(varName, capturedValue);
         } else if (scope == ASTDirAssignment.NAMESPACE) {
             env.setVariable(varName, capturedValue);
         } else if (scope == ASTDirAssignment.GLOBAL) {
