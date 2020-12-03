@@ -30,6 +30,8 @@ addons:
 
 before_install:
   - lscpu
+  - export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-${TRAVIS_CPU_ARCH}/"
+  - export PATH="$JAVA_HOME/bin:$PATH"
 
 install:
   - java -version
