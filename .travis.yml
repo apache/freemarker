@@ -28,6 +28,10 @@ addons:
       - openjdk-8-jdk
       - ant-contrib
 
+cache:
+  directories:
+    - $HOME/.ivy/cache
+
 before_install:
   - lscpu
   - export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-${TRAVIS_CPU_ARCH}/"
