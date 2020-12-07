@@ -30,7 +30,7 @@ addons:
 
 cache:
   directories:
-    - $HOME/.ivy/cache
+    - $HOME/.ivy-freemarker/cache
 
 before_install:
   - lscpu
