@@ -949,12 +949,16 @@ Proceed? </input>
   <!-- ================================================================= -->
   <!-- CI (like Travis).......................                           -->
   <!-- ================================================================= -->
-	
+
+  <target name="ci-setup">
+    <ivy:settings file="ivysettings-ci.xml" />
+  </target>
+
   <target name="ci"
-  	depends="clean, jar, test, javadoc"
+  	depends="ci-setup, clean, jar, test, javadoc"
   	description="CI should invoke this task"
   />
-  
+
   <!-- ================================================================== -->
   <!-- Dependency management                                              -->
   <!-- ================================================================== -->
