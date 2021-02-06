@@ -29433,9 +29433,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed bug because which <literal>.globals</literal>
-              weren't seen as namesapce, so something like
-              <literal>&lt;#assign <replaceable>name</replaceable> =
+              <para>Fixed bug where <literal>.globals</literal> weren't seen
+              as namesapce, so something like <literal>&lt;#assign
+              <replaceable>name</replaceable> =
               <replaceable>value</replaceable> in .globals&gt;</literal>
               failed (although you should use <literal>&lt;#global
               <replaceable>name</replaceable> =
