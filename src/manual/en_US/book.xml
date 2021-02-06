@@ -29415,7 +29415,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/projects/FREEMARKER/issues/FREEMARKER-169">FREEMARKER-169</link>:
-              If <link
+              Fixed bug that made <literal>?c</literal> and
+              <quote>computer</quote> number format inconsistent. If <link
               linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
               is set to 2.3.31 (or higher), when you set the
               <literal>number_format</literal> setting to
@@ -29429,6 +29430,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?c</literal> before incompatible improvements 2.3.21,
               where instead of <quote>INF</quote>, and <quote>NaN</quote>, the
               results used Unicode characters U+221E, and U+FFFD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug because which <literal>.globals</literal>
+              weren't seen as namesapce, so something like
+              <literal>&lt;#assign <replaceable>name</replaceable> =
+              <replaceable>value</replaceable> in .globals&gt;</literal>
+              failed (although you should use <literal>&lt;#global
+              <replaceable>name</replaceable> =
+              <replaceable>value</replaceable>&gt;</literal> instead
+              anyway).</para>
             </listitem>
           </itemizedlist>
         </section>
