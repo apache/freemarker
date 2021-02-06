@@ -931,6 +931,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           {@code <#if x[0]>} works correctly without this fix as well. 
      *     </ul>
      *   </li>
+     *   <li><p>
+     *     2.3.31 (or higher):
+     *     <ul>
+     *       <li><p>When you set the {@code number_format} setting to {@code "computer"} (or you call
+     *       {@link Environment#getCNumberFormat()}), the format now matches the behavior of {@code ?c}, when formatting
+     *       infinite (positive and negative), and NaN. Matching the behavior of {@code ?c} was always the intent,
+     *       but before this incompatible improvement, the {@code "computer"} format always behaved like {@code ?c}
+     *       before Incompatible Improvements 2.3.21, where instead of INF, and NaN, the results used unicode characters
+     *       U+221E, and U+FFFD.
+     *     </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException

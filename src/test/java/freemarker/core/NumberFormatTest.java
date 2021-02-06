@@ -44,11 +44,13 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
+import net.jcip.annotations.Immutable;
 
 @SuppressWarnings("boxing")
 public class NumberFormatTest extends TemplateTest {
-    
+
     @Before
     public void setup() {
         Configuration cfg = getConfiguration();
@@ -313,7 +315,48 @@ public class NumberFormatTest extends TemplateTest {
             assertOutput("${0.0000123?string.@printfG}", "1.23000E-05");
         }
     }
-    
+
+    @Test
+    public void testCFormatOfSpecialNumbers() throws IOException, TemplateException {
+        addToDataModel("pInf", Double.POSITIVE_INFINITY);
+        addToDataModel("nInf", Double.NEGATIVE_INFINITY);
+        addToDataModel("nan", Double.NaN);
+
+        Configuration cfg = getConfiguration();
+        for (Version ici : new Version[] {
+                Configuration.VERSION_2_3_20,
+                Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_30,
+                Configuration.VERSION_2_3_31 } ) {
+            cfg.setIncompatibleImprovements(ici);
+
+            boolean cBuiltInBroken = ici.intValue() < Configuration.VERSION_2_3_21.intValue();
+            boolean cNumberFormatBroken = ici.intValue() < Configuration.VERSION_2_3_31.intValue();
+
+            String humanAudienceOutput = "\u221e -\u221e \ufffd";
+            String computerAudienceOutput = "INF -INF NaN";
+
+            assertOutput(
+                    "${pInf?c} ${nInf?c} ${nan?c}",
+                    cBuiltInBroken ? humanAudienceOutput : computerAudienceOutput);
+
+            assertOutput(
+                    "<#setting numberFormat='computer'>${pInf} ${nInf} ${nan}",
+                    cNumberFormatBroken ? humanAudienceOutput : computerAudienceOutput);
+
+            assertOutput(
+                    "${pInf} ${nInf} ${nan}",
+                    humanAudienceOutput);
+
+            Environment env = new Template(null, "", cfg)
+                    .createProcessingEnvironment(null, null);
+            assertEquals(
+                    cNumberFormatBroken ? humanAudienceOutput : computerAudienceOutput,
+                    env.getCNumberFormat().format(Double.POSITIVE_INFINITY)
+                            + " " + env.getCNumberFormat().format(Double.NEGATIVE_INFINITY)
+                            + " " + env.getCNumberFormat().format(Double.NaN));
+        }
+    }
+
     private static class MutableTemplateNumberModel implements TemplateNumberModel {
         
         private Number number;

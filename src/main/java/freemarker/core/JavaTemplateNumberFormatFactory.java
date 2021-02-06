@@ -31,13 +31,15 @@ import freemarker.log.Logger;
 class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     
     static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
-    
+
+    static final String COMPUTER = "computer";
+
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
     private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
             = new ConcurrentHashMap<>();
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
-    
+
     private JavaTemplateNumberFormatFactory() {
         // Not meant to be instantiated
     }
@@ -45,7 +47,9 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        CacheKey cacheKey = new CacheKey(params, locale);
+        CacheKey cacheKey = new CacheKey(
+                env != null ? env.transformNumberFormatGlobalCacheKey(params) : params,
+                locale);
         NumberFormat jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
         if (jFormat == null) {
             if ("number".equals(params)) {
@@ -54,7 +58,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                 jFormat = NumberFormat.getCurrencyInstance(locale);
             } else if ("percent".equals(params)) {
                 jFormat = NumberFormat.getPercentInstance(locale);
-            } else if ("computer".equals(params)) {
+            } else if (COMPUTER.equals(params)) {
                 jFormat = env.getCNumberFormat();
             } else {
                 try {

@@ -29411,6 +29411,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               work for all JSON-s, but can be a security problem. <link
               linkend="ref_builtin_eval_json">See more here...</link></para>
             </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/projects/FREEMARKER/issues/FREEMARKER-169">FREEMARKER-169</link>:
+              If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.31 (or higher), when you set the
+              <literal>number_format</literal> setting to
+              <literal>computer</literal> (or you call
+              <literal>Environment.getCNumberFormat()</literal>), the format
+              now matches the behavior of <literal>?c</literal>, when
+              formatting infinite (positive and negative), and NaN. Matching
+              the behavior of <literal>?c</literal> was always the intent, but
+              before this incompatible improvement, the
+              <literal>computer</literal> format always behaved like
+              <literal>?c</literal> before incompatible improvements 2.3.21,
+              where instead of <quote>INF</quote>, and <quote>NaN</quote>, the
+              results used Unicode characters U+221E, and U+FFFD.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
