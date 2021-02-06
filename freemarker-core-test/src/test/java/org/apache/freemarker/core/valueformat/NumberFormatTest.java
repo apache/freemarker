@@ -371,5 +371,27 @@ public class NumberFormatTest extends TemplateTest {
         }
         
     }
-    
+
+    @Test
+    public void testCFormatOfSpecialNumbers() throws IOException, TemplateException {
+        addToDataModel("pInf", Double.POSITIVE_INFINITY);
+        addToDataModel("nInf", Double.NEGATIVE_INFINITY);
+        addToDataModel("nan", Double.NaN);
+
+        String humanAudienceOutput = "\u221e -\u221e \ufffd";
+        String computerAudienceOutput = "INF -INF NaN";
+
+        assertOutput("${pInf?c} ${nInf?c} ${nan?c}", computerAudienceOutput);
+        assertOutput("<#setting numberFormat='computer'>${pInf} ${nInf} ${nan}",  computerAudienceOutput);
+        assertOutput("${pInf} ${nInf} ${nan}", humanAudienceOutput);
+
+        Environment env = new Template(null, "", getConfiguration())
+                .createProcessingEnvironment(null, null);
+        assertEquals(
+                computerAudienceOutput,
+                env.getCNumberFormat().format(Double.POSITIVE_INFINITY)
+                        + " " + env.getCNumberFormat().format(Double.NEGATIVE_INFINITY)
+                        + " " + env.getCNumberFormat().format(Double.NaN));
+    }
+
 }

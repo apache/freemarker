@@ -123,6 +123,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         C_NUMBER_FORMAT = new DecimalFormat("0.################", new DecimalFormatSymbols(Locale.US));
         C_NUMBER_FORMAT.setGroupingUsed(false);
         C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
+        DecimalFormatSymbols symbols = C_NUMBER_FORMAT.getDecimalFormatSymbols();
+        symbols.setInfinity("INF");
+        symbols.setNaN("NaN");
+        C_NUMBER_FORMAT.setDecimalFormatSymbols(symbols);
     }
 
     private final Configuration configuration;
