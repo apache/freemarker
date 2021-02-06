@@ -1565,7 +1565,7 @@ public class _StringUtils {
         scanForQuotationType: for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
             if (!(i == 0 ? TemplateLanguageUtils.isNonEscapedIdentifierStart(c) : TemplateLanguageUtils.isNonEscapedIdentifierPart(c)) && c != '@') {
-                if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
+                if ((quotationType == 0 || quotationType == '\\') && TemplateLanguageUtils.isEscapedIdentifierCharacter (c)) {
                     quotationType = '\\';
                 } else {
                     quotationType = '"';

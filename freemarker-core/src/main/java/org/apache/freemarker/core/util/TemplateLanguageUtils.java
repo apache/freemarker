@@ -642,7 +642,7 @@ public final class TemplateLanguageUtils {
      * backslash. Currently it return {@code true} for these: {@code '-'}, {@code '.'} and {@code ':'}.
      */
     public static boolean isEscapedIdentifierCharacter(final char c) {
-        return c == '-' || c == '.' || c == ':';
+        return c == '-' || c == '.' || c == ':' || c ==  '#';
     }
 
     /**

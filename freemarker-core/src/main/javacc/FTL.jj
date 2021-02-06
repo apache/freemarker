@@ -1276,7 +1276,8 @@ TOKEN:
         ]
     >
     |
-    <#ESCAPED_ID_CHAR: "\\" ("-" | "." | ":")>
+    // Keep this in sync with TemplateLanguageUtils.isEscapedIdentifierCharacter
+    <#ESCAPED_ID_CHAR: "\\" ("-" | "." | ":" | "#")>
     |
     <#ID_START_CHAR: <NON_ESCAPED_ID_START_CHAR>|<ESCAPED_ID_CHAR>>
     |
