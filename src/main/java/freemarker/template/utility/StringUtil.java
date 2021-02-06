@@ -1270,6 +1270,17 @@ public class StringUtil {
     public static boolean isFTLIdentifierPart(final char c) {
         return isFTLIdentifierStart(c) || (c >= '0' && c <= '9');  
     }
+
+    /**
+     * Tells if a character can occur in an FTL identifier if it's preceded with a backslash. For example, {@code "-"}
+     * is a such character (as you can have an identifier like {@code foo\-bar} in FTL), but {@code "f"} is not, as
+     * it needn't be, and can't be escaped.
+     *
+     * @since 2.3.31
+     */
+    public static boolean isBackslashEscapedFTLIdentifierCharacter(final char c) {
+        return c == '-' || c == '.' || c == ':' || c ==  '#';
+    }
     
     /**
      * Escapes the <code>String</code> with the escaping rules of Java language

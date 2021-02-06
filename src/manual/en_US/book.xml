@@ -2681,8 +2681,8 @@ baz
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
             Furthermore, the first character can't be an ASCII digit
-            (<literal>0</literal>-<literal>9</literal>). Starting from
-            FreeMarker 2.3.22, the variable name can also contain minus
+            (<literal>0</literal>-<literal>9</literal>). Since FreeMarker
+            2.3.22 the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
             with a preceding backslash (<literal>\</literal>), otherwise they
@@ -2690,7 +2690,10 @@ baz
             whose name is <quote>data-id</quote>, the expression is
             <literal>data\-id</literal>, as <literal>data-id</literal> would
             be interpreted as <quote>data minus id</quote>. (Note that these
-            escapes only work in identifiers, not in string literals.)</para>
+            escapes only work in identifiers, not in string literals.)
+            Furthermore, since FreeMarker 2.3.31, hash mark
+            (<literal>#</literal>) can also be used, but must be escaped with
+            a preceding backslash (<literal>\</literal>).</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -29410,6 +29413,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               routinely misused for the same purpose, which not only doesn't
               work for all JSON-s, but can be a security problem. <link
               linkend="ref_builtin_eval_json">See more here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Allowed escaping <literal>#</literal> with backlash in
+              identifier names (not in string), as it used to occur in
+              database column names. Like if you have a column name like
+              <literal>#users</literal>, you can refer to it as
+              <literal>row.\#users</literal>. (Alternatively,
+              <literal>row['#users']</literal> always worked, but is often
+              less convenient.)</para>
             </listitem>
 
             <listitem>
