@@ -38,7 +38,9 @@
 
 <#setting timeZone='GMT+00'>
 <#assign t1='2000'?dateTime('yyyy')>
+<@assertEquals expected='GMT+00:00' actual=.timeZone />
 <#setting timeZone='GMT+01'>
+<@assertEquals expected='GMT+01:00' actual=.timeZone />
 <#assign t2='2000'?dateTime('yyyy')>
 <@assertEquals expected=1000*60*60 actual=t1?long-t2?long />
 

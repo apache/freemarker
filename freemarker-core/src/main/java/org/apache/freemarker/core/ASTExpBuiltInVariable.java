@@ -48,6 +48,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String LANG = "lang";
     static final String LOCALE = MutableProcessingConfiguration.LOCALE_KEY;
     static final String LOCALE_OBJECT = MutableProcessingConfiguration.LOCALE_KEY + "Object";
+    static final String TIME_ZONE = MutableProcessingConfiguration.TIME_ZONE_KEY;
     static final String NODE = "node";
     static final String PASS = "pass";
     static final String VARS = "vars";
@@ -84,6 +85,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         OUTPUT_ENCODING,
         OUTPUT_FORMAT,
         PASS,
+        TIME_ZONE,
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
@@ -214,7 +216,10 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             String name = ctx.callPlace.getTemplate().getLookupName();
             return name != null ? new SimpleString(name) : TemplateStringModel.EMPTY_STRING;
         }
-        
+        if (name == TIME_ZONE) {
+            return new SimpleString(env.getTimeZone().getID());
+        }
+
         throw new TemplateException(this,
                 "Invalid special variable: ", name);
     }
