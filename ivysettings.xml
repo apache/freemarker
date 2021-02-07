@@ -27,10 +27,12 @@
   <property name="localMaveRepoDir" value="${user.home}/.m2/repository/" />
   <resolvers>
     <chain name="default">
+      <!--
       <filesystem name="mavenLocal" m2compatible="true">
         <artifact pattern="${localMaveRepoDir}/[organisation]/[module]/[revision]/[module]-[revision].[ext]" />
         <ivy pattern="${localMaveRepoDir}/[organisation]/[module]/[revision]/[module]-[revision].pom" />
       </filesystem>
+      -->
       <ibiblio name="mavenCentral" m2compatible="true" />
       <ibiblio name="mavenApacheStaging" m2compatible="true" root="https://repository.apache.org/content/repositories/staging/" />
       <ibiblio name="mavenApacheSnapshot" m2compatible="true" root="https://repository.apache.org/content/repositories/snapshots/" />
