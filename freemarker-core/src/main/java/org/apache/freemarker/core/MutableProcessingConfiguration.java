@@ -1506,10 +1506,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       true, 1.0)</code>
      * </ul>
      * 
-     * <p>{@link Configuration} (a subclass of {@link MutableProcessingConfiguration}) also understands these:</p>
+     * <p>{@link Configuration.Builder} (which implements {@link MutableParsingAndProcessingConfiguration} and
+     * {@link TopLevelConfiguration}) also understands these:</p>
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
-     *       See {@link Configuration#getAutoEscapingPolicy()}
+     *       See {@link ParsingConfiguration#getAutoEscapingPolicy()}
      *       <br>String value: {@code "enableIfDefault"} or {@code "enableIfDefault"} for
      *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT},
      *       {@code "enableIfDefault"} or {@code "enableIfSupported"} for
@@ -1517,13 +1518,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@code "disable"} for {@link AutoEscapingPolicy#DISABLE}.
      *       
      *   <li><p>{@code "sourceEncoding"}:
-     *       See {@link Configuration#getSourceEncoding()}; since 2.3.26 also accepts value "JVM default"
+     *       See {@link ParsingConfiguration#getSourceEncoding()}; since 2.3.26 also accepts value "JVM default"
      *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
      *   <li><p>{@code "localizedTemplateLookup"}:
-     *       See {@link Configuration#getLocalizedTemplateLookup()}.
+     *       See {@link TopLevelConfiguration#getLocalizedTemplateLookup()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
      *       ASTDirCase insensitive.
@@ -1535,7 +1536,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
      *       
      *   <li><p>{@code "registeredCustomOutputFormats"}:
-     *       See {@link Configuration#getRegisteredCustomOutputFormats()}.
+     *       See {@link TopLevelConfiguration#getRegisteredCustomOutputFormats()}.
      *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
      *       {@link OutputFormat}-s.
      *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
@@ -1545,7 +1546,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
      *       
      *   <li><p>{@code "templateCacheStorage"}:
-     *       See {@link Configuration#getTemplateCacheStorage()}.
+     *       See {@link TopLevelConfiguration#getTemplateCacheStorage()}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
      *       If the value does not contain dot,
@@ -1569,38 +1570,38 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       
      *   <li><p>{@code "templateUpdateDelay"}:
      *       Template update delay in <b>seconds</b> (not in milliseconds) if no unit is specified; see
-     *       {@link Configuration#getTemplateUpdateDelayMilliseconds()} for more.
+     *       {@link TopLevelConfiguration#getTemplateUpdateDelayMilliseconds()} for more.
      *       <br>String value: Valid positive integer, optionally followed by a time unit (recommended). The default
      *       unit is seconds. It's strongly recommended to specify the unit for clarity, like in "500 ms" or "30 s".
      *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
      *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
      *   <li><p>{@code "incompatibleImprovements"}:
-     *       See {@link Configuration#getIncompatibleImprovements()}.
+     *       See {@link ParsingConfiguration#getIncompatibleImprovements()}.
      *       <br>String value: version number like {@code 2.3.20}.
-     *       
+     *
      *   <li><p>{@code "recognizeStandardFileExtensions"}:
-     *       See {@link Configuration#getRecognizeStandardFileExtensions()}.
+     *       See {@link TopLevelConfiguration#getRecognizeStandardFileExtensions()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
      *       {@code yes}, etc.
      *       
      *   <li><p>{@code "templateConfigurations"}:
-     *       See: {@link Configuration#getTemplateConfigurations()}.
+     *       See: {@link TopLevelConfiguration#getTemplateConfigurations()}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
      *       can be {@code null}.
      *       
      *   <li><p>{@code "templateLoader"}:
-     *       See: {@link Configuration#getTemplateLoader()}.
+     *       See: {@link TopLevelConfiguration#getTemplateLoader()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>. {@code "null"} is also allowed.
      *       
      *   <li><p>{@code "templateLookupStrategy"}:
-     *       See: {@link Configuration#getTemplateLookupStrategy()}.
+     *       See: {@link TopLevelConfiguration#getTemplateLookupStrategy()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>.
      *       
      *   <li><p>{@code "templateNameFormat"}:
-     *       See: {@link Configuration#getTemplateNameFormat()}.
+     *       See: {@link TopLevelConfiguration#getTemplateNameFormat()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default,
      *       {@link DefaultTemplateNameFormat#INSTANCE}.
      * </ul>
