@@ -25469,6 +25469,18 @@ There was no specific handler for node y
           contains dash and further info after the numbers, like in
           2.3.21-nightly_20140726T151800Z.</para>
         </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>time zone</primary>
+            </indexterm><indexterm>
+              <primary>time_zone</primary>
+            </indexterm><literal>time_zone</literal> (exists since FreeMarker
+          2.3.31): The current value of the <literal>time_zone</literal>
+          setting, as a string. This is the ID of the time zone, like
+          <literal>GMT+01:00</literal>, or
+          <literal>America/Los_Angeles</literal>.</para>
+        </listitem>
       </itemizedlist>
 
       <simplesect xml:id="ref_specvar_get_optional_template">
@@ -29416,6 +29428,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               routinely misused for the same purpose, which not only doesn't
               work for all JSON-s, but can be a security problem. <link
               linkend="ref_builtin_eval_json">See more here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new special variable, <literal>time_zone</literal>
+              (referred like <literal>.time_zone</literal>, like all special
+              variables), to retrieve the current value of the
+              <literal>time_zone</literal> setting as a string.</para>
             </listitem>
 
             <listitem>

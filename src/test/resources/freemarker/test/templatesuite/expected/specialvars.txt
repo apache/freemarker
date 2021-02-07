@@ -18,6 +18,7 @@
  */
 en == en
 en_US == en_US
+GMT+01:00 == GMT+01:00
 utf-8 == utf-8
 specialvars.ftl == specialvars.ftl
 iso-8859-1 == iso-8859-1

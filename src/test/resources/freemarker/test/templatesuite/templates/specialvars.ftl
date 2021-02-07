@@ -26,6 +26,7 @@
 <#assign works = .globals>
 ${.lang} == en
 ${.locale} == en_US
+${.time_zone} == GMT+01:00
 <#assign works = .locals!>
 <#assign works = .main>
 <#assign works = .node!>

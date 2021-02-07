@@ -56,6 +56,8 @@ final class BuiltinVariable extends Expression {
     static final String LOCALE = Configurable.LOCALE_KEY;
     static final String LOCALE_OBJECT_CC = Configurable.LOCALE_KEY_CAMEL_CASE + "Object";
     static final String LOCALE_OBJECT = Configurable.LOCALE_KEY + "_object";
+    static final String TIME_ZONE_CC = Configurable.TIME_ZONE_KEY_CAMEL_CASE;
+    static final String TIME_ZONE = Configurable.TIME_ZONE_KEY;
     static final String CURRENT_NODE_CC = "currentNode";
     static final String CURRENT_NODE = "current_node";
     static final String NODE = "node";
@@ -116,6 +118,8 @@ final class BuiltinVariable extends Expression {
         PASS,
         TEMPLATE_NAME_CC,
         TEMPLATE_NAME,
+        TIME_ZONE_CC,
+        TIME_ZONE,
         URL_ESCAPING_CHARSET_CC,
         URL_ESCAPING_CHARSET,
         VARS,
@@ -269,6 +273,9 @@ final class BuiltinVariable extends Expression {
                 throw new _MiscTemplateException(this, "The \"", ARGS, "\" special variable wasn't initialized.", name);
             }
             return args;
+        }
+        if (name == TIME_ZONE || name == TIME_ZONE_CC) {
+            return new SimpleScalar(env.getTimeZone().getID());
         }
 
         throw new _MiscTemplateException(this,
