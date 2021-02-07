@@ -57,7 +57,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         TemplateModel actual = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
-        TemplateModel expected = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
+        TemplateModel expected = CallableUtils.getArgument(args, EXPECTED_ARG_IDX, null, this);
         if (!env.applyEqualsOperatorLenient(actual, expected)) {
             throw new AssertionFailedInTemplateException("Assertion failed:\n"
                     + "Expected: " + tryUnwrap(expected) + "\n"
