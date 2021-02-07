@@ -15889,13 +15889,16 @@ rif: foo XYr baar</programlisting>
           meaning of these is locale (nationality) specific, and is controlled
           by the Java platform installation, not by FreeMarker, except for
           <literal>computer</literal>, which uses the same formatting as <link
-          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>.
-          There can also be programmer-defined formats, whose name starts with
-          <literal>@</literal> (programmers <link
-          linkend="pgui_config_custom_formats">see more here...</link>). You
-          can use these predefined formats like this:</para>
+          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>
+          (assuming <link
+          linkend="pgui_config_incompatible_improvements">incompatible
+          improvements</link> set to 2.3.31, or higher, or else infinity and
+          NaN isn't formatted like that). There can also be programmer-defined
+          formats, whose name starts with <literal>@</literal> (programmers
+          <link linkend="pgui_config_custom_formats">see more here...</link>).
+          You can use these predefined formats like this:</para>
 
-          <programlisting role="template">&lt;#assign x=42&gt;
+          <programlisting role="template">&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15905,12 +15908,12 @@ ${x?string.computer}</programlisting>
 
           <para>If your locale is US English, this will print:</para>
 
-          <programlisting role="output">42
-42
-42
-$42.00
-4,200%
-42</programlisting>
+          <programlisting role="output">4,200,000
+4,200,000  
+4,200,000
+$4,200,000.00
+420,000,000%
+4200000</programlisting>
 
           <para>The output of first three expressions is identical because the
           first two expressions use the default format, which is
@@ -15918,7 +15921,7 @@ $42.00
           setting:</para>
 
           <programlisting role="template">&lt;#setting number_format="currency"&gt;
-&lt;#assign x=42&gt;
+&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15927,11 +15930,11 @@ ${x?string.percent}</programlisting>
 
           <para>Will now output:</para>
 
-          <programlisting role="output">$42.00
-$42.00
-42
-$42.00
-4,200%</programlisting>
+          <programlisting role="output">$4,200,000.00
+$4,200,000.00  
+4,200,000
+$4,200,000.00
+420,000,000%</programlisting>
 
           <para>since the default number format was set to
           <quote>currency</quote>.</para>
