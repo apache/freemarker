@@ -2681,8 +2681,8 @@ baz
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
             Furthermore, the first character can't be an ASCII digit
-            (<literal>0</literal>-<literal>9</literal>). Starting from
-            FreeMarker 2.3.22, the variable name can also contain minus
+            (<literal>0</literal>-<literal>9</literal>). Since FreeMarker
+            2.3.22 the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
             with a preceding backslash (<literal>\</literal>), otherwise they
@@ -2690,7 +2690,10 @@ baz
             whose name is <quote>data-id</quote>, the expression is
             <literal>data\-id</literal>, as <literal>data-id</literal> would
             be interpreted as <quote>data minus id</quote>. (Note that these
-            escapes only work in identifiers, not in string literals.)</para>
+            escapes only work in identifiers, not in string literals.)
+            Furthermore, since FreeMarker 2.3.31, hash mark
+            (<literal>#</literal>) can also be used, but must be escaped with
+            a preceding backslash (<literal>\</literal>).</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -12795,6 +12798,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_eval_json">eval_json</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_filter">filter</link></para>
           </listitem>
 
@@ -15881,13 +15889,16 @@ rif: foo XYr baar</programlisting>
           meaning of these is locale (nationality) specific, and is controlled
           by the Java platform installation, not by FreeMarker, except for
           <literal>computer</literal>, which uses the same formatting as <link
-          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>.
-          There can also be programmer-defined formats, whose name starts with
-          <literal>@</literal> (programmers <link
-          linkend="pgui_config_custom_formats">see more here...</link>). You
-          can use these predefined formats like this:</para>
+          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>
+          (assuming <link
+          linkend="pgui_config_incompatible_improvements">incompatible
+          improvements</link> set to 2.3.31, or higher, or else infinity and
+          NaN isn't formatted like that). There can also be programmer-defined
+          formats, whose name starts with <literal>@</literal> (programmers
+          <link linkend="pgui_config_custom_formats">see more here...</link>).
+          You can use these predefined formats like this:</para>
 
-          <programlisting role="template">&lt;#assign x=42&gt;
+          <programlisting role="template">&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15897,12 +15908,12 @@ ${x?string.computer}</programlisting>
 
           <para>If your locale is US English, this will print:</para>
 
-          <programlisting role="output">42
-42
-42
-$42.00
-4,200%
-42</programlisting>
+          <programlisting role="output">4,200,000
+4,200,000  
+4,200,000
+$4,200,000.00
+420,000,000%
+4200000</programlisting>
 
           <para>The output of first three expressions is identical because the
           first two expressions use the default format, which is
@@ -15910,7 +15921,7 @@ $42.00
           setting:</para>
 
           <programlisting role="template">&lt;#setting number_format="currency"&gt;
-&lt;#assign x=42&gt;
+&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15919,11 +15930,11 @@ ${x?string.percent}</programlisting>
 
           <para>Will now output:</para>
 
-          <programlisting role="output">$42.00
-$42.00
-42
-$42.00
-4,200%</programlisting>
+          <programlisting role="output">$4,200,000.00
+$4,200,000.00  
+4,200,000
+$4,200,000.00
+420,000,000%</programlisting>
 
           <para>since the default number format was set to
           <quote>currency</quote>.</para>
@@ -19168,6 +19179,16 @@ Filer for positives:
           linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link> instead.)</para>
 
+          <warning>
+            <para>Do not use this to evaluate JSON! For that use the <link
+            linkend="ref_builtin_eval_json"><literal>eval_json</literal>
+            built-in</link> instead. While FTL expression language looks
+            similar to JSON, not all JSON is valid FTL expression. Also, FTL
+            expressions can access variables, and call Java methods on them,
+            so if you <literal>?eval</literal> strings coming from untrusted
+            source, it can become an attack vector.</para>
+          </warning>
+
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
           <literal>eval</literal>. That is, it behaves similarly as if in
@@ -19182,6 +19203,75 @@ Filer for positives:
           (like syntax) and evaluation the rules are the same as with the
           <link linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_eval_json">
+          <title>eval_json</title>
+
+          <indexterm>
+            <primary>eval_json</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>evaluate string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>JSON</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.31.</para>
+          </note>
+
+          <para>This built-in evaluates a string as a JSON
+          <emphasis>expression</emphasis>, so that you can extract data from
+          inside it. For example, if you receive data in the
+          <literal>dataJson</literal> variable, but it's unfortunately just a
+          flat string that contains <literal>{"name": "foo", "ids": [11,
+          22]}</literal>, then you can extract data from it like this:</para>
+
+          <programlisting role="template">&lt;#assign data = dataJson<emphasis>?eval_json</emphasis>&gt;
+&lt;p&gt;Name: ${data.name}
+&lt;p&gt;Ids:
+&lt;ul&gt;
+  &lt;#list data.ids as id&gt;
+    &lt;li&gt;${id}
+  &lt;/#list&gt;
+&lt;/ul&gt;</programlisting>
+
+          <para>Ideally, you shouldn't need <literal>eval_json</literal>,
+          since the template should receive data already parsed (to
+          <literal>List</literal>-s, <literal>Map</literal>-s, Java beans,
+          etc.). This built-in is there as a workaround, if you can't improve
+          the data-model.</para>
+
+          <para>The evaluated JSON expression doesn't have to be a JSON object
+          (key-value pairs), it can be any kind of JSON value, like JSON
+          array, JSON number, etc.</para>
+
+          <para>The syntax understood by this built-in is a superset of
+          JSON:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Java-style comments are supported
+              (<literal>/*<replaceable>...</replaceable>*/</literal> and
+              <literal>//<replaceable>...</replaceable></literal>)</para>
+            </listitem>
+
+            <listitem>
+              <para>BOM (byte order mark) and non-breaking space
+              (<quote>nbsp</quote>) are treated as whitespace (in a stricter
+              JSON parser they are errors of occurring around tokens).</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>No other non-JSON extras are implemented, notably, it's
+          impossible to refer to variables (unlike in the <link
+          linkend="ref_builtin_eval"><literal>eval</literal> built-in</link>).
+          This is important for safety, when receiving JSON from untrusted
+          sources.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -25379,6 +25469,18 @@ There was no specific handler for node y
           contains dash and further info after the numbers, like in
           2.3.21-nightly_20140726T151800Z.</para>
         </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>time zone</primary>
+            </indexterm><indexterm>
+              <primary>time_zone</primary>
+            </indexterm><literal>time_zone</literal> (exists since FreeMarker
+          2.3.31): The current value of the <literal>time_zone</literal>
+          setting, as a string. This is the ID of the time zone, like
+          <literal>GMT+01:00</literal>, or
+          <literal>America/Los_Angeles</literal>.</para>
+        </listitem>
       </itemizedlist>
 
       <simplesect xml:id="ref_specvar_get_optional_template">
@@ -29095,18 +29197,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <para>If you are using the default object wrapper class
                 (<literal>freemarker.template.DefaultObjectWrapper</literal>),
                 or a subclass of it, you should disable the XML (DOM) wrapping
-                feature of it, by overriding <literal>wrapDomNode(Object
-                obj)</literal> so that it does this: <literal>return
-                getModelFactory(obj.getClass()).create(obj, this);</literal>.
-                The problem with the XML wrapping feature, which wraps
-                <literal>org.w3c.dom.Node</literal> objects on special way to
-                make them easier to work with in templates, is that this
-                facility by design lets template authors evaluate arbitrary
-                XPath expressions, and XPath can do too much in certain
-                setups. If you really need the XML wrapping facility, review
-                carefully what XPath expressions are possible in your setup.
-                Also, be sure you don't use the long deprecated, and more
-                dangerous <literal>freemarker.ext.xml</literal> package, only
+                feature of it, by setting its
+                <literal>DOMNodeSupport</literal> property to
+                <literal>false</literal>. The problem with the XML wrapping
+                feature, which wraps <literal>org.w3c.dom.Node</literal>
+                objects on special way to make them easier to work with in
+                templates, is that this facility by design lets template
+                authors evaluate arbitrary XPath expressions, and XPath can do
+                too much in certain setups. If you really need the XML
+                wrapping facility, review carefully what XPath expressions are
+                possible in your setup. Also, be sure you don't use the long
+                deprecated, and more dangerous
+                <literal>freemarker.ext.xml</literal> package, only
                 <literal>freemarker.ext.dom</literal>. Also, note that when
                 using the XML wrapping feature, not allowing
                 <literal>org.w3c.dom.Node</literal> methods in the
@@ -29317,9 +29419,86 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Release date: FIXME</para>
 
         <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added <literal>?eval_json</literal> to evaluate JSON given
+              as flat string. This was added as <literal>?eval</literal> is
+              routinely misused for the same purpose, which not only doesn't
+              work for all JSON-s, but can be a security problem. <link
+              linkend="ref_builtin_eval_json">See more here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new special variable, <literal>time_zone</literal>
+              (referred like <literal>.time_zone</literal>, like all special
+              variables), to retrieve the current value of the
+              <literal>time_zone</literal> setting as a string.</para>
+            </listitem>
+
+            <listitem>
+              <para>Allowed escaping <literal>#</literal> with backlash in
+              identifier names (not in string), as it used to occur in
+              database column names. Like if you have a column name like
+              <literal>#users</literal>, you can refer to it as
+              <literal>row.\#users</literal>. (Alternatively,
+              <literal>row['#users']</literal> always worked, but is often
+              less convenient.)</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/projects/FREEMARKER/issues/FREEMARKER-169">FREEMARKER-169</link>:
+              Fixed bug that made <literal>?c</literal> and
+              <quote>computer</quote> number format inconsistent. If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.31 (or higher), when you set the
+              <literal>number_format</literal> setting to
+              <literal>computer</literal> (or you call
+              <literal>Environment.getCNumberFormat()</literal>), the format
+              now matches the behavior of <literal>?c</literal>, when
+              formatting infinite (positive and negative), and NaN. Matching
+              the behavior of <literal>?c</literal> was always the intent, but
+              before this incompatible improvement, the
+              <literal>computer</literal> format always behaved like
+              <literal>?c</literal> before incompatible improvements 2.3.21,
+              where instead of <quote>INF</quote>, and <quote>NaN</quote>, the
+              results used Unicode characters U+221E, and U+FFFD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug where <literal>.globals</literal> weren't seen
+              as namesapce, so something like <literal>&lt;#assign
+              <replaceable>name</replaceable> =
+              <replaceable>value</replaceable> in .globals&gt;</literal>
+              failed (although you should use <literal>&lt;#global
+              <replaceable>name</replaceable> =
+              <replaceable>value</replaceable>&gt;</literal> instead
+              anyway).</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>More helpful parser error messages for nesting problems
+              (caused by missed or malformed end-tags usually).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>DOMNodeSupport</literal> and
+              <literal>JythonSupport</literal> <literal>boolean</literal>
+              properties to <literal>DefaultObjectWrapper</literal>. This
+              allows disabling the special wrapping of DOM nodes and Jython
+              classes. This might be desirable <link
+              linkend="faq_template_uploading_security">for security
+              reasons</link>.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-145">FREEMARKER-145</link>:
@@ -29345,6 +29524,38 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.beans.Introspector</literal> exposes (which at
               very least can depend on the Java version), and in what
               order.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug where OSGi
+              <literal>Bundle-RequiredExecutionEnvironment</literal> in
+              <literal>META-INF/MANIFEST.FM</literal> has incorrectly
+              contained JavaSE-1.6, J2SE-1.5</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-159">FREEMARKER-159</link>:
+              Set <literal>Automatic-Module-Name</literal> to
+              <literal>freemarker</literal> in
+              <literal>META-INF/MANIFEST.FM</literal>. In most cases this was
+              the deduced Java 9 module name earlier, but that was fragile, as
+              Java has deduced it from the jar file name.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-165">FREEMARKER-165</link>:
+              Fixed bug where where if the namespace expression in a block
+              assignment (like <literal>&lt;#assign
+              <replaceable>x</replaceable> in
+              <replaceable>someNamespace</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>)
+              refers to a missing variable, or has the wrong type, FreeMarker
+              has thrown <literal>NullPointerException</literal> or
+              <literal>ClassCastException</literal>, instead of
+              <literal>InvalidReferenceException</literal> and
+              <literal>NonNamespaceException</literal> with proper helpful
+              message.</para>
             </listitem>
           </itemizedlist>
         </section>

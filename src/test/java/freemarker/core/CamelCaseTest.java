@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -43,6 +44,8 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.data_model?is_hash?c}", "true");
         assertOutput("${.localeObject.toString()}", "de_DE");
         assertOutput("${.locale_object.toString()}", "de_DE");
+        assertOutput("${.time_zone}", getConfiguration().getTimeZone().getID());
+        assertOutput("${.timeZone}", getConfiguration().getTimeZone().getID());
         assertOutput("${.templateName?length}", "0");
         assertOutput("${.template_name?length}", "0");
         assertOutput("${.outputEncoding}", "utf-8");

@@ -60,13 +60,13 @@ public class _TemplateAPI {
     /**
      * Kind of a dummy {@link ObjectWrapper} used at places where the internal code earlier used the
      * {@link ObjectWrapper#DEFAULT_WRAPPER} singleton, because it wasn't supposed to wrap/unwrap anything with it;
-     * never use this {@link ObjectWrapper}r in situations where values of arbitrary types need to be wrapped!
+     * never use this {@link ObjectWrapper} in situations where values of arbitrary types need to be wrapped!
      * The typical situation is that we are using {@link SimpleSequence}, or {@link SimpleHash}, which always has an
      * {@link ObjectWrapper} field, even if we don't care in the given situation, and so we didn't set it explicitly.
      * The concern with the old way is that the {@link ObjectWrapper} set in the {@link Configuration} is possibly
      * more restrictive than the default, so if the template author can somehow make FreeMarker wrap something with the
      * default {@link ObjectWrapper}, then we got a security problem. So we try not to have that around, if possible.
-     * The obvious fix, and the better engineering would be just use a such {@link TemplateSequenceModel} or
+     * The obvious fix, and the better engineering would be just use a {@link TemplateSequenceModel} or
      * {@link TemplateHashModelEx2} implementation at those places, which doesn't have an {@link ObjectWrapper} (and
      * doesn't have the overhead of said implementations either). But, some user code might casts the values it
      * receives (as directive argument for example) to {@link SimpleSequence} or {@link SimpleHash}, instead of to

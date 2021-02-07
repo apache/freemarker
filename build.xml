@@ -113,17 +113,11 @@
     <delete dir="build/coverage/classes" />
   </target>
 
-  <condition property="deps.available">
-    <available file=".ivy" />
-  </condition>
-  
-  <target name="init" depends="_autoget-deps"
-    description="Fetch dependencies if any are missing and create the build directory if necessary"
-  >
+  <target name="init">
     <mkdir dir="build"/>
   </target>
 
-  <property name="ivy.install.version" value="2.4.0" />
+  <property name="ivy.install.version" value="2.5.0" />
   <property name="ivy.home" value="${user.home}/.ant" />
   <property name="ivy.jar.dir" value="${ivy.home}/lib" />
   <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
@@ -579,7 +573,7 @@
     <attribute name="locale" />
     <sequential>
       <ivy:cachepath conf="manual" pathid="ivy.dep" />
-      <taskdef resource="org/freemarker/docgen/antlib.properties"
+      <taskdef resource="org/freemarker/docgen/ant/antlib.properties"
         uri="http://freemarker.org/docgen"
         classpathref="ivy.dep"
       />
@@ -608,9 +602,9 @@
   </target>
   
 
-  <!-- ====================== -->
-  <!-- Distributuion building -->
-  <!-- ====================== -->
+  <!-- ===================== -->
+  <!-- Distribution building -->
+  <!-- ===================== -->
 
   <target name="dist"
     description="Build the FreeMarker distribution files"
@@ -954,105 +948,20 @@ Proceed? </input>
   <!-- ================================================================= -->
   <!-- CI (like Travis).......................                           -->
   <!-- ================================================================= -->
-	
+
+  <target name="ci-setup">
+    <ivy:settings file="ivysettings-ci.xml" />
+  </target>
+
   <target name="ci"
-  	depends="clean, update-deps, jar, test, javadoc"
+  	depends="ci-setup, clean, jar, test, javadoc"
   	description="CI should invoke this task"
   />
-  
+
   <!-- ================================================================== -->
-  <!-- Dependency management (keep it exactly identical for all projects) -->
+  <!-- Dependency management                                              -->
   <!-- ================================================================== -->
   
-  <target name="_autoget-deps" unless="deps.available">
-    <antcall target="_autoget-deps-condition-workaround" />
-  </target>
-
-  <!--
-    Called with antcall to ensure that deps.available will be up-to-date.
-    Without this trick, if ant is called with multiple tasks, the local .ivy
-    directory might ends up corrupted if it was created by the 1st task.
-  -->
-  <target name="_autoget-deps-condition-workaround" unless="deps.available">
-    <antcall target="update-deps" />
-  </target>
-  
-  <target name="update-deps"
-    description="Gets the latest version of the dependencies from the Web"
-  >
-    <echo>Getting dependencies...</echo>
-    <echo>-------------------------------------------------------</echo>
-    <ivy:settings id="remote" url="https://freemarker.apache.org/repos/ivy/ivysettings-remote.xml" />
-    <!-- Build an own repository that will serve us even offline: -->
-    <ivy:retrieve settingsRef="remote" sync="true"
-      ivypattern=".ivy.part/repo/[organisation]/[module]/ivy-[revision].xml"
-      pattern=".ivy.part/repo/[organisation]/[module]/[artifact]-[revision].[ext]"
-    />
-    <echo>-------------------------------------------------------</echo>
-    <echo>*** Successfully acquired dependencies from the Web ***</echo>
-    <echo>Eclipse users: Now right-click on ivy.xml and Resolve! </echo>
-    <echo>-------------------------------------------------------</echo>
-    <!-- Only now that we got all the dependencies will we delete anything. -->
-    <!-- Thus a net or repo outage doesn't left us without the dependencies. -->
-
-    <!-- Save the resolution cache from the soon coming <delete>: -->
-    <move todir=".ivy.part/update-deps-reso-cache">
-      <fileset dir=".ivy/update-deps-reso-cache" />
-    </move>
-    <!-- Drop all the old stuff: -->
-    <delete dir=".ivy" />
-    <!-- And use the new stuff instead: -->
-    <move todir=".ivy">
-      <fileset dir=".ivy.part" />
-    </move>
-  </target>
-
-  <!-- Do NOT call this from 'clean'; offline guys would stuck after that. -->
-  <target name="clean-deps"
-    description="Deletes all dependencies"
-  >
-    <delete dir=".ivy" />
-  </target>
-
-  <target name="publish-override" depends="jar"
-    description="Ivy-publishes THIS project locally as an override"
-  >
-    <ivy:resolve />
-    <ivy:publish
-      pubrevision="${moduleBranch}-branch-head"
-      artifactspattern="build/[artifact].[ext]"
-      overwrite="true" forcedeliver="true"
-      resolver="freemarker-devel-local-override"
-    >
-      <artifact name="freemarker" type="jar" ext="jar" />
-    </ivy:publish>
-    <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
-    <echo>-------------------------------------------------------</echo>
-    <echo>*** Don't forget to `ant unpublish-override` later! ***</echo>
-  </target>
-
-  <target name="unpublish-override"
-    description="Undoes publish-override (made in THIS project)"
-  >
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override/${moduleOrg}/${moduleName}" />
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache/${moduleOrg}/${moduleName}" />
-  </target>  
-
-  <target name="unpublish-override-all"
-    description="Undoes publish-override-s made in ALL projects"
-  >
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override" />
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache" />
-  </target>  
-
-  <target name="uninstall"
-    description="Deletes external files created by FreeMarker developement"
-  >
-    <delete dir="${user.home}/.ivy2/freemarker-devel-cache" />
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override" />
-    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache " />
-  </target>
-
   <target name="report-deps"
     description="Creates a HTML document that summarizes the dependencies."
   >
@@ -1087,28 +996,11 @@ Proceed? </input>
       -->the ide-dependencies Ant task, because Eclipse OSGi support expects them to be here.<!--
     --></echo>
   </target>
-  
-  <!--
-    This meant to be called on the Continuous Integration server, so the
-    integration builds appear in the freemarker.org public Ivy repository.
-    The artifacts must be already built.
-  -->
-  <target name="server-publish-last-build"
-    description="(For the Continuous Integration server only)"
-  >
-    <delete dir="build/dummy-server-ivy-repo" />
-    <ivy:resolve />
-    <ivy:publish
-      pubrevision="${moduleBranch}-branch-head"
-      artifactspattern="build/[artifact].[ext]"
-      overwrite="true" forcedeliver="true"
-      resolver="server-publishing-target"
-    >
-      <artifact name="freemarker" type="jar" ext="jar" />
-    </ivy:publish>
-    <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
-  </target>
-  
+
+  <!-- ================================================================== -->
+  <!-- Misc.                                                              -->
+  <!-- ================================================================== -->
+
   <target name="rat" description="Generates Apache RAT report">
     <ivy:cachepath conf="rat" pathid="ivy.dep" />
     <taskdef
@@ -1129,25 +1021,6 @@ Proceed? </input>
     <echo level="info"><!--
     -->Rat reports were written into build/rat-report-*.txt<!--
     --></echo>
-  </target>
-
-  <target name="archive" depends=""
-    description='Archives project with Git repo into the "archive" directory.'
-  >
-    <mkdir dir="archive" />
-    <tstamp>
-      <format property="tstamp" pattern="yyyyMMdd-HHmm" />
-    </tstamp>
-    <delete file="archive/freemarker-git-${tstamp}.tar" />
-    <delete file="archive/freemarker-git-${tstamp}.tar.bz2" />
-    <tar tarfile="archive/freemarker-git-${tstamp}.tar"
-      basedir="."
-      longfile="gnu"
-      excludes="build/** .build/** .bin/** .ivy/**  archive/**"
-    />
-    <bzip2 src="archive/freemarker-git-${tstamp}.tar"
-        zipfile="archive/freemarker-git-${tstamp}.tar.bz2" />
-    <delete file="archive/freemarker-git-${tstamp}.tar" />
   </target>
     
 </project>

@@ -46,7 +46,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.python.core.PyString;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -58,6 +60,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.beans.WhitelistMemberAccessPolicy;
+import freemarker.ext.jython.JythonSequenceModel;
 import freemarker.ext.util.WrapperTemplateModel;
 
 public class DefaultObjectWrapperTest {
@@ -1033,11 +1036,49 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
             TemplateModelException {
+        assertTrue(OW22.wrap(createDocument()) instanceof TemplateNodeModel);
+    }
+
+    @Test
+    public void testDisabledDOMNodeWrapping() throws SAXException, IOException, ParserConfigurationException,
+            TemplateModelException {
+        Document doc = createDocument();
+        DefaultObjectWrapperBuilder dowB = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_31);
+        dowB.setDOMNodeSupport(false);
+        DefaultObjectWrapper ow = dowB.build();
+
+        testDisabledDomWrappingInternal(doc, ow);
+
+        ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_31);
+        ow.setDOMNodeSupport(false);
+        testDisabledDomWrappingInternal(doc, ow);
+    }
+
+    private void testDisabledDomWrappingInternal(Document doc, DefaultObjectWrapper ow) throws TemplateModelException {
+        TemplateModel model = ow.wrap(doc);
+        assertFalse(model instanceof TemplateNodeModel);
+        assertTrue(model instanceof TemplateHashModel);
+        assertNotNull(((TemplateHashModel) model).get("getDoctype"));
+        assertNotNull(((TemplateHashModel) model).get("class"));
+    }
+
+    @Test
+    public void testDisabledJythonWrapping() throws SAXException, IOException, ParserConfigurationException,
+            TemplateModelException {
+        PyString pyString = new PyString("foo");
+
+        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_31);
+        assertThat(ow.wrap(pyString), Matchers.instanceOf(JythonSequenceModel.class));
+
+        ow.setJythonSupport(false);
+        assertThat(ow.wrap(pyString), not(Matchers.instanceOf(JythonSequenceModel.class)));
+    }
+
+    private Document createDocument() throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
-        Document doc = db.parse(is);        
-        assertTrue(OW22.wrap(doc) instanceof TemplateNodeModel);
+        return db.parse(is);
     }
 
     @Test

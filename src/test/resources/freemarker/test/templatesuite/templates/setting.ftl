@@ -37,8 +37,10 @@
 <@assertEquals expected='dtf' actual=.now?string />
 
 <#setting time_zone='GMT+00'>
+<@assertEquals expected='GMT+00:00' actual=.time_zone />
 <#assign t1='2000'?datetime('yyyy')>
 <#setting time_zone='GMT+01'>
+<@assertEquals expected='GMT+01:00' actual=.time_zone />
 <#assign t2='2000'?datetime('yyyy')>
 <@assertEquals expected=1000*60*60 actual=t1?long-t2?long />
 

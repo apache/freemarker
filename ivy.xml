@@ -164,7 +164,7 @@
 
     <!-- docs -->
     
-    <dependency org="org.freemarker" name="docgen" rev="2.0-branch-head" conf="manual->default" changing="true" />
+    <dependency org="org.apache.freemarker.docgen" name="freemarker-docgen-ant" rev="0.0.2-SNAPSHOT" conf="manual->default" changing="true" />
     
     <!-- parser -->
     

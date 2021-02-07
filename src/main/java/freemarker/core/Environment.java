@@ -72,6 +72,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
+import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
@@ -104,13 +105,24 @@ public final class Environment extends Configurable {
 
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
-    private static final DecimalFormat C_NUMBER_FORMAT = new DecimalFormat(
+    /** "c" number format as it was before Incompatible Improvements 2.3.21. */
+    private static final DecimalFormat C_NUMBER_FORMAT_ICI_2_3_20 = new DecimalFormat(
             "0.################",
             new DecimalFormatSymbols(Locale.US));
-
     static {
-        C_NUMBER_FORMAT.setGroupingUsed(false);
-        C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
+        C_NUMBER_FORMAT_ICI_2_3_20.setGroupingUsed(false);
+        C_NUMBER_FORMAT_ICI_2_3_20.setDecimalSeparatorAlwaysShown(false);
+    }
+
+    // Do not use this object directly; clone it first! DecimalFormat isn't
+    // thread-safe.
+    /** "c" number format as it was starting from Incompatible Improvements 2.3.21. */
+    private static final DecimalFormat C_NUMBER_FORMAT_ICI_2_3_21 = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
+    static {
+        DecimalFormatSymbols symbols = C_NUMBER_FORMAT_ICI_2_3_21.getDecimalFormatSymbols();
+        symbols.setInfinity("INF");
+        symbols.setNaN("NaN");
+        C_NUMBER_FORMAT_ICI_2_3_21.setDecimalFormatSymbols(symbols);
     }
 
     private final Configuration configuration;
@@ -151,6 +163,7 @@ public final class Environment extends Configurable {
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
 
+    @Deprecated
     private NumberFormat cNumberFormat;
 
     /**
@@ -1659,16 +1672,33 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in. This is always US English
-     * <code>"0.################"</code>, without grouping and without superfluous decimal separator.
+     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in, except, if
+     * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is less than 2.3.31,
+     * this will wrongly give the format that the <tt>c</tt> built-in used before Incompatible Improvements 2.3.21.
+     * See more at {@link Configuration#Configuration(Version)}.
      */
     public NumberFormat getCNumberFormat() {
-        // It can't be cached in a static field, because DecimalFormat-s aren't
-        // thread-safe.
+        // Note: DecimalFormat-s aren't thread-safe, so you must clone the static field value.
         if (cNumberFormat == null) {
-            cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT.clone();
+            if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31) {
+                cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_21.clone();
+            } else {
+                cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
+            }
         }
         return cNumberFormat;
+    }
+
+    /**
+     * As we have a number format cache that's shared between {@link Configuration}-s, if the interpretation of a format
+     * is impacted by Incompatible Improvements, we must change the cache key.
+     */
+    String transformNumberFormatGlobalCacheKey(String keyPart) {
+        if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31
+                && JavaTemplateNumberFormatFactory.COMPUTER.equals(keyPart)) {
+            return "computer\u00002";
+        }
+        return keyPart;
     }
 
     @Override
