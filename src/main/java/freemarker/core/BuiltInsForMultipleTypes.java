@@ -58,7 +58,7 @@ class BuiltInsForMultipleTypes {
 
     static class cBI extends AbstractCBI implements ICIChainMember {
         
-        static class BIBeforeICE2d3d21 extends AbstractCBI {
+        static class BIBeforeICI2d3d21 extends AbstractCBI {
 
             @Override
             protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
@@ -73,7 +73,7 @@ class BuiltInsForMultipleTypes {
             
         }
         
-        private final BIBeforeICE2d3d21 prevICIObj = new BIBeforeICE2d3d21();
+        private final BIBeforeICI2d3d21 prevICIObj = new BIBeforeICI2d3d21();
 
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {

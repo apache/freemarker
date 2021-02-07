@@ -16,11 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-en == en
-en_US == en_US
-GMT+01:00 == GMT+01:00
-utf-8 == utf-8
-specialvars.ftl == specialvars.ftl
-iso-8859-1 == iso-8859-1
-x == x
-true == true
+
+package freemarker.ext.beans;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import org.junit.Test;
+
+import freemarker.template.TemplateException;
+import freemarker.test.TemplateTest;
+
+public class Java9InstrospectorBugWorkaroundTest extends TemplateTest {
+
+    @Test
+    public void test() throws IOException, TemplateException {
+        addToDataModel("path", Paths.get("foo", "bar"));
+        assertOutput("<#assign _ = path.parent>", "");
+    }
+
+}

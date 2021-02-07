@@ -29,7 +29,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.30</productname>
+    <productname>Freemarker 2.3.31</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -2681,8 +2681,8 @@ baz
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
             Furthermore, the first character can't be an ASCII digit
-            (<literal>0</literal>-<literal>9</literal>). Starting from
-            FreeMarker 2.3.22, the variable name can also contain minus
+            (<literal>0</literal>-<literal>9</literal>). Since FreeMarker
+            2.3.22 the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
             with a preceding backslash (<literal>\</literal>), otherwise they
@@ -2690,7 +2690,10 @@ baz
             whose name is <quote>data-id</quote>, the expression is
             <literal>data\-id</literal>, as <literal>data-id</literal> would
             be interpreted as <quote>data minus id</quote>. (Note that these
-            escapes only work in identifiers, not in string literals.)</para>
+            escapes only work in identifiers, not in string literals.)
+            Furthermore, since FreeMarker 2.3.31, hash mark
+            (<literal>#</literal>) can also be used, but must be escaped with
+            a preceding backslash (<literal>\</literal>).</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -12795,6 +12798,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_eval_json">eval_json</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_filter">filter</link></para>
           </listitem>
 
@@ -15881,13 +15889,16 @@ rif: foo XYr baar</programlisting>
           meaning of these is locale (nationality) specific, and is controlled
           by the Java platform installation, not by FreeMarker, except for
           <literal>computer</literal>, which uses the same formatting as <link
-          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>.
-          There can also be programmer-defined formats, whose name starts with
-          <literal>@</literal> (programmers <link
-          linkend="pgui_config_custom_formats">see more here...</link>). You
-          can use these predefined formats like this:</para>
+          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>
+          (assuming <link
+          linkend="pgui_config_incompatible_improvements">incompatible
+          improvements</link> set to 2.3.31, or higher, or else infinity and
+          NaN isn't formatted like that). There can also be programmer-defined
+          formats, whose name starts with <literal>@</literal> (programmers
+          <link linkend="pgui_config_custom_formats">see more here...</link>).
+          You can use these predefined formats like this:</para>
 
-          <programlisting role="template">&lt;#assign x=42&gt;
+          <programlisting role="template">&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15897,12 +15908,12 @@ ${x?string.computer}</programlisting>
 
           <para>If your locale is US English, this will print:</para>
 
-          <programlisting role="output">42
-42
-42
-$42.00
-4,200%
-42</programlisting>
+          <programlisting role="output">4,200,000
+4,200,000  
+4,200,000
+$4,200,000.00
+420,000,000%
+4200000</programlisting>
 
           <para>The output of first three expressions is identical because the
           first two expressions use the default format, which is
@@ -15910,7 +15921,7 @@ $42.00
           setting:</para>
 
           <programlisting role="template">&lt;#setting number_format="currency"&gt;
-&lt;#assign x=42&gt;
+&lt;#assign x=4200000&gt;
 ${x}
 ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
@@ -15919,11 +15930,11 @@ ${x?string.percent}</programlisting>
 
           <para>Will now output:</para>
 
-          <programlisting role="output">$42.00
-$42.00
-42
-$42.00
-4,200%</programlisting>
+          <programlisting role="output">$4,200,000.00
+$4,200,000.00  
+4,200,000
+$4,200,000.00
+420,000,000%</programlisting>
 
           <para>since the default number format was set to
           <quote>currency</quote>.</para>
@@ -19168,6 +19179,16 @@ Filer for positives:
           linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link> instead.)</para>
 
+          <warning>
+            <para>Do not use this to evaluate JSON! For that use the <link
+            linkend="ref_builtin_eval_json"><literal>eval_json</literal>
+            built-in</link> instead. While FTL expression language looks
+            similar to JSON, not all JSON is valid FTL expression. Also, FTL
+            expressions can access variables, and call Java methods on them,
+            so if you <literal>?eval</literal> strings coming from untrusted
+            source, it can become an attack vector.</para>
+          </warning>
+
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
           <literal>eval</literal>. That is, it behaves similarly as if in
@@ -19182,6 +19203,75 @@ Filer for positives:
           (like syntax) and evaluation the rules are the same as with the
           <link linkend="ref_builtin_interpret"><literal>interpret</literal>
           built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_eval_json">
+          <title>eval_json</title>
+
+          <indexterm>
+            <primary>eval_json</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>evaluate string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>JSON</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.31.</para>
+          </note>
+
+          <para>This built-in evaluates a string as a JSON
+          <emphasis>expression</emphasis>, so that you can extract data from
+          inside it. For example, if you receive data in the
+          <literal>dataJson</literal> variable, but it's unfortunately just a
+          flat string that contains <literal>{"name": "foo", "ids": [11,
+          22]}</literal>, then you can extract data from it like this:</para>
+
+          <programlisting role="template">&lt;#assign data = dataJson<emphasis>?eval_json</emphasis>&gt;
+&lt;p&gt;Name: ${data.name}
+&lt;p&gt;Ids:
+&lt;ul&gt;
+  &lt;#list data.ids as id&gt;
+    &lt;li&gt;${id}
+  &lt;/#list&gt;
+&lt;/ul&gt;</programlisting>
+
+          <para>Ideally, you shouldn't need <literal>eval_json</literal>,
+          since the template should receive data already parsed (to
+          <literal>List</literal>-s, <literal>Map</literal>-s, Java beans,
+          etc.). This built-in is there as a workaround, if you can't improve
+          the data-model.</para>
+
+          <para>The evaluated JSON expression doesn't have to be a JSON object
+          (key-value pairs), it can be any kind of JSON value, like JSON
+          array, JSON number, etc.</para>
+
+          <para>The syntax understood by this built-in is a superset of
+          JSON:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Java-style comments are supported
+              (<literal>/*<replaceable>...</replaceable>*/</literal> and
+              <literal>//<replaceable>...</replaceable></literal>)</para>
+            </listitem>
+
+            <listitem>
+              <para>BOM (byte order mark) and non-breaking space
+              (<quote>nbsp</quote>) are treated as whitespace (in a stricter
+              JSON parser they are errors of occurring around tokens).</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>No other non-JSON extras are implemented, notably, it's
+          impossible to refer to variables (unlike in the <link
+          linkend="ref_builtin_eval"><literal>eval</literal> built-in</link>).
+          This is important for safety, when receiving JSON from untrusted
+          sources.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -21602,37 +21692,59 @@ or
         <section>
           <title>Description</title>
 
-          <para>Imports a library. That is, it creates a new empty namespace,
-          and then executes the template given with
-          <literal><replaceable>path</replaceable></literal> parameter in that
-          namespace so the template populates the namespace with variables
-          (macros, functions, ...etc.). Then it makes the newly created
-          namespace available to the caller with a hash variable. The hash
-          variable will be created as a plain variable in the namespace used
-          by the caller of <literal>import</literal> (as if you would create
-          it with <literal>assign</literal> directive), with the name given
-          with the <literal><replaceable>hash</replaceable></literal>
-          parameter. If the import happens in the namespace of the main
+          <para>Used for making a collection of macros, functions, and other
+          variables available for the importing template, which were defined
+          in the imported template. For example, let's say you have written
+          macros to generate some commonly needed pieces output, and you have
+          put them into <literal>/libs/commons.ftl</literal>. Then, in the
+          template where you want to use them, do this (near the top of the
+          the template by convention, next to any other
+          <literal>import</literal>-s):</para>
+
+          <programlisting role="template">&lt;#import "/libs/commons.ftl" as com&gt;
+</programlisting>
+
+          <para>Later in same template, let's say you want to use the
+          <literal>copyright</literal> macro defined in
+          <literal>/libs/commons.ftl</literal>. Then you can call that macro
+          like this:</para>
+
+          <programlisting role="template">&lt;@com.copyright date="1999-2002"/&gt;</programlisting>
+
+          <para>Note the <literal>com.</literal> before the macro name above.
+          All that was defined in <literal>/libs/commons.ftl</literal> will be
+          inside <literal>com</literal>.</para>
+
+          <para>Described more technically, <literal>import</literal> first
+          creates a new empty <link
+          linkend="dgui_misc_namespace">namespace</link>, and then executes
+          the template given with
+          <literal><replaceable>path</replaceable></literal> parameter inside
+          that namespace, so the template populates the namespace with
+          variables (macros, functions, ...etc.). Then the namespace is
+          assigned to the variable specified with the
+          <literal><replaceable>hash</replaceable></literal> parameter, and
+          you can access its contents through that. A namespace is <link
+          linkend="dgui_datamodel_container">a hash</link>, hence <link
+          linkend="dgui_template_exp_var_hash">the dot operator</link> worked
+          above. The assignment is like the <literal>assign</literal>
+          directive, that is, it sets the variable in the current namespace.
+          Except, if the import happens in the namespace of the main (topmost)
           template, the hash variable is also created in the global
           namespace.</para>
 
           <para>If you call <literal>import</literal> with the same
           <literal><replaceable>path</replaceable></literal> for multiple
           times, it will create the namespace and run the template for the
-          very first call of <literal>import</literal> only. The later calls
-          will just create a hash by which you can access the
-          <emphasis>same</emphasis> namespace.</para>
+          first call of <literal>import</literal> only. The later calls will
+          just give back the namespace that was created and initialized when
+          the template was imported for the first time, and will not execute
+          the imported template.</para>
 
-          <para>The output printed by the imported template will be ignored
-          (will not be inserted at the place of importing). The template is
-          executed to populate the namespace with variables, and not to write
-          to the output.</para>
-
-          <para>Example:</para>
-
-          <programlisting role="template">&lt;#import "/libs/mylib.ftl" as my&gt;
-
-&lt;@my.copyright date="1999-2002"/&gt;</programlisting>
+          <para>Any output printed by the imported template will be ignored
+          (will not be inserted at the place of <literal>import</literal>
+          directive invocation). An imported template is executed to populate
+          its namespace with variables, and not to write to the output.</para>
 
           <para>The <literal><replaceable>path</replaceable></literal>
           parameter can be a relative path like <literal>"foo.ftl"</literal>
@@ -21641,26 +21753,34 @@ or
           directory of the template that uses the <literal>import</literal>
           directive. Absolute paths are relative to a base (often referred as
           the ''root directory of the templates'') that the programmer defines
-          when he configures FreeMarker.</para>
+          when configuring FreeMarker.</para>
 
           <para>Always use <literal>/</literal> (slash) to separate path
           components, never <literal>\</literal> (backslash). If you are
           loading templates from your local file system and it uses
-          backslashes (like under. Windows), FreeMarker will convert them
-          automatically.</para>
+          backslashes (like under Windows), FreeMarker will do the necessary
+          conversions automatically.</para>
 
           <para>Like with the <literal>include</literal> directive, <link
           linkend="ref_directive_include_acquisition">acquisition</link> and
           <link linkend="ref_directive_include_localized">localized
           lookup</link> may be used for resolving the path.</para>
 
-          <para><phrase role="forProgrammers">Note, that it is possible to
+          <para><phrase role="forProgrammers">Note that it's possible to
           automatically do the commonly used imports for all templates, with
-          the "auto imports" setting of
+          the "auto imports" setting of <literal>Configuration</literal>.
+          Because templates may not use all the automatically imported
+          namespaces, it's also possible to make imports lazy (on demand),
+          with the <quote>lazy auto imports</quote> setting of
           <literal>Configuration</literal>.</phrase></para>
 
           <para>If you are new to namespaces, you should read: <xref
           linkend="dgui_misc_namespace"/></para>
+
+          <para>In case you are not sure if you should use the
+          <literal>import</literal>, or the somewhat similar
+          <literal>include</literal> directive, <link
+          linkend="topic.import_vs_include">then see this</link>.</para>
         </section>
       </section>
 
@@ -21722,6 +21842,16 @@ or
 
         <section>
           <title>Description</title>
+
+          <note>
+            <para><emphasis>Using <literal>include</literal> directive is
+            almost always a bad practice</emphasis>, and you should consider
+            using <link linkend="ref.directive.import">the
+            <literal>import</literal> directive</link> instead! Even if using
+            <literal>import</literal> adds some verbosity, on the long run it
+            can pay off. See <link linkend="topic.import_vs_include">the
+            reasons here...</link></para>
+          </note>
 
           <para>You can use it to insert another FreeMarker template file
           (specified by the <literal><replaceable>path</replaceable></literal>
@@ -22052,6 +22182,73 @@ All rights reserved.</emphasis></programlisting>
 
               <listitem>
                 <para><literal>/footer.ftl</literal></para>
+              </listitem>
+            </itemizedlist>
+          </section>
+
+          <section xml:id="topic.import_vs_include">
+            <title>Why <literal>import</literal> should be used instead of
+            <literal>include</literal></title>
+
+            <para>Generally, using <link linkend="ref.directive.import">the
+            <literal>import</literal> directive</link> is a better practice
+            than using <literal>include</literal>.</para>
+
+            <para>At first glance, import is only fitting if you have a
+            collection of commonly used macros, functions, and other
+            variables, which you put into a template for reuse. But, people
+            often use <literal>include</literal> to insert a common fragment
+            of output (e.g. page footer) into multiple templates. The
+            <literal>import</literal> directive has no output, so it's clearly
+            not a direct replacement. But, it's usually a better practice to
+            <link linkend="dgui_misc_userdefdir">put those output fragments
+            into macros</link>, as macros can have parameters, or even nested
+            content. If you do that, you have a collection of macros in a
+            template, that you can <literal>import</literal>.</para>
+
+            <para>So if you have collection of macros, functions and other
+            variables in a template, this is why <literal>import</literal> is
+            generally a better choice:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Imported templates are processed only when first
+                requested. To compare with <literal>include</literal>, let's
+                say template <literal>top.ftl</literal> includes
+                <literal>commons.ftl</literal>, and
+                <literal>tables.ftl</literal>. If
+                <literal>tables.ftl</literal> also includes
+                <literal>commons.ftl</literal>, then now
+                <literal>commons.ftl</literal> will be processed twice. On the
+                other hand, importing <literal>commons.ftl</literal> for the
+                second time just gives back the namespace that was already
+                initialized during the first import.</para>
+              </listitem>
+
+              <listitem>
+                <para>With imports, each imported template has its own
+                namespace. As they don't just drop everything into a common
+                shared namespace, it's easier to see in templates where a
+                referred variable, or macro/function is coming from.
+                Accidental name clashes are also avoided.</para>
+              </listitem>
+
+              <listitem>
+                <para>If you have several collections of useful
+                macros/functions/constants (say,
+                <literal>commons.ftl</literal>, <literal>form.ftl</literal>,
+                <literal>report.ftl</literal>, etc.), and you decide to
+                auto-import them, but a top-level template usually only uses
+                some of them, you can configure auto-imports to be lazy (i.e.,
+                they on happen when something in their namespace is actually
+                accessed). This is not possible with auto-includes.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>import</literal> never prints to the output,
+                while <literal>include</literal> might prints unwanted output,
+                like some whitespace that wasn't removed by the automatic
+                whitespace removal.</para>
               </listitem>
             </itemizedlist>
           </section>
@@ -25271,6 +25468,18 @@ There was no specific handler for node y
           2.3.0 or 2.2.8 versions. The version number of non-final releases
           contains dash and further info after the numbers, like in
           2.3.21-nightly_20140726T151800Z.</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>time zone</primary>
+            </indexterm><indexterm>
+              <primary>time_zone</primary>
+            </indexterm><literal>time_zone</literal> (exists since FreeMarker
+          2.3.31): The current value of the <literal>time_zone</literal>
+          setting, as a string. This is the ID of the time zone, like
+          <literal>GMT+01:00</literal>, or
+          <literal>America/Los_Angeles</literal>.</para>
         </listitem>
       </itemizedlist>
 
@@ -28985,6 +29194,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 well behaving <literal>ObjectWrapper</literal>, like
                 <literal>DefaultObjectWrapper</literal>.)</para>
 
+                <para>If you are using the default object wrapper class
+                (<literal>freemarker.template.DefaultObjectWrapper</literal>),
+                or a subclass of it, you should disable the XML (DOM) wrapping
+                feature of it, by setting its
+                <literal>DOMNodeSupport</literal> property to
+                <literal>false</literal>. The problem with the XML wrapping
+                feature, which wraps <literal>org.w3c.dom.Node</literal>
+                objects on special way to make them easier to work with in
+                templates, is that this facility by design lets template
+                authors evaluate arbitrary XPath expressions, and XPath can do
+                too much in certain setups. If you really need the XML
+                wrapping facility, review carefully what XPath expressions are
+                possible in your setup. Also, be sure you don't use the long
+                deprecated, and more dangerous
+                <literal>freemarker.ext.xml</literal> package, only
+                <literal>freemarker.ext.dom</literal>. Also, note that when
+                using the XML wrapping feature, not allowing
+                <literal>org.w3c.dom.Node</literal> methods in the
+                <literal>MemberAccessPolicy</literal> has no effect, since it
+                doesn't expose Java <literal>Node</literal> members to
+                templates directly.</para>
+
                 <para>Last not least, some maybe aware of the historical
                 legacy that standard object wrappers filter out some well
                 known <quote>unsafe</quote> methods, like
@@ -29033,11 +29264,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <literal>TemplateModel</literal>, its static initialization
                 will be run. To avoid these, you should use a
                 <literal>TemplateClassResolver</literal> that restricts the
-                accessible classes (possibly based on which template asks for
-                them), such as
+                accessible classes to the absolute minimum (possibly based on
+                which template asks for them), such as
                 <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.
-                Note that if, and only if your
-                <literal>ObjectWrapper</literal> is a
+                Do <emphasis>not</emphasis> use
+                <literal>TemplateClassResolver.SAFER_RESOLVER</literal>, it's
+                not restrictive enough for this purpose! Note that if, and
+                only if your <literal>ObjectWrapper</literal> is a
                 <literal>BeansWrapper</literal> or a subclass of it (typically
                 <literal>DefaultObjectWrapper</literal>), constructors not
                 allowed by the <literal>MemberAccessPolicy</literal> also
@@ -29179,6 +29412,154 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_31">
+        <title>2.3.31</title>
+
+        <para>Release date: FIXME</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added <literal>?eval_json</literal> to evaluate JSON given
+              as flat string. This was added as <literal>?eval</literal> is
+              routinely misused for the same purpose, which not only doesn't
+              work for all JSON-s, but can be a security problem. <link
+              linkend="ref_builtin_eval_json">See more here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new special variable, <literal>time_zone</literal>
+              (referred like <literal>.time_zone</literal>, like all special
+              variables), to retrieve the current value of the
+              <literal>time_zone</literal> setting as a string.</para>
+            </listitem>
+
+            <listitem>
+              <para>Allowed escaping <literal>#</literal> with backlash in
+              identifier names (not in string), as it used to occur in
+              database column names. Like if you have a column name like
+              <literal>#users</literal>, you can refer to it as
+              <literal>row.\#users</literal>. (Alternatively,
+              <literal>row['#users']</literal> always worked, but is often
+              less convenient.)</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/projects/FREEMARKER/issues/FREEMARKER-169">FREEMARKER-169</link>:
+              Fixed bug that made <literal>?c</literal> and
+              <quote>computer</quote> number format inconsistent. If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.31 (or higher), when you set the
+              <literal>number_format</literal> setting to
+              <literal>computer</literal> (or you call
+              <literal>Environment.getCNumberFormat()</literal>), the format
+              now matches the behavior of <literal>?c</literal>, when
+              formatting infinite (positive and negative), and NaN. Matching
+              the behavior of <literal>?c</literal> was always the intent, but
+              before this incompatible improvement, the
+              <literal>computer</literal> format always behaved like
+              <literal>?c</literal> before incompatible improvements 2.3.21,
+              where instead of <quote>INF</quote>, and <quote>NaN</quote>, the
+              results used Unicode characters U+221E, and U+FFFD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug where <literal>.globals</literal> weren't seen
+              as namesapce, so something like <literal>&lt;#assign
+              <replaceable>name</replaceable> =
+              <replaceable>value</replaceable> in .globals&gt;</literal>
+              failed (although you should use <literal>&lt;#global
+              <replaceable>name</replaceable> =
+              <replaceable>value</replaceable>&gt;</literal> instead
+              anyway).</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>More helpful parser error messages for nesting problems
+              (caused by missed or malformed end-tags usually).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>DOMNodeSupport</literal> and
+              <literal>JythonSupport</literal> <literal>boolean</literal>
+              properties to <literal>DefaultObjectWrapper</literal>. This
+              allows disabling the special wrapping of DOM nodes and Jython
+              classes. This might be desirable <link
+              linkend="faq_template_uploading_security">for security
+              reasons</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-145">FREEMARKER-145</link>:
+              Fixed bug where methods with "overloaded" return type may become
+              inaccessible on Java 9+, if some overriding subclasses are not
+              public. (This is because
+              <literal>java.beans.Introspector</literal> behavior has changed
+              with Java 9.)</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-133">FREEMARKER-133</link>:
+              Fixed bug where FreeMarker sometimes tries to expose public
+              methods that are defined or overridden in a non-public class, if
+              the non-public class was then extended by a public class.
+              Calling such method just ends up with
+              <literal>IllegalAccessException</literal>, but they shouldn't be
+              exposed on the first place. Furthermore, such a wrong method
+              sometimes replaces the good version of the method, which would
+              be callable. When this glitch happens is somewhat unpredictable,
+              as it also depends on what methods
+              <literal>java.beans.Introspector</literal> exposes (which at
+              very least can depend on the Java version), and in what
+              order.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug where OSGi
+              <literal>Bundle-RequiredExecutionEnvironment</literal> in
+              <literal>META-INF/MANIFEST.FM</literal> has incorrectly
+              contained JavaSE-1.6, J2SE-1.5</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-159">FREEMARKER-159</link>:
+              Set <literal>Automatic-Module-Name</literal> to
+              <literal>freemarker</literal> in
+              <literal>META-INF/MANIFEST.FM</literal>. In most cases this was
+              the deduced Java 9 module name earlier, but that was fragile, as
+              Java has deduced it from the jar file name.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-165">FREEMARKER-165</link>:
+              Fixed bug where where if the namespace expression in a block
+              assignment (like <literal>&lt;#assign
+              <replaceable>x</replaceable> in
+              <replaceable>someNamespace</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>)
+              refers to a missing variable, or has the wrong type, FreeMarker
+              has thrown <literal>NullPointerException</literal> or
+              <literal>ClassCastException</literal>, instead of
+              <literal>InvalidReferenceException</literal> and
+              <literal>NonNamespaceException</literal> with proper helpful
+              message.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_30">
         <title>2.3.30</title>

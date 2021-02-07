@@ -35,6 +35,8 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
     private boolean iterableSupport;
+    private boolean domNodeSupport;
+    private boolean jythonSupport;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
@@ -43,6 +45,8 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
                 "freemarker.configuration", "DefaultObjectWrapper");
         useAdaptersForContainers = getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22;
         forceLegacyNonListCollections = true; // [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
+        domNodeSupport = true;
+        jythonSupport = true;
     }
 
     /** See {@link DefaultObjectWrapper#getUseAdaptersForContainers()}. */
@@ -63,6 +67,26 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     /** See {@link DefaultObjectWrapper#setForceLegacyNonListCollections(boolean)}. */
     public void setForceLegacyNonListCollections(boolean legacyNonListCollectionWrapping) {
         this.forceLegacyNonListCollections = legacyNonListCollectionWrapping;
+    }
+
+    /** See {@link DefaultObjectWrapper#getDOMNodeSupport()}. */
+    public boolean getDOMNodeSupport() {
+        return domNodeSupport;
+    }
+
+    /** See {@link DefaultObjectWrapper#setDOMNodeSupport(boolean)}. */
+    public void setDOMNodeSupport(boolean domNodeSupport) {
+        this.domNodeSupport = domNodeSupport;
+    }
+
+    /** See {@link DefaultObjectWrapper#getJythonSupport()}. */
+    public boolean getJythonSupport() {
+        return jythonSupport;
+    }
+
+    /** See {@link DefaultObjectWrapper#setJythonSupport(boolean)}. */
+    public void setJythonSupport(boolean jythonSupport) {
+        this.jythonSupport = jythonSupport;
     }
 
     /**
@@ -90,6 +114,8 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         result = result * prime + (useAdaptersForContainers ? 1231 : 1237);
         result = result * prime + (forceLegacyNonListCollections ? 1231 : 1237);
         result = result * prime + (iterableSupport ? 1231 : 1237);
+        result = result * prime + (domNodeSupport ? 1231 : 1237);
+        result = result * prime + (jythonSupport ? 1231 : 1237);
         return result;
     }
 
@@ -99,7 +125,9 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         final DefaultObjectWrapperConfiguration thatDowCfg = (DefaultObjectWrapperConfiguration) that;
         return useAdaptersForContainers == thatDowCfg.getUseAdaptersForContainers()
                 && forceLegacyNonListCollections == thatDowCfg.forceLegacyNonListCollections
-                && iterableSupport == thatDowCfg.iterableSupport;
+                && iterableSupport == thatDowCfg.iterableSupport
+                && domNodeSupport == thatDowCfg.domNodeSupport
+                && jythonSupport == thatDowCfg.jythonSupport;
     }
 
 }

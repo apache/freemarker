@@ -20,8 +20,9 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import freemarker.template.Template;
@@ -43,6 +44,9 @@ import freemarker.template.utility.StringUtil;
  * @see TokenMgrError
  */
 public class ParseException extends IOException implements FMParserConstants {
+
+    private static final String END_TAG_SYNTAX_HINT
+            = "(Note that FreeMarker end-tags must have # or @ after the / character.)";
 
     /**
      * This is the last token that has been consumed successfully.  If
@@ -371,138 +375,214 @@ public class ParseException extends IOException implements FMParserConstants {
             if (description != null) return description;  // When we already have it from the constructor
         }
 
-        String tokenErrDesc;
-        if (currentToken != null) {
-            tokenErrDesc = getCustomTokenErrorDescription();
-            if (tokenErrDesc == null) {
-                // The default JavaCC message generation stuff follows.
-                StringBuilder expected = new StringBuilder();
-                int maxSize = 0;
-                for (int i = 0; i < expectedTokenSequences.length; i++) {
-                    if (i != 0) {
-                        expected.append(eol);
-                    }
-                    expected.append("    ");
-                    if (maxSize < expectedTokenSequences[i].length) {
-                        maxSize = expectedTokenSequences[i].length;
-                    }
-                    for (int j = 0; j < expectedTokenSequences[i].length; j++) {
-                        if (j != 0) expected.append(' ');
-                        expected.append(tokenImage[expectedTokenSequences[i][j]]);
-                    }
-                }
-                tokenErrDesc = "Encountered \"";
-                Token tok = currentToken.next;
-                for (int i = 0; i < maxSize; i++) {
-                    if (i != 0) tokenErrDesc += " ";
-                    if (tok.kind == 0) {
-                        tokenErrDesc += tokenImage[0];
-                        break;
-                    }
-                    tokenErrDesc += add_escapes(tok.image);
-                    tok = tok.next;
-                }
-                tokenErrDesc += "\", but ";
+        if (currentToken == null) {
+            return null;
+        }
 
-                if (expectedTokenSequences.length == 1) {
-                    tokenErrDesc += "was expecting:" + eol;
-                } else {
-                    tokenErrDesc += "was expecting one of:" + eol;
+        Token unexpectedTok = currentToken.next;
+
+        if (unexpectedTok.kind == EOF) {
+            Set<String> endTokenDescs = getExpectedEndTokenDescs();
+            return "Unexpected end of file reached."
+                    + (endTokenDescs.size() == 0
+                            ? ""
+                            : " You have an unclosed " + joinWithAnds(endTokenDescs)
+                                    + ". Check if the FreeMarker end-tags are present, and aren't malformed. "
+                                    + END_TAG_SYNTAX_HINT);
+        }
+
+        int maxExpectedTokenSequenceLength = 0;
+        for (int i = 0; i < expectedTokenSequences.length; i++) {
+            int[] expectedTokenSequence = expectedTokenSequences[i];
+            if (maxExpectedTokenSequenceLength < expectedTokenSequence.length) {
+                maxExpectedTokenSequenceLength = expectedTokenSequence.length;
+            }
+        }
+
+        StringBuilder tokenErrDesc = new StringBuilder();
+        tokenErrDesc.append("Encountered ");
+        boolean encounteredEndTag = false;
+        for (int i = 0; i < maxExpectedTokenSequenceLength; i++) {
+            if (i != 0) {
+                tokenErrDesc.append(" ");
+            }
+            if (unexpectedTok.kind == 0) {
+                tokenErrDesc.append(tokenImage[0]);
+                break;
+            }
+
+            String image = unexpectedTok.image;
+            if (i == 0) {
+                if (image.startsWith("</") || image.startsWith("[/")) {
+                    encounteredEndTag = true;
                 }
-                tokenErrDesc += expected;
+            }
+            tokenErrDesc.append(StringUtil.jQuote(image));
+            unexpectedTok = unexpectedTok.next;
+        }
+        Set<String> expectedEndTokenDescs;
+        int unexpTokKind = currentToken.next.kind;
+        if (getIsEndToken(unexpTokKind) || unexpTokKind == ELSE || unexpTokKind == ELSE_IF) {
+            expectedEndTokenDescs = new LinkedHashSet<>(getExpectedEndTokenDescs());
+            if (unexpTokKind == ELSE || unexpTokKind == ELSE_IF) {
+                // If <\#if> was expected, yet #else or #elseif wasn't, then this isn't nesting related problem.
+                expectedEndTokenDescs.remove(getEndTokenDescIfIsEndToken(END_IF));
+            } else {
+                expectedEndTokenDescs.remove(getEndTokenDescIfIsEndToken(unexpTokKind));
             }
         } else {
-            tokenErrDesc = null;
+            expectedEndTokenDescs = Collections.emptySet();
         }
-        return tokenErrDesc;
+        // Generate more helpful error message if this was a nesting related problem:
+        if (!expectedEndTokenDescs.isEmpty()) {
+            if (unexpTokKind == ELSE || unexpTokKind == ELSE_IF) {
+                tokenErrDesc.append(", which can only be used where an #if");
+                if (unexpTokKind == ELSE) {
+                    tokenErrDesc.append(" or #list");
+                }
+                tokenErrDesc.append(" could be closed");
+            }
+            tokenErrDesc.append(", but at this place only ");
+            tokenErrDesc.append(expectedEndTokenDescs.size() > 1 ? "these" : "this");
+            tokenErrDesc.append(" can be closed: ");
+            boolean first = true;
+            for (String expectedEndTokenDesc : expectedEndTokenDescs) {
+                if (!first) {
+                    tokenErrDesc.append(", ");
+                } else {
+                    first = false;
+                }
+                tokenErrDesc.append(
+                        !expectedEndTokenDesc.startsWith("\"")
+                                ? StringUtil.jQuote(expectedEndTokenDesc)
+                                : expectedEndTokenDesc);
+            }
+            tokenErrDesc.append(".");
+            if (encounteredEndTag) {
+                tokenErrDesc.append(" This usually because of wrong nesting of FreeMarker directives, like a "
+                        + "missed or malformed end-tag somewhere. " + END_TAG_SYNTAX_HINT);
+            }
+            tokenErrDesc.append(eol);
+            tokenErrDesc.append("Was ");
+        } else {
+            tokenErrDesc.append(", but was ");
+        }
+
+        if (expectedTokenSequences.length == 1) {
+            tokenErrDesc.append("expecting pattern:");
+        } else {
+            tokenErrDesc.append("expecting one of these patterns:");
+        }
+        tokenErrDesc.append(eol);
+
+        for (int i = 0; i < expectedTokenSequences.length; i++) {
+            if (i != 0) {
+                tokenErrDesc.append(eol);
+            }
+            tokenErrDesc.append("    ");
+            int[] expectedTokenSequence = expectedTokenSequences[i];
+            for (int j = 0; j < expectedTokenSequence.length; j++) {
+                if (j != 0) {
+                    tokenErrDesc.append(' ');
+                }
+                tokenErrDesc.append(tokenImage[expectedTokenSequence[j]]);
+            }
+        }
+
+        return tokenErrDesc.toString();
     }
 
-    private String getCustomTokenErrorDescription() {
-        final Token nextToken = currentToken.next;
-        final int kind = nextToken.kind;
-        if (kind == EOF) {
-            Set/*<String>*/ endNames = new HashSet();
-            for (int i = 0; i < expectedTokenSequences.length; i++) {
-                int[] sequence = expectedTokenSequences[i];
-                for (int j = 0; j < sequence.length; j++) {
-                    switch (sequence[j]) {
-                    case END_FOREACH:
-                        endNames.add( "#foreach");
-                        break;
-                    case END_LIST:
-                        endNames.add( "#list");
-                        break;
-                    case END_SWITCH:
-                        endNames.add( "#switch");
-                        break;
-                    case END_IF:
-                        endNames.add( "#if");
-                        break;
-                    case END_COMPRESS:
-                        endNames.add( "#compress");
-                        break;
-                    case END_MACRO:
-                        endNames.add( "#macro");
-                    case END_FUNCTION:
-                        endNames.add( "#function");
-                        break;
-                    case END_TRANSFORM:
-                        endNames.add( "#transform");
-                        break;
-                    case END_ESCAPE:
-                        endNames.add( "#escape");
-                        break;
-                    case END_NOESCAPE:
-                        endNames.add( "#noescape");
-                        break;
-                    case END_ASSIGN:
-                        endNames.add( "#assign");
-                        break;
-                    case END_LOCAL:
-                        endNames.add( "#local");
-                        break;
-                    case END_GLOBAL:
-                        endNames.add( "#global");
-                        break;
-                    case END_ATTEMPT:
-                        endNames.add( "#attempt");
-                        break;
-                    case CLOSING_CURLY_BRACKET:
-                        endNames.add( "\"{\"");
-                        break;
-                    case CLOSE_BRACKET:
-                        endNames.add( "\"[\"");
-                        break;
-                    case CLOSE_PAREN:
-                        endNames.add( "\"(\"");
-                        break;
-                    case UNIFIED_CALL_END:
-                        endNames.add( "@...");
-                        break;
-                    }
+    /**
+     * Returns the descriptions end-tags (or expression closing tokens) that we could have at this point.
+     * This is for generating error messages.
+     */
+    private Set<String> getExpectedEndTokenDescs() {
+        Set<String> endTokenDescs = new LinkedHashSet<>();
+        for (int i = 0; i < expectedTokenSequences.length; i++) {
+            int[] sequence = expectedTokenSequences[i];
+            for (int j = 0; j < sequence.length; j++) {
+                int token = sequence[j];
+                String endTokenDesc = getEndTokenDescIfIsEndToken(token);
+                if (endTokenDesc != null) {
+                    endTokenDescs.add(endTokenDesc);
                 }
             }
-            return "Unexpected end of file reached."
-                    + (endNames.size() == 0 ? "" : " You have an unclosed " + concatWithOrs(endNames) + ".");
-        } else if (kind == ELSE) {
-            return "Unexpected directive, \"#else\". "
-                    + "Check if you have a valid #if-#elseif-#else or #list-#else structure.";
-        } else if (kind == END_IF || kind == ELSE_IF) {
-            return "Unexpected directive, "
-                    + StringUtil.jQuote(nextToken)
-                    + ". Check if you have a valid #if-#elseif-#else structure.";
         }
-        return null;
+        return endTokenDescs;
     }
 
-    private String concatWithOrs(Set/*<String>*/ endNames) {
-        StringBuilder sb = new StringBuilder(); 
-        for (Iterator/*<String>*/ it = endNames.iterator(); it.hasNext(); ) {
-            String endName = (String) it.next();
+    private boolean getIsEndToken(int token) {
+        return getEndTokenDescIfIsEndToken(token) != null;
+    }
+
+    private String getEndTokenDescIfIsEndToken(int token) {
+        String endTokenDesc = null;
+        switch (token) {
+        case END_FOREACH:
+            endTokenDesc = "#foreach";
+            break;
+        case END_LIST:
+            endTokenDesc = "#list";
+            break;
+        case END_SEP:
+            endTokenDesc = "#sep";
+            break;
+        case END_ITEMS:
+            endTokenDesc = "#items";
+            break;
+        case END_SWITCH:
+            endTokenDesc = "#switch";
+            break;
+        case END_IF:
+            endTokenDesc = "#if";
+            break;
+        case END_COMPRESS:
+            endTokenDesc = "#compress";
+            break;
+        case END_MACRO:
+        case END_FUNCTION:
+            endTokenDesc = "#macro or #function";
+            break;
+        case END_TRANSFORM:
+            endTokenDesc = "#transform";
+            break;
+        case END_ESCAPE:
+            endTokenDesc = "#escape";
+            break;
+        case END_NOESCAPE:
+            endTokenDesc = "#noescape";
+            break;
+        case END_ASSIGN:
+        case END_GLOBAL:
+        case END_LOCAL:
+            endTokenDesc = "#assign or #local or #global";
+            break;
+        case END_ATTEMPT:
+            endTokenDesc = "#attempt";
+            break;
+        case CLOSING_CURLY_BRACKET:
+            endTokenDesc = "\"{\"";
+            break;
+        case CLOSE_BRACKET:
+            endTokenDesc = "\"[\"";
+            break;
+        case CLOSE_PAREN:
+            endTokenDesc = "\"(\"";
+            break;
+        case UNIFIED_CALL_END:
+            endTokenDesc = "@...";
+            break;
+        }
+        return endTokenDesc;
+    }
+
+    private String joinWithAnds(Collection<String> strings) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : strings) {
             if (sb.length() != 0) {
-                sb.append(" or ");
+                sb.append(" and ");
             }
-            sb.append(endName);
+            sb.append(s);
         }
         return sb.toString();
     }

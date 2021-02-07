@@ -91,7 +91,29 @@ public class ParsingErrorMessagesTest extends TemplateTest {
             assertErrorContains("[#ftl]${'x'>", "end of file");
         }
     }
-    
+
+    @Test
+    public void testNestingErrors() throws Exception {
+        assertErrorContains(
+                "<#if true><#list xs as x></list></#if>",
+                "</#if>", "#list", "end-tag");
+        assertErrorContains(
+                "<#if true><#assign x><#else></#assign></#if>",
+                "<#else>", "#if", "#list", "#assign");
+        assertErrorContains(
+                "<#list xs><#items as x></#list>",
+                "</#list>", "#items", "end-tag");
+        assertErrorContains(
+                "<#list xs as x><#sep></#if></#list>",
+                "</#if>", "#list", "#sep", "end-tag");
+        assertErrorContains(
+                "<#list xs as x>",
+                "end of file", "#list", "end-tag");
+        assertErrorContains(
+                "<#if true>text<#list xs as x></#list>",
+                "end of file", "#if", "end-tag");
+    }
+
     /**
      * "assertErrorContains" with both angle bracket and square bracket tag syntax, by converting the input tag syntax.
      * Beware, it uses primitive search-and-replace.

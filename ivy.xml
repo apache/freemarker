@@ -138,8 +138,8 @@
 
     <dependency org="ch.qos.logback" name="logback-classic" rev="1.1.2" conf="test->default" />
 
-    <dependency org="commons-io" name="commons-io" rev="2.2" conf="test->default" />
-    <dependency org="com.google.guava" name="guava-jdk5" rev="17.0" conf="test->default" />
+    <dependency org="commons-io" name="commons-io" rev="2.7" conf="test->default" />
+    <dependency org="com.google.guava" name="guava" rev="29.0-jre" conf="test->default" />
 
     <dependency org="org.eclipse.jetty" name="jetty-server" rev="&jetty.version;" conf="test->default" />
     <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="&jetty.version;" conf="test->default" />
@@ -164,7 +164,7 @@
 
     <!-- docs -->
     
-    <dependency org="org.freemarker" name="docgen" rev="2.0-branch-head" conf="manual->default" changing="true" />
+    <dependency org="org.apache.freemarker.docgen" name="freemarker-docgen-ant" rev="0.0.2-SNAPSHOT" conf="manual->default" changing="true" />
     
     <!-- parser -->
     

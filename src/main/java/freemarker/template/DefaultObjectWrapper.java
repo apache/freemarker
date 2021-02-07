@@ -74,8 +74,10 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
     private boolean iterableSupport;
+    private boolean domNodeSupport;
+    private boolean jythonSupport;
     private final boolean useAdapterForEnumerations;
-    
+
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
@@ -135,6 +137,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 && getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
         forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
         iterableSupport = dowDowCfg.getIterableSupport();
+        domNodeSupport = dowDowCfg.getDOMNodeSupport();
+        jythonSupport = dowDowCfg.getJythonSupport();
         finalizeConstruction(writeProtected);
     }
 
@@ -259,9 +263,10 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Called for an object that isn't considered to be of a "basic" Java type, like for an application specific type,
      * or for a W3C DOM node. In its default implementation, W3C {@link Node}-s will be wrapped as {@link NodeModel}-s
      * (allows DOM tree traversal), Jython objects will be delegated to the {@code JythonWrapper}, others will be
-     * wrapped using {@link BeansWrapper#wrap(Object)}. Note that if {@link #getMemberAccessPolicy()} doesn't return
-     * a {@link DefaultMemberAccessPolicy} or {@link LegacyDefaultMemberAccessPolicy}, then Jython wrapper will be
-     * skipped for security reasons.
+     * wrapped using {@link BeansWrapper#wrap(Object)}. However, these can be turned off with the
+     * {@link #setDOMNodeSupport(boolean)} and {@link #setJythonSupport(boolean)}. Note that if
+     * {@link #getMemberAccessPolicy()} doesn't return a {@link DefaultMemberAccessPolicy} or
+     * {@link LegacyDefaultMemberAccessPolicy}, then Jython wrapper will be skipped for security reasons.
      * 
      * <p>
      * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
@@ -269,16 +274,20 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * behavior is fine with you).
      */
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        if (obj instanceof Node) {
+        if (domNodeSupport && obj instanceof Node) {
             return wrapDomNode(obj);
         }
-        MemberAccessPolicy memberAccessPolicy = getMemberAccessPolicy();
-        if (memberAccessPolicy instanceof DefaultMemberAccessPolicy
-                || memberAccessPolicy instanceof LegacyDefaultMemberAccessPolicy) {
-            if (JYTHON_WRAPPER != null && JYTHON_OBJ_CLASS.isInstance(obj)) {
-                return JYTHON_WRAPPER.wrap(obj);
+
+        if (jythonSupport) {
+            MemberAccessPolicy memberAccessPolicy = getMemberAccessPolicy();
+            if (memberAccessPolicy instanceof DefaultMemberAccessPolicy
+                    || memberAccessPolicy instanceof LegacyDefaultMemberAccessPolicy) {
+                if (JYTHON_WRAPPER != null && JYTHON_OBJ_CLASS.isInstance(obj)) {
+                    return JYTHON_WRAPPER.wrap(obj);
+                }
             }
         }
+
         return super.wrap(obj); 
     }
     
@@ -393,6 +402,51 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
+     * Getter pair of {@link #setDOMNodeSupport(boolean)}; see there.
+     *
+     * @since 2.3.31
+     */
+    public final boolean getDOMNodeSupport() {
+        return domNodeSupport;
+    }
+
+    /**
+     * Enables wrapping {@link Node}-s on a special way (as described in the "XML Processing Guide" in the Manual);
+     * defaults to {@code true}.. If this is {@code true}, {@link Node}+s will be wrapped like any other generic object.
+     *
+     * @see #handleUnknownType(Object)
+     *
+     * @since 2.3.31
+     */
+    public void setDOMNodeSupport(boolean domNodeSupport) {
+        checkModifiable();
+        this.domNodeSupport = domNodeSupport;
+    }
+
+    /**
+     * Getter pair of {@link #setJythonSupport(boolean)}; see there.
+     *
+     * @since 2.3.31
+     */
+    public final boolean getJythonSupport() {
+        return jythonSupport;
+    }
+
+    /**
+     * Enables wrapping Jython objects in a special way; defaults to {@code true}. If this is {@code false}, they will
+     * be wrapped like any other generic object. Note that Jython wrapping is legacy feature, and might by disabled by
+     * the selected {@link MemberAccessPolicy}, even if this is {@code true}; see {@link #handleUnknownType(Object)}.
+     *
+     * @see #handleUnknownType(Object)
+     *
+     * @since 2.3.31
+     */
+    public void setJythonSupport(boolean jythonSupport) {
+        checkModifiable();
+        this.jythonSupport = jythonSupport;
+    }
+
+    /**
      * Returns the lowest version number that is equivalent with the parameter version.
      * 
      * @since 2.3.22
@@ -420,8 +474,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
         }
         
-        return "useAdaptersForContainers=" + useAdaptersForContainers + ", forceLegacyNonListCollections="
-                + forceLegacyNonListCollections + ", iterableSupport=" + iterableSupport + bwProps;
+        return "useAdaptersForContainers=" + useAdaptersForContainers
+                + ", forceLegacyNonListCollections=" + forceLegacyNonListCollections
+                + ", iterableSupport=" + iterableSupport
+                + ", domNodeSupport=" + domNodeSupport
+                + ", jythonSupport=" + jythonSupport
+                + bwProps;
     }
     
 }

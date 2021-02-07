@@ -15,12 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
-language: java
+os: linux
+dist: focal
+
+arch:
+  - amd64
+  - arm64
+
+addons:
+  apt:
+    packages:
+      - openjdk-8-jdk
+      - ant-optional
+
+cache:
+  directories:
+    - $HOME/.ivy-freemarker/cache
+
 before_install:
-- sudo apt-get -qq update
-# ant-optional is needed for ant junit
-- sudo apt-get install ant-optional
-install: ant download-ivy
-script: ant ci
-jdk:
-  - openjdk8
+  - lscpu
+  - export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-${TRAVIS_CPU_ARCH}/"
+  - export PATH="$JAVA_HOME/bin:$PATH"
+  - java -version
+  - ant -version
+
+install:
+  - ant download-ivy  
+
+script: 
+  - ant ci  

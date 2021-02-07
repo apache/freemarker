@@ -65,6 +65,7 @@ import freemarker.core.BuiltInsForSequences.sequenceBI;
 import freemarker.core.BuiltInsForSequences.sortBI;
 import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
+import freemarker.core.BuiltInsForStringsMisc.evalJsonBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -84,7 +85,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<>();
-    static final int NUMBER_OF_BIS = 289;
+    static final int NUMBER_OF_BIS = 291;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static final String BI_NAME_SNAKE_CASE_WITH_ARGS = "with_args";
@@ -120,6 +121,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
+        putBI("eval_json", "evalJson", new evalJsonBI());
         putBI("exists", new BuiltInsForExistenceHandling.existsBI());
         putBI("filter", new BuiltInsForSequences.filterBI());
         putBI("first", new firstBI());

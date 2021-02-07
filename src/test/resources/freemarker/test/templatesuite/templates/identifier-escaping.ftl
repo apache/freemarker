@@ -30,9 +30,9 @@
 </#function>
 ${f\-a("f-a")}
 
-<#assign \-\-\-\.\: = 'dash-dash-dash etc.'>
-${\-\-\-\.\:}
-${.vars['---.:']}
+<#assign \-\-\-\.\:\# = 'dash-dash-dash etc.'>
+${\-\-\-\.\:\#}
+${.vars['---.:#']}
 <#assign hash = { '--moz-prop': 'propVal' }>
 ${hash.\-\-moz\-prop}
 ${hash['--moz-prop']}

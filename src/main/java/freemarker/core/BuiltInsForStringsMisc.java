@@ -113,6 +113,22 @@ class BuiltInsForStringsMisc {
         
     }
 
+    static class evalJsonBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            try {
+                return JSONParser.parse(s);
+            } catch (JSONParser.JSONParseException e) {
+                throw new _MiscTemplateException(this, env,
+                        "Failed to \"?", key, "\" string with this error:\n\n",
+                        _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        _MessageUtil.EMBEDDED_MESSAGE_END,
+                        "\n\nThe failing expression:");
+            }
+        }
+    }
+
     static class numberBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
@@ -170,5 +186,4 @@ class BuiltInsForStringsMisc {
 
     // Can't be instantiated
     private BuiltInsForStringsMisc() { }
-    
 }

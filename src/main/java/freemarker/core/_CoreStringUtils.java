@@ -46,7 +46,8 @@ public final class _CoreStringUtils {
         scanForQuotationType: for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
             if (!(i == 0 ? StringUtil.isFTLIdentifierStart(c) : StringUtil.isFTLIdentifierPart(c)) && c != '@') {
-                if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
+                if ((quotationType == 0 || quotationType == '\\')
+                        && StringUtil.isBackslashEscapedFTLIdentifierCharacter(c)) {
                     quotationType = '\\';
                 } else {
                     quotationType = '"';
@@ -66,8 +67,27 @@ public final class _CoreStringUtils {
         }
     }
 
-    private static String backslashEscapeIdentifier(String name) {
-        return StringUtil.replace(StringUtil.replace(StringUtil.replace(name, "-", "\\-"), ".", "\\."), ":", "\\:");
+    /*
+     * Escapes an identifier. This assumes that the identifier was once accepted by the parser, thus it is properly
+     * escapeable. Invalid characters that can't be escaped will be left as is. (This is actually feature because of
+     * historically weirdness, like that a sole {@code *} is a valid subvariable name, which must not be escaped.)
+     */
+    public static String backslashEscapeIdentifier(String name) {
+        StringBuilder sb = null;
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (StringUtil.isBackslashEscapedFTLIdentifierCharacter(c)) {
+                if (sb == null) {
+                    sb = new StringBuilder(name.length() + 8);
+                    sb.append(name, 0, i);
+                }
+                sb.append('\\');
+            }
+            if (sb != null) {
+                sb.append(c);
+            }
+        }
+        return sb == null ? name : sb.toString();
     }
 
     /**
