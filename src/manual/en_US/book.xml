@@ -29416,7 +29416,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>
 
-        <para>Release date: FIXME</para>
+        <para>Release date: 2021-02-09 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
