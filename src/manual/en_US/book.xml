@@ -13336,9 +13336,11 @@ Green Mouse</programlisting>
             <primary>chop_linebreak built-in</primary>
           </indexterm>
 
-          <para>The string without the <link
+          <para>Returns the string without the <link
           linkend="gloss.lineBreak">line-break</link> at its very end if there
-          was a line-break, otherwise the unchanged string.</para>
+          was a line-break, otherwise the unchanged string. If the string ends
+          with multiple line-breaks, only the last line-break is
+          removed.</para>
         </section>
 
         <section xml:id="ref_builtin_contains">
@@ -13356,8 +13358,7 @@ Green Mouse</programlisting>
           <para>Returns if the substring specified as the parameter to this
           built-in occurrs in the string. For example:</para>
 
-          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;
-</programlisting>
+          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;</programlisting>
 
           <para>This will output:</para>
 
