@@ -29558,6 +29558,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>NonNamespaceException</literal> with proper helpful
               message.</para>
             </listitem>
+
+            <listitem>
+              <para>Build changes:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Simplified the way Ivy is used. No need to upgrade
+                  dependencies manually anymore.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Test suite is now ran on ARM as well on CI
+                  (Travis).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Docgen is now a Maven dependency, although still from
+                  Apache snapshot repo.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
