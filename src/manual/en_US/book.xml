@@ -29417,7 +29417,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>
 
-        <para>Release date: 2021-02-09 + release process</para>
+        <para>Release date: 2021-02-16</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -29560,22 +29560,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Build changes:</para>
+              <para>Build related changes:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>Simplified the way Ivy is used. No need to upgrade
-                  dependencies manually anymore.</para>
+                  <para>Simplified the way Apache Ivy is used in our Ant
+                  build. It's now used on the standard way, there's no
+                  <literal>ant update-deps</literal> anymore.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Test suite is now ran on ARM as well on CI
+                  <para>Test suite is now ran on ARM (64 bit) as well on CI
                   (Travis).</para>
                 </listitem>
 
                 <listitem>
-                  <para>Docgen is now a Maven dependency, although still from
-                  Apache snapshot repo.</para>
+                  <para>FreeMarker Manual and web site now works much better
+                  on mobile, because of developments in the Docgen
+                  project.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Docgen is now a Maven project, and so a plain Maven
+                  dependency of the other projects (although, it's still only
+                  in the Apache Snapshot Repository, not in Central yet). With
+                  this we could get rid of our Ivy repository.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
