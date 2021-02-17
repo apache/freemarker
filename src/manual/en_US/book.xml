@@ -13336,9 +13336,11 @@ Green Mouse</programlisting>
             <primary>chop_linebreak built-in</primary>
           </indexterm>
 
-          <para>The string without the <link
+          <para>Returns the string without the <link
           linkend="gloss.lineBreak">line-break</link> at its very end if there
-          was a line-break, otherwise the unchanged string.</para>
+          was a line-break, otherwise the unchanged string. If the string ends
+          with multiple line-breaks, only the last line-break is
+          removed.</para>
         </section>
 
         <section xml:id="ref_builtin_contains">
@@ -13356,8 +13358,7 @@ Green Mouse</programlisting>
           <para>Returns if the substring specified as the parameter to this
           built-in occurrs in the string. For example:</para>
 
-          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;
-</programlisting>
+          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;</programlisting>
 
           <para>This will output:</para>
 
@@ -29416,7 +29417,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>
 
-        <para>Release date: 2021-02-09 + release process</para>
+        <para>Release date: 2021-02-16</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -29556,6 +29557,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>InvalidReferenceException</literal> and
               <literal>NonNamespaceException</literal> with proper helpful
               message.</para>
+            </listitem>
+
+            <listitem>
+              <para>Build related changes:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Simplified the way Apache Ivy is used in our Ant
+                  build. It's now used on the standard way, there's no
+                  <literal>ant update-deps</literal> anymore.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Test suite is now ran on ARM (64 bit) as well on CI
+                  (Travis).</para>
+                </listitem>
+
+                <listitem>
+                  <para>FreeMarker Manual and web site now works much better
+                  on mobile, because of developments in the Docgen
+                  project.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Docgen is now a Maven project, and so a plain Maven
+                  dependency of the other projects (although, it's still only
+                  in the Apache Snapshot Repository, not in Central yet). With
+                  this we could get rid of our Ivy repository.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
