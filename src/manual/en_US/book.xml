@@ -5905,7 +5905,7 @@ Foo &amp;amp;amp; bar</programlisting>
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
 &lt;#assign mo1 = "Foo's bar {}"?esc&gt;
-HTLM: ${mo1}
+HTML: ${mo1}
 XML:  &lt;#outputformat 'XML'&gt;${mo1}&lt;/#outputformat&gt;
 RTF:  &lt;#outputformat 'RTF'&gt;${mo1}&lt;/#outputformat&gt;
 
@@ -5914,7 +5914,7 @@ HTML: ${mo2}
 XML:  &lt;#attempt&gt;&lt;#outputformat 'XML'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;
 RTF:  &lt;#attempt&gt;&lt;#outputformat 'RTF'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
 
-            <programlisting role="output">HTLM: Foo&amp;#39;s bar {}
+            <programlisting role="output">HTML: Foo&amp;#39;s bar {}
 XML:  Foo&amp;apos;s bar {}
 RTF:  Foo's bar \{\}
 
@@ -23691,7 +23691,7 @@ ${"'{}"}
             <literal>"HTML"</literal> and then with <literal>"XML"</literal>.
             These are called combined output formats, and can be referred by
             names like <literal>"XML{HTML}"</literal> and
-            <literal>"XML{HTLM{RTF}}"</literal>, respectively. We could use
+            <literal>"XML{HTML{RTF}}"</literal>, respectively. We could use
             these names in the earlier two <literal>outputformat</literal>
             calls, however, there's a shorthand where you inherit the part
             outside the <literal>{<replaceable>...</replaceable>}</literal>
