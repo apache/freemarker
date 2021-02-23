@@ -2900,19 +2900,12 @@ public class Configurable {
     }
     
     /**
-     * This meant to return the String-to-String <code>Map</code> of the
-     * settings. So it actually should return a <code>Properties</code> object,
-     * but it doesn't by mistake. The returned <code>Map</code> is read-only,
-     * but it will reflect the further configuration changes (aliasing effect).
-     *
-     * @deprecated This method was always defective, and certainly it always
-     *     will be. Don't use it. (Simply, it's hardly possible in general to
-     *     convert setting values to text in a way that ensures that
-     *     {@link #setSettings(Properties)} will work with them correctly.)
+     * This returns a copy of the <code>Properties</code> object
      */
-    @Deprecated
-    public Map getSettings() {
-        return Collections.unmodifiableMap(properties);
+    public Properties getSettings() {
+        Properties props = new Properties();
+        props.putAll(properties);
+        return props;
     }
     
     protected Environment getEnvironment() {
