@@ -6922,14 +6922,14 @@ cfg.setTemplateLoader(mtl);</programlisting>
 
                 <listitem>
                   <para>当执行模板时发生的其它问题而导致的 
-				  <literal>freemarker.template.TemplatException</literal> 异常。
+				  <literal>freemarker.template.TemplateException</literal> 异常。
 				  比如，一个频繁发生的错误，就是当模板引用一个不存在的变量。
-				  默认情况下，当 <literal>TemplatException</literal> 异常发生时，
+				  默认情况下，当 <literal>TemplateException</literal> 异常发生时，
 				  FreeMarker会用普通文本格式在输出中打印出FTL的错误信息和堆栈跟踪信息，
-				  然后再次抛出 <literal>TemplatException</literal> 异常而中止模板的执行，
+				  然后再次抛出 <literal>TemplateException</literal> 异常而中止模板的执行，
 				  就可以捕捉到 <literal>Template.process(<replaceable>...</replaceable>)</literal> 
 				  方法抛出的异常了。而这种行为是可以定制的。FreeMarker也会经常写 
-				  <literal>TemplatException</literal> 异常的 
+				  <literal>TemplateException</literal> 异常的 
 				  <link linkend="pgui_misc_logging">日志</link>。</para>
                 </listitem>
               </itemizedlist>
