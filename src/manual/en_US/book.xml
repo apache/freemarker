@@ -8950,15 +8950,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>freemarker.template.TemplatException</literal>
+                  <para><literal>freemarker.template.TemplateException</literal>
                   because other problem occurred while executing the template.
                   For example, a frequent error is referring to a variable
                   that doesn't exist in the data-model. By default, when a
-                  <literal>TemplatException</literal> occurs, FreeMarker
+                  <literal>TemplateException</literal> occurs, FreeMarker
                   prints the FTL error message and the stack trace to the
                   output writer with plain text format, and then aborts the
                   template execution by re-throwing the
-                  <literal>TemplatException</literal>, which then you can
+                  <literal>TemplateException</literal>, which then you can
                   catch as
                   <literal>Template.process(<replaceable>...</replaceable>)</literal>
                   throws it. This behavior can be customized, and in fact, it
@@ -8966,7 +8966,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
                   linkend="pgui_quickstart_createconfiguration">here</link>.
                   By default FreeMarker also <link
                   linkend="pgui_misc_logging">logs</link>
-                  <literal>TemplatException</literal>-s.</para>
+                  <literal>TemplateException</literal>-s.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8974,7 +8974,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
         </section>
 
         <section>
-          <title>Customizing the behavior regarding TemplatException-s</title>
+          <title>Customizing the behavior regarding TemplateException-s</title>
 
           <para><literal>TemplateException</literal>-s thrown during the
           template processing are handled by the
