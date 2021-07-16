@@ -5905,7 +5905,7 @@ Foo &amp;amp;amp; bar</programlisting>
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
 &lt;#assign mo1 = "Foo's bar {}"?esc&gt;
-HTLM: ${mo1}
+HTML: ${mo1}
 XML:  &lt;#outputformat 'XML'&gt;${mo1}&lt;/#outputformat&gt;
 RTF:  &lt;#outputformat 'RTF'&gt;${mo1}&lt;/#outputformat&gt;
 
@@ -5914,7 +5914,7 @@ HTML: ${mo2}
 XML:  &lt;#attempt&gt;&lt;#outputformat 'XML'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;
 RTF:  &lt;#attempt&gt;&lt;#outputformat 'RTF'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
 
-            <programlisting role="output">HTLM: Foo&amp;#39;s bar {}
+            <programlisting role="output">HTML: Foo&amp;#39;s bar {}
 XML:  Foo&amp;apos;s bar {}
 RTF:  Foo's bar \{\}
 
@@ -8950,15 +8950,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>freemarker.template.TemplatException</literal>
+                  <para><literal>freemarker.template.TemplateException</literal>
                   because other problem occurred while executing the template.
                   For example, a frequent error is referring to a variable
                   that doesn't exist in the data-model. By default, when a
-                  <literal>TemplatException</literal> occurs, FreeMarker
+                  <literal>TemplateException</literal> occurs, FreeMarker
                   prints the FTL error message and the stack trace to the
                   output writer with plain text format, and then aborts the
                   template execution by re-throwing the
-                  <literal>TemplatException</literal>, which then you can
+                  <literal>TemplateException</literal>, which then you can
                   catch as
                   <literal>Template.process(<replaceable>...</replaceable>)</literal>
                   throws it. This behavior can be customized, and in fact, it
@@ -8966,7 +8966,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
                   linkend="pgui_quickstart_createconfiguration">here</link>.
                   By default FreeMarker also <link
                   linkend="pgui_misc_logging">logs</link>
-                  <literal>TemplatException</literal>-s.</para>
+                  <literal>TemplateException</literal>-s.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8974,7 +8974,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
         </section>
 
         <section>
-          <title>Customizing the behavior regarding TemplatException-s</title>
+          <title>Customizing the behavior regarding TemplateException-s</title>
 
           <para><literal>TemplateException</literal>-s thrown during the
           template processing are handled by the
@@ -13336,9 +13336,11 @@ Green Mouse</programlisting>
             <primary>chop_linebreak built-in</primary>
           </indexterm>
 
-          <para>The string without the <link
+          <para>Returns the string without the <link
           linkend="gloss.lineBreak">line-break</link> at its very end if there
-          was a line-break, otherwise the unchanged string.</para>
+          was a line-break, otherwise the unchanged string. If the string ends
+          with multiple line-breaks, only the last line-break is
+          removed.</para>
         </section>
 
         <section xml:id="ref_builtin_contains">
@@ -13356,8 +13358,7 @@ Green Mouse</programlisting>
           <para>Returns if the substring specified as the parameter to this
           built-in occurrs in the string. For example:</para>
 
-          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;
-</programlisting>
+          <programlisting role="template">&lt;#if "piceous"?contains("ice")&gt;It contains "ice"&lt;/#if&gt;</programlisting>
 
           <para>This will output:</para>
 
@@ -23690,7 +23691,7 @@ ${"'{}"}
             <literal>"HTML"</literal> and then with <literal>"XML"</literal>.
             These are called combined output formats, and can be referred by
             names like <literal>"XML{HTML}"</literal> and
-            <literal>"XML{HTLM{RTF}}"</literal>, respectively. We could use
+            <literal>"XML{HTML{RTF}}"</literal>, respectively. We could use
             these names in the earlier two <literal>outputformat</literal>
             calls, however, there's a shorthand where you inherit the part
             outside the <literal>{<replaceable>...</replaceable>}</literal>
@@ -29416,7 +29417,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>
 
-        <para>Release date: FIXME</para>
+        <para>Release date: 2021-02-16</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -29556,6 +29557,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>InvalidReferenceException</literal> and
               <literal>NonNamespaceException</literal> with proper helpful
               message.</para>
+            </listitem>
+
+            <listitem>
+              <para>Build related changes:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Simplified the way Apache Ivy is used in our Ant
+                  build. It's now used on the standard way, there's no
+                  <literal>ant update-deps</literal> anymore.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Test suite is now ran on ARM (64 bit) as well on CI
+                  (Travis).</para>
+                </listitem>
+
+                <listitem>
+                  <para>FreeMarker Manual and web site now works much better
+                  on mobile, because of developments in the Docgen
+                  project.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Docgen is now a Maven project, and so a plain Maven
+                  dependency of the other projects (although, it's still only
+                  in the Apache Snapshot Repository, not in Central yet). With
+                  this we could get rid of our Ivy repository.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
