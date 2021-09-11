@@ -53,8 +53,8 @@ public class TemplateException extends Exception {
     private transient TemplateElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
-    private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
-    private String renderedFtlInstructionStackSnapshotTop; // clalc. from ftlInstructionStackSnapshot
+    private String renderedFtlInstructionStackSnapshot;  // calc. from ftlInstructionStackSnapshot 
+    private String renderedFtlInstructionStackSnapshotTop; // calc. from ftlInstructionStackSnapshot
     private String description;  // calc. from descriptionBuilder, or set by the construcor
     private transient String messageWithoutStackTop;
     private transient String message;
