@@ -8974,7 +8974,8 @@ cfg.setTemplateLoader(mtl);</programlisting>
         </section>
 
         <section>
-          <title>Customizing the behavior regarding TemplateException-s</title>
+          <title>Customizing the behavior regarding
+          TemplateException-s</title>
 
           <para><literal>TemplateException</literal>-s thrown during the
           template processing are handled by the
@@ -12268,14 +12269,6 @@ grant codeBase "file:/path/to/freemarker.jar"
                 <td>all ancestors of current nodes plus current nodes.
                 Applicable to same node types as
                 <literal>_parent</literal>.</td>
-              </tr>
-
-              <tr>
-                <td><literal>_cname</literal></td>
-
-                <td>the canonical names of current nodes (namespace URI +
-                local name), one string per node (non-recursive). Applicable
-                to elements and attributes</td>
               </tr>
 
               <tr>
@@ -29413,6 +29406,41 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_32">
+        <title>2.3.32</title>
+
+        <para>Release date: TODO</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>TODO</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
+              Updated dom4j version used during FreeMarker project compilation
+              from 1.3 to 2.1.3. Users can still use FreeMarker with dom4j 1.3
+              (mostly just luck, but it works). We were forced to do this
+              because old dom4j versions have security vulnerabilities, and
+              although FreeMarker is not affected by them (like we do not pull
+              in dom4j as dependency into the projects of our users), we were
+              flagged as vulnerable at certain places for merely supporting
+              1.3.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>

@@ -254,12 +254,6 @@ implements
      *         to same node types as <tt>_parent</tt>.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>_cname</tt></td>
-     *       <td>the canonical names of current nodes (namespace URI + local 
-     *         name), one string per node (non-recursive). Applicable to 
-     *         elements and attributes</td>
-     *     </tr>  
-     *     <tr>
      *       <td><tt>_content</tt></td>
      *       <td>the complete content of current nodes, including children 
      *         elements, text, entity references, and processing instructions 
