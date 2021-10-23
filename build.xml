@@ -463,6 +463,7 @@
       failonerror="true"
       charset="UTF-8"
       docencoding="UTF-8"
+      encoding="UTF-8"
       locale="en_US"
     >
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>

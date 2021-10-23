@@ -55,6 +55,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_29 = Configuration.VERSION_2_3_29.intValue();
     public static final int VERSION_INT_2_3_30 = Configuration.VERSION_2_3_30.intValue();
     public static final int VERSION_INT_2_3_31 = Configuration.VERSION_2_3_31.intValue();
+    public static final int VERSION_INT_2_3_32 = Configuration.VERSION_2_3_32.intValue();
     public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
 
     /**
