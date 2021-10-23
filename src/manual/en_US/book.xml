@@ -5905,7 +5905,7 @@ Foo &amp;amp;amp; bar</programlisting>
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
 &lt;#assign mo1 = "Foo's bar {}"?esc&gt;
-HTLM: ${mo1}
+HTML: ${mo1}
 XML:  &lt;#outputformat 'XML'&gt;${mo1}&lt;/#outputformat&gt;
 RTF:  &lt;#outputformat 'RTF'&gt;${mo1}&lt;/#outputformat&gt;
 
@@ -5914,7 +5914,7 @@ HTML: ${mo2}
 XML:  &lt;#attempt&gt;&lt;#outputformat 'XML'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;
 RTF:  &lt;#attempt&gt;&lt;#outputformat 'RTF'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
 
-            <programlisting role="output">HTLM: Foo&amp;#39;s bar {}
+            <programlisting role="output">HTML: Foo&amp;#39;s bar {}
 XML:  Foo&amp;apos;s bar {}
 RTF:  Foo's bar \{\}
 
@@ -8950,15 +8950,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>freemarker.template.TemplatException</literal>
+                  <para><literal>freemarker.template.TemplateException</literal>
                   because other problem occurred while executing the template.
                   For example, a frequent error is referring to a variable
                   that doesn't exist in the data-model. By default, when a
-                  <literal>TemplatException</literal> occurs, FreeMarker
+                  <literal>TemplateException</literal> occurs, FreeMarker
                   prints the FTL error message and the stack trace to the
                   output writer with plain text format, and then aborts the
                   template execution by re-throwing the
-                  <literal>TemplatException</literal>, which then you can
+                  <literal>TemplateException</literal>, which then you can
                   catch as
                   <literal>Template.process(<replaceable>...</replaceable>)</literal>
                   throws it. This behavior can be customized, and in fact, it
@@ -8966,7 +8966,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
                   linkend="pgui_quickstart_createconfiguration">here</link>.
                   By default FreeMarker also <link
                   linkend="pgui_misc_logging">logs</link>
-                  <literal>TemplatException</literal>-s.</para>
+                  <literal>TemplateException</literal>-s.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8974,7 +8974,8 @@ cfg.setTemplateLoader(mtl);</programlisting>
         </section>
 
         <section>
-          <title>Customizing the behavior regarding TemplatException-s</title>
+          <title>Customizing the behavior regarding
+          TemplateException-s</title>
 
           <para><literal>TemplateException</literal>-s thrown during the
           template processing are handled by the
@@ -12271,14 +12272,6 @@ grant codeBase "file:/path/to/freemarker.jar"
               </tr>
 
               <tr>
-                <td><literal>_cname</literal></td>
-
-                <td>the canonical names of current nodes (namespace URI +
-                local name), one string per node (non-recursive). Applicable
-                to elements and attributes</td>
-              </tr>
-
-              <tr>
                 <td><literal>_content</literal></td>
 
                 <td>the complete content of current nodes, including children
@@ -12374,12 +12367,20 @@ grant codeBase "file:/path/to/freemarker.jar"
                 <td>register a XML namespace with the specified prefix and URI
                 for the current node list and all node lists that are derived
                 from the current node list. After registering, you can use the
-                <literal>nodelist["prefix:localname"]</literal> or
-                <literal>nodelist["@prefix:localname"]</literal> syntaxes to
-                reach elements and attributes whose names are
-                namespace-scoped. Note that the namespace prefix need not
-                match the actual prefix used by the XML document itself since
-                namespaces are compared solely by their URI.</td>
+                <literal>nodelist["prefix:localname"]</literal>, or
+                <literal>nodelist["@prefix:localname"]</literal> syntax (or
+                <literal>nodelist.prefix\:localname</literal>, or
+                <literal>nodelist.@prefix\:localname</literal>) to reach
+                elements, and attributes whose names are namespace-scoped.
+                Note that the namespace prefix need not match the actual
+                prefix used by the XML document itself since namespaces are
+                compared solely by their URI. Also note that if you do
+                <literal>doc.elem1._registerNamespace(<replaceable>...</replaceable>)</literal>,
+                and then later you use <literal>doc.elem1</literal> again, it
+                will not have the prefix registered, because each time you use
+                <literal>doc.elem1</literal>, it gives a completely new
+                object. In this example, you certainly should have used
+                <literal>doc._registerNamespace(<replaceable>...</replaceable>)</literal>.</td>
               </tr>
 
               <tr>
@@ -23691,7 +23692,7 @@ ${"'{}"}
             <literal>"HTML"</literal> and then with <literal>"XML"</literal>.
             These are called combined output formats, and can be referred by
             names like <literal>"XML{HTML}"</literal> and
-            <literal>"XML{HTLM{RTF}}"</literal>, respectively. We could use
+            <literal>"XML{HTML{RTF}}"</literal>, respectively. We could use
             these names in the earlier two <literal>outputformat</literal>
             calls, however, there's a shorthand where you inherit the part
             outside the <literal>{<replaceable>...</replaceable>}</literal>
@@ -29413,6 +29414,48 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_32">
+        <title>2.3.32</title>
+
+        <para>Release date: TODO</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>This is related to <literal>freemarker.ext.xml</literal>,
+              which is the very old, long deprecated XML wrapper (the commonly
+              used one is <literal>freemarker.ext.dom</literal>), which almost
+              nobody uses, or maybe truly nobody. Still, now the
+              <literal>_registerNamespace</literal> key works, doing what the
+              documentation always stated. Before this fix it just behaved as
+              if it was the name of an element you are looking for.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
+              Updated dom4j version used during FreeMarker project compilation
+              from 1.3 to 2.1.3. Users can still use FreeMarker with dom4j 1.3
+              (mostly just luck, but it works), also anyway almost nobody uses
+              FreeMarker's dom4j support (which is long deprecated). We were
+              forced to do this change because old dom4j versions have
+              security vulnerabilities, and although FreeMarker is not
+              affected by them (like we do not pull in dom4j as dependency
+              into the projects of our users), we were flagged as vulnerable
+              at certain places for merely supporting 1.3.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_31">
         <title>2.3.31</title>

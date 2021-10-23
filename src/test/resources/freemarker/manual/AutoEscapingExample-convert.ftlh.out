@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-HTLM: Foo&#39;s bar {}
+HTML: Foo&#39;s bar {}
 XML:  Foo&apos;s bar {}
 RTF:  Foo's bar \{\}
 

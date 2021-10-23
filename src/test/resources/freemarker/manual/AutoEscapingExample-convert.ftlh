@@ -17,7 +17,7 @@
   under the License.
 -->
 <#assign mo1 = "Foo's bar {}"?esc>
-HTLM: ${mo1}
+HTML: ${mo1}
 XML:  <#outputformat 'XML'>${mo1}</#outputformat>
 RTF:  <#outputformat 'RTF'>${mo1}</#outputformat>
 
