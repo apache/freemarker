@@ -12367,12 +12367,20 @@ grant codeBase "file:/path/to/freemarker.jar"
                 <td>register a XML namespace with the specified prefix and URI
                 for the current node list and all node lists that are derived
                 from the current node list. After registering, you can use the
-                <literal>nodelist["prefix:localname"]</literal> or
-                <literal>nodelist["@prefix:localname"]</literal> syntaxes to
-                reach elements and attributes whose names are
-                namespace-scoped. Note that the namespace prefix need not
-                match the actual prefix used by the XML document itself since
-                namespaces are compared solely by their URI.</td>
+                <literal>nodelist["prefix:localname"]</literal>, or
+                <literal>nodelist["@prefix:localname"]</literal> syntax (or
+                <literal>nodelist.prefix\:localname</literal>, or
+                <literal>nodelist.@prefix\:localname</literal>) to reach
+                elements, and attributes whose names are namespace-scoped.
+                Note that the namespace prefix need not match the actual
+                prefix used by the XML document itself since namespaces are
+                compared solely by their URI. Also note that if you do
+                <literal>doc.elem1._registerNamespace(<replaceable>...</replaceable>)</literal>,
+                and then later you use <literal>doc.elem1</literal> again, it
+                will not have the prefix registered, because each time you use
+                <literal>doc.elem1</literal>, it gives a completely new
+                object. In this example, you certainly should have used
+                <literal>doc._registerNamespace(<replaceable>...</replaceable>)</literal>.</td>
               </tr>
 
               <tr>
@@ -29417,7 +29425,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>TODO</para>
+              <para>This is related to <literal>freemarker.ext.xml</literal>,
+              which is the very old, long deprecated XML wrapper (the commonly
+              used one is <literal>freemarker.ext.dom</literal>), which almost
+              nobody uses, or maybe truly nobody. Still, now the
+              <literal>_registerNamespace</literal> key works, doing what the
+              documentation always stated. Before this fix it just behaved as
+              if it was the name of an element you are looking for.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -29431,12 +29445,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
               Updated dom4j version used during FreeMarker project compilation
               from 1.3 to 2.1.3. Users can still use FreeMarker with dom4j 1.3
-              (mostly just luck, but it works). We were forced to do this
-              because old dom4j versions have security vulnerabilities, and
-              although FreeMarker is not affected by them (like we do not pull
-              in dom4j as dependency into the projects of our users), we were
-              flagged as vulnerable at certain places for merely supporting
-              1.3.</para>
+              (mostly just luck, but it works), also anyway almost nobody uses
+              FreeMarker's dom4j support (which is long deprecated). We were
+              forced to do this change because old dom4j versions have
+              security vulnerabilities, and although FreeMarker is not
+              affected by them (like we do not pull in dom4j as dependency
+              into the projects of our users), we were flagged as vulnerable
+              at certain places for merely supporting 1.3.</para>
             </listitem>
           </itemizedlist>
         </section>

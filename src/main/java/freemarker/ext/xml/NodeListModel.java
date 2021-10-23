@@ -327,12 +327,16 @@ implements
      *       <td>register a XML namespace with the specified prefix and URI for
      *         the current node list and all node lists that are derived from 
      *         the current node list. After registering, you can use the
-     *         <tt>nodelist[&quot;prefix:localname&quot;]</tt> or 
-     *         <tt>nodelist[&quot;@prefix:localname&quot;]</tt> syntaxes to 
-     *         reach elements and attributes whose names are namespace-scoped.
+     *         <tt>nodelist[&quot;prefix:localname&quot;]</tt>, or
+     *         <tt>nodelist[&quot;@prefix:localname&quot;]</tt> syntax
+     *          (or <tt>nodelist.prefix\:localname</tt>, or <tt>nodelist.@prefix\:localname</tt>)
+     *         to reach elements, and attributes whose names are namespace-scoped.
      *         Note that the namespace prefix need not match the actual prefix 
      *         used by the XML document itself since namespaces are compared 
-     *         solely by their URI.</td>
+     *         solely by their URI. Also note that if you do {@code doc.elem1._registerNamespace(...)},
+     *         and then later you use {@code doc.elem1} again, it will not have the prefix registered,
+     *         because each time you use {@code doc.elem1}, it gives a completely new object. In this
+     *         example, you certainly should have used {@code doc._registerNamespace(...)}.
      *     </tr>
      *     <tr>
      *       <td><tt>_text</tt></td>
@@ -394,6 +398,7 @@ implements
                 if (namespaces.isShared()) {
                     namespaces = (Namespaces) namespaces.clone();
                 }
+                return namespaces;
             }
         }
         // Last, do a named child element or attribute lookup 
