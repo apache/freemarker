@@ -27,7 +27,7 @@ import freemarker.template.TemplateTemporalModel;
  * Thrown when a {@link TemplateTemporalModel} can't be formatted because the {@link TemplateTemporalFormatFactory}
  * doesn't support it.
  *
- * @since 2.3.31
+ * @since 2.3.32
  */
 public final class UnformattableTemporalTypeException extends UnformattableValueException {
 

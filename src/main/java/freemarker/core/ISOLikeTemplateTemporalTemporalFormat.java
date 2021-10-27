@@ -30,6 +30,12 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 
 // TODO [FREEMARKER-35] These should support parameters similar to {@link ISOTemplateDateFormat},
+
+/**
+ * See {@link ISOTemplateTemporalFormatFactory}, and {@link XSTemplateTemporalFormatFactory}.
+ *
+ * @since 2.3.32
+ */
 final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;
     private final boolean instantConversion;

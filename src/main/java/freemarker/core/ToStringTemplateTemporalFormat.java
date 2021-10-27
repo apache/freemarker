@@ -22,12 +22,18 @@ package freemarker.core;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 
+/**
+ * See {@link ToStringTemplateTemporalFormatFactory}.
+ *
+ * @Deprected TODO [FREEMARKER-35] I guess we shouldn't need this.
+ *
+ * @since 2.3.32
+ */
 class ToStringTemplateTemporalFormat extends TemplateTemporalFormat {
 
     private final ZoneId timeZone;

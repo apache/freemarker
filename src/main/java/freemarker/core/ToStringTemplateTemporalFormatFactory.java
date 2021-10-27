@@ -23,6 +23,13 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * Gives a {@link TemplateTemporalFormat} that simply calls {@link Object#toString()}
+ *
+ * @Deprected TODO [FREEMARKER-35] I guess we shouldn't need this.
+ *
+ * @since 2.3.32
+ */
 class ToStringTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     static final ToStringTemplateTemporalFormatFactory INSTANCE = new ToStringTemplateTemporalFormatFactory();

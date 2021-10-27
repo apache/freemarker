@@ -30,22 +30,25 @@ import freemarker.template.TemplateTemporalModel;
  *
  * <p>
  * Implementations need not be thread-safe if the {@link TemplateTemporalFormatFactory} doesn't recycle them among
- * different {@link Environment}-s. As far as FreeMarker's concerned, instances are bound to a single
- * {@link Environment}, and {@link Environment}-s are thread-local objects.
+ * different {@link Environment}-s. The code outside the {@link TemplateTemporalFormatFactory} will not try to reuse
+ * {@link TemplateTemporalFormat} instances in multiple {@link Environment}-s, and {@link Environment}-s are
+ * thread-local objects.
  *
- * @since 2.3.31
+ * @since 2.3.32
  */
 public abstract class TemplateTemporalFormat extends TemplateValueFormat {
 
     public abstract String format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException;
 
     /**
-     * Tells if this formatter should be re-created if the locale changes.
+     * Tells if the same formatter can be used regardless of the desired locale (so for example after a
+     * {@link Environment#getLocale()} change we can keep using the old instance).
      */
     public abstract boolean isLocaleBound();
 
     /**
-     * Tells if this formatter should be re-created if the time zone changes.
+     * Tells if the same formatter can be used regardless of the desired time zone (so for example after a
+     * {@link Environment#getTimeZone()} change we can keep using the old instance).
      */
     public abstract boolean isTimeZoneBound();
 

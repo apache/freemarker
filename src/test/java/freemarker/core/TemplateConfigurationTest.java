@@ -163,6 +163,16 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("classicCompatibleAsInt", 2);
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
+        SETTING_ASSIGNMENTS.put("instantFormat", "iso");
+        SETTING_ASSIGNMENTS.put("localDateFormat", "iso");
+        SETTING_ASSIGNMENTS.put("localTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("localDateTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("offsetTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("offsetDateTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("zonedTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("zonedDateTimeFormat", "iso");
+        SETTING_ASSIGNMENTS.put("yearFormat", "yyyy");
+        SETTING_ASSIGNMENTS.put("yearMonthFormat", "yyyy-MM");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
         SETTING_ASSIGNMENTS.put("logTemplateExceptions", false);
         SETTING_ASSIGNMENTS.put("wrapUncheckedExceptions", true);
@@ -245,7 +255,6 @@ public class TemplateConfigurationTest {
 
     static {
         IGNORED_PROP_NAMES = new HashSet();
-        IGNORED_PROP_NAMES.add("class");
         IGNORED_PROP_NAMES.add("strictBeanModels");
         IGNORED_PROP_NAMES.add("parentConfiguration");
         IGNORED_PROP_NAMES.add("settings");
@@ -258,7 +267,8 @@ public class TemplateConfigurationTest {
         try {
             for (PropertyDescriptor propDesc : Introspector.getBeanInfo(Configurable.class).getPropertyDescriptors()) {
                 String propName = propDesc.getName();
-                if (!IGNORED_PROP_NAMES.contains(propName)) {
+                if (!IGNORED_PROP_NAMES.contains(propName) && propDesc.getWriteMethod() != null
+                        && propDesc.getWriteMethod().getDeclaringClass() != Object.class) {
                     CONFIGURABLE_PROP_NAMES.add(propName);
                 }
             }
@@ -541,16 +551,20 @@ public class TemplateConfigurationTest {
         for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(false, true)) {
             TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
-    
-            Object newValue = SETTING_ASSIGNMENTS.get(pd.getName());
+
+            String propName = pd.getName();
+            if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
+                throw new AssertionError("SETTING_ASSIGNMENTS doesn't yet contain \"" + propName + "\"");
+            }
+            Object newValue = SETTING_ASSIGNMENTS.get(propName);
             pd.getWriteMethod().invoke(tc, newValue);
             
             Template t = new Template(null, "", DEFAULT_CFG);
             Method tReaderMethod = t.getClass().getMethod(pd.getReadMethod().getName());
             
-            assertNotEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
+            assertNotEquals("For \"" + propName + "\"", newValue, tReaderMethod.invoke(t));
             tc.apply(t);
-            assertEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
+            assertEquals("For \"" + propName + "\"", newValue, tReaderMethod.invoke(t));
         }
     }
     
@@ -705,6 +719,9 @@ public class TemplateConfigurationTest {
             TemplateConfiguration tc = new TemplateConfiguration();
 
             String propName = propDesc.getName();
+            if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
+                throw new AssertionError("SETTING_ASSIGNMENTS doesn't yet contain \"" + propName + "\"");
+            }
             Object value = SETTING_ASSIGNMENTS.get(propName);
             propDesc.getWriteMethod().invoke(tc, value);
             
@@ -905,8 +922,12 @@ public class TemplateConfigurationTest {
         for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
             TemplateConfiguration tc = new TemplateConfiguration();
             checkAllIsSetFalseExcept(tc, null);
-            pd.getWriteMethod().invoke(tc, SETTING_ASSIGNMENTS.get(pd.getName()));
-            checkAllIsSetFalseExcept(tc, pd.getName());
+            String propName = pd.getName();
+            if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
+                throw new AssertionError("SETTING_ASSIGNMENTS doesn't yet contain \"" + propName + "\"");
+            }
+            pd.getWriteMethod().invoke(tc, SETTING_ASSIGNMENTS.get(propName));
+            checkAllIsSetFalseExcept(tc, propName);
         }
     }
 

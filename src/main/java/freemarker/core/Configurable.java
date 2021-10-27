@@ -173,6 +173,10 @@ public class Configurable {
     public static final String OFFSET_TIME_FORMAT_KEY_CAMEL_CASE = "offsetTimeFormat";
     public static final String OFFSET_TIME_FORMAT_KEY = OFFSET_TIME_FORMAT_KEY_SNAKE_CASE;
 
+    public static final String ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "zoned_date_time_format";
+    public static final String ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "zonedDateTimeFormat";
+    public static final String ZONED_DATE_TIME_FORMAT_KEY = ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
+
     public static final String YEAR_FORMAT_KEY_SNAKE_CASE = "year_format";
     public static final String YEAR_FORMAT_KEY_CAMEL_CASE = "yearFormat";
     public static final String YEAR_FORMAT_KEY = YEAR_FORMAT_KEY_SNAKE_CASE;
@@ -180,10 +184,6 @@ public class Configurable {
     public static final String YEAR_MONTH_FORMAT_KEY_SNAKE_CASE = "year_month_format";
     public static final String YEAR_MONTH_FORMAT_KEY_CAMEL_CASE = "yearMonthFormat";
     public static final String YEAR_MONTH_FORMAT_KEY = YEAR_MONTH_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "zoned_date_time_format";
-    public static final String ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "zonedDateTimeFormat";
-    public static final String ZONED_DATE_TIME_FORMAT_KEY = ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
 
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
@@ -442,9 +442,9 @@ public class Configurable {
     private String localTimeFormat;
     private String offsetDateTimeFormat;
     private String offsetTimeFormat;
+    private String zonedDateTimeFormat;
     private String yearFormat;
     private String yearMonthFormat;
-    private String zonedDateTimeFormat;
     private TimeZone timeZone;
     private TimeZone sqlDataAndTimeTimeZone;
     private boolean sqlDataAndTimeTimeZoneSet;
@@ -535,14 +535,14 @@ public class Configurable {
         offsetTimeFormat = "";
         properties.setProperty(OFFSET_TIME_FORMAT_KEY, offsetTimeFormat);
 
+        zonedDateTimeFormat = "";
+        properties.setProperty(ZONED_DATE_TIME_FORMAT_KEY, zonedDateTimeFormat);
+
         yearFormat = "";
         properties.setProperty(YEAR_FORMAT_KEY, yearFormat);
 
         yearMonthFormat = "";
         properties.setProperty(YEAR_MONTH_FORMAT_KEY, yearMonthFormat);
-
-        zonedDateTimeFormat = "";
-        properties.setProperty(ZONED_DATE_TIME_FORMAT_KEY, zonedDateTimeFormat);
 
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
@@ -1369,40 +1369,199 @@ public class Configurable {
         return dateTimeFormat != null;
     }
 
-    public String getInstantFormat() {
-       return instantFormat == null ? parent.getInstantFormat() : instantFormat;
+    /**
+     * Sets the format used to convert {@link java.time.Instant}-s to string-s, also the format that
+     * {@code someString?instant} will use to parse strings.
+     * <p>Defaults to TODO [FREEMARKER-35].
+     * @since 2.3.32
+     */
+    public void setInstantFormat(String instantFormat) {
+        this.instantFormat = instantFormat;
     }
 
+    /**
+     * Getter pair of {@link #setInstantFormat(String)}.
+     * @since 2.3.32
+     */
+    public String getInstantFormat() {
+        return instantFormat == null ? parent.getInstantFormat() : instantFormat;
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isInstantFormatSet() {
+        return instantFormat != null;
+    }
+
+    public void setLocalDateFormat(String localDateFormat) {
+        this.localDateFormat = localDateFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setLocalDateFormat(String)}.
+     * @since 2.3.32
+     */
     public String getLocalDateFormat() {
         return localDateFormat == null ? parent.getLocalDateFormat() : localDateFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isLocalDateFormatSet() {
+        return localDateFormat != null;
+    }
+
+    public void setLocalDateTimeFormat(String localDateTimeFormat) {
+        this.localDateTimeFormat = localDateTimeFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setLocalDateTimeFormat(String)}.
+     * @since 2.3.32
+     */
     public String getLocalDateTimeFormat() {
         return localDateTimeFormat == null ? parent.getLocalDateTimeFormat() : localDateTimeFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isLocalDateTimeFormatSet() {
+        return localDateTimeFormat != null;
+    }
+
+    public void setLocalTimeFormat(String localTimeFormat) {
+        this.localTimeFormat = localTimeFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setLocalTimeFormat(String)}.
+     * @since 2.3.32
+     */
     public String getLocalTimeFormat() {
         return localTimeFormat == null ? parent.getLocalTimeFormat() : localTimeFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isLocalTimeFormatSet() {
+        return localTimeFormat != null;
+    }
+
+    public void setOffsetDateTimeFormat(String offsetDateTimeFormat) {
+        this.offsetDateTimeFormat = offsetDateTimeFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setOffsetDateTimeFormat(String)}.
+     * @since 2.3.32
+     */
     public String getOffsetDateTimeFormat() {
         return offsetDateTimeFormat == null ? parent.getOffsetDateTimeFormat() : offsetDateTimeFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isOffsetDateTimeFormatSet() {
+        return offsetDateTimeFormat != null;
+    }
+
+    public void setOffsetTimeFormat(String offsetTimeFormat) {
+        this.offsetTimeFormat = offsetTimeFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setOffsetTimeFormat(String)}.
+     * @since 2.3.32
+     */
     public String getOffsetTimeFormat() {
         return offsetTimeFormat == null ? parent.getOffsetTimeFormat() : offsetTimeFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isOffsetTimeFormatSet() {
+        return offsetTimeFormat != null;
+    }
+
+    public void setZonedDateTimeFormat(String zonedDateTimeFormat) {
+        this.zonedDateTimeFormat = zonedDateTimeFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setZonedDateTimeFormat(String)}.
+     * @since 2.3.32
+     */
+    public String getZonedDateTimeFormat() {
+        return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isZonedDateTimeFormatSet() {
+        return zonedDateTimeFormat != null;
+    }
+
+    public void setYearFormat(String yearFormat) {
+        this.yearFormat = yearFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setYearFormat(String)}.
+     * @since 2.3.32
+     */
     public String getYearFormat() {
         return yearFormat == null ? parent.getYearFormat() : yearFormat;
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isYearFormatSet() {
+        return yearFormat != null;
+    }
+
+    public void setYearMonthFormat(String yearMonthFormat) {
+        this.yearMonthFormat = yearMonthFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setYearMonthFormat(String)}.
+     * @since 2.3.32
+     */
     public String getYearMonthFormat() {
         return yearMonthFormat == null ? parent.getYearMonthFormat() : yearMonthFormat;
     }
 
-    public String getZonedDateTimeFormat() {
-        return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isYearMonthFormatSet() {
+        return yearMonthFormat != null;
     }
 
     /**
@@ -1417,7 +1576,7 @@ public class Configurable {
      * @throws NullPointerException If {@link temporalClass} was {@code null}
      * @throws IllegalArgumentException If {@link temporalClass} is not a supported {@link Temporal} subclass.
      *
-     * @since 2.3.31
+     * @since 2.3.32
      */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
         Objects.requireNonNull(temporalClass);

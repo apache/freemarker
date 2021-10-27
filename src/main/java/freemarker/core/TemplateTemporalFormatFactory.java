@@ -18,22 +18,19 @@
  */
 package freemarker.core;
 
-import java.text.SimpleDateFormat;
 import java.time.temporal.Temporal;
-import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import freemarker.template.Configuration;
-import freemarker.template.TemplateDateModel;
 
 /**
  * Factory for a certain kind of {@link Temporal} formatting ({@link TemplateTemporalFormat}). Usually a singleton
- * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
+ * (one-per-VM, or one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * TODO [FREEMARKER-35] @see Configurable#setCustomTemporalFormats(java.util.Map)
  * 
- * @since 2.3.24
+ * @since 2.3.32
  */
 public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatFactory {
     
@@ -49,7 +46,7 @@ public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatF
      * 
      * @param params
      *            The string that further describes how the format should look. For example, when the
-     *            {@link Configurable#getInstantFormat()} ()} instantFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@link Configurable#getInstantFormat() instantFormat} is {@code "@fooBar 1, 2"}, then it will be
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
      *            {@link TemplateTemporalFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param temporalClass
@@ -57,14 +54,14 @@ public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatF
      *            {@link UnformattableTemporalTypeException} exception.
      * @param locale
      *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
-     *            forever (i.e. locale changes in the {@link Environment} must not be followed).
+     *            forever. That is, the result of {@link Environment#getLocale()} must not be taken into account.
      * @param timeZone
      *            The time zone to format for. Not {@code null}. The resulting format must be bound to this time zone
-     *            forever (i.e. time zone changes in the {@link Environment} must not be followed).
+     *            forever. That is, the result of {@link Environment#getTimeZone()} must not be taken into account.
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}. The
-     *            result shouldn't depend on setting values in the {@link Environment}, as changing other setting
+     *            result shouldn't depend on setting values in the {@link Environment}, because changing settings
      *            will not necessarily invalidate the result.
      * 
      * @throws TemplateValueFormatException

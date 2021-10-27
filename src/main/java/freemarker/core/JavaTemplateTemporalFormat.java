@@ -40,6 +40,11 @@ import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
+/**
+ * See {@link JavaTemplateTemporalFormatFactory}.
+ *
+ * @since 2.3.32
+ */
 class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
     enum FormatTimeConversion {
@@ -47,7 +52,13 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
         SET_ZONE_FROM_OFFSET
     }
 
-    private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile("(short|medium|long|full)(?:_(short|medium|long|full))?");
+    static final String SHORT = "short";
+    static final String MEDIUM = "medium";
+    static final String LONG = "long";
+    static final String FULL = "full";
+    private static final String ANY_FORMAT_STYLE = "(" + SHORT + "|" + MEDIUM + "|" + LONG + "|" + FULL + ")";
+    private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile(
+            ANY_FORMAT_STYLE + "(?:_" + ANY_FORMAT_STYLE + ")?");
 
     private final DateTimeFormatter dateTimeFormatter;
     private final ZoneId zoneId;

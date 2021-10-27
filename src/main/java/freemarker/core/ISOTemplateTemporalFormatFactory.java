@@ -31,6 +31,9 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * Format factory related to {@link someJava8Temporal?string.iso}, {@link someJava8Temporal?string.iso_...}, etc.
+ */
 class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     static final ISOTemplateTemporalFormatFactory INSTANCE = new ISOTemplateTemporalFormatFactory();
@@ -39,14 +42,13 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         // Not meant to be called from outside
     }
 
-    private static final DateTimeFormatter ISO8601_DATE_FORMAT = new DateTimeFormatterBuilder()
+    static final DateTimeFormatter ISO8601_DATE_FORMAT = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE)
             .toFormatter()
             .withLocale(Locale.US);
 
-    private static final DateTimeFormatter ISO8601_DATE_TIME_FORMAT = new DateTimeFormatterBuilder()
+    static final DateTimeFormatter ISO8601_DATE_TIME_FORMAT = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE)
-            .optionalStart()
             .appendLiteral('T')
             .appendValue(ChronoField.HOUR_OF_DAY, 2)
             .appendLiteral(":")
@@ -57,11 +59,10 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             .optionalStart()
             .appendOffsetId()
             .optionalEnd()
-            .optionalEnd()
             .toFormatter()
             .withLocale(Locale.US);
 
-    private static final DateTimeFormatter ISO8601_TIME_FORMAT = new DateTimeFormatterBuilder()
+    static final DateTimeFormatter ISO8601_TIME_FORMAT = new DateTimeFormatterBuilder()
             .appendValue(ChronoField.HOUR_OF_DAY, 2)
             .appendLiteral(":")
             .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
@@ -74,7 +75,7 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             .toFormatter()
             .withLocale(Locale.US);
 
-    private static final DateTimeFormatter ISO8601_YEARMONTH_FORMAT = new DateTimeFormatterBuilder()
+    static final DateTimeFormatter ISO8601_YEARMONTH_FORMAT = new DateTimeFormatterBuilder()
             .appendValue(ChronoField.YEAR)
             .appendLiteral("-")
             .appendValue(ChronoField.MONTH_OF_YEAR, 2)
@@ -91,7 +92,7 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             TemplateValueFormatException {
         if (!params.isEmpty()) {
             // TODO [FREEMARKER-35]
-            throw new InvalidFormatParametersException("xs currently doesn't support parameters");
+            throw new InvalidFormatParametersException("iso currently doesn't support parameters for Java 8 temporal types");
         }
 
         return getISOFormatter(temporalClass, timeZone);
@@ -104,7 +105,7 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             dateTimeFormatter = ISO8601_TIME_FORMAT;
             description = "ISO 8601 (subset) time";
         } else if (temporalClass == Year.class) {
-            dateTimeFormatter = ISO8601_YEAR_FORMAT; // Same as ISO
+            dateTimeFormatter = ISO8601_YEAR_FORMAT;
             description = "ISO 8601 (subset) year";
         } else if (temporalClass == YearMonth.class) {
             dateTimeFormatter = ISO8601_YEARMONTH_FORMAT;

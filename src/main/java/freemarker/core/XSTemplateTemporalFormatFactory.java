@@ -27,12 +27,13 @@ import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * Format factory related to {@link someJava8Temporal?string.xs}, {@link someJava8Temporal?string.xs_...}, etc.
+ */
 class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     static final XSTemplateTemporalFormatFactory INSTANCE = new XSTemplateTemporalFormatFactory();
@@ -41,52 +42,12 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         // Not meant to be called from outside
     }
 
-    private static final DateTimeFormatter XSD_DATE_FORMAT = new DateTimeFormatterBuilder()
-            .append(DateTimeFormatter.ISO_LOCAL_DATE)
-            .toFormatter()
-            .withLocale(Locale.US);
-
-    private static final DateTimeFormatter XSD_DATE_TIME_FORMAT = new DateTimeFormatterBuilder()
-            .append(DateTimeFormatter.ISO_LOCAL_DATE)
-            .appendLiteral('T')
-            .appendValue(ChronoField.HOUR_OF_DAY, 2)
-            .appendLiteral(":")
-            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-            .appendLiteral(":")
-            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-            .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
-            .optionalStart()
-            .appendOffsetId()
-            .optionalEnd()
-            .toFormatter()
-            .withLocale(Locale.US);
-
-    private static final DateTimeFormatter XSD_TIME_FORMAT = new DateTimeFormatterBuilder()
-            .appendValue(ChronoField.HOUR_OF_DAY, 2)
-            .appendLiteral(":")
-            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-            .appendLiteral(":")
-            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-            .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
-            .optionalStart()
-            .appendOffsetId()
-            .optionalEnd()
-            .toFormatter()
-            .withLocale(Locale.US);
-
-    private static final DateTimeFormatter XSD_YEARMONTH_FORMAT = new DateTimeFormatterBuilder()
-            .appendValue(ChronoField.YEAR)
-            .appendLiteral("-")
-            .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-            .toFormatter()
-            .withLocale(Locale.US);
-
     @Override
     public TemplateTemporalFormat get(String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env) throws
             TemplateValueFormatException {
         if (!params.isEmpty()) {
             // TODO [FREEMARKER-35]
-            throw new InvalidFormatParametersException("xs currently doesn't support parameters");
+            throw new InvalidFormatParametersException("xs currently doesn't support parameters for Java 8 temporal types");
         }
 
         return getXSFormatter(temporalClass, timeZone);
@@ -96,16 +57,16 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         final DateTimeFormatter dateTimeFormatter;
         final String description;
         if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
-            dateTimeFormatter = XSD_TIME_FORMAT;
+            dateTimeFormatter = ISO8601_TIME_FORMAT;
             description = "W3C XML Schema time";
         } else if (temporalClass == Year.class) {
-            dateTimeFormatter = ISO8601_YEAR_FORMAT; // Same as ISO
+            dateTimeFormatter = ISO8601_YEAR_FORMAT;
             description = "W3C XML Schema year";
         } else if (temporalClass == YearMonth.class) {
-            dateTimeFormatter = XSD_YEARMONTH_FORMAT;
+            dateTimeFormatter = ISO8601_YEARMONTH_FORMAT;
             description = "W3C XML Schema year-month";
         } else if (temporalClass == LocalDate.class) {
-            dateTimeFormatter = XSD_DATE_FORMAT;
+            dateTimeFormatter = ISO8601_DATE_FORMAT;
             description = "W3C XML Schema date";
         } else {
             Class<? extends Temporal> normTemporalClass =
@@ -113,7 +74,7 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
             if (normTemporalClass != temporalClass) {
                 return getXSFormatter(normTemporalClass, timeZone);
             } else {
-                dateTimeFormatter = XSD_DATE_TIME_FORMAT;
+                dateTimeFormatter = ISO8601_DATE_TIME_FORMAT;
                 description = "W3C XML Schema date-time";
             }
         }
