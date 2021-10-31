@@ -649,7 +649,7 @@ class BuiltInsForMultipleTypes {
                         cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.format(temporalModel));
                     } catch (TemplateValueFormatException e) {
                         try {
-                            throw _MessageUtil.newCantFormatTemporalException(defaultFormat, target, e, true);
+                            throw _MessageUtil.newCantFormatTemporalException(defaultFormat, temporalModel, target, e, true);
                         } catch (TemplateException e2) {
                             // `e` should always be a TemplateModelException here, but to be sure:
                             throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2);

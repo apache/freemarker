@@ -25,7 +25,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -49,7 +52,8 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
     enum FormatTimeConversion {
         INSTANT_TO_ZONED_DATE_TIME,
-        SET_ZONE_FROM_OFFSET
+        SET_ZONE_FROM_OFFSET,
+        CONVERT_TO_CURRENT_ZONE
     }
 
     static final String SHORT = "short";
@@ -71,20 +75,13 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
         temporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
 
-        Matcher localizedPatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
-        boolean isLocalizedPattern = localizedPatternMatcher.matches();
-        if (temporalClass == Instant.class) {
-            this.formatTimeConversion = FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME;
-        } else if (isLocalizedPattern && (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
-            this.formatTimeConversion = FormatTimeConversion.SET_ZONE_FROM_OFFSET;
-        } else {
-            this.formatTimeConversion = null;
-        }
+        Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
+        boolean isFormatStyleString = formatStylePatternMatcher.matches();
 
         DateTimeFormatter dateTimeFormatter;
-        if (isLocalizedPattern) {
-            FormatStyle datePartFormatStyle = FormatStyle.valueOf(localizedPatternMatcher.group(1).toUpperCase(Locale.ROOT));
-            String group2 = localizedPatternMatcher.group(2);
+        if (isFormatStyleString) {
+            FormatStyle datePartFormatStyle = FormatStyle.valueOf(formatStylePatternMatcher.group(1).toUpperCase(Locale.ROOT));
+            String group2 = formatStylePatternMatcher.group(2);
             FormatStyle timePartFormatStyle = group2 != null
                     ? FormatStyle.valueOf(group2.toUpperCase(Locale.ROOT))
                     : datePartFormatStyle;
@@ -97,8 +94,8 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                 dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(datePartFormatStyle);
             } else {
                 throw new InvalidFormatParametersException(
-                        "Format " + StringUtil.jQuote(formatString) + " is not supported for "
-                        + temporalClass.getName());
+                        "Format styles (like " + StringUtil.jQuote(formatString) + ") is not supported for "
+                        + temporalClass.getName() + " values.");
             }
         } else {
             try {
@@ -108,6 +105,30 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             }
         }
         this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
+
+        if (isLocalTemporalClass(temporalClass)) {
+            this.formatTimeConversion = null;
+        } else {
+            if (showsZone(dateTimeFormatter)) {
+                if (temporalClass == Instant.class) {
+                    this.formatTimeConversion = FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME;
+                } else if (isFormatStyleString &&
+                        (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
+                    this.formatTimeConversion = FormatTimeConversion.SET_ZONE_FROM_OFFSET;
+                } else {
+                    this.formatTimeConversion = null;
+                }
+            } else {
+                if (temporalClass == OffsetTime.class && timeZone.useDaylightTime()) {
+                    throw new InvalidFormatParametersException(
+                            "The format must show the time offset, as the current FreeMarker time zone, "
+                                    + StringUtil.jQuote(timeZone.getID()) + ", may uses Daylight Saving Time, and thus "
+                                    + "it's not possible to convert the value to the local time in that zone, "
+                                    + "since we don't know the day.");
+                }
+                this.formatTimeConversion = FormatTimeConversion.CONVERT_TO_CURRENT_ZONE;
+            }
+        }
 
         this.zoneId = timeZone.toZoneId();
     }
@@ -119,14 +140,33 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
         if (formatTimeConversion == FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME) {
             temporal = ((Instant) temporal).atZone(zoneId);
-        } else if (formatTimeConversion == FormatTimeConversion.SET_ZONE_FROM_OFFSET) {
-            if (temporal instanceof OffsetDateTime) {
-                dateTimeFormatter = dateTimeFormatter.withZone(((OffsetDateTime) temporal).getOffset());
+        } else if (formatTimeConversion == FormatTimeConversion.CONVERT_TO_CURRENT_ZONE) {
+            if (temporal instanceof Instant) {
+                temporal = ((Instant) temporal).atZone(zoneId);
+            } else if (temporal instanceof OffsetDateTime) {
+                temporal = ((OffsetDateTime) temporal).atZoneSameInstant(zoneId);
+            } else if (temporal instanceof ZonedDateTime) {
+                temporal = ((ZonedDateTime) temporal).withZoneSameInstant(zoneId);
             } else if (temporal instanceof OffsetTime) {
+                // Because of logic in the constructor, this is only reached if the zone never uses Daylight Saving.
+                temporal = ((OffsetTime) temporal).withOffsetSameInstant(zoneId.getRules().getOffset(Instant.EPOCH));
+            } else {
+                throw new InvalidFormatParametersException(
+                        "Don't know how to convert value of type " + temporal.getClass().getName() + " to the current "
+                                + "FreeMarker time zone, " + StringUtil.jQuote(zoneId.getId()) + ", which is "
+                                + "needed to format with " + StringUtil.jQuote(formatString) + ".");
+            }
+        } else if (formatTimeConversion == FormatTimeConversion.SET_ZONE_FROM_OFFSET) {
+            // Formats like "long" want a time zone field, but oddly, they don't treat the zoneOffset as such.
+            if (temporal instanceof OffsetDateTime) {
+                OffsetDateTime offsetDateTime = (OffsetDateTime) temporal;
+                temporal = ZonedDateTime.of(offsetDateTime.toLocalDateTime(), offsetDateTime.getOffset());
+            } else if (temporal instanceof OffsetTime) {
+                // There's no ZonedTime class, so we must manipulate the format.
                 dateTimeFormatter = dateTimeFormatter.withZone(((OffsetTime) temporal).getOffset());
             } else {
                 throw new IllegalArgumentException(
-                        "Formatter was created for OffsetTime and OffsetDateTime, but value was a "
+                        "Formatter was created for OffsetTime or OffsetDateTime, but value was a "
                                 + ClassUtil.getShortClassNameOfObject(temporal));
             }
         }
@@ -157,6 +197,24 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     @Override
     public boolean isTimeZoneBound() {
         return true;
+    }
+
+    private static final ZonedDateTime SHOWS_ZONE_SAMPLE_TEMPORAL_1 = ZonedDateTime.of(
+            LocalDateTime.of(2011, 1, 1, 1, 1), ZoneOffset.ofHours(0));
+    private static final ZonedDateTime SHOWS_ZONE_SAMPLE_TEMPORAL_2 = ZonedDateTime.of(
+            LocalDateTime.of(2011, 1, 1, 1, 1), ZoneOffset.ofHours(1));
+
+    private boolean showsZone(DateTimeFormatter dateTimeFormatter) {
+        return !dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_1)
+                .equals(dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_2));
+    }
+
+    private static boolean isLocalTemporalClass(Class<? extends Temporal> normalizedTemporalClass) {
+        return normalizedTemporalClass == LocalDateTime.class
+                || normalizedTemporalClass == LocalTime.class
+                || normalizedTemporalClass == LocalDate.class
+                || normalizedTemporalClass == Year.class
+                || normalizedTemporalClass == YearMonth.class;
     }
 
 }

@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 
 import freemarker.template.Template;
@@ -27,6 +28,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -322,15 +324,34 @@ public class _MessageUtil {
                 : new _MiscTemplateException(e, null, desc);
     }
     
-    public static TemplateException newCantFormatTemporalException(TemplateTemporalFormat format, Expression dataSrcExp,
+    public static TemplateException newCantFormatTemporalException(TemplateTemporalFormat format, TemplateTemporalModel ttm, Expression dataSrcExp,
             TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Failed to format temporal value with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                "Failed to format temporal value of class ", safeGetTemporalClass(ttm),
+                        ", value ", new _DelayedJQuote(new _DelayedToString(safeGetTemporalValue(ttm))),
+                        ", with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp);
         return useTempModelExc
                 ? new _TemplateModelException(e, null, desc)
                 : new _MiscTemplateException(e, null, desc);
+    }
+
+    private static String safeGetTemporalClass(TemplateTemporalModel ttm) {
+        try {
+            return ttm.getAsTemporal().getClass().getName();
+        } catch (TemplateModelException e) {
+            return "[failed to get]";
+        }
+    }
+
+    private static Object safeGetTemporalValue(TemplateTemporalModel ttm) {
+        try {
+            Temporal value = ttm.getAsTemporal();
+            return value != null ? value : "null";
+        } catch (TemplateModelException e) {
+            return "[failed to get]";
+        }
     }
 
     public static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,

@@ -26,6 +26,7 @@
 	</appender>
 	
 	<logger name="org.eclipse.jetty" level="INFO" />
+	<logger name="freemarker.runtime.attempt" level="INFO" />
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

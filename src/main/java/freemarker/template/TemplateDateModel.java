@@ -31,6 +31,9 @@ import java.util.List;
  * <p>
  * Objects of this type should be immutable, that is, calling {@link #getAsDate()} and {@link #getDateType()} should
  * always return the same value as for the first time.
+ *
+ * <p>{@link java.time.temporal.Temporal} values (the date/time classes introduced with Java 8) are handled by
+ * {@link TemplateTemporalModel}.
  */
 public interface TemplateDateModel extends TemplateModel {
     

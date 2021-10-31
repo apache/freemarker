@@ -413,7 +413,7 @@ class EvalUtil {
             try {
                 return assertFormatResultNotNull(format.format(ttm));
             } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatTemporalException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatTemporalException(format, ttm, exp, e, false);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
@@ -424,10 +424,10 @@ class EvalUtil {
 
     /**
      * Like {@link #coerceModelToStringOrMarkup(TemplateModel, Expression, String, Environment)}, but gives error
-     * if the result is markup. This is what you normally used where markup results can't be used.
+     * if the result is markup. This is what you normally use where markup results can't be used.
      *
      * @param seqTip
-     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     *            Tip to display if the value type is not coercable, and it's sequence or collection.
      * 
      * @return Never {@code null}
      */
@@ -456,7 +456,7 @@ class EvalUtil {
             try {
                 return ensureFormatResultString(format.format(ttm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatTemporalException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatTemporalException(format, ttm, exp, e, false);
             }
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);

@@ -2217,7 +2217,8 @@ public final class Environment extends Configurable {
      * @param blamedTtmSourceExp
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatTemporalToPlainText(TemplateTemporalModel ttm, String formatString,
+    String formatTemporalToPlainText(
+            TemplateTemporalModel ttm, String formatString,
             Expression blamedTtmSourceExp, Expression blamedFormatterSourceExp,
             boolean useTempModelExc)
             throws TemplateException {
@@ -2225,21 +2226,26 @@ public final class Environment extends Configurable {
                 formatString, ttm,
                 blamedTtmSourceExp, blamedFormatterSourceExp,
                 useTempModelExc);
-        try {
-            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
-        } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatTemporalException(ttf, blamedTtmSourceExp, e, true);
-        }
+        return Environment.this.formatTemporalToPlainText(ttm, blamedTtmSourceExp, ttf, true);
     }
 
-    String formatTemporalToPlainText(TemplateTemporalModel ttm, Expression blamedTtmSourceExp,
-            boolean useTempModelExc) throws TemplateException {
+    String formatTemporalToPlainText(
+            TemplateTemporalModel ttm, Expression blamedTtmSourceExp,
+            boolean useTempModelExc)
+            throws TemplateException {
         TemplateTemporalFormat ttf = getTemplateTemporalFormat(
                 ttm, blamedTtmSourceExp, useTempModelExc);
+        return formatTemporalToPlainText(ttm, blamedTtmSourceExp, ttf, false);
+    }
+
+    String formatTemporalToPlainText(
+            TemplateTemporalModel ttm, Expression blamedTtmSourceExp, TemplateTemporalFormat ttf,
+            boolean useTempModelExc)
+            throws TemplateException {
         try {
             return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
         } catch (TemplateValueFormatException e) {
-            throw _MessageUtil.newCantFormatTemporalException(ttf, blamedTtmSourceExp, e, false);
+            throw _MessageUtil.newCantFormatTemporalException(ttf, ttm, blamedTtmSourceExp, e, useTempModelExc);
         }
     }
 
@@ -2275,8 +2281,8 @@ public final class Environment extends Configurable {
             }
 
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                    "The value of the \"", settingName,
-                    "\" FreeMarker configuration setting is a malformed temporal format string: ",
+                    "Problem with using the \"", settingName,
+                    "\" FreeMarker configuration setting value, ",
                     new _DelayedJQuote(settingValue), ". Reason given: ",
                     e.getMessage());
             throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
