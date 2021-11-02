@@ -392,29 +392,11 @@ class EvalUtil {
             TemplateModel tm, Expression exp, boolean returnNullOnNonCoercableType, String seqTip, Environment env)
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            TemplateNumberModel tnm = (TemplateNumberModel) tm; 
-            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
-            try {
-                return assertFormatResultNotNull(format.format(tnm));
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
-            }
+            return env.formatNumber((TemplateNumberModel) tm, exp, false);
         } else if (tm instanceof TemplateDateModel) {
-            TemplateDateModel tdm = (TemplateDateModel) tm;
-            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
-            try {
-                return assertFormatResultNotNull(format.format(tdm));
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
-            }
+            return env.formatDate((TemplateDateModel) tm, exp, false);
         } else if (tm instanceof TemplateTemporalModel) {
-            TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm.getAsTemporal().getClass(), exp, false);
-            try {
-                return assertFormatResultNotNull(format.format(ttm));
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatTemporalException(format, ttm, exp, e, false);
-            }
+            return env.formatTemporal((TemplateTemporalModel) tm, exp, false);
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
         } else { 
@@ -435,29 +417,11 @@ class EvalUtil {
             TemplateModel tm, Expression exp, String seqTip, Environment env)
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            TemplateNumberModel tnm = (TemplateNumberModel) tm; 
-            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
-            try {
-                return ensureFormatResultString(format.format(tnm), exp, env);
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
-            }
+            return ensureFormatResultString(env.formatNumber((TemplateNumberModel) tm, exp, false), exp, env);
         } else if (tm instanceof TemplateDateModel) {
-            TemplateDateModel tdm = (TemplateDateModel) tm;
-            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
-            try {
-                return ensureFormatResultString(format.format(tdm), exp, env);
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
-            }
+            return ensureFormatResultString(env.formatDate((TemplateDateModel) tm, exp, false), exp, env);
         } else if (tm instanceof TemplateTemporalModel) {
-            TemplateTemporalModel ttm = (TemplateTemporalModel) tm;
-            TemplateTemporalFormat format = env.getTemplateTemporalFormat(ttm, exp, false);
-            try {
-                return ensureFormatResultString(format.format(ttm), exp, env);
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatTemporalException(format, ttm, exp, e, false);
-            }
+            return ensureFormatResultString(env.formatTemporal((TemplateTemporalModel) tm, exp, false), exp, env);
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }
@@ -570,7 +534,7 @@ class EvalUtil {
         
         TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) formatResult;
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Value was formatted to convert it to string, but the result was markup of ouput format ",
+                "Value was formatted to convert it to string, but the result was markup of output format ",
                 new _DelayedJQuote(mo.getOutputFormat()), ".")
                 .tip("Use value?string to force formatting to plain text.")
                 .blame(exp);

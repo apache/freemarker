@@ -38,7 +38,21 @@ import freemarker.template.TemplateTemporalModel;
  */
 public abstract class TemplateTemporalFormat extends TemplateValueFormat {
 
-    public abstract String format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException;
+    public abstract String formatToPlainText(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException;
+
+    /**
+     * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
+     * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
+     * {@link #formatToPlainText(TemplateTemporalModel)} escaped, it must return the {@link String} that
+     * {@link #formatToPlainText(TemplateTemporalModel)} does.
+     *
+     * <p>The implementation in {@link TemplateTemporalFormat} simply calls {@link #formatToPlainText(TemplateTemporalModel)}.
+     *
+     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
+     */
+    public String format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException {
+        return formatToPlainText(temporalModel);
+    }
 
     /**
      * Tells if the same formatter can be used regardless of the desired locale (so for example after a

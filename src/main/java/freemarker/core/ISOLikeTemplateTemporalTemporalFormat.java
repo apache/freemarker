@@ -55,7 +55,7 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
     }
 
     @Override
-    public String format(TemplateTemporalModel tm) throws TemplateValueFormatException,
+    public String formatToPlainText(TemplateTemporalModel tm) throws TemplateValueFormatException,
             TemplateModelException {
         Temporal temporal = TemplateFormatUtil.getNonNullTemporal(tm);
 

@@ -1454,7 +1454,22 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Format number with the default number format.
+     * Format number with the default number format to plain text or markup.
+     *
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
+     */
+    Object formatNumber(TemplateNumberModel number, Expression exp, boolean useTempModelExc) throws TemplateException {
+        TemplateNumberFormat format = getTemplateNumberFormat(exp, false);
+        try {
+            return EvalUtil.assertFormatResultNotNull(format.format(number));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
+        }
+    }
+
+    /**
+     * Format number with the default number format to plain text.
      * 
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
@@ -1470,7 +1485,7 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumberToPlainText(
+    static String formatNumberToPlainText(
             TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
             boolean useTempModelExc)
             throws TemplateException {
@@ -1753,17 +1768,32 @@ public final class Environment extends Configurable {
     }
 
     /**
+     * Format date with the default format to plain text or markup.
+     *
      * @param blamedTdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDateToPlainText(TemplateDateModel tdm, Expression blamedTdmSourceExpr,
-            boolean useTempModelExc) throws TemplateException {
+    Object formatDate(TemplateDateModel tdm, Expression blamedTdmSourceExpr, boolean useTempModelExc)
+            throws TemplateException {
         TemplateDateFormat format = getTemplateDateFormat(tdm, blamedTdmSourceExpr, useTempModelExc);
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
+            return EvalUtil.assertFormatResultNotNull(format.format(tdm));
         } catch (TemplateValueFormatException e) {
             throw _MessageUtil.newCantFormatDateException(format, blamedTdmSourceExpr, e, useTempModelExc);
         }
+    }
+
+    /**
+     * Format date with the default format to plain text.
+     *
+     * @param blamedTdmSourceExpr
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    String formatDateToPlainText(
+            TemplateDateModel tdm, Expression blamedTdmSourceExpr,
+            boolean useTempModelExc) throws TemplateException {
+        TemplateDateFormat format = getTemplateDateFormat(tdm, blamedTdmSourceExpr, useTempModelExc);
+        return formatDateToPlainText(tdm, blamedTdmSourceExpr, format, useTempModelExc);
     }
 
     /**
@@ -1779,7 +1809,12 @@ public final class Environment extends Configurable {
                 formatString, tdm.getDateType(), EvalUtil.modelToDate(tdm, blamedTdmSourceExp).getClass(),
                 blamedTdmSourceExp, blamedFormatterExp,
                 useTempModelExc);
-        
+        return formatDateToPlainText(tdm, blamedTdmSourceExp, format, useTempModelExc);
+    }
+
+    static String formatDateToPlainText(
+            TemplateDateModel tdm, Expression blamedTdmSourceExp, TemplateDateFormat format,
+            boolean useTempModelExc) throws TemplateException {
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
@@ -2214,6 +2249,24 @@ public final class Environment extends Configurable {
     }
 
     /**
+     * Format temporal with the default format to plain text or markup.
+     *
+     * @param blamedTtmSourceExp
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    Object formatTemporal(TemplateTemporalModel ttm, Expression blamedTtmSourceExp, boolean useTempModelExc)
+            throws TemplateException {
+        TemplateTemporalFormat format = getTemplateTemporalFormat(ttm, blamedTtmSourceExp, useTempModelExc);
+        try {
+            return EvalUtil.assertFormatResultNotNull(format.format(ttm));
+        } catch (TemplateValueFormatException e) {
+            throw _MessageUtil.newCantFormatTemporalException(format, ttm, blamedTtmSourceExp, e, useTempModelExc);
+        }
+    }
+
+    /**
+     * Format temporal with the default format to plain text.
+     *
      * @param blamedTtmSourceExp
      *            The blamed expression if an error occurs; only used for error messages.
      */
@@ -2226,7 +2279,7 @@ public final class Environment extends Configurable {
                 formatString, ttm,
                 blamedTtmSourceExp, blamedFormatterSourceExp,
                 useTempModelExc);
-        return Environment.this.formatTemporalToPlainText(ttm, blamedTtmSourceExp, ttf, true);
+        return formatTemporalToPlainText(ttm, blamedTtmSourceExp, ttf, true);
     }
 
     String formatTemporalToPlainText(
@@ -2238,12 +2291,12 @@ public final class Environment extends Configurable {
         return formatTemporalToPlainText(ttm, blamedTtmSourceExp, ttf, false);
     }
 
-    String formatTemporalToPlainText(
+    static String formatTemporalToPlainText(
             TemplateTemporalModel ttm, Expression blamedTtmSourceExp, TemplateTemporalFormat ttf,
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return EvalUtil.assertFormatResultNotNull(ttf.format(ttm));
+            return EvalUtil.assertFormatResultNotNull(ttf.formatToPlainText(ttm));
         } catch (TemplateValueFormatException e) {
             throw _MessageUtil.newCantFormatTemporalException(ttf, ttm, blamedTtmSourceExp, e, useTempModelExc);
         }
@@ -2256,8 +2309,9 @@ public final class Environment extends Configurable {
             TemplateTemporalModel ttm, Expression blamedTemporalSourceExp, boolean useTempModelExc)
             throws TemplateException {
         return getTemplateTemporalFormat(
-                EvalUtil.modelToTemporal(
-                        ttm, blamedTemporalSourceExp).getClass(), blamedTemporalSourceExp, useTempModelExc);
+                EvalUtil.modelToTemporal(ttm, blamedTemporalSourceExp).getClass(),
+                blamedTemporalSourceExp,
+                useTempModelExc);
     }
 
     /**

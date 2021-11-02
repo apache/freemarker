@@ -629,10 +629,10 @@ class BuiltInsForMultipleTypes {
                 return formatWith(key);
             }
 
-            private TemplateModel formatWith(String key)
+            private TemplateModel formatWith(String formatString)
                     throws TemplateModelException {
                 try {
-                    return new SimpleScalar(env.formatTemporalToPlainText(temporalModel, key, target, stringBI.this, true));
+                    return new SimpleScalar(env.formatTemporalToPlainText(temporalModel, formatString, target, stringBI.this, true));
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure:
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e);
@@ -646,14 +646,10 @@ class BuiltInsForMultipleTypes {
                         throw new BugException();
                     }
                     try {
-                        cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.format(temporalModel));
-                    } catch (TemplateValueFormatException e) {
-                        try {
-                            throw _MessageUtil.newCantFormatTemporalException(defaultFormat, temporalModel, target, e, true);
-                        } catch (TemplateException e2) {
-                            // `e` should always be a TemplateModelException here, but to be sure:
-                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2);
-                        }
+                        cachedValue = Environment.formatTemporalToPlainText(temporalModel, target, defaultFormat, true);
+                    } catch (TemplateException e) {
+                        // `e` should always be a TemplateModelException here, but to be sure:
+                        throw _CoreAPI.ensureIsTemplateModelException("Failed to format temporal value", e);
                     }
                 }
                 return cachedValue;
@@ -700,10 +696,10 @@ class BuiltInsForMultipleTypes {
                 return formatWith(key);
             }
 
-            private TemplateModel formatWith(String key)
+            private TemplateModel formatWith(String formatString)
             throws TemplateModelException {
                 try {
-                    return new SimpleScalar(env.formatDateToPlainText(dateModel, key, target, stringBI.this, true));
+                    return new SimpleScalar(env.formatDateToPlainText(dateModel, formatString, target, stringBI.this, true));
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e); 
@@ -722,14 +718,10 @@ class BuiltInsForMultipleTypes {
                         }
                     }
                     try {
-                        cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
-                    } catch (TemplateValueFormatException e) {
-                        try {
-                            throw _MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
-                        } catch (TemplateException e2) {
-                            // `e` should always be a TemplateModelException here, but to be sure: 
-                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2); 
-                        }
+                        cachedValue = Environment.formatDateToPlainText(dateModel, target, defaultFormat, true);
+                    } catch (TemplateException e2) {
+                        // `e` should always be a TemplateModelException here, but to be sure:
+                        throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2);
                     }
                 }
                 return cachedValue;
@@ -769,14 +761,18 @@ class BuiltInsForMultipleTypes {
             @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
-                return get((String) args.get(0));
+                return formatWith((String) args.get(0));
             }
     
             @Override
             public TemplateModel get(String key) throws TemplateModelException {
+                return formatWith(key);
+            }
+
+            private TemplateModel formatWith(String formatString) throws TemplateModelException {
                 TemplateNumberFormat format;
                 try {
-                    format = env.getTemplateNumberFormat(key, stringBI.this, true);
+                    format = env.getTemplateNumberFormat(formatString, stringBI.this, true);
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to get number format", e); 

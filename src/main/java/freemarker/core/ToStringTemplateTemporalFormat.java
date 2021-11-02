@@ -43,7 +43,7 @@ class ToStringTemplateTemporalFormat extends TemplateTemporalFormat {
     }
 
     @Override
-    public String format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException,
+    public String formatToPlainText(TemplateTemporalModel temporalModel) throws TemplateValueFormatException,
             TemplateModelException {
         Temporal temporal = TemplateFormatUtil.getNonNullTemporal(temporalModel);
         // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did

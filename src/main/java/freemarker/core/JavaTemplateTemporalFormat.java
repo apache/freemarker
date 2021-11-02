@@ -134,7 +134,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     }
 
     @Override
-    public String format(TemplateTemporalModel tm) throws TemplateValueFormatException, TemplateModelException {
+    public String formatToPlainText(TemplateTemporalModel tm) throws TemplateValueFormatException, TemplateModelException {
         DateTimeFormatter dateTimeFormatter = this.dateTimeFormatter;
         Temporal temporal = TemplateFormatUtil.getNonNullTemporal(tm);
 
