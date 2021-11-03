@@ -18,42 +18,53 @@
  */
 package freemarker.core;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateTemporalModel;
 
-public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class LocAndTZSensitiveTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
-    public static final LocAndTZSensitiveTemplateDateFormatFactory INSTANCE = new LocAndTZSensitiveTemplateDateFormatFactory();
+    public static final LocAndTZSensitiveTemporalFormatFactory INSTANCE = new LocAndTZSensitiveTemporalFormatFactory();
     
-    private LocAndTZSensitiveTemplateDateFormatFactory() {
+    private LocAndTZSensitiveTemporalFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
-    public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
-            Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+    public TemplateTemporalFormat get(
+            String params, Class<? extends Temporal> temporalClass,
+            Locale locale, TimeZone timeZone,
+            Environment env)
+            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
         TemplateFormatUtil.checkHasNoParameters(params);
-        return new LocAndTZSensitiveTemplateDateFormat(locale, timeZone);
+        return new LocAndTZSensitiveTemplateTemporalFormat(locale, timeZone);
     }
 
-    private static class LocAndTZSensitiveTemplateDateFormat extends TemplateDateFormat {
+    private static class LocAndTZSensitiveTemplateTemporalFormat extends TemplateTemporalFormat {
 
         private final Locale locale;
         private final TimeZone timeZone;
         
-        public LocAndTZSensitiveTemplateDateFormat(Locale locale, TimeZone timeZone) {
+        public LocAndTZSensitiveTemplateTemporalFormat(Locale locale, TimeZone timeZone) {
             this.locale = locale;
             this.timeZone = timeZone;
         }
 
         @Override
-        public String formatToPlainText(TemplateDateModel dateModel)
+        public String formatToPlainText(TemplateTemporalModel temporalModel)
                 throws UnformattableValueException, TemplateModelException {
-            return TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID();
+            Temporal temporal = TemplateFormatUtil.getNonNullTemporal(temporalModel);
+            long epochMillis;
+            try {
+                epochMillis = temporal.query(Instant::from).toEpochMilli();
+            } catch (Exception e) {
+                throw new UnformattableValueException("Can't extract epoch millis from " + temporal.getClass().getName() + " object.");
+            }
+            return epochMillis + "@" + locale + ":" + timeZone.getID();
         }
 
         @Override
@@ -64,19 +75,6 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         @Override
         public boolean isTimeZoneBound() {
             return true;
-        }
-
-        @Override
-        public Date parse(String s, int dateType) throws UnparsableValueException {
-            try {
-                int atIdx = s.indexOf("@");
-                if (atIdx == -1) {
-                    throw new UnparsableValueException("Missing @");
-                }
-                return new Date(Long.parseLong(s.substring(0, atIdx)));
-            } catch (NumberFormatException e) {
-                throw new UnparsableValueException("Malformed long");
-            }
         }
 
         @Override

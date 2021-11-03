@@ -190,6 +190,8 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        SETTING_ASSIGNMENTS.put("customTemporalFormats",
+                ImmutableMap.of("dummy", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("truncateBuiltinAlgorithm", DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE);
 
         // Parser-only settings:

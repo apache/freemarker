@@ -27,8 +27,8 @@ import freemarker.template.Configuration;
 /**
  * Factory for a certain kind of {@link Temporal} formatting ({@link TemplateTemporalFormat}). Usually a singleton
  * (one-per-VM, or one-per-{@link Configuration}), and so must be thread-safe.
- * 
- * TODO [FREEMARKER-35] @see Configurable#setCustomTemporalFormats(java.util.Map)
+ *
+ * @see Configurable#setCustomTemporalFormats(java.util.Map)
  * 
  * @since 2.3.32
  */

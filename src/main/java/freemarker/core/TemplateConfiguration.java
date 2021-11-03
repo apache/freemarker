@@ -181,6 +181,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isCustomDateFormatsSet()) {
             setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats(), false));
         }
+        if (tc.isCustomTemporalFormatsSet()) {
+            setCustomTemporalFormats(mergeMaps(getCustomTemporalFormats(), tc.getCustomTemporalFormats(), false));
+        }
         if (tc.isCustomNumberFormatsSet()) {
             setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats(), false));
         }
@@ -348,6 +351,10 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (isCustomDateFormatsSet()) {
             template.setCustomDateFormats(
                     mergeMaps(getCustomDateFormats(), template.getCustomDateFormatsWithoutFallback(), false));
+        }
+        if (isCustomTemporalFormatsSet()) {
+            template.setCustomTemporalFormats(
+                    mergeMaps(getCustomTemporalFormats(), template.getCustomTemporalFormatsWithoutFallback(), false));
         }
         if (isCustomNumberFormatsSet()) {
             template.setCustomNumberFormats(
@@ -730,6 +737,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isBooleanFormatSet()
                 || isClassicCompatibleSet()
                 || isCustomDateFormatsSet()
+                || isCustomTemporalFormatsSet()
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()

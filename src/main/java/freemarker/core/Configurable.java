@@ -33,7 +33,6 @@ import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
@@ -150,6 +149,13 @@ public class Configurable {
     public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.32 */
+    public static final String CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE = "custom_temporal_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.32 */
+    public static final String CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE = "customTemporalFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CUSTOM_TEMPORAL_FORMATS_KEY = CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE;
 
     public static final String INSTANT_FORMAT_KEY_SNAKE_CASE = "instant_format";
     public static final String INSTANT_FORMAT_KEY_CAMEL_CASE = "instantFormat";
@@ -357,6 +363,7 @@ public class Configurable {
         CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
         CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
+        CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
         INSTANT_FORMAT_KEY_SNAKE_CASE,
@@ -399,6 +406,7 @@ public class Configurable {
         CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
         CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+        CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
         INSTANT_FORMAT_KEY_CAMEL_CASE,
@@ -470,6 +478,7 @@ public class Configurable {
     private Boolean logTemplateExceptions;
     private Boolean wrapUncheckedExceptions;
     private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
+    private Map<String, ? extends TemplateTemporalFormatFactory> customTemporalFormats;
     private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
     private LinkedHashMap<String, String> autoImports;
     private ArrayList<String> autoIncludes;
@@ -588,6 +597,7 @@ public class Configurable {
         customAttributes = new HashMap();
         
         customDateFormats = Collections.emptyMap();
+        customTemporalFormats = Collections.emptyMap();
         customNumberFormats = Collections.emptyMap();
         
         lazyImports = false;
@@ -1023,7 +1033,7 @@ public class Configurable {
                 throw new IllegalArgumentException("Format name must start with letter: " + name);
             }
             for (int i = 1; i < name.length(); i++) {
-                // Note that we deliberately don't allow "_" here.
+                // We don't allow "_" here, as that's used to separate the parameters from the name at some places.
                 if (!Character.isLetterOrDigit(name.charAt(i))) {
                     throw new IllegalArgumentException("Format name can only contain letters and digits: " + name);
                 }
@@ -1041,7 +1051,11 @@ public class Configurable {
     }
 
     /**
-     * Gets the custom name format registered for the name.
+     * Gets the custom number format factory registered for the name, or {@code null} if no format with the given name
+     * was registered.
+     *
+     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @return The format factory, or {@code null}
      * 
      * @since 2.3.24
      */
@@ -1064,7 +1078,8 @@ public class Configurable {
     public boolean hasCustomFormats() {
         return customNumberFormats != null && !customNumberFormats.isEmpty()
                 || customDateFormats != null && !customDateFormats.isEmpty()
-                || getParent() != null && getParent().hasCustomFormats(); 
+                || customTemporalFormats != null && !customTemporalFormats.isEmpty()
+                || getParent() != null && getParent().hasCustomFormats();
     }
     
     /**
@@ -1602,8 +1617,8 @@ public class Configurable {
      *             conversion mentioned earlier), and will show months with numbers, while "long" and "full" will show
      *             the zone and/or offset, and shows months with their names. (Also "long" and "full" before Java 9
      *             fails for {@link LocalDateTime} and {@link LocalTime}, because of bug JDK-8085887.)
-     *         <li>Other: Interpreted as pattern via {@link DateTimeFormatter#ofPattern}. Example:
-     *             {@code "yyyy-MM-dd HH:mm:ss X"}.
+     *          <li>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom temporal
+     *              format ({@link #setCustomTemporalFormats(Map)}).
      *     </ul>
      *
      * @since 2.3.32
@@ -1749,7 +1764,7 @@ public class Configurable {
      * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
      * doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting
      * (for that, use {@link #getCustomDateFormat(String)}). The returned value isn't a snapshot; it may or may not
-     * shows the changes later made to this setting on this {@link Configurable} level (but usually it's well defined if
+     * show the changes later made to this setting on this {@link Configurable} level (but usually it's well-defined if
      * until what point settings are possibly modified).
      * 
      * <p>
@@ -1805,7 +1820,11 @@ public class Configurable {
     }
 
     /**
-     * Gets the custom name format registered for the name.
+     * Gets the custom date format factory registered for the name, or {@code null} if no format with the given name
+     * was registered.
+     *
+     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @return The format factory, or {@code null}
      * 
      * @since 2.3.24
      */
@@ -1819,15 +1838,83 @@ public class Configurable {
         }
         return parent != null ? parent.getCustomDateFormat(name) : null;
     }
+    
+    /**
+     * Getter pair of {@link #setCustomTemporalFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
+     * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
+     * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
+     * doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting
+     * (for that, use {@link #getCustomTemporalFormat(String)}). The returned value isn't a snapshot; it may or may not
+     * show the changes later made to this setting on this {@link Configurable} level (but usually it's well-defined if
+     * until what point settings are possibly modified).
+     *
+     * <p>
+     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
+     * {@link Map}.
+     *
+     * @see #getCustomTemporalFormatsWithoutFallback()
+     *
+     * @since 2.3.32
+     */
+    public Map<String, ? extends TemplateTemporalFormatFactory> getCustomTemporalFormats() {
+        return customTemporalFormats == null ? parent.getCustomTemporalFormats() : customTemporalFormats;
+    }
 
     /**
-     * Gets the custom name format registered for the name.
+     * Like {@link #getCustomTemporalFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
+     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
      *
-     * @since 2.3.31
+     * @since 2.3.32
+     */
+    public Map<String, ? extends TemplateTemporalFormatFactory> getCustomTemporalFormatsWithoutFallback() {
+        return customTemporalFormats;
+    }
+
+    /**
+     * Associates names with formatter factories, which then can be referred by the various temporal format settings
+     * (like {@link #setLocalDateTimeFormat(String) local_date_time_format},
+     * {@link #setLocalDateFormat(String) local_date_format}, {@link #setLocalTimeFormat(String) local_time_format},
+     * and so on) a value starting with <code>@<i>name</i></code>.
+     *
+     * @param customTemporalFormats
+     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
+     *            letters and digits.
+     *
+     * @since 2.3.32
+     */
+    public void setCustomTemporalFormats(Map<String, ? extends TemplateTemporalFormatFactory> customTemporalFormats) {
+        NullArgumentException.check("customTemporalFormats", customTemporalFormats);
+        validateFormatNames(customTemporalFormats.keySet());
+        this.customTemporalFormats = customTemporalFormats;
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
+     * @since 2.3.32
+     */
+    public boolean isCustomTemporalFormatsSet() {
+        return this.customTemporalFormats != null;
+    }
+
+    /**
+     * Gets the custom temporal format factory registered for the name, or {@code null} if no format with the given name
+     * was registered.
+     *
+     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @return The format factory or, {@code null}
+     *
+     * @since 2.3.32
      */
     public TemplateTemporalFormatFactory getCustomTemporalFormat(String name) {
-        // TODO [FREEMARKER-35]
-        return null;
+        TemplateTemporalFormatFactory r;
+        if (customTemporalFormats != null) {
+            r = customTemporalFormats.get(name);
+            if (r != null) {
+                return r;
+            }
+        }
+        return parent != null ? parent.getCustomTemporalFormat(name) : null;
     }
 
     /**
@@ -2677,7 +2764,12 @@ public class Configurable {
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      *   <br>Example: <code>{ "trade": com.example.TradeTemplateDateFormatFactory,
      *   "log": com.example.LogTemplateDateFormatFactory }</code>
-     *       
+     *
+     *   <li><p>{@code "custom_temporal_formats"}: See {@link #setCustomTemporalFormats(Map)}.
+     *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *   <br>Example: <code>{ "trade": com.example.TradeTemporalFormatFactory,
+     *   "log": com.example.LogTemporalFormatFactory }</code>
+     *
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
@@ -2705,7 +2797,7 @@ public class Configurable {
      *       If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
      *       {@code "bigdecimal"}, {@code "conservative"}.
-     *       
+     *
      *   <li><p>{@code "object_wrapper"}:
      *       See {@link #setObjectWrapper(ObjectWrapper)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
@@ -2724,12 +2816,27 @@ public class Configurable {
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
-     *   
+     *
      *   <li><p>{@code "boolean_format"}: See {@link #setBooleanFormat(String)} .
-     *   
+     *
      *   <li><p>{@code "date_format", "time_format", "datetime_format"}:
-     *       See {@link #setDateFormat(String)}, {@link #setTimeFormat(String)}, {@link #setDateTimeFormat(String)}. 
-     *        
+     *       See {@link #setDateFormat(String)}, {@link #setTimeFormat(String)}, {@link #setDateTimeFormat(String)}.
+     *
+     *   <li><p>{@code "local_date_format", "local_time_format", "local_datetime_format"}:
+     *       See {@link #setLocalDateFormat(String)}, {@link #setLocalTimeFormat(String)}, {@link #setLocalDateTimeFormat(String)}.
+     *
+     *   <li><p>{@code "offset_time_format", "offset_datetime_format"}:
+     *       See {@link #setOffsetTimeFormat(String)}, {@link #setOffsetDateTimeFormat(String)}.
+     *
+     *   <li><p>{@code "zoned_date_time_format"}:
+     *       See {@link #setZonedDateTimeFormat(String)}.
+     *
+     *   <li><p>{@code "year_format"}:
+     *       See {@link #setYearFormat(String)}.
+     *
+     *   <li><p>{@code "year_month_format"}:
+     *       See {@link #setYearMonthFormat(String)}.
+     *
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
@@ -3154,6 +3261,13 @@ public class Configurable {
                 _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
                 _CoreAPI.checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
                 setCustomDateFormats(map);
+            } else if (CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
+                                value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
+                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                _CoreAPI.checkSettingValueItemsType("Map values", TemplateTemporalFormatFactory.class, map.values());
+                setCustomTemporalFormats(map);
             } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
             } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)

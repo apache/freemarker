@@ -65,7 +65,7 @@ public final class TemplateFormatUtil {
      * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
      * {@link TemplateModelException} with a standard error message if that's {@code null}. {@link TemplateDateModel}
      * that store {@code null} are in principle not allowed, and so are considered to be bugs in the
-     * {@link ObjectWrapper} or {@link TemplateNumberModel} implementation.
+     * {@link ObjectWrapper} or {@link TemplateDateModel} implementation.
      */
     public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
         Date date = dateModel.getAsDate();
@@ -75,12 +75,20 @@ public final class TemplateFormatUtil {
         return date;
     }
 
+    /**
+     * Utility method to extract the {@link Temporal} from an {@link TemplateTemporalModel}, and throw
+     * {@link TemplateModelException} with a standard error message if that's {@code null}. {@link TemplateTemporalModel}
+     * that store {@code null} are in principle not allowed, and so are considered to be bugs in the
+     * {@link ObjectWrapper} or {@link TemplateTemporalModel} implementation.
+     *
+     * @since 2.3.32
+     */
     public static Temporal getNonNullTemporal(TemplateTemporalModel temporalModel) throws TemplateModelException {
-        Temporal date = temporalModel.getAsTemporal();
-        if (date == null) {
-            throw EvalUtil.newModelHasStoredNullException(Date.class, temporalModel, null);
+        Temporal temporal = temporalModel.getAsTemporal();
+        if (temporal == null) {
+            throw EvalUtil.newModelHasStoredNullException(Temporal.class, temporalModel, null);
         }
-        return date;
+        return temporal;
     }
 
 }

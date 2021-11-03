@@ -18,25 +18,30 @@
  */
 package freemarker.core;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.StringUtil;
 
-public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class EpochMillisDivTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
-    public static final EpochMillisDivTemplateDateFormatFactory INSTANCE = new EpochMillisDivTemplateDateFormatFactory();
+    public static final EpochMillisDivTemplateTemporalFormatFactory
+            INSTANCE = new EpochMillisDivTemplateTemporalFormatFactory();
     
-    private EpochMillisDivTemplateDateFormatFactory() {
+    private EpochMillisDivTemplateTemporalFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
-    public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
-            Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+    public TemplateTemporalFormat get(
+            String params,
+            Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone,
+            Environment env)
+            throws TemplateValueFormatException {
         int divisor;
         try {
             divisor = Integer.parseInt(params);
@@ -48,21 +53,28 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
             throw new InvalidFormatParametersException(
                     "The format parameter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
         }
-        return new EpochMillisDivTemplateDateFormat(divisor);
+        return new EpochMillisDivTemplateTemporalFormat(divisor);
     }
 
-    private static class EpochMillisDivTemplateDateFormat extends TemplateDateFormat {
+    private static class EpochMillisDivTemplateTemporalFormat extends TemplateTemporalFormat {
 
         private final int divisor;
         
-        private EpochMillisDivTemplateDateFormat(int divisor) {
+        private EpochMillisDivTemplateTemporalFormat(int divisor) {
             this.divisor = divisor;
         }
         
         @Override
-        public String formatToPlainText(TemplateDateModel dateModel)
+        public String formatToPlainText(TemplateTemporalModel temporalModel)
                 throws UnformattableValueException, TemplateModelException {
-            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() / divisor);
+            Temporal temporal = TemplateFormatUtil.getNonNullTemporal(temporalModel);
+            long epochMillis;
+            try {
+                epochMillis = temporal.query(Instant::from).toEpochMilli();
+            } catch (Exception e) {
+                throw new UnformattableValueException("Can't extract epoch millis from " + temporal.getClass().getName() + " object.");
+            }
+            return String.valueOf(epochMillis / divisor);
         }
 
         @Override
@@ -73,15 +85,6 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         @Override
         public boolean isTimeZoneBound() {
             return false;
-        }
-
-        @Override
-        public Date parse(String s, int dateType) throws UnparsableValueException {
-            try {
-                return new Date(Long.parseLong(s));
-            } catch (NumberFormatException e) {
-                throw new UnparsableValueException("Malformed long");
-            }
         }
 
         @Override

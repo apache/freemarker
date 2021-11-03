@@ -70,7 +70,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                         "A format parameter is required to specify the numerical system base.");
             }
             throw new InvalidFormatParametersException(
-                    "The format paramter must be an integer, but was (shown quoted): "
+                    "The format parameter must be an integer, but was (shown quoted): "
                     + StringUtil.jQuote(params));
         }
         if (base < 2) {

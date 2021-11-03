@@ -50,7 +50,7 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
      *
      * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
      */
-    public String format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException {
+    public Object format(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException {
         return formatToPlainText(temporalModel);
     }
 
