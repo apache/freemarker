@@ -46,7 +46,7 @@ public class TemporalFormatTest2 extends TemplateTest {
 
         cfg.setCustomTemporalFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateTemporalFormatFactory.INSTANCE,
-                "loc", LocAndTZSensitiveTemporalFormatFactory.INSTANCE,
+                "loc", LocAndTZSensitiveTemplateTemporalFormatFactory.INSTANCE,
                 "div", EpochMillisDivTemplateTemporalFormatFactory.INSTANCE,
                 "htmlIso", HTMLISOTemplateTemporalFormatFactory.INSTANCE));
     }

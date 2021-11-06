@@ -64,7 +64,9 @@ import freemarker.core.DefaultTruncateBuiltinAlgorithm;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
 import freemarker.core.EpochMillisDivTemplateDateFormatFactory;
+import freemarker.core.EpochMillisDivTemplateTemporalFormatFactory;
 import freemarker.core.EpochMillisTemplateDateFormatFactory;
+import freemarker.core.EpochMillisTemplateTemporalFormatFactory;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
@@ -75,6 +77,7 @@ import freemarker.core.RTFOutputFormat;
 import freemarker.core.TemplateClassResolver;
 import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
+import freemarker.core.TemplateTemporalFormatFactory;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XHTMLOutputFormat;
@@ -1566,6 +1569,78 @@ public class ConfigurationTest extends TestCase {
                     containsString(TemplateDateFormatFactory.class.getName())));
         }
     }
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
+    @Test
+    public void testSetCustomTemporalFormat() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        try {
+            cfg.setCustomTemporalFormats(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("null"));
+        }
+        
+        try {
+            cfg.setCustomTemporalFormats(Collections.singletonMap("", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("0 length"));
+        }
+
+        try {
+            cfg.setCustomTemporalFormats(Collections.singletonMap("a_b", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a_b"));
+        }
+
+        try {
+            cfg.setCustomTemporalFormats(Collections.singletonMap("a b", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a b"));
+        }
+        
+        try {
+            cfg.setCustomTemporalFormats(ImmutableMap.of(
+                    "a", EpochMillisTemplateTemporalFormatFactory.INSTANCE,
+                    "@wrong", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("@wrong"));
+        }
+        
+        cfg.setSetting(Configurable.CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE,
+                "{ 'epoch': " + EpochMillisTemplateTemporalFormatFactory.class.getName() + "() }");
+        assertEquals(
+                Collections.singletonMap("epoch", EpochMillisTemplateTemporalFormatFactory.INSTANCE),
+                cfg.getCustomTemporalFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE,
+                "{ "
+                + "'epoch': " + EpochMillisTemplateTemporalFormatFactory.class.getName() + "(), "
+                + "'epochDiv': " + EpochMillisDivTemplateTemporalFormatFactory.class.getName() + "()"
+                + " }");
+        assertEquals(
+                ImmutableMap.of(
+                        "epoch", EpochMillisTemplateTemporalFormatFactory.INSTANCE,
+                        "epochDiv", EpochMillisDivTemplateTemporalFormatFactory.INSTANCE),
+                cfg.getCustomTemporalFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_TEMPORAL_FORMATS_KEY, "{}");
+        assertEquals(Collections.emptyMap(), cfg.getCustomTemporalFormats());
+        
+        try {
+            cfg.setSetting(Configurable.CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE,
+                    "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getCause().getMessage(), allOf(
+                    containsString(HexTemplateNumberFormatFactory.class.getName()),
+                    containsString(TemplateTemporalFormatFactory.class.getName())));
+        }
+    }
     
     @Test
     public void testHasCustomFormats() throws IOException, TemplateException {
@@ -1605,7 +1680,43 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfg.hasCustomFormats());
         assertFalse(t.hasCustomFormats());
         assertFalse(env.hasCustomFormats());
-        
+
+        // Same with temporal formats:
+
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+
+        env.setCustomTemporalFormats(Collections.singletonMap("f", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+        assertFalse(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        t.setCustomTemporalFormats(Collections.singletonMap("f", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+        assertFalse(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        cfg.setCustomTemporalFormats(Collections.singletonMap("f", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+
+        cfg.setCustomTemporalFormats(Collections.emptyMap());
+        t.setCustomTemporalFormats(Collections.emptyMap());
+        env.setCustomTemporalFormats(Collections.emptyMap());
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+
+        cfg.setCustomTemporalFormats(Collections.singletonMap("f", EpochMillisTemplateTemporalFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+
+        cfg.setCustomTemporalFormats(Collections.emptyMap());
+        t.setCustomTemporalFormats(Collections.emptyMap());
+        env.setCustomTemporalFormats(Collections.emptyMap());
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+
         // Same with number formats:
         
         env.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));

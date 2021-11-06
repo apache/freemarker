@@ -343,6 +343,9 @@ public class TemplateConfigurationTest {
         tc1.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "x", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
+        tc1.setCustomTemporalFormats(ImmutableMap.of(
+                "epoch", EpochMillisTemplateTemporalFormatFactory.INSTANCE,
+                "x", LocAndTZSensitiveTemplateTemporalFormatFactory.INSTANCE));
         tc1.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
@@ -352,6 +355,9 @@ public class TemplateConfigurationTest {
         tc2.setCustomDateFormats(ImmutableMap.of(
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
                 "x", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
+        tc2.setCustomTemporalFormats(ImmutableMap.of(
+                "loc", LocAndTZSensitiveTemplateTemporalFormatFactory.INSTANCE,
+                "x", EpochMillisDivTemplateTemporalFormatFactory.INSTANCE));
         tc2.setCustomNumberFormats(ImmutableMap.of(
                 "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
                 "x", BaseNTemplateNumberFormatFactory.INSTANCE));
@@ -363,6 +369,11 @@ public class TemplateConfigurationTest {
         assertEquals(EpochMillisTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("epoch"));
         assertEquals(LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("loc"));
         assertEquals(EpochMillisDivTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("x"));
+        
+        Map<String, ? extends TemplateTemporalFormatFactory> mergedCustomTemporalFormats = tc1.getCustomTemporalFormats();
+        assertEquals(EpochMillisTemplateTemporalFormatFactory.INSTANCE, mergedCustomTemporalFormats.get("epoch"));
+        assertEquals(LocAndTZSensitiveTemplateTemporalFormatFactory.INSTANCE, mergedCustomTemporalFormats.get("loc"));
+        assertEquals(EpochMillisDivTemplateTemporalFormatFactory.INSTANCE, mergedCustomTemporalFormats.get("x"));
         
         Map<String, ? extends TemplateNumberFormatFactory> mergedCustomNumberFormats = tc1.getCustomNumberFormats();
         assertEquals(HexTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("hex"));
@@ -377,12 +388,14 @@ public class TemplateConfigurationTest {
         // Empty map merging optimization:
         tc1.merge(new TemplateConfiguration());
         assertSame(mergedCustomDateFormats, tc1.getCustomDateFormats());
+        assertSame(mergedCustomTemporalFormats, tc1.getCustomTemporalFormats());
         assertSame(mergedCustomNumberFormats, tc1.getCustomNumberFormats());
         
         // Empty map merging optimization:
         TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.merge(tc1);
         assertSame(mergedCustomDateFormats, tc3.getCustomDateFormats());
+        assertSame(mergedCustomTemporalFormats, tc3.getCustomTemporalFormats());
         assertSame(mergedCustomNumberFormats, tc3.getCustomNumberFormats());
     }
     

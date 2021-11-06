@@ -19,6 +19,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 
@@ -27,25 +28,25 @@ import org.junit.Test;
 
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
+import freemarker.template.SimpleTemporal;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.DateUtil;
 import freemarker.test.TemplateTest;
 
 @SuppressWarnings("boxing")
 public class CoercionToTextualTest extends TemplateTest {
-    
-    /** 2015-09-06T12:00:00Z */
-    private static long T = 1441540800000L;
-    private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATETIME);
-    
+
     @Test
     public void testBasicStringBuiltins() throws IOException, TemplateException {
         assertOutput("${s?upperCase}", "ABC");
         assertOutput("${n?string?lowerCase}", "1.50e+03");
         assertErrorContains("${n?lowerCase}", "convert", "string", "markup", "text/html");
         assertOutput("${dt?string?lowerCase}", "2015-09-06t12:00:00z");
+        assertOutput("${ti?string?lowerCase}", "2015-09-06t12:00:00z");
         assertErrorContains("${dt?lowerCase}", "convert", "string", "markup", "text/html");
+        assertErrorContains("${ti?lowerCase}", "convert", "string", "markup", "text/html");
         assertOutput("${b?upperCase}", "Y");
         assertErrorContains("${m?upperCase}", "convertible to string", "HTMLOutputModel");
     }
@@ -62,6 +63,8 @@ public class CoercionToTextualTest extends TemplateTest {
         assertOutput("${n?esc}", "1.50*10<sup>3</sup>");
         assertOutput("${dt?string?esc}", "2015-09-06T12:00:00Z");
         assertOutput("${dt?esc}", "2015-09-06<span class='T'>T</span>12:00:00Z");
+        assertOutput("${ti?string?esc}", "2015-09-06T12:00:00Z");
+        assertOutput("${ti?esc}", "2015-09-06<span class='T'>T</span>12:00:00Z");
         assertOutput("${b?esc}", "&lt;y&gt;");
         assertOutput("${m?esc}", "<p>M</p>");
     }
@@ -74,6 +77,8 @@ public class CoercionToTextualTest extends TemplateTest {
         assertErrorContains("${n?indexOf('E')}", "convert", "string", "markup", "text/html");
         assertOutput("${dt?string?contains('0')}", "y");
         assertErrorContains("${dt?contains('0')}", "convert", "string", "markup", "text/html");
+        assertOutput("${ti?string?contains('0')}", "y");
+        assertErrorContains("${ti?contains('0')}", "convert", "string", "markup", "text/html");
         assertErrorContains("${m?contains('0')}", "convertible to string", "HTMLOutputModel");
         assertErrorContains("${m?indexOf('0')}", "convertible to string", "HTMLOutputModel");
     }
@@ -83,6 +88,7 @@ public class CoercionToTextualTest extends TemplateTest {
         assertErrorContains("${n?string?markupString}", "Expected", "markup", "string");
         assertErrorContains("${n?markupString}", "Expected", "markup", "number");
         assertErrorContains("${dt?markupString}", "Expected", "markup", "date");
+        assertErrorContains("${ti?markupString}", "Expected", "markup", "temporal");
     }
     
     @Test
@@ -92,6 +98,8 @@ public class CoercionToTextualTest extends TemplateTest {
         assertOutput("${n}", "1.50*10<sup>3</sup>");
         assertOutput("${dt?string}", "2015-09-06T12:00:00Z");
         assertOutput("${dt}", "2015-09-06<span class='T'>T</span>12:00:00Z");
+        assertOutput("${ti?string}", "2015-09-06T12:00:00Z");
+        assertOutput("${ti}", "2015-09-06<span class='T'>T</span>12:00:00Z");
         assertOutput("${b}", "y");
         assertOutput("${m}", "<p>M</p>");
     }
@@ -103,6 +111,8 @@ public class CoercionToTextualTest extends TemplateTest {
         assertOutput("${n + '&'}", "1.50*10<sup>3</sup>&amp;");
         assertOutput("${dt?string + '&'}", "2015-09-06T12:00:00Z&");
         assertOutput("${dt + '&'}", "2015-09-06<span class='T'>T</span>12:00:00Z&amp;");
+        assertOutput("${ti?string + '&'}", "2015-09-06T12:00:00Z&");
+        assertOutput("${ti + '&'}", "2015-09-06<span class='T'>T</span>12:00:00Z&amp;");
         assertOutput("${b + '&'}", "y&");
         assertOutput("${m + '&'}", "<p>M</p>&amp;");
     }
@@ -114,6 +124,8 @@ public class CoercionToTextualTest extends TemplateTest {
         assertOutput("${'&' + n}", "&amp;1.50*10<sup>3</sup>");
         assertOutput("${'&' + dt?string}", "&2015-09-06T12:00:00Z");
         assertOutput("${'&' + dt}", "&amp;2015-09-06<span class='T'>T</span>12:00:00Z");
+        assertOutput("${'&' + ti?string}", "&2015-09-06T12:00:00Z");
+        assertOutput("${'&' + ti}", "&amp;2015-09-06<span class='T'>T</span>12:00:00Z");
         assertOutput("${'&' + b}", "&y");
         assertOutput("${'&' + m}", "&amp;<p>M</p>");
     }
@@ -123,13 +135,18 @@ public class CoercionToTextualTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         cfg.setCustomNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE));
         cfg.setCustomDateFormats(Collections.singletonMap("HI", HTMLISOTemplateDateFormatFactory.INSTANCE));
+        cfg.setCustomTemporalFormats(Collections.singletonMap("HI", HTMLISOTemplateTemporalFormatFactory.INSTANCE));
         cfg.setNumberFormat("@G 3");
         cfg.setDateTimeFormat("@HI");
+        cfg.setInstantFormat("@HI");
         cfg.setBooleanFormat("y,n");
-        
+        cfg.setTimeZone(DateUtil.UTC);
+
         addToDataModel("s", "abc");
         addToDataModel("n", 1500);
-        addToDataModel("dt", TM);
+        long epochMillis = 1441540800000L; // 2015-09-06T12:00:00Z
+        addToDataModel("dt", new SimpleDate(new Date(epochMillis), TemplateDateModel.DATETIME));
+        addToDataModel("ti", new SimpleTemporal(Instant.ofEpochMilli(epochMillis)));
         addToDataModel("b", Boolean.TRUE);
         addToDataModel("m", HTMLOutputFormat.INSTANCE.fromMarkup("<p>M</p>"));
     }

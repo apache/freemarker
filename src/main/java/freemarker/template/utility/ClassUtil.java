@@ -62,6 +62,7 @@ import freemarker.template.TemplateNodeModelEx;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.TemplateTransformModel;
 
 /**
@@ -274,7 +275,11 @@ public class ClassUtil {
         if (TemplateDateModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "date_or_time_or_datetime");
         }
-        
+
+        if (TemplateTemporalModel.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "temporal");
+        }
+
         if (TemplateBooleanModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "boolean");
         }

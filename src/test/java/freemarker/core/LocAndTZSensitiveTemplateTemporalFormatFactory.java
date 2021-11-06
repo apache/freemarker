@@ -26,11 +26,12 @@ import java.util.TimeZone;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 
-public class LocAndTZSensitiveTemporalFormatFactory extends TemplateTemporalFormatFactory {
+public class LocAndTZSensitiveTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
-    public static final LocAndTZSensitiveTemporalFormatFactory INSTANCE = new LocAndTZSensitiveTemporalFormatFactory();
+    public static final LocAndTZSensitiveTemplateTemporalFormatFactory
+            INSTANCE = new LocAndTZSensitiveTemplateTemporalFormatFactory();
     
-    private LocAndTZSensitiveTemporalFormatFactory() {
+    private LocAndTZSensitiveTemplateTemporalFormatFactory() {
         // Defined to decrease visibility
     }
     
