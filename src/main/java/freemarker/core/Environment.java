@@ -1461,11 +1461,13 @@ public final class Environment extends Configurable {
      */
     Object formatNumber(TemplateNumberModel number, Expression exp, boolean useTempModelExc) throws TemplateException {
         TemplateNumberFormat format = getTemplateNumberFormat(exp, false);
+        Object result;
         try {
-            return EvalUtil.assertFormatResultNotNull(format.format(number));
-        } catch (TemplateValueFormatException e) {
+            result = format.format(number);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**
@@ -1489,11 +1491,13 @@ public final class Environment extends Configurable {
             TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
             boolean useTempModelExc)
             throws TemplateException {
+        String result;
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
-        } catch (TemplateValueFormatException e) {
+            result = format.formatToPlainText(number);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**
@@ -1776,11 +1780,13 @@ public final class Environment extends Configurable {
     Object formatDate(TemplateDateModel tdm, Expression blamedTdmSourceExpr, boolean useTempModelExc)
             throws TemplateException {
         TemplateDateFormat format = getTemplateDateFormat(tdm, blamedTdmSourceExpr, useTempModelExc);
+        Object result;
         try {
-            return EvalUtil.assertFormatResultNotNull(format.format(tdm));
-        } catch (TemplateValueFormatException e) {
+            result = format.format(tdm);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatDateException(format, blamedTdmSourceExpr, e, useTempModelExc);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**
@@ -1815,11 +1821,13 @@ public final class Environment extends Configurable {
     static String formatDateToPlainText(
             TemplateDateModel tdm, Expression blamedTdmSourceExp, TemplateDateFormat format,
             boolean useTempModelExc) throws TemplateException {
+        String result;
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
-        } catch (TemplateValueFormatException e) {
+            result = format.formatToPlainText(tdm);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatDateException(format, blamedTdmSourceExp, e, useTempModelExc);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**
@@ -2257,11 +2265,13 @@ public final class Environment extends Configurable {
     Object formatTemporal(TemplateTemporalModel ttm, Expression blamedTtmSourceExp, boolean useTempModelExc)
             throws TemplateException {
         TemplateTemporalFormat format = getTemplateTemporalFormat(ttm, blamedTtmSourceExp, useTempModelExc);
+        Object result;
         try {
-            return EvalUtil.assertFormatResultNotNull(format.format(ttm));
-        } catch (TemplateValueFormatException e) {
+            result = format.format(ttm);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatTemporalException(format, ttm, blamedTtmSourceExp, e, useTempModelExc);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**
@@ -2295,11 +2305,13 @@ public final class Environment extends Configurable {
             TemplateTemporalModel ttm, Expression blamedTtmSourceExp, TemplateTemporalFormat ttf,
             boolean useTempModelExc)
             throws TemplateException {
+        String result;
         try {
-            return EvalUtil.assertFormatResultNotNull(ttf.formatToPlainText(ttm));
-        } catch (TemplateValueFormatException e) {
+            result = ttf.formatToPlainText(ttm);
+        } catch (Exception e) {
             throw _MessageUtil.newCantFormatTemporalException(ttf, ttm, blamedTtmSourceExp, e, useTempModelExc);
         }
+        return EvalUtil.assertFormatResultNotNull(result);
     }
 
     /**

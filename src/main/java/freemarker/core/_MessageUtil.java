@@ -314,27 +314,32 @@ public class _MessageUtil {
     }
 
     public static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,
-            TemplateValueFormatException e, boolean useTempModelExc) {
+            Exception formattingException, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                e.getMessage())
+                formattingException instanceof TemplateValueFormatException
+                        ? formattingException.getMessage()
+                        : String.valueOf(formattingException))
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, null, desc)
-                : new _MiscTemplateException(e, null, desc);
+                ? new _TemplateModelException(formattingException, null, desc)
+                : new _MiscTemplateException(formattingException, null, desc);
     }
     
-    public static TemplateException newCantFormatTemporalException(TemplateTemporalFormat format, TemplateTemporalModel ttm, Expression dataSrcExp,
-            TemplateValueFormatException e, boolean useTempModelExc) {
+    public static TemplateException newCantFormatTemporalException(
+            TemplateTemporalFormat format, TemplateTemporalModel ttm, Expression dataSrcExp,
+            Exception formattingException, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format temporal value of class ", safeGetTemporalClass(ttm),
                         ", value ", new _DelayedJQuote(new _DelayedToString(safeGetTemporalValue(ttm))),
                         ", with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                e.getMessage())
+                formattingException instanceof TemplateValueFormatException
+                        ? formattingException.getMessage()
+                        : String.valueOf(formattingException))
                 .blame(dataSrcExp);
         return useTempModelExc
-                ? new _TemplateModelException(e, null, desc)
-                : new _MiscTemplateException(e, null, desc);
+                ? new _TemplateModelException(formattingException, null, desc)
+                : new _MiscTemplateException(formattingException, null, desc);
     }
 
     private static String safeGetTemporalClass(TemplateTemporalModel ttm) {
@@ -355,14 +360,16 @@ public class _MessageUtil {
     }
 
     public static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
-            TemplateValueFormatException e, boolean useTempModelExc) {
+            Exception formattingException, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                e.getMessage())
+                formattingException instanceof TemplateValueFormatException
+                        ? formattingException.getMessage()
+                        : String.valueOf(formattingException))
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, null, desc)
-                : new _MiscTemplateException(e, null, desc);
+                ? new _TemplateModelException(formattingException, null, desc)
+                : new _MiscTemplateException(formattingException, null, desc);
     }
 
     public static TemplateModelException newKeyValuePairListingNonStringKeyExceptionMessage(
