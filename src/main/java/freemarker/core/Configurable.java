@@ -1054,7 +1054,7 @@ public class Configurable {
      * Gets the custom number format factory registered for the name, or {@code null} if no format with the given name
      * was registered.
      *
-     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @param name The name of the custom format; do not start it with {@code '@'}!
      * @return The format factory, or {@code null}
      * 
      * @since 2.3.24
@@ -1392,7 +1392,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
      *
-     * @param localDateTimeFormat
+     * @param instantFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
      *     {@code iso}/{@code xs} will show the time offset.
      *
@@ -1426,7 +1426,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
      *
-     * @param localDateTimeFormat
+     * @param localDateFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
      *     {@code iso}/{@code xs} will not show the time part.
      *
@@ -1494,7 +1494,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
      *
-     * @param localDateTimeFormat
+     * @param localTimeFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
      *     {@code iso}/{@code xs} will not show the time offset.
      *
@@ -1531,7 +1531,7 @@ public class Configurable {
      * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}, which usually doesn't show the time
      * offset; see the parameter JavaDoc for more.
      *
-     * @param localDateTimeFormat
+     * @param offsetDateTimeFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)}.
      *
      * @since 2.3.32
@@ -1568,7 +1568,7 @@ public class Configurable {
      * <p>Defaults to {@code "long"}, which means {@link FormatStyle#LONG}, which usually show the time offset; see the
      * parameter JavaDoc for more.
      *
-     * @param localDateTimeFormat
+     * @param offsetTimeFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)}, but it <b>must show the offset</b>
      *     (see earlier why).
      *
@@ -1604,7 +1604,7 @@ public class Configurable {
      * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}, which usually doesn't show the time
      * zone; see the parameter JavaDoc for more.
      *
-     * @param localDateTimeFormat
+     * @param zonedDateTimeFormat
      *     One of:
      *     <ul>
      *         <li>{@code "iso"}: ISO-8601 format (like {@code 2021-09-29T13:00:05.2})
@@ -1650,7 +1650,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code "iso"}, which will simply show the year like {@code "2021"} (without the quotation marks).
      *
-     * @param localDateTimeFormat
+     * @param yearFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)},
      *     {@code iso}/{@code xs} only the year is shown.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
@@ -1684,7 +1684,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code "iso"}, which will show the value like {@code "2021-12"} (without the quotation marks).
      *
-     * @param localDateTimeFormat
+     * @param yearMonthFormat
      *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
      *     {@code iso}/{@code xs} will look like {@code 2021-12}.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
@@ -1722,8 +1722,8 @@ public class Configurable {
      *
      * @return Never {@code null}.
      *
-     * @throws NullPointerException If {@link temporalClass} was {@code null}
-     * @throws IllegalArgumentException If {@link temporalClass} is not a supported {@link Temporal} subclass.
+     * @throws NullPointerException If {@code temporalClass} was {@code null}
+     * @throws IllegalArgumentException If {@code temporalClass} is not a supported {@link Temporal} subclass.
      *
      * @since 2.3.32
      */
@@ -1823,7 +1823,7 @@ public class Configurable {
      * Gets the custom date format factory registered for the name, or {@code null} if no format with the given name
      * was registered.
      *
-     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @param name The name of the custom format; do not start it with {@code '@'}!
      * @return The format factory, or {@code null}
      * 
      * @since 2.3.24
@@ -1901,7 +1901,7 @@ public class Configurable {
      * Gets the custom temporal format factory registered for the name, or {@code null} if no format with the given name
      * was registered.
      *
-     * @name The name of the custom format; do not start it with {@code '@'}!
+     * @param name The name of the custom format; do not start it with {@code '@'}!
      * @return The format factory or, {@code null}
      *
      * @since 2.3.32

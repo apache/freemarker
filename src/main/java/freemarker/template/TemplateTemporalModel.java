@@ -18,13 +18,19 @@
  */
 package freemarker.template;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
 /**
  * Any {@link Temporal} value that's included in Java; in Java 8 these are: {@link LocalDateTime}, {@link LocalDate},
- * {@link LocalTime}, {@link OffsetDateTime}, {@link OffsetTime}, {@link ZonedDateTime}, {@link ZonedTime},
+ * {@link LocalTime}, {@link OffsetDateTime}, {@link OffsetTime}, {@link ZonedDateTime},
  * {@link YearMonth}, {@link Year}.
  * This does not deal with {@link java.time.Duration}, and {@link java.time.Period}, because those don't implement the
  * {@link Temporal} interface.

@@ -953,6 +953,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       {@link BeansWrapper} and {@link DefaultObjectWrapper} now wraps {@link Temporal}-s into
      *       {@link SimpleTemporal}. Before that, {@link Temporal}-s were treated as generic Java objects;
      *       see {@link BeansWrapper#BeansWrapper(Version)}.
+     *     </ul>
      *   </li>
      * </ul>
      * 

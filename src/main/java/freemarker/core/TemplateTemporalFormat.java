@@ -19,6 +19,7 @@
 package freemarker.core;
 
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;

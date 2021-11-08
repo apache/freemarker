@@ -956,7 +956,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * <li>if the object is null, returns the {@link #setNullModel(TemplateModel) null model},</li>
      * <li>if the object is a Number returns a {@link NumberModel} for it,</li>
      * <li>if the object is a Date returns a {@link DateModel} for it,</li>
-     * <li>if the object is a java.time.Temporal returns a {@link TemporalModel} for it,</li>
+     * <li>if the object is a {@link Temporal} returns a {@link TemporalModel} for it,</li>
      * <li>if the object is a Boolean returns
      * {@link freemarker.template.TemplateBooleanModel#TRUE} or 
      * {@link freemarker.template.TemplateBooleanModel#FALSE}</li>
