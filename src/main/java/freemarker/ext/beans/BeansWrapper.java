@@ -45,7 +45,6 @@ import freemarker.core.BugException;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedShortClassName;
 import freemarker.core._TemplateModelException;
-import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
@@ -170,7 +169,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Object to wrapped object cache; not used by default.
      * This object only belongs to a single {@link BeansWrapper}.
      */
-    private final ModelCache modelCache;
+    private final BeansModelCache modelCache;
 
     private final BooleanModel falseModel;
     private final BooleanModel trueModel;
@@ -189,7 +188,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private boolean simpleMapWrapper;  // initialized from the BeansWrapperConfiguration
     private boolean strict;  // initialized from the BeansWrapperConfiguration
     private boolean preferIndexedReadMethod; // initialized from the BeansWrapperConfiguration
-    
+    private boolean temporalSupport; // initialized from the BeansWrapperConfiguration
+
     private final Version incompatibleImprovements;
     
     /**
@@ -258,6 +258,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       The default of the {@link #setPreferIndexedReadMethod(boolean) preferIndexedReadMethod} setting changes
      *       from {@code true} to {@code false}.
      *     </li>  
+     *     <li>
+     *       <p>2.3.32 (or higher):
+     *       The default of {@link #setTemporalSupport(boolean) temporalSupport} changes to {@code true},
+     *       and thus {@link Temporal}-s (the Java 8 date/time classes) are wrapped into {@link TemplateTemporalModel}.
+     *       Before that, {@link Temporal}-s were treated as generic Java objects.
+     *       {@link TemplateTemporalModel}) was added in FreeMarker 2.3.32.
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
@@ -346,6 +352,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         
         simpleMapWrapper = bwConf.isSimpleMapWrapper();
         preferIndexedReadMethod =  bwConf.getPreferIndexedReadMethod();
+        temporalSupport = bwConf.getTemporalSupport();
         defaultDateType = bwConf.getDefaultDateType();
         outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
         strict = bwConf.isStrict();
@@ -559,6 +566,33 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     public void setPreferIndexedReadMethod(boolean preferIndexedReadMethod) {
         checkModifiable();
         this.preferIndexedReadMethod = preferIndexedReadMethod;
+    }
+
+    /**
+     * Getter pair of {@link #setTemporalSupport(boolean)}
+     *
+     * @since 2.3.32
+     */
+    public boolean getTemporalSupport() {
+        return temporalSupport;
+    }
+
+    /**
+     * Sets if {@link Temporal}-s (the Java 8 date/time classes) are wrapped into a {@link TemplateTemporalModel}, or
+     * just are wrapped like generic java objects (and thus won't be formatted by FreeMarker properly, nor the built-ins
+     * made for them will work on them). The recommended value is {@code true}. But the defaults is {@code false} if the
+     * {@link BeansWrapper#BeansWrapper(Version) incompatibleImprovements} of the {@link BeansWrapper} is less than
+     * {@code 2.3.32}, otherwise it's {@code true}.
+     *
+     * @since 2.3.32
+     */
+    public void setTemporalSupport(boolean temporalSupport) {
+        checkModifiable();
+        if (temporalSupport != this.temporalSupport) {
+            this.temporalSupport = temporalSupport;
+            getModelCache().clearClassToFactoryMap();
+            getModelCache().clearCache();
+        }
     }
 
     /**
@@ -888,7 +922,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
+        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_32 ? Configuration.VERSION_2_3_32
+                : incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
                 : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
@@ -921,7 +956,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * <li>if the object is null, returns the {@link #setNullModel(TemplateModel) null model},</li>
      * <li>if the object is a Number returns a {@link NumberModel} for it,</li>
      * <li>if the object is a Date returns a {@link DateModel} for it,</li>
-     * <li>if the object is a Boolean returns 
+     * <li>if the object is a java.time.Temporal returns a {@link TemporalModel} for it,</li>
+     * <li>if the object is a Boolean returns
      * {@link freemarker.template.TemplateBooleanModel#TRUE} or 
      * {@link freemarker.template.TemplateBooleanModel#FALSE}</li>
      * <li>if the object is already a TemplateModel, returns it unchanged,</li>
@@ -1012,7 +1048,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (Date.class.isAssignableFrom(clazz)) {
             return DateModel.FACTORY;
         }
-        if (Boolean.class == clazz) { // Boolean is final 
+        if (temporalSupport && Temporal.class.isAssignableFrom(clazz)) {
+            return TemporalModel.FACTORY;
+        }
+        if (Boolean.class == clazz) { // Boolean is final
             return BOOLEAN_FACTORY;
         }
         if (ResourceBundle.class.isAssignableFrom(clazz)) {
@@ -1631,7 +1670,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /** For Unit tests only */
-    ModelCache getModelCache() {
+    BeansModelCache getModelCache() {
         return modelCache;
     }
 
@@ -1850,6 +1889,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                + "exposureLevel=" + classIntrospector.getExposureLevel() + ", "
                + "exposeFields=" + classIntrospector.getExposeFields() + ", "
                + "preferIndexedReadMethod=" + preferIndexedReadMethod + ", "
+               + "temporalSupport=" + temporalSupport + ", "
                + "treatDefaultMethodsAsBeanMembers="
                + classIntrospector.getTreatDefaultMethodsAsBeanMembers() + ", "
                + "sharedClassIntrospCache="

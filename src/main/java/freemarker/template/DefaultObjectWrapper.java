@@ -81,7 +81,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
-     * 
+     *
      * @deprecated Use {@link DefaultObjectWrapperBuilder}, or in rare cases,
      *          {@link #DefaultObjectWrapper(Version)} instead.
      */
@@ -89,7 +89,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     public DefaultObjectWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
-    
+
     /**
      * Use {@link DefaultObjectWrapperBuilder} instead if possible. Instances created with this constructor won't share
      * the class introspection caches with other instances. See {@link BeansWrapper#BeansWrapper(Version)} (the
@@ -112,7 +112,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      *                  the default). This adapter is cleaner than {@link EnumerationModel} as it only implements the
      *                  minimally required FTL type, which avoids some ambiguous situations. (Note that Java API methods
      *                  aren't exposed anymore as subvariables; if you really need them, you can use {@code ?api}). 
-     *                  </li>
      *            </ul>
      * 
      * @since 2.3.21
@@ -211,7 +210,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
             return new SimpleDate((java.util.Date) obj, getDefaultDateType());
         }
-        if (obj instanceof Temporal) {
+        if (getTemporalSupport() && obj instanceof Temporal) {
             return new SimpleTemporal((Temporal) obj);
         }
         final Class<?> objClass = obj.getClass();

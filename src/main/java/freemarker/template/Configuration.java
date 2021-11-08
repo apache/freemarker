@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -944,6 +945,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       before Incompatible Improvements 2.3.21, where instead of INF, and NaN, the results used unicode characters
      *       U+221E, and U+FFFD.
      *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.32 (or higher):
+     *     <ul>
+     *       <li>2.3.32 (or higher):
+     *       {@link BeansWrapper} and {@link DefaultObjectWrapper} now wraps {@link Temporal}-s into
+     *       {@link SimpleTemporal}. Before that, {@link Temporal}-s were treated as generic Java objects;
+     *       see {@link BeansWrapper#BeansWrapper(Version)}.
      *   </li>
      * </ul>
      * 

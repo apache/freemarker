@@ -19,15 +19,20 @@
 
 package freemarker.core;
 
-import java.time.Instant;
 import java.time.LocalTime;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
 public class TemporalErrorMessagesTest extends TemplateTest {
+
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        return new Configuration(Configuration.VERSION_2_3_32);
+    }
 
     @Test
     public void testExplicitFormatString() throws TemplateException {

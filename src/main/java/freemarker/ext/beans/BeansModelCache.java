@@ -71,4 +71,9 @@ public class BeansModelCache extends ModelCache {
         
         return factory.create(object, wrapper);
     }
+
+    void clearClassToFactoryMap() {
+        classToFactory.clear();
+    }
+
 }

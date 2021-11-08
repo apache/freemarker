@@ -47,6 +47,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
     private boolean preferIndexedReadMethod;
+    private boolean temporalSupport;
     private int defaultDateType = TemplateDateModel.UNKNOWN;
     private ObjectWrapper outerIdentity = null;
     private boolean strict = false;
@@ -90,6 +91,8 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         this.incompatibleImprovements = incompatibleImprovements;
         
         preferIndexedReadMethod = incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_27;
+
+        temporalSupport = incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_32;
         
         classIntrospectorBuilder = new ClassIntrospectorBuilder(incompatibleImprovements);
     }
@@ -108,6 +111,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         result = prime * result + incompatibleImprovements.hashCode();
         result = prime * result + (simpleMapWrapper ? 1231 : 1237);
         result = prime * result + (preferIndexedReadMethod ? 1231 : 1237);
+        result = prime * result + (temporalSupport ? 1231 : 1237);
         result = prime * result + defaultDateType;
         result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
         result = prime * result + (strict ? 1231 : 1237);
@@ -130,6 +134,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
         if (simpleMapWrapper != other.simpleMapWrapper) return false;
         if (preferIndexedReadMethod != other.preferIndexedReadMethod) return false;
+        if (temporalSupport != other.temporalSupport) return false;
         if (defaultDateType != other.defaultDateType) return false;
         if (outerIdentity != other.outerIdentity) return false;
         if (strict != other.strict) return false;
@@ -169,6 +174,16 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     /** See {@link BeansWrapper#setPreferIndexedReadMethod(boolean)}. @since 2.3.27 */
     public void setPreferIndexedReadMethod(boolean preferIndexedReadMethod) {
         this.preferIndexedReadMethod = preferIndexedReadMethod;
+    }
+
+    /** @since 2.3.32 */
+    public boolean getTemporalSupport() {
+        return temporalSupport;
+    }
+
+    /** See {@link BeansWrapper#setTemporalSupport(boolean)}. @since 2.3.32 */
+    public void setTemporalSupport(boolean temporalSupport) {
+        this.temporalSupport = temporalSupport;
     }
 
     public int getDefaultDateType() {

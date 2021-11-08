@@ -44,6 +44,7 @@ import freemarker.ext.beans.NumberModel;
 import freemarker.ext.beans.OverloadedMethodsModel;
 import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.beans.StringModel;
+import freemarker.ext.beans.TemporalModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.TemplateBooleanModel;
@@ -214,6 +215,8 @@ public class ClassUtil {
                 return TemplateBooleanModel.class;
             } else if (tm instanceof DateModel) {
                 return TemplateDateModel.class;
+            } else if (tm instanceof TemporalModel) {
+                return TemporalModel.class;
             } else if (tm instanceof StringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
                 return wrapped instanceof String

@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Modifier;
+import java.time.LocalDate;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -37,6 +38,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTemporalModel;
 import freemarker.template.Version;
 import freemarker.template.utility.Constants;
 
@@ -117,7 +119,34 @@ public class BeansWrapperMiscTest {
             assertNull(barTM); // all read methods inaccessible
         }
     }
-    
+
+    @Test
+    public void testTemporalWrappingICI() throws TemplateModelException {
+        LocalDate localDate = LocalDate.of(2021, 10, 31);
+        {
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_31);
+            assertFalse(bw.getTemporalSupport());
+            assertThat(
+                    bw.wrap(localDate),
+                    not(instanceOf(TemplateTemporalModel.class)));
+            bw.setTemporalSupport(true);
+            assertThat(
+                    bw.wrap(localDate),
+                    instanceOf(TemporalModel.class));
+        }
+        {
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_32);
+            assertTrue(bw.getTemporalSupport());
+            assertThat(
+                    bw.wrap(localDate),
+                    instanceOf(TemporalModel.class));
+            bw.setTemporalSupport(false);
+            assertThat(
+                    bw.wrap(localDate),
+                    not(instanceOf(TemplateTemporalModel.class)));
+        }
+    }
+
     public static class BeanWithBothIndexedAndArrayProperty {
         
         private final static String[] FOO = new String[] { "a", "b" };

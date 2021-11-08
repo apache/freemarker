@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,7 +104,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.29
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.30
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.31
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.32
+        expected.add(Configuration.VERSION_2_3_32);
 
         List<Version> actual = new ArrayList<>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
@@ -1090,7 +1091,18 @@ public class DefaultObjectWrapperTest {
         assertFalse(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build().getPreferIndexedReadMethod());
         assertFalse(new DefaultObjectWrapper(Configuration.VERSION_2_3_27).getPreferIndexedReadMethod());
     }
-    
+
+    @Test
+    public void testTemporalWrappingICI() throws TemplateModelException {
+        LocalDate localDate = LocalDate.of(2021, 10, 31);
+        assertThat(
+                new DefaultObjectWrapper(Configuration.VERSION_2_3_31).wrap(localDate),
+                not(instanceOf(TemplateTemporalModel.class)));
+        assertThat(
+                new DefaultObjectWrapper(Configuration.VERSION_2_3_32).wrap(localDate),
+                instanceOf(SimpleTemporal.class));
+    }
+
     private void assertSizeThroughAPIModel(int expectedSize, TemplateModel normalModel) throws TemplateModelException {
         if (!(normalModel instanceof TemplateModelWithAPISupport)) {
             fail(); 
