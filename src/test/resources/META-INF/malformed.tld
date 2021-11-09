@@ -23,7 +23,7 @@
   <tlib-version>2.0</tlib-version>
   <short-name>For ClassPathTlds testing - 3</short-name>
   <uri>http://freemarker.org/taglibs/test/MetaInfTldSources-1xx</uri>
-  <ta>
+  <tag>
     <name>simpletag</name>
     <tag-class>freemarker.ext.jsp.taglibmembers.TestSimpleTag3</tag-class>
     <body-content>empty</body-content>
