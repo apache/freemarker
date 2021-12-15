@@ -113,13 +113,12 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                 throw new InvalidFormatParametersException(e.getMessage(), e);
             }
         }
-        this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
 
         if (isLocalTemporalClass(temporalClass)) {
             this.preFormatValueConversion = null;
         } else {
             PreFormatValueConversion preFormatValueConversion;
-            nonLocalFormatAttempt: do {
+            nonLocalFormatAttempt: while (true) {
                 if (showsZone(dateTimeFormatter)) {
                     if (temporalClass == Instant.class) {
                         preFormatValueConversion = PreFormatValueConversion.INSTANT_TO_ZONED_DATE_TIME;
@@ -143,17 +142,19 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                                             + "it's not possible to convert the value to the local time in that zone, "
                                             + "since we don't know the day.");
                         }
+                        dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(timePartFormatStyle);
                         formatString = timePartFormatStyle.name().toLowerCase(Locale.ROOT);
-                        preFormatValueConversion = null; // Avoid false alarm "might not have been initialized"
                         continue nonLocalFormatAttempt;
                     } else {
                         preFormatValueConversion = PreFormatValueConversion.CONVERT_TO_CURRENT_ZONE;
                     }
                 }
-            } while (false);
+                break nonLocalFormatAttempt;
+            };
             this.preFormatValueConversion = preFormatValueConversion;
         }
 
+        this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
         this.formatString = formatString;
         this.zoneId = timeZone.toZoneId();
     }

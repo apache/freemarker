@@ -28,6 +28,10 @@
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=zonedDateTime?string />
 
 <#setting timeZone="America/New_York">
+<@assertEquals expected="6:07:08 AM" actual=localTime?string />
+<#-- Automatic medium->long step up: -->
+<@assertEquals expected="6:07:08 AM Z" actual=offsetTime?string />
+
 <@assertEquals expected="2003-04-05T01:07:08-05:00" actual=instant?string.iso />
 <@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
 <@assertEquals expected="2003-04-05" actual=localDate?string.iso />
@@ -76,6 +80,13 @@
 <#-- These fail on Java 8 because of JDK-8085887
 <@assertEquals expected="5 avril 2003 06:07:08 ET" actual=localDateTime?string.long />
 <@assertEquals expected="samedi 5 avril 2003 06 h 07 ET" actual=localDateTime?string.full />
+
+<#-- Automatic short->medium->long step up: -->
+<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.short />
+<#-- Automatic medium->long step up: -->
+<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.medium />
+<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.long />
+<@assertEquals expected="06 h 07 Z" actual=offsetTime?string.full />
 -->
 
 <#-- There combinations are clearly not supported by the "localized pattern" API. -->
