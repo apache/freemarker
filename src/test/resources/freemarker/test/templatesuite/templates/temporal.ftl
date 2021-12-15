@@ -22,7 +22,7 @@
 <@assertEquals expected="Apr 5, 2003" actual=localDate?string />
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=offsetDateTime?string />
-<@assertEquals expected="6:07:08 AM Z" actual=offsetTime?string />
+<@assertEquals expected="7:07:08 AM" actual=offsetTime?string />
 <@assertEquals expected="2003" actual=year?string />
 <@assertEquals expected="2003-04" actual=yearMonth?string />
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=zonedDateTime?string />

@@ -50,7 +50,7 @@ import freemarker.template.utility.StringUtil;
  */
 class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
-    enum FormatTimeConversion {
+    enum PreFormatValueConversion {
         INSTANT_TO_ZONED_DATE_TIME,
         SET_ZONE_FROM_OFFSET,
         CONVERT_TO_CURRENT_ZONE
@@ -69,27 +69,30 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;
     private final ZoneId zoneId;
     private final String formatString;
-    private final FormatTimeConversion formatTimeConversion;
+    private final PreFormatValueConversion preFormatValueConversion;
 
     JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
             throws InvalidFormatParametersException {
-        this.formatString = formatString;
-
         temporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
 
         Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
-        boolean isFormatStyleString = formatStylePatternMatcher.matches();
+        final boolean isFormatStyleString = formatStylePatternMatcher.matches();
+        FormatStyle timePartFormatStyle;
 
         DateTimeFormatter dateTimeFormatter;
         if (isFormatStyleString) {
-            String group1 = formatStylePatternMatcher.group(1);
-            FormatStyle datePartFormatStyle = group1 != null
-                    ? FormatStyle.valueOf(group1.toUpperCase(Locale.ROOT))
-                    : FormatStyle.MEDIUM;
-            String group2 = formatStylePatternMatcher.group(2);
-            FormatStyle timePartFormatStyle = group2 != null
-                    ? FormatStyle.valueOf(group2.toUpperCase(Locale.ROOT))
-                    : datePartFormatStyle;
+            FormatStyle datePartFormatStyle;
+            {
+                String group1 = formatStylePatternMatcher.group(1);
+                datePartFormatStyle = group1 != null
+                        ? FormatStyle.valueOf(group1.toUpperCase(Locale.ROOT))
+                        : FormatStyle.MEDIUM;
+                String group2 = formatStylePatternMatcher.group(2);
+                timePartFormatStyle = group2 != null
+                        ? FormatStyle.valueOf(group2.toUpperCase(Locale.ROOT))
+                        : datePartFormatStyle;
+            }
+
             if (temporalClass == LocalDateTime.class || temporalClass == ZonedDateTime.class
                     || temporalClass == OffsetDateTime.class || temporalClass == Instant.class) {
                 dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(datePartFormatStyle, timePartFormatStyle);
@@ -103,6 +106,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                         + temporalClass.getName() + " values.");
             }
         } else {
+            timePartFormatStyle = null;
             try {
                 dateTimeFormatter = DateTimeFormatter.ofPattern(formatString);
             } catch (IllegalArgumentException e) {
@@ -112,30 +116,59 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
         this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
 
         if (isLocalTemporalClass(temporalClass)) {
-            this.formatTimeConversion = null;
+            this.preFormatValueConversion = null;
         } else {
-            if (showsZone(dateTimeFormatter)) {
-                if (temporalClass == Instant.class) {
-                    this.formatTimeConversion = FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME;
-                } else if (isFormatStyleString &&
-                        (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
-                    this.formatTimeConversion = FormatTimeConversion.SET_ZONE_FROM_OFFSET;
+            PreFormatValueConversion preFormatValueConversion;
+            nonLocalFormatAttempt: do {
+                if (showsZone(dateTimeFormatter)) {
+                    if (temporalClass == Instant.class) {
+                        preFormatValueConversion = PreFormatValueConversion.INSTANT_TO_ZONED_DATE_TIME;
+                    } else if (isFormatStyleString &&
+                            (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
+                        preFormatValueConversion = PreFormatValueConversion.SET_ZONE_FROM_OFFSET;
+                    } else {
+                        preFormatValueConversion = null;
+                    }
                 } else {
-                    this.formatTimeConversion = null;
+                    if (temporalClass == OffsetTime.class && timeZone.useDaylightTime()) {
+                        if (isFormatStyleString) {
+                            // To find the closest style that already shows the offset
+                            timePartFormatStyle = getMoreVerboseStyle(timePartFormatStyle);
+                        }
+                        if (timePartFormatStyle == null) {
+                            throw new InvalidFormatParametersException(
+                                    "The format must show the time offset, as the current FreeMarker time zone, "
+                                            + StringUtil.jQuote(timeZone.getID()) +
+                                            ", may uses Daylight Saving Time, and thus "
+                                            + "it's not possible to convert the value to the local time in that zone, "
+                                            + "since we don't know the day.");
+                        }
+                        formatString = timePartFormatStyle.name().toLowerCase(Locale.ROOT);
+                        preFormatValueConversion = null; // Avoid false alarm "might not have been initialized"
+                        continue nonLocalFormatAttempt;
+                    } else {
+                        preFormatValueConversion = PreFormatValueConversion.CONVERT_TO_CURRENT_ZONE;
+                    }
                 }
-            } else {
-                if (temporalClass == OffsetTime.class && timeZone.useDaylightTime()) {
-                    throw new InvalidFormatParametersException(
-                            "The format must show the time offset, as the current FreeMarker time zone, "
-                                    + StringUtil.jQuote(timeZone.getID()) + ", may uses Daylight Saving Time, and thus "
-                                    + "it's not possible to convert the value to the local time in that zone, "
-                                    + "since we don't know the day.");
-                }
-                this.formatTimeConversion = FormatTimeConversion.CONVERT_TO_CURRENT_ZONE;
-            }
+            } while (false);
+            this.preFormatValueConversion = preFormatValueConversion;
         }
 
+        this.formatString = formatString;
         this.zoneId = timeZone.toZoneId();
+    }
+
+    private static FormatStyle getMoreVerboseStyle(FormatStyle style) {
+        switch (style) {
+            case SHORT:
+                return FormatStyle.MEDIUM;
+            case MEDIUM:
+                return FormatStyle.LONG;
+            case LONG:
+                return FormatStyle.FULL;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -143,9 +176,9 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
         DateTimeFormatter dateTimeFormatter = this.dateTimeFormatter;
         Temporal temporal = TemplateFormatUtil.getNonNullTemporal(tm);
 
-        if (formatTimeConversion == FormatTimeConversion.INSTANT_TO_ZONED_DATE_TIME) {
+        if (preFormatValueConversion == PreFormatValueConversion.INSTANT_TO_ZONED_DATE_TIME) {
             temporal = ((Instant) temporal).atZone(zoneId);
-        } else if (formatTimeConversion == FormatTimeConversion.CONVERT_TO_CURRENT_ZONE) {
+        } else if (preFormatValueConversion == PreFormatValueConversion.CONVERT_TO_CURRENT_ZONE) {
             if (temporal instanceof Instant) {
                 temporal = ((Instant) temporal).atZone(zoneId);
             } else if (temporal instanceof OffsetDateTime) {
@@ -161,7 +194,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                                 + "FreeMarker time zone, " + StringUtil.jQuote(zoneId.getId()) + ", which is "
                                 + "needed to format with " + StringUtil.jQuote(formatString) + ".");
             }
-        } else if (formatTimeConversion == FormatTimeConversion.SET_ZONE_FROM_OFFSET) {
+        } else if (preFormatValueConversion == PreFormatValueConversion.SET_ZONE_FROM_OFFSET) {
             // Formats like "long" want a time zone field, but oddly, they don't treat the zoneOffset as such.
             if (temporal instanceof OffsetDateTime) {
                 OffsetDateTime offsetDateTime = (OffsetDateTime) temporal;
