@@ -33,11 +33,13 @@ import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,6 +70,7 @@ import freemarker.ext.beans.MemberAccessPolicy;
 import freemarker.template.AttemptExceptionReporter;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -156,34 +159,6 @@ public class Configurable {
     public static final String CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE = "customTemporalFormats";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String CUSTOM_TEMPORAL_FORMATS_KEY = CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE;
-
-    public static final String INSTANT_FORMAT_KEY_SNAKE_CASE = "instant_format";
-    public static final String INSTANT_FORMAT_KEY_CAMEL_CASE = "instantFormat";
-    public static final String INSTANT_FORMAT_KEY = INSTANT_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String LOCAL_DATE_FORMAT_KEY_SNAKE_CASE = "local_date_format";
-    public static final String LOCAL_DATE_FORMAT_KEY_CAMEL_CASE = "localDateFormat";
-    public static final String LOCAL_DATE_FORMAT_KEY = LOCAL_DATE_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "local_date_time_format";
-    public static final String LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "localDateTimeFormat";
-    public static final String LOCAL_DATE_TIME_FORMAT_KEY = LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String LOCAL_TIME_FORMAT_KEY_SNAKE_CASE = "local_time_format";
-    public static final String LOCAL_TIME_FORMAT_KEY_CAMEL_CASE = "localTimeFormat";
-    public static final String LOCAL_TIME_FORMAT_KEY = LOCAL_TIME_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "offset_date_time_format";
-    public static final String OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "offsetDateTimeFormat";
-    public static final String OFFSET_DATE_TIME_FORMAT_KEY = OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String OFFSET_TIME_FORMAT_KEY_SNAKE_CASE = "offset_time_format";
-    public static final String OFFSET_TIME_FORMAT_KEY_CAMEL_CASE = "offsetTimeFormat";
-    public static final String OFFSET_TIME_FORMAT_KEY = OFFSET_TIME_FORMAT_KEY_SNAKE_CASE;
-
-    public static final String ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE = "zoned_date_time_format";
-    public static final String ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE = "zonedDateTimeFormat";
-    public static final String ZONED_DATE_TIME_FORMAT_KEY = ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE;
 
     public static final String YEAR_FORMAT_KEY_SNAKE_CASE = "year_format";
     public static final String YEAR_FORMAT_KEY_CAMEL_CASE = "yearFormat";
@@ -366,19 +341,13 @@ public class Configurable {
         CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
-        INSTANT_FORMAT_KEY_SNAKE_CASE,
         LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
         LAZY_IMPORTS_KEY_SNAKE_CASE,
-        LOCAL_DATE_FORMAT_KEY_SNAKE_CASE,
-        LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
-        LOCAL_TIME_FORMAT_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
         NUMBER_FORMAT_KEY_SNAKE_CASE,
         OBJECT_WRAPPER_KEY_SNAKE_CASE,
-        OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE,
-        OFFSET_TIME_FORMAT_KEY_SNAKE_CASE,
         OUTPUT_ENCODING_KEY_SNAKE_CASE,
         SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
@@ -390,8 +359,7 @@ public class Configurable {
         URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
         WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE,
         YEAR_FORMAT_KEY_SNAKE_CASE,
-        YEAR_MONTH_FORMAT_KEY_SNAKE_CASE,
-        ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE
+        YEAR_MONTH_FORMAT_KEY_SNAKE_CASE
     };
 
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
@@ -409,19 +377,13 @@ public class Configurable {
         CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
-        INSTANT_FORMAT_KEY_CAMEL_CASE,
         LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
         LAZY_IMPORTS_KEY_CAMEL_CASE,
-        LOCAL_DATE_FORMAT_KEY_CAMEL_CASE,
-        LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
-        LOCAL_TIME_FORMAT_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
         NUMBER_FORMAT_KEY_CAMEL_CASE,
         OBJECT_WRAPPER_KEY_CAMEL_CASE,
-        OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE,
-        OFFSET_TIME_FORMAT_KEY_CAMEL_CASE,
         OUTPUT_ENCODING_KEY_CAMEL_CASE,
         SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
@@ -433,8 +395,7 @@ public class Configurable {
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
         WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE,
         YEAR_FORMAT_KEY_CAMEL_CASE,
-        YEAR_MONTH_FORMAT_KEY_CAMEL_CASE,
-        ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE
+        YEAR_MONTH_FORMAT_KEY_CAMEL_CASE
     };
 
     private Configurable parent;
@@ -446,13 +407,6 @@ public class Configurable {
     private String timeFormat;
     private String dateFormat;
     private String dateTimeFormat;
-    private String instantFormat;
-    private String localDateFormat;
-    private String localDateTimeFormat;
-    private String localTimeFormat;
-    private String offsetDateTimeFormat;
-    private String offsetTimeFormat;
-    private String zonedDateTimeFormat;
     private String yearFormat;
     private String yearMonthFormat;
     private TimeZone timeZone;
@@ -528,27 +482,6 @@ public class Configurable {
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         
-        instantFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(INSTANT_FORMAT_KEY, instantFormat);
-
-        localDateFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(LOCAL_DATE_FORMAT_KEY, localDateFormat);
-
-        localDateTimeFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(LOCAL_DATE_TIME_FORMAT_KEY, localDateTimeFormat);
-
-        localTimeFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(LOCAL_TIME_FORMAT_KEY, localTimeFormat);
-
-        offsetDateTimeFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(OFFSET_DATE_TIME_FORMAT_KEY, offsetDateTimeFormat);
-
-        offsetTimeFormat = JavaTemplateTemporalFormat.LONG;
-        properties.setProperty(OFFSET_TIME_FORMAT_KEY, offsetTimeFormat);
-
-        zonedDateTimeFormat = JavaTemplateTemporalFormat.MEDIUM;
-        properties.setProperty(ZONED_DATE_TIME_FORMAT_KEY, zonedDateTimeFormat);
-
         yearFormat = "iso";
         properties.setProperty(YEAR_FORMAT_KEY, yearFormat);
 
@@ -1225,6 +1158,25 @@ public class Configurable {
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *
      * <p>Defaults to {@code ""}, which is equivalent to {@code "medium"}.
+     *
+     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.32, and
+     * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
+     * classes: {@link LocalTime}, {@link OffsetTime}.
+     *
+     * <p>Note that to format {@link OffsetTime}-s, the format <em>should show the offset</em>, unless you
+     * are sure that the {@link #setTimeZone(TimeZone) timeZone} setting will be a time zone that never used daylight
+     * saving. This is because if the offset is not shown, FreeMarker has to convert the value to the time zone
+     * specified in the {@link #setTimeZone(TimeZone) timeZone} setting, but we don't know the day, so we can't account
+     * for daylight saving changes, and thus we can't do zone conversion reliably. To address this, you can do a few
+     * things (TODO [FREEMARKER-35] Check if these are implemented like shown):
+     * <ul>
+     *   <li>Use a format style, like {@code "medium"}, or the default {@code ""}. In this case FreeMarker will
+     *   automatically increase the veroboseness (like uses {@code "long"} instead of {@code "medium"}) until the
+     *   offset is shown. This format is also the defaults of FreeMarker, so by default you don't have to anything.
+     *   </li>
+     *   <li>Mark the offset/zone part optional in the format pattern: {@code "HH:mm[X];version=2"}.
+     *   ({@code ";version=2"} is needed for "[" and "]" to be interpreted via {@link DateTimeFormatter}.)</li>
+     * </ul>
      */
     public void setTimeFormat(String timeFormat) {
         NullArgumentException.check("timeFormat", timeFormat);
@@ -1348,11 +1300,19 @@ public class Configurable {
      *       format.
      *       
      *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"}, or {@code "full"}, which that has locale-dependent
-     *       meaning defined by the Java platform (see in the documentation of {@link java.text.DateFormat}).
+     *       meaning defined by the Java platform (see in the documentation of {@link java.text.DateFormat} in case
+     *       of {@link Date}, and {@link FormatStyle} in case of {@link Temporal}-s).
      *       For date-time values, you can specify the length of the date and time part independently, be separating
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
-     *       
+     *       TODO [FREEMARKER-35] Check if these are implemented
+     *       Note that Java 8 has a bug (JDK-8085887) where formatting {@link LocalDateTime} and {@link LocalTime}
+     *       fails if for the given locale the format contains a time zone field. This was fixed in Java 9. To work this
+     *       issue around, for these classes, FreeMarker will decrease the verbosity if the time part (like "full" to
+     *       "long", "long" to "medium", etc.), until formatting succeeds. Also, when formatting {@link OffsetTime}
+     *       values, FreeMarker might will increase the verboseness to display the offset (see at {@link #setTimeFormat}
+     *       why).
+     *
      *   <li><p>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom
      *       date/time/dateTime format, but only if either {@link Configuration#getIncompatibleImprovements()}
      *       is at least 2.3.24, or there's any custom formats defined (even if custom number format). The format of
@@ -1363,6 +1323,14 @@ public class Configurable {
      * </ul> 
      * 
      * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
+     *
+     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.32, and
+     * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
+     * classes: {@link Instance}, {@link LocalDateTime}, {@link OffsetDateTime}, {@link ZonedDateTime}.
+     * For non-{@code Local} {@link Temporal}-s FreeMarker will detect if the format doesn't show the offset or zone (as
+     * is typically the case for the {@code "medium"} format), and then before formatting it will convert the value to
+     * the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker, or when parsing
+     * a string it will assume that it uses that time zone.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -1384,264 +1352,6 @@ public class Configurable {
      */
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.Instant}-s to strings, also the format that
-     * {@code someString?instant} will use to parse strings.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
-     *
-     * @param instantFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
-     *     {@code iso}/{@code xs} will show the time offset.
-     *
-     * @since 2.3.32
-     */
-    public void setInstantFormat(String instantFormat) {
-        this.instantFormat = instantFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setInstantFormat(String)}.
-     *
-     * @since 2.3.32
-     */
-    public String getInstantFormat() {
-        return instantFormat == null ? parent.getInstantFormat() : instantFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isInstantFormatSet() {
-        return instantFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.LocalDate}-s to strings, also the format that
-     * {@code someString?local_date} will use to parse strings.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
-     *
-     * @param localDateFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
-     *     {@code iso}/{@code xs} will not show the time part.
-     *
-     * @since 2.3.32
-     */
-    public void setLocalDateFormat(String localDateFormat) {
-        this.localDateFormat = localDateFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setLocalDateFormat(String)}.
-     *
-     * @since 2.3.32
-     */
-    public String getLocalDateFormat() {
-        return localDateFormat == null ? parent.getLocalDateFormat() : localDateFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isLocalDateFormatSet() {
-        return localDateFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.LocalDateTime}-s to strings, also the format that
-     * {@code someString?local_date_time} will use to parse strings.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
-     *
-     * @param localDateTimeFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
-     *     {@code iso}/{@code xs} will not show an offset.
-     *
-     * @since 2.3.32
-     */
-    public void setLocalDateTimeFormat(String localDateTimeFormat) {
-        this.localDateTimeFormat = localDateTimeFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setLocalDateTimeFormat(String)}.
-     *
-     * @since 2.3.32
-     */
-    public String getLocalDateTimeFormat() {
-        return localDateTimeFormat == null ? parent.getLocalDateTimeFormat() : localDateTimeFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isLocalDateTimeFormatSet() {
-        return localDateTimeFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.LocalTime}-s to strings, also the format that
-     * {@code someString?local_time} will use to parse strings.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}.
-     *
-     * @param localTimeFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
-     *     {@code iso}/{@code xs} will not show the time offset.
-     *
-     * @since 2.3.32
-     */
-    public void setLocalTimeFormat(String localTimeFormat) {
-        this.localTimeFormat = localTimeFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setLocalTimeFormat(String)}.
-     *
-     * @since 2.3.32
-     */
-    public String getLocalTimeFormat() {
-        return localTimeFormat == null ? parent.getLocalTimeFormat() : localTimeFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isLocalTimeFormatSet() {
-        return localTimeFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.OffsetDateTime}-s to strings, also the format that
-     * {@code someString?offset_date_time} will use to parse strings. FreeMarker will detect if the format doesn't
-     * show the offset (as is typically the case for the {@code "medium"} format), and then it will convert the value to
-     * the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}, which usually doesn't show the time
-     * offset; see the parameter JavaDoc for more.
-     *
-     * @param offsetDateTimeFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)}.
-     *
-     * @since 2.3.32
-     */
-    public void setOffsetDateTimeFormat(String offsetDateTimeFormat) {
-        this.offsetDateTimeFormat = offsetDateTimeFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setOffsetDateTimeFormat(String)}.
-     * @since 2.3.32
-     */
-    public String getOffsetDateTimeFormat() {
-        return offsetDateTimeFormat == null ? parent.getOffsetDateTimeFormat() : offsetDateTimeFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isOffsetDateTimeFormatSet() {
-        return offsetDateTimeFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.OffsetTime}-s to strings, also the format that
-     * {@code someString?offset_time} will use to parse strings. The format <b>should show the offset</b>, unless you
-     * are sure that {@link #setTimeZone(TimeZone) timeZone} setting will be a zone that has no daylight saving.
-     * This is because if the offset is not shown, FreeMarker has to convert the value to the time zone specified in the
-     * {@link #setTimeZone(TimeZone) timeZone} setting, but we don't know the day, so we can't account for daylight
-     * saving changes, and thus we can't do zone conversion reliably if a daylight saving is possible.
-     *
-     * <p>Defaults to {@code "long"}, which means {@link FormatStyle#LONG}, which usually show the time offset; see the
-     * parameter JavaDoc for more.
-     *
-     * @param offsetTimeFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)}, but it <b>must show the offset</b>
-     *     (see earlier why).
-     *
-     * @since 2.3.32
-     */
-    public void setOffsetTimeFormat(String offsetTimeFormat) {
-        this.offsetTimeFormat = offsetTimeFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setOffsetTimeFormat(String)}.
-     * @since 2.3.32
-     */
-    public String getOffsetTimeFormat() {
-        return offsetTimeFormat == null ? parent.getOffsetTimeFormat() : offsetTimeFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isOffsetTimeFormatSet() {
-        return offsetTimeFormat != null;
-    }
-
-    /**
-     * Sets the format used to convert {@link java.time.ZonedDateTime}-s to strings, also the format that
-     * {@code someString?offset_date_time} will use to parse strings. FreeMarker will detect if the format doesn't
-     * show the zone or offset (as is typically the case for the {@code "medium"} format), and then it will convert the
-     * value to the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker.
-     *
-     * <p>Defaults to {@code "medium"}, which means {@link FormatStyle#MEDIUM}, which usually doesn't show the time
-     * zone; see the parameter JavaDoc for more.
-     *
-     * @param zonedDateTimeFormat
-     *     One of:
-     *     <ul>
-     *         <li>{@code "iso"}: ISO-8601 format (like {@code 2021-09-29T13:00:05.2})
-     *         <li>{@code "xs"}: XSD format (same as ISO-8601, but parsing is more restrictive)
-     *         <li>{@code "short"}, {@code "medium"}, {@code "long"}, {@code "full"}, or two of these connected with
-     *             an {@code "_"}: Refers to the {@link FormatStyle} constants. When in a pair, as in
-     *             {@code "medium_long"}, the 1st style refers to the date part, and the 2nd style to the time part.
-     *             Java doesn't specify what these styles actually mean. However, experience with Java 8 shows
-     *             that "short" and "medium" will not show the time zone or time offset (which then triggers the zone
-     *             conversion mentioned earlier), and will show months with numbers, while "long" and "full" will show
-     *             the zone and/or offset, and shows months with their names. (Also "long" and "full" before Java 9
-     *             fails for {@link LocalDateTime} and {@link LocalTime}, because of bug JDK-8085887.)
-     *          <li>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom temporal
-     *              format ({@link #setCustomTemporalFormats(Map)}).
-     *     </ul>
-     *
-     * @since 2.3.32
-     */
-    public void setZonedDateTimeFormat(String zonedDateTimeFormat) {
-        this.zonedDateTimeFormat = zonedDateTimeFormat;
-    }
-
-    /**
-     * Getter pair of {@link #setZonedDateTimeFormat(String)}.
-     * @since 2.3.32
-     */
-    public String getZonedDateTimeFormat() {
-        return zonedDateTimeFormat == null ? parent.getZonedDateTimeFormat() : zonedDateTimeFormat;
-    }
-
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *
-     * @since 2.3.32
-     */
-    public boolean isZonedDateTimeFormatSet() {
-        return zonedDateTimeFormat != null;
     }
 
     /**
@@ -1729,26 +1439,24 @@ public class Configurable {
      */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
         Objects.requireNonNull(temporalClass);
-        if (temporalClass == Instant.class) {
-            return getInstantFormat();
+        // The temporal classes are final (for now at least), so we can use == operator instead of instanceof.
+        if (temporalClass == Instant.class
+                || temporalClass == LocalDateTime.class
+                || temporalClass == ZonedDateTime.class
+                || temporalClass == OffsetDateTime.class) {
+            return getDateTimeFormat();
         } else if (temporalClass == LocalDate.class) {
-            return getLocalDateFormat();
-        } else if (temporalClass == LocalDateTime.class) {
-            return getLocalDateTimeFormat();
-        } else if (temporalClass == LocalTime.class) {
-            return getLocalTimeFormat();
-        } else if (temporalClass == OffsetDateTime.class) {
-            return getOffsetDateTimeFormat();
-        } else if (temporalClass == OffsetTime.class) {
-            return getOffsetTimeFormat();
-        } else if (temporalClass == ZonedDateTime.class) {
-            return getZonedDateTimeFormat();
+            return getDateFormat();
+        } else if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
+            return getTimeFormat();
         } else if (temporalClass == Year.class) {
             return getYearFormat();
         } else if (temporalClass == YearMonth.class) {
             return getYearMonthFormat();
         } else {
-            Class<? extends Temporal> normTemporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+            // Handle the unlikely situation that in some future Java version we can have subclasses.
+            Class<? extends Temporal> normTemporalClass =
+                    _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
             if (normTemporalClass == temporalClass) {
                 throw new IllegalArgumentException("There's no temporal format setting for this class: "
                         + temporalClass.getName());
@@ -1792,7 +1500,13 @@ public class Configurable {
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
      * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
-     * datetime_format} settings with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
+     * datetime_format} settings with values starting with <code>@<i>name</i></code>.
+     *
+     * <p>It's important that the formats you set here will be only used when formatting {@link Date}-s, not when
+     * formatting {@link Temporal}-s. For the later, use {@link #setCustomTemporalFormats(Map)}. Ideally, you set the
+     * same custom formatter names with both methods.
+     *
+     * <p>Note that if you specify any custom
      * formats here, an initial {@code @} followed by a letter will have special meaning in number/date/time/datetime
      * format strings, even if {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less
      * than 2.3.24 (starting with {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24
@@ -1801,6 +1515,8 @@ public class Configurable {
      * @param customDateFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
      *            letters and digits.
+     *
+     * @see #setCustomTemporalFormats(Map)
      * 
      * @since 2.3.24
      */
@@ -1871,14 +1587,19 @@ public class Configurable {
     }
 
     /**
-     * Associates names with formatter factories, which then can be referred by the various temporal format settings
-     * (like {@link #setLocalDateTimeFormat(String) local_date_time_format},
-     * {@link #setLocalDateFormat(String) local_date_format}, {@link #setLocalTimeFormat(String) local_time_format},
-     * and so on) a value starting with <code>@<i>name</i></code>.
+     * Associates names with {@link Temporal} formatter factories, which then can be referred by the
+     * {@link #setDateTimeFormat(String) date_time_format}, {@link #setDateFormat(String) date_format}, and
+     * {@link #setTimeFormat(String) time_format} settings, with values starting with <code>@<i>name</i></code>.
+     *
+     * <p>It's important that the formats you set here will be only used when formatting {@link Temporal}-s, not when
+     * formatting {@link Date}-s. For the later, use {@link #setCustomDateFormats(Map)}. Ideally, you set the same
+     * custom formatter names with both methods.
      *
      * @param customTemporalFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
      *            letters and digits.
+     *            
+     * @see #setCustomDateFormats(Map) 
      *
      * @since 2.3.32
      */
@@ -3236,24 +2957,10 @@ public class Configurable {
                 setDateFormat(value);
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
-            } else if (INSTANT_FORMAT_KEY_SNAKE_CASE.equals(name) || INSTANT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.instantFormat = value;
-            } else if (LOCAL_DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.localDateFormat = value;
-            } else if (LOCAL_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.localDateTimeFormat = value;
-            } else if (LOCAL_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || LOCAL_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.localTimeFormat = value;
-            } else if (OFFSET_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || OFFSET_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.offsetDateTimeFormat = value;
-            } else if (OFFSET_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || OFFSET_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.offsetTimeFormat = value;
             } else if (YEAR_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 this.yearFormat = value;
             } else if (YEAR_MONTH_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_MONTH_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 this.yearMonthFormat = value;
-            } else if (ZONED_DATE_TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || ZONED_DATE_TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.zonedDateTimeFormat = value;
             } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
                     || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(

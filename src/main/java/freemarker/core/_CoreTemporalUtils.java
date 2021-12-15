@@ -28,12 +28,10 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import freemarker.template.Configuration;
 
@@ -105,20 +103,15 @@ public class _CoreTemporalUtils {
      */
     public static String temporalClassToFormatSettingName(Class<? extends Temporal> temporalClass) {
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
-        if (temporalClass == Instant.class) {
-            return Configuration.INSTANT_FORMAT_KEY;
+        if (temporalClass == Instant.class
+                || temporalClass == LocalDateTime.class
+                || temporalClass == ZonedDateTime.class
+                || temporalClass == OffsetDateTime.class) {
+            return Configuration.DATETIME_FORMAT_KEY;
         } else if (temporalClass == LocalDate.class) {
-            return Configuration.LOCAL_DATE_FORMAT_KEY;
-        } else if (temporalClass == LocalDateTime.class) {
-            return Configuration.LOCAL_DATE_TIME_FORMAT_KEY;
-        } else if (temporalClass == LocalTime.class) {
-            return Configuration.LOCAL_TIME_FORMAT_KEY;
-        } else if (temporalClass == OffsetDateTime.class) {
-            return Configuration.OFFSET_DATE_TIME_FORMAT_KEY;
-        } else if (temporalClass == OffsetTime.class) {
-            return Configuration.OFFSET_TIME_FORMAT_KEY;
-        } else if (temporalClass == ZonedDateTime.class) {
-            return Configuration.ZONED_DATE_TIME_FORMAT_KEY;
+            return Configuration.DATE_FORMAT_KEY;
+        } else if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
+            return Configuration.TIME_FORMAT_KEY;
         } else if (temporalClass == YearMonth.class) {
             return Configuration.YEAR_MONTH_FORMAT_KEY;
         } else if (temporalClass == Year.class) {
@@ -127,5 +120,5 @@ public class _CoreTemporalUtils {
             throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
         }
     }
-    
+
 }

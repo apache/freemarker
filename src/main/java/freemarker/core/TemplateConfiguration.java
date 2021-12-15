@@ -193,27 +193,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isDateTimeFormatSet()) {
             setDateTimeFormat(tc.getDateTimeFormat());
         }
-        if (tc.isInstantFormatSet()) {
-            setInstantFormat(tc.getInstantFormat());
-        }
-        if (tc.isLocalDateFormatSet()) {
-            setLocalDateFormat(tc.getLocalDateFormat());
-        }
-        if (tc.isLocalDateTimeFormatSet()) {
-            setLocalDateTimeFormat(tc.getLocalDateTimeFormat());
-        }
-        if (tc.isLocalTimeFormatSet()) {
-            setLocalTimeFormat(tc.getLocalTimeFormat());
-        }
-        if (tc.isOffsetDateTimeFormatSet()) {
-            setOffsetDateTimeFormat(tc.getOffsetDateTimeFormat());
-        }
-        if (tc.isOffsetTimeFormatSet()) {
-            setOffsetTimeFormat(tc.getOffsetTimeFormat());
-        }
-        if (tc.isZonedDateTimeFormatSet()) {
-            setZonedDateTimeFormat(tc.getZonedDateTimeFormat());
-        }
         if (tc.isYearFormatSet()) {
             setYearFormat(tc.getYearFormat());
         }
@@ -365,27 +344,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
-        }
-        if (isInstantFormatSet() && !template.isInstantFormatSet()) {
-            template.setInstantFormat(getInstantFormat());
-        }
-        if (isLocalDateFormatSet() && !template.isLocalDateFormatSet()) {
-            template.setLocalDateFormat(getLocalDateFormat());
-        }
-        if (isLocalTimeFormatSet() && !template.isLocalTimeFormatSet()) {
-            template.setLocalTimeFormat(getLocalTimeFormat());
-        }
-        if (isLocalDateTimeFormatSet() && !template.isLocalDateTimeFormatSet()) {
-            template.setLocalDateTimeFormat(getLocalDateTimeFormat());
-        }
-        if (isOffsetTimeFormatSet() && !template.isOffsetTimeFormatSet()) {
-            template.setOffsetTimeFormat(getOffsetTimeFormat());
-        }
-        if (isOffsetDateTimeFormatSet() && !template.isOffsetDateTimeFormatSet()) {
-            template.setOffsetDateTimeFormat(getOffsetDateTimeFormat());
-        }
-        if (isZonedDateTimeFormatSet() && !template.isZonedDateTimeFormatSet()) {
-            template.setZonedDateTimeFormat(getZonedDateTimeFormat());
         }
         if (isYearFormatSet() && !template.isYearFormatSet()) {
             template.setYearFormat(getYearFormat());
@@ -741,13 +699,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()
-                || isInstantFormatSet()
-                || isLocalDateFormatSet()
-                || isLocalTimeFormatSet()
-                || isLocalDateTimeFormatSet()
-                || isOffsetTimeFormatSet()
-                || isOffsetDateTimeFormatSet()
-                || isZonedDateTimeFormatSet()
                 || isYearFormatSet()
                 || isYearMonthFormatSet()
                 || isLazyImportsSet()

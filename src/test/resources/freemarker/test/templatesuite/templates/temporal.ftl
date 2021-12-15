@@ -16,6 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=dateTime?string />
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=instant?string />
 <@assertEquals expected="Apr 5, 2003 6:07:08 AM" actual=localDateTime?string />
 <@assertEquals expected="Apr 5, 2003" actual=localDate?string />
@@ -117,19 +118,19 @@
 
 
 <#setting locale="en_US">
-<#setting instantFormat="yyyy MMM dd HH:mm:ss">
+<#setting datetimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 01:07:08" actual=instant?string />
-<#setting localDateTimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting datetimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 06:07:08" actual=localDateTime?string />
-<#setting localDateFormat="yyyy MMM dd">
+<#setting dateFormat="yyyy MMM dd">
 <@assertEquals expected="2003 Apr 05" actual=localDate?string />
-<#setting localDateTimeFormat="HH:mm:ss">
+<#setting datetimeFormat="HH:mm:ss">
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
-<#setting offsetDateTimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting datetimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 01:07:08" actual=offsetDateTime?string />
 <#setting yearFormat="yyyy">
 <@assertEquals expected="2003" actual=year?string />
 <#setting yearMonthFormat="yyyy MMM">
 <@assertEquals expected="2003 Apr" actual=yearMonth?string />
-<#setting zonedDateTimeFormat="yyyy MMM dd HH:mm:ss">
+<#setting datetimeFormat="yyyy MMM dd HH:mm:ss">
 <@assertEquals expected="2003 Apr 05 01:07:08" actual=zonedDateTime?string />

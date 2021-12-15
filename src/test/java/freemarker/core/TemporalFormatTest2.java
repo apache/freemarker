@@ -61,12 +61,12 @@ public class TemporalFormatTest2 extends TemplateTest {
                 "${d?string.@epoch} ${d?string.@epoch} <#setting locale='de_DE'>${d?string.@epoch}",
                 "123456789 123456789 123456789");
 
-        getConfiguration().setOffsetDateTimeFormat("@epoch");
+        getConfiguration().setDateTimeFormat("@epoch");
         assertOutput(
                 "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "123456789 123456789 123456789");
 
-        getConfiguration().setOffsetDateTimeFormat("@htmlIso");
+        getConfiguration().setDateTimeFormat("@htmlIso");
         assertOutput(
                 "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "1970-01-02<span class='T'>T</span>10:17:36.789Z "

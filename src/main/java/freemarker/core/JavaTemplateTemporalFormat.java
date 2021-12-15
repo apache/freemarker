@@ -61,8 +61,10 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     static final String LONG = "long";
     static final String FULL = "full";
     private static final String ANY_FORMAT_STYLE = "(" + SHORT + "|" + MEDIUM + "|" + LONG + "|" + FULL + ")";
+    // Matches format style patterns like "long_medium", "long", and "" (0-length string). It's a legacy from the
+    // pre-Temporal code that "" means "medium", and that it's the default of the date/time-related format settings.
     private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile(
-            ANY_FORMAT_STYLE + "(?:_" + ANY_FORMAT_STYLE + ")?");
+            "(?:" + ANY_FORMAT_STYLE + "(?:_" + ANY_FORMAT_STYLE + ")?)?");
 
     private final DateTimeFormatter dateTimeFormatter;
     private final ZoneId zoneId;
@@ -80,7 +82,10 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
         DateTimeFormatter dateTimeFormatter;
         if (isFormatStyleString) {
-            FormatStyle datePartFormatStyle = FormatStyle.valueOf(formatStylePatternMatcher.group(1).toUpperCase(Locale.ROOT));
+            String group1 = formatStylePatternMatcher.group(1);
+            FormatStyle datePartFormatStyle = group1 != null
+                    ? FormatStyle.valueOf(group1.toUpperCase(Locale.ROOT))
+                    : FormatStyle.MEDIUM;
             String group2 = formatStylePatternMatcher.group(2);
             FormatStyle timePartFormatStyle = group2 != null
                     ? FormatStyle.valueOf(group2.toUpperCase(Locale.ROOT))

@@ -2449,10 +2449,6 @@ public final class Environment extends Configurable {
                 throw new UndefinedCustomFormatException(
                         "No custom temporal format was defined with name " + StringUtil.jQuote(name));
             }
-        } else if (formatStringLen == 0) {
-            // TODO [FREEMARKER-35] This is not right, but for now we mimic what TemporalUtils did
-            formatParams = formatString;
-            formatFactory = ToStringTemplateTemporalFormatFactory.INSTANCE;
         } else {
             formatParams = formatString;
             formatFactory = JavaTemplateTemporalFormatFactory.INSTANCE;

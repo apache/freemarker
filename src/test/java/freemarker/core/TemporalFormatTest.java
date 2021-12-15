@@ -62,7 +62,7 @@ public class TemporalFormatTest {
                 "11:00",
                 formatTemporal(
                         conf -> {
-                            conf.setOffsetTimeFormat("HH:mm");
+                            conf.setTimeFormat("HH:mm");
                             conf.setTimeZone(zoneWithoutDST);
                         },
                         offsetTime));
@@ -72,7 +72,7 @@ public class TemporalFormatTest {
                     "11:00",
                     formatTemporal(
                             conf -> {
-                                conf.setOffsetTimeFormat("HH:mm");
+                                conf.setTimeFormat("HH:mm");
                                 conf.setTimeZone(zoneWithDST);
                             },
                             offsetTime));
@@ -85,7 +85,7 @@ public class TemporalFormatTest {
                 "10:00+01",
                 formatTemporal(
                         conf -> {
-                            conf.setOffsetTimeFormat("HH:mmX");
+                            conf.setTimeFormat("HH:mmX");
                             conf.setTimeZone(zoneWithDST);
                         },
                         offsetTime));
@@ -94,7 +94,7 @@ public class TemporalFormatTest {
                 "10:00+01",
                 formatTemporal(
                         conf -> {
-                            conf.setOffsetTimeFormat("HH:mmX");
+                            conf.setTimeFormat("HH:mmX");
                             conf.setTimeZone(zoneWithoutDST);
                         },
                         offsetTime));
@@ -128,9 +128,7 @@ public class TemporalFormatTest {
                         + "2021-12-30 10:30, 2021-12-30 08:30, 2021-12-30 15:30",
                 formatTemporal(
                         conf -> {
-                            conf.setLocalDateTimeFormat("yyyy-MM-dd HH:mm");
-                            conf.setOffsetDateTimeFormat("yyyy-MM-dd HH:mm");
-                            conf.setZonedDateTimeFormat("yyyy-MM-dd HH:mm");
+                            conf.setDateTimeFormat("yyyy-MM-dd HH:mm");
                             conf.setTimeZone(gbZone);
                         },
                         summerLocalDateTime, summerOffsetDateTime, summerZonedDateTime,
@@ -140,9 +138,7 @@ public class TemporalFormatTest {
                         + "2021-12-30 10:30, 2021-12-30 08:30, 2021-12-30 15:30",
                 formatTemporal(
                         conf -> {
-                            conf.setLocalDateTimeFormat("yyyy-MM-dd HH:mm");
-                            conf.setOffsetDateTimeFormat("yyyy-MM-dd HH:mm");
-                            conf.setZonedDateTimeFormat("yyyy-MM-dd HH:mm");
+                            conf.setDateTimeFormat("yyyy-MM-dd HH:mm");
                             conf.setTimeZone(DateUtil.UTC);
                         },
                         summerLocalDateTime, summerOffsetDateTime, summerZonedDateTime,
@@ -154,8 +150,7 @@ public class TemporalFormatTest {
                         + "2021-12-30 10:30+02, 2021-12-30 10:30-05",
                 formatTemporal(
                         conf -> {
-                            conf.setOffsetDateTimeFormat("yyyy-MM-dd HH:mmX");
-                            conf.setZonedDateTimeFormat("yyyy-MM-dd HH:mmX");
+                            conf.setDateTimeFormat("yyyy-MM-dd HH:mmX");
                             conf.setTimeZone(gbZone);
                         },
                         summerOffsetDateTime, summerZonedDateTime,
@@ -167,7 +162,7 @@ public class TemporalFormatTest {
         try {
             formatTemporal(
                     conf -> {
-                        conf.setLocalDateTimeFormat("yyyy-MM-dd HH:mmX");
+                        conf.setDateTimeFormat("yyyy-MM-dd HH:mmX");
                     },
                     LocalDateTime.of(2021, 10, 30, 1, 2));
             fail();

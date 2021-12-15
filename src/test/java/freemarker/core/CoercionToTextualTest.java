@@ -138,7 +138,6 @@ public class CoercionToTextualTest extends TemplateTest {
         cfg.setCustomTemporalFormats(Collections.singletonMap("HI", HTMLISOTemplateTemporalFormatFactory.INSTANCE));
         cfg.setNumberFormat("@G 3");
         cfg.setDateTimeFormat("@HI");
-        cfg.setInstantFormat("@HI");
         cfg.setBooleanFormat("y,n");
         cfg.setTimeZone(DateUtil.UTC);
 

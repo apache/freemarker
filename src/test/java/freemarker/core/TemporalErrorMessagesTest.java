@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.time.LocalTime;
+import java.time.YearMonth;
 
 import org.junit.Test;
 
@@ -42,19 +43,19 @@ public class TemporalErrorMessagesTest extends TemplateTest {
 
     @Test
     public void testDefaultFormatStringBadFormatString() throws TemplateException {
-        getConfiguration().setSetting("local_time_format", "ABCDEF");
-        addToDataModel("t", LocalTime.now());
-        assertErrorContains("${t}", "local_time_format", "ABCDEF");
-        assertErrorContains("${t?string}", "local_time_format", "ABCDEF");
+        getConfiguration().setSetting("year_month_format", "ABCDEF");
+        addToDataModel("t", YearMonth.now());
+        assertErrorContains("${t}", "year_month", "ABCDEF");
+        assertErrorContains("${t?string}", "year_month", "ABCDEF");
     }
 
     @Test
     public void testDefaultFormatStringIncompatibleFormatString() throws TemplateException {
-        getConfiguration().setSetting("local_time_format", "yyyy-HH");
-        addToDataModel("t", LocalTime.now());
+        getConfiguration().setSetting("year_month_format", "yyyy-mm"); // Deliberately wrong: "mm" is minutes
+        addToDataModel("t", YearMonth.now());
         // TODO [FREEMARKER-35] Should contain "local_time_format" too
-        assertErrorContains("${t}", "Failed to format temporal value", "yyyy-HH", "YearOfEra");
-        assertErrorContains("${t?string}", "Failed to format temporal value", "yyyy-HH", "YearOfEra");
+        assertErrorContains("${t}", "Failed to format temporal value", "yyyy-mm", "MinuteOfHour");
+        assertErrorContains("${t?string}", "Failed to format temporal value", "yyyy-mm", "MinuteOfHour");
     }
 
 }

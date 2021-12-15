@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.time.chrono.ChronoLocalDate;
@@ -62,8 +63,9 @@ public class CoreTemporalUtilTest {
 
         Set<String> uniqueSettingNames = new HashSet<>();
         for (Class<? extends Temporal> supportedTemporalClass : _CoreTemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
-            assertTrue(uniqueSettingNames.add(_CoreTemporalUtils.temporalClassToFormatSettingName(supportedTemporalClass)));
+            uniqueSettingNames.add(_CoreTemporalUtils.temporalClassToFormatSettingName(supportedTemporalClass));
         }
+        assertThat(uniqueSettingNames.size(), equalTo(_CoreTemporalUtils.SUPPORTED_TEMPORAL_CLASSES.size() - 4));
         assertTrue(uniqueSettingNames.stream().allMatch(it -> cfg.getSettingNames(false).contains(it)));
 
         try {
