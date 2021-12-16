@@ -26,14 +26,13 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -357,8 +356,9 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
         } else if (simpleTestName.equals("temporal")) {
             LocalDateTime ldt = LocalDateTime.of(2003, 4, 5, 6, 7, 8);
-            dataModel.put("dateTime", new java.sql.Timestamp(103, 4 - 1, 5, 8, 7, 8, 0));
-            dataModel.put("instant", ldt.toInstant(ZoneOffset.UTC));
+            Instant instant = ldt.toInstant(ZoneOffset.UTC);
+            dataModel.put("dateTime", new java.sql.Timestamp(instant.toEpochMilli()));
+            dataModel.put("instant", instant);
             dataModel.put("localDateTime", ldt);
             dataModel.put("localDate", ldt.toLocalDate());
             dataModel.put("localTime", ldt.toLocalTime());
