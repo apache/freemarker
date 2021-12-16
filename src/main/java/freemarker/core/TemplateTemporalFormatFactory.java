@@ -46,9 +46,9 @@ public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatF
      * 
      * @param params
      *            The string that further describes how the format should look. For example, when the
-     *            {@link Configurable#getInstantFormat() instantFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@link Configurable#getDateTimeFormat() dateTimeFormat} is {@code "@fooBar 1, 2"}, then it will be
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
-     *            {@link TemplateTemporalFormatFactory} implementation. Not {@code null}, often an empty string.
+     *            {@link TemplateTemporalFormatFactory} implementation. Not {@code null}, but often an empty string.
      * @param temporalClass
      *            The type of the temporal. If this type is not supported, the method should throw an
      *            {@link UnformattableTemporalTypeException} exception.

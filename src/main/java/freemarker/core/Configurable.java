@@ -1326,7 +1326,7 @@ public class Configurable {
      *
      * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.32, and
      * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
-     * classes: {@link Instance}, {@link LocalDateTime}, {@link OffsetDateTime}, {@link ZonedDateTime}.
+     * classes: {@link Instant}, {@link LocalDateTime}, {@link OffsetDateTime}, {@link ZonedDateTime}.
      * For non-{@code Local} {@link Temporal}-s FreeMarker will detect if the format doesn't show the offset or zone (as
      * is typically the case for the {@code "medium"} format), and then before formatting it will convert the value to
      * the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker, or when parsing
@@ -1361,7 +1361,7 @@ public class Configurable {
      * <p>Defaults to {@code "iso"}, which will simply show the year like {@code "2021"} (without the quotation marks).
      *
      * @param yearFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)},
+     *     See the similar parameter of {@link #setDateTimeFormat(String)},
      *     {@code iso}/{@code xs} only the year is shown.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
      *
@@ -1395,7 +1395,7 @@ public class Configurable {
      * <p>Defaults to {@code "iso"}, which will show the value like {@code "2021-12"} (without the quotation marks).
      *
      * @param yearMonthFormat
-     *     See the similar parameter of {@link #setZonedDateTimeFormat(String)};
+     *     See the similar parameter of {@link #setDateTimeFormat(String)};
      *     {@code iso}/{@code xs} will look like {@code 2021-12}.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
      *
@@ -2542,15 +2542,6 @@ public class Configurable {
      *
      *   <li><p>{@code "date_format", "time_format", "datetime_format"}:
      *       See {@link #setDateFormat(String)}, {@link #setTimeFormat(String)}, {@link #setDateTimeFormat(String)}.
-     *
-     *   <li><p>{@code "local_date_format", "local_time_format", "local_datetime_format"}:
-     *       See {@link #setLocalDateFormat(String)}, {@link #setLocalTimeFormat(String)}, {@link #setLocalDateTimeFormat(String)}.
-     *
-     *   <li><p>{@code "offset_time_format", "offset_datetime_format"}:
-     *       See {@link #setOffsetTimeFormat(String)}, {@link #setOffsetDateTimeFormat(String)}.
-     *
-     *   <li><p>{@code "zoned_date_time_format"}:
-     *       See {@link #setZonedDateTimeFormat(String)}.
      *
      *   <li><p>{@code "year_format"}:
      *       See {@link #setYearFormat(String)}.
