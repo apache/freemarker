@@ -45,7 +45,6 @@ public class ErrorMessagesTest {
         try {
             thm.get("foo");
         } catch (TemplateModelException e) {
-            e.printStackTrace();
             final String msg = e.getMessage();
             assertThat(msg, containsString("\"foo\""));
             assertThat(msg, containsString("existing sub-variable"));

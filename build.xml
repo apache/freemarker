@@ -388,15 +388,24 @@
   <!-- Testing                                                           -->
   <!-- ================================================================= -->
 
-  <target name="test" depends="compileTest" description="Run test cases">
+  <target name="test" depends="_test, _testFailedCheck" />
+
+  <target name="_test" depends="compileTest, _setTestPropertiesIfCiMode">
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
-    <junit haltonfailure="on" logfailedtests="true" fork="true" forkmode="once">
+    <junit failureproperty="testFailed" logfailedtests="true" fork="true" forkmode="once">
       <classpath>
         <pathelement path="build/test-classes" />
         <pathelement path="build/classes" />
         <path refid="ivy.dep.run.test" />
       </classpath>
+      <syspropertyset>
+        <propertyref prefix="testSystemProperties."/>
+        <mapper type="glob" from="testSystemProperties.*" to="*"/>
+      </syspropertyset>
+      <!-- Print failure details on Travis CI to the console, as we can't access the report files there:  -->
+      <formatter type="brief" usefile="false" if="ciMode" />
+      <!-- When not on Travis CI, these contain the detailed log:  -->
       <formatter type="plain" />
       <formatter type="xml" />
       <batchtest todir="build/junit-reports">
@@ -404,11 +413,21 @@
           <include name="**/*Test.java" />
           <include name="**/*TestSuite.java" />
           <exclude name="**/Abstract*.java" />
+          <exclude name="**/AdhocTest*.java" />
         </fileset>
       </batchtest>
     </junit>
   </target>
-  
+
+  <target name="_setTestPropertiesIfCiMode" if="ciMode">
+    <property name="testSystemProperties.logback.configurationFile" value="logback-test-ci.xml" />
+    <property name="testSystemProperties.logback.statusListenerClass" value="ch.qos.logback.core.status.OnConsoleStatusListener" />
+  </target>
+
+  <target name="_testFailedCheck" if="testFailed">
+    <fail message="Some tests have failed! Check build/junit-reports, or previous Ant log messages." />
+  </target>
+
   <!-- ================================================================= -->
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
@@ -929,6 +948,7 @@ Proceed? </input>
 
   <target name="ci-setup">
     <ivy:settings file="ivysettings-ci.xml" />
+    <property name="ciMode" value="true" />
   </target>
 
   <target name="ci"
