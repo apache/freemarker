@@ -60,6 +60,10 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     static final String MEDIUM = "medium";
     static final String LONG = "long";
     static final String FULL = "full";
+
+    private static final LocalDateTime LOCAL_DATE_TIME_SAMPLE
+            = LocalDateTime.of(2020, 12, 1, 1, 2, 3);
+
     private static final String ANY_FORMAT_STYLE = "(" + SHORT + "|" + MEDIUM + "|" + LONG + "|" + FULL + ")";
     // Matches format style patterns like "long_medium", "long", and "" (0-length string). It's a legacy from the
     // pre-Temporal code that "" means "medium", and that it's the default of the date/time-related format settings.
@@ -75,13 +79,14 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             throws InvalidFormatParametersException {
         temporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
 
-        Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
+        final Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
         final boolean isFormatStyleString = formatStylePatternMatcher.matches();
-        FormatStyle timePartFormatStyle;
+        FormatStyle timePartFormatStyle; // Maybe changes later for re-attempts
+        final FormatStyle datePartFormatStyle;
 
-        DateTimeFormatter dateTimeFormatter;
+        DateTimeFormatter dateTimeFormatter; // Maybe changes later for re-attempts
         if (isFormatStyleString) {
-            FormatStyle datePartFormatStyle;
+            // Set datePartFormatStyle, and timePartFormatStyle; both will be non-null
             {
                 String group1 = formatStylePatternMatcher.group(1);
                 datePartFormatStyle = group1 != null
@@ -106,7 +111,9 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                         + temporalClass.getName() + " values.");
             }
         } else {
+            datePartFormatStyle = null;
             timePartFormatStyle = null;
+
             try {
                 dateTimeFormatter = DateTimeFormatter.ofPattern(formatString);
             } catch (IllegalArgumentException e) {
@@ -114,8 +121,37 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             }
         }
 
+        // Handling of time zone related edge cases
         if (isLocalTemporalClass(temporalClass)) {
             this.preFormatValueConversion = null;
+            if (isFormatStyleString && (temporalClass == LocalTime.class || temporalClass == LocalDateTime.class)) {
+                // The localized pattern possibly contains the time zone (for most locales, LONG and FULL does), so they
+                // fail with local temporals that have a time part. To work this issue around, we decrease the verbosity
+                // of the time style until formatting succeeds. (See also: JDK-8085887)
+                localFormatAttempt: while (true) {
+                    try {
+                        dateTimeFormatter.format(LOCAL_DATE_TIME_SAMPLE); // We only care if it throws exception
+                        break localFormatAttempt; // It worked
+                    } catch (DateTimeException e) {
+                        timePartFormatStyle = getLessVerboseStyle(timePartFormatStyle);
+                        if (timePartFormatStyle == null) {
+                            throw e;
+                        }
+
+                        String timePartFormatString = timePartFormatStyle.name().toLowerCase(Locale.ROOT);
+                        if (temporalClass == LocalDateTime.class) {
+                            dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(
+                                    datePartFormatStyle, timePartFormatStyle);
+                            formatString = datePartFormatStyle == timePartFormatStyle
+                                    ? timePartFormatString
+                                    : datePartFormatStyle.name().toLowerCase(Locale.ROOT) + "_" + timePartFormatString;
+                        } else {
+                            dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(timePartFormatStyle);
+                            formatString = timePartFormatString;
+                        }
+                    }
+                }
+            }
         } else {
             PreFormatValueConversion preFormatValueConversion;
             nonLocalFormatAttempt: while (true) {
@@ -157,19 +193,6 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
         this.dateTimeFormatter = dateTimeFormatter.withLocale(locale);
         this.formatString = formatString;
         this.zoneId = timeZone.toZoneId();
-    }
-
-    private static FormatStyle getMoreVerboseStyle(FormatStyle style) {
-        switch (style) {
-            case SHORT:
-                return FormatStyle.MEDIUM;
-            case MEDIUM:
-                return FormatStyle.LONG;
-            case LONG:
-                return FormatStyle.FULL;
-            default:
-                return null;
-        }
     }
 
     @Override
@@ -254,6 +277,32 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                 || normalizedTemporalClass == LocalDate.class
                 || normalizedTemporalClass == Year.class
                 || normalizedTemporalClass == YearMonth.class;
+    }
+
+    private static FormatStyle getMoreVerboseStyle(FormatStyle style) {
+        switch (style) {
+            case SHORT:
+                return FormatStyle.MEDIUM;
+            case MEDIUM:
+                return FormatStyle.LONG;
+            case LONG:
+                return FormatStyle.FULL;
+            default:
+                return null;
+        }
+    }
+
+    private static FormatStyle getLessVerboseStyle(FormatStyle style) {
+        switch (style) {
+            case FULL:
+                return FormatStyle.LONG;
+            case LONG:
+                return FormatStyle.MEDIUM;
+            case MEDIUM:
+                return FormatStyle.SHORT;
+            default:
+                return null;
+        }
     }
 
 }

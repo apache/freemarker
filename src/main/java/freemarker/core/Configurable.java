@@ -1168,14 +1168,15 @@ public class Configurable {
      * saving. This is because if the offset is not shown, FreeMarker has to convert the value to the time zone
      * specified in the {@link #setTimeZone(TimeZone) timeZone} setting, but we don't know the day, so we can't account
      * for daylight saving changes, and thus we can't do zone conversion reliably. To address this, you can do a few
-     * things (TODO [FREEMARKER-35] Check if these are implemented like shown):
+     * things:
      * <ul>
      *   <li>Use a format style, like {@code "medium"}, or the default {@code ""}. In this case FreeMarker will
      *   automatically increase the veroboseness (like uses {@code "long"} instead of {@code "medium"}) until the
-     *   offset is shown. This format is also the defaults of FreeMarker, so by default you don't have to anything.
+     *   offset is shown. This format is also the default of FreeMarker, so by default you don't have to anything.
      *   </li>
      *   <li>Mark the offset/zone part optional in the format pattern: {@code "HH:mm[X];version=2"}.
-     *   ({@code ";version=2"} is needed for "[" and "]" to be interpreted via {@link DateTimeFormatter}.)</li>
+     *   ({@code ";version=2"} is needed for "[" and "]" to be interpreted via {@link DateTimeFormatter}.)
+     *   (TODO [FREEMARKER-35] Check if these were implemented as shown here)</li>
      * </ul>
      */
     public void setTimeFormat(String timeFormat) {
@@ -1299,19 +1300,19 @@ public class Configurable {
      *       offset is omitted for date values in the {@code "iso"} format, while it's preserved for the {@code "xs"}
      *       format.
      *       
-     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"}, or {@code "full"}, which that has locale-dependent
+     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"}, or {@code "full"}, which has locale-dependent
      *       meaning defined by the Java platform (see in the documentation of {@link java.text.DateFormat} in case
      *       of {@link Date}, and {@link FormatStyle} in case of {@link Temporal}-s).
-     *       For date-time values, you can specify the length of the date and time part independently, be separating
+     *       For date-time values, you can specify the length of the date and time part independently, by separating
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
-     *       TODO [FREEMARKER-35] Check if these are implemented
-     *       Note that Java 8 has a bug (JDK-8085887) where formatting {@link LocalDateTime} and {@link LocalTime}
-     *       fails if for the given locale the format contains a time zone field. This was fixed in Java 9. To work this
-     *       issue around, for these classes, FreeMarker will decrease the verbosity if the time part (like "full" to
-     *       "long", "long" to "medium", etc.), until formatting succeeds. Also, when formatting {@link OffsetTime}
-     *       values, FreeMarker might will increase the verboseness to display the offset (see at {@link #setTimeFormat}
-     *       why).
+     *       The value you set here is possibly automatically adjusted for specific temporal types, in two scenarios:
+     *       Secanrio 1. is when formatting {@link LocalDateTime} or {@link LocalTime} would fail because the format
+     *       contains a time zone field (for most locales "long" anb "full" are like that). To handle this, FreeMarker
+     *       will decrease the verbosity if the time part (like "full" is replaced with "long", "long" is replaced with
+     *       "medium", etc.), until successful formatting will be possible. Scenarion 2 is when formatting
+     *       {@link OffsetTime} values, and the current time zone has DST, in which case FreeMarker will increase the
+     *       verbosity until the offset is displayed (see at {@link #setTimeFormat} why).
      *
      *   <li><p>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom
      *       date/time/dateTime format, but only if either {@link Configuration#getIncompatibleImprovements()}
