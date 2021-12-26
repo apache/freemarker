@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -115,7 +116,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             timePartFormatStyle = null;
 
             try {
-                dateTimeFormatter = DateTimeFormatter.ofPattern(formatString);
+                dateTimeFormatter = DateUtil.dateTimeFormatterFromSimpleDateFormatPattern(formatString, locale);
             } catch (IllegalArgumentException e) {
                 throw new InvalidFormatParametersException(e.getMessage(), e);
             }

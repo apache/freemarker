@@ -29,6 +29,7 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,6 +137,8 @@ public final class Environment extends Configurable {
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
     private Map<String, TemplateNumberFormat> cachedTemplateNumberFormats;
+    private TimeZone cachedZoneIdTimeZone;
+    private ZoneId cachedZoneId;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
