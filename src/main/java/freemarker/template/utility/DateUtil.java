@@ -942,7 +942,7 @@ public class DateUtil {
                     }
 
                     if (textStyle == TextStyle.FULL_STANDALONE
-                            && !JavaTimeBugFlags.hasGoodShortStandaloneMonth(locale)) {
+                            && !JavaTimeBugFlags.hasGoodFullStandaloneMonth(locale)) {
                         textStyle = TextStyle.FULL;
                     }
 
