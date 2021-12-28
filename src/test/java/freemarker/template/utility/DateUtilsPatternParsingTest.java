@@ -29,7 +29,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
@@ -76,18 +79,24 @@ public class DateUtilsPatternParsingTest {
                 Locale.GERMAN,
                 new Locale("hi", "IN"),
                 Locale.JAPANESE,
+                Locale.ROOT,
                 new Locale("ru", "RU"),
                 Locale.US,
                 new Locale("th", "TH") // Uses buddhist calendar
         ).stream()
-                .filter(locale -> !DateTimeFormatter.ofPattern("MMM", locale).format(localDate).equals("12"))
+                .filter(locale -> !(
+                        new DateTimeFormatterBuilder()
+                                .appendText(ChronoField.MONTH_OF_YEAR, TextStyle.SHORT_STANDALONE)
+                                .toFormatter(locale)
+                                .format(localDate))
+                        .equals("12"))
                 .collect(Collectors.toList());
         System.out.println("!!T Sample locales: " + SAMPLE_LOCALES); // TODO Remove this
     }
 
     @Test
     public void testHasEnoughSampleLocales() {
-        if (SAMPLE_LOCALES.size() < 3) {
+        if (SAMPLE_LOCALES.size() < 4) {
             throw new AssertionError("Too many locales were filtered out from SAMPLE_LOCALE. " +
                     "We only have these left: " + SAMPLE_LOCALES);
         }
