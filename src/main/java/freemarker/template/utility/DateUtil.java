@@ -925,6 +925,12 @@ public class DateUtil {
                     } else {
                         textStyle = TextStyle.SHORT_STANDALONE;
                     }
+
+                    if (textStyle == TextStyle.SHORT_STANDALONE
+                            && !JavaTimeBugFlags.hasGoodShortStandaloneMonth(locale)) {
+                        textStyle = TextStyle.SHORT;
+                    }
+
                     builder.appendText(ChronoField.MONTH_OF_YEAR, textStyle);
                 } else {
                     TextStyle textStyle;
@@ -934,6 +940,12 @@ public class DateUtil {
                     } else {
                         textStyle = TextStyle.FULL_STANDALONE;
                     }
+
+                    if (textStyle == TextStyle.FULL_STANDALONE
+                            && !JavaTimeBugFlags.hasGoodShortStandaloneMonth(locale)) {
+                        textStyle = TextStyle.FULL;
+                    }
+
                     builder.appendText(ChronoField.MONTH_OF_YEAR, textStyle);
                 }
                 break;

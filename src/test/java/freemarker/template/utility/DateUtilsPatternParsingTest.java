@@ -29,22 +29,15 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.time.format.TextStyle;
-import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Move pattern parsing related tests from {@link DateUtilTest} to here.
@@ -68,39 +61,19 @@ public class DateUtilsPatternParsingTest {
     // Most likely supported on different test systems
     private static final Locale SAMPLE_LOCALE = Locale.US;
 
-    private static final List<Locale> SAMPLE_LOCALES;
-    static {
-        LocalDate localDate = LocalDate.of(2021, 12, 1);
-        SAMPLE_LOCALES = ImmutableList.of(
-                // Locales picked more or less arbitrarily, in alphabetical order
-                Locale.CHINA,
-                new Locale("ar", "AE"),
-                new Locale("fi", "FI"),
-                Locale.GERMAN,
-                new Locale("hi", "IN"),
-                Locale.JAPANESE,
-                Locale.ROOT,
-                new Locale("ru", "RU"),
-                Locale.US,
-                new Locale("th", "TH") // Uses buddhist calendar
-        ).stream()
-                .filter(locale -> !(
-                        new DateTimeFormatterBuilder()
-                                .appendText(ChronoField.MONTH_OF_YEAR, TextStyle.SHORT_STANDALONE)
-                                .toFormatter(locale)
-                                .format(localDate))
-                        .equals("12"))
-                .collect(Collectors.toList());
-        System.out.println("!!T Sample locales: " + SAMPLE_LOCALES); // TODO Remove this
-    }
-
-    @Test
-    public void testHasEnoughSampleLocales() {
-        if (SAMPLE_LOCALES.size() < 4) {
-            throw new AssertionError("Too many locales were filtered out from SAMPLE_LOCALE. " +
-                    "We only have these left: " + SAMPLE_LOCALES);
-        }
-    }
+    private static final Locale[] SAMPLE_LOCALES = new Locale[]{
+            // Locales picked more or less arbitrarily, in alphabetical order
+            Locale.CHINA,
+            new Locale("ar", "AE"),
+            new Locale("fi", "FI"),
+            Locale.GERMAN,
+            new Locale("hi", "IN"),
+            Locale.JAPANESE,
+            Locale.ROOT,
+            new Locale("ru", "RU"),
+            Locale.US,
+            new Locale("th", "TH") // Uses buddhist calendar
+    };
 
     @Test
     public void testBasics() {
