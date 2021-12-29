@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package freemarker.template.utility;
+package freemarker.core;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatterBuilder;
@@ -29,51 +29,68 @@ import java.util.concurrent.ConcurrentHashMap;
 import freemarker.log.Logger;
 
 /**
- * This is to address https://bugs.openjdk.java.net/browse/JDK-8146356
- * TODO: Detect if the Java version is high enough to always return a fixed value?
+ * Used internally only, might change without notice!
+ * To work around with java.time bugs.
  */
-class JavaTimeBugFlags {
+public final class _JavaTimeBugUtils {
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
     // There are around 160 predefined locales, so this should be enough even if the application uses some variants.
-    private static final int LEAK_ALERT_CACHE_SIZE = 1024;
+    private static final int HAS_GOOD_STANDALONE_MONTH_LEAK_ALERT_CACHE_SIZE = 1024;
 
     private static final LocalDate PROBE_LOCAL_DATE = LocalDate.of(2021, 12, 1);
 
-    private static final ConcurrentHashMap<Locale, Boolean> HAS_GOOD_SHORT_STANDALONE_MONTH = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Locale, Boolean> HAS_GOOD_FULL_STANDALONE_MONTH = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Locale, Boolean> HAS_GOOD_SHORT_STANDALONE_MONTH
+            = _JavaVersion.FEATURE == 8 ? new ConcurrentHashMap<>() : null;
+    private static final ConcurrentHashMap<Locale, Boolean> HAS_GOOD_FULL_STANDALONE_MONTH
+            = _JavaVersion.FEATURE == 8 ? new ConcurrentHashMap<>() : null;
 
-    static boolean hasGoodShortStandaloneMonth(Locale locale) {
-        return hasGoodStandaloneMonth(
-                locale,
-                TextStyle.SHORT_STANDALONE, JavaTimeBugFlags.HAS_GOOD_SHORT_STANDALONE_MONTH);
+    private _JavaTimeBugUtils() {
+        throw new AssertionError();
     }
 
-    static boolean hasGoodFullStandaloneMonth(Locale locale) {
+    /**
+     * To deal with https://bugs.openjdk.java.net/browse/JDK-8146356
+     */
+    public static boolean hasGoodShortStandaloneMonth(Locale locale) {
+        return hasGoodStandaloneMonth(
+                locale,
+                TextStyle.SHORT_STANDALONE, _JavaTimeBugUtils.HAS_GOOD_SHORT_STANDALONE_MONTH);
+    }
+
+    /**
+     * To deal with https://bugs.openjdk.java.net/browse/JDK-8146356
+     */
+    public static boolean hasGoodFullStandaloneMonth(Locale locale) {
         return hasGoodStandaloneMonth(
                 locale,
                 TextStyle.FULL_STANDALONE,
-                JavaTimeBugFlags.HAS_GOOD_FULL_STANDALONE_MONTH);
+                _JavaTimeBugUtils.HAS_GOOD_FULL_STANDALONE_MONTH);
     }
 
     private static boolean hasGoodStandaloneMonth(
             Locale locale, TextStyle textStyle,
             ConcurrentHashMap<Locale, Boolean> cacheMap) {
+        if (cacheMap == null) {
+            // We are using a Java version where the standalone formatting bug was already fixed
+            return true;
+        }
+
         Boolean good = cacheMap.get(locale);
         if (good != null) {
             return good;
         }
 
-        if (cacheMap.size() >= LEAK_ALERT_CACHE_SIZE) {
+        if (cacheMap.size() >= HAS_GOOD_STANDALONE_MONTH_LEAK_ALERT_CACHE_SIZE) {
             boolean triggered = false;
-            synchronized (JavaTimeBugFlags.class) {
-                if (cacheMap.size() >= LEAK_ALERT_CACHE_SIZE) {
+            synchronized (_JavaTimeBugUtils.class) {
+                if (cacheMap.size() >= HAS_GOOD_STANDALONE_MONTH_LEAK_ALERT_CACHE_SIZE) {
                     triggered = true;
                     cacheMap.clear();
                 }
             }
             if (triggered) {
                 LOG.warn("Global HAS_GOOD_STANDALONE_MONTH cache for " + textStyle
-                        + " has exceeded " + LEAK_ALERT_CACHE_SIZE
+                        + " has exceeded " + HAS_GOOD_STANDALONE_MONTH_LEAK_ALERT_CACHE_SIZE
                         + " entries => cache flushed. "
                         + "Typical cause: Something generates high variety of Locale objects.");
             }

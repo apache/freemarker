@@ -38,6 +38,8 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import freemarker.core._JavaTimeBugUtils;
+
 /**
  * Date and time related utilities.
  */
@@ -927,7 +929,7 @@ public class DateUtil {
                     }
 
                     if (textStyle == TextStyle.SHORT_STANDALONE
-                            && !JavaTimeBugFlags.hasGoodShortStandaloneMonth(locale)) {
+                            && !_JavaTimeBugUtils.hasGoodShortStandaloneMonth(locale)) {
                         textStyle = TextStyle.SHORT;
                     }
 
@@ -942,7 +944,7 @@ public class DateUtil {
                     }
 
                     if (textStyle == TextStyle.FULL_STANDALONE
-                            && !JavaTimeBugFlags.hasGoodFullStandaloneMonth(locale)) {
+                            && !_JavaTimeBugUtils.hasGoodFullStandaloneMonth(locale)) {
                         textStyle = TextStyle.FULL;
                     }
 
@@ -1119,7 +1121,7 @@ public class DateUtil {
     }
 
     private static String legacyCalendarTypeToJavaTimeApiCompatibleName(String legacyType) {
-        // "gregory" is the Calendar.calendarType in the old API. The closest Chronology.ofLocale recognizes is "ISO".
+        // "gregory" is the Calendar.calendarType in the old API, but Chronology.ofLocale calls it "ISO".
         return "gregory".equals(legacyType) ? "ISO" : legacyType;
     }
 

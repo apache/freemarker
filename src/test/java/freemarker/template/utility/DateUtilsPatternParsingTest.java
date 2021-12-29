@@ -39,6 +39,8 @@ import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import freemarker.core._JavaVersion;
+
 /**
  * Move pattern parsing related tests from {@link DateUtilTest} to here.
  */
@@ -99,6 +101,11 @@ public class DateUtilsPatternParsingTest {
                 String pattern = StringUtils.repeat(letter, width);
                 for (ZonedDateTime zdt : SAMPLE_ZDTS) {
                     for (Locale locale : SAMPLE_LOCALES) {
+                        if (letter.equals("G") && _JavaVersion.FEATURE > 8 && !locale.equals(Locale.US)) {
+                            // SDF and DTF formats Era differently for many locales after Java 8. US locale remains
+                            // consistent as of Java 13, so let's hope it won't break, and so we can have some coverage.
+                            continue;
+                        }
                         assertSDFAndDTFOutputsEqual(pattern, zdt, locale);
                     }
                 }
@@ -241,13 +248,18 @@ public class DateUtilsPatternParsingTest {
 
     @Test
     public void testParsingLocale() throws ParseException {
-        assertLocalDateParsing(
-                LocalDate.of(2021, 1, 12),
-                "y-MMM-d", "2021-\u044F\u043D\u0432-12", new Locale("ru", "RU"));
-        assertLocalDateParsing(
-                LocalDate.of(2021, 1, 12),
-                "y-MMM-d", "\u0968\u0966\u0968\u0967-\u091C\u0928\u0935\u0930\u0940-\u0967\u0968",
-                new Locale("hi", "IN"));
+        LocalDate localDate = LocalDate.of(2021, 1, 12);
+        String pattern = "y-MMM-d";
+        for (Locale locale : SAMPLE_LOCALES) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, locale);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(UTC_ZONE_ID));
+            String sdfFormatted = simpleDateFormat.format(
+                    Date.from(localDate.atTime(0, 0).atZone(UTC_ZONE_ID).toInstant()));
+
+            assertLocalDateParsing(
+                    localDate,
+                    pattern, sdfFormatted, locale);
+        }
     }
 
     private void assertSDFAndDTFOutputsEqual(String pattern, ZonedDateTime zdt, Locale locale) {
@@ -265,7 +277,7 @@ public class DateUtilsPatternParsingTest {
         if (!sdfOutput.equals(dtfOutput)) {
             fail("Output of\n"
                     + "SDF(" + StringUtil.jQuote(pattern) + ", " + date.toInstant().atZone(timeZone.toZoneId()) + "), and\n"
-                    + "DTF(" + dtf + ", " + temporal + ") differs, with locale " + locale + ":\n"
+                    + "DTF(" + dtf + ", " + temporal + ") differs, with locale " + StringUtil.jQuote(locale) + ":\n"
                     + "SDF: " + sdfOutput + "\n"
                     + "DTF: " + dtfOutput);
         }
