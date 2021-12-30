@@ -67,6 +67,18 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
      */
     public abstract boolean isTimeZoneBound();
 
-    // TODO [FREEMARKER-35] Add parse method
+    /**
+     * Parsers a string to a {@link Temporal}, according to this format. Some format implementations may throw
+     * {@link ParsingNotSupportedException} here.
+     *
+     * @param s
+     *            The string to parse
+     *
+     * @return The interpretation of the text either as a {@link Temporal} or {@link TemplateTemporalModel}. Typically,
+     *         a {@link Temporal}. {@link TemplateTemporalModel} is used if you have to attach some application-specific
+     *         meta-information that's also extracted during {@link #formatToPlainText(TemplateTemporalModel)} (so if
+     *         you format something and then parse it, you get back an equivalent result). It can't be {@code null}.
+     */
+    public abstract Object parse(String s) throws TemplateValueFormatException;
 
 }

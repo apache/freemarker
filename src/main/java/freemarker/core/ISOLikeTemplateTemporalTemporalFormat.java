@@ -71,6 +71,11 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
     }
 
     @Override
+    public Object parse(String s) throws TemplateValueFormatException {
+        throw new ParsingNotSupportedException("To be implemented"); // TODO [FREEMARKER-35]
+    }
+
+    @Override
     public boolean isLocaleBound() {
         return false;
     }

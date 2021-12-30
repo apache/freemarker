@@ -2330,7 +2330,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to moer informative
+     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to more informative
      * {@link TemplateException}-s.
      */
     TemplateTemporalFormat getTemplateTemporalFormat(

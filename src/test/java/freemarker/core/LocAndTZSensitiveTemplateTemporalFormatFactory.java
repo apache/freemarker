@@ -69,6 +69,11 @@ public class LocAndTZSensitiveTemplateTemporalFormatFactory extends TemplateTemp
         }
 
         @Override
+        public Object parse(String s) throws TemplateValueFormatException {
+            throw new ParsingNotSupportedException("Parsing is not implement for this test class");
+        }
+
+        @Override
         public boolean isLocaleBound() {
             return true;
         }

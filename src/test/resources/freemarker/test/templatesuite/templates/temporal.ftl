@@ -22,15 +22,14 @@
 <@assertEquals expected="Apr 5, 2003" actual=localDate?string />
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=offsetDateTime?string />
-<@assertEquals expected="7:07:08 AM" actual=offsetTime?string />
+<@assertFails message="Daylight Saving">${offsetTime}</@>
 <@assertEquals expected="2003" actual=year?string />
 <@assertEquals expected="2003-04" actual=yearMonth?string />
 <@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=zonedDateTime?string />
 
 <#setting timeZone="America/New_York">
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
-<#-- Automatic medium->long step up: -->
-<@assertEquals expected="6:07:08 AM Z" actual=offsetTime?string />
+<@assertFails message="Daylight Saving">${offsetTime}</@>
 
 <@assertEquals expected="2003-04-05T01:07:08-05:00" actual=instant?string.iso />
 <@assertEquals expected="2003-04-05T06:07:08" actual=localDateTime?string.iso />
@@ -81,10 +80,8 @@
 <@assertEquals expected="5 avril 2003 06:07:08" actual=localDateTime?string.long />
 <@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full />
 
-<#-- Automatic short->medium->long step up: -->
-<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.short />
-<#-- Automatic medium->long step up: -->
-<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.medium />
+<@assertFails message="Daylight Saving">${offsetTime?string.short}</@>
+<@assertFails message="Daylight Saving">${offsetTime?string.medium}</@>
 <@assertEquals expected="06:07:08 Z" actual=offsetTime?string.long />
 <@assertEquals expected="06 h 07 Z" actual=offsetTime?string.full />
 

@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import static freemarker.template.utility.StringUtil.*;
 import static freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -32,9 +33,11 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
@@ -44,7 +47,10 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleTemporal;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateTemporalModel;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
+import freemarker.test.hamcerst.Matchers;
 
 public class TemporalFormatTest {
 
@@ -52,20 +58,7 @@ public class TemporalFormatTest {
     public void testOffsetTimeAndZones() throws TemplateException, IOException {
         OffsetTime offsetTime = OffsetTime.of(LocalTime.of(10, 0, 0), ZoneOffset.ofHours(1));
 
-        TimeZone zoneWithoutDST = TimeZone.getTimeZone("GMT+2");
-        assertFalse(zoneWithoutDST.useDaylightTime());
-
-        TimeZone zoneWithDST = TimeZone.getTimeZone("America/New_York");
-        assertTrue(zoneWithDST.useDaylightTime());
-
-        assertEquals(
-                "11:00",
-                formatTemporal(
-                        conf -> {
-                            conf.setTimeFormat("HH:mm");
-                            conf.setTimeZone(zoneWithoutDST);
-                        },
-                        offsetTime));
+        TimeZone timeZone = TimeZone.getTimeZone("America/New_York");
 
         try {
             assertEquals(
@@ -73,7 +66,7 @@ public class TemporalFormatTest {
                     formatTemporal(
                             conf -> {
                                 conf.setTimeFormat("HH:mm");
-                                conf.setTimeZone(zoneWithDST);
+                                conf.setTimeZone(timeZone);
                             },
                             offsetTime));
             fail();
@@ -86,18 +79,10 @@ public class TemporalFormatTest {
                 formatTemporal(
                         conf -> {
                             conf.setTimeFormat("HH:mmX");
-                            conf.setTimeZone(zoneWithDST);
+                            conf.setTimeZone(timeZone);
                         },
                         offsetTime));
 
-        assertEquals(
-                "10:00+01",
-                formatTemporal(
-                        conf -> {
-                            conf.setTimeFormat("HH:mmX");
-                            conf.setTimeZone(zoneWithoutDST);
-                        },
-                        offsetTime));
     }
 
     @Test
@@ -212,6 +197,82 @@ public class TemporalFormatTest {
         }
     }
 
+    @Test
+    public void testDateTimeParsing() throws TemplateException, TemplateValueFormatException {
+        ZoneId zoneId = ZoneId.of("America/New_York");
+        TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+
+        for (int i = 0; i < 2; i++) {
+            String stringToParse = i == 0 ? "2020-12-10 13:14" : "2020-07-10 13:14";
+            LocalDateTime localDateTime = i == 0
+                    ? LocalDateTime.of(2020, 12, 10, 13, 14)
+                    : LocalDateTime.of(2020, 07, 10, 13, 14);
+
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
+            assertParsingResults(
+                    conf -> {
+                        conf.setDateTimeFormat("y-MM-dd HH:mm");
+                        conf.setTimeZone(timeZone);
+                    },
+                    stringToParse, localDateTime,
+                    stringToParse, zonedDateTime.toOffsetDateTime(),
+                    stringToParse, zonedDateTime,
+                    stringToParse, zonedDateTime.toInstant());
+
+            // TODO if zone is shown
+        }
+    }
+
+    @Test
+    public void testDateParsing() throws TemplateException, TemplateValueFormatException {
+        String stringToParse = "2020-11-10";
+        LocalDate localDate = LocalDate.of(2020, 11, 10);
+        assertParsingResults(
+                conf -> conf.setDateFormat("y-MM-dd"),
+                stringToParse, localDate);
+    }
+
+    @Test
+    public void testLocalTimeParsing() throws TemplateException, TemplateValueFormatException {
+        String stringToParse = "13:14";
+        assertParsingResults(
+                conf -> conf.setTimeFormat("HH:mm"),
+                stringToParse, LocalTime.of(13, 14));
+        // TODO if zone is shown
+    }
+
+    @Test
+    public void testParsingLocalization() throws TemplateException, TemplateValueFormatException {
+        // TODO
+    }
+
+    @Test
+    public void testOffsetTimeParsing() throws TemplateException, TemplateValueFormatException {
+        ZoneId zoneId = ZoneId.of("America/New_York");
+        TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+
+        assertParsingResults(
+                conf -> {
+                    conf.setTimeFormat("HH:mmXX");
+                    conf.setTimeZone(timeZone);
+                },
+                "13:14+0130",
+                OffsetTime.of(LocalTime.of(13, 14), ZoneOffset.ofHoursMinutesSeconds(1, 30, 0)));
+
+        try {
+            assertParsingResults(
+                    conf -> {
+                        conf.setTimeFormat("HH:mm");
+                        conf.setTimeZone(timeZone);
+                    },
+                    "13:14",
+                    OffsetTime.now() /* Value doesn't matter, as parsing will fail */);
+            fail("OffsetTime parsing should have failed when offset is not specified");
+        } catch (InvalidFormatParametersException e) {
+            assertThat(e.getMessage(), Matchers.containsStringIgnoringCase("daylight saving"));
+        }
+    }
+
     static private String formatTemporal(Consumer<Configurable> configurer, Temporal... values) throws
             TemplateException {
         Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
@@ -235,4 +296,69 @@ public class TemporalFormatTest {
 
         return sb.toString();
     }
+
+    static private void assertParsingResults(
+            Consumer<Configurable> configurer,
+            Object... stringsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
+        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
+        conf.setTimeZone(DateUtil.UTC);
+        conf.setLocale(Locale.US);
+
+        configurer.accept(conf);
+
+        Environment env = null;
+        try {
+            env = new Template(null, "", conf).createProcessingEnvironment(null, null);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        if (stringsAndExpectedResults.length % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "stringsAndExpectedResults.length must be even, but was " + stringsAndExpectedResults.length + ".");
+        }
+        for (int i = 0; i < stringsAndExpectedResults.length; i += 2) {
+            Object value = stringsAndExpectedResults[i];
+            if (!(value instanceof String)) {
+                throw new IllegalArgumentException("stringsAndExpectedResults[" + i + "] should be a String");
+            }
+            String string = (String) value;
+
+            value = stringsAndExpectedResults[i + 1];
+            if (!(value instanceof Temporal)) {
+                throw new IllegalArgumentException("stringsAndExpectedResults[" + (i + 1) + "] should be a Temporal");
+            }
+            Temporal expectedResult = (Temporal) value;
+
+            Class<? extends Temporal> temporalClass = expectedResult.getClass();
+            TemplateTemporalFormat templateTemporalFormat = env.getTemplateTemporalFormat(temporalClass);
+
+            Temporal actualResult;
+            {
+                Object actualResultObject = templateTemporalFormat.parse(string);
+                if (actualResultObject instanceof Temporal) {
+                    actualResult = (Temporal) actualResultObject;
+                } else if (actualResultObject instanceof TemplateTemporalModel) {
+                    actualResult = ((TemplateTemporalModel) actualResultObject).getAsTemporal();
+                } else {
+                    throw new AssertionError(
+                            "Parsing result of " + jQuote(string) + " is not of an expected type: "
+                                    + ClassUtil.getShortClassNameOfObject(actualResultObject));
+                }
+            }
+
+            if (!expectedResult.equals(actualResult)) {
+                throw new AssertionError(
+                        "Parsing result of " + jQuote(string) + " "
+                                + "(with temporalFormat[" + temporalClass.getSimpleName() + "]="
+                                + jQuote(env.getTemporalFormat(temporalClass)) + ", "
+                                + "timeZone=" + jQuote(env.getTimeZone().toZoneId()) + ", "
+                                + "locale=" + jQuote(env.getLocale()) + ") "
+                                + "differs from expected.\n"
+                                + "Expected: " + expectedResult + "\n"
+                                + "Actual:   " + actualResult);
+            }
+        }
+    }
+
 }
