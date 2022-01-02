@@ -19,15 +19,25 @@
 
 package freemarker.core;
 
+import static freemarker.template.utility.StringUtil.*;
+
 import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalQuery;
 import java.util.TimeZone;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
+import freemarker.template.utility.TemporalUtils;
 
 // TODO [FREEMARKER-35] These should support parameters similar to {@link ISOTemplateDateFormat},
 
@@ -41,17 +51,24 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
     private final boolean instantConversion;
     private final ZoneId zoneId;
     private final String description;
+    private final TemporalQuery temporalQuery;
+    private final Class<? extends Temporal> temporalClass;
+    private final DateTimeFormatter parserExtendedDateTimeFormatter;
+    private final DateTimeFormatter parserBasicDateTimeFormatter;
 
-    public ISOLikeTemplateTemporalTemporalFormat(
-            DateTimeFormatter dateTimeFormatter, Class<? extends Temporal> temporalClass, TimeZone zone, String description) {
+    ISOLikeTemplateTemporalTemporalFormat(
+            DateTimeFormatter dateTimeFormatter,
+            DateTimeFormatter parserExtendedDateTimeFormatter,
+            DateTimeFormatter parserBasicDateTimeFormatter,
+            Class<? extends Temporal> temporalClass, TimeZone zone, String formatString) {
         this.dateTimeFormatter = dateTimeFormatter;
+        this.parserExtendedDateTimeFormatter = parserExtendedDateTimeFormatter;
+        this.parserBasicDateTimeFormatter = parserBasicDateTimeFormatter;
+        this.temporalQuery = TemporalUtils.getTemporalQuery(temporalClass);
         this.instantConversion = Instant.class.isAssignableFrom(temporalClass);
-        if (instantConversion) {
-            zoneId = zone.toZoneId();
-        } else {
-            zoneId = null;
-        }
-        this.description = description;
+        this.temporalClass = temporalClass;
+        this.zoneId = zone.toZoneId();
+        this.description = formatString;
     }
 
     @Override
@@ -72,7 +89,46 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
 
     @Override
     public Object parse(String s) throws TemplateValueFormatException {
-        throw new ParsingNotSupportedException("To be implemented"); // TODO [FREEMARKER-35]
+        DateTimeFormatter parserDateTimeFormatter = parserBasicDateTimeFormatter == null || isExtendedFormatString(s)
+                ? parserExtendedDateTimeFormatter : parserBasicDateTimeFormatter;
+        try {
+            return parserDateTimeFormatter.parse(s, temporalQuery);
+        } catch (DateTimeParseException e) {
+            throw new UnparsableValueException(
+                    "Failed to parse value " + jQuote(s) + " with format " + jQuote(description)
+                            + ", and target class " + temporalClass.getSimpleName() + ", "
+                            + "zoneId " + jQuote(zoneId) + ".\n"
+                            + "(Used this DateTimeFormatter: " + parserDateTimeFormatter + ")\n"
+                            + "(Root cause message: " + e.getMessage() + ")",
+                    e);
+        }
+    }
+
+    private boolean isExtendedFormatString(String s) throws UnparsableValueException {
+        if (temporalClass == LocalDate.class || temporalClass == YearMonth.class) {
+            return !s.isEmpty() && s.indexOf('-', 1) != -1;
+        } else if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
+            return s.indexOf(":") != -1;
+        } else if (temporalClass == Year.class) {
+            return false;
+        } else {
+            int tIndex = s.indexOf('T');
+            if (tIndex < 1) {
+                throw new UnparsableValueException(
+                        "Failed to parse value " + jQuote(s) + " with format " + jQuote(description)
+                                + ", and target class " + temporalClass.getSimpleName() + ": "
+                                + "Character \"T\" must be used to separate the date and time part.");
+            }
+            if (s.indexOf(":", tIndex + 1) != -1) {
+                return true;
+            }
+            // Note: false for: -5000101T00, as there the last '-' has index 0
+            return s.lastIndexOf('-', tIndex - 1) > 0;
+        }
+    }
+
+    private boolean temporalClassHasNoTimePart() {
+        return temporalClass == LocalDate.class || temporalClass == Year.class || temporalClass == YearMonth.class;
     }
 
     @Override

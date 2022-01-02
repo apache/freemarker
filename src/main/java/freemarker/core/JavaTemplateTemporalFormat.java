@@ -36,12 +36,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
-import java.util.IdentityHashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +45,7 @@ import java.util.regex.Pattern;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.TemporalUtils;
 
 /**
  * See {@link JavaTemplateTemporalFormatFactory}.
@@ -82,20 +78,6 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     private static final Pattern FORMAT_STYLE_PATTERN = Pattern.compile(
             "(?:" + ANY_FORMAT_STYLE + "(?:_" + ANY_FORMAT_STYLE + ")?)?");
 
-    private static final Map<Class<? extends Temporal>, TemporalQuery<? extends Temporal>> TEMPORAL_CLASS_TO_QUERY_MAP;
-    static {
-        TEMPORAL_CLASS_TO_QUERY_MAP = new IdentityHashMap<>();
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(Instant.class, Instant::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalDate.class, LocalDate::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalDateTime.class, LocalDateTime::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalTime.class, LocalTime::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(OffsetDateTime.class, JavaTemplateTemporalFormat::offsetDateTimeFrom);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(OffsetTime.class, OffsetTime::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(ZonedDateTime.class, ZonedDateTime::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(Year.class, Year::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(YearMonth.class, YearMonth::from);
-    }
-
     private final DateTimeFormatter dateTimeFormatter;
     private final TemporalQuery<? extends Temporal> temporalQuery;
     private final ZoneId zoneId;
@@ -106,9 +88,9 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
 
     JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
             throws InvalidFormatParametersException {
-        this.temporalClass = _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+        this.temporalClass = TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
 
-        temporalQuery = Objects.requireNonNull(TEMPORAL_CLASS_TO_QUERY_MAP.get(temporalClass));
+        temporalQuery = TemporalUtils.getTemporalQuery(temporalClass);
 
         final Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
         final boolean isFormatStyleString = formatStylePatternMatcher.matches();
@@ -147,7 +129,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             timePartFormatStyle = null;
 
             try {
-                dateTimeFormatter = DateUtil.dateTimeFormatterFromSimpleDateFormatPattern(formatString, locale);
+                dateTimeFormatter = TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(formatString, locale);
             } catch (IllegalArgumentException e) {
                 throw new InvalidFormatParametersException(e.getMessage(), e);
             }
@@ -340,10 +322,6 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                 || normalizedTemporalClass == LocalDate.class
                 || normalizedTemporalClass == Year.class
                 || normalizedTemporalClass == YearMonth.class;
-    }
-
-    private static OffsetDateTime offsetDateTimeFrom(TemporalAccessor temporal) {
-        return ZonedDateTime.from(temporal).toOffsetDateTime();
     }
 
     private static FormatStyle getMoreVerboseStyle(FormatStyle style) {

@@ -19,13 +19,11 @@
 
 package freemarker.core;
 
-import static freemarker.template.utility.StringUtil.*;
 import static freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -36,26 +34,20 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import org.junit.Test;
 
-import freemarker.template.Configuration;
-import freemarker.template.SimpleTemporal;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateTemporalModel;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.test.hamcerst.Matchers;
 
-public class TemporalFormatTest {
+public class TemporalFormatWithJavaFormatTest extends AbstractTemporalFormatTest {
 
     @Test
-    public void testOffsetTimeAndZones() throws TemplateException, IOException {
+    public void testFormatOffsetTimeAndZones() throws TemplateException, IOException {
         OffsetTime offsetTime = OffsetTime.of(LocalTime.of(10, 0, 0), ZoneOffset.ofHours(1));
 
         TimeZone timeZone = TimeZone.getTimeZone("America/New_York");
@@ -86,7 +78,7 @@ public class TemporalFormatTest {
     }
 
     @Test
-    public void testZoneConvertedWhenOffsetOrZoneNotShown() throws TemplateException, IOException {
+    public void testFormatZoneConvertedWhenOffsetOrZoneNotShown() throws TemplateException, IOException {
         TimeZone gbZone = TimeZone.getTimeZone("GB");
         assertTrue(gbZone.useDaylightTime());
         // Summer: GMT+1
@@ -143,7 +135,7 @@ public class TemporalFormatTest {
     }
 
     @Test
-    public void testCanNotFormatLocalIfTimeZoneIsShown() {
+    public void testFormatCanNotFormatLocalIfTimeZoneIsShown() {
         try {
             formatTemporal(
                     conf -> {
@@ -162,7 +154,7 @@ public class TemporalFormatTest {
     }
 
     @Test
-    public void testStylesAreNotSupportedForYear() {
+    public void testFormatStylesAreNotSupportedForYear() {
         try {
             formatTemporal(
                     conf -> {
@@ -180,7 +172,7 @@ public class TemporalFormatTest {
     }
 
     @Test
-    public void testStylesAreNotSupportedForYearMonth() {
+    public void testFormatStylesAreNotSupportedForYearMonth() {
         try {
             formatTemporal(
                     conf -> {
@@ -198,56 +190,129 @@ public class TemporalFormatTest {
     }
 
     @Test
-    public void testDateTimeParsing() throws TemplateException, TemplateValueFormatException {
-        ZoneId zoneId = ZoneId.of("America/New_York");
-        TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+    public void testParseDateTime() throws TemplateException, TemplateValueFormatException {
+        ZoneId cfgZoneId = ZoneId.of("America/New_York");
+        TimeZone cfgTimeZone = TimeZone.getTimeZone(cfgZoneId);
 
-        for (int i = 0; i < 2; i++) {
-            String stringToParse = i == 0 ? "2020-12-10 13:14" : "2020-07-10 13:14";
-            LocalDateTime localDateTime = i == 0
+        for (boolean winter : new boolean[] {true, false}) {
+            String stringToParse = winter ? "2020-12-10 13:14" : "2020-07-10 13:14";
+            LocalDateTime localDateTime = winter
                     ? LocalDateTime.of(2020, 12, 10, 13, 14)
                     : LocalDateTime.of(2020, 07, 10, 13, 14);
 
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
-            assertParsingResults(
-                    conf -> {
-                        conf.setDateTimeFormat("y-MM-dd HH:mm");
-                        conf.setTimeZone(timeZone);
-                    },
-                    stringToParse, localDateTime,
-                    stringToParse, zonedDateTime.toOffsetDateTime(),
-                    stringToParse, zonedDateTime,
-                    stringToParse, zonedDateTime.toInstant());
+            {
+                ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, cfgZoneId);
+                assertParsingResults(
+                        conf -> {
+                            conf.setDateTimeFormat("y-MM-dd HH:mm");
+                            conf.setTimeZone(cfgTimeZone);
+                        },
+                        stringToParse, localDateTime,
+                        stringToParse, zonedDateTime,
+                        stringToParse, zonedDateTime.toInstant(),
+                        stringToParse, zonedDateTime.toOffsetDateTime());
+            }
 
-            // TODO if zone is shown
+            {
+                String stringToParseWithOffset = stringToParse + "+02";
+                OffsetDateTime offsetDateTime = localDateTime.atOffset(ZoneOffset.ofHours(2));
+                ZonedDateTime zonedDateTime = offsetDateTime.toZonedDateTime();
+                assertParsingResults(
+                        conf -> {
+                            conf.setDateTimeFormat("y-MM-dd HH:mmX");
+                            conf.setTimeZone(cfgTimeZone);
+                        },
+                        stringToParseWithOffset, localDateTime,
+                        stringToParseWithOffset, zonedDateTime,
+                        stringToParseWithOffset, zonedDateTime.toInstant(),
+                        stringToParseWithOffset, offsetDateTime);
+            }
+
+            {
+                ZoneId zoneIdToParse = ZoneId.of("Europe/Prague");
+                String stringToParseWithZone = stringToParse + " " + zoneIdToParse.getId();
+                ZonedDateTime zonedDateTime = localDateTime.atZone(zoneIdToParse);
+                assertParsingResults(
+                        conf -> {
+                            conf.setDateTimeFormat("y-MM-dd HH:mm z");
+                            conf.setTimeZone(cfgTimeZone);
+                        },
+                        stringToParseWithZone, localDateTime,
+                        stringToParseWithZone, zonedDateTime,
+                        stringToParseWithZone, zonedDateTime.toInstant(),
+                        stringToParseWithZone, zonedDateTime.toOffsetDateTime());
+            }
         }
     }
 
     @Test
-    public void testDateParsing() throws TemplateException, TemplateValueFormatException {
-        String stringToParse = "2020-11-10";
+    public void testParseWrongFormat() throws TemplateException, TemplateValueFormatException {
+        try {
+            assertParsingResults(
+                    conf -> conf.setDateTimeFormat("y-MM-dd HH:mm"),
+                    "2020-12-10 01:14 PM", LocalDateTime.of(2020, 12, 10, 13, 14));
+            fail("Parsing should have failed");
+        } catch (UnparsableValueException e) {
+            assertThat(
+                    e.getMessage(),
+                    allOf(
+                            containsString("\"2020-12-10 01:14 PM\""),
+                            containsString("\"y-MM-dd HH:mm\""),
+                            containsString("\"en_US\""),
+                            containsString("\"UTC\""),
+                            containsString("LocalDateTime")
+                    )
+            );
+        }
+    }
+
+    @Test
+    public void testParseDate() throws TemplateException, TemplateValueFormatException {
         LocalDate localDate = LocalDate.of(2020, 11, 10);
         assertParsingResults(
                 conf -> conf.setDateFormat("y-MM-dd"),
-                stringToParse, localDate);
+                "2020-11-10", localDate);
+        assertParsingResults(
+                conf -> conf.setDateFormat("yy-MM-dd"),
+                "20-11-10", localDate);
     }
 
     @Test
-    public void testLocalTimeParsing() throws TemplateException, TemplateValueFormatException {
+    public void testParseLocalTime() throws TemplateException, TemplateValueFormatException {
         String stringToParse = "13:14";
+
         assertParsingResults(
                 conf -> conf.setTimeFormat("HH:mm"),
                 stringToParse, LocalTime.of(13, 14));
-        // TODO if zone is shown
+
+        assertParsingResults(
+                conf -> {
+                    conf.setTimeFormat("HH:mmX");
+                    conf.setTimeZone(TimeZone.getTimeZone("GMT+02"));
+                },
+                stringToParse + "+02", LocalTime.of(13, 14));
     }
 
     @Test
-    public void testParsingLocalization() throws TemplateException, TemplateValueFormatException {
-        // TODO
+    public void testParseLocalization() throws TemplateException, TemplateValueFormatException {
+        LocalDate localDate = LocalDate.of(2020, 11, 10);
+        for (Locale locale : new Locale[] {
+                Locale.CHINA,
+                Locale.GERMANY,
+                new Locale("th", "TH"), // Because of the Buddhist calendar
+                Locale.US
+        }) {
+            Consumer<Configurable> configurer = conf -> {
+                conf.setDateFormat("y MMM dd");
+                conf.setLocale(locale);
+            };
+            String formattedDate = formatTemporal(configurer, localDate);
+            assertParsingResults(configurer, formattedDate, localDate);
+        }
     }
 
     @Test
-    public void testOffsetTimeParsing() throws TemplateException, TemplateValueFormatException {
+    public void testParseOffsetTime() throws TemplateException, TemplateValueFormatException {
         ZoneId zoneId = ZoneId.of("America/New_York");
         TimeZone timeZone = TimeZone.getTimeZone(zoneId);
 
@@ -270,94 +335,6 @@ public class TemporalFormatTest {
             fail("OffsetTime parsing should have failed when offset is not specified");
         } catch (InvalidFormatParametersException e) {
             assertThat(e.getMessage(), Matchers.containsStringIgnoringCase("daylight saving"));
-        }
-    }
-
-    static private String formatTemporal(Consumer<Configurable> configurer, Temporal... values) throws
-            TemplateException {
-        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
-
-        configurer.accept(conf);
-
-        Environment env = null;
-        try {
-            env = new Template(null, "", conf).createProcessingEnvironment(null, null);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (Temporal value : values) {
-            if (sb.length() != 0) {
-                sb.append(", ");
-            }
-            sb.append(env.formatTemporalToPlainText(new SimpleTemporal(value), null, false));
-        }
-
-        return sb.toString();
-    }
-
-    static private void assertParsingResults(
-            Consumer<Configurable> configurer,
-            Object... stringsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
-        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
-        conf.setTimeZone(DateUtil.UTC);
-        conf.setLocale(Locale.US);
-
-        configurer.accept(conf);
-
-        Environment env = null;
-        try {
-            env = new Template(null, "", conf).createProcessingEnvironment(null, null);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        if (stringsAndExpectedResults.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "stringsAndExpectedResults.length must be even, but was " + stringsAndExpectedResults.length + ".");
-        }
-        for (int i = 0; i < stringsAndExpectedResults.length; i += 2) {
-            Object value = stringsAndExpectedResults[i];
-            if (!(value instanceof String)) {
-                throw new IllegalArgumentException("stringsAndExpectedResults[" + i + "] should be a String");
-            }
-            String string = (String) value;
-
-            value = stringsAndExpectedResults[i + 1];
-            if (!(value instanceof Temporal)) {
-                throw new IllegalArgumentException("stringsAndExpectedResults[" + (i + 1) + "] should be a Temporal");
-            }
-            Temporal expectedResult = (Temporal) value;
-
-            Class<? extends Temporal> temporalClass = expectedResult.getClass();
-            TemplateTemporalFormat templateTemporalFormat = env.getTemplateTemporalFormat(temporalClass);
-
-            Temporal actualResult;
-            {
-                Object actualResultObject = templateTemporalFormat.parse(string);
-                if (actualResultObject instanceof Temporal) {
-                    actualResult = (Temporal) actualResultObject;
-                } else if (actualResultObject instanceof TemplateTemporalModel) {
-                    actualResult = ((TemplateTemporalModel) actualResultObject).getAsTemporal();
-                } else {
-                    throw new AssertionError(
-                            "Parsing result of " + jQuote(string) + " is not of an expected type: "
-                                    + ClassUtil.getShortClassNameOfObject(actualResultObject));
-                }
-            }
-
-            if (!expectedResult.equals(actualResult)) {
-                throw new AssertionError(
-                        "Parsing result of " + jQuote(string) + " "
-                                + "(with temporalFormat[" + temporalClass.getSimpleName() + "]="
-                                + jQuote(env.getTemporalFormat(temporalClass)) + ", "
-                                + "timeZone=" + jQuote(env.getTimeZone().toZoneId()) + ", "
-                                + "locale=" + jQuote(env.getLocale()) + ") "
-                                + "differs from expected.\n"
-                                + "Expected: " + expectedResult + "\n"
-                                + "Actual:   " + actualResult);
-            }
         }
     }
 

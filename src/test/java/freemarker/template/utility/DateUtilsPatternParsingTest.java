@@ -90,23 +90,27 @@ public class DateUtilsPatternParsingTest {
 
     @Test
     public void testAllLettersAndWidths() {
-        for (String letter : new String[] {
-                "G", "y", "Y", "M", "L", "w", "W", "D", "d", "F", "E", "u", "a", "H", "k", "K", "h", "m", "s", "S",
-                "z", "Z", "X"}) {
-            for (int width = 1; width <= 6; width++) {
-                if (letter.equals("X") && width > 3) {
-                    // Not supported by SimpleDateFormat.
-                    continue;
-                }
-                String pattern = StringUtils.repeat(letter, width);
-                for (ZonedDateTime zdt : SAMPLE_ZDTS) {
-                    for (Locale locale : SAMPLE_LOCALES) {
-                        if (letter.equals("G") && _JavaVersion.FEATURE > 8 && !locale.equals(Locale.US)) {
-                            // SDF and DTF formats Era differently for many locales after Java 8. US locale remains
-                            // consistent as of Java 13, so let's hope it won't break, and so we can have some coverage.
-                            continue;
+        // Prefix is used to have both standalone and non-standalone formatting of the repeated letter.
+        for (String prefix : new String[] {"", "y "}) {
+            for (String letter : new String[]{
+                    "G", "y", "Y", "M", "L", "w", "W", "D", "d", "F", "E", "u", "a", "H", "k", "K", "h", "m", "s", "S",
+                    "z", "Z", "X"}) {
+                for (int width = 1; width <= 6; width++) {
+                    if (letter.equals("X") && width > 3) {
+                        // Not supported by SimpleDateFormat.
+                        continue;
+                    }
+                    String pattern = prefix + StringUtils.repeat(letter, width);
+                    for (ZonedDateTime zdt : SAMPLE_ZDTS) {
+                        for (Locale locale : SAMPLE_LOCALES) {
+                            if (letter.equals("G") && _JavaVersion.FEATURE > 8 && !locale.equals(Locale.US)) {
+                                // SDF and DTF formats Era differently for many locales after Java 8. US locale remains
+                                // consistent as of Java 13, so let's hope it won't break, and so we can have some
+                                // coverage.
+                                continue;
+                            }
+                            assertSDFAndDTFOutputsEqual(pattern, zdt, locale);
                         }
-                        assertSDFAndDTFOutputsEqual(pattern, zdt, locale);
                     }
                 }
             }
@@ -133,17 +137,6 @@ public class DateUtilsPatternParsingTest {
                 assertSDFAndDTFOutputsEqual("u", zdt, locale);
             }
             zdt = zdt.plusDays(1);
-        }
-    }
-
-
-    @Test
-    public void testStandaloneOrNot() {
-        for (Locale locale : SAMPLE_LOCALES) {
-            assertSDFAndDTFOutputsEqual("MMM", SAMPLE_ZDT, locale);
-            assertSDFAndDTFOutputsEqual("y MMM", SAMPLE_ZDT, locale);
-            assertSDFAndDTFOutputsEqual("MMMM", SAMPLE_ZDT, locale);
-            assertSDFAndDTFOutputsEqual("y MMMM", SAMPLE_ZDT, locale);
         }
     }
 
@@ -183,14 +176,14 @@ public class DateUtilsPatternParsingTest {
     @Test
     public void testInvalidPatternExceptions() {
         try {
-            DateUtil.dateTimeFormatterFromSimpleDateFormatPattern("y v", SAMPLE_LOCALE);
+            TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("y v", SAMPLE_LOCALE);
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), Matchers.containsString("\"v\""));
         }
 
         try {
-            DateUtil.dateTimeFormatterFromSimpleDateFormatPattern("XXXX", SAMPLE_LOCALE);
+            TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("XXXX", SAMPLE_LOCALE);
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), Matchers.containsString("4"));
@@ -202,7 +195,7 @@ public class DateUtilsPatternParsingTest {
         assertEquals(
                 LocalDateTime.of(2021, 12, 23, 1, 2, 3),
                 LocalDateTime.from(
-                        DateUtil.dateTimeFormatterFromSimpleDateFormatPattern("yyyyMMddHHmmss", SAMPLE_LOCALE)
+                        TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("yyyyMMddHHmmss", SAMPLE_LOCALE)
                                 .parse("20211223010203")));
     }
 
@@ -270,7 +263,7 @@ public class DateUtilsPatternParsingTest {
         SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
         sdf.setTimeZone(timeZone);
 
-        DateTimeFormatter dtf = DateUtil.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale);
+        DateTimeFormatter dtf = TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale);
 
         String sdfOutput = sdf.format(date);
         String dtfOutput = dtf.format(temporal);
@@ -309,7 +302,7 @@ public class DateUtilsPatternParsingTest {
 
     private LocalDate parseLocalDate(String pattern, String string, Locale locale) {
         return LocalDate.from(
-                DateUtil.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale)
+                TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale)
                         .parse(string));
     }
 

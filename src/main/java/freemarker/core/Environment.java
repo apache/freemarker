@@ -82,6 +82,7 @@ import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.TemplateModelUtils;
+import freemarker.template.utility.TemporalUtils;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -2342,7 +2343,12 @@ public final class Environment extends Configurable {
             String settingName;
             String settingValue;
             try {
-                settingName = _CoreTemporalUtils.temporalClassToFormatSettingName(temporalClass);
+                settingName = TemporalUtils.temporalClassToFormatSettingName(
+                        temporalClass,
+                        blamedTemporalSourceExp != null
+                                ? blamedTemporalSourceExp.getTemplate().getActualNamingConvention()
+                                        == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                                : false);
                 settingValue = getTemporalFormat(temporalClass);
             } catch (IllegalArgumentException e2) {
                 settingName = "???";

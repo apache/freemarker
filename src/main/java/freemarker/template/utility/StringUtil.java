@@ -2156,5 +2156,13 @@ public class StringUtil {
         }
         return sb.toString();
     }
-    
+
+    /**
+     * Tells if the char is a US-ASCII letter.
+     *
+     * @since 2.3.32
+     */
+    public static boolean isUsAsciiLetter(char c) {
+        return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+    }
 }

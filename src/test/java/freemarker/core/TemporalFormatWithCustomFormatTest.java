@@ -33,9 +33,9 @@ import freemarker.template.Configuration;
 import freemarker.test.TemplateTest;
 
 /**
- * Like {@link TemporalFormatTest}, but this one contains the tests that utilize {@link TemplateTest}.
+ * Like {@link TemporalFormatWithJavaFormatTest}, but this one contains the tests that utilize {@link TemplateTest}.
  */
-public class TemporalFormatTest2 extends TemplateTest {
+public class TemporalFormatWithCustomFormatTest extends TemplateTest {
 
     @Before
     public void setup() {

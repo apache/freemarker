@@ -21,19 +21,26 @@ package freemarker.core;
 
 import static freemarker.core.ISOTemplateTemporalFormatFactory.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import freemarker.template.utility.TemporalUtils;
+
 /**
  * Format factory related to {@link someJava8Temporal?string.xs}, {@link someJava8Temporal?string.xs_...}, etc.
  */
+// TODO [FREEMARKER-35] Historical date handling compared to ISO
 class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     static final XSTemplateTemporalFormatFactory INSTANCE = new XSTemplateTemporalFormatFactory();
@@ -55,30 +62,38 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
 
     private static ISOLikeTemplateTemporalTemporalFormat getXSFormatter(Class<? extends Temporal> temporalClass, TimeZone timeZone) {
         final DateTimeFormatter dateTimeFormatter;
+        final DateTimeFormatter parserDateTimeFormatter;
         final String description;
+        temporalClass = TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
         if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
             dateTimeFormatter = ISO8601_TIME_FORMAT;
+            parserDateTimeFormatter = PARSER_ISO8601_EXTENDED_TIME_FORMAT;
             description = "W3C XML Schema time";
         } else if (temporalClass == Year.class) {
             dateTimeFormatter = ISO8601_YEAR_FORMAT;
+            parserDateTimeFormatter = ISO8601_YEAR_FORMAT;
             description = "W3C XML Schema year";
         } else if (temporalClass == YearMonth.class) {
-            dateTimeFormatter = ISO8601_YEARMONTH_FORMAT;
+            dateTimeFormatter = ISO8601_YEAR_MONTH_FORMAT;
+            parserDateTimeFormatter = PARSER_ISO8601_EXTENDED_YEAR_MONTH_FORMAT;
             description = "W3C XML Schema year-month";
         } else if (temporalClass == LocalDate.class) {
             dateTimeFormatter = ISO8601_DATE_FORMAT;
+            parserDateTimeFormatter = PARSER_ISO8601_EXTENDED_DATE_FORMAT;
             description = "W3C XML Schema date";
+        } else if (temporalClass == LocalDateTime.class || temporalClass == OffsetDateTime.class
+                || temporalClass == ZonedDateTime.class || temporalClass == Instant.class) {
+            dateTimeFormatter = ISO8601_DATE_TIME_FORMAT;
+            parserDateTimeFormatter = PARSER_ISO8601_EXTENDED_DATE_TIME_FORMAT;
+            description = "W3C XML Schema date-time";
         } else {
-            Class<? extends Temporal> normTemporalClass =
-                    _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
-            if (normTemporalClass != temporalClass) {
-                return getXSFormatter(normTemporalClass, timeZone);
-            } else {
-                dateTimeFormatter = ISO8601_DATE_TIME_FORMAT;
-                description = "W3C XML Schema date-time";
-            }
+            throw new BugException();
         }
-        return new ISOLikeTemplateTemporalTemporalFormat(dateTimeFormatter, temporalClass, timeZone, description);
+        return new ISOLikeTemplateTemporalTemporalFormat(
+                dateTimeFormatter,
+                parserDateTimeFormatter,
+                null,
+                temporalClass, timeZone, description);
     }
 
 }

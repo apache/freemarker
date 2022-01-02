@@ -82,6 +82,7 @@ import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.TemporalUtils;
 
 /**
  * This is a common superclass of {@link freemarker.template.Configuration},
@@ -1457,7 +1458,7 @@ public class Configurable {
         } else {
             // Handle the unlikely situation that in some future Java version we can have subclasses.
             Class<? extends Temporal> normTemporalClass =
-                    _CoreTemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+                    TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
             if (normTemporalClass == temporalClass) {
                 throw new IllegalArgumentException("There's no temporal format setting for this class: "
                         + temporalClass.getName());
