@@ -37,19 +37,19 @@ Major template language changes / features
 - Switched to camel case as the only supported naming convention. This is as if in FM2 you set the "namingConvention"
   configuration setting to "camelCase", however the "namingConvention" setting was removed, as no other convention will
   be supported (for the default dialect at least). Also, configuration setting names and values must use camel case
-  too (FM2 was forgiving there). Also, in XML processing, the @@ names were also converted to camel case. This means
-  `#elseif` becomes to ``#elseIf`, ``?upper_case`, `?upperCase`, and if you configure FreeMarker with Properties,
-  then `template_loader` becomes to `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
-  becomes to `node.@@nestedMarkup`.
+  too (FM2 was forgiving there). Also, in XML processing, the @@ names were converted to camel case. This means
+  `#elseif` becomes ``#elseIf`, ``?upper_case` becomes `?upperCase`, and if you configure FreeMarker with Properties,
+  then `template_loader` becomes `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
+  becomes `node.@@nestedMarkup`.
   Note that the template converter tool takes care of this conversion.
 - Parameters passed by position (as opposed to by name) must be separated by comma. Earlier the comma was optional.
   (This is needed to allow passing parameters both by-position and by-name in the same invocation, which is not yet
   implemented though.)
   Examples:
-  `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
-  `<#nested x y>` now must be written as `<#nested x, y>`
+  `<@x x + 1 2 3 />` must now be written as `<@x x + 1, 2, 3 />`
+  `<#nested x y>` must now be written as `<#nested x, y>`
 - #macro-s and #function  
-  - Both #macro-s and #function-s can now define parameters that are passed by position, and that are passed by name.
+  - Both #macro-s and #function-s can now define parameters that are passed by position, and parameters that are passed by name.
     Function parameters are by default positional, which can be changed by adding `{named}` after the parameter name.
     Macro parameters are by default named, which can be changed by adding `{positional}` after the parameter name.
     Positional parameters always precede the named ones. There can be both a positional and a named varargs parameter;
@@ -65,9 +65,9 @@ Major template language changes / features
     by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
 - Operator for handing null/missing values were reworked:
   - The right-side operator precedence of the `exp!defaultExp` (and `exp!`) operator is now the same precedence on
-    both sides, which is lower as the precedence of `.`, but higher as the precedence of `+`. The converter takes
-    care of cases where this would change the meaning of the expression (like `x!y+1` is converted to `x!(x+1)`.)
-  - The value of `missing!` now can be used as boolean `false`, and as a function that returns `null` and accepts
+    both sides, which is lower than the precedence of `.`, but higher than the precedence of `+`. The converter takes
+    care of cases where this would change the meaning of the expression (like `x!y+1` is converted to `x!(y+1)`.)
+  - The value of `missing!` can now be used as boolean `false`, and as a function that returns `null` and accepts
     any arguments, and as a directive that does nothing and allows any arguments (not only as "", empty sequence,
     and empty hash).
   - [TODO] Deeper changes are supposed to happen here later. (Some of the above changes will be meaningless then.)
@@ -98,7 +98,7 @@ Node: Changes already mentioned above aren't repeated here!
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
   Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
-  translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
+  translated to `${x}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
 - In `#macro` and `#function` the comma must only be used between by-position parameters (earlier the comma was
   optional).
 - In `#function`, parentheses are now required around parameter list (as in `<#function f(a, b)>`), even if there are
@@ -234,7 +234,7 @@ Major changes / features
   - Callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`) were replaced by
     `TemplateFunctionModel` and the reworked `TemplateDirectiveModel` interface. Both of these support padding arguments
     by position and by name, even in the same call (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`).
-    Because of the extended capabiliteis of this interface, callables defined inside templates (via `#function` and `#macro`)
+    Because of the extended capabilities of this interface, callables defined inside templates (via `#function` and `#macro`)
     are now just create `TemplateFunctionModel` and `TemplateDirectiveModel` objects.
   - Listable TemplateModel-s and their intheriance hierarchy are now much more similar the Java collection API:
     TemplateIterableModel > TemplateCollectionModel > TemplateSequenceModel [TODO: This last will be TemplateListModel].
@@ -242,7 +242,7 @@ Major changes / features
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
   [Note: This is in very early stage, as of 2017-07-06.]
-- Added `Configuration.templateLangauge` and the `TemplateLanguage` class, which encapsulate the syntax and some of the
+- Added `Configuration.templateLanguage` and the `TemplateLanguage` class, which encapsulate the syntax and some of the
   semantics, most importantly the `outputFormat`.
 - Each `TemplateLanguage` has an associated file extension, which should be sufficient for editors (IDE-s) to chose the
   proper syntax highlighting. Syntax auto-detection was removed, as editors couldn't cope with it. Thus, the new file
@@ -575,7 +575,7 @@ Core / Miscellaneous
 
 - Minimum Java version increased to 8
 - Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
-- Removed legacy extensions (so these has no module): rhyno, jython, xml (not to be confused with dom), jdom, ant.
+- Removed legacy extensions (so these have no module): rhino, jython, xml (not to be confused with dom), jdom, ant.
 - Servlet 3.0 and JSP 2.2 and is the minimum requirement now (if Serlvet/JSP features are used at all).
 - Log categories are now simply the full qualified class name of the logging classes. There are no predefined log
   categories (such as "freemarker.runtime", etc.) anymore. This is to follow the common practices in logging.
