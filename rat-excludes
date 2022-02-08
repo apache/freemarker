@@ -5,9 +5,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,24 +19,24 @@
 # --------
 
 # Generated files basically; see details in the files:
-src/manual/en_US/docgen-misc/googleAnalytics.html
-src/manual/zh_CN/docgen-misc/googleAnalytics.html
+freemarker-manual/src/main/docgen/en_US/docgen-misc/googleAnalytics.html
+freemarker-manual/src/main/docgen/zh_CN/docgen-misc/googleAnalytics.html
 
 # Binaries/archives created in the FreeMarker project:
 src/main/misc/overloadedNumberRules/prices.ods
-src/manual/en_US/docgen-originals/figures/overview.odg
-src/manual/en_US/docgen-originals/figures/model2sketch_with_alpha.png
-src/manual/en_US/docgen-originals/figures/tree_with_alpha.png
-src/manual/en_US/favicon.png
-src/manual/en_US/figures/model2sketch.png
-src/manual/en_US/figures/overview.png
-src/manual/en_US/figures/tree.png
-src/manual/en_US/logo.png
-src/manual/zh_CN/favicon.png
-src/manual/zh_CN/figures/model2sketch.png
-src/manual/zh_CN/figures/overview.png
-src/manual/zh_CN/figures/tree.png
-src/manual/zh_CN/logo.png
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/overview.odg
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/model2sketch_with_alpha.png
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/tree_with_alpha.png
+freemarker-manual/src/main/docgen/en_US/favicon.png
+freemarker-manual/src/main/docgen/en_US/figures/model2sketch.png
+freemarker-manual/src/main/docgen/en_US/figures/overview.png
+freemarker-manual/src/main/docgen/en_US/figures/tree.png
+freemarker-manual/src/main/docgen/en_US/logo.png
+freemarker-manual/src/main/docgen/zh_CN/favicon.png
+freemarker-manual/src/main/docgen/zh_CN/figures/model2sketch.png
+freemarker-manual/src/main/docgen/zh_CN/figures/overview.png
+freemarker-manual/src/main/docgen/zh_CN/figures/tree.png
+freemarker-manual/src/main/docgen/zh_CN/logo.png
 
 # Rat thinks it's a binary, but it's UTF-16 text:
 src/test/resources/freemarker/test/templatesuite/expected/output-encoding2.txt

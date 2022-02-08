@@ -29,46 +29,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    strategy:
+        matrix:
+            os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    concurrency: main_tests_${{ github.ref }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - name: Welcome Message
+        run: 'echo "Started with parameters: ${{ matrix.os }} because ${{ github.event_name }} on ${{ github.ref }}"'
+      - uses: actions/checkout@v4
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           java-version: 8
           distribution: temurin
-
       - name: Set up JDK 16
         uses: actions/setup-java@v3
         with:
           java-version: 16
           distribution: zulu
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1.1.0
+      - name: Run Build
+        id: build_step
+        run: './gradlew --continue clean build -PsignPublication=false'
+      - name: Upload Failed Report
+        uses: actions/upload-artifact@v2.3.1
+        if: failure() && steps.build_step.outcome == 'failure'
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: build/reports/**
+          retention-days: 30
 
-      - name: Prepare build.properties
-        shell: bash
-        run: >-
-          echo "boot.classpath.j2se1.8=${JAVA_HOME_8_X64}/jre/lib/rt.jar" >> build.properties;
-          echo "mvnCommand=$(which mvn)" >> build.properties;
-          echo "gpgCommand=$(which gpg)" >> build.properties;
-
-      - name: Create a gpg key for signing
-        shell: bash
-        run: >-
-          gpg --quick-gen-key --batch --passphrase '' github-build@apache.invalid;
-          echo "batch" >> "/home/runner/.gnupg/gpg.conf";
-          echo "pinentry-mode=loopback" >> "/home/runner/.gnupg/gpg.conf";
-
-      - name: Prepare ant with ivy
-        shell: bash
-        run: ant download-ivy
-
-      - name: Build with Ant and ivy
-        shell: bash
-        run: ant ci -Dci=true
-
-      - name: RAT check
-        shell: bash
-        run: ant rat
