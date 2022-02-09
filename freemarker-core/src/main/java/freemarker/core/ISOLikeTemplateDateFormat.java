@@ -22,7 +22,6 @@ package freemarker.core;
 import java.util.Date;
 import java.util.TimeZone;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DateUtil;

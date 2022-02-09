@@ -549,7 +549,6 @@ dependencies {
     compileOnly("org.slf4j:jcl-over-slf4j:${slf4jVersion}") // FIXME: This seems to be unused
     compileOnly("commons-logging:commons-logging:1.1.1") // FIXME: This seems to be unused
     compileOnly("org.zeroturnaround:javarebel-sdk:1.2.2")
-    compileOnly("com.google.code.findbugs:annotations:3.0.0")
     compileOnly("org.dom4j:dom4j:2.1.3")
 
     "jsp20CompileOnly"("javax.servlet.jsp:jsp-api:2.0")
@@ -567,6 +566,7 @@ dependencies {
     "jython25CompileOnly"(sourceSets["jython20"].output)
     "jython25CompileOnly"("org.python:jython:2.5.0")
 
+    testImplementation("com.google.code.findbugs:annotations:3.0.0")
     testImplementation("junit:junit:4.12")
     testImplementation("org.hamcrest:hamcrest-library:1.3")
     testImplementation("ch.qos.logback:logback-classic:1.1.2")

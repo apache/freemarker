@@ -21,7 +21,6 @@ package freemarker.core;
 
 import java.util.List;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.dom._ExtDomApi;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;

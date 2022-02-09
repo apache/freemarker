@@ -22,7 +22,6 @@ package freemarker.template;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.util.WrapperTemplateModel;

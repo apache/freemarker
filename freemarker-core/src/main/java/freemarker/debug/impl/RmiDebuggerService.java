@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.core.DebugBreak;
 import freemarker.core.Environment;
 import freemarker.core.TemplateElement;

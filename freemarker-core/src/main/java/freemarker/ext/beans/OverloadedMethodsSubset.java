@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;

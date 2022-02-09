@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorage;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.core.Configurable;

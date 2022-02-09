@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
