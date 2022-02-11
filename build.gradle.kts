@@ -36,6 +36,18 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+freemarkerRoot {
+    configureTestUtils("16")
+
+    configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME, "8") { enableTests() }
+    configureSourceSet("jsp20", "8")
+    configureSourceSet("jsp21", "8") { enableTests() }
+    configureSourceSet("jython20", "8")
+    configureSourceSet("jython22", "8")
+    configureSourceSet("jython25", "8") { enableTests() }
+    configureSourceSet("core16", "16")
+}
+
 val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJavacc") {
     sourceDirectory.set(file("freemarker-core/src/main/javacc"))
     destinationDirectory.set(buildDir.toPath().resolve("generated").resolve("javacc").toFile())
@@ -70,81 +82,48 @@ val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJ
         "final class SimpleCharStream"
     )
 }
+sourceSets.main.get().java.srcDir(compileJavacc)
 
-val allSourceSetNames = ArrayList<String>()
+tasks.named<Jar>(sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get().sourcesJarTaskName) {
+    from(compileJavacc.flatMap { it.sourceDirectory })
 
-fun configureSourceSet(sourceSetName: String, defaultCompilerVersionStr: String) {
-    allSourceSetNames.add(sourceSetName)
-
-    val compilerVersion = fmExt.freemarkerCompilerVersionOverrideRef
-        .orElse(providers.gradleProperty("java${defaultCompilerVersionStr}CompilerOverride"))
-        .getOrElse(defaultCompilerVersionStr)
-        .let { JavaLanguageVersion.of(it) }
-
-    val baseDirName = if (sourceSetName == SourceSet.MAIN_SOURCE_SET_NAME) "core" else sourceSetName
-
-    val sourceSet = sourceSets.maybeCreate(sourceSetName)
-    sourceSet.java.setSrcDirs(listOf("freemarker-${baseDirName}/src/main/java"))
-    sourceSet.resources.setSrcDirs(listOf("freemarker-${baseDirName}/src/main/resources"))
-
-    val mainSourceSet = sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get()
-
-    if (sourceSetName == SourceSet.MAIN_SOURCE_SET_NAME) {
-        sourceSet.java.srcDir(compileJavacc)
-    } else {
-        tasks.named<Jar>(mainSourceSet.sourcesJarTaskName) {
-            from(sourceSet.allSource)
-        }
-
-        val compileOnlyConfigName = "${sourceSetName}${JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME.capitalize()}"
-
-        configurations.getByName(compileOnlyConfigName) {
-            extendsFrom(configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).get())
-        }
-
-        tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
-            from(sourceSet.output)
-        }
-
-        tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
-            source(sourceSet.java)
-        }
-
-        dependencies {
-            add(compileOnlyConfigName, mainSourceSet.output)
-            testImplementation(sourceSet.output)
-        }
-    }
-
-    if (compilerVersion != java.toolchain.languageVersion.get()) {
-        tasks.named<JavaCompile>(sourceSet.compileJavaTaskName) {
-            javaCompiler.set(javaToolchains.compilerFor {
-                languageVersion.set(compilerVersion)
-            })
-        }
+    from(files("LICENSE", "NOTICE")) {
+        into("META-INF")
     }
 }
 
-configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME, "8")
-configureSourceSet("jsp20", "8")
-configureSourceSet("jsp21", "8")
-configureSourceSet("jython20", "8")
-configureSourceSet("jython22", "8")
-configureSourceSet("jython25", "8")
-configureSourceSet("core16", "16")
-
-sourceSets {
-    test {
-        val baseDir = "freemarker-test/src/test"
-        java.setSrcDirs(listOf("${baseDir}/java"))
-        resources.setSrcDirs(listOf("${baseDir}/resources"))
+configurations {
+    register("combinedClasspath") {
+        extendsFrom(named("jython25CompileClasspath").get())
+        extendsFrom(named("jsp21CompileClasspath").get())
     }
 }
 
-tasks.named<JavaCompile>(sourceSets["test"].compileJavaTaskName) {
-    javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(fmExt.testJavaVersion))
-    })
+// This source set is only needed, because the OSGI plugin supports only a single sourceSet.
+// We are deleting it, because otherwise it would fool IDEs that a source root has multiple owners.
+val osgiSourceSet = sourceSets
+    .create("osgi") {
+        val otherSourceSets = fmExt.allConfiguredSourceSetNames.get().map { name -> sourceSets.named(name).get() }
+
+        java.setSrcDirs(otherSourceSets.flatMap { s -> s.java.srcDirs })
+        resources.setSrcDirs(otherSourceSets.flatMap { s -> s.resources.srcDirs })
+    }
+    .apply {
+        val osgiClasspath = configurations.named("combinedClasspath").get()
+        compileClasspath = osgiClasspath
+        runtimeClasspath = osgiClasspath
+    }
+    .also { sourceSets.remove(it) }
+
+tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
+    configure<aQute.bnd.gradle.BundleTaskExtension> {
+        bndfile.set(file("osgi.bnd"))
+
+        setSourceSet(osgiSourceSet)
+        properties.putAll(fmExt.versionDef.versionProperties)
+        properties.put("moduleOrg", project.group.toString())
+        properties.put("moduleName", project.name)
+    }
 }
 
 tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
@@ -182,98 +161,29 @@ tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
                 parentDirName == "log" && logExcludes.contains(fileName)
                 )
     })
-}
 
-tasks.named<Test>(JavaPlugin.TEST_TASK_NAME) {
-    val processResourcesName = sourceSets[SourceSet.TEST_SOURCE_SET_NAME].processResourcesTaskName
-    val resourcesDestDir = tasks.named<ProcessResources>(processResourcesName).get().destinationDir.toString()
-    systemProperty("freemarker.test.resourcesDir", resourcesDestDir)
-
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(fmExt.testJavaVersion))
-    })
-}
-
-configurations {
-    compileOnly {
-        exclude(group = "xml-apis", module = "xml-apis")
-    }
-    testImplementation {
-        // Excluding to avoid test failures due to SAX parser conflict.
-        exclude(group = "pull-parser", module = "pull-parser")
-    }
-
-    register("combinedClasspath") {
-        extendsFrom(named("jython25CompileOnly").get())
-        extendsFrom(named("jsp21CompileOnly").get())
-    }
-
-    testImplementation {
-        extendsFrom(named("jython25CompileOnly").get())
-    }
-}
-
-tasks.named<Jar>(sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get().sourcesJarTaskName) {
-    from(compileJavacc.flatMap { it.sourceDirectory })
-
-    from(files("LICENSE", "NOTICE")) {
-        into("META-INF")
-    }
-}
-
-// This source set is only needed, because the OSGI plugin supports only a single sourceSet.
-// We are deleting it, because otherwise it would fool IDEs that a source root has multiple owners.
-val osgiSourceSet = sourceSets.create("osgi") {
-    val otherSourceSets = allSourceSetNames.map { name -> sourceSets.named(name).get() }
-
-    java {
-        setSrcDirs(otherSourceSets.flatMap { s -> s.java.srcDirs })
-    }
-    resources {
-        setSrcDirs(otherSourceSets.flatMap { s -> s.resources.srcDirs })
-    }
-}
-val osgiClasspath = configurations.named("combinedClasspath").get()
-osgiSourceSet.compileClasspath = osgiClasspath
-osgiSourceSet.runtimeClasspath = osgiClasspath
-sourceSets.remove(osgiSourceSet)
-
-tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
-    configure<aQute.bnd.gradle.BundleTaskExtension> {
-        bndfile.set(file("osgi.bnd"))
-
-        setSourceSet(osgiSourceSet)
-        properties.putAll(fmExt.versionDef.versionProperties)
-        properties.put("moduleOrg", project.group.toString())
-        properties.put("moduleName", project.name)
-    }
-}
-
-tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
     javadocTool.set(javaToolchains.javadocToolFor {
         languageVersion.set(JavaLanguageVersion.of(fmExt.javadocJavaVersion))
     })
 
-    val javadocEncoding = StandardCharsets.UTF_8
-
-    options {
+    (options as StandardJavadocDocletOptions).apply {
         val displayVersion = fmExt.versionDef.displayVersion
+        val javadocEncoding = StandardCharsets.UTF_8
 
         locale = "en_US"
         encoding = javadocEncoding.name()
         windowTitle = "FreeMarker ${displayVersion} API"
 
-        val extraOptions = this as StandardJavadocDocletOptions
-        extraOptions.links("https://docs.oracle.com/en/java/javase/16/docs/api/")
+        links("https://docs.oracle.com/en/java/javase/16/docs/api/")
 
-        extraOptions.author(true)
-        extraOptions.version(true)
-        extraOptions.docEncoding = javadocEncoding.name()
-        extraOptions.charSet = javadocEncoding.name()
-        extraOptions.docTitle = "FreeMarker ${displayVersion}"
+        author(true)
+        version(true)
+        docEncoding = javadocEncoding.name()
+        charSet = javadocEncoding.name()
+        docTitle = "FreeMarker ${displayVersion}"
 
         // There are too many to check
-        extraOptions.addStringOption("Xdoclint:-missing", "-quiet")
+        addStringOption("Xdoclint:-missing", "-quiet")
     }
 
     classpath = files(configurations.named("combinedClasspath"))
@@ -318,9 +228,9 @@ publishing {
                         to you under the Apache License, Version 2.0 (the
                         "License"); you may not use this file except in compliance
                         with the License.  You may obtain a copy of the License at
-                        
+
                           http://www.apache.org/licenses/LICENSE-2.0
-                        
+
                         Unless required by applicable law or agreed to in writing,
                         software distributed under the License is distributed on an
                         "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -536,10 +446,24 @@ val slf4jVersion = "1.6.1"
 val springVersion = "2.5.6.SEC03"
 val tagLibsVersion = "1.2.5"
 
+configurations {
+    compileOnly {
+        exclude(group = "xml-apis", module = "xml-apis")
+    }
+
+    "jsp21TestImplementation" {
+        extendsFrom(compileClasspath.get())
+        exclude(group = "javax.servlet.jsp")
+        exclude(group = "javax.servlet", module = "servlet-api")
+    }
+}
+
 dependencies {
+    val xalan = "xalan:xalan:2.7.0"
+
     compileOnly("jaxen:jaxen:1.0-FCS")
     compileOnly("saxpath:saxpath:1.0-FCS")
-    compileOnly("xalan:xalan:2.7.0")
+    compileOnly(xalan)
     compileOnly("jdom:jdom:1.0b8")
     compileOnly("ant:ant:1.6.5") // FIXME: This could be moved to "jython20CompileOnly"
     compileOnly("rhino:js:1.6R1")
@@ -549,7 +473,12 @@ dependencies {
     compileOnly("org.slf4j:jcl-over-slf4j:${slf4jVersion}") // FIXME: This seems to be unused
     compileOnly("commons-logging:commons-logging:1.1.1") // FIXME: This seems to be unused
     compileOnly("org.zeroturnaround:javarebel-sdk:1.2.2")
-    compileOnly("org.dom4j:dom4j:2.1.3")
+    compileOnly("org.dom4j:dom4j:2.1.3") {
+        // Excluding "pull-parser" to avoid test failures due to SAX parser conflict.
+        exclude(group = "pull-parser", module = "pull-parser")
+    }
+
+    testImplementation(xalan)
 
     "jsp20CompileOnly"("javax.servlet.jsp:jsp-api:2.0")
     "jsp20CompileOnly"("javax.servlet:servlet-api:2.4")
@@ -557,6 +486,23 @@ dependencies {
     "jsp21CompileOnly"(sourceSets["jsp20"].output)
     "jsp21CompileOnly"("javax.servlet.jsp:jsp-api:2.1")
     "jsp21CompileOnly"("javax.servlet:servlet-api:2.5")
+
+    "jsp21TestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    "jsp21TestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
+    "jsp21TestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
+    "jsp21TestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
+    // Jetty also contains the servlet-api and jsp-api classes
+
+    // JSP JSTL (not included in Jetty):
+    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
+    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
+
+    "jsp21TestImplementation"("org.springframework:spring-core:${springVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    "jsp21TestImplementation"("org.springframework:spring-test:${springVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
 
     "jython20CompileOnly"("jython:jython:2.1")
 
@@ -566,37 +512,22 @@ dependencies {
     "jython25CompileOnly"(sourceSets["jython20"].output)
     "jython25CompileOnly"("org.python:jython:2.5.0")
 
-    testImplementation("com.google.code.findbugs:annotations:3.0.0")
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.hamcrest:hamcrest-library:1.3")
-    testImplementation("ch.qos.logback:logback-classic:1.1.2")
-    testImplementation("commons-io:commons-io:2.7")
-    testImplementation("com.google.guava:guava:29.0-jre")
-    testImplementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
-    testImplementation("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
-    testImplementation("org.eclipse.jetty:jetty-util:${jettyVersion}")
-    testImplementation("org.eclipse.jetty:apache-jsp:${jettyVersion}")
-    // Jetty also contains the servlet-api and jsp-api classes
-
-    testImplementation("displaytag:displaytag:1.2") {
+    "testUtilsImplementation"("displaytag:displaytag:1.2") {
         exclude(group = "com.lowagie", module = "itext")
         // We manage logging centrally:
         exclude(group = "org.slf4j", module = "slf4j-log4j12")
         exclude(group = "rg.slf4j", module = "jcl104-over-slf4j")
         exclude(group = "log4j", module = "log4j")
     }
-
-    // JSP JSTL (not included in Jetty):
-    testImplementation("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
-    testImplementation("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
+    "testUtilsImplementation"(sourceSets.main.get().output)
+    "testUtilsImplementation"("com.google.code.findbugs:annotations:3.0.0")
+    "testUtilsImplementation"(libs.junit)
+    "testUtilsImplementation"("org.hamcrest:hamcrest-library:1.3")
+    "testUtilsImplementation"("ch.qos.logback:logback-classic:1.1.2")
+    "testUtilsImplementation"("commons-io:commons-io:2.7")
+    "testUtilsImplementation"("com.google.guava:guava:29.0-jre")
+    "testUtilsImplementation"("commons-collections:commons-collections:3.1")
 
     // Override Java 9 incompatible version (coming from displaytag):
-    testImplementation("commons-lang:commons-lang:2.6")
-
-    testImplementation("org.springframework:spring-core:${springVersion}") {
-        exclude(group = "commons-logging", module = "commons-logging")
-    }
-    testImplementation("org.springframework:spring-test:${springVersion}") {
-        exclude(group = "commons-logging", module = "commons-logging")
-    }
+    "testUtilsImplementation"("commons-lang:commons-lang:2.6")
 }

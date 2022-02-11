@@ -189,7 +189,7 @@ open class CompileJavaccTask @Inject constructor(
     }
 
     private fun withProcessJavaccRunner(action: JavaccRunner.() -> Unit) {
-        action.invoke { actionArgs ->
+        action { actionArgs ->
             val execResult = execOps.javaexec {
                 classpath = javaccClasspath
                 mainClass.set(JAVACC_MAIN_CLASS)
@@ -203,7 +203,7 @@ open class CompileJavaccTask @Inject constructor(
 
     private fun withClasspathJavaccRunner(action: JavaccRunner.() -> Unit) {
         val workQueue = exec.classLoaderIsolation { classpath.from(javaccClasspath) }
-        action.invoke { actionArgs ->
+        action { actionArgs ->
             workQueue.submit(JavaccRunnerWorkAction::class) { arguments.set(actionArgs) }
         }
         workQueue.await()

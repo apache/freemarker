@@ -17,17 +17,10 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+package freemarker.build
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+import java.nio.file.Path
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            version("defaultJava", "8")
-            version("junit", "4.12")
-
-            library("junit", "junit", "junit").versionRef("junit")
-        }
-    }
+fun Path.withChildren(children: List<String>): Path {
+    return children.fold(this) { parent, child -> parent.resolve(child) }
 }

@@ -22,10 +22,8 @@ package freemarker.build
 import javax.inject.Inject
 import org.freemarker.docgen.core.Transform
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
@@ -43,29 +41,21 @@ open class ManualBuildTask @Inject constructor(
     @InputDirectory
     @SkipWhenEmpty
     @PathSensitive(PathSensitivity.NONE)
-    val inputDirectory: DirectoryProperty
+    val inputDirectory = objects.directoryProperty()
 
     @Input
-    val offline: Property<Boolean>
+    val offline = objects.property<Boolean>().value(true)
 
     @Input
-    val locale: Property<String>
+    val locale = objects.property<String>().value("unknown")
 
     @OutputDirectory
-    val destinationDirectory: DirectoryProperty
-
-    init {
-        this.offline = objects.property<Boolean>().value(true)
-        this.locale = objects.property<String>().value("unknown")
-
-        this.inputDirectory = objects.directoryProperty()
-        this.destinationDirectory = this.offline
-            .zip(layout.buildDirectory) {
-                    offlineValue, buildDirValue -> buildDirValue.asFile.toPath().resolve("manual-${if (offlineValue) "offline" else "online"}")
-            }
-            .zip(this.locale) { localelessDirValue, localeValue -> localelessDirValue.resolve(localeValue).toFile() }
-            .let { objects.directoryProperty().value(layout.dir(it)) }
-    }
+    val destinationDirectory = this.offline
+        .zip(layout.buildDirectory) { offlineValue, buildDirValue ->
+            buildDirValue.asFile.toPath().resolve("manual-${if (offlineValue) "offline" else "online"}")
+        }
+        .zip(this.locale) { localelessDirValue, localeValue -> localelessDirValue.resolve(localeValue).toFile() }
+        .let { objects.directoryProperty().value(layout.dir(it)) }
 
     @TaskAction
     fun buildManual() {

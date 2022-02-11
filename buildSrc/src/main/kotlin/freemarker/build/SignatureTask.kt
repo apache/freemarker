@@ -30,7 +30,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
 
 open class SignatureTask @Inject constructor(
@@ -49,7 +49,7 @@ open class SignatureTask @Inject constructor(
     init {
         this.inputFile = objects.fileProperty()
         this.outputFile = this.inputFile.map { f -> File("${f.asFile}.asc") }
-        this.signing = project.extensions.getByType()
+        this.signing = project.the()
     }
 
     @TaskAction
