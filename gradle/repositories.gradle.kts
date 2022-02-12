@@ -17,6 +17,29 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+fun RepositoryHandler.configurePluginRepositories() {
+    maven {
+        setUrl("https://repository.apache.org/content/groups/public")
+        mavenContent {
+            includeGroup("org.apache.freemarker.docgen")
+        }
+    }
+    gradlePluginPortal()
+    mavenCentral()
+}
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+fun RepositoryHandler.configureMainRepositories() {
+    mavenCentral()
+}
+
+pluginManagement.repositories.configurePluginRepositories()
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+
+    if (rootDir.name == "buildSrc") {
+        repositories.configurePluginRepositories()
+    } else {
+        repositories.configureMainRepositories()
+    }
+}

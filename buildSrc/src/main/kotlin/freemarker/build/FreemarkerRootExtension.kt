@@ -17,6 +17,22 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+package freemarker.build
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+import org.gradle.api.provider.ProviderFactory
+
+class FreemarkerRootExtension constructor(val versionDef: FreemarkerVersionDef, providers: ProviderFactory) {
+    val freemarkerCompilerVersionOverrideRef = providers.gradleProperty("freemarkerCompilerVersionOverride")
+
+    val defaultJavaVersion = freemarkerCompilerVersionOverrideRef
+        .orElse(providers.gradleProperty("freemarkerDefaultJavaVersion"))
+        .getOrElse("8")
+
+    val testJavaVersion = providers.gradleProperty("freeMarkerTestJavaVersion")
+        .getOrElse("16")
+
+    val javadocJavaVersion = providers.gradleProperty("freeMarkerJavadocJavaVersion")
+        .getOrElse(defaultJavaVersion)
+
+    val doSignPackages = providers.gradleProperty("signPublication").map { it.toBoolean() }.orElse(true)
+}

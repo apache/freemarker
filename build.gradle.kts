@@ -18,223 +18,57 @@
  */
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.FileVisitResult
 import java.nio.file.Files
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.attribute.BasicFileAttributes
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.util.Properties
-import java.util.TreeSet
 import java.util.stream.Collectors
 
-buildscript {
-    dependencies {
-        classpath("org.apache.freemarker.docgen:freemarker-docgen-core:0.0.2-SNAPSHOT")
-    }
-}
-
 plugins {
-    `java-library`
+    `freemarker-root`
     `maven-publish`
     signing
     id("biz.aQute.bnd.builder") version "6.1.0"
-    id("org.nosphere.apache.rat") version "0.7.0"
 }
 
 group = "org.freemarker"
 
-val buildTimeStamp = Instant.now()
-val buildTimeStampUtc = buildTimeStamp.atOffset(ZoneOffset.UTC)
-val versionFileTokens = mapOf(
-        "timestampNice" to buildTimeStampUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")),
-        "timestampInVersion" to buildTimeStampUtc.format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"))
-)
-val resourceTemplatesDir = file("freemarker-core/src/main/resource-templates")
-val versionPropertiesTemplate = Properties()
-Files.newBufferedReader(resourceTemplatesDir.toPath().resolve("freemarker").resolve("version.properties"), StandardCharsets.ISO_8859_1).use {
-    versionPropertiesTemplate.load(it)
-}
-val versionProperties = HashMap<String, String>()
-versionPropertiesTemplate.forEach { (key, value) ->
-    var updatedValue = value.toString()
-    for (token in versionFileTokens) {
-        updatedValue = updatedValue.replace("@${token.key}@", token.value)
-    }
-    versionProperties[key.toString()] = updatedValue.trim()
-}
-version = versionProperties["mavenVersion"]!!
-val displayVersion = versionProperties["version"]!!
-
-val freemarkerCompilerVersionOverrideRef = providers.gradleProperty("freemarkerCompilerVersionOverride")
-val defaultJavaVersion = freemarkerCompilerVersionOverrideRef
-    .orElse(providers.gradleProperty("freemarkerDefaultJavaVersion"))
-    .getOrElse("8")
-val testJavaVersion = providers.gradleProperty("freeMarkerTestJavaVersion")
-    .getOrElse("16")
-val testRunnerJavaVersion = providers.gradleProperty("freeMarkerTestRunnerJavaVersion")
-    .getOrElse(testJavaVersion)
-val javadocJavaVersion = providers.gradleProperty("freeMarkerJavadocJavaVersion")
-    .getOrElse(defaultJavaVersion)
-val doSignPackages = providers.gradleProperty("signPublication").map { it.toBoolean() }.orElse(true)
-
-java {
-    withSourcesJar()
-    withJavadocJar()
-
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(defaultJavaVersion))
-    }
-}
+val fmExt = freemarkerRoot
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-data class JavaccReplacePattern(val relPath: String, val pattern: String, val replacement: String) : java.io.Serializable
-
-open class CompileJavacc @Inject constructor(
-    private val fs: FileSystemOperations,
-    private val exec: ExecOperations,
-    layout: ProjectLayout,
-    objects: ObjectFactory
-) : DefaultTask() {
-
-    @InputDirectory
-    val sourceDirectory: DirectoryProperty
-
-    @OutputDirectory
-    val destinationDirectory: DirectoryProperty
-
-    @InputFiles
-    var classpath: FileCollection
-
-    @Input
-    val fileNameOverrides: SetProperty<String>
-
-    @Input
-    val replacePatterns: SetProperty<JavaccReplacePattern>
-
-    init {
-        this.sourceDirectory = objects.directoryProperty().value(layout.projectDirectory.dir("src/main/javacc"))
-        this.destinationDirectory = objects.directoryProperty().value(layout.buildDirectory.dir("generated/javacc-tmp"))
-        this.classpath = objects.fileCollection()
-        this.fileNameOverrides = objects.setProperty()
-        this.replacePatterns = objects.setProperty()
-    }
-
-    @TaskAction
-    fun compileFiles() {
-        fs.delete { delete(destinationDirectory) }
-
-        val destRoot = destinationDirectory.get().asFile
-        val javaccClasspath = classpath
-
-        sourceDirectory.asFileTree.visit(object : EmptyFileVisitor() {
-            override fun visitFile(fileDetails: FileVisitDetails) {
-                val outputDir = fileDetails.relativePath.parent.getFile(destRoot)
-                Files.createDirectories(outputDir.toPath())
-
-                val execResult = exec.javaexec {
-                    classpath = javaccClasspath
-                    mainClass.set("org.javacc.parser.Main")
-                    args = listOf(
-                        "-OUTPUT_DIRECTORY=$outputDir",
-                        fileDetails.file.toString()
-                    )
-                    isIgnoreExitValue = true
-                }
-
-                val exitCode = execResult.exitValue
-                if (exitCode != 0) {
-                    throw IllegalStateException("Javacc failed with error code: $exitCode")
-                }
-            }
-        })
-
-        val fileNameOverridesSnapshot = fileNameOverrides.get()
-        val deletedFileNames = HashSet<String>()
-
-        Files.walkFileTree(destRoot.toPath(), object : SimpleFileVisitor<java.nio.file.Path>() {
-            override fun visitFile(file: java.nio.file.Path, attrs: BasicFileAttributes): FileVisitResult {
-                val fileName = file.fileName.toString()
-                if (fileNameOverridesSnapshot.contains(fileName)) {
-                    deletedFileNames.add(fileName)
-                    Files.delete(file)
-                }
-                return FileVisitResult.CONTINUE
-            }
-        })
-
-        val unusedFileNames = TreeSet(fileNameOverridesSnapshot)
-        unusedFileNames.removeAll(deletedFileNames)
-        if (unusedFileNames.isNotEmpty()) {
-            logger.warn("Javacc did not generate the following files, even though they are marked as overriden: ${unusedFileNames}")
-        }
-
-        replacePatterns.get().groupBy { it.relPath }.forEach { (relPath, patternDefs) ->
-            val file = destRoot.toPath().resolve(relPath.replace("/", File.separator))
-
-            val encoding = StandardCharsets.ISO_8859_1
-            val origContent = String(Files.readAllBytes(file), encoding)
-            var adjContent = origContent
-            for (patternDef in patternDefs) {
-                val prevContent = adjContent
-                adjContent = adjContent.replace(patternDef.pattern, patternDef.replacement)
-                if (prevContent == adjContent) {
-                    logger.warn("$file was not modified, because it does not contain the requested token: '${patternDef.pattern}'")
-                }
-            }
-
-            if (origContent != adjContent) {
-                Files.write(file, adjContent.toByteArray(encoding))
-            }
-        }
-    }
-}
-
-val compileJavacc = tasks.register<CompileJavacc>("compileJavacc") {
+val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJavacc") {
     sourceDirectory.set(file("freemarker-core/src/main/javacc"))
     destinationDirectory.set(buildDir.toPath().resolve("generated").resolve("javacc").toFile())
-    classpath = configurations.detachedConfiguration(dependencies.create("net.java.dev.javacc:javacc:7.0.12"))
+    javaccVersion.set("7.0.12")
+
     fileNameOverrides.addAll(
         "ParseException.java",
         "TokenMgrError.java"
     )
 
     val basePath = "freemarker/core"
-    replacePatterns.addAll(
-        JavaccReplacePattern(
-            "${basePath}/FMParser.java",
-            "enum",
-            "ENUM"
-        ),
-        JavaccReplacePattern(
-            "${basePath}/FMParserConstants.java",
-            "public interface FMParserConstants",
-            "interface FMParserConstants"
-        ),
-        JavaccReplacePattern(
-            "${basePath}/Token.java",
-            "public class Token",
-            "class Token"
-        ),
-        // FIXME: This does nothing at the moment.
-        JavaccReplacePattern(
-            "${basePath}/SimpleCharStream.java",
-            "public final class SimpleCharStream",
-            "final class SimpleCharStream"
-        )
-    )
-}
 
-fun <T> concatLists(vararg lists: List<T>): List<T> {
-    val concatenated = ArrayList<T>()
-    for (list in lists) {
-        concatenated.addAll(list)
-    }
-    return concatenated
+    replacePattern(
+        "${basePath}/FMParser.java",
+        "enum",
+        "ENUM"
+    )
+    replacePattern(
+        "${basePath}/FMParserConstants.java",
+        "public interface FMParserConstants",
+        "interface FMParserConstants"
+    )
+    replacePattern(
+        "${basePath}/Token.java",
+        "public class Token",
+        "class Token"
+    )
+    // FIXME: This does nothing at the moment.
+    replacePattern(
+        "${basePath}/SimpleCharStream.java",
+        "public final class SimpleCharStream",
+        "final class SimpleCharStream"
+    )
 }
 
 val allSourceSetNames = ArrayList<String>()
@@ -242,7 +76,7 @@ val allSourceSetNames = ArrayList<String>()
 fun configureSourceSet(sourceSetName: String, defaultCompilerVersionStr: String) {
     allSourceSetNames.add(sourceSetName)
 
-    val compilerVersion = freemarkerCompilerVersionOverrideRef
+    val compilerVersion = fmExt.freemarkerCompilerVersionOverrideRef
         .orElse(providers.gradleProperty("java${defaultCompilerVersionStr}CompilerOverride"))
         .getOrElse(defaultCompilerVersionStr)
         .let { JavaLanguageVersion.of(it) }
@@ -309,7 +143,7 @@ sourceSets {
 
 tasks.named<JavaCompile>(sourceSets["test"].compileJavaTaskName) {
     javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(testJavaVersion))
+        languageVersion.set(JavaLanguageVersion.of(fmExt.testJavaVersion))
     })
 }
 
@@ -356,7 +190,7 @@ tasks.named<Test>(JavaPlugin.TEST_TASK_NAME) {
     systemProperty("freemarker.test.resourcesDir", resourcesDestDir)
 
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(testRunnerJavaVersion))
+        languageVersion.set(JavaLanguageVersion.of(fmExt.testJavaVersion))
     })
 }
 
@@ -381,64 +215,9 @@ configurations {
 
 tasks.named<Jar>(sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get().sourcesJarTaskName) {
     from(compileJavacc.flatMap { it.sourceDirectory })
-    from(resourceTemplatesDir)
 
     from(files("LICENSE", "NOTICE")) {
         into("META-INF")
-    }
-}
-
-
-tasks.named<ProcessResources>("processResources") {
-    with(copySpec {
-        from(resourceTemplatesDir)
-        filter<org.apache.tools.ant.filters.ReplaceTokens>(mapOf("tokens" to versionFileTokens))
-    })
-}
-
-val rmicOutputDir: java.nio.file.Path = buildDir.toPath().resolve("rmic")
-
-tasks.register("rmic") {
-    val rmicClasspath = objects.fileCollection()
-
-    val sourceSet = sourceSets[SourceSet.MAIN_SOURCE_SET_NAME]
-    val compileTaskName = sourceSet.compileJavaTaskName
-    val compileTaskRef = tasks.named<JavaCompile>(compileTaskName)
-
-    rmicClasspath.from(compileTaskRef.map { it.classpath })
-    rmicClasspath.from(compileTaskRef.map { it.outputs })
-
-    inputs.files(rmicClasspath)
-    outputs.dir(rmicOutputDir)
-
-    doLast {
-        val allClassesDirs = sourceSet.output.classesDirs
-
-        val rmicRelSrcPath = listOf("freemarker", "debug", "impl")
-        val rmicSrcPattern = "Rmi*Impl.class"
-
-        val rmicRelSrcPathStr = rmicRelSrcPath.joinToString(separator = File.separator)
-        val classesDir = allClassesDirs.find { candidateDir ->
-            Files.newDirectoryStream(candidateDir.toPath().resolve(rmicRelSrcPathStr), rmicSrcPattern).use { files ->
-                val firstFile = files.first { Files.isRegularFile(it) }
-                firstFile != null
-            }
-        }
-
-        if (classesDir != null) {
-            ant.withGroovyBuilder {
-                "rmic"(
-                    "classpath" to rmicClasspath.asPath,
-                    "base" to classesDir.toString(),
-                    "destDir" to rmicOutputDir.toString(),
-                    "includes" to "${rmicRelSrcPath.joinToString("/")}/$rmicSrcPattern",
-                    "verify" to "yes",
-                    "stubversion" to "1.2"
-                )
-            }
-        } else {
-            throw IllegalStateException("Couldn't find classes dir in ${allClassesDirs.asPath}")
-        }
     }
 }
 
@@ -460,13 +239,11 @@ osgiSourceSet.runtimeClasspath = osgiClasspath
 sourceSets.remove(osgiSourceSet)
 
 tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
-    from(rmicOutputDir)
-
     configure<aQute.bnd.gradle.BundleTaskExtension> {
         bndfile.set(file("osgi.bnd"))
 
         setSourceSet(osgiSourceSet)
-        properties.putAll(versionProperties)
+        properties.putAll(fmExt.versionDef.versionProperties)
         properties.put("moduleOrg", project.group.toString())
         properties.put("moduleName", project.name)
     }
@@ -474,12 +251,14 @@ tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
 
 tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
     javadocTool.set(javaToolchains.javadocToolFor {
-        languageVersion.set(JavaLanguageVersion.of(javadocJavaVersion))
+        languageVersion.set(JavaLanguageVersion.of(fmExt.javadocJavaVersion))
     })
 
     val javadocEncoding = StandardCharsets.UTF_8
 
     options {
+        val displayVersion = fmExt.versionDef.displayVersion
+
         locale = "en_US"
         encoding = javadocEncoding.name()
         windowTitle = "FreeMarker ${displayVersion} API"
@@ -499,77 +278,26 @@ tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
 
     classpath = files(configurations.named("combinedClasspath"))
 
-    doLast {
-        val stylesheetPath = destinationDir!!.toPath().resolve("stylesheet.css")
-        logger.info("Fixing JDK 8 ${stylesheetPath}")
-
-        val ddSelectorStart = "(?:\\.contentContainer\\s+\\.(?:details|description)|\\.serializedFormContainer)\\s+dl\\s+dd\\b.*?\\{[^\\}]*\\b"
-        val ddPropertyEnd = "\\b.+?;"
-
-        val fixRules = listOf(
-            Pair(Regex("/\\* (Javadoc style sheet) \\*/"), "/\\* \\1 - JDK 8 usability fix regexp substitutions applied \\*/"),
-            Pair(Regex("@import url\\('resources/fonts/dejavu.css'\\);\\s*"), ""),
-            Pair(Regex("['\"]DejaVu Sans['\"]"), "Arial"),
-            Pair(Regex("['\"]DejaVu Sans Mono['\"]"), "'Courier New'"),
-            Pair(Regex("['\"]DejaVu Serif['\"]"), "Arial"),
-            Pair(Regex("(?<=[\\s,:])serif\\b"), "sans-serif"),
-            Pair(Regex("(?<=[\\s,:])Georgia,\\s*"), ""),
-            Pair(Regex("['\"]Times New Roman['\"],\\s*"), ""),
-            Pair(Regex("(?<=[\\s,:])Times,\\s*"), ""),
-            Pair(Regex("(?<=[\\s,:])Arial\\s*,\\s*Arial\\b"), ""),
-            Pair(Regex("(${ddSelectorStart})margin${ddPropertyEnd}"), "\\1margin: 5px 0 10px 20px;"),
-            Pair(Regex("(${ddSelectorStart})font-family${ddPropertyEnd}"), "\\1")
-        )
-
-        var stylesheetContent = String(Files.readAllBytes(stylesheetPath), javadocEncoding)
-        for (rule in fixRules) {
-            val prevContent = stylesheetContent
-            stylesheetContent = stylesheetContent.replace(rule.first, rule.second)
-
-            if (prevContent == stylesheetContent) {
-                logger.warn("Javadoc style sheet did not contain anything matching: ${rule.first}")
-            }
-        }
-
-        Files.write(stylesheetPath, stylesheetContent.toByteArray(javadocEncoding))
-    }
+    doLast(freemarker.build.JavadocStyleAdjustments())
 }
 
-fun registerManualTask(taskName: String, locale: String, offline: Boolean) {
-    val manualTaskRef = tasks.register(taskName) {
-        val inputDir = file("freemarker-manual/src/main/docgen/${locale}")
-        inputs.dir(inputDir)
+fun registerManualTask(taskName: String, localeValue: String, offlineValue: Boolean) {
+    val manualTaskRef = tasks.register<freemarker.build.ManualBuildTask>(taskName) {
+        inputDirectory.set(file("freemarker-manual/src/main/docgen/${localeValue}"))
 
-        val outputDir = buildDir.toPath().resolve("manual-${if (offline) "offline" else "online"}").resolve(locale)
-        outputs.dir(outputDir)
-
-        description = if (offline) "Build the Manual for offline use" else "Build the Manual to be upload to the FreeMarker homepage"
-
-        doLast {
-            val transform = org.freemarker.docgen.core.Transform()
-            transform.offline = offline
-            transform.sourceDirectory = inputDir
-            transform.destinationDirectory = outputDir.toFile()
-
-            transform.execute()
-        }
+        offline.set(offlineValue)
+        locale.set(localeValue)
     }
-
     tasks.named(LifecycleBasePlugin.BUILD_TASK_NAME) { dependsOn(manualTaskRef) }
 }
 
 registerManualTask("manualOffline", "en_US", true)
 registerManualTask("manualOnline", "en_US", false)
 
-afterEvaluate {
-    // We are setting this, so the pom.xml will be generated properly
-    System.setProperty("line.separator", "\n")
-}
-
 publishing {
     repositories {
         maven {
-            val snapshot = project.version.toString().endsWith("-SNAPSHOT")
+            val snapshot = fmExt.versionDef.version.endsWith("-SNAPSHOT")
             val defaultDeployUrl = if (snapshot) "https://repository.apache.org/content/repositories/snapshots" else "https://repository.apache.org/service/local/staging/deploy/maven2"
             setUrl(providers.gradleProperty("freemarkerDeployUrl").getOrElse(defaultDeployUrl))
             name = providers.gradleProperty("freemarkerDeployServerId").getOrElse("apache.releases.https")
@@ -632,7 +360,7 @@ publishing {
                     connection.set("scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git")
                     developerConnection.set("scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git")
                     url.set("https://git-wip-us.apache.org/repos/asf?p=freemarker.git")
-                    tag.set("v${project.version}")
+                    tag.set("v${fmExt.versionDef.version}")
                 }
 
                 issueManagement {
@@ -662,7 +390,7 @@ publishing {
                 }
             }
         }
-        if (doSignPackages.get()) {
+        if (fmExt.doSignPackages.get()) {
             signing.sign(mainPublication)
         }
     }
@@ -672,21 +400,14 @@ val distArchiveBaseName = "apache-${name}"
 val distDir = buildDir.toPath().resolve("distributions")
 
 fun registerSignatureTask(archiveTask: TaskProvider<Tar>) {
-    val signTask = tasks.register(archiveTask.name + "Signature") {
-        val archiveFileRef = archiveTask.flatMap { task -> task.archiveFile }
-
-        inputs.file(archiveFileRef)
-        outputs.file(archiveFileRef.map { f -> File(f.asFile.toString() + ".asc") })
-
-        doLast {
-            signing.sign(archiveTask.get().archiveFile.get().asFile)
-        }
+    val signTask = tasks.register<freemarker.build.SignatureTask>(archiveTask.name + "Signature") {
+        inputFile.set(archiveTask.flatMap { task -> task.archiveFile })
     }
 
     tasks.named(LifecycleBasePlugin.BUILD_TASK_NAME) {
         dependsOn(archiveTask)
 
-        if (doSignPackages.get()) {
+        if (fmExt.doSignPackages.get()) {
             dependsOn(signTask)
         }
     }
@@ -694,8 +415,7 @@ fun registerSignatureTask(archiveTask: TaskProvider<Tar>) {
 
 fun registerCommonFiles(tar: Tar) {
     tar.from("README.md") {
-        val displayVersion = versionProperties.get("version")!!
-        filter { content -> content.replace("{version}", displayVersion) }
+        filter { content -> content.replace("{version}", fmExt.versionDef.displayVersion) }
     }
 
     tar.from(files("NOTICE", "RELEASE-NOTES"))
@@ -767,12 +487,6 @@ fun readExcludeFile(excludeFile: File): List<String> {
             .map { it.trim() }
             .filter { !it.startsWith("#") && !it.isEmpty() }
             .collect(Collectors.toList())
-    }
-}
-
-tasks.withType<org.nosphere.apache.rat.RatTask>() {
-    doLast {
-        println("RAT (${name} task) report was successful: ${reportDir.get().asFile.toPath().resolve("index.html").toUri()}")
     }
 }
 

@@ -50,6 +50,7 @@ archive
 .ivy/**
 .bin/**
 bin/**
+buildSrc/build/**
 build/**
 .build/**
 out/**
