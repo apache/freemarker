@@ -399,13 +399,18 @@ publishing {
 val distArchiveBaseName = "apache-${name}"
 val distDir = buildDir.toPath().resolve("distributions")
 
-fun registerSignatureTask(archiveTask: TaskProvider<Tar>) {
-    val signTask = tasks.register<freemarker.build.SignatureTask>(archiveTask.name + "Signature") {
+fun registerDistSupportTasks(archiveTask: TaskProvider<Tar>) {
+    val signTask = tasks.register<freemarker.build.SignatureTask>("${archiveTask.name}Signature") {
         inputFile.set(archiveTask.flatMap { task -> task.archiveFile })
+    }
+
+    val checksumTask = tasks.register<freemarker.build.ChecksumFileTask>("${archiveTask.name}Checksum") {
+        inputFile.set(signTask.flatMap(freemarker.build.SignatureTask::inputFile))
     }
 
     tasks.named(LifecycleBasePlugin.BUILD_TASK_NAME) {
         dependsOn(archiveTask)
+        dependsOn(checksumTask)
 
         if (fmExt.doSignPackages.get()) {
             dependsOn(signTask)
@@ -446,7 +451,7 @@ val distBin = tasks.register<Tar>("distBin") {
         into("documentation/_html/api")
     }
 }
-registerSignatureTask(distBin)
+registerDistSupportTasks(distBin)
 
 val distSrc = tasks.register<Tar>("distSrc") {
     compression = Compression.GZIP
@@ -479,7 +484,7 @@ val distSrc = tasks.register<Tar>("distSrc") {
         )
     }
 }
-registerSignatureTask(distSrc)
+registerDistSupportTasks(distSrc)
 
 fun readExcludeFile(excludeFile: File): List<String> {
     Files.lines(excludeFile.toPath()).use { lines ->
