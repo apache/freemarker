@@ -431,6 +431,8 @@ public final class TemporalUtils {
      * that FreeMarker directly supports. At least in Java 8 they are all final anyway, but just in case this changes in
      * a future Java version, use this method before using {@code ==}.
      *
+     * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
+     *
      * @since 2.3.32
      */
     public static Class<? extends Temporal> normalizeSupportedTemporalClass(Class<? extends Temporal> temporalClass) {
@@ -456,9 +458,27 @@ public final class TemporalUtils {
             } else if (Year.class.isAssignableFrom(temporalClass)) {
                 return Year.class;
             } else {
-                return temporalClass;
+                throw new IllegalArgumentException("Unsupprted temporal class: " + temporalClass.getName());
             }
         }
+    }
+
+    /**
+     * Tells if the temporal class is one that doesn't store, nor have an implied time zone or offset.
+     *
+     * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
+     *
+     * @since 2.3.32
+     */
+    public static boolean isLocalTemporalClass(Class<? extends Temporal> temporalClass) {
+        temporalClass = normalizeSupportedTemporalClass(temporalClass);
+        if (temporalClass == Instant.class
+                || temporalClass == OffsetDateTime.class
+                || temporalClass == ZonedDateTime.class
+                || temporalClass == OffsetTime.class) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -495,5 +515,4 @@ public final class TemporalUtils {
             throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
         }
     }
-
 }

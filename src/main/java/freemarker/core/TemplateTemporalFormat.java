@@ -25,24 +25,27 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 
 /**
- * Represents a {@link Temporal} format; used in templates for formatting and parsing with that format. This is
- * similar to Java's {@link DateTimeFormatter}, but made to fit the requirements of FreeMarker. Also, it makes easier to
- * define formats that can't be represented with {@link DateTimeFormatter}.
+ * Represents a {@link Temporal} format; used in templates for formatting {@link Temporal}-s, and parsing strings to
+ * {@link Temporal}-s. This is similar to Java's {@link DateTimeFormatter}, but made to fit the requirements of
+ * FreeMarker. Also, it makes it possible to define formats that can't be represented with {@link DateTimeFormatter}.
+ *
+ * <p>{@link TemplateTemporalFormat} instances are usually created by a {@link TemplateTemporalFormatFactory}.
  *
  * <p>
  * Implementations need not be thread-safe if the {@link TemplateTemporalFormatFactory} doesn't recycle them among
  * different {@link Environment}-s. The code outside the {@link TemplateTemporalFormatFactory} will not try to reuse
- * {@link TemplateTemporalFormat} instances in multiple {@link Environment}-s, and {@link Environment}-s are
- * thread-local objects.
+ * {@link TemplateTemporalFormat} instances in multiple {@link Environment}-s, and an {@link Environment} is only used
+ * in a single thread.
  *
  * @since 2.3.32
  */
 public abstract class TemplateTemporalFormat extends TemplateValueFormat {
 
-    public abstract String formatToPlainText(TemplateTemporalModel temporalModel) throws TemplateValueFormatException, TemplateModelException;
+    public abstract String formatToPlainText(TemplateTemporalModel temporalModel)
+            throws TemplateValueFormatException, TemplateModelException;
 
     /**
-     * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
+     * Formats the model to markup instead of to plain text, if the result markup will be more than just plain text
      * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
      * {@link #formatToPlainText(TemplateTemporalModel)} escaped, it must return the {@link String} that
      * {@link #formatToPlainText(TemplateTemporalModel)} does.
@@ -68,7 +71,7 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
     public abstract boolean isTimeZoneBound();
 
     /**
-     * Parsers a string to a {@link Temporal}, according to this format. Some format implementations may throw
+     * Parser a string to a {@link Temporal}, according to this format. Some format implementations may throw
      * {@link ParsingNotSupportedException} here.
      *
      * @param s

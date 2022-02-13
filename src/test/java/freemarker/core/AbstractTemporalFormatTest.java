@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import static freemarker.template.utility.StringUtil.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -40,11 +41,11 @@ import freemarker.template.utility.DateUtil;
  */
 public abstract class AbstractTemporalFormatTest {
 
-    static protected String formatTemporal(Consumer<Configurable> configurer, Temporal... values) throws
+    static protected String formatTemporal(Consumer<Configurable> configurator, Temporal... values) throws
             TemplateException {
         Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
 
-        configurer.accept(conf);
+        configurator.accept(conf);
 
         Environment env = null;
         try {
@@ -65,13 +66,13 @@ public abstract class AbstractTemporalFormatTest {
     }
 
     static protected void assertParsingResults(
-            Consumer<Configurable> configurer,
+            Consumer<Configurable> configurator,
             Object... stringsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
         Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
         conf.setTimeZone(DateUtil.UTC);
         conf.setLocale(Locale.US);
 
-        configurer.accept(conf);
+        configurator.accept(conf);
 
         Environment env = null;
         try {
@@ -125,6 +126,35 @@ public abstract class AbstractTemporalFormatTest {
                                 + "Expected: " + expectedResult + "\n"
                                 + "Actual:   " + actualResult);
             }
+        }
+    }
+
+    static protected void assertParsingFails(
+            Consumer<Configurable> configurator,
+            String parsed,
+            Class<? extends Temporal> temporalClass,
+            Consumer<TemplateValueFormatException> exceptionAssertions) throws TemplateException,
+            TemplateValueFormatException {
+        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
+        conf.setTimeZone(DateUtil.UTC);
+        conf.setLocale(Locale.US);
+
+        configurator.accept(conf);
+
+        Environment env = null;
+        try {
+            env = new Template(null, "", conf).createProcessingEnvironment(null, null);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        TemplateTemporalFormat templateTemporalFormat = env.getTemplateTemporalFormat(temporalClass);
+
+        try {
+            templateTemporalFormat.parse(parsed);
+            fail("Parsing " + jQuote(parsed) + " with " + templateTemporalFormat + " should have failed.");
+        } catch (TemplateValueFormatException e) {
+            exceptionAssertions.accept(e);
         }
     }
 

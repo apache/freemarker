@@ -22,11 +22,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather
- * than as a concrete pattern or other kind of format string.
+ * Creates an alias to another format that's given with a {@link String}, so that the format can be referred with a
+ * simple name in the template, rather than with a concrete pattern or other kind of format string. Internally, this
+ * will call {@link Environment#getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} to resolve the other
+ * format.
+ *
+ * @see Configuration#customDateFormats
  * 
  * @since 2.3.24
  */
@@ -51,7 +56,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
      * @param localizedTargetFormatStrings
      *            Maps {@link Locale}-s to format strings. If the desired locale doesn't occur in the map, a less
      *            specific locale is tried, repeatedly until only the language part remains. For example, if locale is
-     *            {@code new Locale("en", "US", "Linux")}, then these keys will be attempted untol a match is found, in
+     *            {@code new Locale("en", "US", "Linux")}, then these keys will be attempted until a match is found, in
      *            this order: {@code new Locale("en", "US", "Linux")}, {@code new Locale("en", "US")},
      *            {@code new Locale("en")}. If there's still no matching key, the value of the
      *            {@code targetFormatString} will be used.

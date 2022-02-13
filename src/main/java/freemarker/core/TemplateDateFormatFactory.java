@@ -70,7 +70,7 @@ public abstract class TemplateDateFormatFactory extends TemplateValueFormatFacto
      *            <p>
      *            As of FreeMarker 2.3.21, this is {@code true} exactly when the date is an SQL "date without time of
      *            the day" (i.e., a {@link java.sql.Date java.sql.Date}) or an SQL "time of the day" value (i.e., a
-     *            {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
+     *            {@link java.sql.Time java.sql.Time}, although this rule can change in the future, depending on
      *            configuration settings and such, so you shouldn't rely on this rule, just accept what this parameter
      *            says.
      * @param env

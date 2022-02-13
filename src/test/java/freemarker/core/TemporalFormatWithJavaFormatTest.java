@@ -195,10 +195,15 @@ public class TemporalFormatWithJavaFormatTest extends AbstractTemporalFormatTest
         TimeZone cfgTimeZone = TimeZone.getTimeZone(cfgZoneId);
 
         for (boolean winter : new boolean[] {true, false}) {
-            String stringToParse = winter ? "2020-12-10 13:14" : "2020-07-10 13:14";
-            LocalDateTime localDateTime = winter
-                    ? LocalDateTime.of(2020, 12, 10, 13, 14)
-                    : LocalDateTime.of(2020, 07, 10, 13, 14);
+            final String stringToParse;
+            final LocalDateTime localDateTime;
+            if (winter) {
+                stringToParse = "2020-12-10 13:14";
+                localDateTime = LocalDateTime.of(2020, 12, 10, 13, 14);
+            } else {
+                stringToParse = "2020-07-10 13:14";
+                localDateTime = LocalDateTime.of(2020, 07, 10, 13, 14);
+            }
 
             {
                 ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, cfgZoneId);

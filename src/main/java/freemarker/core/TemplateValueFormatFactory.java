@@ -18,8 +18,12 @@
  */
 package freemarker.core;
 
+import freemarker.template.Configuration;
+
 /**
- * Superclass of all format factories.
+ * Superclass of all format factories. A format factory is an object that creates instances of a certain kind of
+ * {@link TemplateValueFormat}. Generally, they are singletons (one per JVM, or one per {@link Configuration}). They
+ * should be thread safe. They may encapsulate a cache and return cached {@link TemplateValueFormat} instances.
  * 
  * @since 2.3.24
  */

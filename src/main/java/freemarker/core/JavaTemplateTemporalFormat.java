@@ -27,8 +27,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.time.Year;
-import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -136,7 +134,7 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
         }
 
         // Handling of time zone related edge cases
-        if (isLocalTemporalClass(temporalClass)) {
+        if (TemporalUtils.isLocalTemporalClass(temporalClass)) {
             this.preFormatValueConversion = null;
             this.specialParsing = null;
             formatWithZone = false;
@@ -314,14 +312,6 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     private boolean showsZone(DateTimeFormatter dateTimeFormatter) {
         return !dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_1)
                 .equals(dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_2));
-    }
-
-    private static boolean isLocalTemporalClass(Class<? extends Temporal> normalizedTemporalClass) {
-        return normalizedTemporalClass == LocalDateTime.class
-                || normalizedTemporalClass == LocalTime.class
-                || normalizedTemporalClass == LocalDate.class
-                || normalizedTemporalClass == Year.class
-                || normalizedTemporalClass == YearMonth.class;
     }
 
     private static FormatStyle getMoreVerboseStyle(FormatStyle style) {

@@ -22,11 +22,9 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.Configuration;
-
 /**
- * Factory for a certain kind of {@link Temporal} formatting ({@link TemplateTemporalFormat}). Usually a singleton
- * (one-per-VM, or one-per-{@link Configuration}), and so must be thread-safe.
+ * Factory for a certain kind of {@link Temporal} formatting ({@link TemplateTemporalFormat}).
+ * See more at {@link TemplateValueFormatFactory}.
  *
  * @see Configurable#setCustomTemporalFormats(java.util.Map)
  * 
@@ -62,7 +60,7 @@ public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatF
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}. The
      *            result shouldn't depend on setting values in the {@link Environment}, because changing settings
-     *            will not necessarily invalidate the result.
+     *            will not necessarily invalidate the returned {@link TemplateTemporalFormat}.
      * 
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclasses:
@@ -71,8 +69,7 @@ public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatF
      *             not supported by this factory.
      */
     public abstract TemplateTemporalFormat get(
-            String params,
-            Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env)
+            String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env)
                     throws TemplateValueFormatException;
 
 }
