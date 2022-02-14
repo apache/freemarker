@@ -1,0 +1,56 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+        matrix:
+            java: [8]
+            os: [windows-latest,ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    concurrency: main_tests_${{ github.ref }}
+    steps:
+      - name: Welcome Message
+        run: 'echo "Started with parameters: ${{ matrix.os }} / JDK ${{ matrix.java }} because ${{ github.event_name }} on ${{ github.ref }}"'
+      - uses: actions/checkout@v2.4.0
+      - name: Set up JDK 8 for compilation
+        uses: actions/setup-java@v2.5.0
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Set up JDK ${{ matrix.java }} for the build
+        uses: actions/setup-java@v2.5.0
+        if: matrix.java > 8
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'adopt'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Run Build
+        id: build_step
+        run: './gradlew --continue clean build -xmanualOnline -PfreemarkerDefaultJavaVersion=${{ matrix.java }} -PsignPublication=false'
+      - name: Upload Failed Report
+        uses: actions/upload-artifact@v2.3.1
+        if: failure() && steps.build_step.outcome == 'failure'
+        with:
+          name: test-reports-${{ matrix.os }}-jdk${{ matrix.java }}
+          path: |
+            build/reports/**
+            freemarker-*/build/reports/**
+          retention-days: 30
