@@ -39,8 +39,6 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core._Debug;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * @version $Id
  */

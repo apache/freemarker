@@ -1,6 +1,11 @@
-build/
+/build/
+/*/build/
+/buildSrc/*/build/
+
 .out/
-bin/
+/bin/
+/*/bin/
+/buildSrc/*/bin/
 .bin/
 target/
 

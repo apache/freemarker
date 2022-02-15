@@ -65,6 +65,10 @@ target/**
 .LSOverride
 .directory
 .Trash*
+buildSrc/.gradle/**
+buildSrc/build/**
+buildSrc/*/.gradle/**
+buildSrc/*/build/**
 freemarker-*/ide-dependencies/**
 freemarker-*/.gradle/**
 freemarker-*/gradle/**

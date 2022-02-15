@@ -62,8 +62,6 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
  * threads.

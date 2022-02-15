@@ -46,8 +46,6 @@ import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 @SuppressWarnings("serial")
 class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEnvironment {
 

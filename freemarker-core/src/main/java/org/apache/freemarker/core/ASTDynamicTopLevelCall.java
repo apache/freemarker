@@ -35,8 +35,6 @@ import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * AST node: {@code <@exp ...>}.
  * Executes a {@link TemplateCallableModel} that's embeddable directly into the static text (hence "top level"). At

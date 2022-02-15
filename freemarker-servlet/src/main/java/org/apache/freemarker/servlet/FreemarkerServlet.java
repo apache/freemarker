@@ -70,8 +70,6 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
  * HTTP servlet request attributes, then forward to an FTL file (instead of to a JSP file) that's mapped to this servet
