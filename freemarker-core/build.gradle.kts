@@ -46,12 +46,6 @@ val compileJavacc = tasks.register<org.apache.freemarker.build.core.CompileJavac
 
     val basePath = "org/apache/freemarker/core"
 
-    // FIXME: This does nothing at the moment.
-    replacePattern(
-        "${basePath}/FMParser.java",
-        "private final LookaheadSuccess",
-        "private static final LookaheadSuccess"
-    )
     replacePattern(
         "${basePath}/FMParser.java",
         "enum",
@@ -67,10 +61,9 @@ val compileJavacc = tasks.register<org.apache.freemarker.build.core.CompileJavac
         "public class Token",
         "class Token"
     )
-    // FIXME: This does nothing at the moment.
     replacePattern(
         "${basePath}/SimpleCharStream.java",
-        "public final class SimpleCharStream",
+        "public class SimpleCharStream",
         "final class SimpleCharStream"
     )
 }

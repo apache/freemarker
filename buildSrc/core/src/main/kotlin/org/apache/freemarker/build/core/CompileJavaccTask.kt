@@ -143,7 +143,7 @@ open class CompileJavaccTask @Inject constructor(
         val unusedFileNames = TreeSet(fileNameOverridesSnapshot)
         unusedFileNames.removeAll(deletedFileNames)
         if (unusedFileNames.isNotEmpty()) {
-            logger.warn("Javacc did not generate the following files," +
+            throw IllegalArgumentException("Javacc did not generate the following files," +
                     " even though they are marked as overridden: $unusedFileNames")
         }
     }
@@ -159,7 +159,8 @@ open class CompileJavaccTask @Inject constructor(
                 val prevContent = adjContent
                 adjContent = adjContent.replace(patternDef.pattern, patternDef.replacement)
                 if (prevContent == adjContent) {
-                    logger.warn("$file was not modified, because it does not contain the requested token: '${patternDef.pattern}'")
+                    throw IllegalArgumentException("$file was not modified," +
+                            " because it does not contain the requested token: '${patternDef.pattern}'")
                 }
             }
 
