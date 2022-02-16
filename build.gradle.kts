@@ -84,12 +84,23 @@ val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJ
 }
 sourceSets.main.get().java.srcDir(compileJavacc)
 
-tasks.named<Jar>(sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get().sourcesJarTaskName) {
+tasks.sourcesJar.configure {
     from(compileJavacc.flatMap { it.sourceDirectory })
 
     from(files("LICENSE", "NOTICE")) {
         into("META-INF")
     }
+}
+
+tasks.javadocJar.configure {
+    from(files("src/dist/javadoc"))
+    from(files("NOTICE")) {
+        into("META-INF")
+    }
+}
+
+tasks.jar.configure {
+    from(files("src/dist/jar"))
 }
 
 configurations {
