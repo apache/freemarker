@@ -19,8 +19,7 @@
 
 package freemarker.core;
 
-import static freemarker.template.utility.StringUtil.*;
-import static freemarker.template.utility.TemporalUtils.*;
+import static freemarker.core._TemporalUtils.*;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -29,19 +28,14 @@ import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQuery;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
-import freemarker.template.utility.TemporalUtils;
 
 // TODO [FREEMARKER-35] These should support parameters similar to {@link ISOTemplateDateFormat},
 
@@ -50,31 +44,24 @@ import freemarker.template.utility.TemporalUtils;
  *
  * @since 2.3.32
  */
-final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat {
+final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;
     private final boolean instantConversion;
-    private final ZoneId zoneId;
     private final String description;
-    private final TemporalQuery<? extends Temporal> temporalQuery;
-    private final Class<? extends Temporal> temporalClass;
     private final DateTimeFormatter parserExtendedDateTimeFormatter;
     private final DateTimeFormatter parserBasicDateTimeFormatter;
-    private final boolean localTemporalClass;
 
     ISOLikeTemplateTemporalTemporalFormat(
             DateTimeFormatter dateTimeFormatter,
             DateTimeFormatter parserExtendedDateTimeFormatter,
             DateTimeFormatter parserBasicDateTimeFormatter,
             Class<? extends Temporal> temporalClass, TimeZone zone, String formatString) {
+        super(temporalClass, zone.toZoneId());
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
         this.dateTimeFormatter = dateTimeFormatter;
         this.parserExtendedDateTimeFormatter = parserExtendedDateTimeFormatter;
         this.parserBasicDateTimeFormatter = parserBasicDateTimeFormatter;
-        this.temporalQuery = TemporalUtils.getTemporalQuery(temporalClass);
         this.instantConversion = temporalClass == Instant.class;
-        this.temporalClass = temporalClass;
-        this.localTemporalClass = isLocalTemporalClass(temporalClass);
-        this.zoneId = temporalClass == Instant.class ? zone.toZoneId() : null;
         this.description = formatString;
     }
 
@@ -97,7 +84,9 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
     }
 
     @Override
-    public Object parse(String s) throws TemplateValueFormatException {
+    public Object parse(String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy) throws TemplateValueFormatException {
+        // TODO [FREEMARKER-35] Implement missingTimeZoneParserPolicy
+
         final boolean extendedFormat;
         final boolean add1Day;
         if (temporalClass == LocalDate.class || temporalClass == YearMonth.class) {
@@ -116,10 +105,9 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
         } else {
             int tIndex = s.indexOf('T');
             if (tIndex < 1) {
-                throw new UnparsableValueException(
-                        "Failed to parse value " + jQuote(s) + " with format " + jQuote(description)
-                                + ", and target class " + temporalClass.getSimpleName() + ": "
-                                + "Character \"T\" must be used to separate the date and time part.");
+                throw newUnparsableValueException(
+                        s, null,
+                        "Character \"T\" must be used to separate the date and time part.", null);
             }
             if (s.indexOf(":", tIndex + 1) != -1) {
                 extendedFormat = true;
@@ -138,35 +126,11 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
 
         DateTimeFormatter parserDateTimeFormatter = parserBasicDateTimeFormatter == null || extendedFormat
                 ? parserExtendedDateTimeFormatter : parserBasicDateTimeFormatter;
-        try {
-            TemporalAccessor parseResult = parserDateTimeFormatter.parse(s);
-            if (!localTemporalClass && !parseResult.isSupported(ChronoField.OFFSET_SECONDS)) {
-                // Unlike for the Java format, for ISO we require the string to contain the offset for a non-local
-                // target type. We could use the default time zone, but that's really just guessing, also DST creates
-                // ambiguous cases. For the Java formatter we are lenient, as the shared date-time format typically
-                // misses the offset, and because we don't want a format-and-then-parse cycle to fail. But in ISO
-                // format, the offset is always shown for a non-local temporal.
-                throw new UnparsableValueException(
-                        "Failed to parse value " + jQuote(s) + " with format " + jQuote(description)
-                                + ", and target class " + temporalClass.getSimpleName() + ": "
-                                + "The string must contain the time zone offset for this target class. "
-                                + "(Defaulting to the current time zone is not allowed for ISO-style formats.)");
-
-            }
-            Temporal resultTemporal = parseResult.query(temporalQuery);
-            if (add1Day) {
-                resultTemporal = resultTemporal.plus(1, ChronoUnit.DAYS);
-            }
-            return resultTemporal;
-        } catch (DateTimeException e) {
-            throw new UnparsableValueException(
-                    "Failed to parse value " + jQuote(s) + " with format " + jQuote(description)
-                            + ", and target class " + temporalClass.getSimpleName() + ", "
-                            + "zoneId " + jQuote(zoneId) + ".\n"
-                            + "(Used this DateTimeFormatter: " + parserDateTimeFormatter + ")\n"
-                            + "(Root cause message: " + e.getMessage() + ")",
-                    e);
+        Temporal resultTemporal = parse(s, missingTimeZoneParserPolicy, parserDateTimeFormatter);
+        if (add1Day) {
+            resultTemporal = resultTemporal.plus(1, ChronoUnit.DAYS);
         }
+        return resultTemporal;
     }
 
     private final static Pattern ZERO_TIME_AFTER_HH = Pattern.compile("(?::?+00(?::?+00(?:.?+0+)?)?)?");
@@ -197,40 +161,6 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
         return ZERO_TIME_AFTER_HH.matcher(timeAfterHH).matches();
     }
 
-    //!!T
-    public static void main(String[] args) {
-        for (String original : new String[] {"24", "24:00", "24:00:00", "24:00:00.0"}) {
-            for (boolean basic : new boolean[] {false, true}) {
-                for (String prefix : new String[] {"", "T"}) {
-                    for (String suffix : new String[] {"", "Z", "-01", "+01"}) {
-                        String s = prefix + (basic ? original.replace(":", "") : original)+ suffix;
-
-                        int startIndex = s.indexOf("24");
-                        if (!isStartOf240000(s, startIndex)) {
-                            throw new AssertionError("Couldn't find end of time part in: " + s);
-                        }
-                    }
-                }
-            }
-        }
-
-        for (String original : new String[] {
-                "24:", "24:01", "24:00:01", "24:00:00.1", "24:0", "24:00:x",
-                "2401", "240001", "240000.1", "240"}) {
-            for (String prefix : new String[] {"", "T"}) {
-                for (String suffix : new String[] {"", "Z", "-01", "+01"}) {
-                    String s = prefix + original + suffix;
-
-                    int startIndex = s.indexOf("24");
-                    if (isStartOf240000(s, startIndex)) {
-                        throw new AssertionError("Shouldn't match: " + s);
-                    }
-                }
-            }
-        }
-
-    }
-
     @Override
     public boolean isLocaleBound() {
         return false;
@@ -238,7 +168,8 @@ final class ISOLikeTemplateTemporalTemporalFormat extends TemplateTemporalFormat
 
     @Override
     public boolean isTimeZoneBound() {
-        return zoneId != null;
+        // TODO [FREEMARKER-35] Even for local temporals?
+        return true;
     }
 
     @Override

@@ -35,8 +35,6 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.utility.TemporalUtils;
-
 /**
  * Format factory related to {@link someJava8Temporal?string.xs}, {@link someJava8Temporal?string.xs_...}, etc.
  */
@@ -64,7 +62,7 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         final DateTimeFormatter dateTimeFormatter;
         final DateTimeFormatter parserDateTimeFormatter;
         final String description;
-        temporalClass = TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+        temporalClass = _TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
         if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
             dateTimeFormatter = ISO8601_TIME_FORMAT;
             parserDateTimeFormatter = PARSER_ISO8601_EXTENDED_TIME_FORMAT;

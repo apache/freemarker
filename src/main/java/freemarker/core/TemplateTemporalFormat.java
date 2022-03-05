@@ -81,7 +81,10 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
      *         a {@link Temporal}. {@link TemplateTemporalModel} is used if you have to attach some application-specific
      *         meta-information that's also extracted during {@link #formatToPlainText(TemplateTemporalModel)} (so if
      *         you format something and then parse it, you get back an equivalent result). It can't be {@code null}.
+     *
+     * @throws ParsingNotSupportedException If this format doesn't implement parsing.
      */
-    public abstract Object parse(String s) throws TemplateValueFormatException;
+    public abstract Object parse(String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy)
+            throws TemplateValueFormatException;
 
 }

@@ -40,6 +40,7 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import freemarker.core._JavaVersion;
+import freemarker.core._TemporalUtils;
 
 /**
  * Move pattern parsing related tests from {@link DateUtilTest} to here.
@@ -176,14 +177,14 @@ public class DateUtilsPatternParsingTest {
     @Test
     public void testInvalidPatternExceptions() {
         try {
-            TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("y v", SAMPLE_LOCALE);
+            _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("y v", SAMPLE_LOCALE);
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), Matchers.containsString("\"v\""));
         }
 
         try {
-            TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("XXXX", SAMPLE_LOCALE);
+            _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("XXXX", SAMPLE_LOCALE);
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), Matchers.containsString("4"));
@@ -195,7 +196,7 @@ public class DateUtilsPatternParsingTest {
         assertEquals(
                 LocalDateTime.of(2021, 12, 23, 1, 2, 3),
                 LocalDateTime.from(
-                        TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("yyyyMMddHHmmss", SAMPLE_LOCALE)
+                        _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern("yyyyMMddHHmmss", SAMPLE_LOCALE)
                                 .parse("20211223010203")));
     }
 
@@ -263,7 +264,7 @@ public class DateUtilsPatternParsingTest {
         SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
         sdf.setTimeZone(timeZone);
 
-        DateTimeFormatter dtf = TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale);
+        DateTimeFormatter dtf = _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale);
 
         String sdfOutput = sdf.format(date);
         String dtfOutput = dtf.format(temporal);
@@ -302,7 +303,7 @@ public class DateUtilsPatternParsingTest {
 
     private LocalDate parseLocalDate(String pattern, String string, Locale locale) {
         return LocalDate.from(
-                TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale)
+                _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(pattern, locale)
                         .parse(string));
     }
 

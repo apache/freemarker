@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import static freemarker.template.utility.StringUtil.*;
+import static freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -46,11 +47,17 @@ import org.junit.Test;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.DateUtil;
 
-public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest {
+public class ISOLikeTemplateTemporalFormatTest extends AbstractTemporalFormatTest {
+
+    private final static TimeZone TIME_ZONE = TimeZone.getTimeZone("America/New_York");
 
     private static final Consumer<Configurable> ISO_DATE_CONFIGURATOR = conf -> conf.setDateFormat("iso");
     private static final Consumer<Configurable> ISO_TIME_CONFIGURATOR = conf -> conf.setTimeFormat("iso");
-    private static final Consumer<Configurable> ISO_DATE_TIME_CONFIGURATOR = conf -> conf.setDateTimeFormat("iso");
+    private static final Consumer<Configurable> ISO_DATE_TIME_CONFIGURATOR = conf -> {
+        conf.setDateTimeFormat("iso");
+        conf.setTimeZone(TIME_ZONE);
+        conf.setLocale(Locale.GERMANY); // So if the decimal separator has a problem, we will notice
+    };
 
     private static Consumer<Configurable> isoDateTimeConfigurator(TimeZone timeZone) {
         return conf -> { ISO_DATE_TIME_CONFIGURATOR.accept(conf); conf.setTimeZone(timeZone); };
@@ -112,7 +119,7 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
                 "2021-12-11T13:01:02",
                 formatTemporal(
                         ISO_DATE_TIME_CONFIGURATOR,
-                        LocalDateTime.of(2021, 12, 11, 13, 1, 2, 0)));
+                        LocalDateTime.of(2021, 12, 11, 13, 1, 2)));
         assertEquals(
                 "2021-12-11T13:01:02.0123",
                 formatTemporal(
@@ -262,44 +269,46 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
 
     @Test
     public void testParseOffsetDateTime() throws TemplateException, TemplateValueFormatException {
-        testParseOffsetDateTimeAndInstant(OffsetDateTime.class);
+        testParseNonLocalDateTimeAndInstant(OffsetDateTime.class);
     }
 
     @Test
     public void testParseInstant() throws TemplateException, TemplateValueFormatException {
-        testParseOffsetDateTimeAndInstant(Instant.class);
+        testParseNonLocalDateTimeAndInstant(Instant.class);
     }
 
     @Test
     public void testParseZonedDateTime() throws TemplateException, TemplateValueFormatException {
-        testParseOffsetDateTimeAndInstant(ZonedDateTime.class);
+        testParseNonLocalDateTimeAndInstant(ZonedDateTime.class);
     }
 
-    private Temporal convertToClass(OffsetDateTime offsetDateTime, Class<? extends Temporal> temporalClass) {
+    private Temporal convertToClass(ZonedDateTime zonedDateTime, Class<? extends Temporal> temporalClass) {
+        if (temporalClass == ZonedDateTime.class) {
+            return zonedDateTime;
+        }
         if (temporalClass == OffsetDateTime.class) {
-            return offsetDateTime;
+            return zonedDateTime.toOffsetDateTime();
         }
         if (temporalClass == Instant.class) {
-            return offsetDateTime.toInstant();
-        }
-        if (temporalClass == ZonedDateTime.class) {
-            return offsetDateTime.toZonedDateTime();
+            return zonedDateTime.toInstant();
         }
         throw new IllegalArgumentException();
     }
 
-    private void testParseOffsetDateTimeAndInstant(Class<? extends Temporal> temporalClass)
+    private void testParseNonLocalDateTimeAndInstant(Class<? extends Temporal> temporalClass)
             throws TemplateException, TemplateValueFormatException {
         // ISO extended and ISO basic format:
-        for (String parsedString : new String[]{"2021-12-11T13:01:02.0123Z", "20211211T130102.0123Z"}) {
+        for (String stringToParse : new String[]{"2021-12-11T13:01:02.0123Z", "20211211T130102.0123Z"}) {
             assertParsingResults(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
-                    OffsetDateTime.of(2021, 12, 11, 13, 1, 2, 12_300_000, ZoneOffset.UTC)) ;
+                    stringToParse,
+                    convertToClass(
+                            ZonedDateTime.of(2021, 12, 11, 13, 1, 2, 12_300_000, ZoneOffset.UTC),
+                            temporalClass));
         }
 
         // Optional parts:
-        for (String parsedString : new String[] {
+        for (String stringToParse : new String[] {
                 "2021-12-11T13:00:00.0+02:00",
                 "2021-12-11T13:00:00+02:00",
                 "2021-12-11T13:00+02",
@@ -311,74 +320,89 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
         }) {
             assertParsingResults(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
                     convertToClass(
-                            OffsetDateTime.of(2021, 12, 11, 13, 0, 0, 0, ZoneOffset.ofHours(2)),
+                            ZonedDateTime.of(2021, 12, 11, 13, 0, 0, 0, ZoneOffset.ofHours(2)),
                             temporalClass));
         }
 
         // Negative year:
-        for (String parsedString : new String[] {
+        for (String stringToParse : new String[] {
                 "-1000-02-03T04Z",
                 "-10000203T04Z"
         }) {
             assertParsingResults(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
                     convertToClass(
-                            OffsetDateTime.of(-1000, 2, 3, 4, 0, 0, 0, ZoneOffset.UTC),
+                            ZonedDateTime.of(-1000, 2, 3, 4, 0, 0, 0, ZoneOffset.UTC),
                             temporalClass));
         }
 
         // Hour 24:
-        for (String parsedString : new String[] {
+        for (String stringToParse : new String[] {
                 "2020-01-02T24Z",
                 "2020-01-02T24:00Z",
                 "2020-01-02T24:00:00Z",
                 "2020-01-02T24:00:00.0Z",
                 "2020-01-02T24:00:00.0+00",
-                // For local temporals only: "2020-01-02T24:00:00",
                 "20200102T24Z",
                 "20200102T2400Z",
                 "20200102T240000Z",
                 "20200102T240000.0Z",
                 "20200102T240000.0+00",
-                // For local temporals only: "20200102T240000"
         }) {
             assertParsingResults(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
                     convertToClass(
-                            OffsetDateTime.of(2020, 1, 3, 0, 0, 0, 0, ZoneOffset.UTC),
+                            ZonedDateTime.of(2020, 1, 3, 0, 0, 0, 0, ZoneOffset.UTC),
                             temporalClass));
         }
 
-        // Unlike for the Java format, for ISO we require the string to contain the offset for a non-local target type.
-        for (String parsedString : new String[] {
+        // MissingTimeZoneParserPolicy-es:
+        String[] localStringsToParse = {
                 "2020-01-02T03", "2020-01-02T03:00", "2020-01-02T03:00:00",
-                "20200102T03", "20200102T0300", "20200102T030000"}) {
-            assertParsingFails(
+                "20200102T03", "20200102T0300", "20200102T030000"};
+        for (String stringToParse : localStringsToParse) {
+            assertParsingResults(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
+                    convertToClass(
+                            ZonedDateTime.of(2020, 1, 2, 3, 0, 0, 0, TIME_ZONE.toZoneId()),
+                            temporalClass));
+        }
+        for (String stringToParse : localStringsToParse) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR, MissingTimeZoneParserPolicy.FALL_BACK_TO_LOCAL_TEMPORAL,
+                    stringToParse,
+                    LocalDateTime.of(2020, 1, 2, 3, 0, 0));
+        }
+        for (String stringToParse : localStringsToParse) {
+            assertParsingFails(
+                    ISO_DATE_TIME_CONFIGURATOR, MissingTimeZoneParserPolicy.FAIL,
+                    stringToParse,
                     temporalClass,
                     e -> assertThat(e.getMessage(), allOf(
-                                containsString(jQuote(parsedString)),
-                                containsString("time zone offset"),
-                                containsString(temporalClass.getSimpleName()))));
+                            containsString(jQuote(stringToParse)),
+                            containsString("time zone or offset"),
+                            containsString(temporalClass.getSimpleName()))));
         }
 
-        for (String parsedString : new String[] {
+        // Invalid strings:
+        for (String stringToParse : new String[] {
                 "2021-12-11", "20211211", "2021-12-11T", "2021-12-11T0Z",
+                "2021-12-11T0102Z", "20211211T01:02Z",
                 "2021-12-11T25Z", "2022-02-29T23Z", "2021-13-11T23Z"}) {
             assertParsingFails(
                     ISO_DATE_TIME_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
                     temporalClass,
                     e -> {
                         assertThat(e.getMessage(), allOf(
-                                containsString(jQuote(parsedString)),
+                                containsString(jQuote(stringToParse)),
                                 containsString(temporalClass.getSimpleName())));
-                        if (!parsedString.contains("T")) {
+                        if (!stringToParse.contains("T")) {
                             assertThat(e.getMessage(), containsString("\"T\""));
                         }
                     });
@@ -387,22 +411,302 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
 
     @Test
     public void testParseOffsetTime() throws TemplateException, TemplateValueFormatException {
-        // TODO [FREEMARKER-35]
+        // ISO extended and ISO basic format:
+        for (String stringToParse : new String[]{"13:01:02.0123Z", "130102.0123Z"}) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    OffsetTime.of(13, 1, 2, 12_300_000, ZoneOffset.UTC)) ;
+        }
+
+        // Optional parts:
+        for (String stringToParse : new String[] {
+                "13:00:00.0+02:00",
+                "13:00:00+02:00",
+                "13:00+02",
+                "13+02",
+                "130000.0+0200",
+                "130000+0200",
+                "1300+02",
+                "13+02",
+        }) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    OffsetTime.of(13, 0, 0, 0, ZoneOffset.ofHours(2)));
+        }
+
+        // Hour 24:
+        for (String stringToParse : new String[] {
+                "24Z",
+                "24:00Z",
+                "24:00:00Z",
+                "24:00:00.0Z",
+                "24:00:00.0+00",
+                "24Z",
+                "2400Z",
+                "240000Z",
+                "240000.0Z",
+                "240000.0+00",
+        }) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC));
+        }
+
+        // MissingTimeZoneParserPolicy-es:
+        String[] localStringsToParse = {
+                "03", "03:00", "03:00:00", "03:00:00.0",
+                "0300", "030000", "030000.0"};
+        for (String stringToParse : localStringsToParse) {
+            assertParsingFails(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    OffsetTime.class,
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsStringIgnoringCase("daylight saving"),
+                            containsString(OffsetTime.class.getSimpleName()))));
+        }
+        for (String stringToParse : localStringsToParse) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR, MissingTimeZoneParserPolicy.FALL_BACK_TO_LOCAL_TEMPORAL,
+                    stringToParse,
+                    LocalTime.of(3, 0, 0));
+        }
+        for (String stringToParse : localStringsToParse) {
+            assertParsingFails(
+                    ISO_TIME_CONFIGURATOR, MissingTimeZoneParserPolicy.FAIL,
+                    stringToParse,
+                    OffsetTime.class,
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsString("time zone or offset"),
+                            containsString(OffsetTime.class.getSimpleName()))));
+        }
+
+        // Invalid strings:
+        for (String stringToParse : new String[] {"Z", "1Z", "T01Z", "25Z", "1161Z", "01:02:03:00Z", "20210101T01Z"}) {
+            assertParsingFails(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    OffsetTime.class,
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsString(OffsetTime.class.getSimpleName()))));
+        }
     }
 
     @Test
     public void testParseLocalDateTime() throws TemplateException, TemplateValueFormatException {
-        // TODO [FREEMARKER-35]
+        // ISO extended and ISO basic format:
+        for (String stringToParse : new String[]{"2021-12-11T13:01:02.0123", "20211211T130102.0123"}) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.of(2021, 12, 11, 13, 1, 2, 12_300_000)) ;
+        }
+
+        // Optional parts:
+        for (String stringToParse : new String[] {
+                "2021-12-11T13:00:00.0",
+                "2021-12-11T13:00:00",
+                "2021-12-11T13:00",
+                "2021-12-11T13",
+                "20211211T130000.0",
+                "20211211T130000",
+                "20211211T1300",
+                "20211211T13",
+        }) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.of(2021, 12, 11, 13, 0, 0));
+        }
+
+        // Negative year:
+        for (String stringToParse : new String[] {
+                "-1000-02-03T04Z",
+                "-10000203T04Z"
+        }) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.of(-1000, 2, 3, 4, 0, 0));
+        }
+
+        // Hour 24:
+        for (String stringToParse : new String[] {
+                "2020-01-02T24",
+                "2020-01-02T24:00",
+                "2020-01-02T24:00:00",
+                "2020-01-02T24:00:00.0",
+                "20200102T24",
+                "20200102T2400",
+                "20200102T240000",
+                "20200102T240000.0",
+        }) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.of(2020, 1, 3, 0, 0, 0));
+        }
+
+        // MissingTimeZoneParserPolicy-es:
+        String[] localStringsToParse = {
+                "2020-01-02T03", "2020-01-02T03:00", "2020-01-02T03:00:00",
+                "20200102T03", "20200102T0300", "20200102T030000"};
+        for (MissingTimeZoneParserPolicy missingTimeZoneParserPolicy : MissingTimeZoneParserPolicy.values()) {
+            for (String stringToParse : localStringsToParse) {
+                assertParsingResults(
+                        ISO_DATE_TIME_CONFIGURATOR, missingTimeZoneParserPolicy,
+                        stringToParse,
+                        LocalDateTime.of(2020, 1, 2, 3, 0));
+            }
+        }
+
+        // Offset is ignored:
+        for (String stringToParse : new String[] {
+                "2021-12-11T03:04:05Z", "2021-12-11T03:04:05+01", "2021-12-11T03:04:05-01:30"}) {
+            assertParsingResults(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.of(2021, 12, 11, 3, 4, 5));
+        }
+
+        // Invalid strings:
+        for (String stringToParse : new String[] {
+                "2021-12-11", "20211211", "2021-12-11T", "2021-12-11T0",
+                "2021-12-11T0102", "20211211T01:02",
+                "2021-12-11T25", "2022-02-29T23", "2021-13-11T23"}) {
+            assertParsingFails(
+                    ISO_DATE_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalDateTime.class,
+                    e -> {
+                        assertThat(e.getMessage(), allOf(
+                                containsString(jQuote(stringToParse)),
+                                containsString(LocalDateTime.class.getSimpleName())));
+                        if (!stringToParse.contains("T")) {
+                            assertThat(e.getMessage(), containsString("\"T\""));
+                        }
+                    });
+        }
     }
 
     @Test
     public void testParseLocalDate() throws TemplateException, TemplateValueFormatException {
-        // TODO [FREEMARKER-35]
+        // ISO extended and ISO basic format:
+        for (String stringToParse : new String[]{"2021-12-11", "20211211"}) {
+            assertParsingResults(
+                    ISO_DATE_CONFIGURATOR,
+                    stringToParse,
+                    LocalDate.of(2021, 12, 11)) ;
+        }
+
+        // Negative year:
+        for (String stringToParse : new String[] {
+                "-1000-02-03",
+                "-10000203"
+        }) {
+            assertParsingResults(
+                    ISO_DATE_CONFIGURATOR,
+                    stringToParse,
+                    LocalDate.of(-1000, 2, 3));
+        }
+
+        // MissingTimeZoneParserPolicy-es:
+        for (MissingTimeZoneParserPolicy missingTimeZoneParserPolicy : MissingTimeZoneParserPolicy.values()) {
+            assertParsingResults(
+                    ISO_DATE_CONFIGURATOR, missingTimeZoneParserPolicy,
+                    "20200102",
+                    LocalDate.of(2020, 1, 2));
+        }
+
+        // Invalid strings:
+        for (String stringToParse : new String[] {
+                "2021-12-11Z", "2021-12-11T", "2021-1211",
+                "2022-02-29", "2021-13-11"}) {
+            assertParsingFails(
+                    ISO_DATE_CONFIGURATOR,
+                    stringToParse,
+                    LocalDate.class,
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsString(LocalDate.class.getSimpleName()))));
+        }
     }
 
     @Test
     public void testParseLocalTime() throws TemplateException, TemplateValueFormatException {
-        // TODO [FREEMARKER-35]
+        // ISO extended and ISO basic format:
+        for (String stringToParse : new String[]{"13:01:02.0123", "130102.0123"}) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalTime.of(13, 1, 2, 12_300_000));
+        }
+
+        // Optional parts:
+        for (String stringToParse : new String[] {
+                "13:00:00.0",
+                "13:00:00",
+                "13:00",
+                "13",
+                "130000.0",
+                "130000",
+                "1300",
+        }) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalTime.of(13, 0, 0));
+        }
+
+        // Hour 24:
+        for (String stringToParse : new String[] {
+                "24",
+                "24:00",
+                "24:00:00",
+                "24:00:00.0",
+                "24:00:00.0",
+                "2400",
+                "240000",
+                "240000.0"
+        }) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalTime.of(0, 0, 0));
+        }
+
+        // MissingTimeZoneParserPolicy-es:
+        for (MissingTimeZoneParserPolicy missingTimeZoneParserPolicy : MissingTimeZoneParserPolicy.values()) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR, missingTimeZoneParserPolicy,
+                    "03:04:05",
+                    LocalTime.of(3, 4, 5));
+        }
+
+        // Offset is ignored:
+        for (String stringToParse : new String[] {"03:04:05Z", "03:04:05+01", "03:04:05-01:30"}) {
+            assertParsingResults(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalTime.of(3, 4, 5));
+        }
+
+        // Invalid strings:
+        for (String stringToParse : new String[] {"", "1", "T01", "25", "1161", "01:02:03:00", "2021-01-01T01"}) {
+            assertParsingFails(
+                    ISO_TIME_CONFIGURATOR,
+                    stringToParse,
+                    LocalTime.class,
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsString(LocalTime.class.getSimpleName()))));
+        }
     }
 
     @Test
@@ -416,12 +720,9 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
                 ISO_DATE_TIME_CONFIGURATOR,
                 "2021-01",
                 Year.class,
-                e -> {
-                    assertThat(e.getMessage(), allOf(
-                            containsString(jQuote("2021-01")),
-                            containsString("Year")));
-                }
-        );
+                e -> assertThat(e.getMessage(), allOf(
+                        containsString(jQuote("2021-01")),
+                        containsString("Year"))));
     }
 
     @Test
@@ -435,17 +736,14 @@ public class TemporalFormatWithIsoFormatTest extends AbstractTemporalFormatTest 
         assertParsingResults(ISO_YEAR_MONTH_CONFIGURATOR, "-1000-01", YearMonth.of(-1000, 1));
         assertParsingResults(ISO_YEAR_MONTH_CONFIGURATOR, "-100001", YearMonth.of(-1000, 1));
 
-        for (String parsedString : new String[] {"2021", "2021-12-11", "2021-13", "202113"}) {
+        for (String stringToParse : new String[] {"2021", "2021-12-11", "2021-13", "202113"}) {
             assertParsingFails(
                     ISO_YEAR_MONTH_CONFIGURATOR,
-                    parsedString,
+                    stringToParse,
                     YearMonth.class,
-                    e -> {
-                        assertThat(e.getMessage(), allOf(
-                                containsString(jQuote(parsedString)),
-                                containsString("YearMonth")));
-                    }
-            );
+                    e -> assertThat(e.getMessage(), allOf(
+                            containsString(jQuote(stringToParse)),
+                            containsString("YearMonth"))));
         }
     }
 

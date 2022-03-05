@@ -40,8 +40,6 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.utility.TemporalUtils;
-
 /**
  * Format factory related to {@link someJava8Temporal?string.iso}, {@link someJava8Temporal?string.iso_...}, etc.
  */
@@ -212,7 +210,7 @@ class ISOTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         final DateTimeFormatter parserExtendedDateTimeFormatter;
         final DateTimeFormatter parserBasicDateTimeFormatter;
         final String description;
-        temporalClass = TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+        temporalClass = _TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
         if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
             dateTimeFormatter = ISO8601_TIME_FORMAT;
             parserExtendedDateTimeFormatter = PARSER_ISO8601_EXTENDED_TIME_FORMAT;

@@ -31,10 +31,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalQuery;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -43,23 +41,19 @@ import java.util.regex.Pattern;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.TemporalUtils;
 
 /**
  * See {@link JavaTemplateTemporalFormatFactory}.
  *
  * @since 2.3.32
  */
-class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
+class JavaTemplateTemporalFormat extends DateTimeFormatBasedTemplateTemporalFormat {
 
     enum PreFormatValueConversion {
         INSTANT_TO_ZONED_DATE_TIME,
+        AS_LOCAL_IN_CURRENT_ZONE,
         SET_ZONE_FROM_OFFSET,
-        OFFSET_TIME_WITHOUT_OFFSET_ON_THE_FORMAT_EXCEPTION
-    }
-
-    enum SpecialParsing {
-        OFFSET_TIME_DST_ERROR
+        OFFSET_TIME_WITHOUT_OFFSET_ON_THE_FORMAT_EXCEPTION,
     }
 
     static final String SHORT = "short";
@@ -77,24 +71,19 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             "(?:" + ANY_FORMAT_STYLE + "(?:_" + ANY_FORMAT_STYLE + ")?)?");
 
     private final DateTimeFormatter dateTimeFormatter;
-    private final TemporalQuery<? extends Temporal> temporalQuery;
     private final ZoneId zoneId;
     private final String formatString;
-    private final Class<? extends Temporal> temporalClass;
     private final PreFormatValueConversion preFormatValueConversion;
-    private final SpecialParsing specialParsing;
 
-    JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
+    JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale,
+            TimeZone timeZone)
             throws InvalidFormatParametersException {
-        this.temporalClass = TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
-
-        temporalQuery = TemporalUtils.getTemporalQuery(temporalClass);
+        super(temporalClass, timeZone.toZoneId());
 
         final Matcher formatStylePatternMatcher = FORMAT_STYLE_PATTERN.matcher(formatString);
         final boolean isFormatStyleString = formatStylePatternMatcher.matches();
         FormatStyle timePartFormatStyle; // Maybe changes later for re-attempts
         final FormatStyle datePartFormatStyle;
-        boolean formatWithZone;
 
         DateTimeFormatter dateTimeFormatter; // Maybe changes later for re-attempts
         if (isFormatStyleString) {
@@ -120,29 +109,28 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             } else {
                 throw new InvalidFormatParametersException(
                         "Format styles (like " + jQuote(formatString) + ") is not supported for "
-                        + temporalClass.getName() + " values.");
+                                + temporalClass.getName() + " values.");
             }
         } else {
             datePartFormatStyle = null;
             timePartFormatStyle = null;
 
             try {
-                dateTimeFormatter = TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(formatString, locale);
+                dateTimeFormatter = _TemporalUtils.dateTimeFormatterFromSimpleDateFormatPattern(formatString, locale);
             } catch (IllegalArgumentException e) {
                 throw new InvalidFormatParametersException(e.getMessage(), e);
             }
         }
 
         // Handling of time zone related edge cases
-        if (TemporalUtils.isLocalTemporalClass(temporalClass)) {
+        if (isLocalTemporalClass) {
             this.preFormatValueConversion = null;
-            this.specialParsing = null;
-            formatWithZone = false;
             if (isFormatStyleString && (temporalClass == LocalTime.class || temporalClass == LocalDateTime.class)) {
                 // The localized pattern possibly contains the time zone (for most locales, LONG and FULL does), so they
                 // fail with local temporals that have a time part. To work this issue around, we decrease the verbosity
                 // of the time style until formatting succeeds. (See also: JDK-8085887)
-                localFormatAttempt: while (true) {
+                localFormatAttempt:
+                while (true) {
                     try {
                         dateTimeFormatter.format(LOCAL_DATE_TIME_SAMPLE); // We only care if it throws exception or not
                         break localFormatAttempt; // It worked
@@ -168,50 +156,39 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
             }
         } else { // is non-local temporal
             PreFormatValueConversion preFormatValueConversion;
-            SpecialParsing specialParsing;
-            if (showsZone(dateTimeFormatter)) {
+            if (showsOffsetOrZone(dateTimeFormatter)) {
                 if (temporalClass == Instant.class) {
                     preFormatValueConversion = PreFormatValueConversion.INSTANT_TO_ZONED_DATE_TIME;
-                    specialParsing = null;
                 } else if (isFormatStyleString &&
                         (temporalClass == OffsetDateTime.class || temporalClass == OffsetTime.class)) {
                     preFormatValueConversion = PreFormatValueConversion.SET_ZONE_FROM_OFFSET;
-                    specialParsing = null;
                 } else {
                     preFormatValueConversion = null;
-                    specialParsing = null;
                 }
-                formatWithZone = false;
             } else { // Doesn't show zone
                 if (temporalClass == OffsetTime.class) {
                     // We give up, but delay the exception until the format is actually used, just in case
                     // format creation is triggered without actually using it.
-                    preFormatValueConversion = PreFormatValueConversion.OFFSET_TIME_WITHOUT_OFFSET_ON_THE_FORMAT_EXCEPTION;
-                    specialParsing = SpecialParsing.OFFSET_TIME_DST_ERROR;
-                    formatWithZone = false;
+                    preFormatValueConversion =
+                            PreFormatValueConversion.OFFSET_TIME_WITHOUT_OFFSET_ON_THE_FORMAT_EXCEPTION;
                 } else {
                     // As no zone is shown, but our temporal class is not local, we tell the formatter convert to
                     // the current time zone. Also, when parsing, that same time zone will be assumed.
-                    preFormatValueConversion = null;
-                    specialParsing = null;
-                    formatWithZone = true;
+                    preFormatValueConversion = PreFormatValueConversion.AS_LOCAL_IN_CURRENT_ZONE;
                 }
             }
             this.preFormatValueConversion = preFormatValueConversion;
-            this.specialParsing = specialParsing;
         }
 
         dateTimeFormatter = dateTimeFormatter.withLocale(locale);
-        if (formatWithZone) {
-            dateTimeFormatter = dateTimeFormatter.withZone(timeZone.toZoneId());
-        }
         this.dateTimeFormatter = dateTimeFormatter;
         this.formatString = formatString;
         this.zoneId = timeZone.toZoneId();
     }
 
     @Override
-    public String formatToPlainText(TemplateTemporalModel tm) throws TemplateValueFormatException, TemplateModelException {
+    public String formatToPlainText(TemplateTemporalModel tm) throws TemplateValueFormatException,
+            TemplateModelException {
         DateTimeFormatter dateTimeFormatter = this.dateTimeFormatter;
         Temporal temporal = TemplateFormatUtil.getNonNullTemporal(tm);
 
@@ -237,6 +214,19 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
                                         + ClassUtil.getShortClassNameOfObject(temporal));
                     }
                     break;
+                case AS_LOCAL_IN_CURRENT_ZONE:
+                    // We could use dateTimeFormatter.withZone(zoneId) for these, but it's not obvious if that will
+                    // always behave as a straightforward conversion to the local temporal type.
+                    if (temporal instanceof OffsetDateTime) {
+                        temporal = ((OffsetDateTime) temporal).atZoneSameInstant(zoneId).toLocalDateTime();
+                    } else if (temporal instanceof ZonedDateTime) {
+                        temporal = ((ZonedDateTime) temporal).withZoneSameInstant(zoneId).toLocalDateTime();
+                    } else if (temporal instanceof Instant) {
+                        temporal = ((Instant) temporal).atZone(zoneId).toLocalDateTime();
+                    } else {
+                        throw new AssertionError("Unhandled case: " + temporal.getClass());
+                    }
+                    break;
                 case OFFSET_TIME_WITHOUT_OFFSET_ON_THE_FORMAT_EXCEPTION:
                     throw newOffsetTimeWithoutOffsetOnTheFormatException();
                 default:
@@ -259,28 +249,9 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
     }
 
     @Override
-    public Object parse(String s) throws TemplateValueFormatException {
-        if (specialParsing != null) {
-            switch (specialParsing) {
-                case OFFSET_TIME_DST_ERROR:
-                    throw newOffsetTimeWithoutOffsetOnTheFormatException();
-                default:
-                    throw new BugException();
-            }
-        }
-
-        try {
-            return dateTimeFormatter.parse(s, temporalQuery);
-        } catch (DateTimeParseException e) {
-            throw new UnparsableValueException(
-                    "Failed to parse value " + jQuote(s) + " with format " + jQuote(formatString)
-                            + ", and target class " + temporalClass.getSimpleName() + ", "
-                            + "locale " + jQuote(dateTimeFormatter.getLocale()) + ", "
-                            + "zoneId " + jQuote(zoneId) + ".\n"
-                            + "(Used this DateTimeFormatter: " + dateTimeFormatter + ")\n"
-                            + "(Root cause message: " + e.getMessage() + ")",
-                    e);
-        }
+    public Temporal parse(String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy) throws
+            TemplateValueFormatException {
+        return parse(s, missingTimeZoneParserPolicy, dateTimeFormatter);
     }
 
     @Override
@@ -301,17 +272,18 @@ class JavaTemplateTemporalFormat extends TemplateTemporalFormat {
      */
     @Override
     public boolean isTimeZoneBound() {
+        // TODO [FREEMARKER-35] Even for local temporals?
         return true;
     }
 
-    private static final ZonedDateTime SHOWS_ZONE_SAMPLE_TEMPORAL_1 = ZonedDateTime.of(
+    private static final ZonedDateTime SHOWS_OFFSET_OR_ZONE_SAMPLE_TEMPORAL_1 = ZonedDateTime.of(
             LocalDateTime.of(2011, 1, 1, 1, 1), ZoneOffset.ofHours(0));
-    private static final ZonedDateTime SHOWS_ZONE_SAMPLE_TEMPORAL_2 = ZonedDateTime.of(
+    private static final ZonedDateTime SHOWS_OFFSET_OR_ZONE_SAMPLE_TEMPORAL_2 = ZonedDateTime.of(
             LocalDateTime.of(2011, 1, 1, 1, 1), ZoneOffset.ofHours(1));
 
-    private boolean showsZone(DateTimeFormatter dateTimeFormatter) {
-        return !dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_1)
-                .equals(dateTimeFormatter.format(SHOWS_ZONE_SAMPLE_TEMPORAL_2));
+    private boolean showsOffsetOrZone(DateTimeFormatter dateTimeFormatter) {
+        return !dateTimeFormatter.format(SHOWS_OFFSET_OR_ZONE_SAMPLE_TEMPORAL_1)
+                .equals(dateTimeFormatter.format(SHOWS_OFFSET_OR_ZONE_SAMPLE_TEMPORAL_2));
     }
 
     private static FormatStyle getMoreVerboseStyle(FormatStyle style) {

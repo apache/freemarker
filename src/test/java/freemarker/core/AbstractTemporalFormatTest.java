@@ -20,6 +20,8 @@
 package freemarker.core;
 
 import static freemarker.template.utility.StringUtil.*;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -65,9 +67,44 @@ public abstract class AbstractTemporalFormatTest {
         return sb.toString();
     }
 
+    /**
+     * Same as {@link #assertParsingResults(Consumer, MissingTimeZoneParserPolicy, Object...)} with 2nd argument {@link
+     * MissingTimeZoneParserPolicy#ASSUME_CURRENT_TIME_ZONE}.
+     */
     static protected void assertParsingResults(
             Consumer<Configurable> configurator,
-            Object... stringsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
+            Object... inputsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
+        assertParsingResults(
+                configurator,
+                MissingTimeZoneParserPolicy.ASSUME_CURRENT_TIME_ZONE,
+                inputsAndExpectedResults);
+    }
+
+    /**
+     * Same as {@link #assertParsingResults(Consumer, MissingTimeZoneParserPolicy, Object...)}, but 2nd argument going
+     * through all {@link MissingTimeZoneParserPolicy} values.
+     */
+    static protected void assertParsingResultsWithAllMissingTimeZonePolicies(
+            Consumer<Configurable> configurator,
+            Object... inputsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
+        for (MissingTimeZoneParserPolicy missingTimeZoneParserPolicy : MissingTimeZoneParserPolicy.values()) {
+            assertParsingResults(
+                    configurator,
+                    MissingTimeZoneParserPolicy.ASSUME_CURRENT_TIME_ZONE,
+                    inputsAndExpectedResults);
+        }
+    }
+
+    /**
+     * @param inputsAndExpectedResults
+     *         Repeats this pattern: Parsed string ({@link String}), optional target temporal class ({@link Class}),
+     *         expected result ({@link Temporal}). If the target temporal class is left out, it will detect it from the
+     *         type of the expected result. ,
+     */
+    static protected void assertParsingResults(
+            Consumer<Configurable> configurator,
+            MissingTimeZoneParserPolicy missingTimeZoneParserPolicy,
+            Object... inputsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
         Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
         conf.setTimeZone(DateUtil.UTC);
         conf.setLocale(Locale.US);
@@ -81,45 +118,76 @@ public abstract class AbstractTemporalFormatTest {
             throw new UncheckedIOException(e);
         }
 
-        if (stringsAndExpectedResults.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "stringsAndExpectedResults.length must be even, but was " + stringsAndExpectedResults.length + ".");
+        boolean hasTargetClasses = inputsAndExpectedResults.length >= 2 && inputsAndExpectedResults[1] instanceof Class;
+
+        if (inputsAndExpectedResults.length == 0) {
+            throw new IllegalArgumentException("inputsAndExpectedResults can't be empty.");
         }
-        for (int i = 0; i < stringsAndExpectedResults.length; i += 2) {
-            Object value = stringsAndExpectedResults[i];
+        int i = 0;
+        while (i < inputsAndExpectedResults.length) {
+            Object value = inputsAndExpectedResults[i];
+
             if (!(value instanceof String)) {
-                throw new IllegalArgumentException("stringsAndExpectedResults[" + i + "] should be a String");
+                throw new IllegalArgumentException("inputsAndExpectedResults[" + i + "] should be a "
+                        + "String, but it's this " + ClassUtil.getShortClassNameOfObject(value) + ": " + value);
             }
-            String string = (String) value;
+            String stringToParse = (String) value;
+            i++;
 
-            value = stringsAndExpectedResults[i + 1];
-            if (!(value instanceof Temporal)) {
-                throw new IllegalArgumentException("stringsAndExpectedResults[" + (i + 1) + "] should be a Temporal");
+            final Class<? extends Temporal> temporalClass;
+            final Temporal expectedResult;
+            if (i == inputsAndExpectedResults.length) {
+                throw new IllegalArgumentException("inputsAndExpectedResults[" + i + "] is out of array bounds; "
+                        + "expecting a Temporal or Class<? extends Temporal> there.");
             }
-            Temporal expectedResult = (Temporal) value;
+            value = inputsAndExpectedResults[i];
+            if (value instanceof Temporal) {
+                expectedResult = (Temporal) value;
+                temporalClass = expectedResult.getClass();
+                i++;
+            } else if (value instanceof Class) {
+                temporalClass = (Class<? extends Temporal>) value;
+                i++;
 
-            Class<? extends Temporal> temporalClass = expectedResult.getClass();
+                if (i == inputsAndExpectedResults.length) {
+                    throw new IllegalArgumentException("inputsAndExpectedResults[" + i + "] is out of array bounds; "
+                            + "expecting a Temporal there.");
+                }
+                value = inputsAndExpectedResults[i];
+                if (!(value instanceof Temporal)) {
+                    throw new IllegalArgumentException("inputsAndExpectedResults[" + i + "] should be a "
+                            + "Temporal, but it's this " + ClassUtil.getShortClassNameOfObject(value) + ": " + value);
+                }
+                expectedResult = (Temporal) value;
+                i++;
+            } else {
+                throw new IllegalArgumentException("inputsAndExpectedResults[" + i + "] should be a "
+                        + "Temporal or Class<? extends Temporal>, but it's this "
+                        + ClassUtil.getShortClassNameOfObject(value) + ": " + value);
+            }
+
             TemplateTemporalFormat templateTemporalFormat = env.getTemplateTemporalFormat(temporalClass);
 
             Temporal actualResult;
             {
-                Object actualResultObject = templateTemporalFormat.parse(string);
+                Object actualResultObject = templateTemporalFormat.parse(stringToParse, missingTimeZoneParserPolicy);
                 if (actualResultObject instanceof Temporal) {
                     actualResult = (Temporal) actualResultObject;
                 } else if (actualResultObject instanceof TemplateTemporalModel) {
                     actualResult = ((TemplateTemporalModel) actualResultObject).getAsTemporal();
                 } else {
                     throw new AssertionError(
-                            "Parsing result of " + jQuote(string) + " is not of an expected type: "
+                            "Parsing result of " + jQuote(stringToParse) + " is not of an expected type: "
                                     + ClassUtil.getShortClassNameOfObject(actualResultObject));
                 }
             }
 
             if (!expectedResult.equals(actualResult)) {
                 throw new AssertionError(
-                        "Parsing result of " + jQuote(string) + " "
+                        "Parsing result of " + jQuote(stringToParse) + " "
                                 + "(with temporalFormat[" + temporalClass.getSimpleName() + "]="
                                 + jQuote(env.getTemporalFormat(temporalClass)) + ", "
+                                + "missingTimeZoneParserPolicy=" + missingTimeZoneParserPolicy + ", "
                                 + "timeZone=" + jQuote(env.getTimeZone().toZoneId()) + ", "
                                 + "locale=" + jQuote(env.getLocale()) + ") "
                                 + "differs from expected.\n"
@@ -131,8 +199,21 @@ public abstract class AbstractTemporalFormatTest {
 
     static protected void assertParsingFails(
             Consumer<Configurable> configurator,
-            String parsed,
+            String stringToParse,
             Class<? extends Temporal> temporalClass,
+            Consumer<TemplateValueFormatException> exceptionAssertions) throws TemplateException,
+            TemplateValueFormatException {
+        assertParsingFails(
+                configurator,
+                MissingTimeZoneParserPolicy.ASSUME_CURRENT_TIME_ZONE,
+                stringToParse, temporalClass,
+                exceptionAssertions);
+    }
+
+    static protected void assertParsingFails(
+            Consumer<Configurable> configurator,
+            MissingTimeZoneParserPolicy missingTimeZoneParserPolicy,
+            String stringToParse, Class<? extends Temporal> temporalClass,
             Consumer<TemplateValueFormatException> exceptionAssertions) throws TemplateException,
             TemplateValueFormatException {
         Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
@@ -151,11 +232,20 @@ public abstract class AbstractTemporalFormatTest {
         TemplateTemporalFormat templateTemporalFormat = env.getTemplateTemporalFormat(temporalClass);
 
         try {
-            templateTemporalFormat.parse(parsed);
-            fail("Parsing " + jQuote(parsed) + " with " + templateTemporalFormat + " should have failed.");
+            templateTemporalFormat.parse(stringToParse, missingTimeZoneParserPolicy);
+            fail("Parsing " + jQuote(stringToParse) + " with " + templateTemporalFormat + " should have failed.");
         } catch (TemplateValueFormatException e) {
             exceptionAssertions.accept(e);
         }
+    }
+
+    protected static void assertMissingTimeZoneFailPolicyTriggered(TemplateValueFormatException e) {
+        assertThat(
+                e.getMessage(),
+                allOf(
+                        containsStringIgnoringCase("doesn't contain time zone or offset"),
+                        containsString(MissingTimeZoneParserPolicy.class.getName() + "."
+                                + MissingTimeZoneParserPolicy.FAIL)));
     }
 
 }

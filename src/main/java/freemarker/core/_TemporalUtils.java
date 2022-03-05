@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package freemarker.template.utility;
+package freemarker.core;
 
 import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
@@ -49,15 +49,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import freemarker.core._JavaTimeBugUtils;
 import freemarker.template.Configuration;
+import freemarker.template.utility.StringUtil;
 
 /**
+ * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * Static utilities related to {@link Temporal}-s, and other {@code java.time} classes.
  *
  * @since 2.3.32
  */
-public final class TemporalUtils {
+public final class _TemporalUtils {
     private static final Map<Class<? extends Temporal>, TemporalQuery<? extends Temporal>> TEMPORAL_CLASS_TO_QUERY_MAP;
     static {
         TEMPORAL_CLASS_TO_QUERY_MAP = new IdentityHashMap<>();
@@ -65,7 +66,7 @@ public final class TemporalUtils {
         TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalDate.class, LocalDate::from);
         TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalDateTime.class, LocalDateTime::from);
         TEMPORAL_CLASS_TO_QUERY_MAP.put(LocalTime.class, LocalTime::from);
-        TEMPORAL_CLASS_TO_QUERY_MAP.put(OffsetDateTime.class, TemporalUtils::offsetDateTimeFrom);
+        TEMPORAL_CLASS_TO_QUERY_MAP.put(OffsetDateTime.class, _TemporalUtils::offsetDateTimeFrom);
         TEMPORAL_CLASS_TO_QUERY_MAP.put(OffsetTime.class, OffsetTime::from);
         TEMPORAL_CLASS_TO_QUERY_MAP.put(ZonedDateTime.class, ZonedDateTime::from);
         TEMPORAL_CLASS_TO_QUERY_MAP.put(Year.class, Year::from);
@@ -75,6 +76,7 @@ public final class TemporalUtils {
     /**
      * {@link Temporal} subclasses directly suppoerted by FreeMarker.
      */
+    // Not private because of tests
     static final List<Class<? extends Temporal>> SUPPORTED_TEMPORAL_CLASSES = Arrays.asList(
             Instant.class,
             LocalDate.class,
@@ -86,10 +88,11 @@ public final class TemporalUtils {
             Year.class,
             YearMonth.class);
 
+    // Not private because of tests
     static final boolean SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL = SUPPORTED_TEMPORAL_CLASSES.stream()
             .allMatch(cl -> (cl.getModifiers() & Modifier.FINAL) == Modifier.FINAL);
 
-    private TemporalUtils() {
+    private _TemporalUtils() {
         throw new AssertionError();
     }
 
@@ -100,8 +103,7 @@ public final class TemporalUtils {
     public static TemporalQuery<? extends Temporal> getTemporalQuery(Class<? extends Temporal> temporalClass) {
         TemporalQuery<? extends Temporal> temporalQuery = TEMPORAL_CLASS_TO_QUERY_MAP.get(temporalClass);
         if (temporalQuery == null) {
-            Class<? extends Temporal> normalizedTemporalClass = normalizeSupportedTemporalClass(
-                    temporalClass);
+            Class<? extends Temporal> normalizedTemporalClass = normalizeSupportedTemporalClass(temporalClass);
             if (temporalClass != normalizedTemporalClass) {
                 temporalQuery = TEMPORAL_CLASS_TO_QUERY_MAP.get(normalizedTemporalClass);
             }
@@ -432,8 +434,6 @@ public final class TemporalUtils {
      * a future Java version, use this method before using {@code ==}.
      *
      * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
-     *
-     * @since 2.3.32
      */
     public static Class<? extends Temporal> normalizeSupportedTemporalClass(Class<? extends Temporal> temporalClass) {
         if (SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL) {
@@ -467,8 +467,6 @@ public final class TemporalUtils {
      * Tells if the temporal class is one that doesn't store, nor have an implied time zone or offset.
      *
      * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
-     *
-     * @since 2.3.32
      */
     public static boolean isLocalTemporalClass(Class<? extends Temporal> temporalClass) {
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
@@ -479,6 +477,26 @@ public final class TemporalUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the local variation of a non-local class, or {@code null} if no local pair is known, or the class is not
+     * recognized .
+     *
+     * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
+     */
+    public static Class<? extends Temporal> getLocalTemporalClassForNonLocal(Class<? extends Temporal> temporalClass) {
+        temporalClass = normalizeSupportedTemporalClass(temporalClass);
+        if (temporalClass == OffsetDateTime.class) {
+            return LocalDateTime.class;
+        }
+        if (temporalClass == ZonedDateTime.class) {
+            return LocalDateTime.class;
+        }
+        if (temporalClass == OffsetTime.class) {
+            return LocalTime.class;
+        }
+        return null;
     }
 
     /**
@@ -515,4 +533,5 @@ public final class TemporalUtils {
             throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
         }
     }
+
 }

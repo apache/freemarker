@@ -64,7 +64,7 @@ public class EpochMillisTemplateTemporalFormatFactory extends TemplateTemporalFo
         }
         
         @Override
-        public Object parse(String s) throws TemplateValueFormatException {
+        public Object parse(String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy) throws TemplateValueFormatException {
             throw new ParsingNotSupportedException("Parsing is not implement for this test class");
         }
 

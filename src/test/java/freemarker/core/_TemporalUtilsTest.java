@@ -17,11 +17,16 @@
  * under the License.
  */
 
-package freemarker.template.utility;
+package freemarker.core;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.Temporal;
 import java.util.HashSet;
@@ -31,21 +36,21 @@ import org.junit.Test;
 
 import freemarker.template.Configuration;
 
-public class TemporalUtilsTest {
+public class _TemporalUtilsTest {
 
     @Test
     public void testSupportedTemporalClassAreFinal() {
         assertTrue(
                 "FreeMarker was implemented with the assumption that temporal classes are final. While there "
                         + "are measures in place to handle if it's not a case, it would be better to review the code.",
-                TemporalUtils.SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL);
+                _TemporalUtils.SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL);
     }
 
     @Test
     public void testGetTemporalFormat() {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
 
-        for (Class<? extends Temporal> supportedTemporalClass : TemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
+        for (Class<? extends Temporal> supportedTemporalClass : _TemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
             assertNotNull(cfg.getTemporalFormat(supportedTemporalClass));
         }
 
@@ -63,20 +68,28 @@ public class TemporalUtilsTest {
 
         for (boolean camelCase : new boolean[] {false, true}) {
             Set<String> uniqueSettingNames = new HashSet<>();
-            for (Class<? extends Temporal> supportedTemporalClass : TemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
+            for (Class<? extends Temporal> supportedTemporalClass : _TemporalUtils.SUPPORTED_TEMPORAL_CLASSES) {
                 uniqueSettingNames.add(
-                        TemporalUtils.temporalClassToFormatSettingName(supportedTemporalClass, camelCase));
+                        _TemporalUtils.temporalClassToFormatSettingName(supportedTemporalClass, camelCase));
             }
-            assertThat(uniqueSettingNames.size(), equalTo(TemporalUtils.SUPPORTED_TEMPORAL_CLASSES.size() - 4));
+            assertThat(uniqueSettingNames.size(), equalTo(_TemporalUtils.SUPPORTED_TEMPORAL_CLASSES.size() - 4));
             assertTrue(uniqueSettingNames.stream().allMatch(it -> cfg.getSettingNames(camelCase).contains(it)));
         }
 
         try {
-            TemporalUtils.temporalClassToFormatSettingName(ChronoLocalDate.class, false);
+            _TemporalUtils.temporalClassToFormatSettingName(ChronoLocalDate.class, false);
             fail();
         } catch (IllegalArgumentException e) {
             // Expected
         }
+    }
+
+    @Test
+    public void testGetLocalTemporalClassForNonLocal() {
+        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(OffsetDateTime.class), equalTo(LocalDateTime.class));
+        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(ZonedDateTime.class), equalTo(LocalDateTime.class));
+        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(OffsetTime.class), equalTo(LocalTime.class));
+        assertNull(_TemporalUtils.getLocalTemporalClassForNonLocal(LocalDateTime.class));
     }
 
 }
