@@ -278,23 +278,30 @@ public class JavaTemplateTemporalFormatTest extends AbstractTemporalFormatTest {
 
     @Test
     public void testParseWrongFormat() throws TemplateException, TemplateValueFormatException {
-        try {
-            assertParsingResults(
-                    conf -> conf.setDateTimeFormat("y-MM-dd HH:mm"),
-                    "2020-12-10 01:14 PM", LocalDateTime.of(2020, 12, 10, 13, 14));
-            fail("Parsing should have failed");
-        } catch (UnparsableValueException e) {
-            assertThat(
-                    e.getMessage(),
-                    allOf(
-                            containsString("\"2020-12-10 01:14 PM\""),
-                            containsString("\"y-MM-dd HH:mm\""),
-                            containsString("\"en_US\""),
-                            containsString("\"UTC\""),
-                            containsString("LocalDateTime")
-                    )
-            );
-        }
+        assertParsingFails(
+                conf -> conf.setDateTimeFormat("y-MM-dd HH:mm"),
+                "2020-12-10 01:14 PM",
+                LocalDateTime.class,
+                e -> assertThat(
+                e.getMessage(),
+                allOf(
+                        containsString("\"2020-12-10 01:14 PM\""),
+                        containsString("\"y-MM-dd HH:mm\""),
+                        containsString("\"en_US\""),
+                        not(containsString("\"UTC\"")), // Because local formats don't depend on timeZone
+                        containsString(LocalDateTime.class.getSimpleName()))));
+        assertParsingFails(
+                conf -> conf.setDateTimeFormat("y-MM-dd HH:mm X"),
+                "2020-12-10 01:14 PM",
+                ZonedDateTime.class,
+                e -> assertThat(
+                        e.getMessage(),
+                        allOf(
+                                containsString("\"2020-12-10 01:14 PM\""),
+                                containsString("\"y-MM-dd HH:mm X\""),
+                                containsString("\"en_US\""),
+                                containsString("\"UTC\""), //
+                                containsString(ZonedDateTime.class.getSimpleName()))));
     }
 
     @Test

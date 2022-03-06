@@ -33,21 +33,29 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAccessor;
+import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * Was created ad-hoc to contain whatever happens to be common between some of our {@link TemplateTemporalFormat}-s.
  */
-abstract class DateTimeFormatBasedTemplateTemporalFormat extends TemplateTemporalFormat {
+abstract class JavaOrISOLikeTemplateTemporalFormat extends TemplateTemporalFormat {
     protected final Class<? extends Temporal> temporalClass;
     protected final boolean isLocalTemporalClass;
+    protected final TimeZone timeZone;
     protected final ZoneId zoneId;
 
-    public DateTimeFormatBasedTemplateTemporalFormat(
-            Class<? extends Temporal> temporalClass, ZoneId zoneId) {
-        temporalClass = _TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
-        this.temporalClass = temporalClass;
-        this.isLocalTemporalClass = isLocalTemporalClass(temporalClass);
-        this.zoneId = zoneId;
+    public JavaOrISOLikeTemplateTemporalFormat(
+            Class<? extends Temporal> temporalClass, TimeZone timeZone) {
+        this.temporalClass = Objects.requireNonNull(_TemporalUtils.normalizeSupportedTemporalClass(temporalClass));
+        this.isLocalTemporalClass = isLocalTemporalClass(this.temporalClass);
+        if (isLocalTemporalClass) {
+            this.zoneId = null;
+            this.timeZone = null;
+        } else {
+            this.timeZone = Objects.requireNonNull(timeZone);
+            this.zoneId = timeZone.toZoneId();
+        }
     }
 
     protected Temporal parse(
@@ -140,4 +148,8 @@ abstract class DateTimeFormatBasedTemplateTemporalFormat extends TemplateTempora
                 e);
     }
 
+    @Override
+    public final boolean canBeUsedForTimeZone(TimeZone timeZone) {
+        return this.timeZone == null || this.timeZone.equals(timeZone);
+    }
 }

@@ -31,6 +31,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -44,7 +45,7 @@ import freemarker.template.TemplateTemporalModel;
  *
  * @since 2.3.32
  */
-final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTemplateTemporalFormat {
+final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;
     private final boolean instantConversion;
     private final String description;
@@ -55,8 +56,8 @@ final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTem
             DateTimeFormatter dateTimeFormatter,
             DateTimeFormatter parserExtendedDateTimeFormatter,
             DateTimeFormatter parserBasicDateTimeFormatter,
-            Class<? extends Temporal> temporalClass, TimeZone zone, String formatString) {
-        super(temporalClass, zone.toZoneId());
+            Class<? extends Temporal> temporalClass, TimeZone timeZone, String formatString) {
+        super(temporalClass, timeZone);
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
         this.dateTimeFormatter = dateTimeFormatter;
         this.parserExtendedDateTimeFormatter = parserExtendedDateTimeFormatter;
@@ -85,8 +86,6 @@ final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTem
 
     @Override
     public Object parse(String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy) throws TemplateValueFormatException {
-        // TODO [FREEMARKER-35] Implement missingTimeZoneParserPolicy
-
         final boolean extendedFormat;
         final boolean add1Day;
         if (temporalClass == LocalDate.class || temporalClass == YearMonth.class) {
@@ -124,9 +123,11 @@ final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTem
             }
         }
 
-        DateTimeFormatter parserDateTimeFormatter = parserBasicDateTimeFormatter == null || extendedFormat
-                ? parserExtendedDateTimeFormatter : parserBasicDateTimeFormatter;
-        Temporal resultTemporal = parse(s, missingTimeZoneParserPolicy, parserDateTimeFormatter);
+        Temporal resultTemporal = parse(
+                s, missingTimeZoneParserPolicy,
+                parserBasicDateTimeFormatter == null || extendedFormat
+                        ? parserExtendedDateTimeFormatter : parserBasicDateTimeFormatter);
+
         if (add1Day) {
             resultTemporal = resultTemporal.plus(1, ChronoUnit.DAYS);
         }
@@ -162,13 +163,7 @@ final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatBasedTem
     }
 
     @Override
-    public boolean isLocaleBound() {
-        return false;
-    }
-
-    @Override
-    public boolean isTimeZoneBound() {
-        // TODO [FREEMARKER-35] Even for local temporals?
+    public boolean canBeUsedForLocale(Locale locale) {
         return true;
     }
 

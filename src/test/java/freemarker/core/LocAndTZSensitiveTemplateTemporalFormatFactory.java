@@ -74,12 +74,12 @@ public class LocAndTZSensitiveTemplateTemporalFormatFactory extends TemplateTemp
         }
 
         @Override
-        public boolean isLocaleBound() {
+        public boolean canBeUsedForLocale(Locale locale) {
             return true;
         }
 
         @Override
-        public boolean isTimeZoneBound() {
+        public boolean canBeUsedForTimeZone(TimeZone timeZone) {
             return true;
         }
 

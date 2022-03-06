@@ -69,12 +69,12 @@ public class EpochMillisTemplateTemporalFormatFactory extends TemplateTemporalFo
         }
 
         @Override
-        public boolean isLocaleBound() {
+        public boolean canBeUsedForLocale(Locale locale) {
             return false;
         }
 
         @Override
-        public boolean isTimeZoneBound() {
+        public boolean canBeUsedForTimeZone(TimeZone timeZone) {
             return false;
         }
 

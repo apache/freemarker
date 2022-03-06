@@ -2950,9 +2950,9 @@ public class Configurable {
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
             } else if (YEAR_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.yearFormat = value;
+                setYearFormat(value);
             } else if (YEAR_MONTH_FORMAT_KEY_SNAKE_CASE.equals(name) || YEAR_MONTH_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                this.yearMonthFormat = value;
+                setYearMonthFormat(value);
             } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
                     || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(

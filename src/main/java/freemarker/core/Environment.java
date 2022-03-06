@@ -29,7 +29,16 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,9 +150,9 @@ public final class Environment extends Configurable {
     private ZoneId cachedZoneId;
 
     /**
-     * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
-     * formatting. That is, in situations like ${lastModified} or even ${lastModified?date}, but not in situations like
-     * ${lastModified?string.iso}.
+     * Stores the date/time/date-time formatters that are used when no format is explicitly given where the value is
+     * converted to text. That is, it's used in situations like ${lastModified} or even ${lastModified?date}, but not in
+     * situations like ${lastModified?string.iso}.
      * 
      * <p>
      * The index of the array is calculated from what kind of formatter we want (see
@@ -159,6 +168,85 @@ public final class Environment extends Configurable {
      * first needed.
      */
     private TemplateDateFormat[] cachedTempDateFormatArray;
+
+    /**
+     * Similar to {@link #cachedTempDateFormatArray}, but for {@link TemplateTemporalFormat}-s. It's not an array as
+     * {@code java.time} classes have no numerical value, unlike legacy FreeMarker date types.
+     */
+    private TemplateTemporalFormatCache cachedTemporalFormatCache;
+    private final class TemplateTemporalFormatCache {
+        // Notes:
+        // - "reusable" fields are set when the current cache field is set
+        // - non-reusable fields are cleared when any related setting is changed, but reusableXxx fields are only
+        //   if the format string changes
+        // - When there's a cache-miss, we check if the "reusable" field has compatible timeZone, and locale, and if
+        //   so, we copy it back into the non-reusable field, and use it.
+
+        private TemplateTemporalFormat localDateTimeFormat;
+        private TemplateTemporalFormat reusableLocalDateTimeFormat;
+        private TemplateTemporalFormat offsetDateTimeFormat;
+        private TemplateTemporalFormat reusableOffsetDateTimeFormat;
+        private TemplateTemporalFormat zonedDateTimeFormat;
+        private TemplateTemporalFormat reusableZonedDateTimeFormat;
+        private TemplateTemporalFormat localDateFormat;
+        private TemplateTemporalFormat reusableLocalDateFormat;
+        private TemplateTemporalFormat localTimeFormat;
+        private TemplateTemporalFormat reusableLocalTimeFormat;
+        private TemplateTemporalFormat offsetTimeFormat;
+        private TemplateTemporalFormat reusableOffsetTimeFormat;
+        private TemplateTemporalFormat yearMonthFormat;
+        private TemplateTemporalFormat reusableYearMonthFormat;
+        private TemplateTemporalFormat yearFormat;
+        private TemplateTemporalFormat reusableYearFormat;
+        private TemplateTemporalFormat instantFormat;
+        private TemplateTemporalFormat reusableInstantFormat;
+
+        private void evictAfterTimeZoneOrLocaleChange() {
+            localDateTimeFormat = null;
+            offsetDateTimeFormat = null;
+            zonedDateTimeFormat = null;
+            localDateFormat = null;
+            localTimeFormat = null;
+            offsetTimeFormat = null;
+            yearMonthFormat = null;
+            yearFormat = null;
+            instantFormat = null;
+        }
+
+        private void evictAfterDateTimeFormatChange() {
+            localDateTimeFormat = null;
+            reusableLocalDateTimeFormat = null;
+            offsetDateTimeFormat = null;
+            reusableOffsetDateTimeFormat = null;
+            zonedDateTimeFormat = null;
+            reusableZonedDateTimeFormat = null;
+            instantFormat = null;
+            reusableInstantFormat = null;
+        }
+
+        private void evictAfterDateFormatChange() {
+            localDateFormat = null;
+            reusableLocalDateFormat = null;
+        }
+
+        private void evictAfterTimeFormatChange() {
+            localTimeFormat = null;
+            reusableLocalTimeFormat = null;
+            offsetTimeFormat = null;
+            reusableOffsetTimeFormat = null;
+        }
+
+        private void evictAfterYearMonthFormatChange() {
+            yearMonthFormat = null;
+            reusableYearMonthFormat = null;
+        }
+
+        private void evictAfterYearFormatChange() {
+            yearFormat = null;
+            reusableYearFormat = null;
+        }
+    }
+
     /** Similar to {@link #cachedTempDateFormatArray}, but used when a formatting string was specified. */
     private HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray;
     private static final int CACHED_TDFS_ZONELESS_INPUT_OFFS = 4;
@@ -1270,6 +1358,10 @@ public final class Environment extends Configurable {
             cachedTempDateFormatsByFmtStrArray = null;
 
             cachedCollator = null;
+
+            if (cachedTemporalFormatCache != null) {
+                cachedTemporalFormatCache.evictAfterTimeZoneOrLocaleChange();
+            }
         }
     }
 
@@ -1294,6 +1386,10 @@ public final class Environment extends Configurable {
             }
 
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
+
+            if (cachedTemporalFormatCache != null) {
+                cachedTemporalFormatCache.evictAfterTimeZoneOrLocaleChange();
+            }
         }
     }
 
@@ -1729,6 +1825,10 @@ public final class Environment extends Configurable {
                     cachedTempDateFormatArray[i + TemplateDateModel.TIME] = null;
                 }
             }
+
+            if (cachedTemporalFormatCache != null) {
+                cachedTemporalFormatCache.evictAfterTimeFormatChange();
+            }
         }
     }
 
@@ -1742,6 +1842,10 @@ public final class Environment extends Configurable {
                     cachedTempDateFormatArray[i + TemplateDateModel.DATE] = null;
                 }
             }
+
+            if (cachedTemporalFormatCache != null) {
+                cachedTemporalFormatCache.evictAfterDateFormatChange();
+            }
         }
     }
 
@@ -1754,6 +1858,36 @@ public final class Environment extends Configurable {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
                     cachedTempDateFormatArray[i + TemplateDateModel.DATETIME] = null;
                 }
+            }
+
+            if (cachedTemporalFormatCache != null) {
+                cachedTemporalFormatCache.evictAfterDateTimeFormatChange();
+            }
+        }
+    }
+
+    @Override
+    public void setYearFormat(String yearFormat) {
+        if (cachedTemporalFormatCache == null) {
+            super.setYearFormat(yearFormat);
+        } else {
+            String prevYearFormat = getYearFormat();
+            super.setYearFormat(yearFormat);
+            if (!yearFormat.equals(prevYearFormat)) {
+                cachedTemporalFormatCache.evictAfterYearFormatChange();
+            }
+        }
+    }
+
+    @Override
+    public void setYearMonthFormat(String yearMonthFormat) {
+        if (cachedTemporalFormatCache == null) {
+            super.setYearMonthFormat(yearMonthFormat);
+        } else {
+            String prevYearMonthFormat = getYearMonthFormat();
+            super.setYearMonthFormat(yearMonthFormat);
+            if (!yearMonthFormat.equals(prevYearMonthFormat)) {
+                cachedTemporalFormatCache.evictAfterYearMonthFormatChange();
             }
         }
     }
@@ -2363,10 +2497,195 @@ public final class Environment extends Configurable {
         }
     }
 
-    TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass)
+    /**
+     * Returns the current format for the given temporal class.
+     *
+     * @since 2.3.31
+     */
+    public TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass)
             throws TemplateValueFormatException {
-        // TODO [FREEMARKER-35] Temporal class keyed cache, invalidated by temporalFormat (instantFormat, localDateFormat, etc.), locale, and timeZone change.
-        return getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+        temporalClass = _TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
+        if (cachedTemporalFormatCache == null) {
+            cachedTemporalFormatCache = new TemplateTemporalFormatCache();
+        }
+
+        TemplateTemporalFormat result;
+
+        // BEGIN Generated with getTemplateTemporalFormatCaching.ftl
+        if (temporalClass == LocalDateTime.class) {
+            result = cachedTemporalFormatCache.localDateTimeFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableLocalDateTimeFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.localDateTimeFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.localDateTimeFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableLocalDateTimeFormat = result;
+            return result;
+        }
+        if (temporalClass == Instant.class) {
+            result = cachedTemporalFormatCache.instantFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableInstantFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.instantFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.instantFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableInstantFormat = result;
+            return result;
+        }
+        if (temporalClass == LocalDate.class) {
+            result = cachedTemporalFormatCache.localDateFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableLocalDateFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.localDateFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.localDateFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableLocalDateFormat = result;
+            return result;
+        }
+        if (temporalClass == LocalTime.class) {
+            result = cachedTemporalFormatCache.localTimeFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableLocalTimeFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.localTimeFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.localTimeFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableLocalTimeFormat = result;
+            return result;
+        }
+        if (temporalClass == ZonedDateTime.class) {
+            result = cachedTemporalFormatCache.zonedDateTimeFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableZonedDateTimeFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.zonedDateTimeFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.zonedDateTimeFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableZonedDateTimeFormat = result;
+            return result;
+        }
+        if (temporalClass == OffsetDateTime.class) {
+            result = cachedTemporalFormatCache.offsetDateTimeFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableOffsetDateTimeFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.offsetDateTimeFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.offsetDateTimeFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableOffsetDateTimeFormat = result;
+            return result;
+        }
+        if (temporalClass == OffsetTime.class) {
+            result = cachedTemporalFormatCache.offsetTimeFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableOffsetTimeFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.offsetTimeFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.offsetTimeFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableOffsetTimeFormat = result;
+            return result;
+        }
+        if (temporalClass == YearMonth.class) {
+            result = cachedTemporalFormatCache.yearMonthFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableYearMonthFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.yearMonthFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.yearMonthFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableYearMonthFormat = result;
+            return result;
+        }
+        if (temporalClass == Year.class) {
+            result = cachedTemporalFormatCache.yearFormat;
+            if (result != null) {
+                return result;
+            }
+
+            result = cachedTemporalFormatCache.reusableYearFormat;
+            if (result != null
+                    && result.canBeUsedForTimeZone(getTimeZone()) && result.canBeUsedForLocale(getLocale())) {
+                cachedTemporalFormatCache.yearFormat = result;
+                return result;
+            }
+
+            result = getTemplateTemporalFormat(getTemporalFormat(temporalClass), temporalClass);
+            cachedTemporalFormatCache.yearFormat = result;
+            // We do this ahead of time, to decrease the cost of evictions:
+            cachedTemporalFormatCache.reusableYearFormat = result;
+            return result;
+        }
+        // END Generated with getTemplateTemporalFormatCaching.ftl
+
+        throw new AssertionError("Unhandled case: " + temporalClass);
     }
 
     /**
@@ -2406,8 +2725,7 @@ public final class Environment extends Configurable {
 
     private TemplateTemporalFormat getTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass)
             throws TemplateValueFormatException {
-        // TODO [FREEMARKER-35] format keyed cache, invalidated by locale, and timeZone change.
-        return getTemplateTemporalFormatWithoutCache(formatString, temporalClass, getLocale(), getTimeZone());
+        return getTemplateTemporalFormat(formatString, temporalClass, getLocale(), getTimeZone());
     }
 
     /**
@@ -2422,7 +2740,7 @@ public final class Environment extends Configurable {
      * @param zonelessInput
      *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
      */
-    private TemplateTemporalFormat getTemplateTemporalFormatWithoutCache(
+    private TemplateTemporalFormat getTemplateTemporalFormat(
             String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
             throws TemplateValueFormatException {
         final int formatStringLen = formatString.length();

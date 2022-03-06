@@ -65,13 +65,13 @@ public class HTMLISOTemplateTemporalFormatFactory extends TemplateTemporalFormat
         }
 
         @Override
-        public boolean isLocaleBound() {
-            return false;
+        public boolean canBeUsedForLocale(Locale locale) {
+            return isoFormat.canBeUsedForLocale(locale);
         }
 
         @Override
-        public boolean isTimeZoneBound() {
-            return false;
+        public boolean canBeUsedForTimeZone(TimeZone timeZone) {
+            return isoFormat.canBeUsedForTimeZone(timeZone);
         }
 
         @Override

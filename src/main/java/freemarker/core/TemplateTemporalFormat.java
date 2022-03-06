@@ -20,6 +20,8 @@ package freemarker.core;
 
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTemporalModel;
@@ -27,7 +29,7 @@ import freemarker.template.TemplateTemporalModel;
 /**
  * Represents a {@link Temporal} format; used in templates for formatting {@link Temporal}-s, and parsing strings to
  * {@link Temporal}-s. This is similar to Java's {@link DateTimeFormatter}, but made to fit the requirements of
- * FreeMarker. Also, it makes it possible to define formats that can't be represented with {@link DateTimeFormatter}.
+ * FreeMarker. Also, it makes it possible to define formats that can't be described with {@link DateTimeFormatter}.
  *
  * <p>{@link TemplateTemporalFormat} instances are usually created by a {@link TemplateTemporalFormatFactory}.
  *
@@ -36,6 +38,8 @@ import freemarker.template.TemplateTemporalModel;
  * different {@link Environment}-s. The code outside the {@link TemplateTemporalFormatFactory} will not try to reuse
  * {@link TemplateTemporalFormat} instances in multiple {@link Environment}-s, and an {@link Environment} is only used
  * in a single thread.
+ *
+ * @see TemplateDateFormat
  *
  * @since 2.3.32
  */
@@ -59,16 +63,14 @@ public abstract class TemplateTemporalFormat extends TemplateValueFormat {
     }
 
     /**
-     * Tells if the same formatter can be used regardless of the desired locale (so for example after a
-     * {@link Environment#getLocale()} change we can keep using the old instance).
+     * Tells if this formatter can be used for the given locale.
      */
-    public abstract boolean isLocaleBound();
+    public abstract boolean canBeUsedForLocale(Locale locale);
 
     /**
-     * Tells if the same formatter can be used regardless of the desired time zone (so for example after a
-     * {@link Environment#getTimeZone()} change we can keep using the old instance).
+     * Tells if this formatter can be used for the given {@link TimeZone}.
      */
-    public abstract boolean isTimeZoneBound();
+    public abstract boolean canBeUsedForTimeZone(TimeZone timeZone);
 
     /**
      * Parser a string to a {@link Temporal}, according to this format. Some format implementations may throw
