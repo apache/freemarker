@@ -29453,6 +29453,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               into the projects of our users), we were flagged as vulnerable
               at certain places for merely supporting 1.3.</para>
             </listitem>
+
+            <listitem>
+              <para>Fixed performance bug with XML processing
+              (<literal>freemarker.ext.dom</literal>) when converting an XML
+              element that contains lots of text nodes (instead of a single
+              big text node) to a string. (<link
+              xlink:href="https://github.com/apache/freemarker/pull/82">GitHub
+              PR 82</link>)</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
