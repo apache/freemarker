@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * Factory for a certain kind of {@link Temporal} formatting ({@link TemplateTemporalFormat}).
+ * Factory for a certain kind of {@link TemplateTemporalFormat}.
  * See more at {@link TemplateValueFormatFactory}.
  *
  * @see Configurable#setCustomTemporalFormats(java.util.Map)

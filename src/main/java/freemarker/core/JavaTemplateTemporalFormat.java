@@ -47,7 +47,7 @@ import freemarker.template.utility.ClassUtil;
  *
  * @since 2.3.32
  */
-class JavaTemplateTemporalFormat extends JavaOrISOLikeTemplateTemporalFormat {
+class JavaTemplateTemporalFormat extends DateTimeFormatterBasedTemplateTemporalFormat {
 
     enum PreFormatValueConversion {
         IDENTITY,
@@ -76,8 +76,8 @@ class JavaTemplateTemporalFormat extends JavaOrISOLikeTemplateTemporalFormat {
     private final String formatString;
     private final PreFormatValueConversion preFormatValueConversion;
 
-    JavaTemplateTemporalFormat(String formatString, Class<? extends Temporal> temporalClass, Locale locale,
-            TimeZone timeZone)
+    JavaTemplateTemporalFormat(
+            String formatString, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone)
             throws InvalidFormatParametersException {
         super(temporalClass, timeZone);
         this.locale = Objects.requireNonNull(locale);
@@ -139,6 +139,7 @@ class JavaTemplateTemporalFormat extends JavaOrISOLikeTemplateTemporalFormat {
                     } catch (DateTimeException e) {
                         timePartFormatStyle = getLessVerboseStyle(timePartFormatStyle);
                         if (timePartFormatStyle == null) {
+                            // Not even the least verbose style worked
                             throw e;
                         }
 

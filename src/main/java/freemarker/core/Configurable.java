@@ -1440,7 +1440,8 @@ public class Configurable {
      */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
         Objects.requireNonNull(temporalClass);
-        // The temporal classes are final (for now at least), so we can use == operator instead of instanceof.
+        // We can use == operator instead of instanceof, as temporal classes are final in Java 8. Just in case that
+        // changes in some later Java version, we have "else" branch that retries with a normalized class.
         if (temporalClass == Instant.class
                 || temporalClass == LocalDateTime.class
                 || temporalClass == ZonedDateTime.class
@@ -1455,14 +1456,14 @@ public class Configurable {
         } else if (temporalClass == YearMonth.class) {
             return getYearMonthFormat();
         } else {
-            // Handle the unlikely situation that in some future Java version we can have subclasses.
-            Class<? extends Temporal> normTemporalClass =
+            // Branch to handle the unlikely situation that in some Java version we can have subclasses.
+            Class<? extends Temporal> normalizedTemporalClass =
                     _TemporalUtils.normalizeSupportedTemporalClass(temporalClass);
-            if (normTemporalClass == temporalClass) {
+            if (normalizedTemporalClass == temporalClass) {
                 throw new IllegalArgumentException("There's no temporal format setting for this class: "
                         + temporalClass.getName());
             } else {
-                return getTemporalFormat(normTemporalClass);
+                return getTemporalFormat(normalizedTemporalClass);
             }
         }
     }
@@ -1503,7 +1504,7 @@ public class Configurable {
      * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
      * datetime_format} settings with values starting with <code>@<i>name</i></code>.
      *
-     * <p>It's important that the formats you set here will be only used when formatting {@link Date}-s, not when
+     * <p>It's important that the formats you set here will be only visible when formatting {@link Date}-s, not when
      * formatting {@link Temporal}-s. For the later, use {@link #setCustomTemporalFormats(Map)}. Ideally, you set the
      * same custom formatter names with both methods.
      *
@@ -1528,7 +1529,8 @@ public class Configurable {
     }
     
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object, or its value is coming from the {@link #getParent()
+     * parent}.
      * 
      * @since 2.3.24
      */
@@ -1588,16 +1590,16 @@ public class Configurable {
     }
 
     /**
-     * Associates names with {@link Temporal} formatter factories, which then can be referred by the
+     * Associates names with {@link TemplateTemporalFormatFactory}-es, which then can be referred by the
      * {@link #setDateTimeFormat(String) date_time_format}, {@link #setDateFormat(String) date_format}, and
      * {@link #setTimeFormat(String) time_format} settings, with values starting with <code>@<i>name</i></code>.
      *
-     * <p>It's important that the formats you set here will be only used when formatting {@link Temporal}-s, not when
+     * <p>It's important that the formats you set here will be only visible when formatting {@link Temporal}-s, not when
      * formatting {@link Date}-s. For the later, use {@link #setCustomDateFormats(Map)}. Ideally, you set the same
      * custom formatter names with both methods.
      *
      * @param customTemporalFormats
-     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
+     *            Can't be {@code null}. The name must start with a UNICODE letter, and can only contain UNICODE
      *            letters and digits.
      *            
      * @see #setCustomDateFormats(Map) 
@@ -1611,7 +1613,8 @@ public class Configurable {
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object, or its value is coming from the {@link #getParent()
+     * parent}.
      *
      * @since 2.3.32
      */

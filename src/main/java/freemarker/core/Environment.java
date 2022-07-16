@@ -176,7 +176,7 @@ public final class Environment extends Configurable {
     private TemplateTemporalFormatCache cachedTemporalFormatCache;
     private final class TemplateTemporalFormatCache {
         // Notes:
-        // - "reusable" fields are set when the current cache field is set
+        // - "reusable" fields are set together with related non-reusable fields
         // - non-reusable fields are cleared when any related setting is changed, but reusableXxx fields are only
         //   if the format string changes
         // - When there's a cache-miss, we check if the "reusable" field has compatible timeZone, and locale, and if
@@ -1760,7 +1760,7 @@ public final class Environment extends Configurable {
      */
     private TemplateNumberFormat getTemplateNumberFormatWithoutCache(String formatString, Locale locale)
             throws TemplateValueFormatException {
-        int formatStringLen = formatString.length();
+        final int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
                 && (isIcI2324OrLater() || hasCustomFormats())
@@ -1768,7 +1768,7 @@ public final class Environment extends Configurable {
             final String name;
             final String params;
             {
-                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
+                int endIdx = getCustomFormatStringNameEnd(formatString);
                 name = formatString.substring(1, endIdx);
                 params = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
@@ -2344,7 +2344,7 @@ public final class Environment extends Configurable {
                 && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
-                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
+                int endIdx = getCustomFormatStringNameEnd(formatString);
                 name = formatString.substring(1, endIdx);
                 formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
@@ -2479,9 +2479,8 @@ public final class Environment extends Configurable {
                 settingName = _TemporalUtils.temporalClassToFormatSettingName(
                         temporalClass,
                         blamedTemporalSourceExp != null
-                                ? blamedTemporalSourceExp.getTemplate().getActualNamingConvention()
-                                        == Configuration.CAMEL_CASE_NAMING_CONVENTION
-                                : false);
+                                && blamedTemporalSourceExp.getTemplate().getActualNamingConvention()
+                                        == Configuration.CAMEL_CASE_NAMING_CONVENTION);
                 settingValue = getTemporalFormat(temporalClass);
             } catch (IllegalArgumentException e2) {
                 settingName = "???";
@@ -2730,14 +2729,16 @@ public final class Environment extends Configurable {
 
     /**
      * Returns the {@link TemplateTemporalFormat} for the given parameters without using the {@link Environment}-level
-     * cache. Of course, the {@link TemplateTemporalFormatFactory} involved might still uses its own cache, which can be
-     * global (class-loader-level) or {@link Environment}-level.
+     * cache. The {@link TemplateTemporalFormatFactory} involved might still uses its own internal cache, which can be
+     * global (class-loader-level), or {@link Environment}-level.
      *
      * @param formatString
      *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
-     * @param dateType
+     * @param temporalClass
      *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
-     * @param zonelessInput
+     * @param locale
+     *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
+     * @param timeZone
      *            See the similar parameter of {@link TemplateTemporalFormatFactory#get}
      */
     private TemplateTemporalFormat getTemplateTemporalFormat(
@@ -2765,7 +2766,7 @@ public final class Environment extends Configurable {
                 && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
-                int endIdx = getCustomFormatStringNameEnd(formatString, formatStringLen);
+                int endIdx = getCustomFormatStringNameEnd(formatString);
                 name = formatString.substring(1, endIdx);
                 formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
@@ -2783,13 +2784,12 @@ public final class Environment extends Configurable {
         return formatFactory.get(formatParams, temporalClass, locale, timeZone, this);
     }
 
-    private static int getCustomFormatStringNameEnd(String formatString, int formatStringLen) {
+    private static int getCustomFormatStringNameEnd(String formatString) {
         int endIdx;
-        findParamsStart:
-        for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
+        for (endIdx = 1; endIdx < formatString.length(); endIdx++) {
             char c = formatString.charAt(endIdx);
             if (c == ' ' || c == '_') {
-                break findParamsStart;
+                return endIdx;
             }
         }
         return endIdx;

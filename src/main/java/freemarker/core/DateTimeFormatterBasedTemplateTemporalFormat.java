@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import static freemarker.core.MissingTimeZoneParserPolicy.*;
 import static freemarker.core._TemporalUtils.*;
 import static freemarker.template.utility.StringUtil.*;
 
@@ -37,15 +38,15 @@ import java.util.Objects;
 import java.util.TimeZone;
 
 /**
- * Was created ad-hoc to contain whatever happens to be common between some of our {@link TemplateTemporalFormat}-s.
+ * Common logic among our {@link TemplateTemporalFormat}-s that are based on {@link TemplateTemporalFormat}.
  */
-abstract class JavaOrISOLikeTemplateTemporalFormat extends TemplateTemporalFormat {
+abstract class DateTimeFormatterBasedTemplateTemporalFormat extends TemplateTemporalFormat {
     protected final Class<? extends Temporal> temporalClass;
     protected final boolean isLocalTemporalClass;
     protected final TimeZone timeZone;
     protected final ZoneId zoneId;
 
-    public JavaOrISOLikeTemplateTemporalFormat(
+    public DateTimeFormatterBasedTemplateTemporalFormat(
             Class<? extends Temporal> temporalClass, TimeZone timeZone) {
         this.temporalClass = Objects.requireNonNull(_TemporalUtils.normalizeSupportedTemporalClass(temporalClass));
         this.isLocalTemporalClass = isLocalTemporalClass(this.temporalClass);
@@ -58,6 +59,11 @@ abstract class JavaOrISOLikeTemplateTemporalFormat extends TemplateTemporalForma
         }
     }
 
+    /**
+     * Called from {@link TemplateTemporalFormat#parse(String, MissingTimeZoneParserPolicy)}, when that has figured
+     * out the {@link DateTimeFormatter} to use, this method will deal with the time zone related matters, and some
+     * more (like converting parsing exceptions).
+     */
     protected Temporal parse(
             String s, MissingTimeZoneParserPolicy missingTimeZoneParserPolicy,
             DateTimeFormatter parserDateTimeFormatter) throws UnparsableValueException {
@@ -70,39 +76,36 @@ abstract class JavaOrISOLikeTemplateTemporalFormat extends TemplateTemporalForma
                 return parseResult.query(_TemporalUtils.getTemporalQuery(temporalClass));
             }
 
-            switch (missingTimeZoneParserPolicy) {
-                case ASSUME_CURRENT_TIME_ZONE:
-                case FALL_BACK_TO_LOCAL_TEMPORAL:
-                    boolean fallbackToLocal = missingTimeZoneParserPolicy == MissingTimeZoneParserPolicy.FALL_BACK_TO_LOCAL_TEMPORAL;
-                    Class<? extends Temporal> localFallbackTemporalClass;
-                    if (temporalClass == Instant.class) {
-                        localFallbackTemporalClass = LocalDateTime.class;
-                    } else {
-                        localFallbackTemporalClass = getLocalTemporalClassForNonLocal(temporalClass);
-                        if (localFallbackTemporalClass == null) {
-                            throw newUnparsableValueException(
-                                    s, parserDateTimeFormatter,
-                                    "String contains no zone offset, and no local temporal type "
-                                            + "exists for target type " + temporalClass.getName(),
-                                    null);
-                        }
-                        if (!fallbackToLocal && temporalClass == OffsetTime.class) {
-                            throw newUnparsableValueException(
-                                    s, parserDateTimeFormatter,
-                                    "It's not possible to parse the string that contains no zone offset to OffsetTime, "
-                                            + "because we don't know the day, and hence can't account for "
-                                            + "Daylight Saving Time, and thus we can't apply the current time zone."
-                                            + temporalClass.getName(),
-                                    null);
-                        }
-                    }
+            if (missingTimeZoneParserPolicy == ASSUME_CURRENT_TIME_ZONE ||
+                    missingTimeZoneParserPolicy == FALL_BACK_TO_LOCAL_TEMPORAL) {
+                boolean fallbackToLocal = missingTimeZoneParserPolicy == FALL_BACK_TO_LOCAL_TEMPORAL;
+                Class<? extends Temporal> localFallbackTemporalClass;
+                localFallbackTemporalClass = tryGetLocalTemporalClassForNonLocal(temporalClass);
+                if (localFallbackTemporalClass == null) {
+                    throw newUnparsableValueException(
+                            s, parserDateTimeFormatter,
+                            "String contains no zone, nor offset, and no local variant exists for target type "
+                                    + temporalClass.getName(),
+                            null);
+                }
+                if (!fallbackToLocal && temporalClass == OffsetTime.class) {
+                    throw newUnparsableValueException(
+                            s, parserDateTimeFormatter,
+                            "It's not possible to parse a string that contains no zone, nor offset, to OffsetTime. "
+                                    + "We don't know the day, and hence can't account for Daylight Saving Time, "
+                                    + "and thus we can't use the current time zone."
+                                    + temporalClass.getName(),
+                            null);
+                }
 
-                    Temporal resultTemporal = parseResult.query(
-                            _TemporalUtils.getTemporalQuery(localFallbackTemporalClass));
-                    if (fallbackToLocal) {
-                        return resultTemporal;
-                    }
-                    ZonedDateTime zonedDateTime = ((LocalDateTime) resultTemporal).atZone(zoneId);
+                Temporal resultLocalTemporal = parseResult.query(
+                        getTemporalQuery(localFallbackTemporalClass));
+                if (fallbackToLocal) {
+                    return resultLocalTemporal;
+                }
+
+                if (resultLocalTemporal instanceof LocalDateTime) {
+                    ZonedDateTime zonedDateTime = ((LocalDateTime) resultLocalTemporal).atZone(zoneId);
                     if (temporalClass == ZonedDateTime.class) {
                         return zonedDateTime;
                     } else if (temporalClass == OffsetDateTime.class) {
@@ -110,22 +113,24 @@ abstract class JavaOrISOLikeTemplateTemporalFormat extends TemplateTemporalForma
                     } else if (temporalClass == Instant.class) {
                         return zonedDateTime.toInstant();
                     }
-                    throw new AssertionError("Unexpected case: " + temporalClass);
-                case FAIL:
-                    throw newUnparsableValueException(
-                            s, parserDateTimeFormatter,
-                            _MessageUtil.FAIL_MISSING_TIME_ZONE_PARSER_POLICY_ERROR_DETAIL, null);
-                default:
-                    throw new AssertionError();
+                }
+                throw new BugException("Unexpected case: "
+                        + "temporalClass=" + temporalClass + ", "
+                        + "missingTimeZoneParserPolicy=" + missingTimeZoneParserPolicy);
+            } else if (missingTimeZoneParserPolicy == FAIL) {
+                throw newUnparsableValueException(
+                        s, parserDateTimeFormatter,
+                        _MessageUtil.FAIL_MISSING_TIME_ZONE_PARSER_POLICY_ERROR_DETAIL, null);
             }
-        } catch (DateTimeException e) {
+            throw new AssertionError();
+        } catch (DateTimeException|ArithmeticException e) {
             throw newUnparsableValueException(s, parserDateTimeFormatter, e.getMessage(), e);
         }
     }
 
     protected UnparsableValueException newUnparsableValueException(
             String s, DateTimeFormatter dateTimeFormatter,
-            String cause, DateTimeException e) {
+            String cause, Exception e) {
         StringBuilder message = new StringBuilder();
 
         message.append("Failed to parse value ").append(jQuote(s))

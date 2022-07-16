@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * Format factory related to {@link someJava8Temporal?string.xs}, {@link someJava8Temporal?string.xs_...}, etc.
+ * Format factory related to {@code someJava8Temporal?string.xs}, {@code someJava8Temporal?string.xs_...}, etc.
  */
 // TODO [FREEMARKER-35] Historical date handling compared to ISO
 class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
@@ -48,8 +48,9 @@ class XSTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
     }
 
     @Override
-    public TemplateTemporalFormat get(String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env) throws
-            TemplateValueFormatException {
+    public TemplateTemporalFormat get(
+            String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env)
+            throws TemplateValueFormatException {
         if (!params.isEmpty()) {
             // TODO [FREEMARKER-35]
             throw new InvalidFormatParametersException("xs currently doesn't support parameters for Java 8 temporal types");

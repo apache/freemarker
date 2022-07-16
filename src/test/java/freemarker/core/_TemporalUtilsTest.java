@@ -22,6 +22,7 @@ package freemarker.core;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -85,11 +86,12 @@ public class _TemporalUtilsTest {
     }
 
     @Test
-    public void testGetLocalTemporalClassForNonLocal() {
-        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(OffsetDateTime.class), equalTo(LocalDateTime.class));
-        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(ZonedDateTime.class), equalTo(LocalDateTime.class));
-        assertThat(_TemporalUtils.getLocalTemporalClassForNonLocal(OffsetTime.class), equalTo(LocalTime.class));
-        assertNull(_TemporalUtils.getLocalTemporalClassForNonLocal(LocalDateTime.class));
+    public void testTryGetLocalTemporalClassForNonLocal() {
+        assertThat(_TemporalUtils.tryGetLocalTemporalClassForNonLocal(OffsetDateTime.class), equalTo(LocalDateTime.class));
+        assertThat(_TemporalUtils.tryGetLocalTemporalClassForNonLocal(ZonedDateTime.class), equalTo(LocalDateTime.class));
+        assertThat(_TemporalUtils.tryGetLocalTemporalClassForNonLocal(OffsetTime.class), equalTo(LocalTime.class));
+        assertThat(_TemporalUtils.tryGetLocalTemporalClassForNonLocal(Instant.class), equalTo(LocalDateTime.class));
+        assertNull(_TemporalUtils.tryGetLocalTemporalClassForNonLocal(LocalDateTime.class));
     }
 
 }

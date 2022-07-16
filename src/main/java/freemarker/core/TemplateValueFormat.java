@@ -19,7 +19,8 @@
 package freemarker.core;
 
 /**
- * Superclass of all value format objects; objects that convert values to strings, or parse strings.
+ * Superclass of all value format objects; objects that convert values to strings in templates, or parse strings
+ * to an object of the given type in templates.
  * 
  * @since 2.3.24
  */

@@ -243,7 +243,7 @@ public abstract class AbstractTemporalFormatTest {
         assertThat(
                 e.getMessage(),
                 allOf(
-                        containsStringIgnoringCase("doesn't contain time zone or offset"),
+                        containsStringIgnoringCase("doesn't contain time zone, nor offset"),
                         containsString(MissingTimeZoneParserPolicy.class.getName() + "."
                                 + MissingTimeZoneParserPolicy.FAIL)));
     }

@@ -90,7 +90,7 @@ public final class _TemporalUtils {
 
     // Not private because of tests
     static final boolean SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL = SUPPORTED_TEMPORAL_CLASSES.stream()
-            .allMatch(cl -> (cl.getModifiers() & Modifier.FINAL) == Modifier.FINAL);
+            .allMatch(cl -> (cl.getModifiers() & Modifier.FINAL) != 0);
 
     private _TemporalUtils() {
         throw new AssertionError();
@@ -439,6 +439,7 @@ public final class _TemporalUtils {
         if (SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL) {
             return temporalClass;
         } else {
+            if (true) throw new AssertionError(); //!!T
             if (Instant.class.isAssignableFrom(temporalClass)) {
                 return Instant.class;
             } else if (LocalDate.class.isAssignableFrom(temporalClass)) {
@@ -458,13 +459,13 @@ public final class _TemporalUtils {
             } else if (Year.class.isAssignableFrom(temporalClass)) {
                 return Year.class;
             } else {
-                throw new IllegalArgumentException("Unsupprted temporal class: " + temporalClass.getName());
+                throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
             }
         }
     }
 
     /**
-     * Tells if the temporal class is one that doesn't store, nor have an implied time zone or offset.
+     * Tells if the temporal class is one that doesn't store, nor have an implied time zone, or offset.
      *
      * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
      */
@@ -485,7 +486,7 @@ public final class _TemporalUtils {
      *
      * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
      */
-    public static Class<? extends Temporal> getLocalTemporalClassForNonLocal(Class<? extends Temporal> temporalClass) {
+    public static Class<? extends Temporal> tryGetLocalTemporalClassForNonLocal(Class<? extends Temporal> temporalClass) {
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
         if (temporalClass == OffsetDateTime.class) {
             return LocalDateTime.class;
@@ -496,13 +497,16 @@ public final class _TemporalUtils {
         if (temporalClass == OffsetTime.class) {
             return LocalTime.class;
         }
+        if (temporalClass == Instant.class) {
+            return LocalDateTime.class;
+        }
         return null;
     }
 
     /**
      * Returns the FreeMarker configuration format setting name for a temporal class.
      *
-     * @throws IllegalArgumentException If {@link temporalClass} is not a supported {@link Temporal} subclass.
+     * @throws IllegalArgumentException If {@code temporalClass} is not a supported {@link Temporal} subclass.
      */
     public static String temporalClassToFormatSettingName(Class<? extends Temporal> temporalClass, boolean camelCase) {
         temporalClass = normalizeSupportedTemporalClass(temporalClass);

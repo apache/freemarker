@@ -55,8 +55,8 @@ public class _MessageUtil {
     };
 
     static final String FAIL_MISSING_TIME_ZONE_PARSER_POLICY_ERROR_DETAIL
-            = "The parsed string doesn't contain time zone or offset, and the specified policy is "
-                    + "to fail in that case (see " + MissingTimeZoneParserPolicy.class.getName()
+            = "The parsed string doesn't contain time zone, nor offset, and that target type is non-local, and the "
+                    + "specified policy is to fail in that case (see " + MissingTimeZoneParserPolicy.class.getName()
                     + "." + MissingTimeZoneParserPolicy.FAIL + ").";
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";

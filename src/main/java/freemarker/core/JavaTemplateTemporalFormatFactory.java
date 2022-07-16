@@ -31,8 +31,9 @@ class JavaTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
     }
 
     @Override
-    public TemplateTemporalFormat get(String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone,
-            Environment env) throws TemplateValueFormatException {
+    public TemplateTemporalFormat get(
+            String params, Class<? extends Temporal> temporalClass, Locale locale, TimeZone timeZone, Environment env)
+            throws TemplateValueFormatException {
         return new JavaTemplateTemporalFormat(params, temporalClass, locale, timeZone);
     }
 

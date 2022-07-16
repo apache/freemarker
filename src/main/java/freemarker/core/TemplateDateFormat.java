@@ -27,9 +27,9 @@ import freemarker.template.TemplateModelException;
 
 /**
  * Represents a date/time/dateTime format; used in templates for formatting and parsing with that format. This is
- * similar to Java's {@link DateFormat}, but made to fit the requirements of FreeMarker. Also, it makes easier to define
+ * similar to Java's {@link DateFormat}, but made to fit the requirements of FreeMarker. Also, it allows defining
  * formats that can't be described with Java's existing {@link DateFormat} implementations.
- * 
+ *
  * <p>
  * Implementations need not be thread-safe if the {@link TemplateDateFormatFactory} doesn't recycle them among
  * different {@link Environment}-s. As far as FreeMarker's concerned, instances are bound to a single
@@ -42,12 +42,15 @@ import freemarker.template.TemplateModelException;
 public abstract class TemplateDateFormat extends TemplateValueFormat {
     
     /**
+     * Formats the value to plain text (string that contains no markup or escaping).
+     *
      * @param dateModel
-     *            The date/time/dateTime to format; not {@code null}. Most implementations will just work with the return value of
-     *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
-     *            a custom {@link TemplateDateModel} implementation.
-     * 
-     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping); can't be {@code null}.
+     *            The date/time/dateTime to format; not {@code null}. Most implementations will just work with the
+     *            return value of {@link TemplateDateModel#getAsDate()}, but some may format differently depending on
+     *            the properties of a custom {@link TemplateDateModel} implementation.
+     *
+     * @return The date/time/dateTime value as plain text (not markup), with no escaping (like no HTML escaping);
+     *             can't be {@code null}.
      * 
      * @throws TemplateValueFormatException
      *             When a problem occurs during the formatting of the value. Notable subclass:
@@ -59,14 +62,15 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
             throws TemplateValueFormatException, TemplateModelException;
 
     /**
-     * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
-     * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
-     * {@link #formatToPlainText(TemplateDateModel)} escaped, it must return the {@link String} that
+     * Formats the value to markup instead of to plain text, but only if the result markup will be more than just plain
+     * text escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
+     * {@link #formatToPlainText(TemplateDateModel)} escaped, then instead it must return the {@link String} that
      * {@link #formatToPlainText(TemplateDateModel)} does.
      * 
      * <p>The implementation in {@link TemplateDateFormat} simply calls {@link #formatToPlainText(TemplateDateModel)}.
-     * 
-     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
+     *
+     * @return A {@link String} (assumed to be plain text, not markup), or a {@link TemplateMarkupOutputModel};
+     *             not {@code null}.
      */
     public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateModelException {
         return formatToPlainText(dateModel);
@@ -86,14 +90,14 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      *            respectively. This parameter rarely if ever {@link TemplateDateModel#UNKNOWN}, but the implementation
      *            that cares about this parameter should be prepared for that. If nothing else, it should throw
      *            {@link UnknownDateTypeParsingUnsupportedException} then.
-     * 
-     * @return The interpretation of the text either as a {@link Date} or {@link TemplateDateModel}. Typically, a
-     *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
-     *         meta-information that's also extracted during {@link #formatToPlainText(TemplateDateModel)} (so if you format
-     *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
-     *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
-     *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional
-     *         application-specific meta-info will be lost.
+     *
+     * @return The text converted to either {@link Date}, or to {@link TemplateDateModel}; not {@code null}.
+     *         Typically, the result should be a {@link Date}. Converting to {@link TemplateDateModel} should only be
+     *         done if you need to store additional data next to the {@link Date}, which is then also used by
+     *         {@link #formatToPlainText(TemplateDateModel)} (so if you format something and then parse it, you get
+     *         back an equivalent result). Known issue (at least in 2.x): {@code ?date}/{@code ?time}/{@code ?datetime},
+     *         when not invoked as a method, can't return the {@link TemplateDateModel}, only the {@link Date} from
+     *         inside it, hence the additional application-specific meta-info will be lost.
      */
     public abstract Object parse(String s, int dateType) throws TemplateValueFormatException;
     

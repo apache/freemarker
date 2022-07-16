@@ -385,7 +385,7 @@ public class ISOLikeTemplateTemporalFormatTest extends AbstractTemporalFormatTes
                     temporalClass,
                     e -> assertThat(e.getMessage(), allOf(
                             containsString(jQuote(stringToParse)),
-                            containsString("time zone or offset"),
+                            containsString("time zone, nor offset"),
                             containsString(temporalClass.getSimpleName()))));
         }
 
@@ -482,7 +482,7 @@ public class ISOLikeTemplateTemporalFormatTest extends AbstractTemporalFormatTes
                     OffsetTime.class,
                     e -> assertThat(e.getMessage(), allOf(
                             containsString(jQuote(stringToParse)),
-                            containsString("time zone or offset"),
+                            containsString("time zone, nor offset"),
                             containsString(OffsetTime.class.getSimpleName()))));
         }
 

@@ -25,12 +25,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * "date", "time" and "date-time" template language data types: corresponds to {@link java.util.Date}. Contrary to Java,
- * FreeMarker distinguishes date (no time part), time and date-time values.
+ * "date", "time", and "date-time" template language data types: corresponds to {@link java.util.Date}. Contrary to
+ * Java, FreeMarker distinguishes date (no time part), time (no date part), and date-time values.
  * 
- * <p>
- * Objects of this type should be immutable, that is, calling {@link #getAsDate()} and {@link #getDateType()} should
- * always return the same value as for the first time.
+ * <p>Objects of this type should be immutable, that is, {@link #getAsDate()}, and {@link #getDateType()} should always
+ * return the same value as for the first time.
  *
  * <p>{@link java.time.temporal.Temporal} values (the date/time classes introduced with Java 8) are handled by
  * {@link TemplateTemporalModel}.

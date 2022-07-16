@@ -122,10 +122,14 @@ import freemarker.template.utility.XmlEscape;
  *  cfg.set<i>SomeSetting</i>(...);
  *  cfg.set<i>OtherSetting</i>(...);
  *  ...
+ *  // Do not modify the settings later, when you have already started processing templates!
  *  
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
  *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
+ *
+ *  <p><b>Do not modify the {@link Configuration} settings after you started processing templates!</b> Doing so can
+ *  cause to undefined behavior, even if you only have a single thread!</p>
  * 
  * <p>A couple of settings that you should not leave on its default value are:
  * <ul>

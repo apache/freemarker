@@ -35,6 +35,9 @@ import java.time.temporal.Temporal;
  * This does not deal with {@link java.time.Duration}, and {@link java.time.Period}, because those don't implement the
  * {@link Temporal} interface.
  *
+ * <p>Objects of this type should be immutable, that is, {@link #getAsTemporal()}} should always return the same value
+ * as for the first time.
+ *
  * <p>{@link java.util.Date} values (the way date/time values were represented prior Java 8) are handled by
  * {@link TemplateDateModel}.
  *
@@ -42,7 +45,7 @@ import java.time.temporal.Temporal;
  */
 public interface TemplateTemporalModel extends TemplateModel {
 	/**
-	 * Returns the date value. The return value must not be {@code null}.
+	 * Returns the temporal value; can't be {@code null}.
 	 */
 	Temporal getAsTemporal() throws TemplateModelException;
 }

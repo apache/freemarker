@@ -20,13 +20,14 @@
 package freemarker.core;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.Temporal;
 
 import freemarker.template.Configuration;
 
 /**
  * Used as a parameter to {@link TemplateTemporalFormat#parse(String, MissingTimeZoneParserPolicy)}, specifies what to
- * do if we have to parse a string that contains no time zone or offset information to a non-local {@code java.time}
- * temporal (like to {@link OffsetDateTime}).
+ * do if we have to parse a string that contains no time zone, nor offset information to a non-local {@link Temporal}
+ * (like to {@link OffsetDateTime}).
  *
  * <p>There's no {@link Configuration} setting for this. Instead, the build-ins that parse to given non-local temporal
  * type have 3 variants, one for each policy. For example, in the case of parsing a string to {@link OffsetDateTime},

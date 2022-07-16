@@ -45,7 +45,7 @@ import freemarker.template.TemplateTemporalModel;
  *
  * @since 2.3.32
  */
-final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateTemporalFormat {
+final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatterBasedTemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;
     private final boolean instantConversion;
     private final String description;
@@ -56,7 +56,9 @@ final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateT
             DateTimeFormatter dateTimeFormatter,
             DateTimeFormatter parserExtendedDateTimeFormatter,
             DateTimeFormatter parserBasicDateTimeFormatter,
-            Class<? extends Temporal> temporalClass, TimeZone timeZone, String formatString) {
+            Class<? extends Temporal> temporalClass,
+            TimeZone timeZone,
+            String formatString) {
         super(temporalClass, timeZone);
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
         this.dateTimeFormatter = dateTimeFormatter;
@@ -92,10 +94,10 @@ final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateT
             extendedFormat = s.indexOf('-', 1) != -1;
             add1Day = false;
         } else if (temporalClass == LocalTime.class || temporalClass == OffsetTime.class) {
-            extendedFormat = s.indexOf(":") != -1;
+            extendedFormat = s.contains(":");
             add1Day = false;
             // ISO 8601 allows hour 24 if the rest of the time is 0:
-            if (isStartOf240000(s, 0)) {
+            if (isStartOf240000InISOFormat(s, 0)) {
                 s = "00" + s.substring(2);
             }
         } else if (temporalClass == Year.class) {
@@ -103,19 +105,21 @@ final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateT
             add1Day = false;
         } else {
             int tIndex = s.indexOf('T');
-            if (tIndex < 1) {
+            if (tIndex < 1) { // tIndex 0 is deliberately not accepted
                 throw newUnparsableValueException(
                         s, null,
                         "Character \"T\" must be used to separate the date and time part.", null);
             }
             if (s.indexOf(":", tIndex + 1) != -1) {
+                // Time part has ":" => extendedFormat
                 extendedFormat = true;
             } else {
+                // Date part has "-" => extendedFormat
                 // Note: false for: -5000101T00, as there the last '-' has index 0
                 extendedFormat = s.lastIndexOf('-', tIndex - 1) > 0;
             }
             // ISO 8601 allows hour 24 if the rest of the time is 0:
-            if (isStartOf240000(s, tIndex + 1)) {
+            if (isStartOf240000InISOFormat(s, tIndex + 1)) {
                 s = s.substring(0, tIndex + 1) + "00" + s.substring(tIndex + 3);
                 add1Day = true;
             } else {
@@ -136,7 +140,12 @@ final class ISOLikeTemplateTemporalTemporalFormat extends JavaOrISOLikeTemplateT
 
     private final static Pattern ZERO_TIME_AFTER_HH = Pattern.compile("(?::?+00(?::?+00(?:.?+0+)?)?)?");
 
-    private static boolean isStartOf240000(String s, int from) {
+    /**
+     * Checks if starting from the given index we have {@code "24:00:00"} or equivalent (like {@code "240000"},
+     * {@code "24:00:00.000"}, {@code "2400"}, {@code "24"}). This only accepts a format that is valid in ISO 8601,
+     * like for {@code "24:0"} this returns {@code false}, as ISO requires two 0-s.
+     */
+    private static boolean isStartOf240000InISOFormat(String s, int from) {
         if (from + 1 >= s.length() || s.charAt(from) != '2' || s.charAt(from + 1) != '4') {
             return false;
         }
