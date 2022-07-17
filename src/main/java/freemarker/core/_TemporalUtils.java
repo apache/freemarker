@@ -439,7 +439,6 @@ public final class _TemporalUtils {
         if (SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL) {
             return temporalClass;
         } else {
-            if (true) throw new AssertionError(); //!!T
             if (Instant.class.isAssignableFrom(temporalClass)) {
                 return Instant.class;
             } else if (LocalDate.class.isAssignableFrom(temporalClass)) {
