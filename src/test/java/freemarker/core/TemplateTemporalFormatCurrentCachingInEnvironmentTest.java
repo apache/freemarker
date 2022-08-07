@@ -32,7 +32,6 @@ import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -41,17 +40,17 @@ import freemarker.template.Template;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
-public class TemplateTemporalFormatCachingInEnvironmentTest {
+/**
+ * Tests the caching of the format in the {@link Environment} for the current value of the format setting (like for
+ * <code>${temporal}</code>, as opposed to <code>${temporal?string(someSpecialFormat)}</code>).
+ *
+ * @see TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
+ */
+public class TemplateTemporalFormatCurrentCachingInEnvironmentTest
+        extends TemplateTemporalFormatAbstractCachingInEnvironmentTest {
 
     @Test
     public void testTemporalClassSeparation() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
-        cfg.setLocale(Locale.US);
-        cfg.setTimeZone(DateUtil.UTC);
-
-        Environment env = new Template(null, "", cfg)
-                .createProcessingEnvironment(null, NullWriter.INSTANCE);
-
         env.setDateTimeFormat("iso");
         TemplateTemporalFormat lastLocalDateTimeFormat = env.getTemplateTemporalFormat(LocalDateTime.class);
         TemplateTemporalFormat lastOffsetDateTimeFormat = env.getTemplateTemporalFormat(OffsetDateTime.class);
@@ -97,95 +96,64 @@ public class TemplateTemporalFormatCachingInEnvironmentTest {
     @Test
     public void testForDateTime() throws Exception {
         // Locale dependent formatters:
-        genericTest(LocalDateTime.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "yyyy-MM-dd HH:mm" : "yyyyMMddHHmm"),
-                true, false);
-        genericTest(ZonedDateTime.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "yyyy-MM-dd HH:mm" : "yyyyMMddHHmm"),
-                true, true);
-        genericTest(OffsetDateTime.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "yyyy-MM-dd HH:mm" : "yyyyMMddHHmm"),
-                true, true);
-        genericTest(Instant.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "yyyy-MM-dd HH:mm" : "yyyyMMddHHmm"),
-                true, true);
+        String[] formats = {"yyyy-MM-dd HH:mm", "yyyyMMddHHmm"};
+        genericTest(LocalDateTime.class, true, false, formats);
+        genericTest(ZonedDateTime.class, true, true, formats);
+        genericTest(OffsetDateTime.class, true, true, formats);
+        genericTest(Instant.class, true, true, formats);
 
         // Locale independent formatters:
-        genericTest(LocalDateTime.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "iso" : "xs"),
-                false, false);
-        genericTest(ZonedDateTime.class,
-                (cfg, first) -> cfg.setDateTimeFormat(first ? "iso" : "xs"),
-                false, true);
+        genericTest(LocalDateTime.class, false, false, "iso", "xs");
+        genericTest(ZonedDateTime.class, false, true, "iso", "xs");
     }
 
     @Test
     public void testForDate() throws Exception {
         // Locale dependent formatters:
-        genericTest(LocalDate.class,
-                (cfg, first) -> cfg.setDateFormat(first ? "yyyy-MM-dd" : "yyyyMM-dd"),
-                true, false);
+        genericTest(LocalDate.class, true, false, "yyyy-MM-dd", "yyyyMM-dd");
 
         // Locale independent formatters:
-        genericTest(LocalDate.class,
-                (cfg, first) -> cfg.setDateFormat(first ? "iso" : "xs"),
-                false, false);
+        genericTest(LocalDate.class, false, false, "iso", "xs");
     }
 
     @Test
     public void testForTime() throws Exception {
         // Locale dependent formatters:
-        genericTest(LocalTime.class,
-                (cfg, first) -> cfg.setTimeFormat(first ? "HH:mm" : "HHmm"),
-                true, false);
-        genericTest(OffsetTime.class,
-                (cfg, first) -> cfg.setTimeFormat(first ? "HH:mm" : "HHmm"),
-                true, true);
+        genericTest(LocalTime.class, true, false, "HH:mm", "HHmm");
+        genericTest(OffsetTime.class, true, true, "HH:mm", "HHmm");
 
         // Locale independent formatters:
-        genericTest(LocalTime.class,
-                (cfg, first) -> cfg.setTimeFormat(first ? "iso" : "xs"),
-                false, false);
-        genericTest(OffsetTime.class,
-                (cfg, first) -> cfg.setTimeFormat(first ? "iso" : "xs"),
-                false, true);
+        genericTest(LocalTime.class, false, false, "iso", "xs");
+        genericTest(OffsetTime.class, false, true, "iso", "xs");
     }
 
     @Test
     public void testForYearMonth() throws Exception {
         // Locale dependent formatters:
-        genericTest(YearMonth.class,
-                (cfg, first) -> cfg.setYearMonthFormat(first ? "yyyy-MM" : "yyyyMM"),
-                true, false);
+        genericTest(YearMonth.class, true, false, "yyyy-MM", "yyyyMM");
 
         // Locale independent formatters:
-        genericTest(YearMonth.class,
-                (cfg, first) -> cfg.setYearMonthFormat(first ? "iso" : "xs"),
-                false, false);
+        genericTest(YearMonth.class, false, false, "iso", "xs");
     }
 
     @Test
     public void testForYear() throws Exception {
         // Locale dependent formatters:
-        genericTest(Year.class,
-                (cfg, first) -> cfg.setYearFormat(first ? "yyyy" : "yy"),
-                true, false);
+        genericTest(Year.class, true, false, "yyyy", "yy");
 
         // Locale independent formatters:
-        genericTest(Year.class,
-                (cfg, first) -> cfg.setYearFormat(first ? "iso" : "xs"),
-                false, false);
+        genericTest(Year.class, false, false, "iso", "xs");
     }
 
     private void genericTest(
             Class<? extends Temporal> temporalClass,
-            SettingSetter settingSetter,
-            boolean localeDependent, boolean timeZoneDependent)
-            throws Exception {
+            boolean localeDependent, boolean timeZoneDependent,
+            String... settingValues) throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
         cfg.setLocale(Locale.GERMANY);
         cfg.setTimeZone(DateUtil.UTC);
-        settingSetter.setSetting(cfg, true);
+        SettingAssignments settingAssignments = new SettingAssignments(temporalClass, settingValues);
+        settingAssignments.execute(cfg, 0);
 
         Environment env = new Template(null, "", cfg)
                 .createProcessingEnvironment(null, NullWriter.INSTANCE);
@@ -193,37 +161,50 @@ public class TemplateTemporalFormatCachingInEnvironmentTest {
         TemplateTemporalFormat lastFormat;
         TemplateTemporalFormat newFormat;
 
+        // Note: We call env.clearCachedTemplateTemporalFormatsByFormatString() directly before all
+        // env.getTemplateTemporalFormat calls, just to avoid that 2nd level of cache hiding any bugs in the level
+        // that we want to test here. But in almost all of these tests scenarios it shouldn't have any effect anyway.
+
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         lastFormat = env.getTemplateTemporalFormat(temporalClass);
         // Assert that it keeps returning the same instance from cache:
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
-        settingSetter.setSetting(env, true);
+        settingAssignments.execute(env, 0);
         // Assert that the cache wasn't cleared when the setting was set to the same value again:
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         env.setLocale(Locale.JAPAN); // Possibly clears non-reusable TemplateTemporalFormatCache field
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         if (localeDependent) {
             assertNotSame(lastFormat, newFormat);
         } else {
+            env.clearCachedTemplateTemporalFormatsByFormatString();
             assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
         }
         lastFormat = newFormat;
 
         env.setLocale(Locale.JAPAN);
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         env.setLocale(Locale.GERMANY); // Possibly clears non-reusable TemplateTemporalFormatCache field
         env.setLocale(Locale.JAPAN);
         // Assert that it restores the same instance from TemplateTemporalFormatCache.reusableXxx field:
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
-        TimeZone otherTimeZone = TimeZone.getTimeZone("GMT+01");
-        env.setTimeZone(otherTimeZone); // Possibly clears non-reusable TemplateTemporalFormatCache field
+        env.setTimeZone(OTHER_TIME_ZONE); // Possibly clears non-reusable TemplateTemporalFormatCache field
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         if (timeZoneDependent) {
             assertNotSame(newFormat, lastFormat);
+            env.clearCachedTemplateTemporalFormatsByFormatString();
             assertSame(newFormat, env.getTemplateTemporalFormat(temporalClass));
         } else {
             assertSame(newFormat, lastFormat);
@@ -231,18 +212,20 @@ public class TemplateTemporalFormatCachingInEnvironmentTest {
         lastFormat = newFormat;
 
         env.setTimeZone(DateUtil.UTC); // Possibly clears non-reusable TemplateTemporalFormatCache field
-        env.setTimeZone(otherTimeZone);
+        env.setTimeZone(OTHER_TIME_ZONE);
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         // Assert that it restores the same instance from TemplateTemporalFormatCache.reusableXxx field:
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
-        settingSetter.setSetting(env, false); // Clears even TemplateTemporalFormatCache.reusableXxx
+        settingAssignments.execute(env, 1); // Clears even TemplateTemporalFormatCache.reusableXxx
+        env.clearCachedTemplateTemporalFormatsByFormatString();
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         assertNotSame(lastFormat, newFormat);
-    }
 
-    @FunctionalInterface
-    interface SettingSetter {
-        void setSetting(Configurable configurable, boolean firstValue);
+        settingAssignments.execute(env, 0); // Clears even TemplateTemporalFormatCache.reusableXxx
+        env.clearCachedTemplateTemporalFormatsByFormatString();
+        newFormat = env.getTemplateTemporalFormat(temporalClass);
+        assertNotSame(lastFormat, newFormat);
     }
 
 }
