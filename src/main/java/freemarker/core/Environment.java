@@ -434,6 +434,8 @@ public final class Environment extends Configurable {
         cachedTempDateFormatArray = null;
         cachedTempDateFormatsByFmtStrArray = null;
 
+        clearCachedTemplateTemporalFormatsByFormatString();
+
         cachedCollator = null;
         cachedURLEscapingCharset = null;
         cachedURLEscapingCharsetSet = false;
