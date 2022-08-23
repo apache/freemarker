@@ -131,21 +131,21 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     @Override
     public String getAsString() throws TemplateModelException {
         NodeList nl = node.getChildNodes();
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < nl.getLength(); i++) {
             Node child = nl.item(i);
             int nodeType = child.getNodeType();
             if (nodeType == Node.ELEMENT_NODE) {
                 String msg = "Only elements with no child elements can be processed as text."
-                             + "\nThis element with name \""
-                             + node.getNodeName()
-                             + "\" has a child element named: " + child.getNodeName();
+                        + "\nThis element with name \""
+                        + node.getNodeName()
+                        + "\" has a child element named: " + child.getNodeName();
                 throw new TemplateModelException(msg);
             } else if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
-                result += child.getNodeValue();
+                result.append(child.getNodeValue());
             }
         }
-        return result;
+        return result.toString();
     }
     
     @Override

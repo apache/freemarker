@@ -191,10 +191,6 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
       - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
-    - On the "Order and Export" tab find dom4j-*.jar, and send it to the
-        bottom of the list (because, an old org.jaxen is included inside
-        dom4j-*.jar, which causes compilation errors if it wins over
-        jaxen-*.jar).
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
