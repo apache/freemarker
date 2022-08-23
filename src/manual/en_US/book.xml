@@ -29462,6 +29462,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://github.com/apache/freemarker/pull/82">GitHub
               PR 82</link>)</para>
             </listitem>
+
+            <listitem>
+              <para>Some internal cleanup and slight improves related to
+              global caching of <literal>SimpleDateFormat</literal> patterns
+              (in
+              <literal>freemarker.core.JavaTemplateDateFormatFactory</literal>).</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

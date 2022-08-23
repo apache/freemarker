@@ -35,10 +35,11 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
-    private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
-            = new ConcurrentHashMap<>();
-    private static final int LEAK_ALERT_DATE_FORMAT_CACHE_SIZE = 1024;
-    
+    private static final int MAX_CACHE_SIZE = 2; //!!T 512
+
+    private final ConcurrentHashMap<CacheKey, DateFormat> cache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<CacheKey, DateFormat> cacheRecallableEntries = new ConcurrentHashMap<>();
+
     private JavaTemplateDateFormatFactory() {
         // Can't be instantiated
     }
@@ -61,68 +62,86 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
         // Get DateFormat from global cache:
         CacheKey cacheKey = new CacheKey(dateType, nameOrPattern, locale, timeZone);
-        DateFormat jFormat;
-        
-        jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
-        if (jFormat == null) {
-            // Add format to global format cache.
-            StringTokenizer tok = new StringTokenizer(nameOrPattern, "_");
-            int tok1Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
-            if (tok1Style != -1) {
-                switch (dateType) {
-                    case TemplateDateModel.UNKNOWN: {
-                        throw new UnknownDateTypeFormattingUnsupportedException();
-                    }
-                    case TemplateDateModel.TIME: {
-                        jFormat = DateFormat.getTimeInstance(tok1Style, cacheKey.locale);
-                        break;
-                    }
-                    case TemplateDateModel.DATE: {
-                        jFormat = DateFormat.getDateInstance(tok1Style, cacheKey.locale);
-                        break;
-                    }
-                    case TemplateDateModel.DATETIME: {
-                        int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
-                        if (tok2Style != -1) {
-                            jFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);
-                        }
-                        break;
-                    }
+
+        DateFormat dateFormat = getFromCache(cacheKey);
+        if (dateFormat == null) {
+            dateFormat = getJavaDateFormatNoCache(dateType, nameOrPattern, cacheKey);
+            dateFormat = addToCacheWithLimitingSize(cacheKey, dateFormat);
+        }
+
+        // Must clone, as SimpleDateFormat is not thread safe, not even if you don't call setters on it:
+        return (DateFormat) dateFormat.clone();
+    }
+
+    private DateFormat addToCacheWithLimitingSize(CacheKey cacheKey, DateFormat dateFormat) {
+        if (cache.size() >= MAX_CACHE_SIZE) {
+            synchronized (JavaTemplateDateFormatFactory.class) {
+                if (cache.size() >= MAX_CACHE_SIZE) {
+                    cacheRecallableEntries.clear();
+                    cacheRecallableEntries.putAll(cache);
+                    cache.clear();
                 }
             }
-            if (jFormat == null) {
-                try {
-                    jFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
-                } catch (IllegalArgumentException e) {
-                    final String msg = e.getMessage();
-                    throw new InvalidFormatParametersException(
-                            msg != null ? msg : "Invalid SimpleDateFormat pattern", e);
+        }
+
+        DateFormat prevDateFormat = cache.putIfAbsent(cacheKey, dateFormat);
+        return prevDateFormat != null ? prevDateFormat : dateFormat;
+    }
+
+    private DateFormat getJavaDateFormatNoCache(int dateType, String nameOrPattern, CacheKey cacheKey) throws
+            UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+        DateFormat dateFormat = getJavaDateFormatNoCacheNoCommonAdjustments(dateType, nameOrPattern, cacheKey.locale);
+        dateFormat.setTimeZone(cacheKey.timeZone);
+        return dateFormat;
+    }
+
+    private DateFormat getJavaDateFormatNoCacheNoCommonAdjustments(
+            int dateType, String nameOrPattern, Locale locale)
+            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+        StringTokenizer tok = new StringTokenizer(nameOrPattern, "_");
+        int tok1Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
+        if (tok1Style != -1) {
+            switch (dateType) {
+                case TemplateDateModel.UNKNOWN: {
+                    throw new UnknownDateTypeFormattingUnsupportedException();
                 }
-            }
-            jFormat.setTimeZone(cacheKey.timeZone);
-            
-            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_DATE_FORMAT_CACHE_SIZE) {
-                boolean triggered = false;
-                synchronized (JavaTemplateDateFormatFactory.class) {
-                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_DATE_FORMAT_CACHE_SIZE) {
-                        triggered = true;
-                        GLOBAL_FORMAT_CACHE.clear();
+                case TemplateDateModel.TIME: {
+                    return DateFormat.getTimeInstance(tok1Style, locale);
+                }
+                case TemplateDateModel.DATE: {
+                    return DateFormat.getDateInstance(tok1Style, locale);
+                }
+                case TemplateDateModel.DATETIME: {
+                    int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
+                    if (tok2Style != -1) {
+                        return DateFormat.getDateTimeInstance(tok1Style, tok2Style, locale);
                     }
-                }
-                if (triggered) {
-                    LOG.warn("Global Java DateFormat cache has exceeded " + LEAK_ALERT_DATE_FORMAT_CACHE_SIZE
-                            + " entries => cache flushed. "
-                            + "Typical cause: Some template generates high variety of format pattern strings.");
+                    break;
                 }
             }
-            
-            DateFormat prevJFormat = GLOBAL_FORMAT_CACHE.putIfAbsent(cacheKey, jFormat);
-            if (prevJFormat != null) {
-                jFormat = prevJFormat;
-            }
-        }  // if cache miss
-        
-        return (DateFormat) jFormat.clone();  // For thread safety
+        }
+
+        try {
+            return new SimpleDateFormat(nameOrPattern, locale);
+        } catch (IllegalArgumentException e) {
+            final String msg = e.getMessage();
+            throw new InvalidFormatParametersException(
+                    msg != null ? msg : "Invalid SimpleDateFormat pattern", e);
+        }
+    }
+
+    private DateFormat getFromCache(CacheKey cacheKey) {
+        DateFormat dateFormat = cache.get(cacheKey);
+        if (dateFormat != null) {
+            return dateFormat;
+        }
+
+        dateFormat = cacheRecallableEntries.remove(cacheKey);
+        if (dateFormat == null) {
+            return null;
+        }
+
+        return addToCacheWithLimitingSize(cacheKey, dateFormat);
     }
 
     private static final class CacheKey {
