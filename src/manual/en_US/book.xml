@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns4="http://www.w3.org/1999/xhtml"
-      xmlns:ns3="http://www.w3.org/2000/svg"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -29440,6 +29437,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-35">FREEMARKER-35</link>:
+              [TODO] Native support for all
+              <literal>java.time.Temporal</literal>-s introduced in Java 8.
+              Most importantly,
+              <literal>freemarker.template.TemplateTemporalModel</literal> was
+              added, hence <quote>temporal</quote> is now a type in the
+              template language.</para>
+
+              <para>Note that to treat <literal>Temporal</literal>-s as
+              expected, the default configuration must be adjusted. For most
+              users, simply setting <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> to 2.3.32 (or greater) is all that's needed. But
+              to be precise, the question is if the
+              <literal>ObjectWrapper</literal> that's set in the
+              <literal>Configuration</literal> will wrap
+              <literal>Temporal</literal>-s into
+              <literal>TemplateTemporalModel</literal>-s, or it doesn't
+              recognize them, and treats them as generic Java objects (which
+              is the backward compatible behavior). Most applications use
+              <literal>DefaultObjetWrapper</literal>, and that has a
+              <literal>temporalSupport</literal> property for this.
+              <literal>DefaultObjetWrapper</literal> itself has an
+              <literal>incompatibleImprovements</literal> property, and
+              <literal>temporalSupport</literal> defaults to
+              <literal>true</literal> exactly if that's set to 2.3.32 (or
+              greater). Most users don't set the
+              <literal>ObjectWrapper</literal> in the
+              <literal>Configuration</literal>, in which case it inherits the
+              <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> from the <literal>Configuration</literal>, and
+              that's why the simple solution earlier works.</para>
+
+              <para>The <literal>date_format</literal>,
+              <literal>time_format</literal>, and
+              <literal>datetime_format</literal> settings now also affects the
+              formatting for <literal>Temporal</literal>-s (to be precise, for
+              <literal>TemplateTemporalModel</literal>-s). There's also two
+              new settings, <literal>year_format</literal>, and a
+              <literal>year_month_format</literal>, for the corresponding
+              <literal>java.time.Temporal</literal> subclasses.</para>
+
+              <para>When formatting non-local temporals, if the corresponding
+              format settings doesn't show the time zone or offset, it's
+              converted to local temporal according the
+              <literal>time_zone</literal> setting.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
