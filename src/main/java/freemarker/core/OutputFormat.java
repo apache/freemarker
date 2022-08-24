@@ -46,13 +46,19 @@ public abstract class OutputFormat {
 
     /**
      * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into
-     * it. If {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like
-     * if the surrounding output format was the same). This is usually a bad idea to allow, as such an event could
-     * indicate application bugs. If this method returns {@code false} (recommended), then FreeMarker will try to
-     * assimilate the inserted value by converting its format to this format, which will currently (2.3.24) cause
-     * exception, unless the inserted value is made by escaping plain text and the target format is non-escaping, in
-     * which case format conversion is trivially possible. (It's not impossible that conversions will be extended beyond
-     * this, if there will be demand for that.)
+     * it.
+     *
+     * <p>If {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output. If the current
+     * output format is a {@link MarkupOutputFormat} this is done using the
+     * {@link MarkupOutputFormat#outputForeign(TemplateMarkupOutputModel, Writer)} method, which can implement smart
+     * conversions. The default behavior (and the only behavior for non-markup outputs) is to behave as if the surrounding
+     * output format was the same; this is usually a bad idea to allow, as such an event could
+     * indicate application bugs.
+     *
+     * <p>If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the inserted value by
+     * converting its format to this format, which will currently (2.3.24) cause exception, unless the inserted value is
+     * made by escaping plain text and the target format is non-escaping, in which case format conversion is trivially
+     * possible. (It's not impossible that conversions will be extended beyond this, if there will be demand for that.)
      * 
      * <p>
      * {@code true} value is used by {@link UndefinedOutputFormat}.
