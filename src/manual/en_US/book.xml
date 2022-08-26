@@ -29417,6 +29417,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Release date: TODO</para>
 
+        <para>Please note that with this version the minimum required Java
+        version was increased from Java 7 to Java 8.</para>
+
         <section>
           <title>Changes on the FTL side</title>
 
