@@ -29515,10 +29515,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Some internal cleanup and slight improves related to
-              global caching of <literal>SimpleDateFormat</literal> patterns
-              (in
-              <literal>freemarker.core.JavaTemplateDateFormatFactory</literal>).</para>
+              <para>Some internal cleanup, and slightly improved global
+              caching of <literal>SimpleDateFormat</literal>, and
+              <literal>DecimalFormat</literal> patterns (in
+              <literal>freemarker.core.JavaTemplateDateFormatFactory</literal>,
+              and <literal>JavaTemplateNumberFormatFactory</literal>).</para>
             </listitem>
           </itemizedlist>
         </section>

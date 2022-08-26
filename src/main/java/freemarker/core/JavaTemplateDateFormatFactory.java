@@ -24,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 
 import freemarker.log.Logger;
 import freemarker.template.TemplateDateModel;
@@ -35,10 +34,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
-    private static final int MAX_CACHE_SIZE = 2; //!!T 512
-
-    private final ConcurrentHashMap<CacheKey, DateFormat> cache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<CacheKey, DateFormat> cacheRecallableEntries = new ConcurrentHashMap<>();
+    private final FastLRUKeyValueStore<CacheKey, DateFormat> dateFormatCache = new FastLRUKeyValueStore<>(512);
 
     private JavaTemplateDateFormatFactory() {
         // Can't be instantiated
@@ -51,41 +47,16 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     @Override
     public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
             Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
-        return new JavaTemplateDateFormat(getJavaDateFormat(dateType, params, locale, timeZone));
-    }
+        CacheKey cacheKey = new CacheKey(dateType, params, locale, timeZone);
 
-    /**
-     * Returns a "private" copy (not in the global cache) for the given format.  
-     */
-    private DateFormat getJavaDateFormat(int dateType, String nameOrPattern, Locale locale, TimeZone timeZone)
-            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
-
-        // Get DateFormat from global cache:
-        CacheKey cacheKey = new CacheKey(dateType, nameOrPattern, locale, timeZone);
-
-        DateFormat dateFormat = getFromCache(cacheKey);
+        DateFormat dateFormat = dateFormatCache.get(cacheKey);
         if (dateFormat == null) {
-            dateFormat = getJavaDateFormatNoCache(dateType, nameOrPattern, cacheKey);
-            dateFormat = addToCacheWithLimitingSize(cacheKey, dateFormat);
+            dateFormat = getJavaDateFormatNoCache(dateType, params, cacheKey);
+            dateFormat = dateFormatCache.putIfAbsentThenReturnStored(cacheKey, dateFormat);
         }
 
         // Must clone, as SimpleDateFormat is not thread safe, not even if you don't call setters on it:
-        return (DateFormat) dateFormat.clone();
-    }
-
-    private DateFormat addToCacheWithLimitingSize(CacheKey cacheKey, DateFormat dateFormat) {
-        if (cache.size() >= MAX_CACHE_SIZE) {
-            synchronized (JavaTemplateDateFormatFactory.class) {
-                if (cache.size() >= MAX_CACHE_SIZE) {
-                    cacheRecallableEntries.clear();
-                    cacheRecallableEntries.putAll(cache);
-                    cache.clear();
-                }
-            }
-        }
-
-        DateFormat prevDateFormat = cache.putIfAbsent(cacheKey, dateFormat);
-        return prevDateFormat != null ? prevDateFormat : dateFormat;
+        return new JavaTemplateDateFormat((DateFormat) dateFormat.clone());
     }
 
     private DateFormat getJavaDateFormatNoCache(int dateType, String nameOrPattern, CacheKey cacheKey) throws
@@ -128,20 +99,6 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
             throw new InvalidFormatParametersException(
                     msg != null ? msg : "Invalid SimpleDateFormat pattern", e);
         }
-    }
-
-    private DateFormat getFromCache(CacheKey cacheKey) {
-        DateFormat dateFormat = cache.get(cacheKey);
-        if (dateFormat != null) {
-            return dateFormat;
-        }
-
-        dateFormat = cacheRecallableEntries.remove(cacheKey);
-        if (dateFormat == null) {
-            return null;
-        }
-
-        return addToCacheWithLimitingSize(cacheKey, dateFormat);
     }
 
     private static final class CacheKey {

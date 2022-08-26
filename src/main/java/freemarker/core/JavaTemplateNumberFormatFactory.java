@@ -21,9 +21,6 @@ package freemarker.core;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-
-import freemarker.log.Logger;
 
 /**
  * Deals with {@link TemplateNumberFormat}-s that just wrap a Java {@link NumberFormat}.
@@ -34,11 +31,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
     static final String COMPUTER = "computer";
 
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
-
-    private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
-            = new ConcurrentHashMap<>();
-    private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
+    private final FastLRUKeyValueStore<CacheKey, NumberFormat> numberFormatCache = new FastLRUKeyValueStore<>(512);
 
     private JavaTemplateNumberFormatFactory() {
         // Not meant to be instantiated
@@ -50,51 +43,35 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
         CacheKey cacheKey = new CacheKey(
                 env != null ? env.transformNumberFormatGlobalCacheKey(params) : params,
                 locale);
-        NumberFormat jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
-        if (jFormat == null) {
-            if ("number".equals(params)) {
-                jFormat = NumberFormat.getNumberInstance(locale);
-            } else if ("currency".equals(params)) {
-                jFormat = NumberFormat.getCurrencyInstance(locale);
-            } else if ("percent".equals(params)) {
-                jFormat = NumberFormat.getPercentInstance(locale);
-            } else if (COMPUTER.equals(params)) {
-                jFormat = env.getCNumberFormat();
-            } else {
-                try {
-                    jFormat = ExtendedDecimalFormatParser.parse(params, locale);
-                } catch (ParseException e) {
-                    String msg = e.getMessage();
-                    throw new InvalidFormatParametersException(
-                            msg != null ? msg : "Invalid DecimalFormat pattern", e);
-                }
-            }
 
-            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
-                boolean triggered = false;
-                synchronized (JavaTemplateNumberFormatFactory.class) {
-                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
-                        triggered = true;
-                        GLOBAL_FORMAT_CACHE.clear();
-                    }
-                }
-                if (triggered) {
-                    LOG.warn("Global Java NumberFormat cache has exceeded " + LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE
-                            + " entries => cache flushed. "
-                            + "Typical cause: Some template generates high variety of format pattern strings.");
-                }
-            }
-            
-            NumberFormat prevJFormat = GLOBAL_FORMAT_CACHE.putIfAbsent(cacheKey, jFormat);
-            if (prevJFormat != null) {
-                jFormat = prevJFormat;
-            }
-        }  // if cache miss
+        NumberFormat numberFormat = numberFormatCache.get(cacheKey);
+        if (numberFormat == null) {
+            numberFormat = getNumberFormatNoCache(params, locale, env);
+            numberFormat = numberFormatCache.putIfAbsentThenReturnStored(cacheKey, numberFormat);
+        }
         
-        // JFormat-s aren't thread-safe; must clone it
-        jFormat = (NumberFormat) jFormat.clone();
-        
-        return new JavaTemplateNumberFormat(jFormat, params); 
+        return new JavaTemplateNumberFormat((NumberFormat) numberFormat.clone(), params);
+    }
+
+    private NumberFormat getNumberFormatNoCache(String params, Locale locale, Environment env) throws
+            InvalidFormatParametersException {
+        if ("number".equals(params)) {
+            return NumberFormat.getNumberInstance(locale);
+        } else if ("currency".equals(params)) {
+            return NumberFormat.getCurrencyInstance(locale);
+        } else if ("percent".equals(params)) {
+            return NumberFormat.getPercentInstance(locale);
+        } else if (COMPUTER.equals(params)) {
+            return env.getCNumberFormat();
+        } else {
+            try {
+                return ExtendedDecimalFormatParser.parse(params, locale);
+            } catch (ParseException e) {
+                String msg = e.getMessage();
+                throw new InvalidFormatParametersException(
+                        msg != null ? msg : "Invalid DecimalFormat pattern", e);
+            }
+        }
     }
 
     private static final class CacheKey {
