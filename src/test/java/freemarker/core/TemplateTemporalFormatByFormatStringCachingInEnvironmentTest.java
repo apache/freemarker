@@ -170,12 +170,14 @@ public class TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
 
         for (int i = 1; i <= 3; i++) {
             env.setLocale(locales.get(locales.size() - i));
+            JavaTemplateTemporalFormatFactory.INSTANCE.clear();
             assertSame(
                     env.getTemplateTemporalFormat(formatString, LocalDate.class),
                     onceCachedFormats.get(onceCachedFormats.size() - i));
         }
 
         env.setLocale(locales.get(0));
+        JavaTemplateTemporalFormatFactory.INSTANCE.clear();
         assertNotSame(
                 env.getTemplateTemporalFormat(formatString, LocalDate.class),
                 onceCachedFormats.get(0));
@@ -202,6 +204,7 @@ public class TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
             TemplateValueFormatException {
         for (int valueIndex = 0; valueIndex < settingAssignments.numberOfValues(); valueIndex++) {
             settingAssignments.execute(env, valueIndex);
+            JavaTemplateTemporalFormatFactory.INSTANCE.clear();
             assertSame(env.getTemplateTemporalFormat(temporalClass), cachedFormats.get(valueIndex));
         }
     }
@@ -212,6 +215,7 @@ public class TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
             TemplateValueFormatException {
         for (int valueIndex = 0; valueIndex < settingAssignments.numberOfValues(); valueIndex++) {
             String formatString = settingAssignments.getValue(valueIndex);
+            JavaTemplateTemporalFormatFactory.INSTANCE.clear();
             assertSame(env.getTemplateTemporalFormat(formatString, temporalClass), cachedFormats.get(valueIndex));
         }
     }

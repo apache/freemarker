@@ -161,50 +161,46 @@ public class TemplateTemporalFormatCurrentCachingInEnvironmentTest
         TemplateTemporalFormat lastFormat;
         TemplateTemporalFormat newFormat;
 
-        // Note: We call env.clearCachedTemplateTemporalFormatsByFormatString() directly before all
-        // env.getTemplateTemporalFormat calls, just to avoid that 2nd level of cache hiding any bugs in the level
-        // that we want to test here. But in almost all of these tests scenarios it shouldn't have any effect anyway.
-
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         lastFormat = env.getTemplateTemporalFormat(temporalClass);
         // Assert that it keeps returning the same instance from cache:
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         settingAssignments.execute(env, 0);
         // Assert that the cache wasn't cleared when the setting was set to the same value again:
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         env.setLocale(Locale.JAPAN); // Possibly clears non-reusable TemplateTemporalFormatCache field
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         if (localeDependent) {
             assertNotSame(lastFormat, newFormat);
         } else {
-            env.clearCachedTemplateTemporalFormatsByFormatString();
+            clearHigherLevelCaches(env);
             assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
         }
         lastFormat = newFormat;
 
         env.setLocale(Locale.JAPAN);
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         env.setLocale(Locale.GERMANY); // Possibly clears non-reusable TemplateTemporalFormatCache field
         env.setLocale(Locale.JAPAN);
         // Assert that it restores the same instance from TemplateTemporalFormatCache.reusableXxx field:
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         env.setTimeZone(OTHER_TIME_ZONE); // Possibly clears non-reusable TemplateTemporalFormatCache field
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         if (timeZoneDependent) {
             assertNotSame(newFormat, lastFormat);
-            env.clearCachedTemplateTemporalFormatsByFormatString();
+            clearHigherLevelCaches(env);
             assertSame(newFormat, env.getTemplateTemporalFormat(temporalClass));
         } else {
             assertSame(newFormat, lastFormat);
@@ -213,19 +209,27 @@ public class TemplateTemporalFormatCurrentCachingInEnvironmentTest
 
         env.setTimeZone(DateUtil.UTC); // Possibly clears non-reusable TemplateTemporalFormatCache field
         env.setTimeZone(OTHER_TIME_ZONE);
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         // Assert that it restores the same instance from TemplateTemporalFormatCache.reusableXxx field:
         assertSame(lastFormat, env.getTemplateTemporalFormat(temporalClass));
 
         settingAssignments.execute(env, 1); // Clears even TemplateTemporalFormatCache.reusableXxx
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         assertNotSame(lastFormat, newFormat);
 
         settingAssignments.execute(env, 0); // Clears even TemplateTemporalFormatCache.reusableXxx
-        env.clearCachedTemplateTemporalFormatsByFormatString();
+        clearHigherLevelCaches(env);
         newFormat = env.getTemplateTemporalFormat(temporalClass);
         assertNotSame(lastFormat, newFormat);
+    }
+
+    /**
+     * Clears caches that are higher level than the "current format", so that we can test the last reliably.
+     */
+    private void clearHigherLevelCaches(Environment env) {
+        JavaTemplateTemporalFormatFactory.INSTANCE.clear();
+        env.clearCachedTemplateTemporalFormatsByFormatString();
     }
 
 }

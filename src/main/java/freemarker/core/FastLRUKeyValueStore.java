@@ -82,4 +82,9 @@ class FastLRUKeyValueStore<K, V> {
 
         return putIfAbsentThenReturnStored(cacheKey, value);
     }
+
+    void clear() {
+        olderEntries.clear();
+        recentEntries.clear();
+    }
 }
