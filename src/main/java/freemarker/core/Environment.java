@@ -143,6 +143,12 @@ public final class Environment extends Configurable {
         C_NUMBER_FORMAT_ICI_2_3_21.setDecimalFormatSymbols(symbols);
     }
 
+    /**
+     * Maximum number of patterns per class in {@link #cachedTemporalFormatsByFormatString}, after which cache size
+     * must be reduced. Not private to help unit testing
+     */
+    static final int CACHED_TEMPORAL_FORMATS_BY_FORMAT_STRING_MAX_SIZE_PER_CLASS = 128;
+
     private final Configuration configuration;
     private final boolean incompatibleImprovementsGE2328;
     private final TemplateHashModel rootDataModel;
@@ -2901,13 +2907,55 @@ public final class Environment extends Configurable {
             throw new BugException("Unhandled temporal class: " + temporalClass.getName());
         }
 
-        return classSpecificMap.computeIfAbsent(
-                formatString,
-                k -> new TemplateTemporalFormat[CACHED_TEMPORAL_FORMATS_BY_FORMAT_STRING_VALUE_ARRAY_LENGTH]);
+        TemplateTemporalFormat[] cachedFormats = classSpecificMap.get(formatString);
+        if (cachedFormats != null) {
+            return cachedFormats;
+        }
+
+        // To defend against memory leak if some misbehaving template generates lots of unique formats:
+        if (classSpecificMap.size() >= CACHED_TEMPORAL_FORMATS_BY_FORMAT_STRING_MAX_SIZE_PER_CLASS) {
+            classSpecificMap.clear();
+        }
+
+        cachedFormats = new TemplateTemporalFormat[CACHED_TEMPORAL_FORMATS_BY_FORMAT_STRING_VALUE_ARRAY_LENGTH];
+        classSpecificMap.put(formatString, cachedFormats);
+        return cachedFormats;
     }
 
+    /** Exposed for unit testing */
     void clearCachedTemplateTemporalFormatsByFormatString() {
         cachedTemporalFormatsByFormatString = null;
+    }
+
+    /** This is used for unit testing */
+    int getTemplateTemporalFormatsByFormatStringMapSize(Class<? extends Temporal> temporalClass) {
+        if (cachedTemporalFormatsByFormatString == null) {
+            return 0;
+        }
+
+        Map<String, TemplateTemporalFormat[]> classSpecificMap;
+        if (temporalClass == Instant.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.instantFormats;
+        } else if (temporalClass == LocalDate.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.localDateFormats;
+        } else if (temporalClass == LocalDateTime.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.localDateTimeFormats;
+        } else if (temporalClass == LocalTime.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.localTimeFormats;
+        } else if (temporalClass == OffsetDateTime.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.offsetDateTimeFormats;
+        } else if (temporalClass == OffsetTime.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.offsetTimeFormats;
+        } else if (temporalClass == ZonedDateTime.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.zonedDateTimeFormats;
+        } else if (temporalClass == YearMonth.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.yearMonthFormats;
+        } else if (temporalClass == Year.class) {
+            classSpecificMap = cachedTemporalFormatsByFormatString.yearFormats;
+        } else {
+            throw new BugException("Unhandled temporal class: " + temporalClass.getName());
+        }
+        return classSpecificMap != null ? classSpecificMap.size() : 0;
     }
 
     /**

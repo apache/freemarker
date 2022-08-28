@@ -26,17 +26,23 @@ import java.util.Locale;
  * Deals with {@link TemplateNumberFormat}-s that just wrap a Java {@link NumberFormat}.
  */
 class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
-    
+
     static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
 
     static final String COMPUTER = "computer";
 
-    private final FastLRUKeyValueStore<CacheKey, NumberFormat> numberFormatCache = new FastLRUKeyValueStore<>(512);
+    /**
+     * Exposed to unit testing.
+     */
+    static final int GUARANTEED_RECENT_ENTRIES = 512;
+
+    private final FastLRUKeyValueStore<CacheKey, NumberFormat> numberFormatCache = new FastLRUKeyValueStore<>(
+            GUARANTEED_RECENT_ENTRIES);
 
     private JavaTemplateNumberFormatFactory() {
         // Not meant to be instantiated
     }
-    
+
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
@@ -49,7 +55,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
             numberFormat = getNumberFormatNoCache(params, locale, env);
             numberFormat = numberFormatCache.putIfAbsentThenReturnStored(cacheKey, numberFormat);
         }
-        
+
         return new JavaTemplateNumberFormat((NumberFormat) numberFormat.clone(), params);
     }
 
@@ -72,6 +78,21 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                         msg != null ? msg : "Invalid DecimalFormat pattern", e);
             }
         }
+    }
+
+
+    /**
+     * Used for unit testing.
+     */
+    void clear() {
+        numberFormatCache.clear();
+    }
+
+    /**
+     * Used for unit testing.
+     */
+    int getSize() {
+        return numberFormatCache.size();
     }
 
     private static final class CacheKey {
@@ -97,5 +118,5 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
             return pattern.hashCode() ^ locale.hashCode();
         }
     }
-    
+
 }

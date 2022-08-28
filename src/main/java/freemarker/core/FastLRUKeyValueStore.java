@@ -67,6 +67,8 @@ class FastLRUKeyValueStore<K, V> {
     }
 
     /**
+     * Gets the entry with the given key, and ensures that it becomes a "recent" entry.
+     *
      * @return {@code null} if there's no entry with the given key.
      */
     V get(K cacheKey) {
@@ -83,8 +85,23 @@ class FastLRUKeyValueStore<K, V> {
         return putIfAbsentThenReturnStored(cacheKey, value);
     }
 
+    /**
+     * Drops all entries.
+     */
     void clear() {
-        olderEntries.clear();
-        recentEntries.clear();
+        synchronized (this) {
+            olderEntries.clear();
+            recentEntries.clear();
+        }
+    }
+
+    /**
+     * Total number of entries stored at the moment. Can be inaccurate if the store concurrent modified, but the main
+     * application is unit testing, where we can avoid that.
+     */
+    int size() {
+        synchronized (this) {
+            return recentEntries.size() + olderEntries.size();
+        }
     }
 }

@@ -25,24 +25,27 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import freemarker.log.Logger;
 import freemarker.template.TemplateDateModel;
 
 class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
-    
-    static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory(); 
-    
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
-    private final FastLRUKeyValueStore<CacheKey, DateFormat> dateFormatCache = new FastLRUKeyValueStore<>(512);
+    static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory();
+
+    /**
+     * Exposed to unit testing.
+     */
+    static final int GUARANTEED_RECENT_ENTRIES = 512;
+
+    private final FastLRUKeyValueStore<CacheKey, DateFormat> dateFormatCache =
+            new FastLRUKeyValueStore<>(GUARANTEED_RECENT_ENTRIES);
 
     private JavaTemplateDateFormatFactory() {
         // Can't be instantiated
     }
-    
+
     /**
      * @param zonelessInput
-     *            Has no effect in this implementation.
+     *         Has no effect in this implementation.
      */
     @Override
     public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
@@ -101,6 +104,21 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         }
     }
 
+
+    /**
+     * Used for unit testing.
+     */
+    void clear() {
+        dateFormatCache.clear();
+    }
+
+    /**
+     * Used for unit testing.
+     */
+    int getSize() {
+        return dateFormatCache.size();
+    }
+
     private static final class CacheKey {
         private final int dateType;
         private final String pattern;
@@ -145,5 +163,5 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         }
         return -1;
     }
-    
+
 }

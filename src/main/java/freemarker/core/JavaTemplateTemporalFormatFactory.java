@@ -27,8 +27,13 @@ import java.util.TimeZone;
 class JavaTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
     public static final JavaTemplateTemporalFormatFactory INSTANCE = new JavaTemplateTemporalFormatFactory();
 
+    /**
+     * Exposed to unit testing.
+     */
+    static final int GUARANTEED_RECENT_ENTRIES = 512;
+
     private final FastLRUKeyValueStore<CacheKey, JavaTemplateTemporalFormat> formatCache =
-            new FastLRUKeyValueStore<>(512);
+            new FastLRUKeyValueStore<>(GUARANTEED_RECENT_ENTRIES);
 
     private JavaTemplateTemporalFormatFactory() {
         // Not instantiated from outside
@@ -49,8 +54,18 @@ class JavaTemplateTemporalFormatFactory extends TemplateTemporalFormatFactory {
         return format;
     }
 
+    /**
+     * Used for unit testing.
+     */
     void clear() {
         formatCache.clear();
+    }
+
+    /**
+     * Used for unit testing.
+     */
+    int getSize() {
+        return formatCache.size();
     }
 
     private static class CacheKey {
