@@ -406,6 +406,10 @@
         preservelastmodified="true" overwrite="true"
     />
     -->
+
+    <jar destfile="build/freemarker-sources.jar">
+        <fileset dir="src" includes="**/*.*"/>
+    </jar>
   </target>
 
   <!-- ================================================================= -->
