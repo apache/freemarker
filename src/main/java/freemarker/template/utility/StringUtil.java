@@ -1439,8 +1439,8 @@ public class StringUtil {
                 } else if (c == '\'') {
                     escapeType = json ? NO_ESC : ESC_BACKSLASH; 
                 } else if (c == '\\') {
-                    escapeType = ESC_BACKSLASH; 
-                } else if (c == '/' && (i == 0 || s.charAt(i - 1) == '<')) {  // against closing elements
+                    escapeType = ESC_BACKSLASH;
+                } else if (c == '/' ) {
                     escapeType = ESC_BACKSLASH; 
                 } else if (c == '>') {  // against "]]> and "-->"
                     final boolean dangerous;
