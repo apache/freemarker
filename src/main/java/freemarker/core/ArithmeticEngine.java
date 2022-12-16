@@ -126,7 +126,7 @@ public abstract class ArithmeticEngine {
                 return 0;
             } else {
                 // The most common case is comparing values of the same type. As BigDecimal can represent all of these
-                // with loseless round-trip (i.e., converting to BigDecimal and then back the original type gives the
+                // with lossless round-trip (i.e., converting to BigDecimal and then back the original type gives the
                 // original value), we can avoid conversion to BigDecimal without changing the result.
                 if (first.getClass() == second.getClass()) {
                     // Bit of optimization for this is a very common case:

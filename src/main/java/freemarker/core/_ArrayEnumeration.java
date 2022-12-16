@@ -22,7 +22,7 @@ package freemarker.core;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _ArrayEnumeration implements Enumeration {
 
     private final Object[] array;

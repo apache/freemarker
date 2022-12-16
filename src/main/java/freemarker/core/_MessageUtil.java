@@ -30,7 +30,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  * Utilities for creating error messages (and other messages).
  */
 public class _MessageUtil {

@@ -59,7 +59,7 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.WriteProtectable;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * 
  * Evaluates object builder expressions used in configuration {@link Properties}.
  * It should be replaced with FTL later (when it was improved to be practical for this), so the syntax should be
@@ -448,7 +448,7 @@ public class _ObjectBuilderSettingEvaluator {
                         }
                     } else {
                         if (resultCoerced) {
-                            // The FTL way (BigDecimal is loseless, and it will be coerced to the target type later):
+                            // The FTL way (BigDecimal is lossless, and it will be coerced to the target type later):
                             return new BigDecimal(numStr);
                         } else {
                             // The Java way (lossy but familiar):

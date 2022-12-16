@@ -3536,7 +3536,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
-            // [2.4] Default might changes to camel-case
+            // [2.4] Default might change to camel-case
             return DEFAULT_ENCODING_KEY;
         }
         if ("defaultCharset".equals(name)) {

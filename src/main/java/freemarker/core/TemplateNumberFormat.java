@@ -83,8 +83,7 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * will be support, it will be similar to {@link TemplateDateFormat#parse(String, int)}.
      */
     public final Object parse(String s) throws TemplateValueFormatException {
-        throw new ParsingNotSupportedException("Number formats currenly don't support parsing");
+        throw new ParsingNotSupportedException("Number formats currently don't support parsing");
     }
-    
-    
+
 }
