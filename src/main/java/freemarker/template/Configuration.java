@@ -945,6 +945,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       U+221E, and U+FFFD.
      *     </ul>
      *   </li>
+     *   <li><p>
+     *     2.3.32 (or higher):
+     *     <ul>
+     *       <li><p>The "computer" formatting of numbers (this is what {@code ?c} does, also setting the
+     *       {@code number_format} to {@code "c"}, or to {@code "computer"}) has changed for some non-whole numbers, and
+     *       for whole numbers with over 100 digits. It's now lossless, so it potentially shows much more decimals. It
+     *       uses exponential format (like 1.2E-7 instead of 0.00000012) for numbers whose absolute value is less
+     *       than 1E-6 (0.000001), and for whole numbers whose absolute value is at least 1E101 (so over 100 digits).
+     *       It also uses exponential format for whole floating point ({@code double}/{@code Double}}, or
+     *       {@code float}/{@code Float}) numbers, when their absolute value is too big for the floating point type to
+     *       store them precisely (so if the intent was to store some ID-s, they are likely corrupted anyway, as the
+     *       type skips some whole numbers).
+     *     </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException

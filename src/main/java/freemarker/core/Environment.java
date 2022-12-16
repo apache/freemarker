@@ -165,6 +165,7 @@ public final class Environment extends Configurable {
 
     @Deprecated
     private NumberFormat cNumberFormat;
+    private TemplateNumberFormat cTemplateNumberFormat;
 
     /**
      * Used by the "iso_" built-ins to accelerate formatting.
@@ -1666,6 +1667,9 @@ public final class Environment extends Configurable {
             }
 
             return formatFactory.get(params, locale, this);
+        } else if (formatStringLen >= 1 && formatString.charAt(0) == 'c'
+                && (formatStringLen == 1 || formatString.equals(COMPUTER))) {
+            return getCTemplateNumberFormat();
         } else {
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
@@ -1676,8 +1680,34 @@ public final class Environment extends Configurable {
      * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is less than 2.3.31,
      * this will wrongly give the format that the <tt>c</tt> built-in used before Incompatible Improvements 2.3.21.
      * See more at {@link Configuration#Configuration(Version)}.
+     *
+     * @deprecated Use {@link #getCTemplateNumberFormat()} instead. This method can't return the format used when
+     * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is 2.3.32,
+     * or greater, and instead it will fall back to return the format that was used for 2.3.31.
      */
+    @Deprecated
     public NumberFormat getCNumberFormat() {
+        ensureCNumberFormatInitialized();
+        return cNumberFormat;
+    }
+
+    /**
+     * Returns the {@link TemplateNumberFormat} used for the <tt>c</tt> built-in uses.
+     * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is 2.3.32 or greater.
+     *
+     * @since 2.3.32
+     */
+    public TemplateNumberFormat getCTemplateNumberFormat() {
+        if (configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_32) {
+            ensureCNumberFormatInitialized();
+            return cTemplateNumberFormat;
+        }
+        return CTemplateNumberFormat.INSTANCE;
+    }
+
+    static final String COMPUTER = "computer";
+
+    private void ensureCNumberFormatInitialized() {
         // Note: DecimalFormat-s aren't thread-safe, so you must clone the static field value.
         if (cNumberFormat == null) {
             if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31) {
@@ -1685,20 +1715,10 @@ public final class Environment extends Configurable {
             } else {
                 cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
             }
+            // Note this uses the legacy name "computer", instead of "c". From IcI 2.3.32 we are using
+            // CTemplateNumberFormat.INSTANCE instead, so users won't see this anymore.
+            cTemplateNumberFormat = new JavaTemplateNumberFormat(cNumberFormat, COMPUTER);
         }
-        return cNumberFormat;
-    }
-
-    /**
-     * As we have a number format cache that's shared between {@link Configuration}-s, if the interpretation of a format
-     * is impacted by Incompatible Improvements, we must change the cache key.
-     */
-    String transformNumberFormatGlobalCacheKey(String keyPart) {
-        if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31
-                && JavaTemplateNumberFormatFactory.COMPUTER.equals(keyPart)) {
-            return "computer\u00002";
-        }
-        return keyPart;
     }
 
     @Override

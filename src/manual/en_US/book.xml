@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns4="http://www.w3.org/1999/xhtml"
-      xmlns:ns3="http://www.w3.org/2000/svg"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -15656,37 +15653,123 @@ rif: foo XYr baar</programlisting>
           That is, it formats with the rules that programming languages used
           to use, which is independent of all the locale and number format
           settings of FreeMarker. It always uses dot as decimal separator, and
-          it never uses grouping separators (like 3,000,000), nor exponential
-          form (like 5E20), nor superfluous leading or trailing 0-s (like 03
-          or 1.0), nor + sign (like +1). It will print at most 16 digits after
-          the decimal dot, and thus numbers whose absolute value is less than
-          1E-16 will be shown as 0. This built-in is crucial because be
-          default (like with <literal>${x}</literal>) numbers are converted to
-          strings with the locale (language, country) specific number
-          formatting, which is for human readers (like 3000000 is possibly
-          printed as 3,000,000). When the number is printed not for human
-          audience (e.g., for a database record ID used as the part of an URL,
-          or as invisible field value in a HTML form, or for printing
-          CSS/JavaScript numerical literals) this built-in must be used to
-          print the number (i.e., use <literal>${x?c}</literal> instead of
-          <literal>${x}</literal>), or else the output will be possibly broken
-          depending on the current number formatting settings and locale (like
-          the decimal point is not dot, but comma in many countries) and the
-          value of the number (like big numbers are possibly
-          <quote>damaged</quote> by grouping separators).</para>
+          it never uses grouping separators (like in 3,000,000), nor
+          <quote>+</quote> sign (like +1), nor superfluous leading or trailing
+          0-s (like 03 or 1.0). It usually avoids exponential form (like it
+          will never format 10000000000 as 1E10), but see the details below
+          regarding that.</para>
 
-          <para>If the <literal>incompatible_improvements</literal> FreeMarker
-          configuration setting is set to 2.3.24 or higher (also if it's set
-          to 2.3.20 or higher and you are outside a string literal), this
-          built-in will return <literal>"INF"</literal>,
-          <literal>"-INF"</literal> and <literal>"NaN"</literal> for
-          positive/negative infinity and IEEE floating point Not-a-Number,
-          respectively. These are the XML Schema compatible representations of
-          these special values. (Earlier it has returned what
-          <literal>java.text.DecimalFormat</literal> did with US locale, none
-          of which is understood by any (common) computer language.)</para>
+          <para>This built-in is crucial because be default (like with
+          <literal>${x}</literal>) numbers are converted to strings with the
+          locale (language, country) specific number formatting, which is for
+          human readers (like 3000000 is possibly printed as 3,000,000). When
+          the number is printed not for human audience (e.g., for a database
+          record ID used as the part of an URL, or as invisible field value in
+          a HTML form, or for printing CSS/JavaScript numerical literals) you
+          must use this built-in to format the number (i.e., use
+          <literal>${x?c}</literal> instead of <literal>${x}</literal>), or
+          else the output will be possibly broken depending on the current
+          number formatting settings and locale (like the decimal point is not
+          dot, but comma in many countries) and the value of the number (like
+          big numbers are possibly <quote>damaged</quote> by grouping
+          separators).</para>
 
-          <para>Note that this built-in <link
+          <para>Further details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Rounding: The conversion is only guaranteed to be lossless
+              if the <link
+              linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+              FreeMarker configuration setting</link> is set to 2.3.32 or
+              higher. Before that, the format never uses exponential form, and
+              is limited to 16 digits after the decimal dot, so rounding can
+              occur (e.g. 1E-17 will be shown as 0).</para>
+            </listitem>
+
+            <listitem>
+              <para>Special floating point values: If the
+              <literal>incompatible_improvements</literal> FreeMarker
+              configuration setting is set to 2.3.24 or higher (also if it's
+              set to 2.3.20 or higher and you are outside a string literal),
+              this built-in will return <literal>"INF"</literal>,
+              <literal>"-INF"</literal> and <literal>"NaN"</literal> for
+              positive/negative infinity and IEEE floating point Not-a-Number,
+              respectively. These are the XML Schema compatible
+              representations of these special values. With too low
+              <literal>incompatible_improvements</literal> it returns what
+              <literal>java.text.DecimalFormat</literal> did with US locale,
+              none of which is understood by any (common) computer
+              language.</para>
+            </listitem>
+
+            <listitem>
+              <para>Exponential form: Before
+              <literal>incompatible_improvements</literal> 2.3.32, it was
+              never used. After that, it's uses exponential form in these
+              cases:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>For a non-whole number whose absolute value is less
+                  than 1E-6 (0.000001).</para>
+                </listitem>
+
+                <listitem>
+                  <para>For a whole number that has more than 100 digits in
+                  non-exponential form</para>
+                </listitem>
+
+                <listitem>
+                  <para>For a whole numbers whose absolute value is too big
+                  for the backing floating point type to be safe from rounding
+                  errors. More specifically:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>For a whole number that's stored in a
+                      <literal>double</literal>, or <literal>Double</literal>
+                      on the Java side (i.e., as 64 bit floating point
+                      number), and has an absolute value greater than
+                      9007199254740992. It's because that type can't store all
+                      whole numbers outside that range. So if the intent was
+                      to store some ID-s, they are likely already corrupted
+                      (because they had to be rounded to the closest whole
+                      number that the type can store), and you should use
+                      <literal>long</literal> or <literal>BigInteger</literal>
+                      on the Java side.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>For a whole (integer) value that's stored in a
+                      <literal>float</literal>, or <literal>Float</literal> on
+                      the Java side (i.e., as 32 bit floating point number),
+                      and has an absolute value greater than 16777216.
+                      Reasoning is the same as for
+                      <literal>double</literal>.</para>
+                    </listitem>
+                  </itemizedlist>
+
+                  <para>Note that by default FreeMarker doesn't use
+                  <literal>double</literal> or <literal>float</literal>, so
+                  such values are likely can only come from the
+                  data-model.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The output never contains superfluous zeros after the
+              decimal point. Thus, unlike in Java, you can't tell apart a
+              <literal>double</literal> from an <literal>int</literal>, if
+              they store the same number mathematically, because the output
+              will look the same for both. (This is because the template
+              language only have a single number type, so you don't have a
+              good control over the backing Java type.)</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Note that the <literal>c</literal> built-in <link
           linkend="ref_builtin_c_boolean">also works on
           booleans</link>.</para>
         </section>
@@ -15884,14 +15967,15 @@ rif: foo XYr baar</programlisting>
           configuration settings. You can also specify a number format
           explicitly with this built-in, as it will be shown later.</para>
 
-          <para>There are four predefined number formats:
-          <literal>computer</literal>, <literal>currency</literal>,
-          <literal>number</literal>, and <literal>percent</literal>. The exact
-          meaning of these is locale (nationality) specific, and is controlled
-          by the Java platform installation, not by FreeMarker, except for
-          <literal>computer</literal>, which uses the same formatting as <link
-          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>
-          (assuming <link
+          <para>There are four predefined number formats: <literal>c</literal>
+          (since 2.3.32, before that it was called
+          <literal>computer</literal>, which still works),
+          <literal>currency</literal>, <literal>number</literal>, and
+          <literal>percent</literal>. The exact meaning of these is locale
+          (nationality) specific, and is controlled by the Java platform
+          installation, not by FreeMarker, except for <literal>c</literal>,
+          which uses the same formatting as <link linkend="ref_builtin_c">the
+          <literal>c</literal> built-in</link> (assuming <link
           linkend="pgui_config_incompatible_improvements">incompatible
           improvements</link> set to 2.3.31, or higher, or else infinity and
           NaN isn't formatted like that). There can also be programmer-defined
@@ -15905,7 +15989,7 @@ ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
 ${x?string.currency}
 ${x?string.percent}
-${x?string.computer}</programlisting>
+${x?string.c} &lt;#-- But you should write ${x?c} --&gt;</programlisting>
 
           <para>If your locale is US English, this will print:</para>
 
@@ -23800,9 +23884,10 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para><literal>computer</literal>, which formats like <link
-                  linkend="ref_builtin_c">the <literal>c</literal>
-                  built-in</link></para>
+                  <para><literal>c</literal> since 2.3.24 (was called
+                  <literal>computer</literal> before that, which still works),
+                  which formats like <link linkend="ref_builtin_c">the
+                  <literal>c</literal> built-in</link></para>
                 </listitem>
 
                 <listitem>
@@ -29424,13 +29509,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>This is related to <literal>freemarker.ext.xml</literal>,
-              which is the very old, long deprecated XML wrapper (the commonly
-              used one is <literal>freemarker.ext.dom</literal>), which almost
-              nobody uses, or maybe truly nobody. Still, now the
-              <literal>_registerNamespace</literal> key works, doing what the
-              documentation always stated. Before this fix it just behaved as
-              if it was the name of an element you are looking for.</para>
+              <para>When setting the <literal>number_format</literal> setting
+              (also when formatting with
+              <literal>?string(<replaceable>format</replaceable>)</literal>),
+              now <quote>c</quote> can be used instead of
+              <quote>computer</quote>. The two mean the same, and
+              <quote>c</quote> is preferred from now on.</para>
+            </listitem>
+
+            <listitem>
+              <para>If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.32 (or higher), the behavior of
+              <literal>?c</literal> (and thus the <quote>computer</quote> and
+              <quote>c</quote> number format) has changed for some non-whole
+              numbers, and for whole numbers with over 100 digits. The goal of
+              this change is to make the formatting lossless, and also to
+              avoiding huge output with exponents of high magnitude. See
+              details at the documentation of the <link
+              linkend="ref_builtin_c"><literal>c</literal>
+              built-in</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>In <literal>freemarker.ext.xml</literal>, which is the
+              old, long deprecated XML wrapper, that almost nobody uses
+              anymore (the commonly used one is
+              <literal>freemarker.ext.dom</literal>), the
+              <literal>_registerNamespace</literal> key now works, doing what
+              the documentation always stated. Before this fix it just behaved
+              as if it was the name of an element you are looking for.</para>
             </listitem>
           </itemizedlist>
         </section>
