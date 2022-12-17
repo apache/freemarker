@@ -623,7 +623,7 @@ public abstract class ArithmeticEngine {
             return new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
             if (NumberUtil.isInfinite(num)) {
-                throw new NumberFormatException("It's impossible to convert an infinte value ("
+                throw new NumberFormatException("It's impossible to convert an infinite value ("
                         + num.getClass().getSimpleName() + " " + num + ") to BigDecimal.");
             }
             // The exception message is useless, so we add a new one:
