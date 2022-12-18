@@ -21,7 +21,7 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _DelayedGetMessageWithoutStackTop extends _DelayedConversionToString {
 
     public _DelayedGetMessageWithoutStackTop(TemplateException exception) {

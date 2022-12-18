@@ -36,7 +36,7 @@ import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.StringUtil;
 
 
@@ -82,7 +82,7 @@ final class InitParamParser {
             String filePath = pureTemplatePath.substring(TEMPLATE_PATH_PREFIX_FILE.length());
             templateLoader = new FileTemplateLoader(new File(filePath));
         } else if (pureTemplatePath.startsWith("[")
-                && cfg.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
+                && cfg.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_22) {
             if (!pureTemplatePath.endsWith("]")) {
                 // B.C. constraint: Can't throw any checked exceptions.
                 throw new TemplatePathParsingException("Failed to parse template path; closing \"]\" is missing.");
@@ -96,7 +96,7 @@ final class InitParamParser {
             }
             templateLoader = new MultiTemplateLoader(templateLoaders);
         } else if (pureTemplatePath.startsWith("{")
-                && cfg.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
+                && cfg.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_22) {
             throw new TemplatePathParsingException("Template paths starting with \"{\" are reseved for future purposes");
         } else {
             templateLoader = new WebappTemplateLoader(srvCtx, pureTemplatePath);

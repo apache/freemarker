@@ -25,7 +25,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * The runtime environment used during the evaluation of configuration {@link Properties}.
  */
 public class _SettingEvaluationEnvironment {

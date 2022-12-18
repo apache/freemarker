@@ -24,7 +24,7 @@ import java.util.Iterator;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
 /**
  * A little bridge class that subclasses the new SimpleList
@@ -35,7 +35,7 @@ public class LegacyList extends SimpleSequence {
     private Iterator iterator;
 
     public LegacyList() {
-        super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
     }
 
     /**

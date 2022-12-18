@@ -31,7 +31,7 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  * Packs a structured from of the error description from which the error message can be rendered on-demand.
  * Note that this class isn't serializable, thus the containing exception should render the message before it's
  * serialized.

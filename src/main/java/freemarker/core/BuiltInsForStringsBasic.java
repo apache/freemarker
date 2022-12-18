@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +36,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.StringUtil;
 
 class BuiltInsForStringsBasic {
@@ -435,7 +436,14 @@ class BuiltInsForStringsBasic {
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toLowerCase(env.getLocale()));
         }
-    }    
+    }
+
+    static class c_lower_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleScalar(s.toLowerCase(Locale.ROOT));
+        }
+    }
 
     static class padBI extends BuiltInForString {
         
@@ -830,10 +838,17 @@ class BuiltInsForStringsBasic {
         }
     }
 
+    static class c_upper_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleScalar(s.toUpperCase(Locale.ROOT));
+        }
+    }
+
     static class word_listBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            SimpleSequence result = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            SimpleSequence result = new SimpleSequence(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             StringTokenizer st = new StringTokenizer(s);
             while (st.hasMoreTokens()) {
                result.add(st.nextToken());

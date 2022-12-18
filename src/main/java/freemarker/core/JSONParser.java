@@ -20,17 +20,13 @@
 package freemarker.core;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
-import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
@@ -38,7 +34,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.Constants;
 import freemarker.template.utility.NumberUtil;
 import freemarker.template.utility.StringUtil;
@@ -297,7 +293,7 @@ class JSONParser {
         if (tryConsumeChar(']')) return Constants.EMPTY_SEQUENCE;
 
         boolean afterComma = false;
-        SimpleSequence elements = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleSequence elements = new SimpleSequence(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         do {
             skipWS();
             elements.add(consumeValue(afterComma ? null : UNCLOSED_ARRAY_MESSAGE, afterComma ? -1 : startP));
@@ -340,7 +336,7 @@ class JSONParser {
             skipWS();
             afterComma = true;
         } while (consumeChar(',', '}', UNCLOSED_OBJECT_MESSAGE, startP) == ',');
-        return new SimpleHash(map, _TemplateAPI.SAFE_OBJECT_WRAPPER, 0);
+        return new SimpleHash(map, _ObjectWrappers.SAFE_OBJECT_WRAPPER, 0);
     }
 
     private boolean isE(char c) {

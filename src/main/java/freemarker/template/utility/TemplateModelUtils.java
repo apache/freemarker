@@ -39,7 +39,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
 /**
  * Static utility method related to {@link TemplateModel}-s that didn't fit elsewhere.
@@ -258,7 +258,7 @@ public final class TemplateModelUtils {
         private void initKeys() throws TemplateModelException {
             if (keys == null) {
                 Set<String> keySet = new HashSet<>();
-                SimpleSequence keySeq = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+                SimpleSequence keySeq = new SimpleSequence(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
                 for (TemplateHashModelEx hash : hashes) {
                     addKeys(keySet, keySeq, hash);
                 }
@@ -281,7 +281,7 @@ public final class TemplateModelUtils {
 
         private void initValues() throws TemplateModelException {
             if (values == null) {
-                SimpleSequence seq = new SimpleSequence(size(), _TemplateAPI.SAFE_OBJECT_WRAPPER);
+                SimpleSequence seq = new SimpleSequence(size(), _ObjectWrappers.SAFE_OBJECT_WRAPPER);
                 // Note: size() invokes initKeys() if needed.
             
                 int ln = keys.size();

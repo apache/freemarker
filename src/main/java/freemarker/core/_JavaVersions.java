@@ -23,7 +23,7 @@ import freemarker.template.Version;
 import freemarker.template.utility.SecurityUtilities;
 
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  */
 public final class _JavaVersions {
     

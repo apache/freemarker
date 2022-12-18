@@ -40,9 +40,11 @@ import freemarker.template.utility.ClassUtil;
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
- */ 
+ */
 public class _CoreAPI {
-    
+    // ATTENTION! Don't refer to other classes in the static initializer of this class! Fields that need that must be
+    // moved into separate class, to avoid class init deadlocks.
+
     public static final String ERROR_MESSAGE_HR = "----";
 
     // Can't be instantiated

@@ -28,12 +28,18 @@ ${1?c}
 ${1234567.886}
 ${1234567.886?c}
 ${int?c}
-${double?c}
-${double2?c}
-${double3?c}
-${double4?c}
-${bigDecimal?c}
-${bigDecimal2?c}
+<#setting number_format = "computer">
+${100000.5}
+<#setting number_format = "c">
+${100000.5}
+<#setting number_format = ",000.##">
+${100000.5}
+<@assertEquals expected="1" actual=double?c />
+<@assertEquals expected="1.000000000000001" actual=double2?c />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("1E-16", "0.0000000000000001") actual=double3?c />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("-1E-16", "-0.0000000000000001") actual=double4?c />
+<@assertEquals expected="1" actual=bigDecimal?c />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("1E-16", "0.0000000000000001") actual=bigDecimal2?c />
 <#if iciIntValue gte 2003021>
   <@assertEquals expected="INF" actual="INF"?number?c />
   <@assertEquals expected="INF" actual="INF"?number?c />

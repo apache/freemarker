@@ -65,6 +65,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -814,7 +815,8 @@ public class Configurable {
      *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
+     *   <li>{@code "c"} (recognized since 2.3.34), or {@code "computer"} (same as {@code "c"}, but also recognized by
+     *       older versions): The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
      *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
@@ -2095,7 +2097,7 @@ public class Configurable {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
                 addAutoInclude((String) templateName, this instanceof Configuration && ((Configuration) this)
-                        .getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_25);
+                        .getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_25);
             }
         }
     }

@@ -20,7 +20,7 @@
 package freemarker.core;
 
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _DelayedGetCanonicalForm extends _DelayedConversionToString {
     
     public _DelayedGetCanonicalForm(TemplateObject obj) {

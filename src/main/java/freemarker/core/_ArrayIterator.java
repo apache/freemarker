@@ -22,7 +22,7 @@ package freemarker.core;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _ArrayIterator implements Iterator {
 
     private final Object[] array;

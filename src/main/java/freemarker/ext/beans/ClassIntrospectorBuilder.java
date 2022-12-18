@@ -29,6 +29,7 @@ import java.util.Map;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 
 final class ClassIntrospectorBuilder implements Cloneable {
@@ -69,15 +70,15 @@ final class ClassIntrospectorBuilder implements Cloneable {
         // to some version changes that affects BeansWrapper, but not the other way around.
         this.incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         treatDefaultMethodsAsBeanMembers
-                = incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
+                = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_26;
         memberAccessPolicy = DefaultMemberAccessPolicy.getInstance(this.incompatibleImprovements);
     }
 
     private static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         // All breakpoints here must occur in BeansWrapper.normalizeIncompatibleImprovements!
-        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_30 ? Configuration.VERSION_2_3_30
-                : incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_21 ? Configuration.VERSION_2_3_21
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_30 ? Configuration.VERSION_2_3_30
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21 ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;
     }
 

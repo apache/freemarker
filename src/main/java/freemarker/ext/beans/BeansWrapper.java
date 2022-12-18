@@ -67,6 +67,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.RichObjectWrapper;
 import freemarker.template.utility.WriteProtectable;
@@ -869,7 +870,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     static boolean is2321Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_21;
+        return version.intValue() >= _VersionInts.V_2_3_21;
     }
 
     boolean is2324Bugfixed() {
@@ -877,7 +878,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     static boolean is2324Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+        return version.intValue() >= _VersionInts.V_2_3_24;
     }
     
     /** 
@@ -886,8 +887,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
-                : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_27 ? Configuration.VERSION_2_3_27
+                : incompatibleImprovements.intValue() == _VersionInts.V_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;

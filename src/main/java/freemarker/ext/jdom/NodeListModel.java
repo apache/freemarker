@@ -60,7 +60,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
 /**
  * Provides a template for wrapping JDOM objects. It is capable of storing not only
@@ -1168,7 +1168,7 @@ implements
     throws Exception {
         org.jdom.input.SAXBuilder builder = new org.jdom.input.SAXBuilder();
         Document document = builder.build(System.in);
-        SimpleHash model = new SimpleHash(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleHash model = new SimpleHash(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         model.put("document", new NodeListModel(document));
         FileReader fr = new FileReader(args[0]);
         Template template = new Template(args[0], fr);

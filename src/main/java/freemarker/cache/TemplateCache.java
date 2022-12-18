@@ -40,6 +40,7 @@ import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
@@ -279,7 +280,7 @@ public class TemplateCache {
         } catch (MalformedTemplateNameException e) {
             // If we don't have to emulate backward compatible behavior, then just rethrow it: 
             if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
-                    || config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_4_0) {
+                    || config.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_4_0) {
                 throw e;
             }
             return new MaybeMissingTemplate(null, e);
@@ -795,7 +796,7 @@ public class TemplateCache {
     private Object modifyForConfIcI(Object templateSource) {
         if (templateSource == null) return null;
         
-        if (config.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (config.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_21) {
             return templateSource;
         }
         

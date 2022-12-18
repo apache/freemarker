@@ -22,7 +22,7 @@ package freemarker.core;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * Thrown by {@link _ObjectBuilderSettingEvaluator}.
  */
 public class _ObjectBuilderSettingEvaluationException extends Exception {

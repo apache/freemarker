@@ -31,7 +31,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 
 /**
@@ -81,7 +81,7 @@ class Interpret extends OutputFormatBoundBuiltIn {
         }
         String templateSource = sourceExpr.evalAndCoerceToPlainText(env);
         Template parentTemplate = env.getConfiguration().getIncompatibleImprovements().intValue()
-                >= _TemplateAPI.VERSION_INT_2_3_26 ? env.getCurrentTemplate() : env.getTemplate();
+                >= _VersionInts.V_2_3_26 ? env.getCurrentTemplate() : env.getTemplate();
         
         final Template interpretedTemplate;
         try {

@@ -20,16 +20,16 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns4="http://www.w3.org/1999/xhtml"
-      xmlns:ns3="http://www.w3.org/2000/svg"
+      xmlns:ns5="http://www.w3.org/2000/svg"
+      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns3="http://www.w3.org/1999/xhtml"
       xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.31</productname>
+    <productname>Freemarker 2.3.32</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -8275,10 +8275,9 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         <literal>locale</literal>, <literal>number_format</literal>,
         <literal>default_encoding</literal>,
         <literal>template_exception_handler</literal>. The full list of
-        settings can be found in the <link
-        xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
-        API documentation of
-        <literal>Configuration.setSetting(...)</literal></link>.</para>
+        settings can be found in the <olink
+        targetdoc="apiConfigurationSettings">Java API documentation of
+        <literal>Configuration.setSetting(...)</literal></olink>.</para>
 
         <para>The settings coming from the <literal>Configuration</literal>
         can be overridden in a <literal>Template</literal> instance. For
@@ -12711,6 +12710,16 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_c_lower_case">c_lower_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_c_upper_case">c_upper_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_cap_first">cap_first</link></para>
           </listitem>
 
@@ -13307,6 +13316,50 @@ GreEN mouse
 
           <para>In the case of <literal>"- green mouse"</literal>, the first
           word is the <literal>-</literal>.</para>
+
+          <para>Note that this uses locale-aware conversion, that is, the
+          result can be different depending on the current
+          <literal>locale</literal> (language, country).</para>
+        </section>
+
+        <section xml:id="ref_builtin_c_lower_case">
+          <title>c_lower_case</title>
+
+          <indexterm>
+            <primary>c_lower_case built-in</primary>
+          </indexterm>
+
+          <para>The string converted to lower case, for computer consumption
+          (<quote>c</quote> as in the <link
+          linkend="ref_builtin_c"><literal>c</literal> built-in</link>). Put
+          simply, it will be converted to lower case as in English, regardless
+          of the current <literal>locale</literal> (language, country). For
+          example <literal>"ITEM list"?c_lower_case</literal> will be
+          <literal>"item list"</literal>, always.</para>
+
+          <para>For lower case conversion for human consumption use the <link
+          linkend="ref_builtin_lower_case"><literal>lower_case</literal>
+          built-in</link> instead!</para>
+        </section>
+
+        <section xml:id="ref_builtin_c_upper_case">
+          <title>c_upper_case</title>
+
+          <indexterm>
+            <primary>c_upper_case built-in</primary>
+          </indexterm>
+
+          <para>The string converted to upper case, for computer consumption
+          (<quote>c</quote> as in the <link
+          linkend="ref_builtin_c"><literal>c</literal> built-in</link>). Put
+          simply, it will be converted to upper case as in English, regardless
+          of the current <literal>locale</literal> (language, country). For
+          example <literal>"ITEM list"?c_upper_case</literal> will be
+          <literal>"ITEM LIST"</literal>, always.</para>
+
+          <para>For upper case conversion for human consumption use the <link
+          linkend="ref_builtin_upper_case"><literal>upper_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_capitalize">
@@ -14151,9 +14204,18 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
             <primary>lower_case built-in</primary>
           </indexterm>
 
-          <para>The lower case version of the string. For example
-          <literal>"GrEeN MoUsE"?lower_case</literal> will be <literal>"green
-          mouse"</literal>.</para>
+          <para>The lower case version of the string, using rules that depend
+          on the current <literal>locale</literal> (language, country). For
+          example <literal>"KARIŞIK işaretler"?lower_case</literal> will be
+          <literal>"karişik işaretler"</literal> in most locales, but will be
+          <literal>"karışık işaretler"</literal> in Turkish
+          (<literal>tr_TR</literal>) locale (note the missing dot above some
+          of the <quote>i</quote>-s).</para>
+
+          <para>To convert to lower case for computer consumption (as opposed
+          to human consumption), use the <link
+          linkend="ref_builtin_c_lower_case"><literal>c_lower_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_matches">
@@ -15006,8 +15068,10 @@ This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerm
 
           <para>The opposite of <link
           linkend="ref_builtin_cap_first"><literal>cap_first</literal></link>.
-          The string with the very first word of the string
-          un-capitalized.</para>
+          The string with the very first word of the string un-capitalized.
+          Note that this uses locale-aware conversion, that is, the result can
+          be different depending on the current <literal>locale</literal>
+          (language, country).</para>
         </section>
 
         <section xml:id="ref_builtin_upper_case">
@@ -15017,9 +15081,17 @@ This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerm
             <primary>upper_case built-in</primary>
           </indexterm>
 
-          <para>The upper case version of the string. For example
-          <literal>"GrEeN MoUsE"</literal> will be <literal>"GREEN
-          MOUSE"</literal>.</para>
+          <para>The upper case version of the string, using rules that depend
+          on the current <literal>locale</literal> (language, country). For
+          example <literal>"KARIŞIK işaretler"?upper_case</literal> will be
+          <literal>"KARIŞIK IŞARETLER"</literal> in most locales, but with
+          Turkish locale it will be <literal>"KARIŞIK İŞARETLER"</literal>
+          (note the dot above the 2nd <quote>I</quote>).</para>
+
+          <para>To convert to upper case for computer consumption (as opposed
+          to human consumption), use the <link
+          linkend="ref_builtin_c_upper_case"><literal>c_upper_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_url">
@@ -15657,37 +15729,123 @@ rif: foo XYr baar</programlisting>
           That is, it formats with the rules that programming languages used
           to use, which is independent of all the locale and number format
           settings of FreeMarker. It always uses dot as decimal separator, and
-          it never uses grouping separators (like 3,000,000), nor exponential
-          form (like 5E20), nor superfluous leading or trailing 0-s (like 03
-          or 1.0), nor + sign (like +1). It will print at most 16 digits after
-          the decimal dot, and thus numbers whose absolute value is less than
-          1E-16 will be shown as 0. This built-in is crucial because be
-          default (like with <literal>${x}</literal>) numbers are converted to
-          strings with the locale (language, country) specific number
-          formatting, which is for human readers (like 3000000 is possibly
-          printed as 3,000,000). When the number is printed not for human
-          audience (e.g., for a database record ID used as the part of an URL,
-          or as invisible field value in a HTML form, or for printing
-          CSS/JavaScript numerical literals) this built-in must be used to
-          print the number (i.e., use <literal>${x?c}</literal> instead of
-          <literal>${x}</literal>), or else the output will be possibly broken
-          depending on the current number formatting settings and locale (like
-          the decimal point is not dot, but comma in many countries) and the
-          value of the number (like big numbers are possibly
-          <quote>damaged</quote> by grouping separators).</para>
+          it never uses grouping separators (like in 3,000,000), nor
+          <quote>+</quote> sign (like +1), nor superfluous leading or trailing
+          0-s (like 03 or 1.0). It usually avoids exponential form (like it
+          will never format 10000000000 as 1E10), but see the details below
+          regarding that.</para>
 
-          <para>If the <literal>incompatible_improvements</literal> FreeMarker
-          configuration setting is set to 2.3.24 or higher (also if it's set
-          to 2.3.20 or higher and you are outside a string literal), this
-          built-in will return <literal>"INF"</literal>,
-          <literal>"-INF"</literal> and <literal>"NaN"</literal> for
-          positive/negative infinity and IEEE floating point Not-a-Number,
-          respectively. These are the XML Schema compatible representations of
-          these special values. (Earlier it has returned what
-          <literal>java.text.DecimalFormat</literal> did with US locale, none
-          of which is understood by any (common) computer language.)</para>
+          <para>This built-in is crucial because be default (like with
+          <literal>${x}</literal>) numbers are converted to strings with the
+          locale (language, country) specific number formatting, which is for
+          human readers (like 3000000 is possibly printed as 3,000,000). When
+          the number is printed not for human audience (e.g., for a database
+          record ID used as the part of an URL, or as invisible field value in
+          a HTML form, or for printing CSS/JavaScript numerical literals) you
+          must use this built-in to format the number (i.e., use
+          <literal>${x?c}</literal> instead of <literal>${x}</literal>), or
+          else the output will be possibly broken depending on the current
+          number formatting settings and locale (like the decimal point is not
+          dot, but comma in many countries) and the value of the number (like
+          big numbers are possibly <quote>damaged</quote> by grouping
+          separators).</para>
 
-          <para>Note that this built-in <link
+          <para>Further details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Rounding: The conversion is only guaranteed to be lossless
+              if the <link
+              linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+              FreeMarker configuration setting</link> is set to 2.3.32 or
+              higher. Before that, the format never uses exponential form, and
+              is limited to 16 digits after the decimal dot, so rounding can
+              occur (e.g. 1E-17 will be shown as 0).</para>
+            </listitem>
+
+            <listitem>
+              <para>Special floating point values: If the
+              <literal>incompatible_improvements</literal> FreeMarker
+              configuration setting is set to 2.3.24 or higher (also if it's
+              set to 2.3.20 or higher and you are outside a string literal),
+              this built-in will return <literal>"INF"</literal>,
+              <literal>"-INF"</literal> and <literal>"NaN"</literal> for
+              positive/negative infinity and IEEE floating point Not-a-Number,
+              respectively. These are the XML Schema compatible
+              representations of these special values. With too low
+              <literal>incompatible_improvements</literal> it returns what
+              <literal>java.text.DecimalFormat</literal> did with US locale,
+              none of which is understood by any (common) computer
+              language.</para>
+            </listitem>
+
+            <listitem>
+              <para>Exponential form: Before
+              <literal>incompatible_improvements</literal> 2.3.32, it was
+              never used. After that, it's uses exponential form in these
+              cases:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>For a non-whole number whose absolute value is less
+                  than 1E-6 (0.000001).</para>
+                </listitem>
+
+                <listitem>
+                  <para>For a whole number that has more than 100 digits in
+                  non-exponential form</para>
+                </listitem>
+
+                <listitem>
+                  <para>For a whole numbers whose absolute value is too big
+                  for the backing floating point type to be safe from rounding
+                  errors. More specifically:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>For a whole number that's stored in a
+                      <literal>double</literal>, or <literal>Double</literal>
+                      on the Java side (i.e., as 64 bit floating point
+                      number), and has an absolute value greater than
+                      9007199254740992. It's because that type can't store all
+                      whole numbers outside that range. So if the intent was
+                      to store some ID-s, they are likely already corrupted
+                      (because they had to be rounded to the closest whole
+                      number that the type can store), and you should use
+                      <literal>long</literal> or <literal>BigInteger</literal>
+                      on the Java side.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>For a whole (integer) value that's stored in a
+                      <literal>float</literal>, or <literal>Float</literal> on
+                      the Java side (i.e., as 32 bit floating point number),
+                      and has an absolute value greater than 16777216.
+                      Reasoning is the same as for
+                      <literal>double</literal>.</para>
+                    </listitem>
+                  </itemizedlist>
+
+                  <para>Note that by default FreeMarker doesn't use
+                  <literal>double</literal> or <literal>float</literal>, so
+                  such values are likely can only come from the
+                  data-model.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The output never contains superfluous zeros after the
+              decimal point. Thus, unlike in Java, you can't tell apart a
+              <literal>double</literal> from an <literal>int</literal>, if
+              they store the same number mathematically, because the output
+              will look the same for both. (This is because the template
+              language only have a single number type, so you don't have a
+              good control over the backing Java type.)</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Note that the <literal>c</literal> built-in <link
           linkend="ref_builtin_c_boolean">also works on
           booleans</link>.</para>
         </section>
@@ -15885,14 +16043,15 @@ rif: foo XYr baar</programlisting>
           configuration settings. You can also specify a number format
           explicitly with this built-in, as it will be shown later.</para>
 
-          <para>There are four predefined number formats:
-          <literal>computer</literal>, <literal>currency</literal>,
-          <literal>number</literal>, and <literal>percent</literal>. The exact
-          meaning of these is locale (nationality) specific, and is controlled
-          by the Java platform installation, not by FreeMarker, except for
-          <literal>computer</literal>, which uses the same formatting as <link
-          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>
-          (assuming <link
+          <para>There are four predefined number formats: <literal>c</literal>
+          (since 2.3.32, before that it was called
+          <literal>computer</literal>, which still works),
+          <literal>currency</literal>, <literal>number</literal>, and
+          <literal>percent</literal>. The exact meaning of these is locale
+          (nationality) specific, and is controlled by the Java platform
+          installation, not by FreeMarker, except for <literal>c</literal>,
+          which uses the same formatting as <link linkend="ref_builtin_c">the
+          <literal>c</literal> built-in</link> (assuming <link
           linkend="pgui_config_incompatible_improvements">incompatible
           improvements</link> set to 2.3.31, or higher, or else infinity and
           NaN isn't formatted like that). There can also be programmer-defined
@@ -15906,7 +16065,7 @@ ${x?string}  &lt;#-- the same as ${x} --&gt;
 ${x?string.number}
 ${x?string.currency}
 ${x?string.percent}
-${x?string.computer}</programlisting>
+${x?string.c} &lt;#-- But you should write ${x?c} --&gt;</programlisting>
 
           <para>If your locale is US English, this will print:</para>
 
@@ -23801,9 +23960,10 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para><literal>computer</literal>, which formats like <link
-                  linkend="ref_builtin_c">the <literal>c</literal>
-                  built-in</link></para>
+                  <para><literal>c</literal> since 2.3.24 (was called
+                  <literal>computer</literal> before that, which still works),
+                  which formats like <link linkend="ref_builtin_c">the
+                  <literal>c</literal> built-in</link></para>
                 </listitem>
 
                 <listitem>
@@ -29425,13 +29585,53 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>This is related to <literal>freemarker.ext.xml</literal>,
-              which is the very old, long deprecated XML wrapper (the commonly
-              used one is <literal>freemarker.ext.dom</literal>), which almost
-              nobody uses, or maybe truly nobody. Still, now the
-              <literal>_registerNamespace</literal> key works, doing what the
-              documentation always stated. Before this fix it just behaved as
-              if it was the name of an element you are looking for.</para>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-208">FREEMARKER-208</link>:
+              Added <link
+              linkend="ref_builtin_c_lower_case"><literal>?c_lower_case</literal></link>,
+              and <link
+              linkend="ref_builtin_c_upper_case"><literal>?c_upper_case</literal></link>,
+              which are the non-localized (computer language) variants of
+              <literal>?lower_case</literal>, and
+              <literal>?upper_case</literal>. The primary problem people run
+              into with the localized versions is that with Turkish locale the
+              letter <literal>i</literal>, and <literal>I</literal> has
+              different conversions as in most languages, which causes problem
+              if the conversion was for computer consumption (for technical
+              purposes), and not for humans.</para>
+            </listitem>
+
+            <listitem>
+              <para>When setting the <literal>number_format</literal> setting
+              (also when formatting with
+              <literal>?string(<replaceable>format</replaceable>)</literal>),
+              now <quote>c</quote> can be used instead of
+              <quote>computer</quote>. The two mean the same, and
+              <quote>c</quote> is preferred from now on.</para>
+            </listitem>
+
+            <listitem>
+              <para>If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.32 (or higher), the behavior of
+              <literal>?c</literal> (and thus the <quote>computer</quote> and
+              <quote>c</quote> number format) has changed for some non-whole
+              numbers, and for whole numbers with over 100 digits. The goal of
+              this change is to make the formatting lossless, and also to
+              avoiding huge output with exponents of high magnitude. See
+              details at the documentation of the <link
+              linkend="ref_builtin_c"><literal>c</literal>
+              built-in</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>In <literal>freemarker.ext.xml</literal>, which is the
+              old, long deprecated XML wrapper, that almost nobody uses
+              anymore (the commonly used one is
+              <literal>freemarker.ext.dom</literal>), the
+              <literal>_registerNamespace</literal> key now works, doing what
+              the documentation always stated. Before this fix it just behaved
+              as if it was the name of an element you are looking for.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -29440,6 +29640,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
+              Fixed possible deadlock when the
+              <literal>Configuration</literal> and
+              <literal>DefaultObjectWrapper</literal> class
+              <emphasis>static</emphasis> initialization is triggered in
+              different threads around the same time. (In the very unlikely
+              case your application can run into this, this will hang the code
+              that initializes FreeMarker before it has processed any
+              templates, and it can't happen anymore if any template
+              processing managed to start.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Environment.getCTemplateNumberFormat()</literal> that
+              returns a
+              <literal>freemarker.core.TemplateNumberFormat</literal>, and
+              deprecated <literal>getCNumberFormat()</literal> that returns a
+              <literal>java.text.NumberFormat</literal>. The new
+              <literal>?c</literal> behavior (see earlier) is only reflected
+              by the new method, and what the deprecated methods returns is
+              stuck at 2.3.31 <literal>incompatible_improvements</literal>
+              mode.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
@@ -29452,6 +29679,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               affected by them (like we do not pull in dom4j as dependency
               into the projects of our users), we were flagged as vulnerable
               at certain places for merely supporting 1.3.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed performance bug with XML processing
+              (<literal>freemarker.ext.dom</literal>) when converting an XML
+              element that contains lots of text nodes (instead of a single
+              big text node) to a string. (<link
+              xlink:href="https://github.com/apache/freemarker/pull/82">GitHub
+              PR 82</link>)</para>
             </listitem>
           </itemizedlist>
         </section>

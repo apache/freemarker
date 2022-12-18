@@ -24,6 +24,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 /**
  * Holds {@link BeansWrapper} configuration settings and defines their defaults.
@@ -89,7 +90,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
                 : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
-        preferIndexedReadMethod = incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_27;
+        preferIndexedReadMethod = incompatibleImprovements.intValue() < _VersionInts.V_2_3_27;
         
         classIntrospectorBuilder = new ClassIntrospectorBuilder(incompatibleImprovements);
     }

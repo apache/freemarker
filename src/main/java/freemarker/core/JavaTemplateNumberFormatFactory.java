@@ -32,8 +32,6 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     
     static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
 
-    static final String COMPUTER = "computer";
-
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
     private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
@@ -47,9 +45,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        CacheKey cacheKey = new CacheKey(
-                env != null ? env.transformNumberFormatGlobalCacheKey(params) : params,
-                locale);
+        CacheKey cacheKey = new CacheKey(params, locale);
         NumberFormat jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
         if (jFormat == null) {
             if ("number".equals(params)) {
@@ -58,8 +54,6 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                 jFormat = NumberFormat.getCurrencyInstance(locale);
             } else if ("percent".equals(params)) {
                 jFormat = NumberFormat.getPercentInstance(locale);
-            } else if (COMPUTER.equals(params)) {
-                jFormat = env.getCNumberFormat();
             } else {
                 try {
                     jFormat = ExtendedDecimalFormatParser.parse(params, locale);

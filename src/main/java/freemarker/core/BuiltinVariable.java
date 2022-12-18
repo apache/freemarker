@@ -32,7 +32,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -222,7 +222,7 @@ final class BuiltinVariable extends Expression {
             // The behavior of env.getTemplate() was changed with IcI 2.3.22, but there was an unintended side effect
             // of changing the behavior of .template_name, which was fixed with IcI 2.3.23. IcI 2.3.22 deliberately
             // remains broken.
-            return (env.getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_23)
+            return (env.getConfiguration().getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_23)
                     ? new SimpleScalar(env.getTemplate230().getName())
                     : new SimpleScalar(env.getTemplate().getName());
         }
