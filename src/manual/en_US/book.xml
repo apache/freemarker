@@ -12710,6 +12710,16 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_c_lower_case">c_lower_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_c_upper_case">c_upper_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_cap_first">cap_first</link></para>
           </listitem>
 
@@ -13306,6 +13316,50 @@ GreEN mouse
 
           <para>In the case of <literal>"- green mouse"</literal>, the first
           word is the <literal>-</literal>.</para>
+
+          <para>Note that this uses locale-aware conversion, that is, the
+          result can be different depending on the current
+          <literal>locale</literal> (language, country).</para>
+        </section>
+
+        <section xml:id="ref_builtin_c_lower_case">
+          <title>c_lower_case</title>
+
+          <indexterm>
+            <primary>c_lower_case built-in</primary>
+          </indexterm>
+
+          <para>The string converted to lower case, for computer consumption
+          (<quote>c</quote> as in the <link
+          linkend="ref_builtin_c"><literal>c</literal> built-in</link>). Put
+          simply, it will be converted to lower case as in English, regardless
+          of the current <literal>locale</literal> (language, country). For
+          example <literal>"ITEM list"?c_lower_case</literal> will be
+          <literal>"item list"</literal>, always.</para>
+
+          <para>For lower case conversion for human consumption use the <link
+          linkend="ref_builtin_lower_case"><literal>lower_case</literal>
+          built-in</link> instead!</para>
+        </section>
+
+        <section xml:id="ref_builtin_c_upper_case">
+          <title>c_upper_case</title>
+
+          <indexterm>
+            <primary>c_upper_case built-in</primary>
+          </indexterm>
+
+          <para>The string converted to upper case, for computer consumption
+          (<quote>c</quote> as in the <link
+          linkend="ref_builtin_c"><literal>c</literal> built-in</link>). Put
+          simply, it will be converted to upper case as in English, regardless
+          of the current <literal>locale</literal> (language, country). For
+          example <literal>"ITEM list"?c_upper_case</literal> will be
+          <literal>"ITEM LIST"</literal>, always.</para>
+
+          <para>For upper case conversion for human consumption use the <link
+          linkend="ref_builtin_upper_case"><literal>upper_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_capitalize">
@@ -14150,9 +14204,18 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
             <primary>lower_case built-in</primary>
           </indexterm>
 
-          <para>The lower case version of the string. For example
-          <literal>"GrEeN MoUsE"?lower_case</literal> will be <literal>"green
-          mouse"</literal>.</para>
+          <para>The lower case version of the string, using rules that depend
+          on the current <literal>locale</literal> (language, country). For
+          example <literal>"KARIŞIK işaretler"?lower_case</literal> will be
+          <literal>"karişik işaretler"</literal> in most locales, but will be
+          <literal>"karışık işaretler"</literal> in Turkish
+          (<literal>tr_TR</literal>) locale (note the missing dot above some
+          of the <quote>i</quote>-s).</para>
+
+          <para>To convert to lower case for computer consumption (as opposed
+          to human consumption), use the <link
+          linkend="ref_builtin_c_lower_case"><literal>c_lower_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_matches">
@@ -15005,8 +15068,10 @@ This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerm
 
           <para>The opposite of <link
           linkend="ref_builtin_cap_first"><literal>cap_first</literal></link>.
-          The string with the very first word of the string
-          un-capitalized.</para>
+          The string with the very first word of the string un-capitalized.
+          Note that this uses locale-aware conversion, that is, the result can
+          be different depending on the current <literal>locale</literal>
+          (language, country).</para>
         </section>
 
         <section xml:id="ref_builtin_upper_case">
@@ -15016,9 +15081,17 @@ This is auto-escaped: &amp;lt;span&amp;gt;, but not &lt;span class='truncateTerm
             <primary>upper_case built-in</primary>
           </indexterm>
 
-          <para>The upper case version of the string. For example
-          <literal>"GrEeN MoUsE"</literal> will be <literal>"GREEN
-          MOUSE"</literal>.</para>
+          <para>The upper case version of the string, using rules that depend
+          on the current <literal>locale</literal> (language, country). For
+          example <literal>"KARIŞIK işaretler"?upper_case</literal> will be
+          <literal>"KARIŞIK IŞARETLER"</literal> in most locales, but with
+          Turkish locale it will be <literal>"KARIŞIK İŞARETLER"</literal>
+          (note the dot above the 2nd <quote>I</quote>).</para>
+
+          <para>To convert to upper case for computer consumption (as opposed
+          to human consumption), use the <link
+          linkend="ref_builtin_c_upper_case"><literal>c_upper_case</literal>
+          built-in</link> instead!</para>
         </section>
 
         <section xml:id="ref_builtin_url">
@@ -29512,6 +29585,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-208">FREEMARKER-208</link>:
+              Added <link
+              linkend="ref_builtin_c_lower_case"><literal>?c_lower_case</literal></link>,
+              and <link
+              linkend="ref_builtin_c_upper_case"><literal>?c_upper_case</literal></link>,
+              which are the non-localized (computer language) variants of
+              <literal>?lower_case</literal>, and
+              <literal>?upper_case</literal>. The primary problem people run
+              into with the localized versions is that with Turkish locale the
+              letter <literal>i</literal>, and <literal>I</literal> has
+              different conversions as in most languages, which causes problem
+              if the conversion was for computer consumption (for technical
+              purposes), and not for humans.</para>
+            </listitem>
+
+            <listitem>
               <para>When setting the <literal>number_format</literal> setting
               (also when formatting with
               <literal>?string(<replaceable>format</replaceable>)</literal>),
@@ -29562,6 +29652,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that initializes FreeMarker before it has processed any
               templates, and it can't happen anymore if any template
               processing managed to start.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Environment.getCTemplateNumberFormat()</literal> that
+              returns a
+              <literal>freemarker.core.TemplateNumberFormat</literal>, and
+              deprecated <literal>getCNumberFormat()</literal> that returns a
+              <literal>java.text.NumberFormat</literal>. The new
+              <literal>?c</literal> behavior (see earlier) is only reflected
+              by the new method, and what the deprecated methods returns is
+              stuck at 2.3.31 <literal>incompatible_improvements</literal>
+              mode.</para>
             </listitem>
 
             <listitem>

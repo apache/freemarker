@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -435,7 +436,14 @@ class BuiltInsForStringsBasic {
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toLowerCase(env.getLocale()));
         }
-    }    
+    }
+
+    static class c_lower_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleScalar(s.toLowerCase(Locale.ROOT));
+        }
+    }
 
     static class padBI extends BuiltInForString {
         
@@ -827,6 +835,13 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toUpperCase(env.getLocale()));
+        }
+    }
+
+    static class c_upper_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleScalar(s.toUpperCase(Locale.ROOT));
         }
     }
 
