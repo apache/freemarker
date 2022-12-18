@@ -29,6 +29,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -115,7 +116,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             return;
         }
         
-        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
+        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_22
                 && hasAnyConfigurableSet()) {
             throw new IllegalStateException(
                     "This TemplateConfiguration can't be associated to a Configuration that has "

@@ -1031,7 +1031,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static TemplateLoader createDefaultTemplateLoader(
             Version incompatibleImprovements, TemplateLoader existingTemplateLoader) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (incompatibleImprovements.intValue() < _VersionInts.V_2_3_21) {
             if (existingTemplateLoader instanceof LegacyDefaultFileTemplateLoader) {
                 return existingTemplateLoader;
             }
@@ -2463,7 +2463,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions == null
-                ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
+                ? incompatibleImprovements.intValue() >= _VersionInts.V_2_3_24
                 : recognizeStandardFileExtensions.booleanValue();
     }
 
@@ -3667,7 +3667,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.21
      */
     public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (incompatibleImprovements.intValue() < _VersionInts.V_2_3_21) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
             return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();

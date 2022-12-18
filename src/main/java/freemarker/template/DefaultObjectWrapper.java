@@ -133,7 +133,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
         useAdapterForEnumerations = useAdaptersForContainers
-                && getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
+                && getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_26;
         forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
         iterableSupport = dowDowCfg.getIterableSupport();
         domNodeSupport = dowDowCfg.getDOMNodeSupport();
@@ -450,8 +450,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         Version bwIcI = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
-        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_22
-                || bwIcI.intValue() >= _TemplateAPI.VERSION_INT_2_3_22
+        return incompatibleImprovements.intValue() < _VersionInts.V_2_3_22
+                || bwIcI.intValue() >= _VersionInts.V_2_3_22
                 ? bwIcI : Configuration.VERSION_2_3_22;
     }
 

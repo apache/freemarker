@@ -49,7 +49,7 @@ import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNodeModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -602,7 +602,7 @@ extends
     }
 
     private static TemplateModel wrapMap(Map table) {
-        SimpleHash model = new SimpleHash(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleHash model = new SimpleHash(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         for (Iterator it = table.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             model.put(String.valueOf(entry.getKey()), new SimpleScalar(String.valueOf(entry.getValue())));

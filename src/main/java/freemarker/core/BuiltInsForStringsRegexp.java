@@ -35,7 +35,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.StringUtil;
 
 
@@ -145,7 +145,7 @@ class BuiltInsForStringsRegexp {
             MatchWithGroups(String input, Matcher matcher) {
                 matchedInputPart = input.substring(matcher.start(), matcher.end());
                 final int grpCount = matcher.groupCount() + 1;
-                groupsSeq = new SimpleSequence(grpCount, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+                groupsSeq = new SimpleSequence(grpCount, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
                 for (int i = 0; i < grpCount; i++) {
                     groupsSeq.add(matcher.group(i));
                 }

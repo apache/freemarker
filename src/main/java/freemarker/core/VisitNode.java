@@ -27,7 +27,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
 
 /**
@@ -57,7 +57,7 @@ final class VisitNode extends TemplateElement {
         }
         if (nss != null) {
             if (nss instanceof Environment.Namespace) {
-                SimpleSequence ss = new SimpleSequence(1, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+                SimpleSequence ss = new SimpleSequence(1, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
                 ss.add(nss);
                 nss = ss;
             } else if (!(nss instanceof TemplateSequenceModel)) {

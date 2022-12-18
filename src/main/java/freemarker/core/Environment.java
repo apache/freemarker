@@ -73,7 +73,8 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 import freemarker.template.Version;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
@@ -218,7 +219,7 @@ public final class Environment extends Configurable {
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
-        incompatibleImprovementsGE2328 = configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_28;
+        incompatibleImprovementsGE2328 = configuration.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_28;
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
@@ -520,7 +521,7 @@ public final class Environment extends Configurable {
                     if (tc != null
                             && !(t instanceof FlowControlException
                                     && getConfiguration().getIncompatibleImprovements().intValue()
-                                    >= _TemplateAPI.VERSION_INT_2_3_27)) {
+                                    >= _VersionInts.V_2_3_27)) {
                         tc.onError(t);
                     } else {
                         throw t;
@@ -739,7 +740,7 @@ public final class Environment extends Configurable {
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
             throws TemplateException, IOException {
         if (nodeNamespaces == null) {
-            SimpleSequence ss = new SimpleSequence(1, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+            SimpleSequence ss = new SimpleSequence(1, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
             ss.add(currentNamespace);
             nodeNamespaces = ss;
         }
@@ -1136,7 +1137,7 @@ public final class Environment extends Configurable {
 
     private static SimpleSequence initPositionalCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleSequence positionalCatchAllParamValue;
-        positionalCatchAllParamValue = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        positionalCatchAllParamValue = new SimpleSequence(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         macroCtx.setLocalVar(catchAllParamName, positionalCatchAllParamValue);
         return positionalCatchAllParamValue;
     }
@@ -1144,7 +1145,7 @@ public final class Environment extends Configurable {
     private static SimpleHash initNamedCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleHash namedCatchAllParamValue;
         namedCatchAllParamValue = new SimpleHash(
-                new LinkedHashMap<String, Object>(), _TemplateAPI.SAFE_OBJECT_WRAPPER, 0);
+                new LinkedHashMap<String, Object>(), _ObjectWrappers.SAFE_OBJECT_WRAPPER, 0);
         macroCtx.setLocalVar(catchAllParamName, namedCatchAllParamValue);
         return namedCatchAllParamValue;
     }
@@ -1698,7 +1699,7 @@ public final class Environment extends Configurable {
      * @since 2.3.32
      */
     public TemplateNumberFormat getCTemplateNumberFormat() {
-        if (configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_32) {
+        if (configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_32) {
             ensureCNumberFormatInitialized();
             return cTemplateNumberFormat;
         }
@@ -1710,7 +1711,7 @@ public final class Environment extends Configurable {
     private void ensureCNumberFormatInitialized() {
         // Note: DecimalFormat-s aren't thread-safe, so you must clone the static field value.
         if (cNumberFormat == null) {
-            if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31) {
+            if (configuration.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_31) {
                 cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_21.clone();
             } else {
                 cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
@@ -3308,12 +3309,12 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
-            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             this.template = Environment.this.getTemplate();
         }
 
         Namespace(Template template) {
-            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             this.template = template;
         }
 
@@ -3517,11 +3518,11 @@ public final class Environment extends Configurable {
     };
 
     private boolean isBeforeIcI2322() {
-        return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        return configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_22;
     }
 
     boolean isIcI2324OrLater() {
-        return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+        return configuration.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_24;
     }
 
     /**

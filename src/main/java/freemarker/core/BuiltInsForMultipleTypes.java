@@ -48,6 +48,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NumberUtil;
 
 /**
@@ -114,7 +115,7 @@ class BuiltInsForMultipleTypes {
 
             @Override
             public int getMinimumICIVersion() {
-                return _TemplateAPI.VERSION_INT_2_3_21;
+                return _VersionInts.V_2_3_21;
             }
 
             @Override
@@ -136,7 +137,7 @@ class BuiltInsForMultipleTypes {
 
         @Override
         public int getMinimumICIVersion() {
-            return _TemplateAPI.VERSION_INT_2_3_32;
+            return _VersionInts.V_2_3_32;
         }
         
         @Override
@@ -364,7 +365,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    && (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
+                    && (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _VersionInts.V_2_3_21
                         // These implement TemplateSequenceModel, yet they can't be #list-ed:
                         || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;

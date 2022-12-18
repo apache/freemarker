@@ -65,6 +65,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -2096,7 +2097,7 @@ public class Configurable {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
                 addAutoInclude((String) templateName, this instanceof Configuration && ((Configuration) this)
-                        .getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_25);
+                        .getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_25);
             }
         }
     }

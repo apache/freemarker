@@ -25,7 +25,7 @@ import freemarker.template.SimpleHash;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 /**
  * Thrown when {@code ?api} is not supported by a value.
@@ -56,7 +56,7 @@ class APINotSupportedTemplateException extends TemplateException {
                     desc.tip("In the FreeMarker configuration, \"", Configurable.OBJECT_WRAPPER_KEY,
                             "\" is a DefaultObjectWrapper with its \"useAdaptersForContainers\" property set to "
                             + "false. Setting it to true might solves this problem.");
-                    if (dow.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22) {
+                    if (dow.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_22) {
                         desc.tip("Setting DefaultObjectWrapper's \"incompatibleImprovements\" to 2.3.22 or higher will "
                                 + "change the default value of \"useAdaptersForContainers\" to true.");
                     }

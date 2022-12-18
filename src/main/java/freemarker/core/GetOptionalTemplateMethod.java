@@ -37,7 +37,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.TemplateModelUtils;
 
 /**
@@ -144,7 +144,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
                         "; see cause exception");
         }
         
-        SimpleHash result = new SimpleHash(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleHash result = new SimpleHash(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         result.put(RESULT_EXISTS, template != null);
         // If the template is missing, result.include and such will be missing too, so that a default can be
         // conveniently provided like in <@optTemp.include!myDefaultMacro />.

@@ -31,7 +31,9 @@ import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template._ObjectWrappers;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 @SuppressWarnings("deprecation")
 final class HashLiteral extends Expression {
@@ -111,7 +113,7 @@ final class HashLiteral extends Expression {
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         SequenceHash(Environment env) throws TemplateException {
-            if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _TemplateAPI.VERSION_INT_2_3_21) {
+            if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _VersionInts.V_2_3_21) {
                 map = new LinkedHashMap<>();
                 for (int i = 0; i < size; i++) {
                     Expression keyExp = keys.get(i);
@@ -127,8 +129,8 @@ final class HashLiteral extends Expression {
                 // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
                 // doing hash[key].
                 map = new HashMap<>();
-                SimpleSequence keyList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
-                SimpleSequence valueList = new SimpleSequence(size, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+                SimpleSequence keyList = new SimpleSequence(size, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
+                SimpleSequence valueList = new SimpleSequence(size, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
                 for (int i = 0; i < size; i++) {
                     Expression keyExp = keys.get(i);
                     Expression valExp = values.get(i);
@@ -156,7 +158,7 @@ final class HashLiteral extends Expression {
             if (keyCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
                 keyCollection = new CollectionAndSequence(
-                        new SimpleSequence(map.keySet(), _TemplateAPI.SAFE_OBJECT_WRAPPER));
+                        new SimpleSequence(map.keySet(), _ObjectWrappers.SAFE_OBJECT_WRAPPER));
             }
             return keyCollection;
         }
@@ -166,7 +168,7 @@ final class HashLiteral extends Expression {
             if (valueCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
                 valueCollection = new CollectionAndSequence(
-                        new SimpleSequence(map.values(), _TemplateAPI.SAFE_OBJECT_WRAPPER));
+                        new SimpleSequence(map.values(), _ObjectWrappers.SAFE_OBJECT_WRAPPER));
             }
             return valueCollection;
         }

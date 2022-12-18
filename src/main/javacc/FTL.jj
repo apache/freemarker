@@ -292,22 +292,22 @@ public class FMParser {
         
         this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
-        if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
+        if (incompatibleImprovements < _VersionInts.V_2_3_24) {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
-            incompatibleImprovements = _TemplateAPI.VERSION_INT_2_3_0;
+            incompatibleImprovements = _VersionInts.V_2_3_0;
         }
-        
+
         // So that loop variable built-ins, like ?index, works inside the interpolations in the string literal:
         iteratorBlockContexts = parentParser.iteratorBlockContexts;
     }
 
     void tearDownStringLiteralMode(FMParser parentParser) {
         // If the naming convention was established inside the string literal, it's inherited by the parent:
-        FMParserTokenManager parentTokenSource = parentParser.token_source; 
+        FMParserTokenManager parentTokenSource = parentParser.token_source;
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
     }
-    
+
     /**
      * Used when we need to recreate the source code from the AST (such as for the FM2 to FM3 converter).
      */
@@ -350,7 +350,7 @@ public class FMParser {
         }
         return null;
     }
-    
+
     /**
      * Updates the {@link #autoEscaping} field based on the {@link #autoEscapingPolicy} and {@link #outputFormat} fields.
      */
@@ -369,7 +369,7 @@ public class FMParser {
             autoEscaping = false;
         }
     }
-    
+
     MarkupOutputFormat getMarkupOutputFormat() {
         return outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null;
     }
@@ -382,7 +382,7 @@ public class FMParser {
                 ? Configuration.SQUARE_BRACKET_TAG_SYNTAX
                 : Configuration.ANGLE_BRACKET_TAG_SYNTAX;
     }
-    
+
     /**
      * Don't use it, unless you are developing FreeMarker itself.
      * The naming convention used by this template; if it couldn't be detected so far, it will be the most probable one.
@@ -513,14 +513,14 @@ public class FMParser {
         }
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
-    
+
     void checkCurrentOutputFormatCanEscape(Token start) throws ParseException {
         if (!(outputFormat instanceof MarkupOutputFormat)) {
             throw new ParseException("The current output format can't do escaping: " + outputFormat,
                     template, start);
         }
-    }    
-    
+    }
+
     private ParserIteratorBlockContext pushIteratorBlockContext() {
         if (iteratorBlockContexts == null) {
             iteratorBlockContexts = new ArrayList<ParserIteratorBlockContext>(4);
@@ -529,16 +529,16 @@ public class FMParser {
         iteratorBlockContexts.add(newCtx);
         return newCtx;
     }
-    
+
     private void popIteratorBlockContext() {
         iteratorBlockContexts.remove(iteratorBlockContexts.size() - 1);
     }
-    
+
     private ParserIteratorBlockContext peekIteratorBlockContext() {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
-        return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
+        return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null;
     }
-    
+
     private void checkLoopVariableBuiltInLHO(String loopVarName, Expression lhoExp, Token biName)
             throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
@@ -560,8 +560,8 @@ public class FMParser {
                 + "but there's no loop variable in scope with this name: " + loopVarName,
                 lhoExp);
     }
-    
-	private String forEachDirectiveSymbol() {    
+
+	private String forEachDirectiveSymbol() {
 	    // [2.4] Use camel case as the default
 	    return token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "#forEach" : "#foreach";
 	}
@@ -685,7 +685,7 @@ TOKEN_MGR_DECLS:
         // We only get here if this is a strict FTL tag.
         tagSyntaxEstablished = true;
         
-        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+        if (incompatibleImprovements >= _VersionInts.V_2_3_28
                 || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
 	        // For END_xxx tags, as they can't contain expressions, the whole tag is a single token. So this is the only
 	        // chance to check if we got something inconsistent like `</#if]`. (We can't do this at the #CLOSE_TAG1 or
@@ -702,16 +702,16 @@ TOKEN_MGR_DECLS:
                 }
             } // if end-tag
         }
-        
+
         checkNamingConvention(tok, tokenNamingConvention);
-        
+
         SwitchTo(newLexState);
     }
 
     void checkNamingConvention(Token tok) {
-        checkNamingConvention(tok, _CoreStringUtils.getIdentifierNamingConvention(tok.image)); 
+        checkNamingConvention(tok, _CoreStringUtils.getIdentifierNamingConvention(tok.image));
     }
-    
+
     void checkNamingConvention(Token tok, int tokenNamingConvention) {
         if (tokenNamingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION) {
 	        if (namingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION) {
@@ -722,7 +722,7 @@ TOKEN_MGR_DECLS:
 	        }
         }
     }
-    
+
     private TokenMgrError newNameConventionMismatchException(Token tok) {
         return new TokenMgrError(
                 "Naming convention mismatch. "
@@ -733,7 +733,7 @@ TOKEN_MGR_DECLS:
                 + (namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
                             ? "camel case naming convention (like: exampleName) "
                             : (namingConvention == Configuration.LEGACY_NAMING_CONVENTION
-                                    ? "legacy naming convention (directive (tag) names are like examplename, " 
+                                    ? "legacy naming convention (directive (tag) names are like examplename, "
                                       + "everything else is like example_name) "
                                     : "??? (internal error)"
                                     ))
@@ -755,11 +755,11 @@ TOKEN_MGR_DECLS:
     private void handleTagSyntaxAndSwitch(Token tok, int newLexState) {
         handleTagSyntaxAndSwitch(tok, Configuration.AUTO_DETECT_NAMING_CONVENTION, newLexState);
     }
-    
+
     private boolean isStrictTag(String image) {
         return image.length() > 2 && (image.charAt(1) == '#' || image.charAt(2) == '#');
     }
-    
+
     /**
      * Detects the naming convention used, both in start- and end-tag tokens.
      *
@@ -773,7 +773,7 @@ TOKEN_MGR_DECLS:
 
     static char getTagNameCharAt(Token tok, int charIdxInName) {
         final String image = tok.image;
-        
+
         // Skip tag delimiter:
         int idx = 0;
         for (;;) {
@@ -817,7 +817,7 @@ TOKEN_MGR_DECLS:
     }
 
     private void startInterpolation(Token tok) {
-        if ( 
+        if (
                 interpolationSyntax == LEGACY_INTERPOLATION_SYNTAX
                     && tok.kind == SQUARE_BRACKET_INTERPOLATION_OPENING
                 || interpolationSyntax == DOLLAR_INTERPOLATION_SYNTAX
@@ -827,7 +827,7 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        
+
         if (postInterpolationLexState != -1) {
             // This certainly never occurs, as starting an interpolation in expression mode fails earlier.
             char c = tok.image.charAt(0);
@@ -847,7 +847,7 @@ TOKEN_MGR_DECLS:
         SwitchTo(postInterpolationLexState);
         postInterpolationLexState = -1;
     }
-    
+
     private TokenMgrError newUnexpectedClosingTokenException(Token closingTk) {
             return new TokenMgrError(
                     "You can't have an \"" + closingTk.image + "\" here, as there's nothing open that it could close.",
@@ -921,7 +921,7 @@ TOKEN:
      */
     <ATTEMPT : <START_TAG> "attempt" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <RECOVER : <START_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); } 
+    <RECOVER : <START_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <IF : <START_TAG> "if" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
@@ -1096,7 +1096,7 @@ TOKEN:
      */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
-        if (!tagSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
+        if (!tagSyntaxEstablished && incompatibleImprovements < _VersionInts.V_2_3_19) {
             matchedToken.kind = STATIC_TEXT_NON_WS;
         } else {
             char firstChar = matchedToken.image.charAt(0);
@@ -1121,7 +1121,7 @@ TOKEN:
                 // unknown directive:
                 if (_CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
-                            "#" + dn + " is an existing directive, but the tag is malformed. " 
+                            "#" + dn + " is an existing directive, but the tag is malformed. "
                             + " (See FreeMarker Manual / Directive Reference.)",
                             TokenMgrError.LEXICAL_ERROR,
                             matchedToken.beginLine, matchedToken.beginColumn + 1,
@@ -1214,7 +1214,7 @@ TOKEN:
             ("x" ["0"-"9", "A"-"F", "a"-"f"])
         )
     >
-    | 
+    |
     <STRING_LITERAL :
         (
             "\""
@@ -1322,12 +1322,12 @@ TOKEN:
             // There's a legacy glitch where you can always close a tag with `]`, like `<#if x]`. We have to keep that
             // working for backward compatibility, hence we don't always throw at !squBracTagSyntax:
             if (!squBracTagSyntax
-                    && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+                    && (incompatibleImprovements >= _VersionInts.V_2_3_28
                             || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)
                     || postInterpolationLexState != -1 /* We're in an interpolation => We aren't in a tag */) {
                 throw newUnexpectedClosingTokenException(matchedToken);
             }
-            
+
             // Close tag, either legally or to emulate legacy glitch:
             matchedToken.kind = DIRECTIVE_END;
             if (inFTLHeader) {
@@ -1379,7 +1379,7 @@ TOKEN:
         // Remove backslashes from Token.image:
         final String s = matchedToken.image;
         if (s.indexOf('\\') != -1) {
-            final int srcLn = s.length(); 
+            final int srcLn = s.length();
             final char[] newS = new char[srcLn - 1];
             int dstIdx = 0;
             for (int srcIdx = 0; srcIdx < srcLn; srcIdx++) {
@@ -1411,136 +1411,136 @@ TOKEN:
     <#NON_ESCAPED_ID_START_CHAR:
         [
             // This was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
-			"$", 
-			"@" - "Z", 
-			"_", 
-			"a" - "z", 
-			"\u00AA", 
-			"\u00B5", 
-			"\u00BA", 
-			"\u00C0" - "\u00D6", 
-			"\u00D8" - "\u00F6", 
-			"\u00F8" - "\u1FFF", 
-			"\u2071", 
-			"\u207F", 
-			"\u2090" - "\u209C", 
-			"\u2102", 
-			"\u2107", 
-			"\u210A" - "\u2113", 
-			"\u2115", 
-			"\u2119" - "\u211D", 
-			"\u2124", 
-			"\u2126", 
-			"\u2128", 
-			"\u212A" - "\u212D", 
-			"\u212F" - "\u2139", 
-			"\u213C" - "\u213F", 
-			"\u2145" - "\u2149", 
-			"\u214E", 
-			"\u2183" - "\u2184", 
-			"\u2C00" - "\u2C2E", 
-			"\u2C30" - "\u2C5E", 
-			"\u2C60" - "\u2CE4", 
-			"\u2CEB" - "\u2CEE", 
-			"\u2CF2" - "\u2CF3", 
-			"\u2D00" - "\u2D25", 
-			"\u2D27", 
-			"\u2D2D", 
-			"\u2D30" - "\u2D67", 
-			"\u2D6F", 
-			"\u2D80" - "\u2D96", 
-			"\u2DA0" - "\u2DA6", 
-			"\u2DA8" - "\u2DAE", 
-			"\u2DB0" - "\u2DB6", 
-			"\u2DB8" - "\u2DBE", 
-			"\u2DC0" - "\u2DC6", 
-			"\u2DC8" - "\u2DCE", 
-			"\u2DD0" - "\u2DD6", 
-			"\u2DD8" - "\u2DDE", 
-			"\u2E2F", 
-			"\u3005" - "\u3006", 
-			"\u3031" - "\u3035", 
-			"\u303B" - "\u303C", 
-			"\u3040" - "\u318F", 
-			"\u31A0" - "\u31BA", 
-			"\u31F0" - "\u31FF", 
-			"\u3300" - "\u337F", 
-			"\u3400" - "\u4DB5", 
-			"\u4E00" - "\uA48C", 
-			"\uA4D0" - "\uA4FD", 
-			"\uA500" - "\uA60C", 
-			"\uA610" - "\uA62B", 
-			"\uA640" - "\uA66E", 
-			"\uA67F" - "\uA697", 
-			"\uA6A0" - "\uA6E5", 
-			"\uA717" - "\uA71F", 
-			"\uA722" - "\uA788", 
-			"\uA78B" - "\uA78E", 
-			"\uA790" - "\uA793", 
-			"\uA7A0" - "\uA7AA", 
-			"\uA7F8" - "\uA801", 
-			"\uA803" - "\uA805", 
-			"\uA807" - "\uA80A", 
-			"\uA80C" - "\uA822", 
-			"\uA840" - "\uA873", 
-			"\uA882" - "\uA8B3", 
-			"\uA8D0" - "\uA8D9", 
-			"\uA8F2" - "\uA8F7", 
-			"\uA8FB", 
-			"\uA900" - "\uA925", 
-			"\uA930" - "\uA946", 
-			"\uA960" - "\uA97C", 
-			"\uA984" - "\uA9B2", 
-			"\uA9CF" - "\uA9D9", 
-			"\uAA00" - "\uAA28", 
-			"\uAA40" - "\uAA42", 
-			"\uAA44" - "\uAA4B", 
-			"\uAA50" - "\uAA59", 
-			"\uAA60" - "\uAA76", 
-			"\uAA7A", 
-			"\uAA80" - "\uAAAF", 
-			"\uAAB1", 
-			"\uAAB5" - "\uAAB6", 
-			"\uAAB9" - "\uAABD", 
-			"\uAAC0", 
-			"\uAAC2", 
-			"\uAADB" - "\uAADD", 
-			"\uAAE0" - "\uAAEA", 
-			"\uAAF2" - "\uAAF4", 
-			"\uAB01" - "\uAB06", 
-			"\uAB09" - "\uAB0E", 
-			"\uAB11" - "\uAB16", 
-			"\uAB20" - "\uAB26", 
-			"\uAB28" - "\uAB2E", 
-			"\uABC0" - "\uABE2", 
-			"\uABF0" - "\uABF9", 
-			"\uAC00" - "\uD7A3", 
-			"\uD7B0" - "\uD7C6", 
-			"\uD7CB" - "\uD7FB", 
-			"\uF900" - "\uFB06", 
-			"\uFB13" - "\uFB17", 
-			"\uFB1D", 
-			"\uFB1F" - "\uFB28", 
-			"\uFB2A" - "\uFB36", 
-			"\uFB38" - "\uFB3C", 
-			"\uFB3E", 
-			"\uFB40" - "\uFB41", 
-			"\uFB43" - "\uFB44", 
-			"\uFB46" - "\uFBB1", 
-			"\uFBD3" - "\uFD3D", 
-			"\uFD50" - "\uFD8F", 
-			"\uFD92" - "\uFDC7", 
-			"\uFDF0" - "\uFDFB", 
-			"\uFE70" - "\uFE74", 
-			"\uFE76" - "\uFEFC", 
-			"\uFF10" - "\uFF19", 
-			"\uFF21" - "\uFF3A", 
-			"\uFF41" - "\uFF5A", 
-			"\uFF66" - "\uFFBE", 
-			"\uFFC2" - "\uFFC7", 
-			"\uFFCA" - "\uFFCF", 
-			"\uFFD2" - "\uFFD7", 
-			"\uFFDA" - "\uFFDC" 
+			"$",
+			"@" - "Z",
+			"_",
+			"a" - "z",
+			"\u00AA",
+			"\u00B5",
+			"\u00BA",
+			"\u00C0" - "\u00D6",
+			"\u00D8" - "\u00F6",
+			"\u00F8" - "\u1FFF",
+			"\u2071",
+			"\u207F",
+			"\u2090" - "\u209C",
+			"\u2102",
+			"\u2107",
+			"\u210A" - "\u2113",
+			"\u2115",
+			"\u2119" - "\u211D",
+			"\u2124",
+			"\u2126",
+			"\u2128",
+			"\u212A" - "\u212D",
+			"\u212F" - "\u2139",
+			"\u213C" - "\u213F",
+			"\u2145" - "\u2149",
+			"\u214E",
+			"\u2183" - "\u2184",
+			"\u2C00" - "\u2C2E",
+			"\u2C30" - "\u2C5E",
+			"\u2C60" - "\u2CE4",
+			"\u2CEB" - "\u2CEE",
+			"\u2CF2" - "\u2CF3",
+			"\u2D00" - "\u2D25",
+			"\u2D27",
+			"\u2D2D",
+			"\u2D30" - "\u2D67",
+			"\u2D6F",
+			"\u2D80" - "\u2D96",
+			"\u2DA0" - "\u2DA6",
+			"\u2DA8" - "\u2DAE",
+			"\u2DB0" - "\u2DB6",
+			"\u2DB8" - "\u2DBE",
+			"\u2DC0" - "\u2DC6",
+			"\u2DC8" - "\u2DCE",
+			"\u2DD0" - "\u2DD6",
+			"\u2DD8" - "\u2DDE",
+			"\u2E2F",
+			"\u3005" - "\u3006",
+			"\u3031" - "\u3035",
+			"\u303B" - "\u303C",
+			"\u3040" - "\u318F",
+			"\u31A0" - "\u31BA",
+			"\u31F0" - "\u31FF",
+			"\u3300" - "\u337F",
+			"\u3400" - "\u4DB5",
+			"\u4E00" - "\uA48C",
+			"\uA4D0" - "\uA4FD",
+			"\uA500" - "\uA60C",
+			"\uA610" - "\uA62B",
+			"\uA640" - "\uA66E",
+			"\uA67F" - "\uA697",
+			"\uA6A0" - "\uA6E5",
+			"\uA717" - "\uA71F",
+			"\uA722" - "\uA788",
+			"\uA78B" - "\uA78E",
+			"\uA790" - "\uA793",
+			"\uA7A0" - "\uA7AA",
+			"\uA7F8" - "\uA801",
+			"\uA803" - "\uA805",
+			"\uA807" - "\uA80A",
+			"\uA80C" - "\uA822",
+			"\uA840" - "\uA873",
+			"\uA882" - "\uA8B3",
+			"\uA8D0" - "\uA8D9",
+			"\uA8F2" - "\uA8F7",
+			"\uA8FB",
+			"\uA900" - "\uA925",
+			"\uA930" - "\uA946",
+			"\uA960" - "\uA97C",
+			"\uA984" - "\uA9B2",
+			"\uA9CF" - "\uA9D9",
+			"\uAA00" - "\uAA28",
+			"\uAA40" - "\uAA42",
+			"\uAA44" - "\uAA4B",
+			"\uAA50" - "\uAA59",
+			"\uAA60" - "\uAA76",
+			"\uAA7A",
+			"\uAA80" - "\uAAAF",
+			"\uAAB1",
+			"\uAAB5" - "\uAAB6",
+			"\uAAB9" - "\uAABD",
+			"\uAAC0",
+			"\uAAC2",
+			"\uAADB" - "\uAADD",
+			"\uAAE0" - "\uAAEA",
+			"\uAAF2" - "\uAAF4",
+			"\uAB01" - "\uAB06",
+			"\uAB09" - "\uAB0E",
+			"\uAB11" - "\uAB16",
+			"\uAB20" - "\uAB26",
+			"\uAB28" - "\uAB2E",
+			"\uABC0" - "\uABE2",
+			"\uABF0" - "\uABF9",
+			"\uAC00" - "\uD7A3",
+			"\uD7B0" - "\uD7C6",
+			"\uD7CB" - "\uD7FB",
+			"\uF900" - "\uFB06",
+			"\uFB13" - "\uFB17",
+			"\uFB1D",
+			"\uFB1F" - "\uFB28",
+			"\uFB2A" - "\uFB36",
+			"\uFB38" - "\uFB3C",
+			"\uFB3E",
+			"\uFB40" - "\uFB41",
+			"\uFB43" - "\uFB44",
+			"\uFB46" - "\uFBB1",
+			"\uFBD3" - "\uFD3D",
+			"\uFD50" - "\uFD8F",
+			"\uFD92" - "\uFDC7",
+			"\uFDF0" - "\uFDFB",
+			"\uFE70" - "\uFE74",
+			"\uFE76" - "\uFEFC",
+			"\uFF10" - "\uFF19",
+			"\uFF21" - "\uFF3A",
+			"\uFF41" - "\uFF5A",
+			"\uFF66" - "\uFFBE",
+			"\uFFC2" - "\uFFC7",
+			"\uFFCA" - "\uFFCF",
+			"\uFFD2" - "\uFFD7",
+			"\uFFDA" - "\uFFDC"
         ]
     >
     |
@@ -1569,7 +1569,7 @@ TOKEN:
     |
     <EMPTY_DIRECTIVE_END : "/>" | "/]">
     {
-        if (tagSyntaxEstablished && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+        if (tagSyntaxEstablished && (incompatibleImprovements >= _VersionInts.V_2_3_28
                 || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
             String image = matchedToken.image;
             char lastChar = image.charAt(image.length() - 1);
@@ -3518,11 +3518,11 @@ Macro Macro() :
         // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
         lastIteratorBlockContexts = iteratorBlockContexts;
         iteratorBlockContexts = null;
-        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
-	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
-	        lastContinuableDirectiveNesting = continuableDirectiveNesting;
-	        breakableDirectiveNesting = 0; 
-	        continuableDirectiveNesting = 0;
+        if (incompatibleImprovements >= _VersionInts.V_2_3_23) {
+            lastBreakableDirectiveNesting = breakableDirectiveNesting;
+            lastContinuableDirectiveNesting = continuableDirectiveNesting;
+            breakableDirectiveNesting = 0;
+            continuableDirectiveNesting = 0;
         } else {
             lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
             lastContinuableDirectiveNesting = 0;
@@ -3542,11 +3542,11 @@ Macro Macro() :
     )
     {
         iteratorBlockContexts = lastIteratorBlockContexts;
-        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+        if (incompatibleImprovements >= _VersionInts.V_2_3_23) {
             breakableDirectiveNesting = lastBreakableDirectiveNesting;
             continuableDirectiveNesting = lastContinuableDirectiveNesting;
         }
-        
+
         inMacro = inFunction = false;
         Macro result = new Macro(
                 name, paramNamesWithDefault, catchAllParamName, isFunction, requireArgsSpecialVariable, children);
@@ -4305,7 +4305,7 @@ Token UnparsedContent(Token start, StringBuilder buf) :
     {
         buf.setLength(buf.length() - t.image.length());
         if (!t.image.endsWith(";")
-                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _TemplateAPI.VERSION_INT_2_3_21) {
+                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _VersionInts.V_2_3_21) {
             throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
         }
         return t;

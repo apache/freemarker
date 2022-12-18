@@ -106,7 +106,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.32
 
         List<Version> actual = new ArrayList<>();
-        for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
+        for (int i = _VersionInts.V_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;
