@@ -20,7 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:ns5="http://www.w3.org/2000/svg"
+      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns3="http://www.w3.org/1999/xhtml"
+      xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -29547,6 +29550,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
+              Fixed possible deadlock when the
+              <literal>Configuration</literal> and
+              <literal>DefaultObjectWrapper</literal> class
+              <emphasis>static</emphasis> initialization is triggered in
+              different threads around the same time. (In the very unlikely
+              case your application can run into this, this will hang the code
+              that initializes FreeMarker before it has processed any
+              templates, and it can't happen anymore if any template
+              processing managed to start.)</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-190">FREEMARKER-190</link>:
