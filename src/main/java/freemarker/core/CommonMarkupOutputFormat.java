@@ -117,6 +117,16 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
 
     /**
      * Creates a new {@link CommonTemplateMarkupOutputModel} that's bound to this {@link OutputFormat} instance.
+     * When this is called from {@link CommonMarkupOutputFormat}, exactly one of the parameters will be
+     * non-{@code null}.
+     *
+     * @param plainTextContent
+     *      {@code null} if the content is markup that possibly can be described as plain text without loss.
+     * @param markupContent
+     *      Typically will be {@code null} if {@code plainTextContent} is not {@code null}. While the plain text always
+     *      can be converted to markup via {@link #escapePlainText(String)}, it's up to the implementation if it wants
+     *      to do that now and store the markup, or later on demand (like each time when
+     *      {@link #getMarkupString(CommonTemplateMarkupOutputModel)} is called).
      */
     protected abstract MO newTemplateMarkupOutputModel(String plainTextContent, String markupContent)
             throws TemplateModelException;
