@@ -56,95 +56,52 @@ import freemarker.template.utility.NumberUtil;
  */
 class BuiltInsForMultipleTypes {
 
-    static class cBI extends AbstractCBI implements ICIChainMember {
-        
-        static class BIBeforeICI2d3d21 extends AbstractCBI {
+    static class cBI extends AbstractCLikeBI {
+        final protected String formatNull(Environment env) throws InvalidReferenceException {
+            throw InvalidReferenceException.getInstance(target, env);
+        }
+    }
 
-            @Override
-            protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
-                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
-                if (num instanceof Integer || num instanceof Long) {
-                    // Accelerate these fairly common cases
-                    return new SimpleScalar(num.toString());
-                } else {
-                    return new SimpleScalar(env.getCNumberFormat().format(num));
+    static class cnBI extends AbstractCLikeBI {
+        final protected String formatNull(Environment env) {
+            return env.getCFormat().getNullString();
+        }
+    }
+
+    private static abstract class AbstractCLikeBI extends BuiltIn {
+
+        @Override
+        final TemplateModel _eval(Environment env) throws TemplateException {
+            final String result;
+            final TemplateModel model = target.eval(env);
+            if (model instanceof TemplateNumberModel) {
+                TemplateNumberFormat cTemplateNumberFormat = env.getCTemplateNumberFormat();
+                try {
+                    result = cTemplateNumberFormat.formatToPlainText((TemplateNumberModel) model);
+                } catch (TemplateValueFormatException e) {
+                    throw _MessageUtil.newCantFormatNumberException(cTemplateNumberFormat, target, e, false);
                 }
+            } else if (model instanceof TemplateBooleanModel) {
+                boolean b = ((TemplateBooleanModel) model).getAsBoolean();
+                CFormat cFormat = env.getCFormat();
+                result = b ? cFormat.getTrueString() : cFormat.getFalseString();
+            } else if (model instanceof TemplateScalarModel) {
+                String s = EvalUtil.modelToString((TemplateScalarModel) model, target, env);
+                result = env.getCFormat().formatString(s, env);
+            } else if (model == null) {
+                result = formatNull(env);
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "number, boolean, or string",
+                        new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class, TemplateScalarModel.class },
+                        env);
             }
-            
+            return new SimpleScalar(result);
         }
 
-        static class BIBeforeICI2d3d32 extends AbstractCBI implements ICIChainMember {
-            private final BIBeforeICI2d3d21 prevICIObj = new BIBeforeICI2d3d21();
+        protected abstract String formatNull(Environment env) throws InvalidReferenceException;
 
-            @Override
-            protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
-                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
-                if (num instanceof Integer || num instanceof Long) {
-                    // Accelerate these fairly common cases
-                    return new SimpleScalar(num.toString());
-                // INF etc. is properly handled by ?c since 2.3.21, but the getCNumberFormat returns the pre 2.3.21
-                // format before IcI 2.3.31, so we keep these here:
-                } else if (num instanceof Double) {
-                    double n = num.doubleValue();
-                    if (n == Double.POSITIVE_INFINITY) {
-                        return new SimpleScalar("INF");
-                    }
-                    if (n == Double.NEGATIVE_INFINITY) {
-                        return new SimpleScalar("-INF");
-                    }
-                    if (Double.isNaN(n)) {
-                        return new SimpleScalar("NaN");
-                    }
-                    // Deliberately falls through
-                } else if (num instanceof Float) {
-                    float n = num.floatValue();
-                    if (n == Float.POSITIVE_INFINITY) {
-                        return new SimpleScalar("INF");
-                    }
-                    if (n == Float.NEGATIVE_INFINITY) {
-                        return new SimpleScalar("-INF");
-                    }
-                    if (Float.isNaN(n)) {
-                        return new SimpleScalar("NaN");
-                    }
-                    // Deliberately falls through
-                }
-
-                return new SimpleScalar(env.getCNumberFormat().format(num));
-            }
-
-            @Override
-            public int getMinimumICIVersion() {
-                return _VersionInts.V_2_3_21;
-            }
-
-            @Override
-            public Object getPreviousICIChainMember() {
-                return prevICIObj;
-            }
-        }
-
-        @Override
-        protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateException {
-            try {
-                return new SimpleScalar(CTemplateNumberFormat.INSTANCE.formatToPlainText((TemplateNumberModel) model));
-            } catch (TemplateValueFormatException e) {
-                throw _MessageUtil.newCantFormatNumberException(CTemplateNumberFormat.INSTANCE, target, e, false);
-            }
-        }
-
-        private final BIBeforeICI2d3d32 prevICIObj = new BIBeforeICI2d3d32();
-
-        @Override
-        public int getMinimumICIVersion() {
-            return _VersionInts.V_2_3_32;
-        }
-        
-        @Override
-        public Object getPreviousICIChainMember() {
-            return prevICIObj;
-        }
-        
     }
 
     static class dateBI extends BuiltIn {
@@ -801,27 +758,5 @@ class BuiltInsForMultipleTypes {
 
     // Can't be instantiated
     private BuiltInsForMultipleTypes() { }
-
-    static abstract class AbstractCBI extends BuiltIn {
-        
-        @Override
-        final TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel model = target.eval(env);
-            if (model instanceof TemplateNumberModel) {
-                return formatNumber(env, model);
-            } else if (model instanceof TemplateBooleanModel) {
-                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
-                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
-            } else {
-                throw new UnexpectedTypeException(
-                        target, model,
-                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
-                        env);
-            }
-        }
-
-        protected abstract TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateException;
-        
-    }
 
 }

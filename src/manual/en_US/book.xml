@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/2000/svg"
-      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns3="http://www.w3.org/1999/xhtml"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -6011,6 +6008,119 @@ To prove that "s" didn't contain the value in escaped form:
             here...</link></para>
           </section>
         </section>
+      </section>
+
+      <section xml:id="dgui_misc_computer_vs_human_format">
+        <title>Formatting for humans, or for computers</title>
+
+        <para>By default
+        <literal>${<replaceable>someValue</replaceable>}</literal> outputs
+        numbers, date/time/date-time and boolean values in a format that
+        targets normal users (<quote>humans</quote>). You have various
+        settings to specify how that format looks, like
+        <literal>number_format</literal>, <literal>date_format</literal>,
+        <literal>time_format</literal>, <literal>datetime_format</literal>,
+        <literal>boolan_format</literal>. The output also often depends on the
+        <literal>locale</literal> setting (i.e., on the language, and country
+        of the user). So 3000000 is possibly printed as
+        <literal>3,000,000</literal> (i.e., with grouping separators), or
+        <literal>3.14</literal> is possibly printed as <literal>3,14</literal>
+        (i.e., with a different decimal separator).</para>
+
+        <para>At some places you need to output values that will be read
+        (parsed) by some program, in which case always use the <link
+        linkend="ref_builtin_c"><literal>c</literal> built-in</link>, as in
+        <literal>${<replaceable>someValue</replaceable>?c}</literal> (the
+        <quote>c</quote> stands for Computer). <emphasis>Then the formatting
+        depends on the <literal>c_format</literal> <link
+        linkend="pgui_config_settings">setting</link></emphasis>, which
+        usually refers to a computer language, like <literal>"JSON"</literal>.
+        The output of <literal>?c</literal> is not influenced by
+        <literal>locale</literal>, <literal>number_format</literal>,
+        etc.</para>
+
+        <para>The <literal>c</literal> built-in will format string values to
+        string literals. Like if the <literal>c_format</literal> setting is
+        <quote>JSON</quote>, then <literal>{"fullName":
+        ${fullName?c}}</literal> will output something like
+        <literal>{"fullName": "John Doe"}</literal>, where the quotation marks
+        (and <literal>\</literal> escaping if needed) were added by
+        <literal>?c</literal>.</para>
+
+        <note>
+          <para>At least as of 2.3.32, the <literal>c</literal> built-in
+          doesn't support date/time/datetime values, only numbers, booleans,
+          and strings.</para>
+        </note>
+
+        <para>When formatting for computers, at some places you want to output
+        a <literal>null</literal> (or its equivalent in the target language)
+        if the value you print is missing/<literal>null</literal>. The
+        convenient shortcut for that is using the <literal>cn</literal>
+        built-in (the <quote>n</quote> stands for Nullable), as in
+        <literal>${<replaceable>someValue</replaceable>?cn}</literal>. It's
+        behaves like the <literal>c</literal> built-in, except that if
+        <literal><replaceable>someValue</replaceable></literal> evaluates to
+        <literal>null</literal>/missing, it outputs the
+        <literal>null</literal> literal in the syntax that the
+        <literal>c_format</literal> setting specifies, instead of stopping
+        with missing value error.</para>
+
+        <para>For the templates where the output is obviously only for
+        computer consumption, some prefers setting the
+        <literal>number_format</literal>, and
+        <literal>boolean_format</literal> settings to <literal>"c"</literal>.
+        (Before 2.3.32, for <literal>number_format</literal> you have to use
+        <literal>"computer"</literal> instead.) Then
+        <literal>${<replaceable>someValue</replaceable>}</literal>, for
+        number, and boolean values will format like <literal>?c</literal>
+        does. To output string literals (i.e, to add quotation and escaping),
+        you will still need an explicit <literal>?c</literal>. Also if you
+        need to output <literal>null</literal> literals, you still have to use
+        <literal>?cn</literal>.</para>
+
+        <para>These are the table of supported <literal>c_format</literal>
+        setting values (as of FreeMarker 2.3.32), and their intended
+        use:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>JSON</literal>: JSON generation</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>JavaScript</literal>: JavaScript generation</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>Java</literal>: Java source code generation</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>XS</literal>: XML Schema compliant XML
+            generation</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>default 2.3.0</literal>: Default for backward
+            compatibility if the <link
+            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+            setting</link> is less than 2.3.21. Avoid!</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>default 2.3.21</literal>: Default for backward
+            compatibility if the <link
+            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+            setting</link> is equal or greater than 2.3.21. Avoid!</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The behaviour of these is documented at the <literal>c</literal>
+        built-in: <link linkend="ref_builtin_c">for numbers</link>, <link
+        linkend="ref_builtin_c_boolean">for boolean</link>, <link
+        linkend="ref_builtin_c_string">for strings</link>, <link
+        linkend="ref_builtin_cn">for null-s</link>.</para>
       </section>
 
       <section xml:id="dgui_misc_whitespace">
@@ -12705,7 +12815,8 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para>c <link linkend="ref_builtin_c">for strings</link>, <link
-            linkend="ref_builtin_c_boolean">for booleans</link></para>
+            linkend="ref_builtin_c_boolean">for booleans</link>, <link
+            linkend="ref_builtin_c_string">for strings</link></para>
           </listitem>
 
           <listitem>
@@ -12743,6 +12854,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_chunk">chunk</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_cn">cn</link></para>
           </listitem>
 
           <listitem>
@@ -13320,6 +13435,115 @@ GreEN mouse
           <para>Note that this uses locale-aware conversion, that is, the
           result can be different depending on the current
           <literal>locale</literal> (language, country).</para>
+        </section>
+
+        <section xml:id="ref_builtin_c_string">
+          <title>c (for string value)</title>
+
+          <indexterm>
+            <primary>c built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>string</secondary>
+          </indexterm>
+
+          <note>
+            <para>The <literal>c</literal> built-in also works <link
+            linkend="ref_builtin_c">on numbers</link>, and <link
+            linkend="ref_builtin_c_boolean">on booleans</link>!</para>
+          </note>
+
+          <note>
+            <para>To provide a background, see <xref
+            linkend="dgui_misc_computer_vs_human_format"/></para>
+          </note>
+
+          <note>
+            <para>The <literal>c</literal> built-in supports strings since
+            FreeMarker 2.3.32.</para>
+          </note>
+
+          <para>This built-in converts a string to a <quote>computer
+          language</quote> literal, according the value of the <link
+          linkend="gloss.c_format"><literal>c_format</literal>
+          setting</link>.</para>
+
+          <para>For the <literal>c_format</literal>-s that are built into
+          FreeMarker the rules are the following:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><quote>JSON</quote>, <quote>default 2.3.0</quote>, and
+              <quote>default 2.3.21</quote>: Gives a JSON string literal, that
+              is, it will be surrounded with quotation marks
+              (<literal>"</literal>), and will be escaped using backslash
+              (<literal>\</literal>) where needed. For the exact escaping
+              rules see <link linkend="ref_builtin_json_string">the
+              <literal>json_string</literal> built-in</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><quote>JavaScript</quote>: Almost the same as JSON, but
+              uses <literal>\x<replaceable>XX</replaceable></literal> instead
+              of <literal>\u<replaceable>XXXX</replaceable></literal> where
+              possible. For the exact escaping rules see <link
+              linkend="ref_builtin_js_string">the <literal>js_string</literal>
+              built-in</link>, except that this won't escape the apostrophe
+              quote (since it knows that it has used quotation marks around
+              the string literal).</para>
+            </listitem>
+
+            <listitem>
+              <para><quote>Java</quote>: Gives a Java string literal, that is,
+              it will be surrounded with quotation marks
+              (<literal>"</literal>), and will be escaped using backslash
+              (<literal>\</literal>) where needed. For the exact escaping
+              rules see <link linkend="ref_builtin_j_string">the
+              <literal>j_string</literal> built-in</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><quote>XS</quote>: Leaves the string as is. The idea is
+              that you will insert the value as the body of an XML element, or
+              into an XML attribute, so it needs no quotation, or any other
+              special syntax. While it does need XML encoding, that should be
+              handled by the <link linkend="dgui_misc_autoescaping">automatic
+              escaping facility</link>, and not by the
+              <literal>c_format</literal> facility.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>If the value the <literal>c</literal> built-in is applied on
+          is <literal>null</literal>/missing, it will stop the template
+          processing with error, just like most other built-ins. If instead
+          you want to output a <literal>null</literal> literal, see the <link
+          linkend="ref_builtin_cn_string"><literal>cn</literal>
+          built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_cn_string">
+          <title>cn (for string value)</title>
+
+          <indexterm>
+            <primary>cn built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>string</secondary>
+          </indexterm>
+
+          <para>This does the same as the <link
+          linkend="ref_builtin_c_string"><literal>c</literal> built-in</link>,
+          but when applied on a <literal>null</literal>/missing value, it will
+          output a <literal>null</literal> value according the <link
+          linkend="gloss.c_format"><literal>c_format</literal> setting</link>.
+          See more details about formatting a <literal>null</literal> <link
+          linkend="ref_builtin_cn">here</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_c_lower_case">
@@ -13944,10 +14168,11 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           JSON strings must be quoted with <literal>"</literal>.</para>
 
           <para>The escaping rules are almost identical to those <link
-          linkend="ref_builtin_j_string">documented for
+          linkend="ref_builtin_js_string">documented for
           <literal>js_string</literal></link>. The differences are that
-          <literal>'</literal> is not escaped at all, that &gt; is escaped as
-          \u003E (not as \&gt;), and that
+          <literal>'</literal> is not escaped at all, that
+          <literal>&gt;</literal> is escaped as <literal>\u003E</literal> (not
+          as <literal>\&gt;</literal>), and that
           <literal>\u<replaceable>XXXX</replaceable></literal> escapes are
           used instead of <literal>\x<replaceable>XX</replaceable></literal>
           escapes.</para>
@@ -15700,7 +15925,7 @@ rif: foo XYr baar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_c">
-          <title>c (when used with numerical value)</title>
+          <title>c (for numbers)</title>
 
           <indexterm>
             <primary>c built-in</primary>
@@ -15721,69 +15946,141 @@ rif: foo XYr baar</programlisting>
           </indexterm>
 
           <note>
-            <para>This built-in exists since FreeMarker 2.3.3.</para>
+            <para>The <literal>c</literal> built-in also works <link
+            linkend="ref_builtin_c_boolean">on booleans</link>, and <link
+            linkend="ref_builtin_c_string">on strings</link>!</para>
           </note>
 
-          <para>This built-in converts a number to string for a
-          <quote>computer language</quote> as opposed to for human audience.
-          That is, it formats with the rules that programming languages used
-          to use, which is independent of all the locale and number format
-          settings of FreeMarker. It always uses dot as decimal separator, and
-          it never uses grouping separators (like in 3,000,000), nor
-          <quote>+</quote> sign (like +1), nor superfluous leading or trailing
-          0-s (like 03 or 1.0). It usually avoids exponential form (like it
-          will never format 10000000000 as 1E10), but see the details below
-          regarding that.</para>
+          <note>
+            <para>To provide a background, see <xref
+            linkend="dgui_misc_computer_vs_human_format"/></para>
+          </note>
 
-          <para>This built-in is crucial because be default (like with
+          <para>This built-in converts a number to a <quote>computer
+          language</quote> literal, as opposed to format it for human reading.
+          This format is independent of the <literal>locale</literal> (human
+          language, country) and <literal>number_format</literal> settings of
+          FreeMarker. Instead, it depends on the <link
+          linkend="gloss.c_format"><literal>c_format</literal> setting</link>,
+          which is usually something like <literal>"JSON"</literal>; a
+          computer language.</para>
+
+          <para>This built-in is crucial because by default (like with
           <literal>${x}</literal>) numbers are converted to strings with the
-          locale (language, country) specific number formatting, which is for
-          human readers (like 3000000 is possibly printed as 3,000,000). When
-          the number is printed not for human audience (e.g., for a database
-          record ID used as the part of an URL, or as invisible field value in
-          a HTML form, or for printing CSS/JavaScript numerical literals) you
-          must use this built-in to format the number (i.e., use
+          locale specific number formatting, so 3000000 is possibly printed as
+          <literal>3,000,000</literal> (i.e., with grouping separators), or
+          <literal>3.14</literal> is possibly printed as
+          <literal>3,14</literal> (i.e., with a different decimal separator).
+          When the number is printed not for human audience (e.g., for a
+          database record ID used as the part of an URL, or as invisible field
+          value in a HTML form, or for printing CSS/JavaScript numerical
+          literals) you must use this built-in to format the number (i.e., use
           <literal>${x?c}</literal> instead of <literal>${x}</literal>), or
-          else the output will be possibly broken depending on the current
-          number formatting settings and locale (like the decimal point is not
-          dot, but comma in many countries) and the value of the number (like
-          big numbers are possibly <quote>damaged</quote> by grouping
-          separators).</para>
+          else the output will be possibly unparsable for the consumer.</para>
 
-          <para>Further details:</para>
+          <para>The exact format of numbers depend on value of the
+          <literal>c_format</literal> setting, but for all the
+          <literal>c_format</literal>-s that are built into FreeMarker, these
+          sand:</para>
 
           <itemizedlist>
             <listitem>
-              <para>Rounding: The conversion is only guaranteed to be lossless
-              if the <link
-              linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
-              FreeMarker configuration setting</link> is set to 2.3.32 or
-              higher. Before that, the format never uses exponential form, and
-              is limited to 16 digits after the decimal dot, so rounding can
-              occur (e.g. 1E-17 will be shown as 0).</para>
+              <para>It always uses dot as decimal separator</para>
             </listitem>
 
             <listitem>
-              <para>Special floating point values: If the
-              <literal>incompatible_improvements</literal> FreeMarker
-              configuration setting is set to 2.3.24 or higher (also if it's
-              set to 2.3.20 or higher and you are outside a string literal),
-              this built-in will return <literal>"INF"</literal>,
-              <literal>"-INF"</literal> and <literal>"NaN"</literal> for
-              positive/negative infinity and IEEE floating point Not-a-Number,
-              respectively. These are the XML Schema compatible
-              representations of these special values. With too low
-              <literal>incompatible_improvements</literal> it returns what
-              <literal>java.text.DecimalFormat</literal> did with US locale,
-              none of which is understood by any (common) computer
-              language.</para>
+              <para>It always uses dot as decimal separator</para>
             </listitem>
 
             <listitem>
-              <para>Exponential form: Before
-              <literal>incompatible_improvements</literal> 2.3.32, it was
-              never used. After that, it's uses exponential form in these
-              cases:</para>
+              <para>Never uses <quote>+</quote> sign (as in +1), except maybe
+              after the <quote>E</quote> that signifies the exponent
+              part</para>
+            </listitem>
+
+            <listitem>
+              <para>No superfluous leading or trailing 0-s (like 03 or
+              1.0)</para>
+            </listitem>
+
+            <listitem>
+              <para>It usually avoids exponential form (like it will never
+              format 10000000000 as 1E10), but see the details below regarding
+              that.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Finder details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Rounding:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>For all non-deprecated <literal>c_format</literal>-s
+                  that are built into FreeMarker: There's no rounding.</para>
+                </listitem>
+
+                <listitem>
+                  <para>For the deprecated <literal>c_format</literal>-s,
+                  <quote>default 2.3.0</quote>, and <quote>default
+                  2.3.21</quote>: The numbers are limited to 16 digits after
+                  the decimal dot, so rounding can occur. The these formats
+                  never use exponential form either, so the decimal point
+                  place is fixed. Thus, for example, 1E-17 will be formatted
+                  as <literal>0</literal>. </para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Special floating point values, positive infinity, negative
+              infinity, and NaN (for Not-a-Number):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>For <literal>c_format</literal>-s <quote>JSON</quote>,
+                  and <quote>JavaScript</quote>: <literal>Infinity</literal>,
+                  <literal>-Infinity</literal>, <literal>NaN</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para>For <literal>c_format</literal> <quote>Java</quote>:
+                  If the value has Java type <literal>double</literal> or
+                  <literal>Double</literal>:
+                  <literal>Double.POSITIVE_INFINITY</literal>,
+                  <literal>Double.NEGATIVE_INFINITY</literal>,
+                  <literal>Double.NaN</literal>. If the value has Java type
+                  <literal>float</literal> or <literal>Float</literal>:
+                  <literal>Float.POSITIVE_INFINITY</literal>,
+                  <literal>Float.NEGATIVE_INFINITY</literal>,
+                  <literal>Float.NaN</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>For <literal>c_format</literal> <quote>XS</quote>, and
+                  also for the deprecated <literal>c_format</literal>,
+                  <quote>default 2.3.21</quote>: <literal>INF</literal>,
+                  <literal>-INF</literal>, and <literal>NaN</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>For the deprecated <literal>c_format</literal>,
+                  <quote>default 2.3.0</quote>: Gives what
+                  <literal>java.text.DecimalFormat</literal> does with US
+                  locale, which are <literal>∞</literal>,
+                  <literal>-∞</literal>, and <literal>�</literal> (U+FFFD,
+                  replacement character).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Exponential form is used by all non-deprecated
+              <literal>c_format</literal>-s that are built into FreeMarker
+              (but not by the deprecated <quote>default 2.3.0</quote>, and
+              <quote>default 2.3.21</quote>):</para>
 
               <itemizedlist>
                 <listitem>
@@ -15828,26 +16125,128 @@ rif: foo XYr baar</programlisting>
 
                   <para>Note that by default FreeMarker doesn't use
                   <literal>double</literal> or <literal>float</literal>, so
-                  such values are likely can only come from the
-                  data-model.</para>
+                  such values are likely come from the data-model.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>The output never contains superfluous zeros after the
-              decimal point. Thus, unlike in Java, you can't tell apart a
-              <literal>double</literal> from an <literal>int</literal>, if
-              they store the same number mathematically, because the output
-              will look the same for both. (This is because the template
-              language only have a single number type, so you don't have a
-              good control over the backing Java type.)</para>
+              <para>Currently, in the <literal>c_format</literal>-s that are
+              built into FreeMarker, the output never contains superfluous
+              zeros after the decimal point. Thus, unlike in Java, you can't
+              tell apart a <literal>double</literal> from an
+              <literal>int</literal>, if they store the same number
+              mathematically, because the output will look the same for both.
+              (This is because the template language only have a single number
+              type, so you don't have a good control over the backing Java
+              type.)</para>
             </listitem>
           </itemizedlist>
 
-          <para>Note that the <literal>c</literal> built-in <link
-          linkend="ref_builtin_c_boolean">also works on
-          booleans</link>.</para>
+          <para>If you only generate output that's computer language and isn't
+          read by end-users, you may prefer to set the
+          <literal>number_format</literal> configuration setting to
+          <literal>"c"</literal> (since FreeMarker 2.3.32,
+          <literal>"computer"</literal> before that), in which case
+          <literal>${<replaceable>aNumber</replaceable>}</literal> will have
+          the same output as
+          <literal>${<replaceable>aNumber</replaceable>?c}</literal>. (In this
+          case you should use a <literal>c_format</literal> like
+          <literal>"JSON"</literal>, and not some of the strictly backward
+          compatible defaults, as those are emulating some confusing old
+          glitches.)</para>
+
+          <para>If the value the <literal>c</literal> built-in is applied on
+          is <literal>null</literal>/missing, it will stop the template
+          processing with error, just like most other built-ins. If instead
+          you want to output a <literal>null</literal> literal, see the <link
+          linkend="ref_builtin_cn"><literal>cn</literal>
+          built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_cn">
+          <title>cn (for numbers)</title>
+
+          <indexterm>
+            <primary>cn built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>number</secondary>
+          </indexterm>
+
+          <note>
+            <para><literal>cn</literal> works with all types that
+            <literal>c</literal> does, and thus for strings and booleans as
+            well. The formatting of <literal>null</literal>/missing doesn't
+            depend on the type of course (as we have no value that could have
+            a type).</para>
+          </note>
+
+          <note>
+            <para>See <xref linkend="dgui_misc_computer_vs_human_format"/> for
+            background</para>
+          </note>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.32</para>
+          </note>
+
+          <para>This is the same as the <link
+          linkend="ref_builtin_c"><literal>c</literal> built-in</link>, except
+          if the value on its left side is <literal>null</literal>/missing,
+          this won't stop with error, but outputs a <literal>null</literal>
+          literal that's appropriate for the current
+          <literal>c_format</literal> setting:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>For <quote>JSON</quote>, <quote>Java</quote>,
+              <quote>JavaScript</quote>, <quote>default 2.3.0</quote>,
+              <quote>default 2.3.21</quote>: <literal>null</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>For <quote>XS</quote> (used for generating XML that
+              follows XML Schema principles): 0 length string (i.e.,
+              <literal>${<replaceable>thisIsNull</replaceable>?cn}</literal>
+              prints nothing), which is often not good enough (see below), but
+              we can't do better with a
+              <literal><replaceable>stringValue</replaceable>?c</literal>
+              alone. The idea is that you write something like
+              <literal>&lt;full-name&gt;${fullName?nc}&lt;/full-name&gt;</literal>,
+              or <literal>&lt;user <replaceable>...</replaceable>
+              full-name="${fullName?nc}" /&gt;</literal>, and then, in case
+              <literal>fullName</literal> is <literal>null</literal>, the
+              output will be
+              <literal>&lt;full-name&gt;&lt;/full-name&gt;</literal>, and
+              <literal>&lt;user <replaceable>...</replaceable> full-name=""
+              /&gt;</literal>. Some applications accept that as the equivalent
+              of a <literal>null</literal>, at least where a string value is
+              expected according the XML Schema.</para>
+
+              <para>Note that the XML Schema approach is that you skip
+              outputting the whole <literal>full-name</literal> XML element,
+              or XML attribute. For that you have to write <literal>&lt;#if
+              fullName??&gt;&lt;full-name&gt;${full-name?c}&lt;/full-name&gt;&lt;/#if&gt;</literal>,
+              and <literal>&lt;user <replaceable>...</replaceable> &lt;#if
+              fullName??&gt;full-name="${fullName?c}"&lt;/#if&gt;
+              /&gt;</literal>. When using such condition, and the value is a
+              string (as with this example), you might as well just write
+              <literal>${fullName}</literal>, without the
+              <literal>?c</literal>.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="ref_builtin_is_infinite">
@@ -16991,7 +17390,7 @@ Tue, Apr 8, '03
         </indexterm>
 
         <section xml:id="ref_builtin_c_boolean">
-          <title>c (when used with boolean)</title>
+          <title>c (for boolean value)</title>
 
           <indexterm>
             <primary>c built-in</primary>
@@ -17012,28 +17411,73 @@ Tue, Apr 8, '03
           </indexterm>
 
           <note>
-            <para>This built-in exists since FreeMarker 2.3.20.</para>
+            <para>The <literal>c</literal> built-in also works <link
+            linkend="ref_builtin_c_boolean"> <link linkend="ref_builtin_c">on
+            numbers</link></link>, and <link linkend="ref_builtin_c_string">on
+            strings</link>!</para>
           </note>
 
-          <para>This built-in converts a boolean to string for a
-          <quote>computer language</quote> as opposed to for human audience.
-          The result will be <literal>"true"</literal> or
-          <literal>"false"</literal>, regardless of the
-          <literal>boolean_format</literal> configuration setting, as that
-          setting is meant to specify the format for human consumption. When
-          generating boolean literals for JavaScript and such, this should be
-          used.</para>
+          <note>
+            <para>To provide a background, see <xref
+            linkend="dgui_misc_computer_vs_human_format"/></para>
+          </note>
+
+          <note>
+            <para>The <literal>c</literal> built-in supports booleans since
+            FreeMarker 2.3.20.</para>
+          </note>
+
+          <para>This built-in converts a boolean to a <quote>computer
+          language</quote> literal, as opposed to format it for human reading.
+          This formats is independent of the <literal>boolean_format</literal>
+          configuration setting, as that setting is meant to specify the
+          format for human readers. Instead, it depends on the <link
+          linkend="gloss.c_format"><literal>c_format</literal> setting</link>.
+          However, currently all <literal>c_format</literal> that's built into
+          FreeMarker result will give <literal>true</literal> or
+          <literal>false</literal>.</para>
+
+          <para>When outputting boolean literals for JavaScript, JSON, Java,
+          and many other languages, always use this built-in, instead of
+          relying on <literal>boolean_format</literal>.</para>
 
           <para>If you only generate output that's computer language and isn't
-          read by end-users, you may want to set the
+          read by end-users, you may prefer to set the
           <literal>boolean_format</literal> configuration setting to
           <literal>c</literal> (since FreeMarker 2.3.29), in which case
           <literal>${<replaceable>aBoolean</replaceable>}</literal> will have
           the same output as
           <literal>${<replaceable>aBoolean</replaceable>?c}</literal>.</para>
 
-          <para>Note that this built-in <link linkend="ref_builtin_c">also
-          works on strings</link>.</para>
+          <para>If the value the <literal>c</literal> built-in is applied on
+          is <literal>null</literal>/missing, it will stop the template
+          processing with error, just like most other built-ins. If instead
+          you want to output a <literal>null</literal> literal, see the <link
+          linkend="ref_builtin_cn_string"><literal>cn</literal>
+          built-in</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_cn_boolean">
+          <title>cn (for boolean value)</title>
+
+          <indexterm>
+            <primary>cn built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>boolean</secondary>
+          </indexterm>
+
+          <para>This does the same as the <link
+          linkend="ref_builtin_c_boolean"><literal>c</literal>
+          built-in</link>, but when applied on a
+          <literal>null</literal>/missing value, it will output a
+          <literal>null</literal> value according the <link
+          linkend="gloss.c_format"><literal>c_format</literal> setting</link>.
+          See more details about formatting a <literal>null</literal> <link
+          linkend="ref_builtin_cn">here</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_string_for_boolean">
@@ -17211,10 +17655,6 @@ N
           <indexterm>
             <primary>columnar printing of sequences</primary>
           </indexterm>
-
-          <note>
-            <para>This built-in exists since FreeMarker 2.3.3.</para>
-          </note>
 
           <para>This built-in splits a sequence into multiple sequences of the
           size given with the 1st parameter to the built-in (like
@@ -23886,9 +24326,7 @@ ${"'{}"}
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#setting <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
-</programlisting>
+          <programlisting role="metaTemplate"><literal>&lt;#setting <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal></programlisting>
 
           <para>Where:</para>
 
@@ -24316,6 +24754,18 @@ ${"'{}"}
               <literal>time_zone</literal> FreeMarker setting. See more in the
               Java API documentation of
               <literal>Configurable.setSQLDateAndTimeTimeZone(TimeZone)</literal>.</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><indexterm>
+                  <primary>c_format</primary>
+                </indexterm><literal>c_format</literal> (since FreeMarker
+              2.3.32): Sets what format to use when formatting for computer
+              consumption, like <literal>"JSON"</literal>. Mostly prominently
+              this affects the <link
+              linkend="ref_builtin_c"><literal>c</literal> built-in</link>,
+              hence the name. See valid values and their meaning here: <xref
+              linkend="dgui_misc_computer_vs_human_format"/>.</para>
             </listitem>
 
             <listitem>
@@ -29585,6 +30035,129 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Improved outputting values for computer/parser consumption
+              (such as for generating JSON, JavaScript values, values encoded
+              into URL-s):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added new configuration setting, <link
+                  linkend="gloss.c_format"><literal>c_format</literal></link>
+                  (also settable via the <link
+                  linkend="ref.directive.setting"><literal>setting</literal>
+                  directive</link>). This specifies what format to use when
+                  formatting for computer consumption, like
+                  <literal>"JSON"</literal>. Most prominently, this affects
+                  the <link linkend="ref_builtin_c"><literal>c</literal>
+                  built-in</link>, hence the name. See valid setting values,
+                  and their meaning here: <xref
+                  linkend="dgui_misc_computer_vs_human_format"/>.</para>
+
+                  <para>If you set the <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+                  setting</link> to 2.3.32, the default of
+                  <literal>c_format</literal> changes to
+                  <literal>JSON</literal>, which is a format that most targets
+                  can parse (because we just format simple values, not lists
+                  and maps). With lower
+                  <literal>incompatible_improvements</literal>, the default
+                  value is a <literal>c_format</literal> that emulates the old
+                  behavior of <literal>?c</literal> (where you can lose
+                  numerical prevision, etc.), so it's recommended to set it to
+                  something else.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><link
+                  linkend="ref_builtin_c">?c</link></literal> now formats
+                  string values to string literals (with quotation marks and
+                  escaping), according the language specified in the <link
+                  linkend="gloss.c_format"><literal>c_format</literal>
+                  setting</link>, such as <literal>JSON</literal>,
+                  <literal>Java</literal>, etc. Earlier, <literal>?c</literal>
+                  only allowed numbers, and booleans.</para>
+
+                  <para>To generate JSON, you can now write a piece of
+                  template like this:</para>
+
+                  <programlisting role="template">"fullName": ${user.fullName?c},</programlisting>
+
+                  <para>Then the output will be like:</para>
+
+                  <programlisting role="output">"fullName": "John Doe",</programlisting>
+
+                  <para>Note that the quotation marks were added by
+                  <literal>?c</literal>, and weren't typed into the
+                  template.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <link linkend="ref_builtin_cn">?cn</link>, which
+                  is like <literal><link
+                  linkend="ref_builtin_c">?c</link></literal>, except if the
+                  value is <literal>null</literal>/missing, it will output a
+                  <literal>null</literal> literal, according the language
+                  specified in the new <link
+                  linkend="gloss.c_format"><literal>c_format</literal>
+                  setting</link>.</para>
+
+                  <para>Let's say, in the previous example
+                  <literal>user.fullName</literal> is expected to be
+                  <literal>null</literal> sometimes. Then you can just use
+                  <literal>?cn</literal> instead if
+                  <literal>?c</literal>:</para>
+
+                  <programlisting role="template">"fullName": ${user.fullName?cn},</programlisting>
+
+                  <para>If said variable is <literal>null</literal>, the
+                  output will be like this (otherwise it will be a quoted
+                  string like earlier):</para>
+
+                  <programlisting role="output">"fullName": null,</programlisting>
+
+                  <para>Note with this approach you don't complicate the
+                  template anymore to avoid printing quotation marks. Of
+                  course, <literal>?cn</literal> works on numerical and
+                  boolean values as well.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>c_format</literal>-s which are not merely for
+                  backward compatibility, the number formatting changes
+                  relatively to how <literal>?c</literal> did it in earlier
+                  versions. The change affects some non-whole numbers, and
+                  whole numbers with over 100 digits. The goal of this change
+                  is to make the formatting lossless, and also to avoiding
+                  huge output with exponents of high magnitude. See details at
+                  the documentation of the <link
+                  linkend="ref_builtin_c"><literal>c</literal>
+                  built-in</link>.</para>
+
+                  <para>Because setting the <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+                  setting</link> to 2.3.32 will change the default of
+                  <literal>c_format</literal> to <literal>JSON</literal>, it
+                  will consequently also activate these changes. But this only
+                  affects number formatting done with <literal>?c</literal>,
+                  <literal>?cn</literal>, and with <quote>c</quote>
+                  <literal>number_format</literal>, and not number formatting
+                  in general.</para>
+                </listitem>
+
+                <listitem>
+                  <para>For consistency, when setting the
+                  <literal>number_format</literal> setting (also when
+                  formatting with
+                  <literal>?string(<replaceable>format</replaceable>)</literal>),
+                  now <quote>c</quote> can be used instead of
+                  <quote>computer</quote>. Both has the same effect on
+                  formatting, but <quote>c</quote> is preferred from now
+                  on.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-208">FREEMARKER-208</link>:
               Added <link
@@ -29599,29 +30172,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               different conversions as in most languages, which causes problem
               if the conversion was for computer consumption (for technical
               purposes), and not for humans.</para>
-            </listitem>
-
-            <listitem>
-              <para>When setting the <literal>number_format</literal> setting
-              (also when formatting with
-              <literal>?string(<replaceable>format</replaceable>)</literal>),
-              now <quote>c</quote> can be used instead of
-              <quote>computer</quote>. The two mean the same, and
-              <quote>c</quote> is preferred from now on.</para>
-            </listitem>
-
-            <listitem>
-              <para>If <link
-              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
-              is set to 2.3.32 (or higher), the behavior of
-              <literal>?c</literal> (and thus the <quote>computer</quote> and
-              <quote>c</quote> number format) has changed for some non-whole
-              numbers, and for whole numbers with over 100 digits. The goal of
-              this change is to make the formatting lossless, and also to
-              avoiding huge output with exponents of high magnitude. See
-              details at the documentation of the <link
-              linkend="ref_builtin_c"><literal>c</literal>
-              built-in</link>.</para>
             </listitem>
 
             <listitem>
@@ -42581,6 +43131,36 @@ Apache Software Foundation.</programlisting>
         <replaceable>...</replaceable>&gt;</literal> directive when you want
         to display text based on some condition, say, you show a certain part
         of the page only for visitors who has logged in.</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss.c">
+      <glossterm>c</glossterm>
+
+      <glossdef>
+        <para>In the context of FreeMarker, this usually refers to the <link
+        linkend="ref_builtin_c"><literal>c</literal> built-in</link>, or
+        <quote>computer format</quote> in general.</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss.c_format">
+      <glossterm>c_format</glossterm>
+
+      <glossdef>
+        <para><literal>c_format</literal> (aka. <literal>cFormat</literal>,
+        <quote>c format</quote>) is a <link
+        linkend="pgui_config_settings">configuration setting</link> that
+        specifies how to format values for <quote>computer
+        consumption</quote>, that is, if the target is some computer language,
+        or other simpler parser, and not a human reader. The value of this
+        setting is usually a computer language, like <quote>JSON</quote>, or
+        <quote>Java</quote>. The name refers to the <link
+        linkend="ref_builtin_c"><literal>c</literal> built-in</link>, which is
+        the typical way of formatting simple values for such output (e.g.
+        <literal>&lt;a href="/product/${product.id?c}"&gt;</literal>). To
+        understand the topic more, see: <xref
+        linkend="dgui_misc_computer_vs_human_format"/></para>
       </glossdef>
     </glossentry>
 

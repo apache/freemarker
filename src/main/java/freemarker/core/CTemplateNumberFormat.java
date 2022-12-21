@@ -19,23 +19,44 @@
 
 package freemarker.core;
 
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
 /**
+ * The number format used by most {@link CFormat}-s starting from Incompatible Improvements
+ * {@link Configuration#VERSION_2_3_32}.
+ *
+ * <p>This {@link TemplateNumberFormat} implementation is thread-safe an immutable.
+ *
+ * <p>This is a lossless format, except that the number types are not kept. That is, the original number can always be
+ * exactly restored from the string representation, but only if you know what the type of the number was.
+ *
  * @since 2.3.32
  */
 final class CTemplateNumberFormat extends TemplateNumberFormat {
-    static final TemplateNumberFormat INSTANCE = new CTemplateNumberFormat();
-
     private static final float MAX_INCREMENT_1_FLOAT = 16777216f;
     private static final double MAX_INCREMENT_1_DOUBLE = 9007199254740992d;
 
-    private CTemplateNumberFormat() {
+    private final String doublePositiveInfinity;
+    private final String doubleNegativeInfinity;
+    private final String doubleNaN;
+    private final String floatPositiveInfinity;
+    private final String floatNegativeInfinity;
+    private final String floatNaN;
+
+    CTemplateNumberFormat(
+            String doublePositiveInfinity, String doubleNegativeInfinity, String doubleNaN,
+            String floatPositiveInfinity, String floatNegativeInfinity, String floatNaN) {
+        this.doublePositiveInfinity = doublePositiveInfinity;
+        this.doubleNegativeInfinity = doubleNegativeInfinity;
+        this.doubleNaN = doubleNaN;
+        this.floatPositiveInfinity = floatPositiveInfinity;
+        this.floatNegativeInfinity = floatNegativeInfinity;
+        this.floatNaN = floatNaN;
     }
 
     @Override
@@ -49,13 +70,13 @@ final class CTemplateNumberFormat extends TemplateNumberFormat {
         } else if (num instanceof Double) {
             double n = num.doubleValue();
             if (n == Double.POSITIVE_INFINITY) {
-                return "INF";
+                return doublePositiveInfinity;
             }
             if (n == Double.NEGATIVE_INFINITY) {
-                return "-INF";
+                return doubleNegativeInfinity;
             }
             if (Double.isNaN(n)) {
-                return "NaN";
+                return doubleNaN;
             }
             if (Math.floor(n) == n) {
                 if (Math.abs(n) <= MAX_INCREMENT_1_DOUBLE) {
@@ -84,13 +105,13 @@ final class CTemplateNumberFormat extends TemplateNumberFormat {
             float n = num.floatValue();
 
             if (n == Float.POSITIVE_INFINITY) {
-                return "INF";
+                return floatPositiveInfinity;
             }
             if (n == Float.NEGATIVE_INFINITY) {
-                return "-INF";
+                return floatNegativeInfinity;
             }
             if (Float.isNaN(n)) {
-                return "NaN";
+                return floatNaN;
             }
             if (Math.floor(n) == n) {
                 if (Math.abs(n) <= MAX_INCREMENT_1_FLOAT) {
@@ -117,7 +138,8 @@ final class CTemplateNumberFormat extends TemplateNumberFormat {
             if (scale <= 0) {
                 // A whole number. Myabe a long ID in a database or other system, and for those exponential form is not
                 // expected generally, so we avoid that. But then, it becomes too easy to write something like
-                // 1e1000000000000 and kill the server with a terra byte long rendering of the number, so for lengths that
+                // 1e1000000000000 and kill the server with a terra byte long rendering of the number, so for lengths
+                // that
                 // realistically aren't ID-s or such, we use exponential format after all:
                 if (scale <= -100) {
                     return bd.toString(); // Will give exponential form for this scale

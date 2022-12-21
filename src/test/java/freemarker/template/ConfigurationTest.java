@@ -54,12 +54,15 @@ import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.BaseNTemplateNumberFormatFactory;
+import freemarker.core.CFormat;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
+import freemarker.core.Default230CFormat;
+import freemarker.core.Default2321CFormat;
 import freemarker.core.DefaultTruncateBuiltinAlgorithm;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
@@ -67,6 +70,9 @@ import freemarker.core.EpochMillisDivTemplateDateFormatFactory;
 import freemarker.core.EpochMillisTemplateDateFormatFactory;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
+import freemarker.core.JSONCFormat;
+import freemarker.core.JavaCFormat;
+import freemarker.core.JavaScriptCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OptInTemplateClassResolver;
 import freemarker.core.OutputFormat;
@@ -79,6 +85,7 @@ import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
+import freemarker.core.XSCFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.LegacyDefaultMemberAccessPolicy;
@@ -96,7 +103,7 @@ public class ConfigurationTest extends TestCase {
     public ConfigurationTest(String name) {
         super(name);
     }
-    
+
     public void testIncompatibleImprovementsChangesDefaults() {
         Version newVersion = Configuration.VERSION_2_3_21;
         Version oldVersion = Configuration.VERSION_2_3_20;
@@ -180,6 +187,20 @@ public class ConfigurationTest extends TestCase {
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_27);
         assertTrue(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
         assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getPreferIndexedReadMethod());
+
+        cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_20);
+        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
+        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
+        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_32);
+        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
+        cfg.setCFormat(JSONCFormat.INSTANCE); // Same as default, but explicitly set now
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
+        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {
@@ -286,6 +307,14 @@ public class ConfigurationTest extends TestCase {
             assertFalse(cfg.isCacheStorageExplicitlySet());
             assertTrue(cfg.getCacheStorage() instanceof SoftCacheStorage);
         }
+
+        assertFalse(cfg.isCFormatExplicitlySet());
+        //
+        cfg.setCFormat(XSCFormat.INSTANCE);
+        assertTrue(cfg.isCFormatExplicitlySet());
+        //
+        cfg.unsetCFormat();
+        assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -1888,7 +1917,32 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
-    @Test
+    public void testCFormat() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+
+        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default230CFormat.NAME);
+        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, JSONCFormat.NAME);
+        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
+
+        cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, "default");
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default2321CFormat.NAME);
+
+        for (CFormat standardCFormat : new CFormat[] {
+                        Default230CFormat.INSTANCE, Default2321CFormat.INSTANCE,
+                        JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaCFormat.INSTANCE,
+                        XSCFormat.INSTANCE
+                }) {
+            cfg.setSetting(Configuration.C_FORMAT_KEY, standardCFormat.getName());
+            assertSame(standardCFormat, cfg.getCFormat());
+        }
+
+        // Object Builder value:
+        cfg.setSetting(Configuration.C_FORMAT_KEY, JSONCFormat.class.getName() + "()");
+        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
+    }
+
     public void testFallbackOnNullLoopVariable() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
         assertTrue(cfg.getFallbackOnNullLoopVariable());

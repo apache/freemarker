@@ -59,11 +59,15 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
+import freemarker.core.CFormat;
 import freemarker.core.CSSOutputFormat;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
+import freemarker.core.Default230CFormat;
+import freemarker.core.Default2321CFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.JSONCFormat;
 import freemarker.core.JSONOutputFormat;
 import freemarker.core.JavaScriptOutputFormat;
 import freemarker.core.MarkupOutputFormat;
@@ -384,7 +388,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         STANDARD_OUTPUT_FORMATS.put(JavaScriptOutputFormat.INSTANCE.getName(), JavaScriptOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
     }
-    
+
     /**
      * The parser decides between {@link #ANGLE_BRACKET_TAG_SYNTAX} and {@link #SQUARE_BRACKET_TAG_SYNTAX} based on the
      * first tag (like {@code [#if x]} or {@code <#if x>}) it mets. Note that {@code [=...]} is <em>not</em> a tag, but
@@ -572,6 +576,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean localeExplicitlySet;
     private boolean defaultEncodingExplicitlySet;
     private boolean timeZoneExplicitlySet;
+    private boolean cFormatExplicitlySet;
 
     
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
@@ -739,7 +744,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          It won't be affected by {@code #include} and {@code #nested} anymore. This is unintended, a bug with
      *          {@code incompatible_improvement} 2.3.22 (a consequence of the lower level fixing described in the next
      *          point). The old behavior of {@code .template_name} is restored if you set
-     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()}) of
+     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()} of
      *          {@link Environment} keeps the changed behavior shown in the next point). 
      *       </li>
      *       <li><p>
@@ -1824,7 +1829,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     static TimeZone getDefaultTimeZone() {
         return TimeZone.getDefault();
     }
-    
+
     @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
@@ -2019,7 +2024,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 logTemplateExceptionsExplicitlySet = true;
                 unsetLogTemplateExceptions();
             }
-            
+
+            if (!cFormatExplicitlySet) {
+                cFormatExplicitlySet = true;
+                unsetCFormat();
+            }
+
             if (!wrapUncheckedExceptionsExplicitlySet) {
                 wrapUncheckedExceptionsExplicitlySet = true;
                 unsetWrapUncheckedExceptions();
@@ -2465,6 +2475,45 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return recognizeStandardFileExtensions == null
                 ? incompatibleImprovements.intValue() >= _VersionInts.V_2_3_24
                 : recognizeStandardFileExtensions.booleanValue();
+    }
+
+    @Override
+    public void setCFormat(CFormat cFormat) {
+        super.setCFormat(cFormat);
+        cFormatExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also
+     * {@link #isCFormatExplicitlySet()} will return {@code false}.
+     *
+     * @since 2.3.32
+     */
+    public void unsetCFormat() {
+        if (cFormatExplicitlySet) {
+            setCFormat(getDefaultCFormat(incompatibleImprovements));
+            cFormatExplicitlySet = false;
+        }
+    }
+
+    static CFormat getDefaultCFormat(Version incompatibleImprovements) {
+        if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_32) {
+            return JSONCFormat.INSTANCE;
+        }
+        if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21) {
+            return Default2321CFormat.INSTANCE;
+        }
+        return Default230CFormat.INSTANCE;
+    }
+
+    /**
+     * Tells if {@link #setCFormat(CFormat)} (or equivalent) was already called on this instance.
+     *
+     * @since 2.3.32
+     */
+    public boolean isCFormatExplicitlySet() {
+        return cFormatExplicitlySet;
     }
 
     /**
