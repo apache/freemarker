@@ -26,8 +26,8 @@ import freemarker.template.TemplateModelException;
 
 /**
  * Superclass of {@link OutputFormat}-s that represent a "markup" format, which is any format where certain character
- * sequences have special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has
- * to insert non-markup text from the data-model into the output markup. See also:
+ * sequences have special meaning, and thus may need escaping. (Escaping is important for FreeMarker, as typically it
+ * has to insert non-markup text from the data-model into the output markup. See also:
  * {@link Configuration#setOutputFormat(OutputFormat)}.)
  * 
  * <p>
@@ -77,7 +77,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
 
     /**
      * Equivalent to calling {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may uses a more efficient solution.
+     * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may use a more efficient solution.
      */
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
@@ -105,7 +105,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     
     /**
      * Should give the same result as {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient solution.
+     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may use a more efficient solution.
      */
     public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
 

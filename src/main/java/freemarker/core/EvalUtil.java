@@ -481,7 +481,7 @@ class EvalUtil {
                     throw InvalidReferenceException.getInstance(exp, env);
                 } else {
                     throw new InvalidReferenceException(
-                            "Null/missing value (no more informatoin avilable)",
+                            "Null/missing value (no more information available)",
                             env);
                 }
             }

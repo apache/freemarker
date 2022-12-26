@@ -34,7 +34,7 @@ import freemarker.core.ParseException;
 public class StringUtilTest {
 
     @Test
-    public void testV2319() {
+    public void testJavaScriptStringEncV2319() {
         assertEquals("\\n\\r\\f\\b\\t\\x00\\x19", StringUtil.javaScriptStringEnc("\n\r\f\b\t\u0000\u0019"));
     }
 

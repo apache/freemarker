@@ -27,6 +27,7 @@ import freemarker.cache.CacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.CFormat;
 import freemarker.core.Expression;
 import freemarker.core.OutputFormat;
 import freemarker.core.TemplateObject;
@@ -185,9 +186,13 @@ public class _TemplateAPI {
     public static Locale getDefaultLocale() {
         return Configuration.getDefaultLocale();
     }
-    
+
     public static TimeZone getDefaultTimeZone() {
         return Configuration.getDefaultTimeZone();
+    }
+
+    public static CFormat getDefaultCFormat(Version incompatibleImprovements) {
+        return Configuration.getDefaultCFormat(incompatibleImprovements);
     }
 
     public static void setPreventStrippings(Configuration conf, boolean preventStrippings) {

@@ -46,7 +46,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.Version;
 import freemarker.test.TemplateTest;
-import net.jcip.annotations.Immutable;
 
 @SuppressWarnings("boxing")
 public class NumberFormatTest extends TemplateTest {
@@ -326,14 +325,16 @@ public class NumberFormatTest extends TemplateTest {
         for (Version ici : new Version[] {
                 Configuration.VERSION_2_3_20,
                 Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_30,
-                Configuration.VERSION_2_3_31 } ) {
+                Configuration.VERSION_2_3_31,
+                Configuration.VERSION_2_3_32 } ) {
             cfg.setIncompatibleImprovements(ici);
 
             boolean cBuiltInBroken = ici.intValue() < Configuration.VERSION_2_3_21.intValue();
             boolean cNumberFormatBroken = ici.intValue() < Configuration.VERSION_2_3_31.intValue();
 
             String humanAudienceOutput = "\u221e -\u221e \ufffd";
-            String computerAudienceOutput = "INF -INF NaN";
+            String computerAudienceOutput = ici.intValue() < Configuration.VERSION_2_3_32.intValue()
+                    ? "INF -INF NaN" : "Infinity -Infinity NaN";
 
             assertOutput(
                     "${pInf?c} ${nInf?c} ${nan?c}",

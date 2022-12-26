@@ -38,11 +38,14 @@ final class PropertySetting extends TemplateElement {
 
     private final String key;
     private final Expression value;
+    private final ValueSafetyChecker valueSafeyChecker;
     
     static final String[] SETTING_NAMES = new String[] {
             // Must be sorted alphabetically!
             Configurable.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
             Configurable.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+            Configurable.C_FORMAT_KEY_CAMEL_CASE,
+            Configurable.C_FORMAT_KEY_SNAKE_CASE,
             Configurable.CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
             Configurable.CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
             Configurable.DATE_FORMAT_KEY_CAMEL_CASE,
@@ -66,7 +69,7 @@ final class PropertySetting extends TemplateElement {
 
     PropertySetting(Token keyTk, FMParserTokenManager tokenManager, Expression value, Configuration cfg)
             throws ParseException {
-        String key = keyTk.image;
+        final String key = keyTk.image;
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
             StringBuilder sb = new StringBuilder();
             if (_TemplateAPI.getConfigurationSettingNames(cfg, true).contains(key)
@@ -107,6 +110,26 @@ final class PropertySetting extends TemplateElement {
         
         this.key = key;
         this.value = value;
+
+        if (key.equals(Configurable.C_FORMAT_KEY_SNAKE_CASE) || key.equals(Configurable.C_FORMAT_KEY_CAMEL_CASE)) {
+            valueSafeyChecker = new ValueSafetyChecker() {
+                @Override
+                public void check(Environment env, String actualValue) throws TemplateException {
+                    if (actualValue.startsWith("@")
+                            || StandardCFormats.STANDARD_C_FORMATS.containsKey(actualValue)
+                            || actualValue.equals("default")) {
+                        return;
+                    }
+                    throw new TemplateException("It's not allowed to set \"" + key + "\" to "
+                            + StringUtil.jQuote(actualValue) + " in a template. Use a standard c format name ("
+                            + String.join(", ", StandardCFormats.STANDARD_C_FORMATS.keySet()) + "), " +
+                            "or registered custom  c format name after a \"@\".",
+                            env);
+                }
+            };
+        } else {
+            valueSafeyChecker = null;
+        }
     }
 
     @Override
@@ -121,6 +144,9 @@ final class PropertySetting extends TemplateElement {
             strval = ((TemplateNumberModel) mval).getAsNumber().toString();
         } else {
             strval = value.evalAndCoerceToStringOrUnsupportedMarkup(env);
+        }
+        if (valueSafeyChecker != null) {
+            valueSafeyChecker.check(env, strval);
         }
         env.setSetting(key, strval);
         return null;
@@ -170,6 +196,10 @@ final class PropertySetting extends TemplateElement {
     @Override
     boolean isNestedBlockRepeater() {
         return false;
+    }
+
+    private interface ValueSafetyChecker {
+        void check(Environment env, String value) throws TemplateException;
     }
     
 }

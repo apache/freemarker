@@ -23,7 +23,7 @@ import java.text.NumberFormat;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
-final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
+class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
     
     private final String formatString;
     private final NumberFormat javaNumberFormat;

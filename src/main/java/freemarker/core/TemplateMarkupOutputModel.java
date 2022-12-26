@@ -27,8 +27,8 @@ import freemarker.template.TemplateScalarModel;
  * mechanism. Values of this kind are exempt from {@link OutputFormat}-based automatic escaping.
  * 
  * <p>
- * Each implementation of this type has a {@link OutputFormat} subclass pair, whose singleton instance is returned by
- * {@link #getOutputFormat()}. See more about how markup output values work at {@link OutputFormat}.
+ * Each implementation of this type has a corresponding {@link OutputFormat} subclass, whose singleton instance is
+ * returned by {@link #getOutputFormat()}. See more about how markup output values work at {@link OutputFormat}.
  * 
  * <p>
  * Note that {@link TemplateMarkupOutputModel}-s are by design not treated like {@link TemplateScalarModel}-s, and so

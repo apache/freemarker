@@ -191,6 +191,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isDateTimeFormatSet()) {
             setDateTimeFormat(tc.getDateTimeFormat());
         }
+        if (tc.isCFormatSet()) {
+            setCFormat(tc.getCFormat());
+        }
         if (tc.isEncodingSet()) {
             setEncoding(tc.getEncoding());
         }
@@ -332,6 +335,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
+        }
+        if (isCFormatSet() && !template.isCFormatSet()) {
+            template.setCFormat(getCFormat());
         }
         if (isEncodingSet() && template.getEncoding() == null) {
             template.setEncoding(getEncoding());
@@ -541,7 +547,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public boolean isOutputFormatSet() {
         return outputFormat != null;
     }
-    
+
     /**
      * See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}. 
      */
@@ -680,6 +686,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()
+                || isCFormatSet()
                 || isLazyImportsSet()
                 || isLazyAutoImportsSet()
                 || isLocaleSet()

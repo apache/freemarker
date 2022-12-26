@@ -41,7 +41,8 @@ public class CTemplateNumberFormatTest {
         testFormat(10000000000000000d, "1E16");
         testFormat(12300000000000000d, "1.23E16");
         testFormat(Double.NaN, "NaN");
-        testFormat(Double.POSITIVE_INFINITY, "INF");
+        testFormat(Double.POSITIVE_INFINITY, "Infinity");
+        testFormat(Double.NEGATIVE_INFINITY, "-Infinity");
         testFormat(1.9E-6, "0.0000019");
         testFormat(9.5E-7, "9.5E-7");
         testFormat(9999999.5, "9999999.5");
@@ -58,7 +59,8 @@ public class CTemplateNumberFormatTest {
         testFormat(100000000f, "1E8");
         testFormat(123000000f, "1.23E8");
         testFormat(Float.NaN, "NaN");
-        testFormat(Float.POSITIVE_INFINITY, "INF");
+        testFormat(Float.POSITIVE_INFINITY, "Infinity");
+        testFormat(Float.NEGATIVE_INFINITY, "-Infinity");
         testFormat(1.9E-6f, "0.0000019");
         testFormat(9.5E-7f, "9.5E-7");
         testFormat(1000000.5f, "1000000.5");
@@ -100,11 +102,12 @@ public class CTemplateNumberFormatTest {
 
     private void testFormat(Number n, String expectedResult) throws TemplateModelException,
         TemplateValueFormatException {
-        String actualResult = (String) CTemplateNumberFormat.INSTANCE.format(new SimpleNumber(n));
+        TemplateNumberFormat cTemplateNumberFormat = JSONCFormat.INSTANCE.getTemplateNumberFormat();
+        String actualResult = (String) cTemplateNumberFormat.format(new SimpleNumber(n));
         assertFormatResult(n, actualResult, expectedResult);
         if (!actualResult.equals("NaN") && !actualResult.equals("0") && !actualResult.startsWith("-")) {
             Number negativeN = negate(n);
-            actualResult = (String) CTemplateNumberFormat.INSTANCE.format(new SimpleNumber(negativeN));
+            actualResult = (String) cTemplateNumberFormat.format(new SimpleNumber(negativeN));
             assertFormatResult(negativeN, actualResult, "-" + expectedResult);
         }
     }
