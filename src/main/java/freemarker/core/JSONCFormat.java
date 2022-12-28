@@ -23,6 +23,8 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.StringUtil.JsStringEncCompatibility;
+import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 
 /**
  * JSON {@link CFormat}; when this is used, values output by {@code ?c} are valid JSON values, and therefore also
@@ -46,7 +48,7 @@ public final class JSONCFormat extends AbstractJSONLikeFormat {
 
     @Override
     String formatString(String s, Environment env) throws TemplateException {
-        return StringUtil.jsStringEnc(s, true, true);
+        return StringUtil.jsStringEnc(s, JsStringEncCompatibility.JSON, JsStringEncQuotation.QUOTATION_MARK);
     }
 
     @Override

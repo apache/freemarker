@@ -19,6 +19,8 @@
 
 package freemarker.template.utility;
 
+import static freemarker.template.utility.StringUtil.JsStringEncQuotation.*;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -1320,7 +1322,7 @@ public class StringUtil {
     
     /**
      * Escapes a {@link String} to be safely insertable into a JavaScript string literal; for more see
-     * {@link #jsStringEnc(String, boolean, boolean) jsStringEnc(s, false, false)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, false, QuotationMode.NONE)}.
      */
     public static String javaScriptStringEnc(String s) {
         return jsStringEnc(s, false);
@@ -1340,12 +1342,12 @@ public class StringUtil {
     
     /**
      * Escapes a {@link String} to be safely insertable into a JSON or JavaScript string literal; for more see
-     * {@link #jsStringEnc(String, boolean, boolean) jsStringEnc(s, json, false)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, json, QuotationMode.NONE)}.
      *
      * @since 2.3.20
      */
     public static String jsStringEnc(String s, boolean json) {
-        return jsStringEnc(s, json, false);
+        return jsStringEnc(s, json ? JsStringEncCompatibility.JSON : JsStringEncCompatibility.JAVA_SCRIPT, null);
     }
 
     /**
@@ -1399,22 +1401,24 @@ public class StringUtil {
      * </table>
      *
      * @param s The string to escape
-     * @param json If escaping should restrict itself to rules that are valid in both JSON and JavaScript.
-     * @param quote If quotation marks should be added around the result.
-     *      Currently, it's always ({@code "}, not {@code '}).
+     * @param compatibility If escaping should restrict itself to rules that are valid in JSON, in JavaScript, or in both.
+     * @param quotation In not {@code null}, quotation marks of this type are added around the value.
      *
      * @since 2.3.32
      */
-    public static String jsStringEnc(String s, boolean json, boolean quote) {
+    public static String jsStringEnc(String s, JsStringEncCompatibility compatibility, JsStringEncQuotation quotation) {
         NullArgumentException.check("s", s);
         
         int ln = s.length();
         StringBuilder sb;
-        if (quote) {
-            sb = new StringBuilder(ln + 8);
-            sb.append('"');
-        } else {
+        if (quotation == null) {
             sb = null;
+        } else {
+            if (quotation == APOSTROPHE && compatibility.jsonCompatible) {
+                throw new IllegalArgumentException("JSON compatible mode doesn't allow quotationMode=" + quotation);
+            }
+            sb = new StringBuilder(ln + 8);
+            sb.append(quotation.getSymbol());
         }
         for (int i = 0; i < ln; i++) {
             final char c = s.charAt(i);
@@ -1435,19 +1439,23 @@ public class StringUtil {
                         escapeType = ESC_HEXA;
                     }
                 } else if (c == '"') {
-                    escapeType = ESC_BACKSLASH;
+                    escapeType = quotation == APOSTROPHE ? NO_ESC : ESC_BACKSLASH;
                 } else if (c == '\'') {
-                    escapeType = json || quote ? NO_ESC : ESC_BACKSLASH;
+                    escapeType = !compatibility.javaScriptCompatible || quotation == QUOTATION_MARK ? NO_ESC
+                            : (compatibility.jsonCompatible ? ESC_HEXA : ESC_BACKSLASH);
                 } else if (c == '\\') {
                     escapeType = ESC_BACKSLASH; 
-                } else if (c == '/'  && (i == 0 || s.charAt(i - 1) == '<')) {  // against closing elements
-                    escapeType = quote ? NO_ESC : ESC_BACKSLASH;
-                } else if (c == '>') {  // against "]]> and "-->"
+                } else if (c == '/'
+                        && (i == 0 && quotation == null || i != 0 && s.charAt(i - 1) == '<')) {
+                    // against closing elements with "</"
+                    escapeType = ESC_BACKSLASH;
+                } else if (c == '>') {
+                    // against "]]> and "-->"
                     final boolean dangerous;
-                    if (i == 0) {
-                        dangerous = true;
-                    } else if (quote) {
+                    if (quotation != null && i < 2) {
                         dangerous = false;
+                    } else if (i == 0) {
+                        dangerous = true;
                     } else {
                         final char prevC = s.charAt(i - 1);
                         if (prevC == ']' || prevC == '-') {
@@ -1461,13 +1469,12 @@ public class StringUtil {
                             dangerous = false;
                         }
                     }
-                    escapeType = dangerous ? (json ? ESC_HEXA : ESC_BACKSLASH) : NO_ESC;
-                } else if (c == '<') {  // against "<!"
+                    escapeType = dangerous ? (compatibility.jsonCompatible ? ESC_HEXA : ESC_BACKSLASH) : NO_ESC;
+                } else if (c == '<') {
+                    // against "<!"
                     final boolean dangerous;
                     if (i == ln - 1) {
-                        dangerous = true;
-                    } else if (quote) {
-                        dangerous = false;
+                        dangerous = quotation == null;
                     } else {
                         char nextC = s.charAt(i + 1);
                         dangerous = nextC == '!' || nextC == '?';
@@ -1491,7 +1498,7 @@ public class StringUtil {
                     if (escapeType > 0x20) {
                         sb.append((char) escapeType);
                     } else if (escapeType == ESC_HEXA) {
-                        if (!json && c < 0x100) {
+                        if (!compatibility.jsonCompatible && c < 0x100) {
                             sb.append('x');
                             sb.append(toHexDigitUpperCase(c >> 4));
                             sb.append(toHexDigitUpperCase(c & 0xF));
@@ -1515,8 +1522,8 @@ public class StringUtil {
             if (sb != null) sb.append(c);
         } // for each characters
 
-        if (quote) {
-            sb.append('"');
+        if (quotation != null) {
+            sb.append(quotation.getSymbol());
         }
         
         return sb == null ? s : sb.toString();
@@ -2168,5 +2175,59 @@ public class StringUtil {
         }
         return sb.toString();
     }
-    
+
+    /**
+     * Used as the argument of {@link StringUtil#jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)}.
+     *
+     * @since 2.3.32
+     */
+    public enum JsStringEncCompatibility {
+        /**
+         * Output is expected to be used in JavaScript, not in JSON.
+         */
+        JAVA_SCRIPT(true, false),
+
+        /**
+         * Output is expected to be used in JSON, not in JavaScript. While JSON is compatible with JavaScript, in this
+         * mode we don't care about escaping apostrophe, as it's not special in JSON.
+         */
+        JSON(false, true),
+
+        /**
+         * Output is expected to be used both in JSON and JavaScript.
+         */
+        JAVA_SCRIPT_OR_JSON(true, true);
+
+        JsStringEncCompatibility(boolean javaScriptCompatible, boolean jsonCompatible) {
+            this.javaScriptCompatible = javaScriptCompatible;
+            this.jsonCompatible = jsonCompatible;
+        }
+
+        private final boolean javaScriptCompatible;
+        private final boolean jsonCompatible;
+
+        boolean isJSONCompatible() {
+            return jsonCompatible;
+        }
+    }
+
+    /**
+     * Used as the argument of {@link StringUtil#jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)}.
+     *
+     * @since 2.3.32
+     */
+    public enum JsStringEncQuotation {
+        QUOTATION_MARK('"'),
+        APOSTROPHE('\'');
+
+        private final char symbol;
+
+        JsStringEncQuotation(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public char getSymbol() {
+            return symbol;
+        }
+    }
 }

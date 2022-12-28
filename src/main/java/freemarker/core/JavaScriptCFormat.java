@@ -21,6 +21,8 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.StringUtil.JsStringEncCompatibility;
+import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 
 /**
  * JavaScript {@link CFormat}. This is almost the same as {@link JSONCFormat}, but it uses shorter forms where
@@ -41,7 +43,7 @@ public final class JavaScriptCFormat extends AbstractJSONLikeFormat {
 
     @Override
     String formatString(String s, Environment env) throws TemplateException {
-        return StringUtil.jsStringEnc(s, false, true);
+        return StringUtil.jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT, JsStringEncQuotation.QUOTATION_MARK);
     }
 
     @Override

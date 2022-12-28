@@ -25,6 +25,8 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.StringUtil.JsStringEncCompatibility;
+import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 
 /**
  * Super class of {@link CFormat}-s that merely exist to mimic old {@code ?c} behavior for backward compatibility.
@@ -43,7 +45,8 @@ public abstract class AbstractLegacyCFormat extends CFormat {
 
     @Override
     final String formatString(String s, Environment env) throws TemplateException {
-        return StringUtil.jsStringEnc(s, true, true);
+        return StringUtil.jsStringEnc(
+                s, JsStringEncCompatibility.JAVA_SCRIPT_OR_JSON, JsStringEncQuotation.QUOTATION_MARK);
     }
 
     @Override

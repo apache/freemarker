@@ -30212,6 +30212,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Improved <literal>StringUtil.jsStringEnc</literal> and
+              <literal>javaSctringEsc</literal> to support quoting. Also
+              <literal>jsStringEnc</literal> now have a mode that targets both
+              JavaScript and JSON, and doesn't give up apostrophe
+              escaping.</para>
+            </listitem>
+
+            <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
               Fixed possible deadlock when the
