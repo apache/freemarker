@@ -6058,7 +6058,7 @@ To prove that "s" didn't contain the value in escaped form:
         if the value you print is missing/<literal>null</literal>. The
         convenient shortcut for that is using the <literal>cn</literal>
         built-in (the <quote>n</quote> stands for Nullable), as in
-        <literal>${<replaceable>someValue</replaceable>?cn}</literal>. It's
+        <literal>${<replaceable>someValue</replaceable>?cn}</literal>. It
         behaves like the <literal>c</literal> built-in, except that if
         <literal><replaceable>someValue</replaceable></literal> evaluates to
         <literal>null</literal>/missing, it outputs the
@@ -30191,17 +30191,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><link
-              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
-              Fixed possible deadlock when the
-              <literal>Configuration</literal> and
-              <literal>DefaultObjectWrapper</literal> class
-              <emphasis>static</emphasis> initialization is triggered in
-              different threads around the same time. (In the very unlikely
-              case your application can run into this, this will hang the code
-              that initializes FreeMarker before it has processed any
-              templates, and it can't happen anymore if any template
-              processing managed to start.)</para>
+              <para>Added <literal>Configurable.setCFormat(CFormat)</literal>,
+              with the usual accompanying setting API methods/constants. See
+              the <literal>c_format</literal>-, and the
+              <literal>?c</literal>-related changes earlier in the FTL
+              section.</para>
             </listitem>
 
             <listitem>
@@ -30215,6 +30209,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               by the new method, and what the deprecated methods returns is
               stuck at 2.3.31 <literal>incompatible_improvements</literal>
               mode.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
+              Fixed possible deadlock when the
+              <literal>Configuration</literal> and
+              <literal>DefaultObjectWrapper</literal> class
+              <emphasis>static</emphasis> initialization is triggered in
+              different threads around the same time. (In the very unlikely
+              case your application can run into this, this will hang the code
+              that initializes FreeMarker before it has processed any
+              templates, and it can't happen anymore if any template
+              processing managed to start.)</para>
             </listitem>
 
             <listitem>
