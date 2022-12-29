@@ -25,8 +25,8 @@ import freemarker.template.TemplateException;
 
 /**
  * Defines a format (usually a computer language) that's used by the {@code c}, {@code cn} built-ins, and for the
- * {@code "c"} and {@code "computer"} {@link Configurable#setNumberFormat(String)} number_format), and
- * the {@code "c"} {@link Configurable#setBooleanFormat(String)} boolean_format}.
+ * {@code "c"} and {@code "computer"} {@link Configurable#setNumberFormat(String) number_format}, and
+ * the {@code "c"} {@link Configurable#setBooleanFormat(String) boolean_format}.
  * A {@link CFormat} currently defines how numbers, booleans, and strings are converted to text that defines a similar
  * value in some computer language (or other computer-parsed syntax) that the {@link CFormat} is made for.
  *

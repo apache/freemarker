@@ -698,7 +698,7 @@ public class Configurable {
 
     /**
      * Sets the format (usually a computer language) used for the {@code c}, {@code cn} built-ins, and for the
-     * {@code "c"} {@code "computer"} before 2.3.32) {@link #setNumberFormat(String) number_format}, and the
+     * {@code "c"} ({@code "computer"} before 2.3.32) {@link #setNumberFormat(String) number_format}, and the
      * {@code "c"} {@link #setBooleanFormat(String) boolean_format}.
      *
      * <p>The default value depends on {@link Configuration#Configuration(Version) incompatible_improvements}.
