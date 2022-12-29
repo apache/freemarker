@@ -697,9 +697,13 @@ public class Configurable {
     }
 
     /**
-     * Sets the computer language that's used for the {@code c}, {@code cn} built-ins, and for the {@code "c"}
-     * (and {@code "computer"}) number format ({@link Environment#getCTemplateNumberFormat()}). That is, of the
-     * templates output pieces in a computer language (like JavaScript), you should set what's that here.
+     * Sets the format (usually a computer language) used for the {@code c}, {@code cn} built-ins, and for the
+     * {@code "c"} {@code "computer"} before 2.3.32) {@link #setNumberFormat(String) number_format}, and the
+     * {@code "c"} {@link #setBooleanFormat(String) boolean_format}.
+     *
+     * <p>The default value depends on {@link Configuration#Configuration(Version) incompatible_improvements}.
+     * If that's 2.3.32 or higher, then it's {@code "JavaScript or JSON"}. For lower it's {@code "default 2.3.31"} or
+     * {@code "default 2.3.0"}.
      *
      * @since 2.3.32
      */
@@ -2185,10 +2189,11 @@ public class Configurable {
      *   <li><p>{@code "c_format"}:
      *       See {@link Configuration#setCFormat(CFormat)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default (on {@link Configuration} only), or
-     *       one of the predefined values {@value JSONCFormat#NAME}, {@value JavaScriptCFormat#NAME},
-     *       {@value JavaCFormat#NAME}, {@value XSCFormat#NAME}, {@value Default230CFormat#NAME},
-     *       {@value Default2321CFormat#NAME}, or an <a href="#fm_obe">object builder expression</a> that gives a
-     *       {@link CFormat} object.
+     *       one of the predefined values {@code "JavaScript or JSON"}, {@code "JSON"},
+     *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"},
+     *       {@code "default 2.3.0"}, {@code "default 2.3.21"}, or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value,
+     *       or an <a href="#fm_obe">object builder expression</a> that gives a {@link CFormat} object.
      *
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.

@@ -19,23 +19,21 @@
 
 package freemarker.core;
 
-import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.StringUtil.JsStringEncCompatibility;
 import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 
 /**
- * JSON {@link CFormat}; when this is used, values output by {@code ?c} are valid JSON values, and therefore also
- * valid JavaScript values.
- * This is the default of {@link Configurable#getCFormat()} starting from
- * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements}
- * {@link Configuration#VERSION_2_3_32}.
+ * {@value #NAME} {@link CFormat}; to be used when generating JSON (and not JavaScript), except, in most cases
+ * {@link JavaScriptOrJSONCFormat} is recommended over this.
  *
  * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
+ *
+ * @see JavaScriptCFormat
+ * @see JavaScriptOrJSONCFormat
  *
  * @since 2.3.32
  */

@@ -49,7 +49,7 @@ public class CAndCnBuiltInTest extends TemplateTest {
         addToDataModel("floatInf", Float.POSITIVE_INFINITY);
         addToDataModel("floatNegativeInf", Float.NEGATIVE_INFINITY);
         addToDataModel("floatNaN", Float.NaN);
-        addToDataModel("string", "a\nb");
+        addToDataModel("string", "a\nb\u0000c");
         addToDataModel("long", Long.MAX_VALUE);
         addToDataModel("int", Integer.MAX_VALUE);
         addToDataModel("bigInteger", new BigInteger("123456789123456789123456789123456789"));
@@ -126,11 +126,25 @@ public class CAndCnBuiltInTest extends TemplateTest {
     }
 
     private void testWithNonNumber(String builtInName, Version ici) throws TemplateException, IOException {
-        assertOutput("${string?" + builtInName + "}", "\"a\\nb\"");
+        getConfiguration().setIncompatibleImprovements(ici);
+        assertOutput("${string?" + builtInName + "}", "\"a\\nb\\u0000c\"");
         assertOutput("${booleanTrue?" + builtInName + "}", "true");
         assertOutput("${booleanFalse?" + builtInName + "}", "false");
         assertErrorContains("${dateTime?" + builtInName + "}",
                 "Expected a number, boolean, or string");
+    }
+
+    @Test
+    public void testCFormatsWithString() throws TemplateException, IOException {
+        Configuration conf = getConfiguration();
+        conf.setCFormat(JavaScriptCFormat.INSTANCE);
+        assertOutput("${string?c}", "\"a\\nb\\x00c\"");
+        conf.setCFormat(JSONCFormat.INSTANCE);
+        assertOutput("${string?c}", "\"a\\nb\\u0000c\"");
+        conf.setCFormat(JavaScriptOrJSONCFormat.INSTANCE);
+        assertOutput("${string?c}", "\"a\\nb\\u0000c\"");
+        conf.setCFormat(XSCFormat.INSTANCE);
+        assertOutput("${string?c}", "a\nb\u0000c");
     }
 
     @Test

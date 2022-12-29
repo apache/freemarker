@@ -26,15 +26,19 @@ final class StandardCFormats {
     private StandardCFormats() {
     }
 
-    static final Map<String, CFormat> STANDARD_C_FORMATS;
+    static final Map<String, CFormat> STANDARD_C_FORMATS = new LinkedHashMap<>();
     static {
-            STANDARD_C_FORMATS = new LinkedHashMap<>();
-            STANDARD_C_FORMATS.put(JSONCFormat.INSTANCE.getName(), JSONCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(JavaScriptCFormat.INSTANCE.getName(), JavaScriptCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(JavaCFormat.INSTANCE.getName(), JavaCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(XSCFormat.INSTANCE.getName(), XSCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(Default230CFormat.INSTANCE.getName(), Default230CFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(Default2321CFormat.INSTANCE.getName(), Default2321CFormat.INSTANCE);
+        addStandardCFormat(JavaScriptOrJSONCFormat.INSTANCE);
+        addStandardCFormat(JSONCFormat.INSTANCE);
+        addStandardCFormat(JavaScriptCFormat.INSTANCE);
+        addStandardCFormat(JavaCFormat.INSTANCE);
+        addStandardCFormat(XSCFormat.INSTANCE);
+        addStandardCFormat(Default230CFormat.INSTANCE);
+        addStandardCFormat(Default2321CFormat.INSTANCE);
+    }
+
+    private static void addStandardCFormat(CFormat cFormat) {
+        STANDARD_C_FORMATS.put(cFormat.getName(), cFormat);
     }
 
 }

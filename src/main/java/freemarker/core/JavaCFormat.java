@@ -27,7 +27,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Java {@link CFormat}.
+ * {@value #NAME} {@link CFormat}.
  *
  * @since 2.3.32
  */

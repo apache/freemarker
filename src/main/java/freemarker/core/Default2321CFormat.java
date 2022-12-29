@@ -28,8 +28,8 @@ import freemarker.template.Version;
 
 /**
  * Corresponds to the behavior of {@code ?c} if
- * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is between
- * {@link Configuration#VERSION_2_3_21} and {@link Configuration#VERSION_2_3_31}.
+ * {@link Configuration#Configuration(Version) incompatible_improvements} is between
+ * {@linkplain Configuration#VERSION_2_3_21 2.3.21} and {@linkplain Configuration#VERSION_2_3_31 2.3.31}.
  * The only good reason for using this is strict backward-compatibility.
  *
  * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
@@ -41,7 +41,7 @@ import freemarker.template.Version;
  *
  * @since 2.3.32
  */
-public class Default2321CFormat extends AbstractLegacyCFormat {
+public final class Default2321CFormat extends AbstractLegacyCFormat {
     public static final Default2321CFormat INSTANCE = new Default2321CFormat();
     public static final String NAME = "default 2.3.21";
 

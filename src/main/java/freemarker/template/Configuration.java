@@ -67,8 +67,8 @@ import freemarker.core.Default230CFormat;
 import freemarker.core.Default2321CFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
-import freemarker.core.JSONCFormat;
 import freemarker.core.JSONOutputFormat;
+import freemarker.core.JavaScriptOrJSONCFormat;
 import freemarker.core.JavaScriptOutputFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
@@ -2499,7 +2499,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     static CFormat getDefaultCFormat(Version incompatibleImprovements) {
         if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_32) {
-            return JSONCFormat.INSTANCE;
+            return JavaScriptOrJSONCFormat.INSTANCE;
         }
         if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21) {
             return Default2321CFormat.INSTANCE;

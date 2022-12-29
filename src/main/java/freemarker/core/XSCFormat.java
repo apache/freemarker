@@ -26,7 +26,7 @@ import java.text.NumberFormat;
 import freemarker.template.TemplateException;
 
 /**
- * {@link CFormat} for outputting XML that follows the conventions of XML Schema.
+ * {@value #NAME} {@link CFormat}, for outputting XML that follows the conventions of XML Schema.
  *
  * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for

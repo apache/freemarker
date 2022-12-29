@@ -29,8 +29,8 @@ import freemarker.template.Version;
 
 /**
  * Corresponds to the behavior of {@code ?c} if
- * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is less than
- * {@link Configuration#VERSION_2_3_21}.
+ * {@link Configuration#Configuration(Version) incompatible_improvements} is less than
+ * {@linkplain Configuration#VERSION_2_3_21 2.3.21}.
  * The only good reason for using this is strict backward-compatibility.
  *
  * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
@@ -42,7 +42,7 @@ import freemarker.template.Version;
  *
  * @since 2.3.32
  */
-public class Default230CFormat extends AbstractLegacyCFormat {
+public final class Default230CFormat extends AbstractLegacyCFormat {
     public static final Default230CFormat INSTANCE = new Default230CFormat();
     public static final String NAME = "default 2.3.0";
 

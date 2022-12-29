@@ -73,6 +73,7 @@ import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.JSONCFormat;
 import freemarker.core.JavaCFormat;
 import freemarker.core.JavaScriptCFormat;
+import freemarker.core.JavaScriptOrJSONCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OptInTemplateClassResolver;
 import freemarker.core.OutputFormat;
@@ -197,10 +198,10 @@ public class ConfigurationTest extends TestCase {
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
         assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_32);
-        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
-        cfg.setCFormat(JSONCFormat.INSTANCE); // Same as default, but explicitly set now
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfg.getCFormat());
+        cfg.setCFormat(JavaScriptOrJSONCFormat.INSTANCE); // Same as default, but explicitly set now
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
-        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfg.getCFormat());
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {

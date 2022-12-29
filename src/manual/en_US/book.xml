@@ -6041,7 +6041,7 @@ To prove that "s" didn't contain the value in escaped form:
 
         <para>The <literal>c</literal> built-in will format string values to
         string literals. Like if the <literal>c_format</literal> setting is
-        <quote>JSON</quote>, then <literal>{"fullName":
+        <literal>"JSON"</literal>, then <literal>{"fullName":
         ${fullName?c}}</literal> will output something like
         <literal>{"fullName": "John Doe"}</literal>, where the quotation marks
         (and <literal>\</literal> escaping if needed) were added by
@@ -6085,31 +6085,49 @@ To prove that "s" didn't contain the value in escaped form:
 
         <itemizedlist>
           <listitem>
-            <para><literal>JSON</literal>: JSON generation</para>
+            <para><literal>"JSON"</literal>: JSON generation. Generally,
+            <literal>"JavaScript or JSON"</literal> (see later) is recommended
+            over this.</para>
           </listitem>
 
           <listitem>
-            <para><literal>JavaScript</literal>: JavaScript generation</para>
+            <para><literal>"JavaScript"</literal>: JavaScript generation.
+            Generally, <literal>"JavaScript or JSON"</literal> (see later) is
+            recommended over this.</para>
           </listitem>
 
           <listitem>
-            <para><literal>Java</literal>: Java source code generation</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>XS</literal>: XML Schema compliant XML
+            <para><literal>"Java"</literal>: Java source code
             generation</para>
           </listitem>
 
           <listitem>
-            <para><literal>default 2.3.0</literal>: Default for backward
+            <para><literal>"XS"</literal>: XML Schema compliant XML
+            generation</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"JavaScript or JSON"</literal>: For generating
+            output that's compatible with both JSON and JavaScript. This setup
+            is therefore resilient against configuration mistakes, where we
+            generate output in one language, but use the
+            <literal>c_format</literal> for the other. The small price to pay
+            is that we can't utilize some language-specific opportunities to
+            make the output a bit shorter, but that hardly matters in
+            practice. This is the default if if the <link
+            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+            setting</link> is at least 2.3.32.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"default 2.3.0"</literal>: Default for backward
             compatibility if the <link
             linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
             setting</link> is less than 2.3.21. Avoid!</para>
           </listitem>
 
           <listitem>
-            <para><literal>default 2.3.21</literal>: Default for backward
+            <para><literal>"default 2.3.21"</literal>: Default for backward
             compatibility if the <link
             linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
             setting</link> is equal or greater than 2.3.21. Avoid!</para>
@@ -16041,7 +16059,8 @@ rif: foo XYr baar</programlisting>
               <itemizedlist>
                 <listitem>
                   <para>For <literal>c_format</literal>-s <quote>JSON</quote>,
-                  and <quote>JavaScript</quote>: <literal>Infinity</literal>,
+                  and <quote>JavaScript</quote>, <quote>JavaScript or
+                  JSON</quote>: <literal>Infinity</literal>,
                   <literal>-Infinity</literal>, <literal>NaN</literal></para>
                 </listitem>
 
@@ -16152,9 +16171,9 @@ rif: foo XYr baar</programlisting>
           the same output as
           <literal>${<replaceable>aNumber</replaceable>?c}</literal>. (In this
           case you should use a <literal>c_format</literal> like
-          <literal>"JSON"</literal>, and not some of the strictly backward
-          compatible defaults, as those are emulating some confusing old
-          glitches.)</para>
+          <literal>"JavaScript or JSON"</literal>, and not some of the
+          strictly backward compatible defaults, as those are emulating some
+          confusing old glitches.)</para>
 
           <para>If the value the <literal>c</literal> built-in is applied on
           is <literal>null</literal>/missing, it will stop the template
@@ -24761,8 +24780,8 @@ ${"'{}"}
                   <primary>c_format</primary>
                 </indexterm><literal>c_format</literal> (since FreeMarker
               2.3.32): Sets what format to use when formatting for computer
-              consumption, like <literal>"JSON"</literal>. Mostly prominently
-              this affects the <link
+              consumption, like <literal>"JavaScript or JSON"</literal>.
+              Mostly prominently this affects the <link
               linkend="ref_builtin_c"><literal>c</literal> built-in</link>,
               hence the name. See valid values and their meaning here: <xref
               linkend="dgui_misc_computer_vs_human_format"/>.</para>
@@ -30133,12 +30152,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="ref_builtin_c"><literal>c</literal>
                   built-in</link>.</para>
 
-                  <para>Because setting the <link
+                  <para>Setting the <link
                   linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
                   setting</link> to 2.3.32 will change the default of
-                  <literal>c_format</literal> to <literal>JSON</literal>, it
-                  will consequently also activate these changes. But this only
-                  affects number formatting done with <literal>?c</literal>,
+                  <literal>c_format</literal> to <literal>"JavaScript or
+                  JSON"</literal>, which has these number formatting changes
+                  (just like all <literal>c_format</literal>-s that aren't
+                  just to emulate old behavior have). But this only affects
+                  number formatting done with <literal>?c</literal>,
                   <literal>?cn</literal>, and with <quote>c</quote>
                   <literal>number_format</literal>, and not number formatting
                   in general.</para>
