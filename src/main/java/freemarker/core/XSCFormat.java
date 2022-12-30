@@ -33,7 +33,7 @@ import freemarker.template.TemplateException;
  * XML-escaping is the duty of the auto-escaping facility of FreeMarker, and not of the {@link CFormat}, so that's not
  * done here either.)
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
  *
@@ -47,7 +47,7 @@ public final class XSCFormat extends CFormat {
             "INF", "-INF", "NaN",
             "INF", "-INF", "NaN");
 
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("INF");
@@ -56,7 +56,7 @@ public final class XSCFormat extends CFormat {
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }
 
@@ -64,7 +64,7 @@ public final class XSCFormat extends CFormat {
     }
 
     @Override
-    TemplateNumberFormat getTemplateNumberFormat() {
+    TemplateNumberFormat getTemplateNumberFormat(Environment env) {
         return TEMPLATE_NUMBER_FORMAT;
     }
 

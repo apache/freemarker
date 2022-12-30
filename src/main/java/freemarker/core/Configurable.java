@@ -857,13 +857,18 @@ public class Configurable {
     }
 
     /**
-     * Sets the default number format used to convert numbers to strings. Currently, this is one of these:
+     * Sets the number format used to convert numbers to strings. Currently, this is one of these:
      * <ul>
-     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}. This is the
+     *       default.</li>
+     *   <li>{@code "c"} (recognized since 2.3.32): The number format used by FTL's {@code c} built-in (like in
+     *       {@code someNumber?c}). So with this <code>${someNumber}</code> will output the same as
+     *       <code>${someNumber?c}</code>. This should only be used if the template solely generates source code,
+     *       configuration file, or other content that's nor read by normal users. If the template contains parts that's
+     *       read by normal users (like typical a web page), you are not supposed to use this.</li>
+     *   <li>{@code "computer"}: The old (deprecated) name for {@code "c"}. Recognized by all FreeMarker versions.</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "c"} (recognized since 2.3.32), or {@code "computer"} (same as {@code "c"}, but also recognized by
-     *       older versions): The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
      *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}

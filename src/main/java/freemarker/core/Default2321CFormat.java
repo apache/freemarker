@@ -32,7 +32,7 @@ import freemarker.template.Version;
  * {@linkplain Configuration#VERSION_2_3_21 2.3.21} and {@linkplain Configuration#VERSION_2_3_31 2.3.31}.
  * The only good reason for using this is strict backward-compatibility.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * constructor and most methods are not exposed outside FreeMarker, and so you can't create a custom implementation.
  * The class itself and some members are exposed as they are needed for configuring FreeMarker.
  *
@@ -48,7 +48,7 @@ public final class Default2321CFormat extends AbstractLegacyCFormat {
     /**
      * "c" number format as it was starting from Incompatible Improvements 2.3.21.
      */
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("INF");
@@ -60,7 +60,7 @@ public final class Default2321CFormat extends AbstractLegacyCFormat {
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         // Note: DecimalFormat-s aren't thread-safe, so you must clone the static field value.
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }

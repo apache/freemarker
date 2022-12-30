@@ -1679,7 +1679,7 @@ public final class Environment extends Configurable {
     @Deprecated
     public NumberFormat getCNumberFormat() {
         if (cNumberFormat == null) {
-            cNumberFormat = getCFormatWithPre2331IcIBug().getLegacyNumberFormat();
+            cNumberFormat = getCFormatWithPre2331IcIBug().getLegacyNumberFormat(this);
         }
         return cNumberFormat;
     }
@@ -1694,7 +1694,7 @@ public final class Environment extends Configurable {
      */
     public TemplateNumberFormat getCTemplateNumberFormat() {
         if (cTemplateNumberFormat == null) {
-            cTemplateNumberFormat = getCFormat().getTemplateNumberFormat();
+            cTemplateNumberFormat = getCFormat().getTemplateNumberFormat(this);
         }
         return cTemplateNumberFormat;
     }
@@ -1705,7 +1705,7 @@ public final class Environment extends Configurable {
      */
     private TemplateNumberFormat getCTemplateNumberFormatWithPre2331IcIBug() {
         if (cTemplateNumberFormatWithPre2331IcIBug == null) {
-            cTemplateNumberFormatWithPre2331IcIBug = getCFormatWithPre2331IcIBug().getTemplateNumberFormat();
+            cTemplateNumberFormatWithPre2331IcIBug = getCFormatWithPre2331IcIBug().getTemplateNumberFormat(this);
         }
         return cTemplateNumberFormatWithPre2331IcIBug;
     }

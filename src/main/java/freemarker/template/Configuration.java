@@ -955,12 +955,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *     2.3.32 (or higher):
      *     <ul>
      *       <li><p>
-     *         The number formatting of {@code ?c}, {@code ?cn}, and if the {@code "c"} and {@code "computer"}
-     *         {@link Configurable#setNumberFormat(String) number_format} changes, if the
-     *         {@link #setCFormat(CFormat) c_format} was left on its default (because the default of that changes to
-     *         {@link JavaScriptOrJSONCFormat#INSTANCE}, from {@link Default2321CFormat#INSTANCE}):
+     *         The number formatting of {@code ?c}, {@code ?cn} (and thus also of the {@code "c"}, and
+     *         {@code "computer"} {@link Configurable#setNumberFormat(String) number_format}) changes, if the
+     *         {@link #setCFormat(CFormat) c_format} setting was left on its default. The default of
+     *         {@link #setCFormat(CFormat) c_format} changes to {@link JavaScriptOrJSONCFormat#INSTANCE}, from
+     *         {@link Default2321CFormat#INSTANCE} (or from {@link Default230CFormat#INSTANCE}, depending on the
+     *         previous Incompatible Improvement value), and that's what contains the changes:</p>
      *         <ul>
-     *           <li><p>Changes affecting non-whole numbers, and for whole numbers with over 100 digits:
+     *           <li><p>Changes affecting non-whole numbers, and whole numbers with over 100 digits:
      *             Formatting is now lossless, so it potentially shows much more decimals.
      *             It now uses exponential format (like 1.2E-7 instead of 0.00000012) for numbers whose absolute value
      *             is less than 1E-6 (0.000001), and for whole numbers whose absolute value is at least 1E101 (so over
@@ -968,8 +970,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             ({@code double}/{@code Double}}, or {@code float}/{@code Float}) numbers, when their absolute value
      *             is too big for the floating point type to store them precisely (so if the intent was to store some
      *             ID-s, they are likely corrupted anyway, as the type skips some whole numbers).</p></li>
-     *           <li><p>Changes floating point infinity format from {@code INF} to {@code Infinity}, which is the
-     *             JavaScript and JSON syntax. If you generate XML with XSD-style number syntax (which uses
+     *           <li><p>Changes affecting floating point infinity: Output changes from {@code INF} to {@code Infinity},
+     *             which is the JavaScript and JSON syntax. If you generate XML with XSD-style number syntax (which uses
      *             {@code INF}), but you want the other number formatting changes (recommended), then set
      *             {@link #setCFormat(CFormat) c_format} to {@link XSCFormat#INSTANCE}/{@code "XS"}.</p></li>
      *         </ul>

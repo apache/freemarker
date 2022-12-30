@@ -19,8 +19,6 @@
 
 package freemarker.core;
 
-import java.text.NumberFormat;
-
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
@@ -31,7 +29,7 @@ import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 /**
  * Super class of {@link CFormat}-s that merely exist to mimic old {@code ?c} behavior for backward compatibility.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * constructor and most methods are not exposed outside FreeMarker, and so you can't create a custom implementation.
  * The class itself and some members are exposed as they are needed for configuring FreeMarker.
  *
@@ -50,8 +48,8 @@ public abstract class AbstractLegacyCFormat extends CFormat {
     }
 
     @Override
-    final TemplateNumberFormat getTemplateNumberFormat() {
-        return new LegacyCTemplateNumberFormat();
+    final TemplateNumberFormat getTemplateNumberFormat(Environment env) {
+        return new LegacyCTemplateNumberFormat(env);
     }
 
     @Override
@@ -69,12 +67,10 @@ public abstract class AbstractLegacyCFormat extends CFormat {
         return "null";
     }
 
-    abstract NumberFormat getLegacyNumberFormat();
-
     final class LegacyCTemplateNumberFormat extends JavaTemplateNumberFormat {
 
-        public LegacyCTemplateNumberFormat() {
-            super(getLegacyNumberFormat(), Environment.COMPUTER_FORMAT_STRING);
+        public LegacyCTemplateNumberFormat(Environment env) {
+            super(getLegacyNumberFormat(env), Environment.COMPUTER_FORMAT_STRING);
         }
 
         @Override

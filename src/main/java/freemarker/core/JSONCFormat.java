@@ -28,7 +28,7 @@ import freemarker.template.utility.StringUtil.JsStringEncQuotation;
  * {@value #NAME} {@link CFormat}; to be used when generating JSON (and not JavaScript), except, in most cases
  * {@link JavaScriptOrJSONCFormat} is recommended over this.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
  *

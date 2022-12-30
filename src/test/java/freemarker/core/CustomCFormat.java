@@ -37,7 +37,7 @@ class CustomCFormat extends CFormat {
             "M:INF", "M:NINF", "M:NaN");
 
     private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE =
-            (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+            (DecimalFormat) Default230CFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
 
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
@@ -47,12 +47,12 @@ class CustomCFormat extends CFormat {
     }
 
     @Override
-    TemplateNumberFormat getTemplateNumberFormat() {
+    TemplateNumberFormat getTemplateNumberFormat(Environment env) {
         return TEMPLATE_NUMBER_FORMAT;
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }
 

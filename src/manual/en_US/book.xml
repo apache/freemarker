@@ -30064,8 +30064,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="gloss.c_format"><literal>c_format</literal></link>
                   (also settable via the <link
                   linkend="ref.directive.setting"><literal>setting</literal>
-                  directive</link>). This specifies what format to use when
-                  formatting for computer consumption, like
+                  directive</link>). This specifies what syntax to use when
+                  formatting values for computer consumption/parser, like
                   <literal>"JSON"</literal>. Most prominently, this affects
                   the <link linkend="ref_builtin_c"><literal>c</literal>
                   built-in</link>, hence the name. See valid setting values,
@@ -30170,9 +30170,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>number_format</literal> setting (also when
                   formatting with
                   <literal>?string(<replaceable>format</replaceable>)</literal>),
-                  now <quote>c</quote> can be used instead of
+                  now <literal>"c"</literal> can be used instead of
                   <quote>computer</quote>. Both has the same effect on
-                  formatting, but <quote>c</quote> is preferred from now
+                  formatting, but <literal>"c"</literal> is preferred from now
                   on.</para>
                 </listitem>
               </itemizedlist>

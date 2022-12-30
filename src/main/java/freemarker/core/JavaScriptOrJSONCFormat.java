@@ -35,7 +35,7 @@ import freemarker.template.utility.StringUtil.JsStringEncQuotation;
  * {@link Configuration#Configuration(Version) incompatible_improvements}
  * {@linkplain Configuration#VERSION_2_3_32 2.3.32}.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
  *

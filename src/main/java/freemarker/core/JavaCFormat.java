@@ -39,7 +39,7 @@ public final class JavaCFormat extends CFormat {
             "Double.POSITIVE_INFINITY", "Double.NEGATIVE_INFINITY", "Double.NaN",
             "Float.POSITIVE_INFINITY", "Float.NEGATIVE_INFINITY", "Float.NaN");
 
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("Double.POSITIVE_INFINITY");
@@ -51,7 +51,7 @@ public final class JavaCFormat extends CFormat {
     }
 
     @Override
-    TemplateNumberFormat getTemplateNumberFormat() {
+    TemplateNumberFormat getTemplateNumberFormat(Environment env) {
         return TEMPLATE_NUMBER_FORMAT;
     }
 
@@ -76,7 +76,7 @@ public final class JavaCFormat extends CFormat {
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }
 
