@@ -702,8 +702,7 @@ public class Configurable {
      * {@code "c"} {@link #setBooleanFormat(String) boolean_format}.
      *
      * <p>The default value depends on {@link Configuration#Configuration(Version) incompatible_improvements}.
-     * If that's 2.3.32 or higher, then it's {@code "JavaScript or JSON"}. For lower it's {@code "default 2.3.31"} or
-     * {@code "default 2.3.0"}.
+     * If that's 2.3.32 or higher, then it's {@code "JavaScript or JSON"}, otherwise it's {@code "legacy"}.
      *
      * @since 2.3.32
      */
@@ -2196,7 +2195,7 @@ public class Configurable {
      *       <br>String value: {@code "default"} (case insensitive) for the default (on {@link Configuration} only), or
      *       one of the predefined values {@code "JavaScript or JSON"}, {@code "JSON"},
      *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"},
-     *       {@code "default 2.3.0"}, {@code "default 2.3.21"}, or
+     *       {@code "legacy"}, or
      *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value,
      *       or an <a href="#fm_obe">object builder expression</a> that gives a {@link CFormat} object.
      *

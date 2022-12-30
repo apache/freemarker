@@ -63,13 +63,12 @@ import freemarker.core.CFormat;
 import freemarker.core.CSSOutputFormat;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
-import freemarker.core.Default230CFormat;
-import freemarker.core.Default2321CFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.JSONOutputFormat;
 import freemarker.core.JavaScriptOrJSONCFormat;
 import freemarker.core.JavaScriptOutputFormat;
+import freemarker.core.LegacyCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -959,8 +958,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *         {@code "computer"} {@link Configurable#setNumberFormat(String) number_format}) changes, if the
      *         {@link #setCFormat(CFormat) c_format} setting was left on its default. The default of
      *         {@link #setCFormat(CFormat) c_format} changes to {@link JavaScriptOrJSONCFormat#INSTANCE}, from
-     *         {@link Default2321CFormat#INSTANCE} (or from {@link Default230CFormat#INSTANCE}, depending on the
-     *         previous Incompatible Improvement value), and that's what contains the changes:</p>
+     *         {@link LegacyCFormat#INSTANCE}, and that's what contains the changes:</p>
      *         <ul>
      *           <li><p>Changes affecting non-whole numbers, and whole numbers with over 100 digits:
      *             Formatting is now lossless, so it potentially shows much more decimals.
@@ -2512,13 +2510,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     static CFormat getDefaultCFormat(Version incompatibleImprovements) {
-        if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_32) {
-            return JavaScriptOrJSONCFormat.INSTANCE;
-        }
-        if (incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21) {
-            return Default2321CFormat.INSTANCE;
-        }
-        return Default230CFormat.INSTANCE;
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_32
+                ? JavaScriptOrJSONCFormat.INSTANCE
+                : LegacyCFormat.INSTANCE;
     }
 
     /**

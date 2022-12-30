@@ -1679,7 +1679,13 @@ public final class Environment extends Configurable {
     @Deprecated
     public NumberFormat getCNumberFormat() {
         if (cNumberFormat == null) {
-            cNumberFormat = getCFormatWithPre2331IcIBug().getLegacyNumberFormat(this);
+            CFormat cFormat = getCFormat();
+            if (cFormat == LegacyCFormat.INSTANCE && configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_31) {
+                // Emulate old bug
+                cNumberFormat = ((LegacyCFormat) cFormat).getLegacyNumberFormat(_VersionInts.V_2_3_20);
+            } else {
+                cNumberFormat = cFormat.getLegacyNumberFormat(this);
+            }
         }
         return cNumberFormat;
     }
@@ -1705,18 +1711,15 @@ public final class Environment extends Configurable {
      */
     private TemplateNumberFormat getCTemplateNumberFormatWithPre2331IcIBug() {
         if (cTemplateNumberFormatWithPre2331IcIBug == null) {
-            cTemplateNumberFormatWithPre2331IcIBug = getCFormatWithPre2331IcIBug().getTemplateNumberFormat(this);
+            CFormat cFormat = getCFormat();
+            if (cFormat == LegacyCFormat.INSTANCE && configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_31) {
+                // Emulate old bug
+                cTemplateNumberFormatWithPre2331IcIBug = ((LegacyCFormat) cFormat).getTemplateNumberFormat(_VersionInts.V_2_3_20);
+            } else {
+                cTemplateNumberFormatWithPre2331IcIBug = cFormat.getTemplateNumberFormat(this);
+            }
         }
         return cTemplateNumberFormatWithPre2331IcIBug;
-    }
-
-    private CFormat getCFormatWithPre2331IcIBug() {
-        CFormat cFormat = getCFormat();
-        if (cFormat == Default2321CFormat.INSTANCE
-                && configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_31) {
-            return Default230CFormat.INSTANCE;
-        }
-        return cFormat;
     }
 
     @Override

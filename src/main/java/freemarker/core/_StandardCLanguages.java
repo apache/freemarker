@@ -33,8 +33,7 @@ final class StandardCFormats {
         addStandardCFormat(JavaScriptCFormat.INSTANCE);
         addStandardCFormat(JavaCFormat.INSTANCE);
         addStandardCFormat(XSCFormat.INSTANCE);
-        addStandardCFormat(Default230CFormat.INSTANCE);
-        addStandardCFormat(Default2321CFormat.INSTANCE);
+        addStandardCFormat(LegacyCFormat.INSTANCE);
     }
 
     private static void addStandardCFormat(CFormat cFormat) {

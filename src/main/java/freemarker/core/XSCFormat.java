@@ -47,7 +47,8 @@ public final class XSCFormat extends CFormat {
             "INF", "-INF", "NaN",
             "INF", "-INF", "NaN");
 
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE
+            = (DecimalFormat) LegacyCFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("INF");

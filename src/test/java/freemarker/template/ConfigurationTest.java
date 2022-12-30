@@ -61,8 +61,6 @@ import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
-import freemarker.core.Default230CFormat;
-import freemarker.core.Default2321CFormat;
 import freemarker.core.DefaultTruncateBuiltinAlgorithm;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
@@ -74,6 +72,7 @@ import freemarker.core.JSONCFormat;
 import freemarker.core.JavaCFormat;
 import freemarker.core.JavaScriptCFormat;
 import freemarker.core.JavaScriptOrJSONCFormat;
+import freemarker.core.LegacyCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OptInTemplateClassResolver;
 import freemarker.core.OutputFormat;
@@ -190,13 +189,13 @@ public class ConfigurationTest extends TestCase {
         assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getPreferIndexedReadMethod());
 
         cfg = new Configuration(Configuration.VERSION_2_3_0);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_20);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_32);
         assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfg.getCFormat());
         cfg.setCFormat(JavaScriptOrJSONCFormat.INSTANCE); // Same as default, but explicitly set now
@@ -1921,17 +1920,17 @@ public class ConfigurationTest extends TestCase {
     public void testCFormat() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
 
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
-        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default230CFormat.NAME);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, LegacyCFormat.NAME);
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, JSONCFormat.NAME);
         assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
 
         cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, "default");
-        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default2321CFormat.NAME);
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, LegacyCFormat.NAME);
 
         for (CFormat standardCFormat : new CFormat[] {
-                        Default230CFormat.INSTANCE, Default2321CFormat.INSTANCE,
+                        LegacyCFormat.INSTANCE,
                         JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaCFormat.INSTANCE,
                         XSCFormat.INSTANCE
                 }) {

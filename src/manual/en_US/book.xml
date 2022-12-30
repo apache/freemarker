@@ -6120,17 +6120,11 @@ To prove that "s" didn't contain the value in escaped form:
           </listitem>
 
           <listitem>
-            <para><literal>"default 2.3.0"</literal>: Default for backward
-            compatibility if the <link
+            <para><literal>"legacy"</literal>: Default for backward
+            compatibility when the <link
             linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
-            setting</link> is less than 2.3.21. Avoid!</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"default 2.3.21"</literal>: Default for backward
-            compatibility if the <link
-            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
-            setting</link> is equal or greater than 2.3.21. Avoid!</para>
+            setting</link> is less than 2.3.32. Avoid! Can have rounding
+            losses, and formatting glitches for infinity and NaN.</para>
           </listitem>
         </itemizedlist>
 
@@ -13494,12 +13488,11 @@ GreEN mouse
 
           <itemizedlist>
             <listitem>
-              <para><quote>JSON</quote>, <quote>default 2.3.0</quote>, and
-              <quote>default 2.3.21</quote>: Gives a JSON string literal, that
-              is, it will be surrounded with quotation marks
-              (<literal>"</literal>), and will be escaped using backslash
-              (<literal>\</literal>) where needed. For the exact escaping
-              rules see <link linkend="ref_builtin_json_string">the
+              <para><quote>JSON</quote>, <quote>legacy</quote>: Gives a JSON
+              string literal, that is, it will be surrounded with quotation
+              marks (<literal>"</literal>), and will be escaped using
+              backslash (<literal>\</literal>) where needed. For the exact
+              escaping rules see <link linkend="ref_builtin_json_string">the
               <literal>json_string</literal> built-in</link>.</para>
             </listitem>
 
@@ -16036,18 +16029,18 @@ rif: foo XYr baar</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>For all non-deprecated <literal>c_format</literal>-s
-                  that are built into FreeMarker: There's no rounding.</para>
+                  <para>For all that are built into FreeMarker, except
+                  <quote>legacy</quote> <literal>c_format </literal>: There's
+                  no rounding.</para>
                 </listitem>
 
                 <listitem>
-                  <para>For the deprecated <literal>c_format</literal>-s,
-                  <quote>default 2.3.0</quote>, and <quote>default
-                  2.3.21</quote>: The numbers are limited to 16 digits after
-                  the decimal dot, so rounding can occur. The these formats
-                  never use exponential form either, so the decimal point
-                  place is fixed. Thus, for example, 1E-17 will be formatted
-                  as <literal>0</literal>. </para>
+                  <para>For the deprecated <literal>c_format</literal>,
+                  <quote>legacy</quote>: The numbers are limited to 16 digits
+                  after the decimal dot, so rounding can occur. The these
+                  formats never use exponential form either, so the decimal
+                  point place is fixed. Thus, for example, 1E-17 will be
+                  formatted as <literal>0</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -16079,14 +16072,19 @@ rif: foo XYr baar</programlisting>
 
                 <listitem>
                   <para>For <literal>c_format</literal> <quote>XS</quote>, and
-                  also for the deprecated <literal>c_format</literal>,
-                  <quote>default 2.3.21</quote>: <literal>INF</literal>,
-                  <literal>-INF</literal>, and <literal>NaN</literal>.</para>
+                  also if <link
+                  linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+                  setting</link> is at least 2.3.21, for
+                  <literal>c_format</literal>, <quote>legacy</quote>:
+                  <literal>INF</literal>, <literal>-INF</literal>, and
+                  <literal>NaN</literal>.</para>
                 </listitem>
 
                 <listitem>
-                  <para>For the deprecated <literal>c_format</literal>,
-                  <quote>default 2.3.0</quote>: Gives what
+                  <para>For <literal>c_format</literal> <quote>legacy</quote>,
+                  if <link
+                  linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+                  setting</link> is less than 2.3.21: Gives what
                   <literal>java.text.DecimalFormat</literal> does with US
                   locale, which are <literal>∞</literal>,
                   <literal>-∞</literal>, and <literal>�</literal> (U+FFFD,
@@ -16096,10 +16094,9 @@ rif: foo XYr baar</programlisting>
             </listitem>
 
             <listitem>
-              <para>Exponential form is used by all non-deprecated
-              <literal>c_format</literal>-s that are built into FreeMarker
-              (but not by the deprecated <quote>default 2.3.0</quote>, and
-              <quote>default 2.3.21</quote>):</para>
+              <para>Exponential form is used by all
+              <literal>c_format</literal>-s that are built into FreeMarker,
+              except <quote>legacy</quote>:</para>
 
               <itemizedlist>
                 <listitem>
@@ -16231,8 +16228,8 @@ rif: foo XYr baar</programlisting>
           <itemizedlist>
             <listitem>
               <para>For <quote>JSON</quote>, <quote>Java</quote>,
-              <quote>JavaScript</quote>, <quote>default 2.3.0</quote>,
-              <quote>default 2.3.21</quote>: <literal>null</literal></para>
+              <quote>JavaScript</quote>, and <quote>legacy</quote>:
+              <literal>null</literal></para>
             </listitem>
 
             <listitem>
@@ -30075,12 +30072,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>If you set the <link
                   linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
                   setting</link> to 2.3.32, the default of
-                  <literal>c_format</literal> changes to
-                  <literal>JSON</literal>, which is a format that most targets
-                  can parse (because we just format simple values, not lists
-                  and maps). With lower
+                  <literal>c_format</literal> changes from
+                  <literal>"legacy"</literal> to <literal>"JavaScript or
+                  JSON"</literal>, which is a format that most targets can
+                  parse (because we just format simple values, not lists and
+                  maps). With lower
                   <literal>incompatible_improvements</literal>, the default
-                  value is a <literal>c_format</literal> that emulates the old
+                  value is <literal>"legacy"</literal> that emulates the old
                   behavior of <literal>?c</literal> (where you can lose
                   numerical prevision, etc.), so it's recommended to set it to
                   something else.</para>
