@@ -19,47 +19,15 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
 import org.apache.freemarker.core.BuiltInsForDates.iso_BI;
 import org.apache.freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
 import org.apache.freemarker.core.BuiltInsForMarkupOutputs.markup_stringBI;
 import org.apache.freemarker.core.BuiltInsForMultipleTypes.is_dateLikeBI;
-import org.apache.freemarker.core.BuiltInsForNodes.ancestorsBI;
-import org.apache.freemarker.core.BuiltInsForNodes.childrenBI;
-import org.apache.freemarker.core.BuiltInsForNodes.nextSiblingBI;
-import org.apache.freemarker.core.BuiltInsForNodes.node_nameBI;
-import org.apache.freemarker.core.BuiltInsForNodes.node_namespaceBI;
-import org.apache.freemarker.core.BuiltInsForNodes.node_typeBI;
-import org.apache.freemarker.core.BuiltInsForNodes.parentBI;
-import org.apache.freemarker.core.BuiltInsForNodes.previousSiblingBI;
-import org.apache.freemarker.core.BuiltInsForNodes.rootBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.absBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.byteBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.ceilingBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.doubleBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.floatBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.floorBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.intBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.is_infiniteBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.is_nanBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.longBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.number_to_dateBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.roundBI;
-import org.apache.freemarker.core.BuiltInsForNumbers.shortBI;
+import org.apache.freemarker.core.BuiltInsForNodes.*;
+import org.apache.freemarker.core.BuiltInsForNumbers.*;
 import org.apache.freemarker.core.BuiltInsForOutputFormatRelated.escBI;
 import org.apache.freemarker.core.BuiltInsForOutputFormatRelated.no_escBI;
-import org.apache.freemarker.core.BuiltInsForSequences.chunkBI;
-import org.apache.freemarker.core.BuiltInsForSequences.firstBI;
-import org.apache.freemarker.core.BuiltInsForSequences.lastBI;
-import org.apache.freemarker.core.BuiltInsForSequences.reverseBI;
-import org.apache.freemarker.core.BuiltInsForSequences.seq_containsBI;
-import org.apache.freemarker.core.BuiltInsForSequences.seq_index_ofBI;
-import org.apache.freemarker.core.BuiltInsForSequences.sortBI;
-import org.apache.freemarker.core.BuiltInsForSequences.sort_byBI;
+import org.apache.freemarker.core.BuiltInsForSequences.*;
 import org.apache.freemarker.core.BuiltInsForStringsMisc.evalBI;
 import org.apache.freemarker.core.BuiltInsForStringsMisc.evalJsonBI;
 import org.apache.freemarker.core.model.TemplateCallableModel;
@@ -67,6 +35,11 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * AST expression node: {@code exp?name}
@@ -76,8 +49,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 272;
-    static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+    static final int NUMBER_OF_BIS = 274;
+    static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap<>(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -224,6 +197,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("long", new longBI());
         putBI("lowerAbc", new BuiltInsForNumbers.lower_abcBI());
         putBI("lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
+        putBI("cLowerCase", new BuiltInsForStringsBasic.c_lower_caseBI());
         putBI("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         putBI("new", new BuiltInsForStringsMisc.newBI());
         putBI("markupString", new markup_stringBI());
@@ -275,6 +249,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("uncapFirst", new BuiltInsForStringsBasic.uncap_firstBI());
         putBI("upperAbc", new BuiltInsForNumbers.upper_abcBI());
         putBI("upperCase", new BuiltInsForStringsBasic.upper_caseBI());
+        putBI("cUpperCase", new BuiltInsForStringsBasic.c_upper_caseBI());
         putBI("url", new BuiltInsForStringsEncoding.urlBI());
         putBI("urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());

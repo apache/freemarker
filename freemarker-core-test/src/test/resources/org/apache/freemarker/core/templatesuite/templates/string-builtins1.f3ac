@@ -127,3 +127,10 @@ ${c?eval}
 [${"</script>"?jsonString}] = [<\/script>]
 [${"<![CDATA["?jsonString}] = [\u003C![CDATA[]
 [${"]]>"?jsonString}] = []]\u003E]
+
+<#-- ?c_...: -->
+<#setting locale="tr_TR">
+<@assertEquals actual="i"?upperCase expected="\x0130" />
+<@assertEquals actual="i"?cUpperCase expected="I" />
+<@assertEquals actual="I"?lowerCase expected="\x0131" />
+<@assertEquals actual="I"?cLowerCase expected="i" />
