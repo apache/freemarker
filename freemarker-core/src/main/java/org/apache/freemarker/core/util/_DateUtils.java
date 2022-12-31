@@ -20,16 +20,12 @@
 package org.apache.freemarker.core.util;
 
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * Date and time related utilities.
  */
 public class _DateUtils {

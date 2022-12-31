@@ -19,18 +19,18 @@
 
 package org.apache.freemarker.core;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-
 import org.apache.freemarker.core.model.impl._MethodUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  * Packs a structured from of the error description from which the error message can be rendered on-demand.
  * Note that this class isn't serializable, thus the containing exception should render the message before it's
  * serialized.

@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * 
  * <p>Implemented by {@link TemplateModel}-s that can explain why they don't implement a certain type. 
  * */

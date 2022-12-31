@@ -19,24 +19,20 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.CallableUtils.*;
-
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util._StringUtils;
+
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 class BuiltInsForStringsBasic {
 
@@ -488,7 +484,14 @@ class BuiltInsForStringsBasic {
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleString(s.toLowerCase(env.getLocale()));
         }
-    }    
+    }
+
+    static class c_lower_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleString(s.toLowerCase(Locale.ROOT));
+        }
+    }
 
     static class padBI extends BuiltInForString {
         
@@ -919,6 +922,13 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleString(s.toUpperCase(env.getLocale()));
+        }
+    }
+
+    static class c_upper_caseBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleString(s.toUpperCase(Locale.ROOT));
         }
     }
 

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.util;
 
+import org.apache.freemarker.core.model.impl.BeanModel;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -26,8 +28,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.freemarker.core.model.impl.BeanModel;
 
 public class _ClassUtils {
     
@@ -216,7 +216,7 @@ public class _ClassUtils {
             throws IOException {
         InputStream ins;
         try {
-            // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
+            // This is how we did this earlier. May use some JarURLConnection caches, which leads to the problems.
             ins = baseClass.getResourceAsStream(resource);
         } catch (Exception e) {
             // Workaround for "IllegalStateException: zip file closed", and other related exceptions. This happens due
@@ -261,7 +261,7 @@ public class _ClassUtils {
         InputStream ins  = null;
         try {
             try {
-                // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
+                // This is how we did this earlier. May use some JarURLConnection caches, which leads to the problems.
                 ins = baseClass.getResourceAsStream(resource);
             } catch (Exception e) {
                 throw new MaybeZipFileClosedException();

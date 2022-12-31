@@ -19,6 +19,10 @@
 
 package org.apache.freemarker.core.util;
 
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.Version;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -29,11 +33,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.Version;
-
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _StringUtils {
 
     private static final char[] LT = new char[] { '&', 'l', 't', ';' };

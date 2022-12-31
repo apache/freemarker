@@ -18,14 +18,14 @@
  */
 package org.apache.freemarker.core.valueformat;
 
-import java.text.NumberFormat;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+
+import java.text.NumberFormat;
 
 /**
  * Represents a number format; used in templates for formatting and parsing with that format. This is similar to Java's
@@ -84,7 +84,7 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * will be support, it will be similar to {@link TemplateDateFormat#parse(String, int)}.
      */
     public final Object parse(String s) throws TemplateValueFormatException {
-        throw new ParsingNotSupportedException("Number formats currenly don't support parsing");
+        throw new ParsingNotSupportedException("Number formats currently don't support parsing");
     }
     
     

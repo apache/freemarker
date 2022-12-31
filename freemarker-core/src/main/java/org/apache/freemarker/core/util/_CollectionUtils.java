@@ -19,18 +19,10 @@
 
 package org.apache.freemarker.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * {@link Collection} and {@link Map}-related utilities.
  */
 public class _CollectionUtils {

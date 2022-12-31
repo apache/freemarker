@@ -19,16 +19,16 @@
 
 package org.apache.freemarker.core.debug;
 
-import java.rmi.RemoteException;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.util._SecurityUtils;
 
+import java.rmi.RemoteException;
+import java.util.Collections;
+import java.util.List;
+
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * This class provides debugging hooks for the core FreeMarker engine. It is
  * not usable for anyone outside the FreeMarker core classes.
  */

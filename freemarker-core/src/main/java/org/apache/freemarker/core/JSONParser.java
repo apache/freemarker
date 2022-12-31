@@ -19,25 +19,14 @@
 
 package org.apache.freemarker.core;
 
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNullModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.SimpleHash;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NumberUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
-import jdk.nashorn.internal.objects.NativeNumber;
+import java.math.BigDecimal;
 
 /**
  * JSON parser that returns a {@link TameplatModel}, similar to what FTL literals product (and so, what

@@ -18,10 +18,10 @@
  */
 package org.apache.freemarker.core.arithmetic.impl;
 
-import java.math.BigDecimal;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.util._NumberUtils;
+
+import java.math.BigDecimal;
 
 /**
  * Arithmetic engine that converts all numbers to {@link BigDecimal} and then operates on them, and also keeps the
@@ -48,7 +48,7 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
             return 0;
         } else {
             // The most common case is comparing values of the same type. As BigDecimal can represent all of these
-            // with loseless round-trip (i.e., converting to BigDecimal and then back the original type gives the
+            // with lossless round-trip (i.e., converting to BigDecimal and then back the original type gives the
             // original value), we can avoid conversion to BigDecimal without changing the result.
             if (first.getClass() == second.getClass()) {
                 // Bit of optimization for this is a very common case:

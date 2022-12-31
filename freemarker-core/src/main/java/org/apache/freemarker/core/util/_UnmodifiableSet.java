@@ -21,7 +21,7 @@ package org.apache.freemarker.core.util;
 
 import java.util.AbstractSet;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
 
     @Override

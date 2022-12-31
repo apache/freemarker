@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  */
 public final class _JavaVersions {
 

@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * Immutable list that wraps an array that's known to be non-changing.
  */
 public class _ArrayAdapterList<E> extends AbstractList<E> {

@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.util._StringUtils;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _DelayedJQuote extends _DelayedConversionToString {
 
     public _DelayedJQuote(Object object) {

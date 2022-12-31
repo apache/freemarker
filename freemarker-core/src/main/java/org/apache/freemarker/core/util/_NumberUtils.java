@@ -22,7 +22,7 @@ package org.apache.freemarker.core.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _NumberUtils {
 
     private static final BigDecimal BIG_DECIMAL_INT_MIN = BigDecimal.valueOf(Integer.MIN_VALUE);

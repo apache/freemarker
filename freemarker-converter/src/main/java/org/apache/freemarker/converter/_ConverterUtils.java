@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.converter;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public final class _ConverterUtils {
 
     private _ConverterUtils() {

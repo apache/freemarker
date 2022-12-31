@@ -22,7 +22,7 @@ package org.apache.freemarker.core.util;
 import java.util.Iterator;
 import java.util.Set;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
     
     private final Set<E> set1, set2;

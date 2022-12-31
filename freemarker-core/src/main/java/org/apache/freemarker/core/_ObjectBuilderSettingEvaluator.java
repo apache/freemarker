@@ -19,6 +19,17 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.model.ObjectWrappingException;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.JavaMethodModel;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.outputformat.impl.*;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.templateresolver.*;
+import org.apache.freemarker.core.util.*;
+
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -27,45 +38,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.JavaMethodModel;
-import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.templateresolver.AndMatcher;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.NotMatcher;
-import org.apache.freemarker.core.templateresolver.OrMatcher;
-import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
-import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.GenericParseException;
-import org.apache.freemarker.core.util.TemplateLanguageUtils;
-import org.apache.freemarker.core.util._ClassUtils;
-import org.apache.freemarker.core.util._StringUtils;
+import java.util.*;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * 
  * Evaluates object builder expressions used in configuration {@link Properties}.
  * It should be replaced with FTL later (when it was improved to be practical for this), so the syntax should be
@@ -442,7 +418,7 @@ public class _ObjectBuilderSettingEvaluator {
                         }
                     } else {
                         if (resultCoerced) {
-                            // The FTL way (BigDecimal is loseless, and it will be coerced to the target type later):
+                            // The FTL way (BigDecimal is lossless, and it will be coerced to the target type later):
                             return new BigDecimal(numStr);
                         } else {
                             // The Java way (lossy but familiar):

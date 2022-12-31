@@ -19,20 +19,12 @@
 
 package org.apache.freemarker.test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
-import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
+import org.apache.freemarker.core.templateresolver.*;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Removes the Apache copyright boiler plate from the beginning of the template, so that they don't mess up the expected
@@ -92,7 +84,7 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
             return null;
         }
         try {
-            // Encoding then decosing in ISO-8859-1 is binary loseless
+            // Encoding then decoding in ISO-8859-1 is binary lossless
             String content = IOUtils.toString(in, StandardCharsets.ISO_8859_1.name());
             return new ReaderInputStream(
                     new StringReader(TestUtils.removeFTLCopyrightComment(content)),

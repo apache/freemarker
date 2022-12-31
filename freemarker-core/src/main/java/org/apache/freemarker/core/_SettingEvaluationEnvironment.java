@@ -19,12 +19,12 @@
 
 package org.apache.freemarker.core;
 
-import java.util.Properties;
-
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 
+import java.util.Properties;
+
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * The runtime environment used during the evaluation of configuration {@link Properties}.
  */
 public class _SettingEvaluationEnvironment {

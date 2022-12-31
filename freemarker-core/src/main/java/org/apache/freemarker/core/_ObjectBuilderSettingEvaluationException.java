@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
+ * Don't use this; used internally by FreeMarker, might change without notice.
  * Thrown by {@link _ObjectBuilderSettingEvaluator}.
  */
 public class _ObjectBuilderSettingEvaluationException extends Exception {

@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.lang.reflect.Method;
 
 /**
- * Used internally only, might changes without notice!
+ * Used internally only, might change without notice!
  * Used for accessing functionality that's only present in Java 6 or later.
  */
 public interface _Java8 {
