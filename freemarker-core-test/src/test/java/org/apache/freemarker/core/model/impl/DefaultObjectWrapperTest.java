@@ -19,57 +19,21 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import static org.apache.freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.NonTemplateCallPlace;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.model.WrappingTemplateModel;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.*;
+
+import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class DefaultObjectWrapperTest {
 
@@ -83,7 +47,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_3_0_0);
 
         List<Version> actual = new ArrayList<>();
-        int i = _CoreAPI.VERSION_INT_3_0_0;
+        int i = _VersionInts.VERSION_INT_3_0_0;
         while (i <= Configuration.getVersion().intValue()) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;

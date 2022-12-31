@@ -19,11 +19,27 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.Configuration.*;
-import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
-import static org.apache.freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.*;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
+import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.templateresolver.*;
+import org.apache.freemarker.core.templateresolver.impl.*;
+import org.apache.freemarker.core.userpkg.*;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,68 +50,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
+import java.util.*;
 
-import org.apache.freemarker.core.Configuration.*;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.MemberAccessPolicy;
-import org.apache.freemarker.core.model.impl.MemberSelectorListMemberAccessPolicy;
-import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleString;
-import org.apache.freemarker.core.model.impl.WhitelistMemberAccessPolicy;
-import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
-import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
-import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactoryException;
-import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
-import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
-import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
-import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
-import org.apache.freemarker.core.templateresolver.impl.NullCacheStorage;
-import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
-import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
-import org.apache.freemarker.core.userpkg.CustomHTMLOutputFormat;
-import org.apache.freemarker.core.userpkg.DummyOutputFormat;
-import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
-import org.apache.freemarker.core.userpkg.NameClashingDummyOutputFormat;
-import org.apache.freemarker.core.userpkg.SeldomEscapedOutputFormat;
-import org.apache.freemarker.core.util._CollectionUtils;
-import org.apache.freemarker.core.util._DateUtils;
-import org.apache.freemarker.core.util._NullWriter;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import static org.apache.freemarker.core.Configuration.*;
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
+import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class ConfigurationTest {
 
@@ -223,7 +184,7 @@ public class ConfigurationTest {
     @Test
     public void testVersion() {
         Version v = getVersion();
-        assertTrue(v.intValue() >= _CoreAPI.VERSION_INT_3_0_0);
+        assertTrue(v.intValue() >= _VersionInts.VERSION_INT_3_0_0);
         
         try {
             new Builder(new Version(999, 1, 2)).build();

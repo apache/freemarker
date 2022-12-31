@@ -28,8 +28,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * access things inside this package that users shouldn't. 
  */ 
 public final class _CoreAPI {
-
-    public static final int VERSION_INT_3_0_0 = Configuration.VERSION_3_0_0.intValue();
+    // ATTENTION! Don't refer to other classes in the static initializer of this class! Fields that need that must be
+    // moved into a separate class, to avoid class init deadlocks.
 
     // Can't be instantiated
     private _CoreAPI() { }
@@ -66,7 +66,7 @@ public final class _CoreAPI {
                     + incompatibleImprovements + ", but the installed FreeMarker version is only "
                     + Configuration.getVersion() + ". You may need to upgrade FreeMarker in your project.");
         }
-        if (iciV < VERSION_INT_3_0_0) {
+        if (iciV < _VersionInts.VERSION_INT_3_0_0) {
             throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 3.0.0, but was "
                     + incompatibleImprovements);
         }

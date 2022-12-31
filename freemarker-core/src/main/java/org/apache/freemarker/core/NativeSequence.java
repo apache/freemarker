@@ -19,17 +19,17 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
- * A sequence where each items is already a {@link TemplateModel}, so no {@link ObjectWrapper} need to be specified.
+ * A sequence where each item is already a {@link TemplateModel}, so no {@link ObjectWrapper} need to be specified.
  *
  * <p>While this class allows adding items, doing so is not thread-safe, and thus only meant to be done during the
  * initialization of the sequence.
