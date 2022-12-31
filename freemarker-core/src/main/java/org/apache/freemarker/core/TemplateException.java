@@ -19,15 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Method;
-
 import org.apache.freemarker.core.util._CollectionUtils;
+
+import java.io.*;
+import java.lang.reflect.Method;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -46,8 +41,8 @@ public class TemplateException extends Exception {
     private transient ASTElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
-    private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
-    private String renderedFtlInstructionStackSnapshotTop; // clalc. from ftlInstructionStackSnapshot
+    private String renderedFtlInstructionStackSnapshot;  // calc. from ftlInstructionStackSnapshot 
+    private String renderedFtlInstructionStackSnapshotTop; // calc. from ftlInstructionStackSnapshot
     private String description;  // calc. from descriptionBuilder, or set by the construcor
     private transient String messageWithoutStackTop;
     private transient String message;
