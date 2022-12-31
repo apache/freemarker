@@ -19,8 +19,6 @@
  
 package org.apache.freemarker.dom;
 
-import java.util.Collections;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
@@ -33,6 +31,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.Collections;
 
 class ElementModel extends NodeModel implements TemplateStringModel {
 
@@ -126,7 +126,7 @@ class ElementModel extends NodeModel implements TemplateStringModel {
     @Override
     public String getAsString() throws TemplateException {
         NodeList nl = node.getChildNodes();
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < nl.getLength(); i++) {
             Node child = nl.item(i);
             int nodeType = child.getNodeType();
@@ -137,10 +137,10 @@ class ElementModel extends NodeModel implements TemplateStringModel {
                              + "\" has a child element named: " + child.getNodeName();
                 throw new TemplateException(msg);
             } else if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
-                result += child.getNodeValue();
+                result.append(child.getNodeValue());
             }
         }
-        return result;
+        return result.toString();
     }
     
     @Override
