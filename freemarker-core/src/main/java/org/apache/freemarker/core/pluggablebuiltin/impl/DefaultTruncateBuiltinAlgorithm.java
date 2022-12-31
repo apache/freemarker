@@ -91,8 +91,8 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
             STANDARD_ASCII_TERMINATOR, STANDARD_M_TERMINATOR, true);
 
     /**
-     * Instance uses that {@code "[…]"} as the {@code defaultTerminator} constructor argument, which contains
-     * ellipsis character ({@code "…"}, U+2026), and thus only works with UTF-8, and the cp125x charsets (like
+     * Instance uses that {@code "[\u2026]"} as the {@code defaultTerminator} constructor argument, which contains
+     * ellipsis character ({@code "\u2026"}, U+2026), and thus only works with UTF-8, and the cp125x charsets (like
      * cp1250), and with some other rarely used ones. It does not work (becomes to a question mark) with ISO-8859-x
      * charsets (like ISO-8859-1), which are probably the most often used charsets after UTF-8.
      *
