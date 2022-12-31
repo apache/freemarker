@@ -317,7 +317,7 @@ Core / Configuration
   to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
   "allowsNothing" were renamed to "allowNothing".
 - TemplateExceptionHandler.IGNORE_HANDLER, RETHROW_HANDLER, DEBUG_HANDLER and
-  HTLM_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG
+  HTML_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG
 - AttemptExceptionReporter.LOG_ERROR_REPORTER and LOG_WARN_REPORTER was renamed to
   LOG_ERROR and LOG_WARN (to be consistent with the new TemplateExceptionHandler names)
 - Removed TemplateClassResolver.SAFER_RESOLVER, because the classes it has blocked were removed from FreeMarker, so it's
