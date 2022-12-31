@@ -37,8 +37,6 @@ import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
 import org.apache.freemarker.core.valueformat.UnparsableValueException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     
     private static final String XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE

@@ -92,8 +92,6 @@ import org.apache.freemarker.core.valueformat.impl.XSTemplateDateFormatFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Object that represents the runtime environment during template processing. For every invocation of a
  * <tt>Template.process()</tt> method, a new instance of this object is created, and then discarded when

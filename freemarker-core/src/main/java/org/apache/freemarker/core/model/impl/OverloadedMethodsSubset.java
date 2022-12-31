@@ -32,8 +32,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Encapsulates the rules and data structures (including cache) for choosing of the best matching callable member for
  * a parameter list, from a given set of callable members. There are two subclasses of this, one for non-varags methods,

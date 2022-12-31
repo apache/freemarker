@@ -21,8 +21,5 @@ language: java
 #  - sudo apt-get install -y openjdk-8-jre
 jdk:
 - openjdk8
-env:
-  global:
-  - freemarker_build_boot_classpath_java_8=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar
 install:
-- ./gradlew assemble aggregateJavadoc javadoc
+- ./gradlew build -xmanualOnline -PsignPublication=false

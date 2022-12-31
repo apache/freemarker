@@ -33,8 +33,6 @@ import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Adapts an {@link Enumeration} to the corresponding {@link TemplateModel} interface(s), most importantly to
  * {@link TemplateIterableModel}. Putting aside that it wraps an {@link Enumeration} instead of an {@link Iterator},

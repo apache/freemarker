@@ -23,8 +23,6 @@ import java.net.URL;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.util._NullArgumentException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 @SuppressWarnings("serial")
 public class URLTemplateLoadingSource implements TemplateLoadingSource {
 
