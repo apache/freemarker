@@ -38,7 +38,7 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
     @Override
     public int compareNumbers(Number first, Number second) {
         // We try to find the result based on the sign (+/-/0) first, because:
-        // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
+        // - It's much faster than converting to BigDecimal, and comparing to 0 is the most common comparison.
         // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
         int firstSignum = _NumberUtils.getSignum(first); 
         int secondSignum = _NumberUtils.getSignum(second);

@@ -19,15 +19,17 @@
 
 package org.apache.freemarker.core.arithmetic.impl;
 
-import static org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine.*;
-import static org.junit.Assert.*;
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.junit.Test;
+import static org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine.INSTANCE;
+import static org.junit.Assert.*;
 
-public class BigDecimalArithmeticEngineTest {
+public class ArithmeticEngineTest {
 
     @Test
     public void compareNumbersZeroTest() {
@@ -93,5 +95,33 @@ public class BigDecimalArithmeticEngineTest {
             }
         }
     }
-    
+
+    @Test
+    public void toNumberTest() {
+        for (ArithmeticEngine arithmeticEngine : new ArithmeticEngine[]{BigDecimalArithmeticEngine.INSTANCE, ConservativeArithmeticEngine.INSTANCE}) {
+            assertEquals(Double.POSITIVE_INFINITY, arithmeticEngine.toNumber("INF"));
+            assertEquals(Double.NEGATIVE_INFINITY, arithmeticEngine.toNumber("-INF"));
+            assertEquals(Double.NEGATIVE_INFINITY, arithmeticEngine.toNumber("-Infinity"));
+            assertEquals(Double.POSITIVE_INFINITY, arithmeticEngine.toNumber("Infinity"));
+            Number nan = arithmeticEngine.toNumber("NaN");
+            assertThat(nan, Matchers.instanceOf(Double.class));
+            assertTrue(Double.isNaN((double) nan));
+        }
+
+        assertEquals(new BigDecimal("1234567"), BigDecimalArithmeticEngine.INSTANCE.toNumber("1234567"));
+        assertEquals(Integer.valueOf("1234567"), ConservativeArithmeticEngine.INSTANCE.toNumber("1234567"));
+
+        assertEquals(new BigDecimal("12345678901234"), BigDecimalArithmeticEngine.INSTANCE.toNumber("12345678901234"));
+        assertEquals(12345678901234L, ConservativeArithmeticEngine.INSTANCE.toNumber("12345678901234"));
+
+        assertEquals(new BigDecimal("12345678901234567890"), BigDecimalArithmeticEngine.INSTANCE.toNumber("12345678901234567890"));
+        assertEquals(new BigInteger("12345678901234567890"), ConservativeArithmeticEngine.INSTANCE.toNumber("12345678901234567890"));
+
+        assertEquals(new BigDecimal("1.9"), BigDecimalArithmeticEngine.INSTANCE.toNumber("1.9"));
+        assertEquals(1.9, ConservativeArithmeticEngine.INSTANCE.toNumber("1.9"));
+
+        assertEquals(new BigDecimal("0.9"), BigDecimalArithmeticEngine.INSTANCE.toNumber(".9"));
+        assertEquals(0.9, ConservativeArithmeticEngine.INSTANCE.toNumber(".9"));
+    }
+
 }
