@@ -51,10 +51,6 @@ public class NumberBiTest extends TemplateTest {
         assertNumberBi("+1", "1");
     }
 
-    private void assertThrowsNumberFormatException(String s) {
-        assertErrorContains("${'" + s + "'?number}", NonNumericalException.class, "\"" + s + "\"");
-    }
-
     private final void assertNumberBi(String input, String output) throws TemplateException, IOException {
         assertOutput("${'" + input + "'?number?c}", output);
     }

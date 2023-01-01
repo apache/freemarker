@@ -10604,7 +10604,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
         linkend="gloss.unicode">UNICODE</link> text" (UTF-16). Nonetheless,
         there are situations when it must deal with <link
         linkend="gloss.charset">charsets</link>, because it has to exchange
-        data with the outer world that may uses various other charsets.</para>
+        data with the outer world that may use various other charsets.</para>
 
         <section>
           <title>The charset of the input</title>
@@ -16269,7 +16269,7 @@ rif: foo XYr baar</programlisting>
           <title>is_infinite</title>
 
           <indexterm>
-            <primary>is_infinte built-in</primary>
+            <primary>is_infinite built-in</primary>
           </indexterm>
 
           <indexterm>
@@ -28786,7 +28786,7 @@ End book</programlisting>
           <answer>
             <para>FreeMarker uses the locale-sensitive number formatting
             capability of the Java platform. The default number format for
-            your locale may uses grouping or other formatting. If you don't
+            your locale may use grouping or other formatting. If you don't
             want that, you have to override the number format suggested by the
             Java platform with the <literal>number_format</literal> <link
             linkend="pgui_config_settings">FreeMarker setting</link>. For

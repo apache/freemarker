@@ -66,6 +66,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template._VersionInts;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -82,7 +83,7 @@ import freemarker.template.utility.StringUtil;
  * object.
  */
 public class Configurable {
-    static final String C_TRUE_FALSE = "true,false";
+    static final String BOOLEAN_FORMAT_LEGACY_DEFAULT = "true,false";
     static final String C_FORMAT_STRING = "c";
 
     private static final String NULL = "null";
@@ -386,8 +387,6 @@ public class Configurable {
     private TimeZone sqlDataAndTimeTimeZone;
     private boolean sqlDataAndTimeTimeZoneSet;
     private String booleanFormat;
-    private String booleanFormatCommaSplitTrueSide;  // deduced from booleanFormat
-    private String booleanFormatCommaSplitFalseSide;  // deduced from booleanFormat
     private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private AttemptExceptionReporter attemptExceptionReporter;
@@ -493,7 +492,7 @@ public class Configurable {
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
 
-        setBooleanFormat(C_TRUE_FALSE);
+        setBooleanFormat(BOOLEAN_FORMAT_LEGACY_DEFAULT);
         
         customAttributes = new HashMap();
         
@@ -697,12 +696,13 @@ public class Configurable {
     }
 
     /**
-     * Sets the format (usually a computer language) used for the {@code c}, {@code cn} built-ins, and for the
+     * Sets the format (usually a computer language) used for {@code ?c}, {@code ?cn}, and for the
      * {@code "c"} ({@code "computer"} before 2.3.32) {@link #setNumberFormat(String) number_format}, and the
      * {@code "c"} {@link #setBooleanFormat(String) boolean_format}.
      *
      * <p>The default value depends on {@link Configuration#Configuration(Version) incompatible_improvements}.
-     * If that's 2.3.32 or higher, then it's {@code "JavaScript or JSON"}, otherwise it's {@code "legacy"}.
+     * If that's 2.3.32 or higher, then it's {@link JavaScriptOrJSONCFormat#INSTANCE "JavaScript or JSON"},
+     * otherwise it's {@link LegacyCFormat#INSTANCE "legacy"}.
      *
      * @since 2.3.32
      */
@@ -863,7 +863,7 @@ public class Configurable {
      *   <li>{@code "c"} (recognized since 2.3.32): The number format used by FTL's {@code c} built-in (like in
      *       {@code someNumber?c}). So with this <code>${someNumber}</code> will output the same as
      *       <code>${someNumber?c}</code>. This should only be used if the template solely generates source code,
-     *       configuration file, or other content that's nor read by normal users. If the template contains parts that's
+     *       configuration file, or other content that's not read by normal users. If the template contains parts that's
      *       read by normal users (like typical a web page), you are not supposed to use this.</li>
      *   <li>{@code "computer"}: The old (deprecated) name for {@code "c"}. Recognized by all FreeMarker versions.</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
@@ -882,8 +882,7 @@ public class Configurable {
      *       <code><i>parameters</i></code> is parsed by the custom {@link TemplateNumberFormat}.
      *   </li>
      * </ul>
-     * 
-     *   
+     *
      * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
@@ -1034,11 +1033,38 @@ public class Configurable {
      * only influenced the result of {@code myBool?string}. 
      */
     public void setBooleanFormat(String booleanFormat) {
+        validateBooleanFormat(booleanFormat);
+        this.booleanFormat = booleanFormat;
+        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
+    }
+
+    /**
+     * @throws IllegalArgumentException If the format string has unrecognized format
+     */
+    private static void validateBooleanFormat(String booleanFormat) {
+        parseOrValidateBooleanFormat(booleanFormat, true);
+    }
+
+    /**
+     * @return {@code null} for legacy default (not set in effect), empty array if the {@link CFormat} should be used,
+     * and an array of {@code [trueString, falseString]} otherwise.
+     *
+     * @throws IllegalArgumentException If the format string has unrecognized format
+     */
+    static String[] parseBooleanFormat(String booleanFormat) {
+        return parseOrValidateBooleanFormat(booleanFormat, false);
+    }
+
+    private static String[] parseOrValidateBooleanFormat(String booleanFormat, boolean validateOnly) {
         NullArgumentException.check("booleanFormat", booleanFormat);
 
-        if (booleanFormat.equals(C_TRUE_FALSE) || booleanFormat.equals(C_FORMAT_STRING)) {
-            booleanFormatCommaSplitTrueSide = null;
-            booleanFormatCommaSplitFalseSide = null;
+        if (booleanFormat.equals(C_FORMAT_STRING)) {
+            if (validateOnly) {
+                return null;
+            }
+            return CollectionUtils.EMPTY_STRING_ARRAY;
+        } else if (booleanFormat.equals(BOOLEAN_FORMAT_LEGACY_DEFAULT)) {
+            return null;
         } else {
             int commaIdx = booleanFormat.indexOf(',');
             if (commaIdx == -1) {
@@ -1047,12 +1073,14 @@ public class Configurable {
                                 "or it must be \"" + C_FORMAT_STRING + "\", but it was " +
                                 StringUtil.jQuote(booleanFormat) + ".");
             }
-            booleanFormatCommaSplitTrueSide = booleanFormat.substring(0, commaIdx);
-            booleanFormatCommaSplitFalseSide = booleanFormat.substring(commaIdx + 1);
+            if (validateOnly) {
+                return null;
+            }
+            return new String[] {
+                    booleanFormat.substring(0, commaIdx),
+                    booleanFormat.substring(commaIdx + 1)
+            };
         }
-
-        this.booleanFormat = booleanFormat;
-        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
     }
     
     /**
@@ -1060,32 +1088,6 @@ public class Configurable {
      */
     public String getBooleanFormat() {
         return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
-    }
-
-    /**
-     * Non-{@code null} if the {@link #setBooleanFormat(String)} boolean_format} setting is comma separated true, and
-     * false strings.
-     *
-     * @since 2.3.32
-     */
-    String getBooleanFormatCommaSplitTrueSide() {
-        if (booleanFormat != null) {
-            return booleanFormatCommaSplitTrueSide;
-        }
-        return parent != null ? parent.getBooleanFormatCommaSplitTrueSide() : null;
-    }
-
-    /**
-     * Non-{@code null} if the {@link #setBooleanFormat(String)} boolean_format} setting is comma separated true, and
-     * false strings.
-     *
-     * @since 2.3.32
-     */
-    String getBooleanFormatCommaSplitFalseSide() {
-        if (booleanFormat != null) {
-            return booleanFormatCommaSplitFalseSide;
-        }
-        return parent != null ? parent.getBooleanFormatCommaSplitFalseSide() : null;
     }
 
     /**

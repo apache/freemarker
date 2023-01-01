@@ -314,7 +314,7 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isCFormatExplicitlySet());
         //
         cfg.unsetCFormat();
-        assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        assertFalse(cfg.isCFormatExplicitlySet());
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -1877,8 +1877,10 @@ public class ConfigurationTest extends TestCase {
             assertEquals(3, alg.getDefaultTerminatorLength());
             assertNull(alg.getDefaultMTerminator());
             assertNull(alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
@@ -1895,8 +1897,10 @@ public class ConfigurationTest extends TestCase {
             assertEquals("markupOutput(format=HTML, markup=<span class=trunc>...</span>)",
                     alg.getDefaultMTerminator().toString());
             assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
@@ -1931,8 +1935,8 @@ public class ConfigurationTest extends TestCase {
 
         for (CFormat standardCFormat : new CFormat[] {
                         LegacyCFormat.INSTANCE,
-                        JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaCFormat.INSTANCE,
-                        XSCFormat.INSTANCE
+                        JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaScriptOrJSONCFormat.INSTANCE,
+                        JavaCFormat.INSTANCE, XSCFormat.INSTANCE
                 }) {
             cfg.setSetting(Configuration.C_FORMAT_KEY, standardCFormat.getName());
             assertSame(standardCFormat, cfg.getCFormat());

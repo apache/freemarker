@@ -1691,9 +1691,9 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the {@link TemplateNumberFormat} used for the <tt>c</tt> built-in currently uses in this environment.
+     * Returns the {@link TemplateNumberFormat} that {@code ?c}/{@code ?cn} uses.
      * Calling this method for many times is fine, as it internally caches the result object.
-     * Remember that {@link TemplateNumberFormat}-s are not thread-safe objects, so the resulting object should only
+     * Remember that {@link TemplateNumberFormat}-s aren't thread-safe objects, so the resulting object should only
      * be used in the same thread where this {@link Environment} runs.
      *
      * @since 2.3.32
@@ -1729,6 +1729,7 @@ public final class Environment extends Configurable {
         if (prevCFormat != cFormat) {
             cTemplateNumberFormat = null;
             cTemplateNumberFormatWithPre2331IcIBug = null;
+            cNumberFormat = null;
             if (cachedTemplateNumberFormats != null) {
                 cachedTemplateNumberFormats.remove(C_FORMAT_STRING);
                 cachedTemplateNumberFormats.remove(COMPUTER_FORMAT_STRING);
@@ -1812,7 +1813,7 @@ public final class Environment extends Configurable {
         return new _ErrorDescriptionBuilder(
                 "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
                 new _DelayedJQuote(getBooleanFormat()),
-                (getBooleanFormat().equals(C_TRUE_FALSE)
+                (getBooleanFormat().equals(BOOLEAN_FORMAT_LEGACY_DEFAULT)
                         ? ", which is the legacy deprecated default, and we treat it as if no format was set. "
                         + "This is the default configuration; you should provide the format explicitly for each "
                         + "place where you print a boolean."
@@ -1869,17 +1870,19 @@ public final class Environment extends Configurable {
     }
 
     private void cacheTrueAndFalseStrings() {
-        String spitTrueSide = getBooleanFormatCommaSplitTrueSide();
-        if (spitTrueSide != null) {
-            cachedTrueString = spitTrueSide;
-            cachedFalseString = getBooleanFormatCommaSplitFalseSide();
-        } else if (getBooleanFormat().equals(C_FORMAT_STRING)) {
-            CFormat cFormat = getCFormat();
-            cachedTrueString = cFormat.getTrueString();
-            cachedFalseString = cFormat.getFalseString();
+        String[] parsedBooleanFormat = parseBooleanFormat(getBooleanFormat());
+        if (parsedBooleanFormat != null) {
+            if (parsedBooleanFormat.length == 0) {
+                CFormat cFormat = getCFormat();
+                cachedTrueString = cFormat.getTrueString();
+                cachedFalseString = cFormat.getFalseString();
+            } else {
+                cachedTrueString = parsedBooleanFormat[0];
+                cachedFalseString = parsedBooleanFormat[1];
+            }
         } else {
-            // This happens for C_TRUE_FALSE deliberately. That's the default for BC, but it's not a good default for human
-            // audience formatting, so we pretend that it wasn't set.
+            // This happens for BOOLEAN_FORMAT_LEGACY_DEFAULT deliberately. That's the default for BC, but it's not a
+            // good default for human audience formatting, so we pretend that it wasn't set.
             cachedTrueString = null;
             cachedFalseString = null;
         }
@@ -2410,7 +2413,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Similar to {@link #getLocalVariable(String)}, but might returns {@link TemplateNullModel}. Only used internally,
+     * Similar to {@link #getLocalVariable(String)}, but might return {@link TemplateNullModel}. Only used internally,
      * as {@link TemplateNullModel} is internal.
      *
      * @since 2.3.29

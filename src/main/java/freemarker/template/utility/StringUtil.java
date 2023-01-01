@@ -933,7 +933,7 @@ public class StringUtil {
             } else {
                 b.append(c);
             }
-        } // for each characters
+        } // for each character
         b.append('"');
         return b.toString();
     }
@@ -1316,24 +1316,26 @@ public class StringUtil {
                     c = s.charAt(i);
                 }
             } // if has to be escaped
-        } // for each characters
+        } // for each character
         return quote ? '"' + s + '"' : s;
     }
     
     /**
      * Escapes a {@link String} to be safely insertable into a JavaScript string literal; for more see
-     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, false, QuotationMode.NONE)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)
+     * jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT, null)}.
      */
     public static String javaScriptStringEnc(String s) {
-        return jsStringEnc(s, false);
+        return jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT);
     }
 
     /**
      * Escapes a {@link String} to be safely insertable into a JSON string literal; for more see
-     * {@link #jsStringEnc(String, boolean) jsStringEnc(s, true)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)
+     * jsStringEnc(s, JsStringEncCompatibility.JSON, null)}.
      */
     public static String jsonStringEnc(String s) {
-        return jsStringEnc(s, true);
+        return jsStringEnc(s, JsStringEncCompatibility.JSON);
     }
 
     private static final int NO_ESC = 0;
@@ -1342,12 +1344,25 @@ public class StringUtil {
     
     /**
      * Escapes a {@link String} to be safely insertable into a JSON or JavaScript string literal; for more see
-     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, json, QuotationMode.NONE)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)
+     * jsStringEnc(s, json ? JsStringEncCompatibility.JSON : JsStringEncCompatibility.JAVA_SCRIPT, null)}.
      *
      * @since 2.3.20
+     * @deprecated Use {@link #jsStringEnc(String, JsStringEncCompatibility)} instead.
      */
+    @Deprecated
     public static String jsStringEnc(String s, boolean json) {
         return jsStringEnc(s, json ? JsStringEncCompatibility.JSON : JsStringEncCompatibility.JAVA_SCRIPT, null);
+    }
+
+    /**
+     * Escapes a {@link String} to be safely insertable into a JSON or JavaScript string literal; for more see
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, compatibility, null)}.
+     *
+     * @since 2.3.32
+     */
+    public static String jsStringEnc(String s, JsStringEncCompatibility compatibility) {
+        return jsStringEnc(s, compatibility, null);
     }
 
     /**
@@ -1520,7 +1535,7 @@ public class StringUtil {
             // Needs no escaping
                 
             if (sb != null) sb.append(c);
-        } // for each characters
+        } // for each character
 
         if (quotation != null) {
             sb.append(quotation.getSymbol());

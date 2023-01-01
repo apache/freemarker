@@ -70,4 +70,10 @@ public class CFormatTemplateTest extends TemplateTest {
                         + "Java: \"a'b\\\"c\\u0001\" ");
     }
 
+    @Test
+    public void testUnsafeSetting() throws TemplateException, IOException {
+        assertErrorContains("<#setting c_format='com.example.ExploitCFormat()'>", "not allowed");
+        assertErrorContains("<#setting cFormat='com.example.ExploitCFormat()'>", "not allowed");
+    }
+
 }
