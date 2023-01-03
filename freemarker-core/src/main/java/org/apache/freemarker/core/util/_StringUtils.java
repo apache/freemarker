@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import static org.apache.freemarker.core.util._StringUtils.JsStringEncQuotation.APOSTROPHE;
+import static org.apache.freemarker.core.util._StringUtils.JsStringEncQuotation.QUOTATION_MARK;
+
 /** Don't use this; used internally by FreeMarker, might change without notice. */
 public class _StringUtils {
 
@@ -629,14 +632,14 @@ public class _StringUtils {
                 } else {
                     b.append("\\u00");
                     int x = c / 0x10;
-                    b.append(toHexDigit(x));
+                    b.append(toHexDigitUpperCase(x));
                     x = c & 0xF;
-                    b.append(toHexDigit(x));
+                    b.append(toHexDigitUpperCase(x));
                 }
             } else {
                 b.append(c);
             }
-        } // for each characters
+        } // for each character
         b.append('"');
         return b.toString();
     }
@@ -659,7 +662,7 @@ public class _StringUtils {
             return "null";
         }
         int ln = s.length();
-        StringBuilder b = new StringBuilder(ln + 4);
+        StringBuilder b = new StringBuilder(ln + 6);
         b.append('"');
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
@@ -682,37 +685,48 @@ public class _StringUtils {
                     b.append("\\t");
                 } else {
                     b.append("\\u00");
-                    int x = c / 0x10;
-                    b.append(toHexDigit(x));
-                    x = c & 0xF;
-                    b.append(toHexDigit(x));
-                }
+                    b.append(toHexDigitLowerCase(c / 0x10));
+                    b.append(toHexDigitLowerCase(c & 0xF));                }
             } else {
                 b.append(c);
             }
-        } // for each characters
+        } // for each character
         b.append('"');
         return b.toString();
     }
 
     /**
-     * Escapes the <code>String</code> with the escaping rules of Java language
+     * Escapes the {@code String} with the escaping rules of Java language
      * string literals, so it's safe to insert the value into a string literal.
      * The resulting string will not be quoted.
-     * 
+     *
+     * See more details at {@link #javaStringEnc(String, boolean)}, as this just calls that with {@code false} as the
+     * 2nd argument.
+     */
+    public static String javaStringEnc(String s) {
+        return javaStringEnc(s, false);
+    }
+
+    /**
+     * Escapes the {@code String} with the escaping rules of Java language string literals, and then if {@code quote} is
+     * true, it also adds quotation marks before and after it.
+     *
      * <p>All characters under UCS code point 0x20 will be escaped.
      * Where they have no dedicated escape sequence in Java, they will
-     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
-     * 
+     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>).
+     *
      * @see #jQuote(String)
-     */ 
-    public static String javaStringEnc(String s) {
+     */
+    public static String javaStringEnc(String s, boolean quote) {
         int ln = s.length();
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '"' || c == '\\' || c < 0x20) {
-                StringBuilder b = new StringBuilder(ln + 4);
-                b.append(s.substring(0, i));
+                StringBuilder b = new StringBuilder(ln + (quote ? 6 : 4));
+                if (quote) {
+                    b.append("\"");
+                }
+                b.append(s, 0, i);
                 while (true) {
                     if (c == '"') {
                         b.append("\\\"");
@@ -731,62 +745,71 @@ public class _StringUtils {
                             b.append("\\t");
                         } else {
                             b.append("\\u00");
-                            int x = c / 0x10;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'a'));
-                            x = c & 0xF;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'a'));
+                            b.append(toHexDigitLowerCase(c / 0x10));
+                            b.append(toHexDigitLowerCase(c & 0xF));
                         }
                     } else {
                         b.append(c);
                     }
                     i++;
                     if (i >= ln) {
+                        if (quote) {
+                            b.append("\"");
+                        }
                         return b.toString();
                     }
                     c = s.charAt(i);
                 }
             } // if has to be escaped
-        } // for each characters
-        return s;
+        } // for each character
+        return quote ? '"' + s + '"' : s;
     }
-    
+
     /**
      * Escapes a {@link String} to be safely insertable into a JavaScript string literal; for more see
-     * {@link #jsStringEnc(String, boolean) jsStringEnc(s, false)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)
+     * jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT, null)}.
      */
     public static String javaScriptStringEnc(String s) {
-        return jsStringEnc(s, false);
+        return jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT);
     }
 
     /**
      * Escapes a {@link String} to be safely insertable into a JSON string literal; for more see
-     * {@link #jsStringEnc(String, boolean) jsStringEnc(s, true)}.
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)
+     * jsStringEnc(s, JsStringEncCompatibility.JSON, null)}.
      */
     public static String jsonStringEnc(String s) {
-        return jsStringEnc(s, true);
+        return jsStringEnc(s, JsStringEncCompatibility.JSON);
     }
 
     private static final int NO_ESC = 0;
     private static final int ESC_HEXA = 1;
     private static final int ESC_BACKSLASH = 3;
-    
+
     /**
-     * Escapes a {@link String} to be safely insertable into a JavaScript or a JSON string literal.
-     * The resulting string will <em>not</em> be quoted; the caller must ensure that they are there in the final
-     * output. Note that for JSON, the quotation marks must be {@code "}, not {@code '}, because JSON doesn't escape
-     * {@code '}.
-     * 
+     * Escapes a {@link String} to be safely insertable into a JSON or JavaScript string literal; for more see
+     * {@link #jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation) jsStringEnc(s, json,null)}.
+     */
+    public static String jsStringEnc(String s, JsStringEncCompatibility compatibility) {
+        return jsStringEnc(s, compatibility, null);
+    }
+
+    /**
+     * Escapes a {@link String} to be safely insertable into a JavaScript or a JSON string literal, and if the 3rd
+     * argument is {@code true}, also adds quotation marks around it.
+     * If instead the caller ensures that the quotation marks are there, then in JSON mode (2nd argument), the quotation
+     * marks must be {@code "}, not {@code '}, because for JSON we won't escape {@code '}.
+     *
      * <p>The escaping rules guarantee that if the inside of the JavaScript/JSON string literal is from one or more
      * touching pieces that were escaped with this, no character sequence can occur that closes the
      * JavaScript/JSON string literal, or has a meaning in HTML/XML that causes the HTML script section to be closed.
      * (If, however, the escaped section is preceded by or followed by strings from other sources, this can't be
-     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?jsString}"</tt> might closes the "script"
+     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?js_string}"</tt> might closes the "script"
      * element if {@code a} is {@code "script>"}.)
-     * 
+     *
      * The escaped characters are:
-     * 
+     *
      * <table style="width: auto; border-collapse: collapse" border="1" summary="Characters escaped by jsStringEnc">
      * <tr>
      *   <th>Input
@@ -795,7 +818,7 @@ public class _StringUtils {
      *   <td><tt>"</tt>
      *   <td><tt>\"</tt>
      * <tr>
-     *   <td><tt>'</tt> if not in JSON-mode
+     *   <td><tt>'</tt> if not in JSON-mode, nor is the {@code quited} argument {@code true}
      *   <td><tt>\'</tt>
      * <tr>
      *   <td><tt>\</tt>
@@ -807,7 +830,7 @@ public class _StringUtils {
      *   <td><tt>&gt;</tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
      *   <td>JavaScript: <tt>\&gt;</tt>; JSON: <tt>\</tt><tt>u003E</tt>
      * <tr>
-     *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt> 
+     *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt>
      *   <td><tt><tt>\</tt>u003C</tt>
      * <tr>
      *   <td>
@@ -821,15 +844,30 @@ public class _StringUtils {
      *     u2029 (Paragraph separator - source code line-break in ECMAScript)<br>
      *   <td><tt>\<tt>u</tt><i>XXXX</i></tt>
      * </table>
+     *
+     * @param s The string to escape
+     * @param compatibility If escaping should restrict itself to rules that are valid in JSON, in JavaScript, or in both.
+     * @param quotation In not {@code null}, quotation marks of this type are added around the value.
+     *
+     * @since 2.3.32
      */
-    public static String jsStringEnc(String s, boolean json) {
+    public static String jsStringEnc(String s, JsStringEncCompatibility compatibility, JsStringEncQuotation quotation) {
         _NullArgumentException.check("s", s);
-        
+
         int ln = s.length();
-        StringBuilder sb = null;
+        StringBuilder sb;
+        if (quotation == null) {
+            sb = null;
+        } else {
+            if (quotation == APOSTROPHE && compatibility.jsonCompatible) {
+                throw new IllegalArgumentException("JSON compatible mode doesn't allow quotationMode=" + quotation);
+            }
+            sb = new StringBuilder(ln + 8);
+            sb.append(quotation.getSymbol());
+        }
         for (int i = 0; i < ln; i++) {
             final char c = s.charAt(i);
-            final int escapeType;  // 
+            final int escapeType;  //
             if (!(c > '>' && c < 0x7F && c != '\\') && c != ' ' && !(c >= 0xA0 && c < 0x2028)) {  // skip common chars
                 if (c <= 0x1F) {  // control chars range 1
                     if (c == '\n') {
@@ -846,16 +884,22 @@ public class _StringUtils {
                         escapeType = ESC_HEXA;
                     }
                 } else if (c == '"') {
-                    escapeType = ESC_BACKSLASH;
+                    escapeType = quotation == APOSTROPHE ? NO_ESC : ESC_BACKSLASH;
                 } else if (c == '\'') {
-                    escapeType = json ? NO_ESC : ESC_BACKSLASH; 
+                    escapeType = !compatibility.javaScriptCompatible || quotation == QUOTATION_MARK ? NO_ESC
+                            : (compatibility.jsonCompatible ? ESC_HEXA : ESC_BACKSLASH);
                 } else if (c == '\\') {
-                    escapeType = ESC_BACKSLASH; 
-                } else if (c == '/' && (i == 0 || s.charAt(i - 1) == '<')) {  // against closing elements
-                    escapeType = ESC_BACKSLASH; 
-                } else if (c == '>') {  // against "]]> and "-->"
+                    escapeType = ESC_BACKSLASH;
+                } else if (c == '/'
+                        && (i == 0 && quotation == null || i != 0 && s.charAt(i - 1) == '<')) {
+                    // against closing elements with "</"
+                    escapeType = ESC_BACKSLASH;
+                } else if (c == '>') {
+                    // against "]]> and "-->"
                     final boolean dangerous;
-                    if (i == 0) {
+                    if (quotation != null && i < 2) {
+                        dangerous = false;
+                    } else if (i == 0) {
                         dangerous = true;
                     } else {
                         final char prevC = s.charAt(i - 1);
@@ -870,61 +914,71 @@ public class _StringUtils {
                             dangerous = false;
                         }
                     }
-                    escapeType = dangerous ? (json ? ESC_HEXA : ESC_BACKSLASH) : NO_ESC;
-                } else if (c == '<') {  // against "<!"
+                    escapeType = dangerous ? (compatibility.jsonCompatible ? ESC_HEXA : ESC_BACKSLASH) : NO_ESC;
+                } else if (c == '<') {
+                    // against "<!"
                     final boolean dangerous;
                     if (i == ln - 1) {
-                        dangerous = true;
+                        dangerous = quotation == null;
                     } else {
                         char nextC = s.charAt(i + 1);
                         dangerous = nextC == '!' || nextC == '?';
                     }
                     escapeType = dangerous ? ESC_HEXA : NO_ESC;
                 } else if ((c >= 0x7F && c <= 0x9F)  // control chars range 2
-                            || (c == 0x2028 || c == 0x2029)  // UNICODE line terminators
-                            ) {
+                        || (c == 0x2028 || c == 0x2029)  // UNICODE line terminators
+                ) {
                     escapeType = ESC_HEXA;
                 } else {
                     escapeType = NO_ESC;
                 }
-                
+
                 if (escapeType != NO_ESC) { // If needs escaping
                     if (sb == null) {
                         sb = new StringBuilder(ln + 6);
-                        sb.append(s.substring(0, i));
+                        sb.append(s, 0, i);
                     }
-                    
+
                     sb.append('\\');
                     if (escapeType > 0x20) {
                         sb.append((char) escapeType);
                     } else if (escapeType == ESC_HEXA) {
-                        if (!json && c < 0x100) {
+                        if (!compatibility.jsonCompatible && c < 0x100) {
                             sb.append('x');
-                            sb.append(toHexDigit(c >> 4));
-                            sb.append(toHexDigit(c & 0xF));
+                            sb.append(toHexDigitUpperCase(c >> 4));
+                            sb.append(toHexDigitUpperCase(c & 0xF));
                         } else {
                             sb.append('u');
-                            sb.append(toHexDigit((c >> 12) & 0xF));
-                            sb.append(toHexDigit((c >> 8) & 0xF));
-                            sb.append(toHexDigit((c >> 4) & 0xF));
-                            sb.append(toHexDigit(c & 0xF));
+                            int cp = c;
+                            sb.append(toHexDigitUpperCase((cp >> 12) & 0xF));
+                            sb.append(toHexDigitUpperCase((cp >> 8) & 0xF));
+                            sb.append(toHexDigitUpperCase((cp >> 4) & 0xF));
+                            sb.append(toHexDigitUpperCase(cp & 0xF));
                         }
                     } else {  // escapeType == ESC_BACKSLASH
                         sb.append(c);
                     }
-                    continue; 
+                    continue;
                 }
-                // Falls through when escapeType == NO_ESC 
+                // Falls through when escapeType == NO_ESC
             }
             // Needs no escaping
-                
+
             if (sb != null) sb.append(c);
-        } // for each characters
-        
+        } // for each character
+
+        if (quotation != null) {
+            sb.append(quotation.getSymbol());
+        }
+
         return sb == null ? s : sb.toString();
     }
 
-    private static char toHexDigit(int d) {
+    private static char toHexDigitLowerCase(int d) {
+        return (char) (d < 0xA ? d + '0' : d - 0xA + 'a');
+    }
+
+    private static char toHexDigitUpperCase(int d) {
         return (char) (d < 0xA ? d + '0' : d - 0xA + 'A');
     }
     
@@ -1634,4 +1688,54 @@ public class _StringUtils {
         return NORMALIZE_EOLS_REGEXP.matcher(s).replaceAll("\n");
     }
 
+    /**
+     * Used as the argument of {@link _StringUtils#jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)}.
+     */
+    public enum JsStringEncCompatibility {
+        /**
+         * Output is expected to be used in JavaScript, not in JSON.
+         */
+        JAVA_SCRIPT(true, false),
+
+        /**
+         * Output is expected to be used in JSON, not in JavaScript. While JSON is compatible with JavaScript, in this
+         * mode we don't care about escaping apostrophe, as it's not special in JSON.
+         */
+        JSON(false, true),
+
+        /**
+         * Output is expected to be used both in JSON and JavaScript.
+         */
+        JAVA_SCRIPT_OR_JSON(true, true);
+
+        JsStringEncCompatibility(boolean javaScriptCompatible, boolean jsonCompatible) {
+            this.javaScriptCompatible = javaScriptCompatible;
+            this.jsonCompatible = jsonCompatible;
+        }
+
+        private final boolean javaScriptCompatible;
+        private final boolean jsonCompatible;
+
+        boolean isJSONCompatible() {
+            return jsonCompatible;
+        }
+    }
+
+    /**
+     * Used as the argument of {@link _StringUtils#jsStringEnc(String, JsStringEncCompatibility, JsStringEncQuotation)}.
+     */
+    public enum JsStringEncQuotation {
+        QUOTATION_MARK('"'),
+        APOSTROPHE('\'');
+
+        private final char symbol;
+
+        JsStringEncQuotation(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public char getSymbol() {
+            return symbol;
+        }
+    }
 }

@@ -19,9 +19,6 @@
 
 package org.apache.freemarker.core.valueformat.impl;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -31,11 +28,10 @@ import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
 import org.apache.freemarker.core.util._DateUtils.DateParseException;
 import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
-import org.apache.freemarker.core.valueformat.TemplateDateFormat;
-import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
-import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
-import org.apache.freemarker.core.valueformat.UnparsableValueException;
+import org.apache.freemarker.core.valueformat.*;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     
@@ -51,7 +47,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     protected final int accuracy;
 
     /**
-     * @param formatString The value of the ..._format setting, like "iso nz".
+     * @param formatString The value of the {@code ...Format} setting, like "iso nz".
      * @param parsingStart The index of the char in the {@code settingValue} that directly after the prefix that has
      *     indicated the exact formatter class (like "iso" or "xs") 
      */

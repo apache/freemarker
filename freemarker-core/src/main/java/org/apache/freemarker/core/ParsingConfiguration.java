@@ -18,8 +18,6 @@
  */
 package org.apache.freemarker.core;
 
-import java.nio.charset.Charset;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
@@ -28,6 +26,8 @@ import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+
+import java.nio.charset.Charset;
 
 /**
  * Implemented by FreeMarker core classes (not by you) that provide configuration settings that affect template parsing
@@ -67,7 +67,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isWhitespaceStrippingSet();
@@ -80,7 +80,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isArithmeticEngineSet();
@@ -136,7 +136,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isAutoEscapingPolicySet();
@@ -170,7 +170,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isOutputFormatSet();
@@ -222,7 +222,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isRecognizeStandardFileExtensionsSet();
@@ -235,7 +235,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isIncompatibleImprovementsSet();
@@ -253,7 +253,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isTabSizeSet();
@@ -276,7 +276,7 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * the setting might return a default value, or returns the value of the setting from a parent parsing
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isSourceEncodingSet();

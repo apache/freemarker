@@ -19,8 +19,15 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.cformat.impl.*;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +36,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.util._DateUtils;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.junit.Test;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class MutableParsingAndProcessingConfigurationTest {
 
@@ -279,7 +281,7 @@ public class MutableParsingAndProcessingConfigurationTest {
         assertTrue(cfgB.isTimeZoneSet());
     }
 
-
+    @Test
     public void testTruncateBuiltinAlgorithm() throws TemplateException {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
@@ -287,11 +289,11 @@ public class MutableParsingAndProcessingConfigurationTest {
         cfgB.setSetting("truncateBuiltinAlgorithm", "unicodE");
         assertSame(DefaultTruncateBuiltinAlgorithm.UNICODE_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
 
-        cfgB.setSetting("truncate_builtin_algorithm", "ASCII");
+        cfgB.setSetting("truncateBuiltinAlgorithm", "ASCII");
         assertSame(DefaultTruncateBuiltinAlgorithm.ASCII_INSTANCE, cfgB.getTruncateBuiltinAlgorithm());
 
         {
-            cfgB.setSetting("truncate_builtin_algorithm",
+            cfgB.setSetting("truncateBuiltinAlgorithm",
                     "DefaultTruncateBuiltinAlgorithm('...', false)");
             DefaultTruncateBuiltinAlgorithm alg =
                     (DefaultTruncateBuiltinAlgorithm) cfgB.getTruncateBuiltinAlgorithm();
@@ -300,12 +302,14 @@ public class MutableParsingAndProcessingConfigurationTest {
             assertEquals(3, alg.getDefaultTerminatorLength());
             assertNull(alg.getDefaultMTerminator());
             assertNull(alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
-            cfgB.setSetting("truncate_builtin_algorithm",
+            cfgB.setSetting("truncateBuiltinAlgorithm",
                     "DefaultTruncateBuiltinAlgorithm(" +
                             "'...', " +
                             "markup(HTMLOutputFormat(), '<span class=trunc>...</span>'), " +
@@ -318,12 +322,14 @@ public class MutableParsingAndProcessingConfigurationTest {
             assertEquals("markupOutput(format=HTML, markup=<span class=trunc>...</span>)",
                     alg.getDefaultMTerminator().toString());
             assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
-            cfgB.setSetting("truncate_builtin_algorithm",
+            cfgB.setSetting("truncateBuiltinAlgorithm",
                     "DefaultTruncateBuiltinAlgorithm(" +
                             "DefaultTruncateBuiltinAlgorithm.STANDARD_ASCII_TERMINATOR, null, null, " +
                             "DefaultTruncateBuiltinAlgorithm.STANDARD_M_TERMINATOR, null, null, " +
@@ -338,6 +344,32 @@ public class MutableParsingAndProcessingConfigurationTest {
             assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
             assertEquals(0.5, alg.getWordBoundaryMinLength(), 0);
         }
+    }
+
+    @Test
+    public void testCFormat() throws TemplateException {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfgB.getCFormat());
+        cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, JavaScriptOrJSONCFormat.NAME);
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfgB.getCFormat());
+        cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, JSONCFormat.NAME);
+        assertSame(JSONCFormat.INSTANCE, cfgB.getCFormat());
+
+        cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, "default");
+        cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, JavaScriptOrJSONCFormat.NAME);
+
+        for (CFormat standardCFormat : new CFormat[] {
+                JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaScriptOrJSONCFormat.INSTANCE,
+                JavaCFormat.INSTANCE, XSCFormat.INSTANCE
+        }) {
+            cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, standardCFormat.getName());
+            assertSame(standardCFormat, cfgB.getCFormat());
+        }
+
+        // Object Builder value:
+        cfgB.setSetting(MutableProcessingConfiguration.C_FORMAT_KEY, JSONCFormat.class.getName() + "()");
+        assertSame(JSONCFormat.INSTANCE, cfgB.getCFormat());
     }
 
     // ------------

@@ -19,37 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FilterReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.cformat.CFormat;
 import org.apache.freemarker.core.debug._DebuggerService;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNodeModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
@@ -61,6 +34,12 @@ import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
+import java.io.*;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
@@ -919,6 +898,16 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     @Override
     public boolean isBooleanFormatSet() {
         return tCfg != null && tCfg.isBooleanFormatSet();
+    }
+
+    @Override
+    public CFormat getCFormat() {
+        return tCfg != null && tCfg.isCFormatSet() ? tCfg.getCFormat() : cfg.getCFormat();
+    }
+
+    @Override
+    public boolean isCFormatSet() {
+        return tCfg != null && tCfg.isCFormatSet();
     }
 
     @Override

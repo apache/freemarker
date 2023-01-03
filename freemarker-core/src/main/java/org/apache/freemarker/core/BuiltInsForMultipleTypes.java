@@ -19,26 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.CallableUtils.*;
-
-import java.util.Date;
-
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
@@ -48,64 +30,61 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 
+import java.util.Date;
+
+import static org.apache.freemarker.core.util.CallableUtils.getOptionalStringArgument;
+
 /**
  * A holder for builtins that didn't fit into any other category.
  */
 class BuiltInsForMultipleTypes {
 
-    static class cBI extends AbstractCBI {
-        
+    static class cBI extends AbstractCLikeBI {
+        final protected String formatNull(Environment env) throws InvalidReferenceException {
+            throw InvalidReferenceException.getInstance(target, env);
+        }
+    }
+
+    static class cnBI extends AbstractCLikeBI {
+        final protected String formatNull(Environment env) {
+            return env.getCFormat().getNullString();
+        }
+    }
+
+    private static abstract class AbstractCLikeBI extends ASTExpBuiltIn {
+
         @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel model = target.eval(env);
+        final TemplateModel _eval(Environment env) throws TemplateException {
+            final String result;
+            final TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return formatNumber(env, model);
+                TemplateNumberFormat cTemplateNumberFormat = env.getCTemplateNumberFormat();
+                try {
+                    result = cTemplateNumberFormat.formatToPlainText((TemplateNumberModel) model);
+                } catch (TemplateValueFormatException e) {
+                    throw MessageUtils.newCantFormatNumberException(cTemplateNumberFormat, target, e);
+                }
             } else if (model instanceof TemplateBooleanModel) {
-                return new SimpleString(((TemplateBooleanModel) model).getAsBoolean()
-                        ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
+                boolean b = ((TemplateBooleanModel) model).getAsBoolean();
+                CFormat cFormat = env.getCFormat();
+                result = b ? cFormat.getTrueString() : cFormat.getFalseString();
+            } else if (model instanceof TemplateStringModel) {
+                String s = _EvalUtils.modelToString((TemplateStringModel) model, target);
+                result = env.getCFormat().formatString(s, env);
+            } else if (model == TemplateNullModel.INSTANCE || model == null) {
+                result = formatNull(env);
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
-                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
+                        "number, boolean, or string",
+                        new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class, TemplateStringModel.class },
                         null, env);
             }
+            return new SimpleString(result);
         }
 
-        @Override
-        protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateException {
-            Number num = _EvalUtils.modelToNumber((TemplateNumberModel) model, target);
-            if (num instanceof Integer || num instanceof Long) {
-                // Accelerate these fairly common cases
-                return new SimpleString(num.toString());
-            } else if (num instanceof Double) {
-                double n = num.doubleValue();
-                if (n == Double.POSITIVE_INFINITY) {
-                    return new SimpleString("INF");
-                }
-                if (n == Double.NEGATIVE_INFINITY) {
-                    return new SimpleString("-INF");
-                }
-                if (Double.isNaN(n)) {
-                    return new SimpleString("NaN");
-                }
-                // Deliberately falls through
-            } else if (num instanceof Float) {
-                float n = num.floatValue();
-                if (n == Float.POSITIVE_INFINITY) {
-                    return new SimpleString("INF");
-                }
-                if (n == Float.NEGATIVE_INFINITY) {
-                    return new SimpleString("-INF");
-                }
-                if (Float.isNaN(n)) {
-                    return new SimpleString("NaN");
-                }
-                // Deliberately falls through
-            }
-        
-            return new SimpleString(env.getCNumberFormat().format(num));
-        }
-        
+        protected abstract String formatNull(Environment env) throws InvalidReferenceException;
+
     }
 
     static class dateBI extends ASTExpBuiltIn {
@@ -600,27 +579,5 @@ class BuiltInsForMultipleTypes {
 
     // Can't be instantiated
     private BuiltInsForMultipleTypes() { }
-
-    static abstract class AbstractCBI extends ASTExpBuiltIn {
-        
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel model = target.eval(env);
-            if (model instanceof TemplateNumberModel) {
-                return formatNumber(env, model);
-            } else if (model instanceof TemplateBooleanModel) {
-                return new SimpleString(((TemplateBooleanModel) model).getAsBoolean()
-                        ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
-            } else {
-                throw MessageUtils.newUnexpectedOperandTypeException(
-                        target, model,
-                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
-                        null, env);
-            }
-        }
-    
-        protected abstract TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateException;
-        
-    }
 
 }

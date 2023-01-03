@@ -19,50 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.CallableUtils.*;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.Collator;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateCallableModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateModelWithOriginName;
-import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateNullModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
@@ -70,27 +29,27 @@ import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.util.CallableUtils;
-import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util.*;
 import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._NullWriter;
-import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.core.valueformat.TemplateDateFormat;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateValueFormat;
-import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
-import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
-import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
+import org.apache.freemarker.core.valueformat.*;
 import org.apache.freemarker.core.valueformat.impl.ISOTemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.JavaTemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.JavaTemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.XSTemplateDateFormatFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.Collator;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
+
+import static org.apache.freemarker.core.TemplateBooleanFormat.C_FORMAT_STRING;
+import static org.apache.freemarker.core.util.CallableUtils._newNullOrOmittedArgumentException;
 
 /**
  * Object that represents the runtime environment during template processing. For every invocation of a
@@ -167,7 +126,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
 
-    private NumberFormat cNumberFormat;
+    private TemplateNumberFormat cachedCTemplateNumberFormat;
 
     /**
      * Used by the "iso_" built-ins to accelerate formatting.
@@ -1084,6 +1043,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return getMainTemplate().getBooleanFormat();
     }
 
+    @Override
+    protected CFormat getDefaultCFormat() {
+        return getMainTemplate().getCFormat();
+    }
+
     /**
      * Converts a value to plain text {@link String}, or to {@link TemplateMarkupOutputModel} if that's what the
      * {@link TemplateValueFormat} involved prefer to produce, similarly as <code>${value}</code> would do it. (Most
@@ -1203,7 +1167,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     TemplateBooleanFormat getTemplateBooleanFormat() {
         TemplateBooleanFormat format = cachedTemplateBooleanFormat;
         if (format == null) {
-            format = TemplateBooleanFormat.getInstance(getBooleanFormat());
+            format = TemplateBooleanFormat.getInstance(getBooleanFormat(), getCFormat());
             if (format != null) {
                 cachedTemplateBooleanFormat = format;
             }
@@ -1217,6 +1181,18 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         super.setBooleanFormat(booleanFormat);
         if (!booleanFormat.equals(previousFormat)) {
             cachedTemplateBooleanFormat = null;
+        }
+    }
+
+    @Override
+    public void setCFormat(CFormat cFormat) {
+        CFormat prevCFormat = getCFormat();
+        super.setCFormat(cFormat);
+        if (prevCFormat != cFormat) {
+            cachedTemplateBooleanFormat = null;
+            if (cachedTemplateNumberFormats != null) {
+                cachedTemplateNumberFormats.remove(C_FORMAT_STRING);
+            }
         }
     }
 
@@ -1391,7 +1367,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             final String params;
             {
                 int endIdx;
-                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
+                findParamsStart:
+                for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
                     char c = formatString.charAt(endIdx);
                     if (c == ' ' || c == '_') {
                         break findParamsStart;
@@ -1408,22 +1385,26 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
 
             return formatFactory.get(params, locale, this);
+        } else if (formatStringLen == 1 && formatString.charAt(0) == 'c') {
+            return getCTemplateNumberFormat();
         } else {
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
     }
 
     /**
-     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in. This is always US English
-     * <code>"0.################"</code>, without grouping and without superfluous decimal separator.
+     * Returns the {@link TemplateNumberFormat} that {@code ?c}/{@code ?cn} uses.
+     * Calling this method for many times is fine, as it internally caches the result object.
+     * Remember that {@link TemplateNumberFormat}-s aren't thread-safe objects, so the resulting object should only
+     * be used in the same thread where this {@link Environment} runs.
+     *
+     * @since 2.3.32
      */
-    public NumberFormat getCNumberFormat() {
-        // It can't be cached in a static field, because DecimalFormat-s aren't
-        // thread-safe.
-        if (cNumberFormat == null) {
-            cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT.clone();
+    public TemplateNumberFormat getCTemplateNumberFormat() {
+        if (cachedCTemplateNumberFormat == null) {
+            cachedCTemplateNumberFormat = getCFormat().getTemplateNumberFormat(this);
         }
-        return cNumberFormat;
+        return cachedCTemplateNumberFormat;
     }
 
     @Override

@@ -19,33 +19,11 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.freemarker.core.Dialect.ConfiguredDialect;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.cformat.impl.JavaScriptOrJSONCFormat;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -54,41 +32,24 @@ import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
-import org.apache.freemarker.core.outputformat.impl.CSSOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.JSONOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.JavaScriptOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.GetTemplateResult;
-import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
-import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
-import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.TemplateResolver;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
-import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
-import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.util._ClassUtils;
-import org.apache.freemarker.core.util._CollectionUtils;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
+import org.apache.freemarker.core.templateresolver.*;
+import org.apache.freemarker.core.templateresolver.impl.*;
+import org.apache.freemarker.core.util.*;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -225,6 +186,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final TimeZone timeZone;
     private final TimeZone sqlDateAndTimeTimeZone;
     private final String booleanFormat;
+    private final CFormat cFormat;
     private final TemplateExceptionHandler templateExceptionHandler;
     private final AttemptExceptionReporter attemptExceptionReporter;
     private final ArithmeticEngine arithmeticEngine;
@@ -390,6 +352,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         booleanFormat = builder.getBooleanFormat();
         timeZone = builder.getTimeZone();
         sqlDateAndTimeTimeZone = builder.getSQLDateAndTimeTimeZone();
+        cFormat = builder.getCFormat();
         templateExceptionHandler = builder.getTemplateExceptionHandler();
         attemptExceptionReporter = builder.getAttemptExceptionReporter();
         arithmeticEngine = builder.getArithmeticEngine();
@@ -1002,6 +965,20 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
 
     @Override
+    public CFormat getCFormat() {
+        return cFormat;
+    }
+
+    /**
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
+     */
+    @Override
+    public boolean isCFormatSet() {
+        return true;
+    }
+
+    @Override
     public String getTimeFormat() {
         return timeFormat;
     }
@@ -1584,7 +1561,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     /**
      * Usually you use {@link Builder} instead of this abstract class, except where you declare the type of a method
      * parameter or field, where the more generic {@link ExtendableBuilder} should be used. {@link ExtendableBuilder}
-     * might have other subclasses than {@link Builder}, because some applications needs different setting defaults
+     * might have other subclasses than {@link Builder}, because some applications need different setting defaults
      * or other changes.
      */
     public abstract static class ExtendableBuilder<SelfT extends ExtendableBuilder<SelfT>>
@@ -2514,6 +2491,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         @Override
         protected String getDefaultNumberFormat() {
             return "number";
+        }
+
+        @Override
+        protected CFormat getDefaultCFormat() {
+            return JavaScriptOrJSONCFormat.INSTANCE;
         }
 
         @Override

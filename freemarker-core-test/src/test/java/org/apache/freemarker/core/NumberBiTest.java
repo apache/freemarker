@@ -32,8 +32,8 @@ public class NumberBiTest extends TemplateTest {
         assertNumberBi("-1", "-1");
         assertNumberBi("1.9000", "1.9");
         assertNumberBi("19E-1", "1.9");
-        assertNumberBi("INF", "INF");
-        assertNumberBi("-Infinity", "-INF");
+        assertNumberBi("Infinity", "Infinity");
+        assertNumberBi("-Infinity", "-Infinity");
         assertNumberBi("NaN", "NaN");
     }
 

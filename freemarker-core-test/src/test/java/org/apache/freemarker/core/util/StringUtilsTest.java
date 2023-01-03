@@ -19,20 +19,19 @@
 
 package org.apache.freemarker.core.util;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.*;
+import org.apache.freemarker.core.util._StringUtils.JsStringEncCompatibility;
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.regex.Pattern;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import static junit.framework.TestCase.assertNull;
+import static org.apache.freemarker.core.util._StringUtils.JsStringEncCompatibility.*;
+import static org.apache.freemarker.core.util._StringUtils.JsStringEncQuotation.APOSTROPHE;
+import static org.apache.freemarker.core.util._StringUtils.JsStringEncQuotation.QUOTATION_MARK;
+import static org.junit.Assert.*;
 
 public class StringUtilsTest {
 
@@ -89,17 +88,17 @@ public class StringUtilsTest {
     @Test
     public void testSameStringsReturned() {
         String s = "==> I/m <safe>!";
-        assertTrue(s == _StringUtils.jsStringEnc(s, false));  // "==" because is must return the same object
-        assertTrue(s == _StringUtils.jsStringEnc(s, true));
+        assertTrue(s == _StringUtils.jsStringEnc(s, JAVA_SCRIPT));  // "==" because is must return the same object
+        assertTrue(s == _StringUtils.jsStringEnc(s, JSON));
 
         s = "";
-        assertTrue(s == _StringUtils.jsStringEnc(s, false));
-        assertTrue(s == _StringUtils.jsStringEnc(s, true));
+        assertTrue(s == _StringUtils.jsStringEnc(s, JAVA_SCRIPT));
+        assertTrue(s == _StringUtils.jsStringEnc(s, JSON));
 
         s = "\u00E1rv\u00EDzt\u0171r\u0151 \u3020";
-        assertEquals(s, _StringUtils.jsStringEnc(s, false));
-        assertTrue(s == _StringUtils.jsStringEnc(s, false));
-        assertTrue(s == _StringUtils.jsStringEnc(s, true));
+        assertEquals(s, _StringUtils.jsStringEnc(s, JAVA_SCRIPT));
+        assertTrue(s == _StringUtils.jsStringEnc(s, JAVA_SCRIPT));
+        assertTrue(s == _StringUtils.jsStringEnc(s, JSON));
     }
 
     @Test
@@ -115,8 +114,8 @@ public class StringUtilsTest {
     }
 
     private void assertEsc(String s, String javaScript, String json) {
-        assertEquals(javaScript, _StringUtils.jsStringEnc(s, false));
-        assertEquals(json, _StringUtils.jsStringEnc(s, true));
+        assertEquals(javaScript, _StringUtils.jsStringEnc(s, JAVA_SCRIPT));
+        assertEquals(json, _StringUtils.jsStringEnc(s, JSON));
     }
 
     @Test
@@ -394,6 +393,78 @@ public class StringUtilsTest {
         _StringUtils.RTFEnc(in, sw);
         assertEquals(expected, sw.toString());
     }
+
+    @Test
+    public void jsStringEncQuotationTests() {
+        for (JsStringEncCompatibility anyCompatibility : JsStringEncCompatibility.values()) {
+            JsStringEncCompatibility anyJsonCompatible = anyCompatibility.isJSONCompatible() ? anyCompatibility : JSON;
+
+            assertEquals("", _StringUtils.jsStringEnc("", anyCompatibility, null));
+            assertEquals("''", _StringUtils.jsStringEnc("", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"\"", _StringUtils.jsStringEnc("", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("a", _StringUtils.jsStringEnc("a", anyCompatibility, null));
+            assertEquals("a", _StringUtils.jsStringEnc("a", anyCompatibility, null));
+            assertEquals("'a'", _StringUtils.jsStringEnc("a", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"a\"", _StringUtils.jsStringEnc("a", anyCompatibility, QUOTATION_MARK));
+
+            try {
+                _StringUtils.jsStringEnc("", anyJsonCompatible, APOSTROPHE);
+                fail();
+            } catch (IllegalArgumentException e) {
+                // expected
+            }
+
+            assertEquals("a\\'b", _StringUtils.jsStringEnc("a'b", JAVA_SCRIPT, null));
+            assertEquals("a'b", _StringUtils.jsStringEnc("a'b", JSON, null));
+            assertEquals("a\\u0027b", _StringUtils.jsStringEnc("a'b", JAVA_SCRIPT_OR_JSON, null));
+            assertEquals("'a\\'b'", _StringUtils.jsStringEnc("a'b", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"a'b\"", _StringUtils.jsStringEnc("a'b", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("<\\/e>", _StringUtils.jsStringEnc("</e>", anyCompatibility, null));
+            assertEquals("'<\\/e>'", _StringUtils.jsStringEnc("</e>", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"<\\/e>\"", _StringUtils.jsStringEnc("</e>", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("\\/e>", _StringUtils.jsStringEnc("/e>", anyCompatibility, null));
+            assertEquals("'/e>'", _StringUtils.jsStringEnc("/e>", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"/e>\"", _StringUtils.jsStringEnc("/e>", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("\\>", _StringUtils.jsStringEnc(">", JAVA_SCRIPT, null));
+            assertEquals("\\u003E", _StringUtils.jsStringEnc(">", JSON, null));
+            assertEquals("'>'", _StringUtils.jsStringEnc(">", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\">\"", _StringUtils.jsStringEnc(">", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("-\\>", _StringUtils.jsStringEnc("->", JAVA_SCRIPT, null));
+            assertEquals("-\\u003E", _StringUtils.jsStringEnc("->", JSON, null));
+            assertEquals("'->'", _StringUtils.jsStringEnc("->", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"->\"", _StringUtils.jsStringEnc("->", JAVA_SCRIPT, QUOTATION_MARK));
+
+            assertEquals("--\\>", _StringUtils.jsStringEnc("-->", JAVA_SCRIPT, null));
+            assertEquals("--\\u003E", _StringUtils.jsStringEnc("-->", anyJsonCompatible, null));
+            assertEquals("'--\\>'", _StringUtils.jsStringEnc("-->", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"--\\>\"", _StringUtils.jsStringEnc("-->", JAVA_SCRIPT, QUOTATION_MARK));
+            assertEquals("\"--\\u003E\"", _StringUtils.jsStringEnc("-->", anyJsonCompatible, QUOTATION_MARK));
+
+            assertEquals("x->", _StringUtils.jsStringEnc("x->", anyCompatibility, null));
+            assertEquals("'x->'", _StringUtils.jsStringEnc("x->", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"x->\"", _StringUtils.jsStringEnc("x->", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("\\x3C", _StringUtils.jsStringEnc("<", JAVA_SCRIPT, null));
+            assertEquals("\\u003C", _StringUtils.jsStringEnc("<", JSON, null));
+            assertEquals("'<'", _StringUtils.jsStringEnc("<", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"<\"", _StringUtils.jsStringEnc("<", anyCompatibility, QUOTATION_MARK));
+
+            assertEquals("\\x3C!", _StringUtils.jsStringEnc("<!", JAVA_SCRIPT, null));
+            assertEquals("\\u003C!", _StringUtils.jsStringEnc("<!", JSON, null));
+            assertEquals("'\\x3C!'", _StringUtils.jsStringEnc("<!", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"\\x3C!\"", _StringUtils.jsStringEnc("<!", JAVA_SCRIPT, QUOTATION_MARK));
+            assertEquals("\"\\u003C!\"", _StringUtils.jsStringEnc("<!", anyJsonCompatible, QUOTATION_MARK));
+
+            assertEquals("<x", _StringUtils.jsStringEnc("<x", anyCompatibility, null));
+            assertEquals("'<x'", _StringUtils.jsStringEnc("<x", JAVA_SCRIPT, APOSTROPHE));
+            assertEquals("\"<x\"", _StringUtils.jsStringEnc("<x", anyCompatibility, QUOTATION_MARK));
+        }
+    }    
 
     @Test
     public void testNormalizeEOLs() {

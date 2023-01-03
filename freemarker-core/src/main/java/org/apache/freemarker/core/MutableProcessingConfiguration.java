@@ -19,60 +19,29 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.cformat.impl.StandardCFormats;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
 import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.templateresolver.AndMatcher;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.NotMatcher;
-import org.apache.freemarker.core.templateresolver.OrMatcher;
-import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
+import org.apache.freemarker.core.templateresolver.*;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.util.GenericParseException;
-import org.apache.freemarker.core.util.OptInTemplateClassResolver;
-import org.apache.freemarker.core.util.TemplateLanguageUtils;
-import org.apache.freemarker.core.util._ClassUtils;
-import org.apache.freemarker.core.util._CollectionUtils;
-import org.apache.freemarker.core.util._KeyValuePair;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtils;
+import org.apache.freemarker.core.util.*;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
+import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * Extended by FreeMarker core classes (not by you) that support specifying {@link ProcessingConfiguration} setting
@@ -98,6 +67,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = "attemptExceptionReporter";
     public static final String ARITHMETIC_ENGINE_KEY = "arithmeticEngine";
     public static final String BOOLEAN_FORMAT_KEY = "booleanFormat";
+    public static final String C_FORMAT_KEY = "cFormat";
     public static final String OUTPUT_ENCODING_KEY = "outputEncoding";
     public static final String URL_ESCAPING_CHARSET_KEY = "urlEscapingCharset";
     public static final String AUTO_FLUSH_KEY = "autoFlush";
@@ -119,6 +89,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         AUTO_IMPORTS_KEY,
         AUTO_INCLUDES_KEY,
         BOOLEAN_FORMAT_KEY,
+        C_FORMAT_KEY,
         CUSTOM_DATE_FORMATS_KEY,
         CUSTOM_NUMBER_FORMATS_KEY,
         DATE_FORMAT_KEY,
@@ -147,6 +118,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private TimeZone sqlDateAndTimeTimeZone;
     private boolean sqlDateAndTimeTimeZoneSet;
     private String booleanFormat;
+    private CFormat cFormat;
     private TemplateExceptionHandler templateExceptionHandler;
     private AttemptExceptionReporter attemptExceptionReporter;
     private ArithmeticEngine arithmeticEngine;
@@ -339,7 +311,47 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public boolean isNumberFormatSet() {
         return numberFormat != null;
     }
-    
+
+    /**
+     * Setter pair of {@link #getCFormat()}
+     */
+    public void setCFormat(CFormat cFormat) {
+        _NullArgumentException.check("cFormat", cFormat);
+        this.cFormat = cFormat;
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setCFormat(CFormat)}
+     */
+    public SelfT cFormat(CFormat value) {
+        setCFormat(value);
+        return self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetCFormat() {
+        cFormat = null;
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
+     */
+    protected abstract CFormat getDefaultCFormat();
+
+    @Override
+    public CFormat getCFormat() {
+        return isCFormatSet() ? cFormat : getDefaultCFormat();
+    }
+
+    @Override
+    public boolean isCFormatSet() {
+        return cFormat != null;
+    }
+
     @Override
     public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
          return isCustomNumberFormatsSet() ? customNumberFormats : getDefaultCustomNumberFormats();
@@ -1374,8 +1386,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *        
      *   <li><p>{@code "timeZone"}:
      *       See {@link #setTimeZone(TimeZone)}.
-     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
-     *       {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone(String)} defines it.
+     *       Also, {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
      *       <br>If you set this setting, consider setting {@code sqlDateAndTimeTimeZone}
@@ -1383,9 +1395,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       
      *   <li><p>{@code sqlDateAndTimeTimeZone}:
      *       See {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
-     *       Since 2.3.21.
-     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, {@code "JVM default"}
-     *       can be used that will be replaced with the actual JVM default time zone when
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone(String)} defines it.
+     *       Also, {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called. Also {@code "null"} can be used, which has the same effect
      *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
@@ -1809,6 +1820,16 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 }
             } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
+            } else if (C_FORMAT_KEY.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
+                    unsetCFormat();
+                } else {
+                    CFormat cFormat = StandardCFormats.STANDARD_C_FORMATS.get(value);
+                    setCFormat(
+                            cFormat != null ? cFormat
+                                    : (CFormat) _ObjectBuilderSettingEvaluator.eval(
+                                    value, CFormat.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (OUTPUT_ENCODING_KEY.equals(name)) {
                 setOutputEncoding(Charset.forName(value));
             } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {

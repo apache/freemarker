@@ -18,17 +18,17 @@
  */
 package org.apache.freemarker.core.valueformat.impl;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Deals with {@link TemplateNumberFormat}-s that wrap a Java {@link NumberFormat}. The parameter string is usually
@@ -67,8 +67,6 @@ public class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory
                 jFormat = NumberFormat.getCurrencyInstance(locale);
             } else if ("percent".equals(params)) {
                 jFormat = NumberFormat.getPercentInstance(locale);
-            } else if ("computer".equals(params)) {
-                jFormat = env.getCNumberFormat();
             } else {
                 try {
                     jFormat = ExtendedDecimalFormatParser.parse(params, locale);

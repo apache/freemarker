@@ -19,61 +19,19 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.WeakHashMap;
-
-import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.NonTemplateCallPlace;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core._DelayedShortClassName;
-import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.RichObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNullModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
+import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
+
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to invoke instances of
@@ -144,7 +102,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      * {@link String} class name to {@link StaticModel} cache.
      * This object only belongs to a single {@link DefaultObjectWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final StaticModels staticModels;
@@ -152,7 +110,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      * {@link String} class name to an enum value hash.
      * This object only belongs to a single {@link DefaultObjectWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final ClassBasedModelFactory enumModels;
@@ -1440,7 +1398,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          *         <p>
          *         Note that the version will be normalized to the lowest version where the same incompatible {@link
          *         DefaultObjectWrapper} improvements were already present, so {@link #getIncompatibleImprovements()}
-         *         might returns a lower version than what you have specified.
+         *         might return a lower version than what you have specified.
          * @param isIncompImprsAlreadyNormalized
          *         Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em>
          *         value. This parameter meant to be {@code true} when the class that extends {@link

@@ -19,14 +19,15 @@
 
 package org.apache.freemarker.core;
 
-import java.util.Set;
-
+import org.apache.freemarker.core.cformat.impl.StandardCFormats;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtils;
+
+import java.util.Set;
 
 /**
  * AST directive node: {@code #setting}.
@@ -35,10 +36,13 @@ final class ASTDirSetting extends ASTDirective {
 
     private final String key;
     private final ASTExpression value;
-    
+
+    private final ValueSafetyChecker valueSafeyChecker;
+
     static final Set<String> SETTING_NAMES = new _SortedArraySet<>(
             // Must be sorted alphabetically!
             MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
+            MutableProcessingConfiguration.C_FORMAT_KEY,
             MutableProcessingConfiguration.DATE_FORMAT_KEY,
             MutableProcessingConfiguration.DATE_TIME_FORMAT_KEY,
             MutableProcessingConfiguration.LOCALE_KEY,
@@ -101,6 +105,23 @@ final class ASTDirSetting extends ASTDirective {
         
         this.key = key;
         this.value = value;
+
+        if (key.equals(MutableProcessingConfiguration.C_FORMAT_KEY)) {
+            valueSafeyChecker = (env, actualValue) -> {
+                if (actualValue.startsWith("@")
+                        || StandardCFormats.STANDARD_C_FORMATS.containsKey(actualValue)
+                        || actualValue.equals("default")) {
+                    return;
+                }
+                throw new TemplateException("It's not allowed to set \"" + key + "\" to "
+                        + _StringUtils.jQuote(actualValue) + " in a template. Use a standard c format name ("
+                        + String.join(", ", StandardCFormats.STANDARD_C_FORMATS.keySet()) + "), " +
+                        "or registered custom  c format name after a \"@\".",
+                        env);
+            };
+        } else {
+            valueSafeyChecker = null;
+        }
     }
 
     @Override
@@ -115,6 +136,9 @@ final class ASTDirSetting extends ASTDirective {
             strval = ((TemplateNumberModel) mval).getAsNumber().toString();
         } else {
             strval = value.evalAndCoerceToStringOrUnsupportedMarkup(env);
+        }
+        if (valueSafeyChecker != null) {
+            valueSafeyChecker.check(env, strval);
         }
         try {
             env.setSetting(key, strval);
@@ -169,5 +193,10 @@ final class ASTDirSetting extends ASTDirective {
     boolean isNestedBlockRepeater() {
         return false;
     }
-    
+
+    @FunctionalInterface
+    private interface ValueSafetyChecker {
+        void check(Environment env, String value) throws TemplateException;
+    }
+
 }

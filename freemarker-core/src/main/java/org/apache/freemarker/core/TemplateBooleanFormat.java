@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.cformat.CFormat;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateValueFormat;
 
@@ -28,25 +29,29 @@ final class TemplateBooleanFormat extends TemplateValueFormat {
     static final String C_FORMAT_STRING = "c";
     static final String C_FALSE = "false";
     static final String C_TRUE = "true";
-    static final TemplateBooleanFormat C_INSTANCE = new TemplateBooleanFormat(C_FORMAT_STRING, C_TRUE, C_FALSE);
 
     /**
      * @return {@code null} if the format string was an empty string.
      */
-    static TemplateBooleanFormat getInstance(String formatString) {
-        return getInstanceOrValidate(formatString, false);
+    static TemplateBooleanFormat getInstance(String formatString, CFormat cFormat) {
+        return getInstanceOrValidate(formatString, cFormat,  false);
     }
 
     static void validateFormatString(String formatString) {
-        getInstanceOrValidate(formatString, true);
+        getInstanceOrValidate(formatString, null, true);
     }
 
-    private static TemplateBooleanFormat getInstanceOrValidate(String formatString, boolean validationOnly) {
-        if (formatString.length() == 0) {
+    private static TemplateBooleanFormat getInstanceOrValidate(String formatString, CFormat cFormat, boolean validationOnly) {
+        if (formatString == null || formatString.length() == 0) {
             return null;
         }
+
         if (formatString.equals(C_FORMAT_STRING)) {
-            return C_INSTANCE;
+            if (validationOnly) {
+                return null;
+            }
+
+            return new TemplateBooleanFormat(formatString, cFormat.getTrueString(), cFormat.getFalseString());
         }
 
         int commaIdx = formatString.indexOf(',');

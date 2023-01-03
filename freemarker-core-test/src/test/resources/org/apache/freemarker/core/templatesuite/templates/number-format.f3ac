@@ -34,9 +34,26 @@ ${double3?c}
 ${double4?c}
 ${bigDecimal?c}
 ${bigDecimal2?c}
-<@assertEquals expected="INF" actual="INF"?number?c />
-<@assertEquals expected="INF" actual="INF"?number?c />
-<@assertEquals expected="-INF" actual="-INF"?number?c />
-<@assertEquals expected="-INF" actual="-INF"?number?float?c />
+<#setting numberFormat = "c">
+${100000.5}
+<#setting numberFormat = ",000.##">
+${100000.5}
+<#setting numberFormat = "c">
+<@assertEquals expected="1" actual=double?string />
+<@assertEquals expected="1.000000000000001" actual=double2?string />
+<@assertEquals expected=(iciIntValue ge 2003032)?then("1E-16", "0.0000000000000001") actual=double3?string />
+<@assertEquals expected=(iciIntValue ge 2003032)?then("-1E-16", "-0.0000000000000001") actual=double4?string />
+<@assertEquals expected="1" actual=bigDecimal?string />
+<@assertEquals expected=(iciIntValue ge 2003032)?then("1E-16", "0.0000000000000001") actual=bigDecimal2?string />
+<@assertEquals expected="Infinity" actual="INF"?number?string />
+<@assertEquals expected="Infinity" actual="INF"?number?float?string />
+<@assertEquals expected="-Infinity" actual="-INF"?number?string />
+<@assertEquals expected="-Infinity" actual="-INF"?number?float?string />
+<@assertEquals expected="NaN" actual="NaN"?number?string />
+<@assertEquals expected="NaN" actual="NaN"?number?float?string />
+<@assertEquals expected="Infinity" actual="Infinity"?number?c />
+<@assertEquals expected="Infinity" actual="Infinity"?number?c />
+<@assertEquals expected="-Infinity" actual="-Infinity"?number?c />
+<@assertEquals expected="-Infinity" actual="-Infinity"?number?float?c />
 <@assertEquals expected="NaN" actual="NaN"?number?float?c />
 <@assertEquals expected="NaN" actual="NaN"?number?float?c />

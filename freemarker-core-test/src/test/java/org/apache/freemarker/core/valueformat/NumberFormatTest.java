@@ -18,23 +18,8 @@
  */
 package org.apache.freemarker.core.valueformat;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-
-import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.TemplateException;
+import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -53,7 +38,16 @@ import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("boxing")
 public class NumberFormatTest extends TemplateTest {
@@ -379,19 +373,14 @@ public class NumberFormatTest extends TemplateTest {
         addToDataModel("nan", Double.NaN);
 
         String humanAudienceOutput = "\u221e -\u221e \ufffd";
-        String computerAudienceOutput = "INF -INF NaN";
+        String computerAudienceOutput = "Infinity -Infinity NaN";
 
         assertOutput("${pInf?c} ${nInf?c} ${nan?c}", computerAudienceOutput);
-        assertOutput("<#setting numberFormat='computer'>${pInf} ${nInf} ${nan}",  computerAudienceOutput);
+        assertOutput("<#setting numberFormat='c'>${pInf} ${nInf} ${nan}",  computerAudienceOutput);
         assertOutput("${pInf} ${nInf} ${nan}", humanAudienceOutput);
 
         Environment env = new Template(null, "", getConfiguration())
                 .createProcessingEnvironment(null, null);
-        assertEquals(
-                computerAudienceOutput,
-                env.getCNumberFormat().format(Double.POSITIVE_INFINITY)
-                        + " " + env.getCNumberFormat().format(Double.NEGATIVE_INFINITY)
-                        + " " + env.getCNumberFormat().format(Double.NaN));
     }
 
 }

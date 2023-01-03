@@ -19,20 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.cformat.impl.JavaScriptOrJSONCFormat;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.MemberAccessPolicy;
 import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
@@ -40,6 +30,13 @@ import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAl
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
+import java.io.Serializable;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Implemented by FreeMarker core classes (not by you) that provide configuration settings that affect {@linkplain
@@ -160,9 +157,13 @@ public interface ProcessingConfiguration {
      * {@link Configuration}-level default is {@code "number"}. The possible values are:
      * <ul>
      *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "c"}: The number format used by FTL's {@code c} built-in (like in
+     *       {@code someNumber?c}). So with this <code>${someNumber}</code> will output the same as
+     *       <code>${someNumber?c}</code>. This should only be used if the template solely generates source code,
+     *       configuration file, or other content that's not read by normal users. If the template contains parts that's
+     *       read by normal users (like typical a web page), you are not supposed to use this.</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>A {@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
      *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
@@ -403,6 +404,22 @@ public interface ProcessingConfiguration {
      * an {@link CoreSettingValueNotSetException}.
      */
     boolean isCustomDateFormatsSet();
+
+
+    /**
+     * The format (usually a computer language) used {@code ?c}, {@code ?cn}, and for the
+     * {@code "c"} {@link #getNumberFormat() numberFormat}, and the
+     * {@code "c"} {@link #getBooleanFormat() booleanFormat}.
+     * Its {@link Configuration}-level default is {@link JavaScriptOrJSONCFormat#INSTANCE "JavaScript or JSON"}.
+     */
+    CFormat getCFormat();
+
+    /**
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
+     * an {@link CoreSettingValueNotSetException}.
+     */
+    boolean isCFormatSet();
 
     /**
      * The exception handler used to handle exceptions occurring inside templates.
@@ -739,7 +756,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this custom setting is set directly in this object (not in its parent
      * {@link ProcessingConfiguration}). If not, then depending on the implementing class, reading the custom
-     * attribute might returns the value of the setting from a parent object, or returns {@code null}, or throws a
+     * attribute might return the value of the setting from a parent object, or returns {@code null}, or throws a
      * {@link CoreSettingValueNotSetException}. Note that if an attribute was set to {@code
      * null} (as opposed to not set at all) then this method will return {@code true}.
      */

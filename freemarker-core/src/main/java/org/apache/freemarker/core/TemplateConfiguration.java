@@ -18,6 +18,15 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.cformat.CFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.util.CommonBuilder;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -25,14 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
-import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.pluggablebuiltin.TruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._CollectionUtils;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
  * A partial set of configuration settings used for customizing the {@link Configuration}-level settings for individual
@@ -63,6 +64,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final TimeZone sqlDateAndTimeTimeZone;
     private final boolean sqlDateAndTimeTimeZoneSet;
     private final String booleanFormat;
+    private final CFormat cFormat;
     private final TemplateExceptionHandler templateExceptionHandler;
     private final AttemptExceptionReporter attemptExceptionReporter;
     private final ArithmeticEngine arithmeticEngine;
@@ -102,6 +104,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         sqlDateAndTimeTimeZoneSet = builder.isSQLDateAndTimeTimeZoneSet();
         sqlDateAndTimeTimeZone = sqlDateAndTimeTimeZoneSet ? builder.getSQLDateAndTimeTimeZone() : null;
         booleanFormat = builder.isBooleanFormatSet() ? builder.getBooleanFormat() : null;
+        cFormat = builder.isCFormatSet() ? builder.getCFormat() : null;
         templateExceptionHandler = builder.isTemplateExceptionHandlerSet() ? builder.getTemplateExceptionHandler()
                 : null;
         attemptExceptionReporter = builder.isAttemptExceptionReporterSet() ? builder.getAttemptExceptionReporter()
@@ -334,6 +337,19 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean isBooleanFormatSet() {
         return booleanFormat != null;
+    }
+
+    @Override
+    public CFormat getCFormat() {
+        if (!isCFormatSet()) {
+            throw new CoreSettingValueNotSetException("cFormat");
+        }
+        return cFormat;
+    }
+
+    @Override
+    public boolean isCFormatSet() {
+        return cFormat != null;
     }
 
     @Override
@@ -656,6 +672,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
+        protected CFormat getDefaultCFormat() {
+            throw new CoreSettingValueNotSetException("cFormat");
+        }
+
+        @Override
         protected String getDefaultTimeFormat() {
             throw new CoreSettingValueNotSetException("timeFormat");
         }
@@ -785,6 +806,9 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isBooleanFormatSet()) {
                 setBooleanFormat(tc.getBooleanFormat());
+            }
+            if (tc.isCFormatSet()) {
+                setCFormat(tc.getCFormat());
             }
             if (tc.isCustomDateFormatsSet()) {
                 setCustomDateFormats(_CollectionUtils.mergeImmutableMaps(

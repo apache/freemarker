@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.cformat.impl.XSCFormat;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.*;
@@ -166,6 +167,14 @@ public class ConfigurationTest {
             assertFalse(cfgB.isTemplateCacheStorageSet());
             assertTrue(cfgB.getTemplateCacheStorage() instanceof SoftCacheStorage);
         }
+
+        assertFalse(cfgB.isCFormatSet());
+        //
+        cfgB.setCFormat(XSCFormat.INSTANCE);
+        assertTrue(cfgB.isCFormatSet());
+        //
+        cfgB.unsetCFormat();
+        assertFalse(cfgB.isCFormatSet());
     }
 
     @Test

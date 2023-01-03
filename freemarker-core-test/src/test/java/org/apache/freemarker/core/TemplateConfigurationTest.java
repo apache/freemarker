@@ -18,8 +18,27 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ProcessingConfiguration.*;
-import static org.junit.Assert.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.collections.ListUtils;
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
+import org.apache.freemarker.core.cformat.impl.JavaScriptCFormat;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
+import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
+import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.core.userpkg.*;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+import org.apache.freemarker.test.MonitoredTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
+import org.junit.Test;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -32,43 +51,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
-import org.apache.commons.collections.ListUtils;
-import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
-import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.pluggablebuiltin.impl.DefaultTruncateBuiltinAlgorithm;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
-import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
-import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
-import org.apache.freemarker.test.MonitoredTemplateLoader;
-import org.apache.freemarker.test.TestConfigurationBuilder;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("boxing")
 public class TemplateConfigurationTest {
@@ -174,6 +160,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
+        SETTING_ASSIGNMENTS.put("CFormat", JavaScriptCFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOW_NOTHING);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
         SETTING_ASSIGNMENTS.put("objectWrapper",

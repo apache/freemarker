@@ -19,34 +19,23 @@
 
 package org.apache.freemarker.test;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import junit.framework.TestSuite;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.util._StringUtils;
 import org.junit.runner.RunWith;
 import org.junit.runners.AllTests;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import junit.framework.TestSuite;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Abstract superclass for JUnit test suites where the test cases are defined in
@@ -126,7 +115,9 @@ public abstract class TemplateTestSuite extends TestSuite {
             }
             if (testSuiteIcis.isEmpty()) {
                 testSuiteIcis.add(getMinIcIVersion());
-                testSuiteIcis.add(getMaxIcIVersion());
+                if (!getMaxIcIVersion().equals(getMinIcIVersion())) {
+                    testSuiteIcis.add(getMaxIcIVersion());
+                }
             }
 
             java.net.URL url = getClass().getResource(CONFIGURATION_XML_FILE_NAME);

@@ -483,7 +483,7 @@ Core / Models and Object wrapping
     - `TemplateHashModel` doesn't have `isEmpty()` method anymore. (As the point of a pure `TemplateHashModel` is that
       it's not able to list its keys, almost all `isEmpty()` implementations in FM2 were just dummies returning `false`.)
       Note that `?hasContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
-      based on the idea that for some `key` (which you may don't know) `get(key)` might returns something.
+      based on the idea that for some `key` (which you may don't know) `get(key)` might return something.
   - `TemplateModel.NOTHING` was removed without replacement.
 - BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
 - Methods that return void now return an empty string instead of `TemplateModel.NOTHING` (which was removed).

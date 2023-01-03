@@ -92,7 +92,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
 
     /**
      * Returns the content as markup text; never {@code null}. If this {@link TemplateMarkupOutputModel} was created
-     * with {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required
+     * with {@link #fromMarkup(String)}, it might return the original markup text literally, but this is not required
      * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
      * with {@link #fromMarkup(String)} and it doesn't yet have the markup, it has to generate the markup now.
      */
