@@ -417,8 +417,8 @@
         and "directive" synonyms.)</para>
 
         <note>
-          <para>You can easily try writing templates on <link
-          xlink:href="http://freemarker-online.kenshoo.com/">http://freemarker-online.kenshoo.com/</link></para>
+          <para>You can easily try writing templates on <olink
+          targetdoc="onlineTemplateTester"/></para>
         </note>
 
         <section>
