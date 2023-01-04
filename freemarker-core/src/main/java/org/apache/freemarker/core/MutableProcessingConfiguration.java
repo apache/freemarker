@@ -1542,9 +1542,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       
      *   <li><p>{@code "outputFormat"}:
      *       See {@link ParsingConfiguration#getOutputFormat()}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or an
-     *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
-     *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default,
+     *       one of {@code undefined}, {@code HTML}, {@code XHTML}, {@code XML}, {@code RTF}, {@code plainText},
+     *       {@code CSS}, {@code JavaScript}, {@code JSON},
+     *       or an <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
+     *       {@code HTMLOutputFormat}, or {@code com.example.MyOutputFormat()}.
      *       
      *   <li><p>{@code "registeredCustomOutputFormats"}:
      *       See {@link TopLevelConfiguration#getRegisteredCustomOutputFormats()}.

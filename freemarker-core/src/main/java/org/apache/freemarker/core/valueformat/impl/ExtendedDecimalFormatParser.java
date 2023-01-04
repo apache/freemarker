@@ -18,17 +18,13 @@
  */
 package org.apache.freemarker.core.valueformat.impl;
 
+import org.apache.freemarker.core.util._StringUtils;
+
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Set;
-
-import org.apache.freemarker.core.util._StringUtils;
+import java.util.*;
 
 /**
  * Parses a {@link DecimalFormat} pattern string to a {@link DecimalFormat} instance, with the pattern string extensions
@@ -266,7 +262,7 @@ class ExtendedDecimalFormatParser {
         }
 
         String currencySymbol = null;  // Exceptional, as must be applied after "currency code"
-        fetchParamters: do {
+        fetchParameters: do {
             int namePos = pos;
             String name = fetchName();
             if (name == null) {
@@ -310,7 +306,7 @@ class ExtendedDecimalFormatParser {
                 skipWS();
             } else {
                 if (pos == ln) {
-                    break fetchParamters;
+                    break fetchParameters;
                 }
                 if (pos == paramEndPos) {
                     throw newExpectedSgParseException("parameter separator whitespace or comma");

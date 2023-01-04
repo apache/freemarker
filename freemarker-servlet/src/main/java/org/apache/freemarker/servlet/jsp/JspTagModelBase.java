@@ -19,6 +19,18 @@
 
 package org.apache.freemarker.servlet.jsp;
 
+import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateModelWithOriginName;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.util._StringUtils;
+import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.DynamicAttributes;
+import javax.servlet.jsp.tagext.JspTag;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -28,23 +40,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.DynamicAttributes;
-import javax.servlet.jsp.tagext.JspTag;
-
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core._DelayedShortClassName;
-import org.apache.freemarker.core._ErrorDescriptionBuilder;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModelWithOriginName;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 
 abstract class JspTagModelBase implements TemplateModelWithOriginName {
     protected final String tagName;
@@ -112,7 +107,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
                                 "). See cause exception for the more specific cause...");
                         if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {
-                            desc.tip("This problem is often caused by unnecessary parameter quotation. Paramters "
+                            desc.tip("This problem is often caused by unnecessary parameter quotation. Parameters "
                                     + "aren't quoted in FTL, similarly as they aren't quoted in most languages. "
                                     + "For example, these parameter assignments are wrong: ",
                                     "<@my.tag p1=\"true\" p2=\"10\" p3=\"${someVariable}\" p4=\"${x+1}\" />",
