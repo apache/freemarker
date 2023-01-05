@@ -2413,9 +2413,11 @@ public class Configurable {
      *       
      *   <li><p>{@code "output_format"}:
      *       See {@link Configuration#setOutputFormat(OutputFormat)}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or an
-     *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
-     *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default,
+     *       one of {@code undefined}, {@code HTML}, {@code XHTML}, {@code XML}, {@code RTF}, {@code plainText},
+     *       {@code CSS}, {@code JavaScript}, {@code JSON},
+     *       or an <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
+     *       {@code HTMLOutputFormat}, or {@code com.example.MyOutputFormat()}.
      *
      *   <li><p>{@code "registered_custom_output_formats"}:
      *       See {@link Configuration#setRegisteredCustomOutputFormats(Collection)}.
