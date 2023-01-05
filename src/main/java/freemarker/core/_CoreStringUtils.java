@@ -19,6 +19,8 @@
 
 package freemarker.core;
 
+import java.util.Collection;
+
 import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
@@ -142,4 +144,14 @@ public final class _CoreStringUtils {
         return c >= 'A' && c <= 'Z';
     }
 
+    public static String commaSeparatedJQuotedItems(Collection<String> items) {
+        StringBuilder sb = new StringBuilder();
+        for (String item : items) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(StringUtil.jQuote(item));
+        }
+        return sb.toString();
+    }
 }

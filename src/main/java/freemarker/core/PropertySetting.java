@@ -122,7 +122,7 @@ final class PropertySetting extends TemplateElement {
                     }
                     throw new TemplateException("It's not allowed to set \"" + key + "\" to "
                             + StringUtil.jQuote(actualValue) + " in a template. Use a standard c format name ("
-                            + String.join(", ", StandardCFormats.STANDARD_C_FORMATS.keySet()) + "), " +
+                            + _CoreStringUtils.commaSeparatedJQuotedItems(StandardCFormats.STANDARD_C_FORMATS.keySet()) + "), " +
                             "or registered custom  c format name after a \"@\".",
                             env);
                 }
