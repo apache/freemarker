@@ -16183,9 +16183,9 @@ rif: foo XYr baar</programlisting>
           the same output as
           <literal>${<replaceable>aNumber</replaceable>?c}</literal>. (In this
           case you should use a <literal>c_format</literal> like
-          <literal>"JavaScript or JSON"</literal>, and not some of the
-          strictly backward compatible defaults, as those are emulating some
-          confusing old glitches.)</para>
+          <literal>"JavaScript or JSON"</literal>, and not
+          <literal>"legacy"</literal>, as that emulates some confusing old
+          glitches.)</para>
 
           <para>If the value the <literal>c</literal> built-in is applied on
           is <literal>null</literal>/missing, it will stop the template
@@ -30059,7 +30059,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_32">
         <title>2.3.32</title>
 
-        <para>Release date: TODO</para>
+        <para>Release date: 2023-01-05 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30246,6 +30246,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>freemarker.core.MarkupOutputFormat.outputForeign(MO2
+              mo, Writer out)</literal> method, which for a
+              <literal>MarkupOutputFormat</literal> where
+              <literal>isOutputFormatMixingAllowed()</literal> returns
+              <literal>true</literal>, allows full control over how to print a
+              different markup into it. This can check what other markup is
+              allowed, and do conversion if necessary. (<link
+              xlink:href="https://github.com/apache/freemarker/pull/83">GitHub
+              PR 83</link>)</para>
+            </listitem>
+
+            <listitem>
               <para>Improved <literal>StringUtil.jsStringEnc</literal> and
               <literal>javaSctringEsc</literal> to support quoting. Also
               <literal>jsStringEnc</literal> now have a mode that targets both
@@ -30288,6 +30301,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               big text node) to a string. (<link
               xlink:href="https://github.com/apache/freemarker/pull/82">GitHub
               PR 82</link>)</para>
+            </listitem>
+
+            <listitem>
+              <para>Slightly improved
+              <literal>DefaultMemberAccessPolicy-rules</literal> (used by
+              default), and <literal>unsafeMethods.properties</literal> (long
+              deprecated, not used by default). Note that no matter how much
+              we tweak these, they will never provide proper security if you
+              have untrusted templates! See <link
+              linkend="faq_template_uploading_security">this in the
+              FAQ</link>!</para>
             </listitem>
           </itemizedlist>
         </section>

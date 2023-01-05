@@ -2196,9 +2196,7 @@ public class Configurable {
      *       See {@link Configuration#setCFormat(CFormat)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default (on {@link Configuration} only), or
      *       one of the predefined values {@code "JavaScript or JSON"}, {@code "JSON"},
-     *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"},
-     *       {@code "legacy"}, or
-     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value,
+     *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"}, {@code "legacy"},
      *       or an <a href="#fm_obe">object builder expression</a> that gives a {@link CFormat} object.
      *
      *   <li><p>{@code "template_exception_handler"}:
