@@ -30246,6 +30246,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>freemarker.core.MarkupOutputFormat.outputForeign(MO2
+              mo, Writer out)</literal> method, which for a
+              <literal>MarkupOutputFormat</literal> where
+              <literal>isOutputFormatMixingAllowed()</literal> returns
+              <literal>true</literal>, allows full control over how to print a
+              different markup into it. This can check what other markup is
+              allowed, and do conversion if necessary. (<link
+              xlink:href="https://github.com/apache/freemarker/pull/83">GitHub
+              PR 83</link>)</para>
+            </listitem>
+
+            <listitem>
               <para>Improved <literal>StringUtil.jsStringEnc</literal> and
               <literal>javaSctringEsc</literal> to support quoting. Also
               <literal>jsStringEnc</literal> now have a mode that targets both

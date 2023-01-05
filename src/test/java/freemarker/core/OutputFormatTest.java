@@ -746,11 +746,11 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testMixedContent() throws Exception {
-        getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(DummyOutputFormat.INSTANCE));
+        getConfiguration().setOutputFormat(DummyOutputFormat.INSTANCE);
         addToDataModel("m1", HTMLOutputFormat.INSTANCE.fromMarkup("x"));
         addToDataModel("m2", XMLOutputFormat.INSTANCE.fromMarkup("y"));
-        assertOutput("<#ftl outputFormat='dummy'>${m1}", "x");
-        assertErrorContains("<#ftl outputFormat='dummy'>${m2}", "is incompatible with");
+        assertOutput("${m1}", "x");
+        assertErrorContains("${m2}", "is incompatible with");
     }
 
     @Test
