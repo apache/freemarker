@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
+import freemarker.core._TemplateModelException;
+import freemarker.core._DelayedToString;
 
 public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
     
@@ -44,6 +46,20 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOut
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
         out.write(escapePlainText(textToEsc));
+    }
+
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return true;
+    }
+
+    @Override
+    public <MO extends TemplateMarkupOutputModel<MO>> void outputForeign(MO mo, Writer out) throws IOException, TemplateModelException {
+        if (mo.getOutputFormat().getMimeType().equals("text/html")) {
+            mo.getOutputFormat().output(mo, out);
+        } else {
+            throw new _TemplateModelException("DummyOutputFormat is incompatible with ", new _DelayedToString(mo.getOutputFormat()));
+        }
     }
 
     @Override
