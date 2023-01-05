@@ -30302,6 +30302,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://github.com/apache/freemarker/pull/82">GitHub
               PR 82</link>)</para>
             </listitem>
+
+            <listitem>
+              <para>Slightly improved
+              <literal>DefaultMemberAccessPolicy-rules</literal> (used by
+              default), and <literal>unsafeMethods.properties</literal> (long
+              deprecated, not used by default). Note that no matter how much
+              we tweak these, they will never provide proper security if you
+              have untrusted templates! See <link
+              linkend="faq_template_uploading_security">this in the
+              FAQ</link>!</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
