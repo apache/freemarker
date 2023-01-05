@@ -629,9 +629,9 @@ public class _StringUtils {
                 } else {
                     b.append("\\u00");
                     int x = c / 0x10;
-                    b.append(toHexDigitUpperCase(x));
+                    b.append(toHexDigit(x));
                     x = c & 0xF;
-                    b.append(toHexDigitUpperCase(x));
+                    b.append(toHexDigit(x));
                 }
             } else {
                 b.append(c);
@@ -682,8 +682,8 @@ public class _StringUtils {
                     b.append("\\t");
                 } else {
                     b.append("\\u00");
-                    b.append(toHexDigitLowerCase(c / 0x10));
-                    b.append(toHexDigitLowerCase(c & 0xF));                }
+                    b.append(toHexDigit(c / 0x10));
+                    b.append(toHexDigit(c & 0xF));                }
             } else {
                 b.append(c);
             }
@@ -742,8 +742,8 @@ public class _StringUtils {
                             b.append("\\t");
                         } else {
                             b.append("\\u00");
-                            b.append(toHexDigitLowerCase(c / 0x10));
-                            b.append(toHexDigitLowerCase(c & 0xF));
+                            b.append(toHexDigit(c / 0x10));
+                            b.append(toHexDigit(c & 0xF));
                         }
                     } else {
                         b.append(c);
@@ -942,15 +942,15 @@ public class _StringUtils {
                     } else if (escapeType == ESC_HEXA) {
                         if (!compatibility.jsonCompatible && c < 0x100) {
                             sb.append('x');
-                            sb.append(toHexDigitUpperCase(c >> 4));
-                            sb.append(toHexDigitUpperCase(c & 0xF));
+                            sb.append(toHexDigit(c >> 4));
+                            sb.append(toHexDigit(c & 0xF));
                         } else {
                             sb.append('u');
                             int cp = c;
-                            sb.append(toHexDigitUpperCase((cp >> 12) & 0xF));
-                            sb.append(toHexDigitUpperCase((cp >> 8) & 0xF));
-                            sb.append(toHexDigitUpperCase((cp >> 4) & 0xF));
-                            sb.append(toHexDigitUpperCase(cp & 0xF));
+                            sb.append(toHexDigit((cp >> 12) & 0xF));
+                            sb.append(toHexDigit((cp >> 8) & 0xF));
+                            sb.append(toHexDigit((cp >> 4) & 0xF));
+                            sb.append(toHexDigit(cp & 0xF));
                         }
                     } else {  // escapeType == ESC_BACKSLASH
                         sb.append(c);
@@ -971,11 +971,7 @@ public class _StringUtils {
         return sb == null ? s : sb.toString();
     }
 
-    private static char toHexDigitLowerCase(int d) {
-        return (char) (d < 0xA ? d + '0' : d - 0xA + 'a');
-    }
-
-    private static char toHexDigitUpperCase(int d) {
+    private static char toHexDigit(int d) {
         return (char) (d < 0xA ? d + '0' : d - 0xA + 'A');
     }
     

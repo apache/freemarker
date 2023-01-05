@@ -110,7 +110,7 @@ ${c?eval}
 
 [${"a"?jString}] = [a]
 [${"a\\'x'\nb"?jString}] = [a\\'x'\nb]
-[${"\x0001\x001A "?jString}] = [\u0001\u001a ]
+[${"\x0001\x001A "?jString}] = [\u0001\u001A ]
 
 [${"a"?jsString}] = [a]
 [${"a\\'x'\nb"?jsString}] = [a\\\'x\'\nb]
