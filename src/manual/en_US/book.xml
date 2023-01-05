@@ -16183,9 +16183,9 @@ rif: foo XYr baar</programlisting>
           the same output as
           <literal>${<replaceable>aNumber</replaceable>?c}</literal>. (In this
           case you should use a <literal>c_format</literal> like
-          <literal>"JavaScript or JSON"</literal>, and not some of the
-          strictly backward compatible defaults, as those are emulating some
-          confusing old glitches.)</para>
+          <literal>"JavaScript or JSON"</literal>, and not
+          <literal>"legacy"</literal>, as that emulates some confusing old
+          glitches.)</para>
 
           <para>If the value the <literal>c</literal> built-in is applied on
           is <literal>null</literal>/missing, it will stop the template
@@ -30059,7 +30059,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_32">
         <title>2.3.32</title>
 
-        <para>Release date: TODO</para>
+        <para>Release date: 2023-01-05 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
