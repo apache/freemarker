@@ -30059,7 +30059,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_32">
         <title>2.3.32</title>
 
-        <para>Release date: 2023-01-05 + release process</para>
+        <para>Release date: 2023-01-06 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30095,7 +30095,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>incompatible_improvements</literal>, the default
                   value is <literal>"legacy"</literal> that emulates the old
                   behavior of <literal>?c</literal> (where you can lose
-                  numerical prevision, etc.), so it's recommended to set it to
+                  numerical precision, etc.), so it's recommended to set it to
                   something else.</para>
                 </listitem>
 
@@ -30203,9 +30203,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?upper_case</literal>. The primary problem people run
               into with the localized versions is that with Turkish locale the
               letter <literal>i</literal>, and <literal>I</literal> has
-              different conversions as in most languages, which causes problem
-              if the conversion was for computer consumption (for technical
-              purposes), and not for humans.</para>
+              different conversions than in most languages, which causes
+              problem if the conversion was for computer consumption (for
+              technical purposes), and not for humans.</para>
             </listitem>
 
             <listitem>
@@ -30260,7 +30260,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Improved <literal>StringUtil.jsStringEnc</literal> and
-              <literal>javaSctringEsc</literal> to support quoting. Also
+              <literal>javaSctringEnc</literal> to support quoting. Also
               <literal>jsStringEnc</literal> now have a mode that targets both
               JavaScript and JSON, and doesn't give up apostrophe
               escaping.</para>
