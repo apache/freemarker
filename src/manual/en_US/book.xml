@@ -813,6 +813,16 @@ All Rights Reserved.
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para><literal>product.id?c</literal> formats
+              <literal>product.id</literal> (let's say that's a number, the
+              technical ID of the product in our database) so that it can be
+              safely parsed by a computer process. This is important, as
+              <literal>${product.id}</literal> would format it for human
+              audience, which may contains more complicated (like localized,
+              grouped, etc.) formatting.</para>
+            </listitem>
           </itemizedlist>
 
           <para>Some built-ins require parameters to specify the behavior
@@ -4376,19 +4386,19 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <para>since German people use comma as decimal separator.</para>
 
           <warning>
-            <para>As you can see, interpolations print for human audience (by
-            default at least), as opposed to ''computer audience''. In some
-            cases this is not good, like when you print a database record ID
-            as the part of an URL or as an invisible field value in a HTML
-            form, or when you print CSS/JavaScript numerical literals, because
-            these printed values will be read by computer programs and not by
-            humans. Most computer programs are very particular about the
-            format of the numbers, and understand only a kind of simple US
-            number formatting. For that, use the <link
-            linkend="ref_builtin_c"><literal>c</literal></link> (stands for
-            ''computer audience'') built-in, for example:</para>
+            <para>When the number you print will be read by some computer
+            process, always use the <link linkend="ref_builtin_c"><link
+            linkend="ref_builtin_c"><literal>c</literal></link>
+            built-in</link>, to get rid of any localized, or otherwise fancy
+            formatting! Like when you print a database record ID as the part
+            of an URL or as an invisible field value in a HTML form, or when
+            you print CSS/JavaScript numerical literals. Example:</para>
 
-            <programlisting role="template">&lt;a href="/shop/productdetails?id=${product.id?c}"&gt;Details...&lt;/a&gt;</programlisting>
+            <programlisting role="template">&lt;a href="/shop/productdetails?id=${product.id<emphasis>?c</emphasis>}"&gt;Details...&lt;/a&gt;</programlisting>
+
+            <para>That <literal>?c</literal> there formats the number with a
+            simple US format, which most computer processes will
+            understand.</para>
           </warning>
         </section>
 
@@ -4452,7 +4462,8 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           error.</para>
 
           <para>When you want to generate JavaScript or other computer
-          language parts, then <literal>${someBoolean?c}</literal>
+          language parts, then
+          <literal>${<replaceable>someBoolean</replaceable>?c}</literal>
           (<quote>c</quote> stands for computer audience) should be used to
           print true/false. (Remember that <literal>?c</literal> was also used
           to print numbers for computer audience.)</para>
@@ -6646,9 +6657,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.29) do you want to apply the fixes that are not 100%
+// version (here 2.3.32) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -6672,7 +6683,10 @@ cfg.setLogTemplateExceptions(false);
 cfg.setWrapUncheckedExceptions(true);
 
 // Do not fall back to higher scopes when reading a null loop variable:
-cfg.setFallbackOnNullLoopVariable(false);</programlisting>
+cfg.setFallbackOnNullLoopVariable(false);
+
+// To accomodate to how JDBC returns values; see Javadoc!
+cfg.setSQLDateAndTimeTimeZone(TimeZone.getDefault());</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6944,7 +6958,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         // Recommended settings for new projects:
         cfg.setDefaultEncoding("UTF-8");
@@ -6952,6 +6966,7 @@ public class Test {
         cfg.setLogTemplateExceptions(false);
         cfg.setWrapUncheckedExceptions(true);
         cfg.setFallbackOnNullLoopVariable(false);
+        cfg.setSQLDateAndTimeTimeZone(TimeZone.getDefault());
 
         /* ------------------------------------------------------------------------ */
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
