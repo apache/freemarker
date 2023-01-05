@@ -115,8 +115,8 @@ final class ASTDirSetting extends ASTDirective {
                 }
                 throw new TemplateException("It's not allowed to set \"" + key + "\" to "
                         + _StringUtils.jQuote(actualValue) + " in a template. Use a standard c format name ("
-                        + String.join(", ", StandardCFormats.STANDARD_C_FORMATS.keySet()) + "), " +
-                        "or registered custom  c format name after a \"@\".",
+                        + _StringUtils.toCommaSeparatedJQuotedItems(StandardCFormats.STANDARD_C_FORMATS.keySet())
+                        + "), or registered custom  c format name after a \"@\".",
                         env);
             };
         } else {

@@ -1338,7 +1338,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      *   <br>Example: <code>{ "trade": com.example.TradeTemplateDateFormatFactory,
      *   "log": com.example.LogTemplateDateFormatFactory }</code>
-     *       
+     *
+     *   <li><p>{@code "cFormat"}:
+     *       See {@link #setCFormat(CFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default (on {@link Configuration} only),
+     *       or one of the predefined values {@code "JavaScript or JSON"}, {@code "JSON"},
+     *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"},
+     *       or an <a href="#fm_obe">object builder expression</a> that gives a {@link CFormat} object.
+     *
      *   <li><p>{@code "templateExceptionHandler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder

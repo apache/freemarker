@@ -27,10 +27,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.apache.freemarker.core.util._StringUtils.JsStringEncQuotation.APOSTROPHE;
@@ -1686,6 +1683,17 @@ public class _StringUtils {
             return null;
         }
         return NORMALIZE_EOLS_REGEXP.matcher(s).replaceAll("\n");
+    }
+
+    public static String toCommaSeparatedJQuotedItems(Collection<String> items) {
+        StringBuilder sb = new StringBuilder();
+        for (String item : items) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(jQuote(item));
+        }
+        return sb.toString();
     }
 
     /**
