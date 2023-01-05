@@ -745,6 +745,15 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
+    public void testMixedContent() throws Exception {
+        getConfiguration().setOutputFormat(DummyOutputFormat.INSTANCE);
+        addToDataModel("m1", HTMLOutputFormat.INSTANCE.fromMarkup("x"));
+        addToDataModel("m2", XMLOutputFormat.INSTANCE.fromMarkup("y"));
+        assertOutput("${m1}", "x");
+        assertErrorContains("${m2}", "is incompatible with");
+    }
+
+    @Test
     public void testExplicitAutoEscBannedForNonMarkup() throws Exception {
         // While this restriction is technically unnecessary, we can catch a dangerous and probably common user
         // misunderstanding.

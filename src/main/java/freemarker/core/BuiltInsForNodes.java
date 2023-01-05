@@ -30,7 +30,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNodeModelEx;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
         /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.
@@ -123,7 +123,7 @@ class BuiltInsForNodes {
         private Environment env;
         
         AncestorSequence(Environment env) {
-            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             this.env = env;
         }
         

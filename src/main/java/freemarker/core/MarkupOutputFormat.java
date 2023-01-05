@@ -26,8 +26,8 @@ import freemarker.template.TemplateModelException;
 
 /**
  * Superclass of {@link OutputFormat}-s that represent a "markup" format, which is any format where certain character
- * sequences have special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has
- * to insert non-markup text from the data-model into the output markup. See also:
+ * sequences have special meaning, and thus may need escaping. (Escaping is important for FreeMarker, as typically it
+ * has to insert non-markup text from the data-model into the output markup. See also:
  * {@link Configuration#setOutputFormat(OutputFormat)}.)
  * 
  * <p>
@@ -77,10 +77,22 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
 
     /**
      * Equivalent to calling {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may uses a more efficient solution.
+     * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may use a more efficient solution.
      */
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
+    /**
+     * Outputs a value from a foreign output format; only used if {@link #isOutputFormatMixingAllowed()} return
+     * {@code true}. The default implementation in {@link MarkupOutputFormat} will just let the other
+     * {@link OutputFormat} to output value, but it can be overridden to support more nuanced conversions, or to check if outputting without
+     * conversion should be allowed.
+     *
+     * @since 2.3.32
+     */
+    public <MO2 extends TemplateMarkupOutputModel<MO2>> void outputForeign(MO2 mo, Writer out) throws IOException, TemplateModelException {
+        mo.getOutputFormat().output(mo, out);
+    }
+
     /**
      * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns
      * the original plain text, otherwise it returns {@code null}. Useful for converting between different types
@@ -91,7 +103,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
 
     /**
      * Returns the content as markup text; never {@code null}. If this {@link TemplateMarkupOutputModel} was created
-     * with {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required
+     * with {@link #fromMarkup(String)}, it might return the original markup text literally, but this is not required
      * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
      * with {@link #fromMarkup(String)} and it doesn't yet have the markup, it has to generate the markup now.
      */
@@ -105,7 +117,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     
     /**
      * Should give the same result as {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient solution.
+     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may use a more efficient solution.
      */
     public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
 

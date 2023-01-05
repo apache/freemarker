@@ -22,6 +22,7 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 /**
  * A class that represents a Range between two integers.
@@ -56,7 +57,7 @@ final class Range extends Expression {
                     begin, endType != END_SIZE_LIMITED ? lhoValue : begin + lhoValue,
                     endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
         } else {
-            return _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _TemplateAPI.VERSION_INT_2_3_21
+            return _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _VersionInts.V_2_3_21
                     ? new ListableRightUnboundedRangeModel(begin)
                     : new NonListableRightUnboundedRangeModel(begin);
         }

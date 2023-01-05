@@ -32,7 +32,7 @@ public class TemporalErrorMessagesTest extends TemplateTest {
 
     @Override
     protected Configuration createConfiguration() throws Exception {
-        return new Configuration(Configuration.VERSION_2_3_32);
+        return new Configuration(Configuration.VERSION_2_3_33);
     }
 
     @Test

@@ -18,7 +18,9 @@
 // under the License.
 
 deployUrl: "https://freemarker.apache.org/docs/"
-onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+// ASF policy doesn't allow using Google Analytics anymore:
+// onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+// Search still uses cookies:
 cookieConsentScriptURL: "https://cdn.jsdelivr.net/npm/cookie-bar/cookiebar-latest.min.js"
 searchKey: "003127866208504630097:arjqbv_znfw"
 validation: {
@@ -58,6 +60,7 @@ logo: {
 olinks: {
   homepage: "https://freemarker.apache.org/"
   api: "api/index.html"
+  apiConfigurationSettings: "api/freemarker/core/Configurable.html#setSetting-java.lang.String-java.lang.String-"
   
   // Homepage links:
   freemarkerdownload: "https://freemarker.apache.org/freemarkerdownload.html"
@@ -71,9 +74,10 @@ olinks: {
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
-  newBugReport: "https://issues.apache.org/jira/browse/FREEMARKER/"
-  newStackOverflowQuestion: "https://stackoverflow.com/questions/ask?tags=freemarker"
-  asfIncubator: "http://incubator.apache.org/"
+  reportBug: "https://issues.apache.org/jira/browse/FREEMARKER/"
+  reportSecurityVulnerability: "https://freemarker.apache.org/report-security-vulnerabilities.html"
+  askHelpOnStackOverflow: "https://stackoverflow.com/questions/ask?tags=freemarker"
+  asfPrivacyPolicy: "https://privacy.apache.org/policies/privacy-policy-public.html"
 }
 
 internalBookmarks: {
@@ -99,7 +103,7 @@ tabs: {
 // .icon-star
 secondaryTabs: {
   "Contribute": { class: "icon-heart", href: "olink:contribute" }
-  "Report a Bug": { class: "icon-bug", href: "olink:newBugReport" }
+  "Report a Bug": { class: "icon-bug", href: "olink:reportBug" }
   "Download": { class: "icon-download", href: "olink:freemarkerdownload" }
 }
 
@@ -108,27 +112,30 @@ footerSiteMap: {
     "What is FreeMarker?": "olink:what-is-freemarker"
     "Download": "olink:freemarkerdownload"
     "Version history": "id:app_versions"
-    "About us": "olink:history"
+    "FAQ": "id:app_faq"
     "License": "id:app_license"
+    "Privacy policy": "olink:asfPrivacyPolicy"
   }
-  "Handy stuff": {
+  "Often used / Reference": {
     "Try template online": "olink:onlineTemplateTester"
     "Expressions cheatsheet": "id:exp_cheatsheet"
     "#directives": "id:ref_directive_alphaidx"
     "?built_ins": "id:ref_builtins_alphaidx"
     ".special_vars": "id:ref_specvar"
+    "Configuration settings": "olink:apiConfigurationSettings"
   }
   "Community": {
-    "FreeMarker on Github": "olink:githubProject"
-    "Follow us on Twitter": "olink:twitter"
-    "Report a bug": "olink:newBugReport"
-    "Ask a question": "olink:newStackOverflowQuestion"
-    "Mailing lists": "olink:mailing-lists"
+    "Github project page": "olink:githubProject"
+    "Report a bug": "olink:reportBug"
+    "Report security vulnerability": "olink:reportSecurityVulnerability"
+    "Get help on StackOverflow": "olink:askHelpOnStackOverflow"
+    "Announcements on Twitter": "olink:twitter"
+    "Discuss on mailing lists": "olink:mailing-lists"
   }
 }
 
 socialLinks: {
   "Github": { class: "github", href: "olink:githubProject" }
   "Twitter": { class: "twitter", href: "olink:twitter" }
-  "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
+  "Stack Overflow": { class: "stack-overflow", href: "olink:askHelpOnStackOverflow" }
 }

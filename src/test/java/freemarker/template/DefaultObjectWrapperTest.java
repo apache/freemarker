@@ -104,10 +104,11 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.29
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.30
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.31
-        expected.add(Configuration.VERSION_2_3_32);
+        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.32
+        expected.add(Configuration.VERSION_2_3_33);
 
         List<Version> actual = new ArrayList<>();
-        for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
+        for (int i = _VersionInts.V_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;
@@ -1096,10 +1097,10 @@ public class DefaultObjectWrapperTest {
     public void testTemporalWrappingICI() throws TemplateModelException {
         LocalDate localDate = LocalDate.of(2021, 10, 31);
         assertThat(
-                new DefaultObjectWrapper(Configuration.VERSION_2_3_31).wrap(localDate),
+                new DefaultObjectWrapper(Configuration.VERSION_2_3_32).wrap(localDate),
                 not(instanceOf(TemplateTemporalModel.class)));
         assertThat(
-                new DefaultObjectWrapper(Configuration.VERSION_2_3_32).wrap(localDate),
+                new DefaultObjectWrapper(Configuration.VERSION_2_3_33).wrap(localDate),
                 instanceOf(SimpleTemporal.class));
     }
 

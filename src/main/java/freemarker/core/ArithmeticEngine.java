@@ -116,7 +116,7 @@ public abstract class ArithmeticEngine {
         @Override
         public int compareNumbers(Number first, Number second) {
             // We try to find the result based on the sign (+/-/0) first, because:
-            // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
+            // - It's much faster than converting to BigDecimal, and comparing to 0 is the most common comparison.
             // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
             int firstSignum = NumberUtil.getSignum(first); 
             int secondSignum = NumberUtil.getSignum(second);
@@ -126,7 +126,7 @@ public abstract class ArithmeticEngine {
                 return 0;
             } else {
                 // The most common case is comparing values of the same type. As BigDecimal can represent all of these
-                // with loseless round-trip (i.e., converting to BigDecimal and then back the original type gives the
+                // with lossless round-trip (i.e., converting to BigDecimal and then back the original type gives the
                 // original value), we can avoid conversion to BigDecimal without changing the result.
                 if (first.getClass() == second.getClass()) {
                     // Bit of optimization for this is a very common case:
@@ -623,7 +623,7 @@ public abstract class ArithmeticEngine {
             return new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
             if (NumberUtil.isInfinite(num)) {
-                throw new NumberFormatException("It's impossible to convert an infinte value ("
+                throw new NumberFormatException("It's impossible to convert an infinite value ("
                         + num.getClass().getSimpleName() + " " + num + ") to BigDecimal.");
             }
             // The exception message is useless, so we add a new one:

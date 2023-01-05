@@ -28,7 +28,7 @@ import java.util.TimeZone;
  *
  * @see Configurable#setCustomTemporalFormats(java.util.Map)
  * 
- * @since 2.3.32
+ * @since 2.3.33
  */
 public abstract class TemplateTemporalFormatFactory extends TemplateValueFormatFactory {
     

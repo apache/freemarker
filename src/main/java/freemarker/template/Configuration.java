@@ -60,13 +60,16 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
+import freemarker.core.CFormat;
 import freemarker.core.CSSOutputFormat;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.JSONOutputFormat;
+import freemarker.core.JavaScriptOrJSONCFormat;
 import freemarker.core.JavaScriptOutputFormat;
+import freemarker.core.LegacyCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -79,6 +82,7 @@ import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
+import freemarker.core.XSCFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
@@ -123,14 +127,14 @@ import freemarker.template.utility.XmlEscape;
  *  cfg.set<i>OtherSetting</i>(...);
  *  ...
  *  // Do not modify the settings later, when you have already started processing templates!
- *  
+ *
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
  *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  *
  *  <p><b>Do not modify the {@link Configuration} settings after you started processing templates!</b> Doing so can
  *  cause to undefined behavior, even if you only have a single thread!</p>
- * 
+ *
  * <p>A couple of settings that you should not leave on its default value are:
  * <ul>
  *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
@@ -389,7 +393,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         STANDARD_OUTPUT_FORMATS.put(JavaScriptOutputFormat.INSTANCE.getName(), JavaScriptOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
     }
-    
+
     /**
      * The parser decides between {@link #ANGLE_BRACKET_TAG_SYNTAX} and {@link #SQUARE_BRACKET_TAG_SYNTAX} based on the
      * first tag (like {@code [#if x]} or {@code <#if x>}) it mets. Note that {@code [=...]} is <em>not</em> a tag, but
@@ -480,8 +484,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** FreeMarker version 2.3.31 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_31 = new Version(2, 3, 31);
 
-    /** FreeMarker version 2.3.31 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    /** FreeMarker version 2.3.32 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_32 = new Version(2, 3, 32);
+
+    /** FreeMarker version 2.3.33 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_33 = new Version(2, 3, 33);
 
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
@@ -577,6 +584,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean localeExplicitlySet;
     private boolean defaultEncodingExplicitlySet;
     private boolean timeZoneExplicitlySet;
+    private boolean cFormatExplicitlySet;
 
     
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
@@ -744,7 +752,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          It won't be affected by {@code #include} and {@code #nested} anymore. This is unintended, a bug with
      *          {@code incompatible_improvement} 2.3.22 (a consequence of the lower level fixing described in the next
      *          point). The old behavior of {@code .template_name} is restored if you set
-     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()}) of
+     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()} of
      *          {@link Environment} keeps the changed behavior shown in the next point). 
      *       </li>
      *       <li><p>
@@ -953,8 +961,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *   <li><p>
      *     2.3.32 (or higher):
      *     <ul>
-     *       <li>2.3.32 (or higher):
-     *       {@link BeansWrapper} and {@link DefaultObjectWrapper} now wraps {@link Temporal}-s into
+     *       <li><p>
+     *         The number formatting of {@code ?c}, {@code ?cn} (and thus also of the {@code "c"}, and
+     *         {@code "computer"} {@link Configurable#setNumberFormat(String) number_format}) changes, if the
+     *         {@link #setCFormat(CFormat) c_format} setting was left on its default. The default of
+     *         {@link #setCFormat(CFormat) c_format} changes to {@link JavaScriptOrJSONCFormat#INSTANCE}, from
+     *         {@link LegacyCFormat#INSTANCE}, and that's what contains the changes:</p>
+     *         <ul>
+     *           <li><p>Changes affecting non-whole numbers, and whole numbers with over 100 digits:
+     *             Formatting is now lossless, so it potentially shows much more decimals.
+     *             It now uses exponential format (like 1.2E-7 instead of 0.00000012) for numbers whose absolute value
+     *             is less than 1E-6 (0.000001), and for whole numbers whose absolute value is at least 1E101 (so over
+     *             100 digits). It also uses exponential format for whole floating point
+     *             ({@code double}/{@code Double}}, or {@code float}/{@code Float}) numbers, when their absolute value
+     *             is too big for the floating point type to store them precisely (so if the intent was to store some
+     *             ID-s, they are likely corrupted anyway, as the type skips some whole numbers).</p></li>
+     *           <li><p>Changes affecting floating point infinity: Output changes from {@code INF} to {@code Infinity},
+     *             which is the JavaScript and JSON syntax. If you generate XML with XSD-style number syntax (which uses
+     *             {@code INF}), but you want the other number formatting changes (recommended), then set
+     *             {@link #setCFormat(CFormat) c_format} to {@link XSCFormat#INSTANCE}/{@code "XS"}.</p></li>
+     *         </ul>
+     *       </li>
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.33 (or higher):
+     *     <ul>
+     *       <li>{@link BeansWrapper} and {@link DefaultObjectWrapper} now wraps {@link Temporal}-s into
      *       {@link SimpleTemporal}. Before that, {@link Temporal}-s were treated as generic Java objects;
      *       see {@link BeansWrapper#BeansWrapper(Version)}.
      *     </ul>
@@ -1031,7 +1064,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static TemplateLoader createDefaultTemplateLoader(
             Version incompatibleImprovements, TemplateLoader existingTemplateLoader) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (incompatibleImprovements.intValue() < _VersionInts.V_2_3_21) {
             if (existingTemplateLoader instanceof LegacyDefaultFileTemplateLoader) {
                 return existingTemplateLoader;
             }
@@ -1824,7 +1857,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     static TimeZone getDefaultTimeZone() {
         return TimeZone.getDefault();
     }
-    
+
     @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
@@ -2019,7 +2052,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 logTemplateExceptionsExplicitlySet = true;
                 unsetLogTemplateExceptions();
             }
-            
+
+            if (!cFormatExplicitlySet) {
+                cFormatExplicitlySet = true;
+                unsetCFormat();
+            }
+
             if (!wrapUncheckedExceptionsExplicitlySet) {
                 wrapUncheckedExceptionsExplicitlySet = true;
                 unsetWrapUncheckedExceptions();
@@ -2463,8 +2501,43 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions == null
-                ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
+                ? incompatibleImprovements.intValue() >= _VersionInts.V_2_3_24
                 : recognizeStandardFileExtensions.booleanValue();
+    }
+
+    @Override
+    public void setCFormat(CFormat cFormat) {
+        super.setCFormat(cFormat);
+        cFormatExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also
+     * {@link #isCFormatExplicitlySet()} will return {@code false}.
+     *
+     * @since 2.3.32
+     */
+    public void unsetCFormat() {
+        if (cFormatExplicitlySet) {
+            setCFormat(getDefaultCFormat(incompatibleImprovements));
+            cFormatExplicitlySet = false;
+        }
+    }
+
+    static CFormat getDefaultCFormat(Version incompatibleImprovements) {
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_32
+                ? JavaScriptOrJSONCFormat.INSTANCE
+                : LegacyCFormat.INSTANCE;
+    }
+
+    /**
+     * Tells if {@link #setCFormat(CFormat)} (or equivalent) was already called on this instance.
+     *
+     * @since 2.3.32
+     */
+    public boolean isCFormatExplicitlySet() {
+        return cFormatExplicitlySet;
     }
 
     /**
@@ -3536,7 +3609,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
-            // [2.4] Default might changes to camel-case
+            // [2.4] Default might change to camel-case
             return DEFAULT_ENCODING_KEY;
         }
         if ("defaultCharset".equals(name)) {
@@ -3667,7 +3740,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.21
      */
     public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (incompatibleImprovements.intValue() < _VersionInts.V_2_3_21) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
             return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();

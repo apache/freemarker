@@ -41,7 +41,7 @@ import java.time.temporal.Temporal;
  * <p>{@link java.util.Date} values (the way date/time values were represented prior Java 8) are handled by
  * {@link TemplateDateModel}.
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 public interface TemplateTemporalModel extends TemplateModel {
 	/**

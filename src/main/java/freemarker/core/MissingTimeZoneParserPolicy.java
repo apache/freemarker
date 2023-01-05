@@ -37,7 +37,7 @@ import freemarker.template.Configuration;
  * <p>This is not used when parsing to {@link java.util.Date}, and the policy there is always effectively
  * {@link #ASSUME_CURRENT_TIME_ZONE}.
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 public enum MissingTimeZoneParserPolicy {
     /**

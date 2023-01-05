@@ -42,7 +42,7 @@ import freemarker.template.TemplateTemporalModel;
  *
  * @see TemplateDateFormat
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 public abstract class TemplateTemporalFormat extends TemplateValueFormat {
 

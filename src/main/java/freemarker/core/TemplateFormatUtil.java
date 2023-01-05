@@ -81,7 +81,7 @@ public final class TemplateFormatUtil {
      * that store {@code null} are in principle not allowed, and so are considered to be bugs in the
      * {@link ObjectWrapper} or {@link TemplateTemporalModel} implementation.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public static Temporal getNonNullTemporal(TemplateTemporalModel temporalModel) throws TemplateModelException {
         Temporal temporal = temporalModel.getAsTemporal();

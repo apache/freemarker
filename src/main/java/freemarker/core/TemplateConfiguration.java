@@ -29,6 +29,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -115,7 +116,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             return;
         }
         
-        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
+        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_22
                 && hasAnyConfigurableSet()) {
             throw new IllegalStateException(
                     "This TemplateConfiguration can't be associated to a Configuration that has "
@@ -198,6 +199,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (tc.isYearMonthFormatSet()) {
             setYearMonthFormat(tc.getYearMonthFormat());
+        }
+        if (tc.isCFormatSet()) {
+            setCFormat(tc.getCFormat());
         }
         if (tc.isEncodingSet()) {
             setEncoding(tc.getEncoding());
@@ -350,6 +354,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isYearMonthFormatSet() && !template.isYearMonthFormatSet()) {
             template.setYearMonthFormat(getYearMonthFormat());
+        }
+        if (isCFormatSet() && !template.isCFormatSet()) {
+            template.setCFormat(getCFormat());
         }
         if (isEncodingSet() && template.getEncoding() == null) {
             template.setEncoding(getEncoding());
@@ -559,7 +566,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public boolean isOutputFormatSet() {
         return outputFormat != null;
     }
-    
+
     /**
      * See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}. 
      */
@@ -701,6 +708,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isDateTimeFormatSet()
                 || isYearFormatSet()
                 || isYearMonthFormatSet()
+                || isCFormatSet()
                 || isLazyImportsSet()
                 || isLazyAutoImportsSet()
                 || isLocaleSet()

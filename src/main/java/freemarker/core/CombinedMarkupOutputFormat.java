@@ -70,6 +70,11 @@ public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<T
     }
 
     @Override
+    public <MO2 extends TemplateMarkupOutputModel<MO2>> void outputForeign(MO2 mo, Writer out) throws IOException, TemplateModelException {
+        outer.outputForeign(mo, out);
+    }
+
+    @Override
     public String escapePlainText(String plainTextContent) throws TemplateModelException {
         return outer.escapePlainText(inner.escapePlainText(plainTextContent));
     }

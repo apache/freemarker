@@ -68,6 +68,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTemporalModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.RichObjectWrapper;
 import freemarker.template.utility.WriteProtectable;
@@ -152,7 +153,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * {@link String} class name to {@link StaticModel} cache.
      * This object only belongs to a single {@link BeansWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final StaticModels staticModels;
@@ -160,7 +161,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * {@link String} class name to {@link EnumerationModel} cache.
      * This object only belongs to a single {@link BeansWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final ClassBasedModelFactory enumModels;
@@ -259,15 +260,15 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       from {@code true} to {@code false}.
      *     </li>  
      *     <li>
-     *       <p>2.3.32 (or higher):
+     *       <p>2.3.33 (or higher):
      *       The default of {@link #setTemporalSupport(boolean) temporalSupport} changes to {@code true},
      *       and thus {@link Temporal}-s (the Java 8 date/time classes) are wrapped into {@link TemplateTemporalModel}.
      *       Before that, {@link Temporal}-s were treated as generic Java objects.
-     *       {@link TemplateTemporalModel}) was added in FreeMarker 2.3.32.
+     *       {@link TemplateTemporalModel}) was added in FreeMarker 2.3.33.
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
-     *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
+     *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might return
      *   a lower version than what you have specified.
      *
      * @since 2.3.21
@@ -571,7 +572,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * Getter pair of {@link #setTemporalSupport(boolean)}
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public boolean getTemporalSupport() {
         return temporalSupport;
@@ -582,9 +583,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * just are wrapped like generic java objects (and thus won't be formatted by FreeMarker properly, nor the built-ins
      * made for them will work on them). The recommended value is {@code true}. But the defaults is {@code false} if the
      * {@link BeansWrapper#BeansWrapper(Version) incompatibleImprovements} of the {@link BeansWrapper} is less than
-     * {@code 2.3.32}, otherwise it's {@code true}.
+     * {@code 2.3.33}, otherwise it's {@code true}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public void setTemporalSupport(boolean temporalSupport) {
         checkModifiable();
@@ -905,7 +906,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     static boolean is2321Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_21;
+        return version.intValue() >= _VersionInts.V_2_3_21;
     }
 
     boolean is2324Bugfixed() {
@@ -913,7 +914,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     static boolean is2324Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+        return version.intValue() >= _VersionInts.V_2_3_24;
     }
     
     /** 
@@ -922,9 +923,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_32 ? Configuration.VERSION_2_3_32
-                : incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
-                : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_27 ? Configuration.VERSION_2_3_27
+                : incompatibleImprovements.intValue() == _VersionInts.V_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;

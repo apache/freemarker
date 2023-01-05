@@ -124,7 +124,7 @@ public class BeansWrapperMiscTest {
     public void testTemporalWrappingICI() throws TemplateModelException {
         LocalDate localDate = LocalDate.of(2021, 10, 31);
         {
-            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_31);
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_32);
             assertFalse(bw.getTemporalSupport());
             assertThat(
                     bw.wrap(localDate),
@@ -135,7 +135,7 @@ public class BeansWrapperMiscTest {
                     instanceOf(TemporalModel.class));
         }
         {
-            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_32);
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_33);
             assertTrue(bw.getTemporalSupport());
             assertThat(
                     bw.wrap(localDate),

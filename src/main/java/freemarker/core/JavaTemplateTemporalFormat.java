@@ -45,7 +45,7 @@ import freemarker.template.utility.ClassUtil;
 /**
  * See {@link JavaTemplateTemporalFormatFactory}.
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 class JavaTemplateTemporalFormat extends DateTimeFormatterBasedTemplateTemporalFormat {
 

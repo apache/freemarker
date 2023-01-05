@@ -40,7 +40,7 @@ public class CustomTemplateTemporalFormatTest extends TemplateTest {
     @Before
     public void setup() {
         Configuration cfg = getConfiguration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_32);
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_33);
         cfg.setLocale(Locale.US);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
 

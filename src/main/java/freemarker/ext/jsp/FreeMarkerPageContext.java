@@ -61,7 +61,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -195,7 +195,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             case PAGE_SCOPE: {
                 try {
                     final TemplateModel tm = environment.getGlobalNamespace().get(name);
-                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && unwrapper != null) {
+                    if (incompatibleImprovements >= _VersionInts.V_2_3_22 && unwrapper != null) {
                         return unwrapper.unwrap(tm);
                     } else { // Legacy behavior branch
                         if (tm instanceof AdapterTemplateModel) {
@@ -213,7 +213,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                         if (tm instanceof TemplateBooleanModel) {
                             return Boolean.valueOf(((TemplateBooleanModel) tm).getAsBoolean());
                         }
-                        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22
+                        if (incompatibleImprovements >= _VersionInts.V_2_3_22
                                 && tm instanceof TemplateDateModel) {
                             return ((TemplateDateModel) tm).getAsDate();
                         }

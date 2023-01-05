@@ -26,8 +26,6 @@ import java.io.Writer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.Collator;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -85,7 +83,8 @@ import freemarker.template.TemplateTemporalModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 import freemarker.template.Version;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
@@ -114,34 +113,6 @@ public final class Environment extends Configurable {
 
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
     private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
-
-    // Do not use this object directly; clone it first! DecimalFormat isn't
-    // thread-safe.
-    /**
-     * "c" number format as it was before Incompatible Improvements 2.3.21.
-     */
-    private static final DecimalFormat C_NUMBER_FORMAT_ICI_2_3_20 = new DecimalFormat(
-            "0.################",
-            new DecimalFormatSymbols(Locale.US));
-
-    static {
-        C_NUMBER_FORMAT_ICI_2_3_20.setGroupingUsed(false);
-        C_NUMBER_FORMAT_ICI_2_3_20.setDecimalSeparatorAlwaysShown(false);
-    }
-
-    // Do not use this object directly; clone it first! DecimalFormat isn't
-    // thread-safe.
-    /**
-     * "c" number format as it was starting from Incompatible Improvements 2.3.21.
-     */
-    private static final DecimalFormat C_NUMBER_FORMAT_ICI_2_3_21 = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
-
-    static {
-        DecimalFormatSymbols symbols = C_NUMBER_FORMAT_ICI_2_3_21.getDecimalFormatSymbols();
-        symbols.setInfinity("INF");
-        symbols.setNaN("NaN");
-        C_NUMBER_FORMAT_ICI_2_3_21.setDecimalFormatSymbols(symbols);
-    }
 
     /**
      * Maximum number of patterns per class in {@link #cachedTemporalFormatsByFormatString}, after which cache size
@@ -297,6 +268,17 @@ public final class Environment extends Configurable {
 
     @Deprecated
     private NumberFormat cNumberFormat;
+    private TemplateNumberFormat cTemplateNumberFormat;
+    private TemplateNumberFormat cTemplateNumberFormatWithPre2331IcIBug;
+
+    /**
+     * Should be a boolean "trueAndFalseStringsCached", but with Incompatible Improvements less than 2.3.22 the
+     * effective value of {@code boolean_format} could change because of {@code #import} and {@code #include},
+     * as those changed the parent template. So we need this cache invalidation trick.
+     */
+    private Configurable trueAndFalseStringsCachedForParent;
+    private String cachedTrueString;
+    private String cachedFalseString;
 
     /**
      * Used by the "iso_" built-ins to accelerate formatting.
@@ -349,8 +331,7 @@ public final class Environment extends Configurable {
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
-        incompatibleImprovementsGE2328 =
-                configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_28;
+        incompatibleImprovementsGE2328 = configuration.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_28;
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
@@ -653,8 +634,8 @@ public final class Environment extends Configurable {
                 try {
                     if (tc != null
                             && !(t instanceof FlowControlException
-                            && getConfiguration().getIncompatibleImprovements().intValue()
-                            >= _TemplateAPI.VERSION_INT_2_3_27)) {
+                                    && getConfiguration().getIncompatibleImprovements().intValue()
+                                    >= _VersionInts.V_2_3_27)) {
                         tc.onError(t);
                     } else {
                         throw t;
@@ -874,7 +855,7 @@ public final class Environment extends Configurable {
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
             throws TemplateException, IOException {
         if (nodeNamespaces == null) {
-            SimpleSequence ss = new SimpleSequence(1, _TemplateAPI.SAFE_OBJECT_WRAPPER);
+            SimpleSequence ss = new SimpleSequence(1, _ObjectWrappers.SAFE_OBJECT_WRAPPER);
             ss.add(currentNamespace);
             nodeNamespaces = ss;
         }
@@ -1273,7 +1254,7 @@ public final class Environment extends Configurable {
 
     private static SimpleSequence initPositionalCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleSequence positionalCatchAllParamValue;
-        positionalCatchAllParamValue = new SimpleSequence(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+        positionalCatchAllParamValue = new SimpleSequence(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
         macroCtx.setLocalVar(catchAllParamName, positionalCatchAllParamValue);
         return positionalCatchAllParamValue;
     }
@@ -1281,7 +1262,7 @@ public final class Environment extends Configurable {
     private static SimpleHash initNamedCatchAllParameter(Macro.Context macroCtx, String catchAllParamName) {
         SimpleHash namedCatchAllParamValue;
         namedCatchAllParamValue = new SimpleHash(
-                new LinkedHashMap<String, Object>(), _TemplateAPI.SAFE_OBJECT_WRAPPER, 0);
+                new LinkedHashMap<String, Object>(), _ObjectWrappers.SAFE_OBJECT_WRAPPER, 0);
         macroCtx.setLocalVar(catchAllParamName, namedCatchAllParamValue);
         return namedCatchAllParamValue;
     }
@@ -1794,6 +1775,8 @@ public final class Environment extends Configurable {
         return format;
     }
 
+    static final String COMPUTER_FORMAT_STRING = "computer";
+
     /**
      * Returns the {@link TemplateNumberFormat} for the given parameters without using the {@link Environment}-level
      * cache. Of course, the {@link TemplateNumberFormatFactory} involved might still uses its own cache.
@@ -1825,6 +1808,9 @@ public final class Environment extends Configurable {
             }
 
             return formatFactory.get(params, locale, this);
+        } else if (formatStringLen >= 1 && formatString.charAt(0) == 'c'
+                && (formatStringLen == 1 || formatString.equals(COMPUTER_FORMAT_STRING))) {
+            return getCTemplateNumberFormatWithPre2331IcIBug();
         } else {
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
@@ -1833,31 +1819,75 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in, except, if
      * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is less than 2.3.31,
-     * this will wrongly give the format that the <tt>c</tt> built-in used before Incompatible Improvements 2.3.21. See
-     * more at {@link Configuration#Configuration(Version)}.
+     * this will wrongly give the format that the <tt>c</tt> built-in used before Incompatible Improvements 2.3.21.
+     * See more at {@link Configuration#Configuration(Version)}.
+     *
+     * @deprecated Use {@link #getCTemplateNumberFormat()} instead. This method can't return the format used when
+     * {@linkplain Configuration#setIncompatibleImprovements(Version) Incompatible Improvements} is 2.3.32,
+     * or greater, and instead it will fall back to return the format that was used for 2.3.31. Also, as its described
+     * earlier, this method was inconsistent with {@code ?c} between Incompatible Improvements 2.3.21 and 2.3.30, while
+     * {@link #getCTemplateNumberFormat()} behaves as {@code ?c} for all Incompatible Improvements value.
      */
+    @Deprecated
     public NumberFormat getCNumberFormat() {
-        // Note: DecimalFormat-s aren't thread-safe, so you must clone the static field value.
         if (cNumberFormat == null) {
-            if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31) {
-                cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_21.clone();
+            CFormat cFormat = getCFormat();
+            if (cFormat == LegacyCFormat.INSTANCE && configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_31) {
+                // Emulate old bug
+                cNumberFormat = ((LegacyCFormat) cFormat).getLegacyNumberFormat(_VersionInts.V_2_3_20);
             } else {
-                cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT_ICI_2_3_20.clone();
+                cNumberFormat = cFormat.getLegacyNumberFormat(this);
             }
         }
         return cNumberFormat;
     }
 
     /**
-     * As we have a number format cache that's shared between {@link Configuration}-s, if the interpretation of a format
-     * is impacted by Incompatible Improvements, we must change the cache key.
+     * Returns the {@link TemplateNumberFormat} that {@code ?c}/{@code ?cn} uses.
+     * Calling this method for many times is fine, as it internally caches the result object.
+     * Remember that {@link TemplateNumberFormat}-s aren't thread-safe objects, so the resulting object should only
+     * be used in the same thread where this {@link Environment} runs.
+     *
+     * @since 2.3.32
      */
-    String transformNumberFormatGlobalCacheKey(String keyPart) {
-        if (configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_31
-                && JavaTemplateNumberFormatFactory.COMPUTER.equals(keyPart)) {
-            return "computer\u00002";
+    public TemplateNumberFormat getCTemplateNumberFormat() {
+        if (cTemplateNumberFormat == null) {
+            cTemplateNumberFormat = getCFormat().getTemplateNumberFormat(this);
         }
-        return keyPart;
+        return cTemplateNumberFormat;
+    }
+
+    /**
+     * Like {@link #getCTemplateNumberFormat()}, but emulates the same bug as
+     * {@link #getCNumberFormat()} if a legacy default {@link CFormat} is used.
+     */
+    private TemplateNumberFormat getCTemplateNumberFormatWithPre2331IcIBug() {
+        if (cTemplateNumberFormatWithPre2331IcIBug == null) {
+            CFormat cFormat = getCFormat();
+            if (cFormat == LegacyCFormat.INSTANCE && configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_31) {
+                // Emulate old bug
+                cTemplateNumberFormatWithPre2331IcIBug = ((LegacyCFormat) cFormat).getTemplateNumberFormat(_VersionInts.V_2_3_20);
+            } else {
+                cTemplateNumberFormatWithPre2331IcIBug = cFormat.getTemplateNumberFormat(this);
+            }
+        }
+        return cTemplateNumberFormatWithPre2331IcIBug;
+    }
+
+    @Override
+    public void setCFormat(CFormat cFormat) {
+        CFormat prevCFormat = getCFormat();
+        super.setCFormat(cFormat);
+        if (prevCFormat != cFormat) {
+            cTemplateNumberFormat = null;
+            cTemplateNumberFormatWithPre2331IcIBug = null;
+            cNumberFormat = null;
+            if (cachedTemplateNumberFormats != null) {
+                cachedTemplateNumberFormats.remove(C_FORMAT_STRING);
+                cachedTemplateNumberFormats.remove(COMPUTER_FORMAT_STRING);
+            }
+            clearCachedTrueAndFalseString();
+        }
     }
 
     @Override
@@ -1935,6 +1965,118 @@ public final class Environment extends Configurable {
                 cachedTemporalFormats.evictAfterYearMonthFormatChange();
             }
         }
+    }
+
+    @Override
+    public void setBooleanFormat(String booleanFormat) {
+        super.setBooleanFormat(booleanFormat);
+        clearCachedTrueAndFalseString();
+    }
+
+    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
+        if (value) {
+            String s = getTrueStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_TRUE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        } else {
+            String s = getFalseStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_FALSE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        }
+    }
+
+    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
+        return new _ErrorDescriptionBuilder(
+                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
+                new _DelayedJQuote(getBooleanFormat()),
+                (getBooleanFormat().equals(BOOLEAN_FORMAT_LEGACY_DEFAULT)
+                        ? ", which is the legacy deprecated default, and we treat it as if no format was set. "
+                        + "This is the default configuration; you should provide the format explicitly for each "
+                        + "place where you print a boolean."
+                        : ".")
+        ).tips(
+                "Write something like myBool?string('yes', 'no') to specify boolean formatting in place.",
+                new Object[]{
+                        "If you want \"true\"/\"false\" result as you are generating computer-language output "
+                                + "(not for direct human consumption), then use \"?c\", like ${myBool?c}. (If you "
+                                + "always generate computer-language output, then it's might be reasonable to set "
+                                + "the \"", BOOLEAN_FORMAT_KEY, "\" setting to \"c\" instead.)",
+                },
+                new Object[] {
+                        "If you need the same two values on most places, the programmers can set the \"",
+                        BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\". However, then it will be easy to "
+                        + "unwillingly format booleans like that."
+                }
+        );
+    }
+
+    /**
+     * Returns the string to which {@code true} is converted to for human audience, or {@code null} if automatic
+     * coercion to string is not allowed.
+     *
+     * <p>This value is deduced from the {@code "boolean_format"} setting.
+     * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
+     * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally, as that default is a
+     * historical mistake in FreeMarker, since it targets computer language output, not human writing. Thus it's
+     * ignored, and instead we admit that we don't know how to show boolean values.
+     */
+    String getTrueStringValue() {
+        if (trueAndFalseStringsCachedForParent == getParent()) {
+            return cachedTrueString;
+        }
+        cacheTrueAndFalseStrings();
+        return cachedTrueString;
+    }
+
+    /**
+     * Same as {@link #getTrueStringValue()} but with {@code false}.
+     */
+    String getFalseStringValue() {
+        if (trueAndFalseStringsCachedForParent == getParent()) {
+            return cachedFalseString;
+        }
+        cacheTrueAndFalseStrings();
+        return cachedFalseString;
+    }
+
+    private void clearCachedTrueAndFalseString() {
+        trueAndFalseStringsCachedForParent = null;
+        cachedTrueString = null;
+        cachedFalseString = null;
+    }
+
+    private void cacheTrueAndFalseStrings() {
+        String[] parsedBooleanFormat = parseBooleanFormat(getBooleanFormat());
+        if (parsedBooleanFormat != null) {
+            if (parsedBooleanFormat.length == 0) {
+                CFormat cFormat = getCFormat();
+                cachedTrueString = cFormat.getTrueString();
+                cachedFalseString = cFormat.getFalseString();
+            } else {
+                cachedTrueString = parsedBooleanFormat[0];
+                cachedFalseString = parsedBooleanFormat[1];
+            }
+        } else {
+            // This happens for BOOLEAN_FORMAT_LEGACY_DEFAULT deliberately. That's the default for BC, but it's not a
+            // good default for human audience formatting, so we pretend that it wasn't set.
+            cachedTrueString = null;
+            cachedFalseString = null;
+        }
+        trueAndFalseStringsCachedForParent = getParent();
     }
 
     public Configuration getConfiguration() {
@@ -3065,7 +3207,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Similar to {@link #getLocalVariable(String)}, but might returns {@link TemplateNullModel}. Only used internally,
+     * Similar to {@link #getLocalVariable(String)}, but might return {@link TemplateNullModel}. Only used internally,
      * as {@link TemplateNullModel} is internal.
      *
      * @since 2.3.29
@@ -4087,12 +4229,12 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
-            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             this.template = Environment.this.getTemplate();
         }
 
         Namespace(Template template) {
-            super(_TemplateAPI.SAFE_OBJECT_WRAPPER);
+            super(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
             this.template = template;
         }
 
@@ -4296,11 +4438,11 @@ public final class Environment extends Configurable {
     };
 
     private boolean isBeforeIcI2322() {
-        return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        return configuration.getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_22;
     }
 
     boolean isIcI2324OrLater() {
-        return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+        return configuration.getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_24;
     }
 
     /**

@@ -29,8 +29,6 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
     static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
 
-    static final String COMPUTER = "computer";
-
     /**
      * Exposed to unit testing.
      */
@@ -46,9 +44,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        CacheKey cacheKey = new CacheKey(
-                env != null ? env.transformNumberFormatGlobalCacheKey(params) : params,
-                locale);
+        CacheKey cacheKey = new CacheKey(params, locale);
 
         NumberFormat numberFormat = numberFormatCache.get(cacheKey);
         if (numberFormat == null) {
@@ -67,8 +63,6 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
             return NumberFormat.getCurrencyInstance(locale);
         } else if ("percent".equals(params)) {
             return NumberFormat.getPercentInstance(locale);
-        } else if (COMPUTER.equals(params)) {
-            return env.getCNumberFormat();
         } else {
             try {
                 return ExtendedDecimalFormatParser.parse(params, locale);

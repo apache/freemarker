@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * accessed from N threads concurrently, there's a chance to end up with N-1 more remembered entries, though in
  * practical applications this is very unlikely to happen. That's also precision given up for speed.
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 class FastLRUKeyValueStore<K, V> {
     private final int guaranteedRecentEntries;

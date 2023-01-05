@@ -25,9 +25,10 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
-public class BigDecimalArithmeticEngineTest {
+public class ArithmeticEngineTest {
 
     @Test
     public void compareNumbersZeroTest() {
@@ -92,6 +93,34 @@ public class BigDecimalArithmeticEngineTest {
                 assertEquals(-1, BIGDECIMAL_ENGINE.compareNumbers(one, posInf));
             }
         }
+    }
+
+    @Test
+    public void toNumberTest() {
+        for (ArithmeticEngine arithmeticEngine : new ArithmeticEngine[]{BIGDECIMAL_ENGINE, CONSERVATIVE_ENGINE}) {
+            assertEquals(Double.POSITIVE_INFINITY, arithmeticEngine.toNumber("INF"));
+            assertEquals(Double.NEGATIVE_INFINITY, arithmeticEngine.toNumber("-INF"));
+            assertEquals(Double.NEGATIVE_INFINITY, arithmeticEngine.toNumber("-Infinity"));
+            assertEquals(Double.POSITIVE_INFINITY, arithmeticEngine.toNumber("Infinity"));
+            Number nan = arithmeticEngine.toNumber("NaN");
+            assertThat(nan, Matchers.instanceOf(Double.class));
+            assertTrue(Double.isNaN((double) nan));
+        }
+
+        assertEquals(new BigDecimal("1234567"), BIGDECIMAL_ENGINE.toNumber("1234567"));
+        assertEquals(Integer.valueOf("1234567"), CONSERVATIVE_ENGINE.toNumber("1234567"));
+
+        assertEquals(new BigDecimal("12345678901234"), BIGDECIMAL_ENGINE.toNumber("12345678901234"));
+        assertEquals(12345678901234L, CONSERVATIVE_ENGINE.toNumber("12345678901234"));
+
+        assertEquals(new BigDecimal("12345678901234567890"), BIGDECIMAL_ENGINE.toNumber("12345678901234567890"));
+        assertEquals(new BigInteger("12345678901234567890"), CONSERVATIVE_ENGINE.toNumber("12345678901234567890"));
+
+        assertEquals(new BigDecimal("1.9"), BIGDECIMAL_ENGINE.toNumber("1.9"));
+        assertEquals(1.9, CONSERVATIVE_ENGINE.toNumber("1.9"));
+
+        assertEquals(new BigDecimal("0.9"), BIGDECIMAL_ENGINE.toNumber(".9"));
+        assertEquals(0.9, CONSERVATIVE_ENGINE.toNumber(".9"));
     }
 
 }

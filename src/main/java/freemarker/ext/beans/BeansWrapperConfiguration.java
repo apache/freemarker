@@ -24,6 +24,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 
 /**
  * Holds {@link BeansWrapper} configuration settings and defines their defaults.
@@ -63,7 +64,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      *            See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}. Not {@code null}. Note
      *            that the version will be normalized to the lowest version where the same incompatible
      *            {@link BeansWrapper} improvements were already present, so for the returned instance
-     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified
+     *            {@link #getIncompatibleImprovements()} might return a lower version than what you have specified
      *            here.
      * @param isIncompImprsAlreadyNormalized
      *            Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.
@@ -90,9 +91,9 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
                 : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
-        preferIndexedReadMethod = incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_27;
+        preferIndexedReadMethod = incompatibleImprovements.intValue() < _VersionInts.V_2_3_27;
 
-        temporalSupport = incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_32;
+        temporalSupport = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33;
         
         classIntrospectorBuilder = new ClassIntrospectorBuilder(incompatibleImprovements);
     }
@@ -176,12 +177,12 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         this.preferIndexedReadMethod = preferIndexedReadMethod;
     }
 
-    /** @since 2.3.32 */
+    /** @since 2.3.33 */
     public boolean getTemporalSupport() {
         return temporalSupport;
     }
 
-    /** See {@link BeansWrapper#setTemporalSupport(boolean)}. @since 2.3.32 */
+    /** See {@link BeansWrapper#setTemporalSupport(boolean)}. @since 2.3.33 */
     public void setTemporalSupport(boolean temporalSupport) {
         this.temporalSupport = temporalSupport;
     }

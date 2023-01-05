@@ -264,7 +264,7 @@ class ExtendedDecimalFormatParser {
         }
 
         String currencySymbol = null;  // Exceptional, as must be applied after "currency code"
-        fetchParamters: do {
+        fetchParameters: do {
             int namePos = pos;
             String name = fetchName();
             if (name == null) {
@@ -308,7 +308,7 @@ class ExtendedDecimalFormatParser {
                 skipWS();
             } else {
                 if (pos == ln) {
-                    break fetchParamters;
+                    break fetchParameters;
                 }
                 if (pos == paramEndPos) {
                     throw newExpectedSgParseException("parameter separator whitespace or comma");

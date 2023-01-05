@@ -80,6 +80,8 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -96,7 +98,7 @@ import freemarker.template.utility.StringUtil;
  * object.
  */
 public class Configurable {
-    static final String C_TRUE_FALSE = "true,false";
+    static final String BOOLEAN_FORMAT_LEGACY_DEFAULT = "true,false";
     static final String C_FORMAT_STRING = "c";
 
     private static final String NULL = "null";
@@ -110,7 +112,14 @@ public class Configurable {
     public static final String LOCALE_KEY_CAMEL_CASE = "locale";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String LOCALE_KEY = LOCALE_KEY_SNAKE_CASE;
-    
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String C_FORMAT_KEY_SNAKE_CASE = "c_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String C_FORMAT_KEY_CAMEL_CASE = "cFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String C_FORMAT_KEY = C_FORMAT_KEY_SNAKE_CASE;
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String NUMBER_FORMAT_KEY_SNAKE_CASE = "number_format";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -153,9 +162,9 @@ public class Configurable {
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.32 */
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.33 */
     public static final String CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE = "custom_temporal_formats";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.32 */
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.33 */
     public static final String CUSTOM_TEMPORAL_FORMATS_KEY_CAMEL_CASE = "customTemporalFormats";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String CUSTOM_TEMPORAL_FORMATS_KEY = CUSTOM_TEMPORAL_FORMATS_KEY_SNAKE_CASE;
@@ -335,6 +344,7 @@ public class Configurable {
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
         BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+        C_FORMAT_KEY_SNAKE_CASE,
         CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
         CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
@@ -371,6 +381,7 @@ public class Configurable {
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
         BOOLEAN_FORMAT_KEY_CAMEL_CASE,
+        C_FORMAT_KEY_CAMEL_CASE,
         CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
         CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
@@ -403,6 +414,7 @@ public class Configurable {
     private HashMap<Object, Object> customAttributes;
     
     private Locale locale;
+    private CFormat cFormat;
     private String numberFormat;
     private String timeFormat;
     private String dateFormat;
@@ -413,8 +425,6 @@ public class Configurable {
     private TimeZone sqlDataAndTimeTimeZone;
     private boolean sqlDataAndTimeTimeZoneSet;
     private String booleanFormat;
-    private String trueStringValue;  // deduced from booleanFormat
-    private String falseStringValue;  // deduced from booleanFormat
     private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private AttemptExceptionReporter attemptExceptionReporter;
@@ -463,7 +473,7 @@ public class Configurable {
         
         locale = _TemplateAPI.getDefaultLocale();
         properties.setProperty(LOCALE_KEY, locale.toString());
-        
+
         timeZone = _TemplateAPI.getDefaultTimeZone();
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
         
@@ -481,12 +491,15 @@ public class Configurable {
         
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
-        
+
         yearFormat = "iso";
         properties.setProperty(YEAR_FORMAT_KEY, yearFormat);
 
         yearMonthFormat = "iso";
         properties.setProperty(YEAR_MONTH_FORMAT_KEY, yearMonthFormat);
+
+
+        cFormat = _TemplateAPI.getDefaultCFormat(incompatibleImprovements);
 
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
@@ -525,7 +538,7 @@ public class Configurable {
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
 
-        setBooleanFormat(C_TRUE_FALSE);
+        setBooleanFormat(BOOLEAN_FORMAT_LEGACY_DEFAULT);
         
         customAttributes = new HashMap();
         
@@ -723,12 +736,47 @@ public class Configurable {
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
+     * @since 2.3.32
+     */
+    public boolean isCFormatSet() {
+        return cFormat != null;
+    }
+
+    /**
+     * Sets the format (usually a computer language) used for {@code ?c}, {@code ?cn}, and for the
+     * {@code "c"} ({@code "computer"} before 2.3.32) {@link #setNumberFormat(String) number_format}, and the
+     * {@code "c"} {@link #setBooleanFormat(String) boolean_format}.
+     *
+     * <p>The default value depends on {@link Configuration#Configuration(Version) incompatible_improvements}.
+     * If that's 2.3.32 or higher, then it's {@link JavaScriptOrJSONCFormat#INSTANCE "JavaScript or JSON"},
+     * otherwise it's {@link LegacyCFormat#INSTANCE "legacy"}.
+     *
+     * @since 2.3.32
+     */
+    public void setCFormat(CFormat cFormat) {
+        NullArgumentException.check("cFormat", cFormat);
+        this.cFormat = cFormat;
+    }
+
+    /**
+     * Getter pair of {@link #setCFormat(CFormat)}. Not {@code null}.
+     *
+     * @since 2.3.32
+     */
+    public CFormat getCFormat() {
+        return cFormat != null ? cFormat : parent.getCFormat();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *
      * @since 2.3.24
      */
     public boolean isLocaleSet() {
         return locale != null;
     }
-    
+
+
     /**
      * Sets the time zone to use when formatting date/time values.
      * Defaults to the system time zone ({@link TimeZone#getDefault()}), regardless of the "locale" FreeMarker setting,
@@ -855,12 +903,18 @@ public class Configurable {
     }
 
     /**
-     * Sets the default number format used to convert numbers to strings. Currently, this is one of these:
+     * Sets the number format used to convert numbers to strings. Currently, this is one of these:
      * <ul>
-     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}. This is the
+     *       default.</li>
+     *   <li>{@code "c"} (recognized since 2.3.32): The number format used by FTL's {@code c} built-in (like in
+     *       {@code someNumber?c}). So with this <code>${someNumber}</code> will output the same as
+     *       <code>${someNumber?c}</code>. This should only be used if the template solely generates source code,
+     *       configuration file, or other content that's not read by normal users. If the template contains parts that's
+     *       read by normal users (like typical a web page), you are not supposed to use this.</li>
+     *   <li>{@code "computer"}: The old (deprecated) name for {@code "c"}. Recognized by all FreeMarker versions.</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
      *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
@@ -875,8 +929,7 @@ public class Configurable {
      *       <code><i>parameters</i></code> is parsed by the custom {@link TemplateNumberFormat}.
      *   </li>
      * </ul>
-     * 
-     *   
+     *
      * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
@@ -1032,16 +1085,38 @@ public class Configurable {
      * only influenced the result of {@code myBool?string}. 
      */
     public void setBooleanFormat(String booleanFormat) {
+        validateBooleanFormat(booleanFormat);
+        this.booleanFormat = booleanFormat;
+        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
+    }
+
+    /**
+     * @throws IllegalArgumentException If the format string has unrecognized format
+     */
+    private static void validateBooleanFormat(String booleanFormat) {
+        parseOrValidateBooleanFormat(booleanFormat, true);
+    }
+
+    /**
+     * @return {@code null} for legacy default (not set in effect), empty array if the {@link CFormat} should be used,
+     * and an array of {@code [trueString, falseString]} otherwise.
+     *
+     * @throws IllegalArgumentException If the format string has unrecognized format
+     */
+    static String[] parseBooleanFormat(String booleanFormat) {
+        return parseOrValidateBooleanFormat(booleanFormat, false);
+    }
+
+    private static String[] parseOrValidateBooleanFormat(String booleanFormat, boolean validateOnly) {
         NullArgumentException.check("booleanFormat", booleanFormat);
 
-        if (booleanFormat.equals(C_TRUE_FALSE)) {
-            // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
-            // pretend that it wasn't set.
-            trueStringValue = null; 
-            falseStringValue = null;
-        } else if (booleanFormat.equals(C_FORMAT_STRING)) {
-            trueStringValue = MiscUtil.C_TRUE;
-            falseStringValue = MiscUtil.C_FALSE;
+        if (booleanFormat.equals(C_FORMAT_STRING)) {
+            if (validateOnly) {
+                return null;
+            }
+            return CollectionUtils.EMPTY_STRING_ARRAY;
+        } else if (booleanFormat.equals(BOOLEAN_FORMAT_LEGACY_DEFAULT)) {
+            return null;
         } else {
             int commaIdx = booleanFormat.indexOf(',');
             if (commaIdx == -1) {
@@ -1050,12 +1125,14 @@ public class Configurable {
                                 "or it must be \"" + C_FORMAT_STRING + "\", but it was " +
                                 StringUtil.jQuote(booleanFormat) + ".");
             }
-            trueStringValue = booleanFormat.substring(0, commaIdx);
-            falseStringValue = booleanFormat.substring(commaIdx + 1);
+            if (validateOnly) {
+                return null;
+            }
+            return new String[] {
+                    booleanFormat.substring(0, commaIdx),
+                    booleanFormat.substring(commaIdx + 1)
+            };
         }
-
-        this.booleanFormat = booleanFormat;
-        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
     }
     
     /**
@@ -1064,7 +1141,7 @@ public class Configurable {
     public String getBooleanFormat() {
         return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
-    
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
@@ -1072,83 +1149,6 @@ public class Configurable {
      */
     public boolean isBooleanFormatSet() {
         return booleanFormat != null;
-    }
-        
-    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
-        if (value) {
-            String s = getTrueStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return MiscUtil.C_TRUE;
-                } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
-        } else {
-            String s = getFalseStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return MiscUtil.C_FALSE;
-                } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
-        }
-    }
-
-    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
-        return new _ErrorDescriptionBuilder(
-                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
-                new _DelayedJQuote(getBooleanFormat()), 
-                (getBooleanFormat().equals(C_TRUE_FALSE)
-                    ? ", which is the legacy deprecated default, and we treat it as if no format was set. "
-                            + "This is the default configuration; you should provide the format explicitly for each "
-                            + "place where you print a boolean."
-                    : ".")
-                ).tips(
-                     "Write something like myBool?string('yes', 'no') to specify boolean formatting in place.",
-                    new Object[]{
-                        "If you want \"true\"/\"false\" result as you are generating computer-language output "
-                                + "(not for direct human consumption), then use \"?c\", like ${myBool?c}. (If you "
-                                + "always generate computer-language output, then it's might be reasonable to set "
-                                + "the \"", BOOLEAN_FORMAT_KEY, "\" setting to \"c\" instead.)",
-                    },
-                    new Object[] {
-                        "If you need the same two values on most places, the programmers can set the \"",
-                        BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\". However, then it will be easy to "
-                                + "unwillingly format booleans like that."
-                    }
-                 );
-    }
-
-    /**
-     * Returns the string to which {@code true} is converted to for human audience, or {@code null} if automatic
-     * coercion to string is not allowed. The default value is {@code null}.
-     * 
-     * <p>This value is deduced from the {@code "boolean_format"} setting.
-     * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
-     * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally, as that default is a
-     * historical mistake in FreeMarker, since it targets computer language output, not human writing. Thus it's
-     * ignored.
-     * 
-     * @since 2.3.20
-     */
-    String getTrueStringValue() {
-        // The first step deliberately tests booleanFormat instead of trueStringValue! 
-        return booleanFormat != null ? trueStringValue : (parent != null ? parent.getTrueStringValue() : null); 
-    }
-
-    /**
-     * Same as {@link #getTrueStringValue()} but with {@code false}. 
-     * @since 2.3.20
-     */
-    String getFalseStringValue() {
-        // The first step deliberately tests booleanFormat instead of falseStringValue! 
-        return booleanFormat != null ? falseStringValue : (parent != null ? parent.getFalseStringValue() : null); 
     }
 
     /**
@@ -1159,7 +1159,7 @@ public class Configurable {
      *
      * <p>Defaults to {@code ""}, which is equivalent to {@code "medium"}.
      *
-     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.32, and
+     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.33, and
      * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
      * classes: {@link LocalTime}, {@link OffsetTime}.
      *
@@ -1325,7 +1325,7 @@ public class Configurable {
      * 
      * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
      *
-     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.32, and
+     * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.33, and
      * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
      * classes: {@link Instant}, {@link LocalDateTime}, {@link OffsetDateTime}, {@link ZonedDateTime}.
      * For non-{@code Local} {@link Temporal}-s FreeMarker will detect if the format doesn't show the offset or zone (as
@@ -1366,7 +1366,7 @@ public class Configurable {
      *     {@code iso}/{@code xs} only the year is shown.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public void setYearFormat(String yearFormat) {
         this.yearFormat = yearFormat;
@@ -1374,7 +1374,7 @@ public class Configurable {
 
     /**
      * Getter pair of {@link #setYearFormat(String)}.
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public String getYearFormat() {
         return yearFormat == null ? parent.getYearFormat() : yearFormat;
@@ -1383,7 +1383,7 @@ public class Configurable {
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public boolean isYearFormatSet() {
         return yearFormat != null;
@@ -1400,7 +1400,7 @@ public class Configurable {
      *     {@code iso}/{@code xs} will look like {@code 2021-12}.
      *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public void setYearMonthFormat(String yearMonthFormat) {
         this.yearMonthFormat = yearMonthFormat;
@@ -1409,7 +1409,7 @@ public class Configurable {
     /**
      * Getter pair of {@link #setYearMonthFormat(String)}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public String getYearMonthFormat() {
         return yearMonthFormat == null ? parent.getYearMonthFormat() : yearMonthFormat;
@@ -1418,7 +1418,7 @@ public class Configurable {
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public boolean isYearMonthFormatSet() {
         return yearMonthFormat != null;
@@ -1436,7 +1436,7 @@ public class Configurable {
      * @throws NullPointerException If {@code temporalClass} was {@code null}
      * @throws IllegalArgumentException If {@code temporalClass} is not a supported {@link Temporal} subclass.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public String getTemporalFormat(Class<? extends Temporal> temporalClass) {
         Objects.requireNonNull(temporalClass);
@@ -1519,7 +1519,7 @@ public class Configurable {
      *            letters and digits.
      *
      * @see #setCustomTemporalFormats(Map)
-     * 
+     *
      * @since 2.3.24
      */
     public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
@@ -1573,7 +1573,7 @@ public class Configurable {
      *
      * @see #getCustomTemporalFormatsWithoutFallback()
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public Map<String, ? extends TemplateTemporalFormatFactory> getCustomTemporalFormats() {
         return customTemporalFormats == null ? parent.getCustomTemporalFormats() : customTemporalFormats;
@@ -1583,7 +1583,7 @@ public class Configurable {
      * Like {@link #getCustomTemporalFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
      * provide a non-{@code null} default when called as the method of a {@link Configuration}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public Map<String, ? extends TemplateTemporalFormatFactory> getCustomTemporalFormatsWithoutFallback() {
         return customTemporalFormats;
@@ -1601,10 +1601,10 @@ public class Configurable {
      * @param customTemporalFormats
      *            Can't be {@code null}. The name must start with a UNICODE letter, and can only contain UNICODE
      *            letters and digits.
-     *            
-     * @see #setCustomDateFormats(Map) 
      *
-     * @since 2.3.32
+     * @see #setCustomDateFormats(Map)
+     *
+     * @since 2.3.33
      */
     public void setCustomTemporalFormats(Map<String, ? extends TemplateTemporalFormatFactory> customTemporalFormats) {
         NullArgumentException.check("customTemporalFormats", customTemporalFormats);
@@ -1616,7 +1616,7 @@ public class Configurable {
      * Tells if this setting is set directly in this object, or its value is coming from the {@link #getParent()
      * parent}.
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public boolean isCustomTemporalFormatsSet() {
         return this.customTemporalFormats != null;
@@ -1629,7 +1629,7 @@ public class Configurable {
      * @param name The name of the custom format; do not start it with {@code '@'}!
      * @return The format factory or, {@code null}
      *
-     * @since 2.3.32
+     * @since 2.3.33
      */
     public TemplateTemporalFormatFactory getCustomTemporalFormat(String name) {
         TemplateTemporalFormatFactory r;
@@ -2392,7 +2392,7 @@ public class Configurable {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
                 addAutoInclude((String) templateName, this instanceof Configuration && ((Configuration) this)
-                        .getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_25);
+                        .getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_25);
             }
         }
     }
@@ -2473,7 +2473,7 @@ public class Configurable {
      *       See {@link #setLocale(Locale)}.
      *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}, or since 2.3.26,
      *       "JVM default" (ignoring case) to use the default locale of the Java environment.
-     *       
+     *
      *   <li><p>{@code "classic_compatible"}:
      *       See {@link #setClassicCompatible(boolean)} and {@link Configurable#setClassicCompatibleAsInt(int)}.
      *       <br>String value: {@code "true"}, {@code "false"}, also since 2.3.20 {@code 0} or {@code 1} or {@code 2}.
@@ -2494,6 +2494,13 @@ public class Configurable {
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      *   <br>Example: <code>{ "trade": com.example.TradeTemporalFormatFactory,
      *   "log": com.example.LogTemporalFormatFactory }</code>
+     *
+     *   <li><p>{@code "c_format"}:
+     *       See {@link Configuration#setCFormat(CFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default (on {@link Configuration} only), or
+     *       one of the predefined values {@code "JavaScript or JSON"}, {@code "JSON"},
+     *       {@code "JavaScript"}, {@code "Java"}, {@code "XS"}, {@code "legacy"},
+     *       or an <a href="#fm_obe">object builder expression</a> that gives a {@link CFormat} object.
      *
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
@@ -2555,7 +2562,7 @@ public class Configurable {
      *
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
-     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone(String)} defines it. Also, since 2.3.21
      *       {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
@@ -2565,8 +2572,8 @@ public class Configurable {
      *   <li><p>{@code sql_date_and_time_time_zone}:
      *       See {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      *       Since 2.3.21.
-     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, {@code "JVM default"}
-     *       can be used that will be replaced with the actual JVM default time zone when
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone(String)} defines it. Also,
+     *       {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called. Also {@code "null"} can be used, which has the same effect
      *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
@@ -2713,10 +2720,12 @@ public class Configurable {
      *       
      *   <li><p>{@code "output_format"}:
      *       See {@link Configuration#setOutputFormat(OutputFormat)}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or an
-     *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
-     *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
-     *       
+     *       <br>String value: {@code "default"} (case insensitive) for the default,
+     *       one of {@code undefined}, {@code HTML}, {@code XHTML}, {@code XML}, {@code RTF}, {@code plainText},
+     *       {@code CSS}, {@code JavaScript}, {@code JSON},
+     *       or an <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
+     *       {@code HTMLOutputFormat}, or {@code com.example.MyOutputFormat()}.
+     *
      *   <li><p>{@code "registered_custom_output_formats"}:
      *       See {@link Configuration#setRegisteredCustomOutputFormats(Collection)}.
      *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
@@ -3067,6 +3076,20 @@ public class Configurable {
                 }
             } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
+            } else if (C_FORMAT_KEY_SNAKE_CASE.equals(name) || C_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    if (this instanceof Configuration) {
+                        ((Configuration) this).unsetCFormat();
+                    } else {
+                        throw invalidSettingValueException(name, value);
+                    }
+                } else {
+                    CFormat cFormat = StandardCFormats.STANDARD_C_FORMATS.get(value);
+                    setCFormat(
+                            cFormat != null ? cFormat
+                                    : (CFormat) _ObjectBuilderSettingEvaluator.eval(
+                                            value, CFormat.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (OUTPUT_ENCODING_KEY_SNAKE_CASE.equals(name) || OUTPUT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 setOutputEncoding(value);
             } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)

@@ -174,6 +174,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("yearFormat", "yyyy");
         SETTING_ASSIGNMENTS.put("yearMonthFormat", "yyyy-MM");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
+        SETTING_ASSIGNMENTS.put("CFormat", JavaScriptCFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("logTemplateExceptions", false);
         SETTING_ASSIGNMENTS.put("wrapUncheckedExceptions", true);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);

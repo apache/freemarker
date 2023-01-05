@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,7 +41,7 @@
 
   <!-- Will be overidden on the Continous Integration server: -->
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
-  
+
   <property file="build.properties"/>
   <condition property="has.explicit.boot.classpath.j2se1.8">
     <isset property="boot.classpath.j2se1.8"/>
@@ -56,13 +56,13 @@
   <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
   <property name="boot.classpath.j2se1.8" value="${sun.boot.class.path}" />
-  
+
   <!-- For checking the correctness of the boot.classpath.j2se* -->
   <available classpath="${boot.classpath.j2se1.8}"
-    classname="java.time.Instant" ignoresystemclasses="true" 
+    classname="java.time.Instant" ignoresystemclasses="true"
     property="boot.classpath.j2se1.8.correct"
   />
-  
+
   <!-- Set up version/timestamp filters and the version property: -->
   <tstamp>
     <format property="timestampNice" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -83,17 +83,17 @@
   <property file="build/version.properties.tmp" />
   <delete file="build/version.properties.tmp" />
   <filter token="version" value="${version}" />
-  
+
   <property name="dist.dir" value="build/dist" />
   <property name="dist.archiveBaseName" value="apache-${mavenArtifactId}-${mavenVersion}" />
   <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}-bin" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
-  
+
   <!-- ================================================================== -->
   <!-- Initialization                                                     -->
   <!-- ================================================================== -->
 
-  
+
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
     <delete dir="META-INF" />
@@ -118,11 +118,11 @@
     <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
          dest="${ivy.jar.file}" usetimestamp="true"/>
   </target>
-  
+
   <!-- ================================================================= -->
   <!-- Compilation                                                       -->
   <!-- ================================================================= -->
-  
+
   <target name="javacc" depends="init" unless="parser.uptodate"
     description="Build the parser from its grammar file"
   >
@@ -131,7 +131,7 @@
       uri="http://javacc.dev.java.net/"
       classpathref="ivy.dep"
     />
-    
+
     <property name="_javaccOutputDir"
       value="build/generated-sources/java/freemarker/core/"
     />
@@ -144,7 +144,7 @@
       javacchome="build/javacc-home.tmp"
     />
     <delete dir="build/javacc-home.tmp" />
-    
+
     <replace
       file="${_javaccOutputDir}/FMParser.java"
       token="private final LookaheadSuccess"
@@ -175,18 +175,18 @@
       token="enum"
       value="ENUM"
     />
-    
+
     <!-- As we have a modified version in src/main/java: -->
-    <move 
+    <move
       file="${_javaccOutputDir}/ParseException.java"
       tofile="${_javaccOutputDir}/ParseException.java.ignore"
     />
-    <move 
+    <move
       file="${_javaccOutputDir}/TokenMgrError.java"
       tofile="${_javaccOutputDir}/TokenMgrError.java.ignore"
     />
   </target>
-   
+
   <target name="compile" depends="javacc">
     <fail unless="boot.classpath.j2se1.8.correct"><!--
       -->The "boot.classpath.j2se1.8" property value (${boot.classpath.j2se1.8}) <!--
@@ -199,7 +199,7 @@
       -->Java 8: ${boot.classpath.j2se1.8}<!--
     --></echo>
 
-    <!-- Comment out @SuppressFBWarnings, as it causes compilation warnings in dependent Gradle projects -->    
+    <!-- Comment out @SuppressFBWarnings, as it causes compilation warnings in dependent Gradle projects -->
     <delete dir="build/src-main-java-filtered" />
     <mkdir dir="build/src-main-java-filtered" />
     <copy toDir="build/src-main-java-filtered">
@@ -217,7 +217,7 @@
     >
       <fileset dir="build/src-main-java-filtered" includes="**/*.java" />
     </replaceregexp>
-    
+
     <mkdir dir="build/classes" />
 
     <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
@@ -232,7 +232,7 @@
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
         freemarker/cache/WebappTemplateLoader.java,
-        
+
         freemarker/ext/jython/**,
         freemarker/template/utility/JythonRuntime.java,
         freemarker/ext/ant/**"
@@ -264,9 +264,9 @@
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
-    
+
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
-    
+
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
@@ -293,7 +293,7 @@
         freemarker/ext/jython/_Jython22VersionAdapter.java,
         freemarker/ext/jython/_Jython25VersionAdapter.java"
     />
-    
+
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
@@ -303,7 +303,7 @@
       includes="
         freemarker/ext/jython/_Jython22VersionAdapter.java"
     />
-    
+
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
@@ -313,12 +313,12 @@
       includes="
         freemarker/ext/jython/_Jython25VersionAdapter.java"
     />
-    
+
     <rmic base="build/classes" classpathref="ivy.dep"
       includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
     />
-    
+
     <copy toDir="build/classes">
       <fileset dir="src/main/resources"
         excludes="
@@ -339,9 +339,9 @@
 
   <target name="compileTest" depends="compile">
     <mkdir dir="build/test-classes" />
-  
+
     <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
-    <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
+    <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
@@ -354,14 +354,14 @@
       />
     </copy>
   </target>
-   
+
    <target name="jar" depends="compile">
     <ivy:cachepath pathid="ivy.dep" conf="bnd" />
     <taskdef resource="aQute/bnd/ant/taskdef.properties"
       uri="http://www.aqute.biz/bnd"
       classpathref="ivy.dep"
     />
-  
+
     <!-- Hack: This file should be excluded, but I can't explain that to bnd. -->
     <!-- We don't have this file in 2.4.X... yet?
     <move
@@ -462,7 +462,7 @@
         <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
-    
+
     <!-- conf="IDE": as that has to contain all depedencies -->
     <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
@@ -491,14 +491,14 @@
   </target>
 
   <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" description="Build the JavaDocs" />
-  
+
   <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
     <property name="file" value="build/api/stylesheet.css" />
-        
+
     <available file="${file}" property="stylesheet.available"/>
     <fail unless="stylesheet.available">CSS file not found: ${file}</fail>
     <echo>Fixing JDK 8 CSS in ${file}</echo>
-    
+
     <!-- Tell that it's modified: -->
     <replaceregexp
         file="${file}" flags="gs" encoding="utf-8"
@@ -510,7 +510,7 @@
         file="${file}" flags="gs" encoding="utf-8"
         match="@import url\('resources/fonts/dejavu.css'\);\s*" replace=""
     />
-    
+
     <!-- Font family fixes: -->
     <replaceregexp
         file="${file}" flags="gsi" encoding="utf-8"
@@ -544,7 +544,7 @@
         file="${file}" flags="gsi" encoding="utf-8"
         match="(?&lt;=[\s,:])Arial\s*,\s*Arial\b" replace="Arial"
     />
-    
+
     <!-- "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes: -->
     <property name="ddSelectorStart" value="(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b" />
     <property name="ddPropertyEnd" value="\b.+?;" />
@@ -559,11 +559,11 @@
         match="(${ddSelectorStart})font-family${ddPropertyEnd}" replace="\1"
     />
   </target>
-  
+
   <!-- ====================== -->
   <!-- Manual                 -->
   <!-- ====================== -->
-  
+
   <macrodef name="manual" uri="http://freemarker.org/util">
     <attribute name="offline" />
     <attribute name="locale" />
@@ -573,14 +573,14 @@
         uri="http://freemarker.org/docgen"
         classpathref="ivy.dep"
       />
-      
+
       <docgen:transform
         srcdir="src/manual/@{locale}" destdir="build/manual/@{locale}"
         offline="@{offline}"
       />
     </sequential>
   </macrodef>
-  
+
   <target name="manualOffline" depends="init" description="Build the Manual for offline use" >
     <u:manual offline="true" locale="en_US" />
   </target>
@@ -588,7 +588,7 @@
   <target name="manualOnline" depends="init" description="Build the Manual to be upload to the FreeMarker homepage" >
     <u:manual offline="false" locale="en_US" />
   </target>
-  
+
   <target name="manualOffline_zh_CN" depends="init" description="Build the Manual for offline use" >
     <u:manual offline="true" locale="zh_CN" />
   </target>
@@ -596,7 +596,7 @@
   <target name="manualOnline_zh_CN" depends="init" description="Build the Manual to be upload to the FreeMarker homepage" >
     <u:manual offline="false" locale="zh_CN" />
   </target>
-  
+
 
   <!-- ===================== -->
   <!-- Distribution building -->
@@ -613,7 +613,7 @@
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>
-  
+
   <target name="_dist"
     depends="test, jar, javadoc, manualOffline"
   >
@@ -622,9 +622,9 @@
     <!-- ..................................... -->
     <!-- Binary distribution                   -->
     <!-- ..................................... -->
-    
+
     <mkdir dir="${dist.bin.dir}" />
-    
+
     <!-- Copy txt-s -->
     <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
@@ -651,7 +651,7 @@
 
     <!-- Copy documentation -->
     <mkdir dir="${dist.bin.dir}/documentation" />
-    
+
     <!--
       The US English Manual is the source of any translations and thus it's the
       only one that is guaranteed to be up to date when doing the release, so we
@@ -663,7 +663,7 @@
     <copy todir="${dist.bin.dir}/documentation/_html/api" includeEmptyDirs="no">
       <fileset dir="build/api" />
     </copy>
-    
+
     <u:packageAndSignDist
         srcDir="${dist.bin.dir}/.."
         archiveNameWithoutExt="${dist.archiveBaseName}-bin"
@@ -672,7 +672,7 @@
     <!-- ..................................... -->
     <!-- Source distribution                   -->
     <!-- ..................................... -->
-    
+
     <mkdir dir="${dist.src.dir}" />
 
     <!-- Copy extensionless files: -->
@@ -689,7 +689,7 @@
       token="{version}"
       value="${version}"
     />
-    
+
     <copy todir="${dist.src.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
@@ -704,7 +704,7 @@
         <include name="rat-excludes" />
       </fileset>
     </copy>
-    
+
     <u:packageAndSignDist
         srcDir="${dist.src.dir}/.."
         archiveNameWithoutExt="${dist.archiveBaseName}-src"
@@ -735,7 +735,7 @@
         <arg value="--detach-sig" />
         <arg value="${archive.gzip}" />
       </exec>
-      
+
       <echo>*** Signature verification: ***</echo>
       <exec executable="${gpgCommand}" failonerror="true">
         <arg value="--verify" />
@@ -752,12 +752,12 @@
         <equals arg1="y" arg2="${signatureGood}"/>
       </condition>
       <fail unless="signatureGood.y" message="Task aborted by user." />
-    
+
       <echo>Creating checksum file for "${archive.gzip}"...</echo>
       <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
     </sequential>
   </macrodef>
-  
+
   <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <!--
@@ -768,9 +768,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -778,24 +778,24 @@
   specific language governing permissions and limitations
   under the License.
 -->
-    
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
     <version>17</version>
   </parent>
-  
+
   <groupId>${mavenGroupId}</groupId>
   <artifactId>${mavenArtifactId}</artifactId>
   <version>${mavenVersion}</version>
-  
+
   <packaging>jar</packaging>
-  
+
   <name>Apache FreeMarker</name>
   <description>
     Google App Engine compliant variation of FreeMarker.
@@ -806,15 +806,15 @@
     <name>Apache Software Foundation</name>
     <url>http://apache.org</url>
   </organization>
-  
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>      
+      <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <scm>
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</developerConnection>
@@ -847,7 +847,7 @@
       <post>private@freemarker.apache.org</post>
     </mailingList>
   </mailingLists>
-  
+
   <dependencies>
     <!-- no required dependencies -->
   </dependencies>
@@ -917,7 +917,7 @@ Proceed? </input>
       <equals arg1="y" arg2="${mavenUpload.answer}"/>
     </condition>
     <fail unless="mavenUpload.yes" message="Task aborted by user." />
-    
+
 		<!-- Sign and deploy the main artifact -->
 		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.6:sign-and-deploy-file" />
@@ -933,7 +933,7 @@ Proceed? </input>
 			<arg value="-Djavadoc=build/maven-javadoc-attachment.jar" />
       <arg value="-Pgpg" />
 		</exec>
-    
+
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
     <echo>Now you need to close and maybe release the staged repo on</echo>
@@ -959,7 +959,7 @@ Proceed? </input>
   <!-- ================================================================== -->
   <!-- Dependency management                                              -->
   <!-- ================================================================== -->
-  
+
   <target name="report-deps"
     description="Creates a HTML document that summarizes the dependencies."
   >
@@ -967,15 +967,15 @@ Proceed? </input>
     <ivy:resolve />
     <ivy:report todir="build/deps-report" />
   </target>
-  
+
   <target name="ide-dependencies" depends="jar"
     description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
     <mkdir dir="ide-dependencies" />
-    <delete includeEmptyDirs="true">  
-      <fileset dir="ide-dependencies">  
-         <include name="*/**" />  
-      </fileset>  
-    </delete>    
+    <delete includeEmptyDirs="true">
+      <fileset dir="ide-dependencies">
+         <include name="*/**" />
+      </fileset>
+    </delete>
     <ivy:retrieve conf="IDE" pattern="ide-dependencies/[artifact]-[revision].[ext]" />
 
     <!--
@@ -993,6 +993,33 @@ Proceed? </input>
       -->Do not edit the files in this directory! They are extracted from freemarker.jar as part of&#x0a;<!--
       -->the ide-dependencies Ant task, because Eclipse OSGi support expects them to be here.<!--
     --></echo>
+
+  <!--
+    Add bndtools support (bnd workspace model), which requires a bnd.bnd file to be present.
+    See https://bndtools.org/concepts.html#workspacerepositoriesproject-model for more information.
+    We copy the existing osgi.bnd to bnd.bnd and replace the variables
+    with values from this build.xml and version.properties
+    The resulting bnd.bnd in the project root is only consumed by Eclipse
+    if the bndtools plugin is installed.
+    bnd.bnd is also in .gitignore, to avoid accidental commits.
+  -->
+    <filter token="moduleOrg" value="${moduleOrg}" />
+    <filter token="moduleName" value="${moduleName}" />
+    <filter filtersfile="build/classes/freemarker/version.properties" />
+
+    <copy
+        file="osgi.bnd"
+        tofile="bnd.bnd"
+        filtering="true"
+        overwrite="true"
+    >
+      <filterchain>
+          <expandproperties />
+      </filterchain>
+    </copy>
+
+
+
   </target>
 
   <!-- ================================================================== -->
@@ -1005,8 +1032,8 @@ Proceed? </input>
       uri="antlib:org.apache.rat.anttasks"
       resource="org/apache/rat/anttasks/antlib.xml"
       classpathref="ivy.dep"
-    />  
-    
+    />
+
     <rat:report reportFile="build/rat-report-root.txt">
       <fileset dir="" excludesfile="rat-excludes" />
     </rat:report>
@@ -1020,5 +1047,5 @@ Proceed? </input>
     -->Rat reports were written into build/rat-report-*.txt<!--
     --></echo>
   </target>
-    
+
 </project>

@@ -31,7 +31,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._ObjectWrappers;
 
 final class ListLiteral extends Expression {
 
@@ -44,7 +44,7 @@ final class ListLiteral extends Expression {
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        SimpleSequence list = new SimpleSequence(items.size(), _TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleSequence list = new SimpleSequence(items.size(), _ObjectWrappers.SAFE_OBJECT_WRAPPER);
         for (Expression exp : items) {
             TemplateModel tm = exp.eval(env);
             if (env == null || !env.isClassicCompatible()) {
@@ -140,7 +140,7 @@ final class ListLiteral extends Expression {
     
     TemplateSequenceModel evaluateStringsToNamespaces(Environment env) throws TemplateException {
         TemplateSequenceModel val = (TemplateSequenceModel) eval(env);
-        SimpleSequence result = new SimpleSequence(val.size(), _TemplateAPI.SAFE_OBJECT_WRAPPER);
+        SimpleSequence result = new SimpleSequence(val.size(), _ObjectWrappers.SAFE_OBJECT_WRAPPER);
         for (int i = 0; i < items.size(); i++) {
             Object itemExpr = items.get(i);
             if (itemExpr instanceof StringLiteral) {

@@ -28,23 +28,35 @@ ${1?c}
 ${1234567.886}
 ${1234567.886?c}
 ${int?c}
-${double?c}
-${double2?c}
-${double3?c}
-${double4?c}
-${bigDecimal?c}
-${bigDecimal2?c}
-<#if iciIntValue gte 2003021>
-  <@assertEquals expected="INF" actual="INF"?number?c />
-  <@assertEquals expected="INF" actual="INF"?number?c />
-  <@assertEquals expected="-INF" actual="-INF"?number?c />
-  <@assertEquals expected="-INF" actual="-INF"?number?float?c />
-  <@assertEquals expected="NaN" actual="NaN"?number?float?c />
-  <@assertEquals expected="NaN" actual="NaN"?number?float?c />
+<#setting number_format = "computer">
+${100000.5}
+<#setting number_format = "c">
+${100000.5}
+<#setting number_format = ",000.##">
+${100000.5}
+<#setting number_format = "c">
+<@assertEquals expected="1" actual=double?string />
+<@assertEquals expected="1.000000000000001" actual=double2?string />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("1E-16", "0.0000000000000001") actual=double3?string />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("-1E-16", "-0.0000000000000001") actual=double4?string />
+<@assertEquals expected="1" actual=bigDecimal?string />
+<@assertEquals expected=(iciIntValue gte 2003032)?then("1E-16", "0.0000000000000001") actual=bigDecimal2?string />
+<#if iciIntValue gte 2003032>
+  <@assertEquals expected="Infinity" actual="INF"?number?string />
+  <@assertEquals expected="Infinity" actual="INF"?number?float?string />
+  <@assertEquals expected="-Infinity" actual="-INF"?number?string />
+  <@assertEquals expected="-Infinity" actual="-INF"?number?float?string />
+  <@assertEquals expected="NaN" actual="NaN"?number?string />
+  <@assertEquals expected="NaN" actual="NaN"?number?float?string />
+<#elseif iciIntValue == 2003031>
+  <@assertEquals expected="INF" actual="INF"?number?string />
+  <@assertEquals expected="INF" actual="INF"?number?float?string />
+  <@assertEquals expected="-INF" actual="-INF"?number?string />
+  <@assertEquals expected="-INF" actual="-INF"?number?float?string />
+  <@assertEquals expected="NaN" actual="NaN"?number?string />
+  <@assertEquals expected="NaN" actual="NaN"?number?float?string />
 <#else>
-  <#setting locale = "en_US">
-  <#setting number_format = "0.#">
-  <@assertEquals expected="INF"?number?string actual="INF"?number?c />
-  <@assertEquals expected="-INF"?number?string actual="-INF"?number?c />
-  <@assertEquals expected="NaN"?number?string actual="NaN"?number?c />
+  <@assertEquals expected="\x221E" actual="INF"?number?string />
+  <@assertEquals expected="-\x221E" actual="-INF"?number?string />
+  <@assertEquals expected="\xFFFD" actual="NaN"?number?string />
 </#if>

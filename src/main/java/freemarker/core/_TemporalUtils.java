@@ -56,7 +56,7 @@ import freemarker.template.utility.StringUtil;
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * Static utilities related to {@link Temporal}-s, and other {@code java.time} classes.
  *
- * @since 2.3.32
+ * @since 2.3.33
  */
 public final class _TemporalUtils {
     private static final Map<Class<? extends Temporal>, TemporalQuery<? extends Temporal>> TEMPORAL_CLASS_TO_QUERY_MAP;

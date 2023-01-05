@@ -45,7 +45,7 @@ public abstract class AbstractTemporalFormatTest {
 
     static protected String formatTemporal(Consumer<Configurable> configurator, Temporal... values) throws
             TemplateException {
-        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
+        Configuration conf = new Configuration(Configuration.VERSION_2_3_33);
 
         configurator.accept(conf);
 
@@ -105,7 +105,7 @@ public abstract class AbstractTemporalFormatTest {
             Consumer<Configurable> configurator,
             MissingTimeZoneParserPolicy missingTimeZoneParserPolicy,
             Object... inputsAndExpectedResults) throws TemplateException, TemplateValueFormatException {
-        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
+        Configuration conf = new Configuration(Configuration.VERSION_2_3_33);
         conf.setTimeZone(DateUtil.UTC);
         conf.setLocale(Locale.US);
 
@@ -216,7 +216,7 @@ public abstract class AbstractTemporalFormatTest {
             String stringToParse, Class<? extends Temporal> temporalClass,
             Consumer<TemplateValueFormatException> exceptionAssertions) throws TemplateException,
             TemplateValueFormatException {
-        Configuration conf = new Configuration(Configuration.VERSION_2_3_32);
+        Configuration conf = new Configuration(Configuration.VERSION_2_3_33);
         conf.setTimeZone(DateUtil.UTC);
         conf.setLocale(Locale.US);
 

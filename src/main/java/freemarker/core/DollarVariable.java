@@ -73,7 +73,9 @@ final class DollarVariable extends Interpolation {
             final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
             final MarkupOutputFormat moOF = mo.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-            if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+            if (moOF == outputFormat) {
+                moOF.output(mo, out);
+            } else if (!outputFormat.isOutputFormatMixingAllowed()) {
                 final String srcPlainText;
                 // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
                 srcPlainText = moOF.getSourcePlainText(mo);
@@ -83,11 +85,13 @@ final class DollarVariable extends Interpolation {
                             " format, which differs from the current output format, ",
                             new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }
-                if (outputFormat instanceof MarkupOutputFormat) {
-                    ((MarkupOutputFormat) outputFormat).output(srcPlainText, out);
+                if (markupOutputFormat != null) {
+                    markupOutputFormat.output(srcPlainText, out);
                 } else {
                     out.write(srcPlainText);
                 }
+            } else if (markupOutputFormat != null) {
+                markupOutputFormat.outputForeign(mo, out);
             } else {
                 moOF.output(mo, out);
             }

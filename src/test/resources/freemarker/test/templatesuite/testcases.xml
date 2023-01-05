@@ -221,7 +221,7 @@
    </testCase>
    <testCase name="date-type-builtins" noOutput="true" />
    <testCase name="temporal" noOutput="true">
-      <setting incompatible_improvements="2.3.32, max"/>
+      <setting incompatible_improvements="2.3.33, max"/>
    </testCase>
    <testCase name="url" noOutput="true" />
    <testCase name="var-layers"/>

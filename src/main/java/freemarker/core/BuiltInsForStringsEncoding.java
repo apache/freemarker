@@ -28,7 +28,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
+import freemarker.template._VersionInts;
 import freemarker.template.utility.StringUtil;
 
 class BuiltInsForStringsEncoding {
@@ -51,7 +51,7 @@ class BuiltInsForStringsEncoding {
     
         @Override
         public int getMinimumICIVersion() {
-            return _TemplateAPI.VERSION_INT_2_3_20;
+            return _VersionInts.V_2_3_20;
         }
     
         @Override
