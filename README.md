@@ -43,7 +43,7 @@ See the LICENSE file for more details!
 Documentation
 -------------
 
-Online: http://freemarker.org/docs/
+Online: https://freemarker.apache.org/docs/
 
 Offline: The full documentation is available in the binary distribution
 in the documentation/index.html directory.
@@ -114,7 +114,7 @@ etc.). You can also install the jar-s into your local Maven repository with
 `./gradlew install`.
 
 Note for Windows users: If you are using an Apache source release (as opposed
-to checking the project out from the Git repository), ./gradlew will fail as
+to checking the project out from the Git repository), `./gradlew` will fail as
 `gradle\wrapper\gradle-wrapper.jar` is missing. Due to Apache policy we can't
 include that file in distributions, so you have to download that very common
 artifact from somewhere manually (like from the Git repository of FreeMarker).
@@ -124,16 +124,15 @@ script does everything itself.)
 To test your build, issue `./gradlew test`. Issued from the top directory,
 this will run the tests of all modules.
 
-To generate the aggregated API documention (contains the API of several modules
+To generate the aggregated API documentation (contains the API of several modules
 that are deemed to be used commonly enough), issue `./gradlew aggregateJavadoc`
 from the root module; the output will appear in the `build/docs/javadoc`
 subdirectory. To generate API documentation per module, issue
 `./gradlew javadoc`; the output will appear in the `build/docs/javadoc`
 subdirectory of the module.
 
-To generate the FreeMarker Manual, issue `./gradlew manualOffline`
-(TODO: not yet working); the output will appear under
-`freemarker-manual/build/docgen`.
+To generate the FreeMarker Manual, issue `./gradlew manualOffline`; the output
+will appear under `freemarker-manual/build/docgen`.
 
 
 IDE setup
@@ -220,6 +219,8 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
     Let it do it (as it's an incorrect duplication of the `freemarker` root project).
   - At the end of this process you should have all modules in the Project tree view.
 - "File" -> "Settings"
+  - Under "Build, Execution, Deployment" / "Build Tools" / "Gradle" find the "Build and test using", and
+    "Run tests using" dropdowns, and set all of them to "Gradle".
   - Under "Editor" / "Code style", import and use
     freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
   - Under "Editor" / "Inspections", import and use
