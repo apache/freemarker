@@ -19,24 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.MessageUtils.*;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Date;
-
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNullModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.BugException;
@@ -45,6 +30,12 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Date;
+
+import static org.apache.freemarker.core.MessageUtils.*;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -548,7 +539,9 @@ public class _EvalUtils {
             final Writer out, ASTExpression exp) throws TemplateException, IOException {
         final MarkupOutputFormat moOF = mo.getOutputFormat();
         // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-        if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+        if (moOF == outputFormat) {
+            moOF.output(mo, out);
+        } else if (!outputFormat.isOutputFormatMixingAllowed()) {
             final String srcPlainText;
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
             srcPlainText = moOF.getSourcePlainText(mo);
@@ -563,6 +556,8 @@ public class _EvalUtils {
             } else {
                 out.write(srcPlainText);
             }
+        } else if (outputFormat instanceof MarkupOutputFormat) {
+            ((MarkupOutputFormat<?>) outputFormat).outputForeign(mo, out);
         } else {
             moOF.output(mo, out);
         }

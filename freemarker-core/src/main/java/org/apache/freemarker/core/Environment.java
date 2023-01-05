@@ -1117,9 +1117,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (moOrStr instanceof String) {
             final String s = (String) moOrStr;
             
-            MarkupOutputFormat markupOutputFormat;
             if (outputFormat instanceof MarkupOutputFormat) {
-                markupOutputFormat = (MarkupOutputFormat) outputFormat;
+                MarkupOutputFormat markupOutputFormat = (MarkupOutputFormat) outputFormat;
                 if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_SUPPORTED
                         || autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_DEFAULT
                                 && markupOutputFormat.isAutoEscapedByDefault()) {

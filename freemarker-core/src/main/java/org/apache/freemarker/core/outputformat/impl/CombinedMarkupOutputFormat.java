@@ -18,12 +18,13 @@
  */
 package org.apache.freemarker.core.outputformat.impl;
 
-import java.io.IOException;
-import java.io.Writer;
-
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Represents two markup formats nested into each other. For example, markdown nested into HTML.
@@ -67,6 +68,12 @@ public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<T
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateException {
         outer.output(inner.escapePlainText(textToEsc), out);
+    }
+
+    @Override
+    public <MO2 extends TemplateMarkupOutputModel<MO2>> void outputForeign(MO2 mo, Writer out)
+            throws IOException, TemplateException {
+        outer.outputForeign(mo, out);
     }
 
     @Override

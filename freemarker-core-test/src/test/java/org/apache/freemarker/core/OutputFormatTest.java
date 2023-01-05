@@ -18,20 +18,9 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.AutoEscapingPolicy.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Collections;
-
+import com.google.common.collect.ImmutableList;
 import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
@@ -43,7 +32,14 @@ import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collections;
+
+import static org.apache.freemarker.core.AutoEscapingPolicy.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class OutputFormatTest extends TemplateTest {
 
@@ -706,7 +702,16 @@ public class OutputFormatTest extends TemplateTest {
                 + "${.autoEsc?c}",
                 "true\n  x\ntrue");
     }
-    
+
+    @Test
+    public void testMixedContent() throws Exception {
+        setConfiguration(newConfigurationBuilder().outputFormat(DummyOutputFormat.INSTANCE));
+        addToDataModel("m1", HTMLOutputFormat.INSTANCE.fromMarkup("x"));
+        addToDataModel("m2", XMLOutputFormat.INSTANCE.fromMarkup("y"));
+        assertOutput("${m1}", "x");
+        assertErrorContains("${m2}", "is incompatible with");
+    }
+
     @Test
     public void testExplicitAutoEscBannedForNonMarkup() throws Exception {
         // While this restriction is technically unnecessary, we can catch a dangerous and probably common user

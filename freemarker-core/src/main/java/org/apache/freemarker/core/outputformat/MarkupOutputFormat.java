@@ -81,7 +81,18 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may use a more efficient solution.
      */
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateException;
-    
+
+    /**
+     * Outputs a value from a foreign output format; only used if {@link #isOutputFormatMixingAllowed()} return
+     * {@code true}. The default implementation in {@link MarkupOutputFormat} will just let the other
+     * {@link OutputFormat} to output value, but it can be overridden to support more nuanced conversions, or to check if outputting without
+     * conversion should be allowed.
+     */
+    public <MO2 extends TemplateMarkupOutputModel<MO2>> void outputForeign(MO2 mo, Writer out)
+            throws IOException, TemplateException {
+        mo.getOutputFormat().output(mo, out);
+    }
+
     /**
      * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns
      * the original plain text, otherwise it returns {@code null}. Useful for converting between different types

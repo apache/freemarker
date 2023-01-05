@@ -18,10 +18,13 @@
  */
 package org.apache.freemarker.core.userpkg;
 
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core._DelayedToString;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
+
 import java.io.IOException;
 import java.io.Writer;
-
-import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 
 public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
     
@@ -44,6 +47,21 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOut
     @Override
     public void output(String textToEsc, Writer out) throws IOException {
         out.write(escapePlainText(textToEsc));
+    }
+
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return true;
+    }
+
+    @Override
+    public <MO extends TemplateMarkupOutputModel<MO>> void outputForeign(MO mo, Writer out)
+            throws IOException, TemplateException {
+        if (mo.getOutputFormat().getMimeType().equals("text/html")) {
+            mo.getOutputFormat().output(mo, out);
+        } else {
+            throw new TemplateException("DummyOutputFormat is incompatible with ", new _DelayedToString(mo.getOutputFormat()));
+        }
     }
 
     @Override
