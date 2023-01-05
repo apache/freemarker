@@ -51,6 +51,7 @@
   </condition>
   <condition property="has.all.explicit.boot.classpaths">
     <and>
+      <isset property="has.explicit.boot.classpath.j2se1.7"/>
       <isset property="has.explicit.boot.classpath.j2se1.8"/>
     </and>
   </condition>
