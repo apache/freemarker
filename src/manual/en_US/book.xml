@@ -417,8 +417,8 @@
         and "directive" synonyms.)</para>
 
         <note>
-          <para>You can easily try writing templates on <link
-          xlink:href="http://freemarker-online.kenshoo.com/">http://freemarker-online.kenshoo.com/</link></para>
+          <para>You can easily try writing templates on <olink
+          targetdoc="onlineTemplateTester"/></para>
         </note>
 
         <section>
@@ -812,6 +812,16 @@ All Rights Reserved.
                   class="${animal?item_parity}Row"&gt;</literal>.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para><literal>product.id?c</literal> formats
+              <literal>product.id</literal> (let's say that's a number, the
+              technical ID of the product in our database) so that it can be
+              safely parsed by a computer process. This is important, as
+              <literal>${product.id}</literal> would format it for human
+              audience, which may contains more complicated (like localized,
+              grouped, etc.) formatting.</para>
             </listitem>
           </itemizedlist>
 
@@ -4376,19 +4386,19 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <para>since German people use comma as decimal separator.</para>
 
           <warning>
-            <para>As you can see, interpolations print for human audience (by
-            default at least), as opposed to ''computer audience''. In some
-            cases this is not good, like when you print a database record ID
-            as the part of an URL or as an invisible field value in a HTML
-            form, or when you print CSS/JavaScript numerical literals, because
-            these printed values will be read by computer programs and not by
-            humans. Most computer programs are very particular about the
-            format of the numbers, and understand only a kind of simple US
-            number formatting. For that, use the <link
-            linkend="ref_builtin_c"><literal>c</literal></link> (stands for
-            ''computer audience'') built-in, for example:</para>
+            <para>When the number you print will be read by some computer
+            process, always use the <link linkend="ref_builtin_c"><link
+            linkend="ref_builtin_c"><literal>c</literal></link>
+            built-in</link>, to get rid of any localized, or otherwise fancy
+            formatting! Like when you print a database record ID as the part
+            of an URL or as an invisible field value in a HTML form, or when
+            you print CSS/JavaScript numerical literals. Example:</para>
 
-            <programlisting role="template">&lt;a href="/shop/productdetails?id=${product.id?c}"&gt;Details...&lt;/a&gt;</programlisting>
+            <programlisting role="template">&lt;a href="/shop/productdetails?id=${product.id<emphasis>?c</emphasis>}"&gt;Details...&lt;/a&gt;</programlisting>
+
+            <para>That <literal>?c</literal> there formats the number with a
+            simple US format, which most computer processes will
+            understand.</para>
           </warning>
         </section>
 
@@ -4452,7 +4462,8 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           error.</para>
 
           <para>When you want to generate JavaScript or other computer
-          language parts, then <literal>${someBoolean?c}</literal>
+          language parts, then
+          <literal>${<replaceable>someBoolean</replaceable>?c}</literal>
           (<quote>c</quote> stands for computer audience) should be used to
           print true/false. (Remember that <literal>?c</literal> was also used
           to print numbers for computer audience.)</para>
@@ -6041,7 +6052,7 @@ To prove that "s" didn't contain the value in escaped form:
 
         <para>The <literal>c</literal> built-in will format string values to
         string literals. Like if the <literal>c_format</literal> setting is
-        <quote>JSON</quote>, then <literal>{"fullName":
+        <literal>"JSON"</literal>, then <literal>{"fullName":
         ${fullName?c}}</literal> will output something like
         <literal>{"fullName": "John Doe"}</literal>, where the quotation marks
         (and <literal>\</literal> escaping if needed) were added by
@@ -6058,7 +6069,7 @@ To prove that "s" didn't contain the value in escaped form:
         if the value you print is missing/<literal>null</literal>. The
         convenient shortcut for that is using the <literal>cn</literal>
         built-in (the <quote>n</quote> stands for Nullable), as in
-        <literal>${<replaceable>someValue</replaceable>?cn}</literal>. It's
+        <literal>${<replaceable>someValue</replaceable>?cn}</literal>. It
         behaves like the <literal>c</literal> built-in, except that if
         <literal><replaceable>someValue</replaceable></literal> evaluates to
         <literal>null</literal>/missing, it outputs the
@@ -6085,34 +6096,46 @@ To prove that "s" didn't contain the value in escaped form:
 
         <itemizedlist>
           <listitem>
-            <para><literal>JSON</literal>: JSON generation</para>
+            <para><literal>"JSON"</literal>: JSON generation. Generally,
+            <literal>"JavaScript or JSON"</literal> (see later) is recommended
+            over this.</para>
           </listitem>
 
           <listitem>
-            <para><literal>JavaScript</literal>: JavaScript generation</para>
+            <para><literal>"JavaScript"</literal>: JavaScript generation.
+            Generally, <literal>"JavaScript or JSON"</literal> (see later) is
+            recommended over this.</para>
           </listitem>
 
           <listitem>
-            <para><literal>Java</literal>: Java source code generation</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>XS</literal>: XML Schema compliant XML
+            <para><literal>"Java"</literal>: Java source code
             generation</para>
           </listitem>
 
           <listitem>
-            <para><literal>default 2.3.0</literal>: Default for backward
-            compatibility if the <link
-            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
-            setting</link> is less than 2.3.21. Avoid!</para>
+            <para><literal>"XS"</literal>: XML Schema compliant XML
+            generation</para>
           </listitem>
 
           <listitem>
-            <para><literal>default 2.3.21</literal>: Default for backward
-            compatibility if the <link
+            <para><literal>"JavaScript or JSON"</literal>: For generating
+            output that's compatible with both JSON and JavaScript. This setup
+            is therefore resilient against configuration mistakes, where we
+            generate output in one language, but use the
+            <literal>c_format</literal> for the other. The small price to pay
+            is that we can't utilize some language-specific opportunities to
+            make the output a bit shorter, but that hardly matters in
+            practice. This is the default if if the <link
             linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
-            setting</link> is equal or greater than 2.3.21. Avoid!</para>
+            setting</link> is at least 2.3.32.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"legacy"</literal>: Default for backward
+            compatibility when the <link
+            linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+            setting</link> is less than 2.3.32. Avoid! Can have rounding
+            losses, and formatting glitches for infinity and NaN.</para>
           </listitem>
         </itemizedlist>
 
@@ -6634,9 +6657,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.29) do you want to apply the fixes that are not 100%
+// version (here 2.3.32) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -6660,7 +6683,10 @@ cfg.setLogTemplateExceptions(false);
 cfg.setWrapUncheckedExceptions(true);
 
 // Do not fall back to higher scopes when reading a null loop variable:
-cfg.setFallbackOnNullLoopVariable(false);</programlisting>
+cfg.setFallbackOnNullLoopVariable(false);
+
+// To accomodate to how JDBC returns values; see Javadoc!
+cfg.setSQLDateAndTimeTimeZone(TimeZone.getDefault());</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6932,7 +6958,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         // Recommended settings for new projects:
         cfg.setDefaultEncoding("UTF-8");
@@ -6940,6 +6966,7 @@ public class Test {
         cfg.setLogTemplateExceptions(false);
         cfg.setWrapUncheckedExceptions(true);
         cfg.setFallbackOnNullLoopVariable(false);
+        cfg.setSQLDateAndTimeTimeZone(TimeZone.getDefault());
 
         /* ------------------------------------------------------------------------ */
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
@@ -10592,7 +10619,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
         linkend="gloss.unicode">UNICODE</link> text" (UTF-16). Nonetheless,
         there are situations when it must deal with <link
         linkend="gloss.charset">charsets</link>, because it has to exchange
-        data with the outer world that may uses various other charsets.</para>
+        data with the outer world that may use various other charsets.</para>
 
         <section>
           <title>The charset of the input</title>
@@ -13476,12 +13503,11 @@ GreEN mouse
 
           <itemizedlist>
             <listitem>
-              <para><quote>JSON</quote>, <quote>default 2.3.0</quote>, and
-              <quote>default 2.3.21</quote>: Gives a JSON string literal, that
-              is, it will be surrounded with quotation marks
-              (<literal>"</literal>), and will be escaped using backslash
-              (<literal>\</literal>) where needed. For the exact escaping
-              rules see <link linkend="ref_builtin_json_string">the
+              <para><quote>JSON</quote>, <quote>legacy</quote>: Gives a JSON
+              string literal, that is, it will be surrounded with quotation
+              marks (<literal>"</literal>), and will be escaped using
+              backslash (<literal>\</literal>) where needed. For the exact
+              escaping rules see <link linkend="ref_builtin_json_string">the
               <literal>json_string</literal> built-in</link>.</para>
             </listitem>
 
@@ -16018,18 +16044,18 @@ rif: foo XYr baar</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>For all non-deprecated <literal>c_format</literal>-s
-                  that are built into FreeMarker: There's no rounding.</para>
+                  <para>For all that are built into FreeMarker, except
+                  <quote>legacy</quote> <literal>c_format </literal>: There's
+                  no rounding.</para>
                 </listitem>
 
                 <listitem>
-                  <para>For the deprecated <literal>c_format</literal>-s,
-                  <quote>default 2.3.0</quote>, and <quote>default
-                  2.3.21</quote>: The numbers are limited to 16 digits after
-                  the decimal dot, so rounding can occur. The these formats
-                  never use exponential form either, so the decimal point
-                  place is fixed. Thus, for example, 1E-17 will be formatted
-                  as <literal>0</literal>. </para>
+                  <para>For the deprecated <literal>c_format</literal>,
+                  <quote>legacy</quote>: The numbers are limited to 16 digits
+                  after the decimal dot, so rounding can occur. The these
+                  formats never use exponential form either, so the decimal
+                  point place is fixed. Thus, for example, 1E-17 will be
+                  formatted as <literal>0</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -16041,7 +16067,8 @@ rif: foo XYr baar</programlisting>
               <itemizedlist>
                 <listitem>
                   <para>For <literal>c_format</literal>-s <quote>JSON</quote>,
-                  and <quote>JavaScript</quote>: <literal>Infinity</literal>,
+                  and <quote>JavaScript</quote>, <quote>JavaScript or
+                  JSON</quote>: <literal>Infinity</literal>,
                   <literal>-Infinity</literal>, <literal>NaN</literal></para>
                 </listitem>
 
@@ -16060,14 +16087,19 @@ rif: foo XYr baar</programlisting>
 
                 <listitem>
                   <para>For <literal>c_format</literal> <quote>XS</quote>, and
-                  also for the deprecated <literal>c_format</literal>,
-                  <quote>default 2.3.21</quote>: <literal>INF</literal>,
-                  <literal>-INF</literal>, and <literal>NaN</literal>.</para>
+                  also if <link
+                  linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+                  setting</link> is at least 2.3.21, for
+                  <literal>c_format</literal>, <quote>legacy</quote>:
+                  <literal>INF</literal>, <literal>-INF</literal>, and
+                  <literal>NaN</literal>.</para>
                 </listitem>
 
                 <listitem>
-                  <para>For the deprecated <literal>c_format</literal>,
-                  <quote>default 2.3.0</quote>: Gives what
+                  <para>For <literal>c_format</literal> <quote>legacy</quote>,
+                  if <link
+                  linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
+                  setting</link> is less than 2.3.21: Gives what
                   <literal>java.text.DecimalFormat</literal> does with US
                   locale, which are <literal>∞</literal>,
                   <literal>-∞</literal>, and <literal>�</literal> (U+FFFD,
@@ -16077,10 +16109,9 @@ rif: foo XYr baar</programlisting>
             </listitem>
 
             <listitem>
-              <para>Exponential form is used by all non-deprecated
-              <literal>c_format</literal>-s that are built into FreeMarker
-              (but not by the deprecated <quote>default 2.3.0</quote>, and
-              <quote>default 2.3.21</quote>):</para>
+              <para>Exponential form is used by all
+              <literal>c_format</literal>-s that are built into FreeMarker,
+              except <quote>legacy</quote>:</para>
 
               <itemizedlist>
                 <listitem>
@@ -16152,9 +16183,9 @@ rif: foo XYr baar</programlisting>
           the same output as
           <literal>${<replaceable>aNumber</replaceable>?c}</literal>. (In this
           case you should use a <literal>c_format</literal> like
-          <literal>"JSON"</literal>, and not some of the strictly backward
-          compatible defaults, as those are emulating some confusing old
-          glitches.)</para>
+          <literal>"JavaScript or JSON"</literal>, and not some of the
+          strictly backward compatible defaults, as those are emulating some
+          confusing old glitches.)</para>
 
           <para>If the value the <literal>c</literal> built-in is applied on
           is <literal>null</literal>/missing, it will stop the template
@@ -16212,8 +16243,8 @@ rif: foo XYr baar</programlisting>
           <itemizedlist>
             <listitem>
               <para>For <quote>JSON</quote>, <quote>Java</quote>,
-              <quote>JavaScript</quote>, <quote>default 2.3.0</quote>,
-              <quote>default 2.3.21</quote>: <literal>null</literal></para>
+              <quote>JavaScript</quote>, and <quote>legacy</quote>:
+              <literal>null</literal></para>
             </listitem>
 
             <listitem>
@@ -16253,7 +16284,7 @@ rif: foo XYr baar</programlisting>
           <title>is_infinite</title>
 
           <indexterm>
-            <primary>is_infinte built-in</primary>
+            <primary>is_infinite built-in</primary>
           </indexterm>
 
           <indexterm>
@@ -24761,8 +24792,8 @@ ${"'{}"}
                   <primary>c_format</primary>
                 </indexterm><literal>c_format</literal> (since FreeMarker
               2.3.32): Sets what format to use when formatting for computer
-              consumption, like <literal>"JSON"</literal>. Mostly prominently
-              this affects the <link
+              consumption, like <literal>"JavaScript or JSON"</literal>.
+              Mostly prominently this affects the <link
               linkend="ref_builtin_c"><literal>c</literal> built-in</link>,
               hence the name. See valid values and their meaning here: <xref
               linkend="dgui_misc_computer_vs_human_format"/>.</para>
@@ -28770,7 +28801,7 @@ End book</programlisting>
           <answer>
             <para>FreeMarker uses the locale-sensitive number formatting
             capability of the Java platform. The default number format for
-            your locale may uses grouping or other formatting. If you don't
+            your locale may use grouping or other formatting. If you don't
             want that, you have to override the number format suggested by the
             Java platform with the <literal>number_format</literal> <link
             linkend="pgui_config_settings">FreeMarker setting</link>. For
@@ -30045,8 +30076,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="gloss.c_format"><literal>c_format</literal></link>
                   (also settable via the <link
                   linkend="ref.directive.setting"><literal>setting</literal>
-                  directive</link>). This specifies what format to use when
-                  formatting for computer consumption, like
+                  directive</link>). This specifies what syntax to use when
+                  formatting values for computer consumption/parser, like
                   <literal>"JSON"</literal>. Most prominently, this affects
                   the <link linkend="ref_builtin_c"><literal>c</literal>
                   built-in</link>, hence the name. See valid setting values,
@@ -30056,12 +30087,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>If you set the <link
                   linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
                   setting</link> to 2.3.32, the default of
-                  <literal>c_format</literal> changes to
-                  <literal>JSON</literal>, which is a format that most targets
-                  can parse (because we just format simple values, not lists
-                  and maps). With lower
+                  <literal>c_format</literal> changes from
+                  <literal>"legacy"</literal> to <literal>"JavaScript or
+                  JSON"</literal>, which is a format that most targets can
+                  parse (because we just format simple values, not lists and
+                  maps). With lower
                   <literal>incompatible_improvements</literal>, the default
-                  value is a <literal>c_format</literal> that emulates the old
+                  value is <literal>"legacy"</literal> that emulates the old
                   behavior of <literal>?c</literal> (where you can lose
                   numerical prevision, etc.), so it's recommended to set it to
                   something else.</para>
@@ -30133,12 +30165,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="ref_builtin_c"><literal>c</literal>
                   built-in</link>.</para>
 
-                  <para>Because setting the <link
+                  <para>Setting the <link
                   linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
                   setting</link> to 2.3.32 will change the default of
-                  <literal>c_format</literal> to <literal>JSON</literal>, it
-                  will consequently also activate these changes. But this only
-                  affects number formatting done with <literal>?c</literal>,
+                  <literal>c_format</literal> to <literal>"JavaScript or
+                  JSON"</literal>, which has these number formatting changes
+                  (just like all <literal>c_format</literal>-s that aren't
+                  just to emulate old behavior have). But this only affects
+                  number formatting done with <literal>?c</literal>,
                   <literal>?cn</literal>, and with <quote>c</quote>
                   <literal>number_format</literal>, and not number formatting
                   in general.</para>
@@ -30149,9 +30183,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>number_format</literal> setting (also when
                   formatting with
                   <literal>?string(<replaceable>format</replaceable>)</literal>),
-                  now <quote>c</quote> can be used instead of
+                  now <literal>"c"</literal> can be used instead of
                   <quote>computer</quote>. Both has the same effect on
-                  formatting, but <quote>c</quote> is preferred from now
+                  formatting, but <literal>"c"</literal> is preferred from now
                   on.</para>
                 </listitem>
               </itemizedlist>
@@ -30191,17 +30225,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><link
-              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
-              Fixed possible deadlock when the
-              <literal>Configuration</literal> and
-              <literal>DefaultObjectWrapper</literal> class
-              <emphasis>static</emphasis> initialization is triggered in
-              different threads around the same time. (In the very unlikely
-              case your application can run into this, this will hang the code
-              that initializes FreeMarker before it has processed any
-              templates, and it can't happen anymore if any template
-              processing managed to start.)</para>
+              <para>Added <literal>Configurable.setCFormat(CFormat)</literal>,
+              with the usual accompanying setting API methods/constants. See
+              the <literal>c_format</literal>-, and the
+              <literal>?c</literal>-related changes earlier in the FTL
+              section.</para>
             </listitem>
 
             <listitem>
@@ -30215,6 +30243,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               by the new method, and what the deprecated methods returns is
               stuck at 2.3.31 <literal>incompatible_improvements</literal>
               mode.</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved <literal>StringUtil.jsStringEnc</literal> and
+              <literal>javaSctringEsc</literal> to support quoting. Also
+              <literal>jsStringEnc</literal> now have a mode that targets both
+              JavaScript and JSON, and doesn't give up apostrophe
+              escaping.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-198">FREEMARKER-198</link>:
+              Fixed possible deadlock when the
+              <literal>Configuration</literal> and
+              <literal>DefaultObjectWrapper</literal> class
+              <emphasis>static</emphasis> initialization is triggered in
+              different threads around the same time. (In the very unlikely
+              case your application can run into this, this will hang the code
+              that initializes FreeMarker before it has processed any
+              templates, and it can't happen anymore if any template
+              processing managed to start.)</para>
             </listitem>
 
             <listitem>

@@ -63,7 +63,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      *            See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}. Not {@code null}. Note
      *            that the version will be normalized to the lowest version where the same incompatible
      *            {@link BeansWrapper} improvements were already present, so for the returned instance
-     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified
+     *            {@link #getIncompatibleImprovements()} might return a lower version than what you have specified
      *            here.
      * @param isIncompImprsAlreadyNormalized
      *            Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.

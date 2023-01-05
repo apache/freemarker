@@ -102,7 +102,7 @@ public class CTemplateNumberFormatTest {
 
     private void testFormat(Number n, String expectedResult) throws TemplateModelException,
         TemplateValueFormatException {
-        TemplateNumberFormat cTemplateNumberFormat = JSONCFormat.INSTANCE.getTemplateNumberFormat();
+        TemplateNumberFormat cTemplateNumberFormat = JSONCFormat.INSTANCE.getTemplateNumberFormat(null);
         String actualResult = (String) cTemplateNumberFormat.format(new SimpleNumber(n));
         assertFormatResult(n, actualResult, expectedResult);
         if (!actualResult.equals("NaN") && !actualResult.equals("0") && !actualResult.startsWith("-")) {

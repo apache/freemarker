@@ -136,11 +136,10 @@ final class CTemplateNumberFormat extends TemplateNumberFormat {
             BigDecimal bd = ((BigDecimal) num).stripTrailingZeros();
             int scale = bd.scale();
             if (scale <= 0) {
-                // A whole number. Myabe a long ID in a database or other system, and for those exponential form is not
+                // A whole number. Maybe a long ID in a database or other system, and for those exponential form is not
                 // expected generally, so we avoid that. But then, it becomes too easy to write something like
                 // 1e1000000000000 and kill the server with a terra byte long rendering of the number, so for lengths
-                // that
-                // realistically aren't ID-s or such, we use exponential format after all:
+                // that realistically aren't ID-s or such, we use exponential format after all:
                 if (scale <= -100) {
                     return bd.toString(); // Will give exponential form for this scale
                 }
@@ -195,6 +194,5 @@ final class CTemplateNumberFormat extends TemplateNumberFormat {
     public String getDescription() {
         return "c";
     }
-
 
 }

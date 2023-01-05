@@ -41,7 +41,7 @@ import freemarker.template.utility.NullArgumentException;
  */
 public class _TemplateAPI {
     // ATTENTION! Don't refer to other classes in the static initializer of this class! Fields that need that must be
-    // moved into separate class, as it was done in _VersionInts, and _ObjectWrappers, to avoid class init deadlocks.
+    // moved into a separate class, to avoid class init deadlocks.
 
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);

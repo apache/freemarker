@@ -45,13 +45,12 @@ public class BooleanFormatEnvironmentCachingTest extends TemplateTest {
                         + "<#setting cFormat='JSON'>${true} ${true} ${false} ${false} "
                         + "<#setting booleanFormat='y,n'>${true} ${true} ${false} ${false} "
                         + "<#setting cFormat='Java'>${true} ${true} ${false} ${false} "
-                        + "<#setting booleanFormat='c'>${true} ${true} ${false} ${false} ",
+                        + "<#setting booleanFormat='c'>${true} ${true} ${false} ${false}",
                 ""
                         + "TRUE TRUE FALSE FALSE "
                         + "true true false false "
                         + "y y n n "
                         + "y y n n "
-                        + "true true false false "
-                        + "");
+                        + "true true false false");
     }
 }

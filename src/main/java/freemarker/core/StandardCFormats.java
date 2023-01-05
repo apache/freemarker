@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,13 +29,18 @@ final class StandardCFormats {
 
     static final Map<String, CFormat> STANDARD_C_FORMATS;
     static {
-            STANDARD_C_FORMATS = new LinkedHashMap<>();
-            STANDARD_C_FORMATS.put(JSONCFormat.INSTANCE.getName(), JSONCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(JavaScriptCFormat.INSTANCE.getName(), JavaScriptCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(JavaCFormat.INSTANCE.getName(), JavaCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(XSCFormat.INSTANCE.getName(), XSCFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(Default230CFormat.INSTANCE.getName(), Default230CFormat.INSTANCE);
-            STANDARD_C_FORMATS.put(Default2321CFormat.INSTANCE.getName(), Default2321CFormat.INSTANCE);
+        Map<String, CFormat> map = new LinkedHashMap<>();
+        addStandardCFormat(map, JavaScriptOrJSONCFormat.INSTANCE);
+        addStandardCFormat(map, JSONCFormat.INSTANCE);
+        addStandardCFormat(map, JavaScriptCFormat.INSTANCE);
+        addStandardCFormat(map, JavaCFormat.INSTANCE);
+        addStandardCFormat(map, XSCFormat.INSTANCE);
+        addStandardCFormat(map, LegacyCFormat.INSTANCE);
+        STANDARD_C_FORMATS = Collections.unmodifiableMap(map);
+    }
+
+    private static void addStandardCFormat(Map<String, CFormat> map, CFormat cFormat) {
+        map.put(cFormat.getName(), cFormat);
     }
 
 }

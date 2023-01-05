@@ -26,11 +26,18 @@ import java.text.NumberFormat;
 import freemarker.template.TemplateException;
 
 /**
- * {@link CFormat} for outputting XML that follows the conventions of XML Schema.
+ * {@value #NAME} {@link CFormat}, for outputting XML that follows the conventions of XML Schema.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p>Note that with this, strings formatted with {@code ?c}/{@code ?cn} aren't quoted, or escaped with backslash, since
+ * those are meaningless in XML, as far as XML Schema is concerned. They are just printed without change. (Note that
+ * XML-escaping is the duty of the auto-escaping facility of FreeMarker, and not of the {@link CFormat}, so that's not
+ * done here either.)
+ *
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
+ *
+ * @since 2.3.32
  */
 public final class XSCFormat extends CFormat {
     public static final String NAME = "XS";
@@ -40,7 +47,8 @@ public final class XSCFormat extends CFormat {
             "INF", "-INF", "NaN",
             "INF", "-INF", "NaN");
 
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE
+            = (DecimalFormat) LegacyCFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("INF");
@@ -49,7 +57,7 @@ public final class XSCFormat extends CFormat {
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }
 
@@ -57,7 +65,7 @@ public final class XSCFormat extends CFormat {
     }
 
     @Override
-    TemplateNumberFormat getTemplateNumberFormat() {
+    TemplateNumberFormat getTemplateNumberFormat(Environment env) {
         return TEMPLATE_NUMBER_FORMAT;
     }
 

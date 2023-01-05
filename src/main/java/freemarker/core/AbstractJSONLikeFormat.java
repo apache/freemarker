@@ -26,7 +26,7 @@ import java.text.NumberFormat;
 /**
  * Defines the methods in {@link CFormat} that are the same for all JSON-like languages.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * constructor and most methods are not exposed outside FreeMarker, and so you can't create a custom implementation.
  * The class itself and some members are exposed as they are needed for configuring FreeMarker.
  *
@@ -37,7 +37,8 @@ public abstract class AbstractJSONLikeFormat extends CFormat {
             "Infinity", "-Infinity", "NaN",
             "Infinity", "-Infinity", "NaN");
 
-    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE = (DecimalFormat) Default230CFormat.INSTANCE.getLegacyNumberFormat().clone();
+    private static final DecimalFormat LEGACY_NUMBER_FORMAT_PROTOTYPE
+            = (DecimalFormat) LegacyCFormat.LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.clone();
     static {
         DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE.getDecimalFormatSymbols();
         symbols.setInfinity("Infinity");
@@ -65,12 +66,12 @@ public abstract class AbstractJSONLikeFormat extends CFormat {
     }
 
     @Override
-    final TemplateNumberFormat getTemplateNumberFormat() {
+    final TemplateNumberFormat getTemplateNumberFormat(Environment env) {
         return TEMPLATE_NUMBER_FORMAT;
     }
 
     @Override
-    NumberFormat getLegacyNumberFormat() {
+    NumberFormat getLegacyNumberFormat(Environment env) {
         return (NumberFormat) LEGACY_NUMBER_FORMAT_PROTOTYPE.clone();
     }
 }

@@ -21,14 +21,19 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.StringUtil.JsStringEncCompatibility;
+import freemarker.template.utility.StringUtil.JsStringEncQuotation;
 
 /**
- * JavaScript {@link CFormat}. This is almost the same as {@link JSONCFormat}, but it uses shorter forms where
- * the additional JavaScript features make that possible.
+ * {@value #NAME} {@link CFormat}, to be used when generating JavaScript (and not JSON), except, in most cases
+ * {@link JavaScriptOrJSONCFormat} is recommended over this.
  *
- * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now the
+ * <p><b>Experimental class!</b> This class is too new, and might will change over time. Therefore, for now
  * most methods are not exposed outside FreeMarker. The class itself and some members are exposed as they are needed for
  * configuring FreeMarker.
+ *
+ * @see JSONCFormat
+ * @see JavaScriptOrJSONCFormat
  *
  * @since 2.3.32
  */
@@ -41,7 +46,7 @@ public final class JavaScriptCFormat extends AbstractJSONLikeFormat {
 
     @Override
     String formatString(String s, Environment env) throws TemplateException {
-        return StringUtil.jsStringEnc(s, false, true);
+        return StringUtil.jsStringEnc(s, JsStringEncCompatibility.JAVA_SCRIPT, JsStringEncQuotation.QUOTATION_MARK);
     }
 
     @Override

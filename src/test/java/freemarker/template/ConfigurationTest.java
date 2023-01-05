@@ -61,8 +61,6 @@ import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
-import freemarker.core.Default230CFormat;
-import freemarker.core.Default2321CFormat;
 import freemarker.core.DefaultTruncateBuiltinAlgorithm;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
@@ -73,6 +71,8 @@ import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.JSONCFormat;
 import freemarker.core.JavaCFormat;
 import freemarker.core.JavaScriptCFormat;
+import freemarker.core.JavaScriptOrJSONCFormat;
+import freemarker.core.LegacyCFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OptInTemplateClassResolver;
 import freemarker.core.OutputFormat;
@@ -189,18 +189,18 @@ public class ConfigurationTest extends TestCase {
         assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getPreferIndexedReadMethod());
 
         cfg = new Configuration(Configuration.VERSION_2_3_0);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_20);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_32);
-        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
-        cfg.setCFormat(JSONCFormat.INSTANCE); // Same as default, but explicitly set now
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfg.getCFormat());
+        cfg.setCFormat(JavaScriptOrJSONCFormat.INSTANCE); // Same as default, but explicitly set now
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_31);
-        assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
+        assertSame(JavaScriptOrJSONCFormat.INSTANCE, cfg.getCFormat());
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {
@@ -314,7 +314,7 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isCFormatExplicitlySet());
         //
         cfg.unsetCFormat();
-        assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        assertFalse(cfg.isCFormatExplicitlySet());
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -1877,8 +1877,10 @@ public class ConfigurationTest extends TestCase {
             assertEquals(3, alg.getDefaultTerminatorLength());
             assertNull(alg.getDefaultMTerminator());
             assertNull(alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
@@ -1895,8 +1897,10 @@ public class ConfigurationTest extends TestCase {
             assertEquals("markupOutput(format=HTML, markup=<span class=trunc>...</span>)",
                     alg.getDefaultMTerminator().toString());
             assertEquals(Integer.valueOf(3), alg.getDefaultMTerminatorLength());
-            assertEquals(DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
-                    alg.getWordBoundaryMinLength());
+            assertEquals(
+                    DefaultTruncateBuiltinAlgorithm.DEFAULT_WORD_BOUNDARY_MIN_LENGTH,
+                    alg.getWordBoundaryMinLength(),
+                    0);
         }
 
         {
@@ -1920,19 +1924,19 @@ public class ConfigurationTest extends TestCase {
     public void testCFormat() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
 
-        assertSame(Default2321CFormat.INSTANCE, cfg.getCFormat());
-        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default230CFormat.NAME);
-        assertSame(Default230CFormat.INSTANCE, cfg.getCFormat());
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, LegacyCFormat.NAME);
+        assertSame(LegacyCFormat.INSTANCE, cfg.getCFormat());
         cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, JSONCFormat.NAME);
         assertSame(JSONCFormat.INSTANCE, cfg.getCFormat());
 
         cfg.setSetting(Configuration.C_FORMAT_KEY_CAMEL_CASE, "default");
-        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, Default2321CFormat.NAME);
+        cfg.setSetting(Configuration.C_FORMAT_KEY_SNAKE_CASE, LegacyCFormat.NAME);
 
         for (CFormat standardCFormat : new CFormat[] {
-                        Default230CFormat.INSTANCE, Default2321CFormat.INSTANCE,
-                        JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaCFormat.INSTANCE,
-                        XSCFormat.INSTANCE
+                        LegacyCFormat.INSTANCE,
+                        JSONCFormat.INSTANCE, JavaScriptCFormat.INSTANCE, JavaScriptOrJSONCFormat.INSTANCE,
+                        JavaCFormat.INSTANCE, XSCFormat.INSTANCE
                 }) {
             cfg.setSetting(Configuration.C_FORMAT_KEY, standardCFormat.getName());
             assertSame(standardCFormat, cfg.getCFormat());

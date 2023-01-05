@@ -152,7 +152,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * {@link String} class name to {@link StaticModel} cache.
      * This object only belongs to a single {@link BeansWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final StaticModels staticModels;
@@ -160,7 +160,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * {@link String} class name to {@link EnumerationModel} cache.
      * This object only belongs to a single {@link BeansWrapper}.
-     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * This has to be final as {@link #getStaticModels()} might return it any time and then it has to remain a good
      * reference.
      */
     private final ClassBasedModelFactory enumModels;
@@ -260,7 +260,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
-     *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
+     *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might return
      *   a lower version than what you have specified.
      *
      * @since 2.3.21
