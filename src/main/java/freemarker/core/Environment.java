@@ -2686,7 +2686,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the current format for the given temporal class.
      *
-     * @since 2.3.31
+     * @since 2.3.33
      */
     public TemplateTemporalFormat getTemplateTemporalFormat(Class<? extends Temporal> temporalClass)
             throws TemplateValueFormatException {
@@ -3173,7 +3173,7 @@ public final class Environment extends Configurable {
      * should only by used with
      * {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone,
      * DateToISO8601CalendarFactory)} and
-     * {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)} .
+     * {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}.
      */
     DateToISO8601CalendarFactory getISOBuiltInCalendarFactory() {
         if (isoBuiltInCalendarFactory == null) {

@@ -30,7 +30,7 @@ import freemarker.log.Logger;
 
 /**
  * Used internally only, might change without notice!
- * To work around with java.time bugs.
+ * To work around java.time bugs.
  */
 public final class _JavaTimeBugUtils {
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");

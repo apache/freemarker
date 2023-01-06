@@ -55,7 +55,7 @@ public class _MessageUtil {
     };
 
     static final String FAIL_MISSING_TIME_ZONE_PARSER_POLICY_ERROR_DETAIL
-            = "The parsed string doesn't contain time zone, nor offset, and that target type is non-local, and the "
+            = "The parsed string doesn't contain time zone, nor offset, and the target type is non-local, and the "
                     + "specified policy is to fail in that case (see " + MissingTimeZoneParserPolicy.class.getName()
                     + "." + MissingTimeZoneParserPolicy.FAIL + ").";
 
@@ -335,7 +335,7 @@ public class _MessageUtil {
             TemplateTemporalFormat format, TemplateTemporalModel ttm, Expression dataSrcExp,
             Exception formattingException, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Failed to format temporal value of class ", safeGetTemporalClass(ttm),
+                "Failed to format temporal value of class ", safeGetTemporalClassName(ttm),
                         ", value ", new _DelayedJQuote(new _DelayedToString(safeGetTemporalValue(ttm))),
                         ", with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 formattingException instanceof TemplateValueFormatException
@@ -347,10 +347,11 @@ public class _MessageUtil {
                 : new _MiscTemplateException(formattingException, null, desc);
     }
 
-    private static String safeGetTemporalClass(TemplateTemporalModel ttm) {
+    private static String safeGetTemporalClassName(TemplateTemporalModel ttm) {
         try {
-            return ttm.getAsTemporal().getClass().getName();
-        } catch (TemplateModelException e) {
+            Temporal value = ttm.getAsTemporal();
+            return value != null ? value.getClass().getName() : "Null";
+        } catch (Exception e) {
             return "[failed to get]";
         }
     }
@@ -359,7 +360,7 @@ public class _MessageUtil {
         try {
             Temporal value = ttm.getAsTemporal();
             return value != null ? value : "null";
-        } catch (TemplateModelException e) {
+        } catch (Exception e) {
             return "[failed to get]";
         }
     }

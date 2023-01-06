@@ -1307,10 +1307,10 @@ public class Configurable {
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
      *       The value you set here is possibly automatically adjusted for specific temporal types, in two scenarios:
-     *       Secanrio 1. is when formatting {@link LocalDateTime} or {@link LocalTime} would fail because the format
-     *       contains a time zone field (for most locales "long" anb "full" are like that). To handle this, FreeMarker
+     *       Scenario 1 is when formatting {@link LocalDateTime}, or {@link LocalTime} would fail because the format
+     *       contains a time zone field (for most locales "long" and "full" are like that). To handle this, FreeMarker
      *       will decrease the verbosity if the time part (like "full" is replaced with "long", "long" is replaced with
-     *       "medium", etc.), until successful formatting will be possible. Scenarion 2 is when formatting
+     *       "medium", etc.), until successful formatting will be possible. Scenario 2 is when formatting
      *       {@link OffsetTime} values, and the current time zone has DST, in which case FreeMarker will increase the
      *       verbosity until the offset is displayed (see at {@link #setTimeFormat} why).
      *
@@ -1323,15 +1323,15 @@ public class Configurable {
      *       
      * </ul> 
      * 
-     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
+     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium"}.
      *
      * <p>If temporal support is enabled (see {@link Configuration#setIncompatibleImprovements(Version)} at 2.3.33, and
      * {@link DefaultObjectWrapperBuilder#setTemporalSupport(boolean)}) this is also used for these {@link Temporal}
      * classes: {@link Instant}, {@link LocalDateTime}, {@link OffsetDateTime}, {@link ZonedDateTime}.
      * For non-{@code Local} {@link Temporal}-s FreeMarker will detect if the format doesn't show the offset or zone (as
      * is typically the case for the {@code "medium"} format), and then before formatting it will convert the value to
-     * the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker, or when parsing
-     * a string it will assume that it uses that time zone.
+     * the time zone specified in the {@link #setTimeZone(TimeZone) timeZone} setting of FreeMarker. Also, when parsing
+     * a string that contains no offset or zone, it will assume that it uses that time zone.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -1362,9 +1362,8 @@ public class Configurable {
      * <p>Defaults to {@code "iso"}, which will simply show the year like {@code "2021"} (without the quotation marks).
      *
      * @param yearFormat
-     *     See the similar parameter of {@link #setDateTimeFormat(String)},
-     *     {@code iso}/{@code xs} only the year is shown.
-     *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
+     *     See the similar parameter of {@link #setDateTimeFormat(String)}, except for {@code iso}/{@code xs} only the
+     *     year is shown, and "styles" (like "short", "medium", etc.) aren't supported.
      *
      * @since 2.3.33
      */
@@ -1396,9 +1395,9 @@ public class Configurable {
      * <p>Defaults to {@code "iso"}, which will show the value like {@code "2021-12"} (without the quotation marks).
      *
      * @param yearMonthFormat
-     *     See the similar parameter of {@link #setDateTimeFormat(String)};
-     *     {@code iso}/{@code xs} will look like {@code 2021-12}.
-     *     Java (as of version 8) doesn't support "styles" (like "short", "medium", etc.) for this.
+     *     See the similar parameter of {@link #setDateTimeFormat(String)},
+     *     except {@code iso}/{@code xs} will look like {@code 2021-12}, and "styles" (like "short", "medium", etc.)
+     *     aren't supported.
      *
      * @since 2.3.33
      */

@@ -42,8 +42,6 @@ import freemarker.template.TemplateTemporalModel;
 
 /**
  * See {@link ISOTemplateTemporalFormatFactory}, and {@link XSTemplateTemporalFormatFactory}.
- *
- * @since 2.3.32
  */
 final class ISOLikeTemplateTemporalTemporalFormat extends DateTimeFormatterBasedTemplateTemporalFormat {
     private final DateTimeFormatter dateTimeFormatter;

@@ -96,7 +96,7 @@ class EvalUtil {
     static Temporal modelToTemporal(TemplateTemporalModel model, Expression expr)
             throws TemplateModelException {
         Temporal value = model.getAsTemporal();
-        if (value == null) throw newModelHasStoredNullException(Date.class, model, expr);
+        if (value == null) throw newModelHasStoredNullException(Temporal.class, model, expr);
         return value;
     }
 

@@ -27,11 +27,11 @@ import freemarker.template.utility.StringUtil;
 
 /**
  * Creates an alias to another format that's given with a {@link String}, so that the format can be referred with a
- * simple name in the template, rather than with a concrete pattern or other kind of format string. Internally, this
+ * simple name in the template, rather than with a concrete pattern, or other kind of format string. Internally, this
  * will call {@link Environment#getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} to resolve the other
  * format.
  *
- * @see Configuration#customDateFormats
+ * @see Configuration#setCustomDateFormats(Map) 
  * 
  * @since 2.3.24
  */

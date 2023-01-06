@@ -412,8 +412,7 @@ public final class _TemporalUtils {
                 chronologyLocale = locale;
             }
         }
-        Chronology chronology = Chronology.ofLocale(chronologyLocale);
-        return chronology;
+        return Chronology.ofLocale(chronologyLocale);
     }
 
     private static String legacyCalendarTypeToJavaTimeApiCompatibleName(String legacyType) {
@@ -438,28 +437,28 @@ public final class _TemporalUtils {
     public static Class<? extends Temporal> normalizeSupportedTemporalClass(Class<? extends Temporal> temporalClass) {
         if (SUPPORTED_TEMPORAL_CLASSES_ARE_FINAL) {
             return temporalClass;
+        }
+
+        if (Instant.class.isAssignableFrom(temporalClass)) {
+            return Instant.class;
+        } else if (LocalDate.class.isAssignableFrom(temporalClass)) {
+            return LocalDate.class;
+        } else if (LocalDateTime.class.isAssignableFrom(temporalClass)) {
+            return LocalDateTime.class;
+        } else if (LocalTime.class.isAssignableFrom(temporalClass)) {
+            return LocalTime.class;
+        } else if (OffsetDateTime.class.isAssignableFrom(temporalClass)) {
+            return OffsetDateTime.class;
+        } else if (OffsetTime.class.isAssignableFrom(temporalClass)) {
+            return OffsetTime.class;
+        } else if (ZonedDateTime.class.isAssignableFrom(temporalClass)) {
+            return ZonedDateTime.class;
+        } else if (YearMonth.class.isAssignableFrom(temporalClass)) {
+            return YearMonth.class;
+        } else if (Year.class.isAssignableFrom(temporalClass)) {
+            return Year.class;
         } else {
-            if (Instant.class.isAssignableFrom(temporalClass)) {
-                return Instant.class;
-            } else if (LocalDate.class.isAssignableFrom(temporalClass)) {
-                return LocalDate.class;
-            } else if (LocalDateTime.class.isAssignableFrom(temporalClass)) {
-                return LocalDateTime.class;
-            } else if (LocalTime.class.isAssignableFrom(temporalClass)) {
-                return LocalTime.class;
-            } else if (OffsetDateTime.class.isAssignableFrom(temporalClass)) {
-                return OffsetDateTime.class;
-            } else if (OffsetTime.class.isAssignableFrom(temporalClass)) {
-                return OffsetTime.class;
-            } else if (ZonedDateTime.class.isAssignableFrom(temporalClass)) {
-                return ZonedDateTime.class;
-            } else if (YearMonth.class.isAssignableFrom(temporalClass)) {
-                return YearMonth.class;
-            } else if (Year.class.isAssignableFrom(temporalClass)) {
-                return Year.class;
-            } else {
-                throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
-            }
+            throw new IllegalArgumentException("Unsupported temporal class: " + temporalClass.getName());
         }
     }
 
@@ -470,18 +469,15 @@ public final class _TemporalUtils {
      */
     public static boolean isLocalTemporalClass(Class<? extends Temporal> temporalClass) {
         temporalClass = normalizeSupportedTemporalClass(temporalClass);
-        if (temporalClass == Instant.class
-                || temporalClass == OffsetDateTime.class
-                || temporalClass == ZonedDateTime.class
-                || temporalClass == OffsetTime.class) {
-            return false;
-        }
-        return true;
+        return temporalClass != Instant.class
+                && temporalClass != OffsetDateTime.class
+                && temporalClass != ZonedDateTime.class
+                && temporalClass != OffsetTime.class;
     }
 
     /**
      * Returns the local variation of a non-local class, or {@code null} if no local pair is known, or the class is not
-     * recognized .
+     * recognized.
      *
      * @throws IllegalArgumentException If the temporal class is not currently supported by FreeMarker.
      */
