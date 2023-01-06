@@ -39,12 +39,12 @@ import freemarker.template.TemplateException;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
-public abstract class TemplateTemporalFormatAbstractCachingInEnvironmentTest {
+public abstract class AbstractTemplateTemporalFormatAbstractCachingInEnvironmentTest {
     protected static final TimeZone OTHER_TIME_ZONE = TimeZone.getTimeZone("GMT+01");
 
     protected final Environment env;
 
-    public TemplateTemporalFormatAbstractCachingInEnvironmentTest() {
+    public AbstractTemplateTemporalFormatAbstractCachingInEnvironmentTest() {
         try {
             this.env = createEnvironment();
         } catch (Exception e) {

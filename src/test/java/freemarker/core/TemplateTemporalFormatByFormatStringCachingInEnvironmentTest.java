@@ -47,7 +47,7 @@ import freemarker.template.TemplateException;
  * to <code>${temporal}</code>).
  */
 public class TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
-        extends TemplateTemporalFormatAbstractCachingInEnvironmentTest {
+        extends AbstractTemplateTemporalFormatAbstractCachingInEnvironmentTest {
 
     public void test() throws IOException, TemplateException, TemplateValueFormatException {
         Class<? extends Temporal> temporalClass = LocalDateTime.class;

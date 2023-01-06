@@ -33,7 +33,7 @@ import freemarker.template.TemplateDateModel;
  * also assert when exactly the flushing happens; that can change in the future, in which case adjust the tests.
  */
 public class FormatCacheMemoryLeakPreventionFlushingTest
-        extends TemplateTemporalFormatAbstractCachingInEnvironmentTest {
+        extends AbstractTemplateTemporalFormatAbstractCachingInEnvironmentTest {
 
     @Test
     public void testGlobalJavaTemporalFormatCacheLeakProtection() throws Exception {

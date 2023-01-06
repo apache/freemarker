@@ -47,7 +47,7 @@ import freemarker.template.utility.NullWriter;
  * @see TemplateTemporalFormatByFormatStringCachingInEnvironmentTest
  */
 public class TemplateTemporalFormatCurrentCachingInEnvironmentTest
-        extends TemplateTemporalFormatAbstractCachingInEnvironmentTest {
+        extends AbstractTemplateTemporalFormatAbstractCachingInEnvironmentTest {
 
     @Test
     public void testTemporalClassSeparation() throws Exception {
