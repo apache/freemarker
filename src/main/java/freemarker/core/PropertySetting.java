@@ -38,7 +38,7 @@ final class PropertySetting extends TemplateElement {
 
     private final String key;
     private final Expression value;
-    private final ValueSafetyChecker valueSafeyChecker;
+    private final ValueSafetyChecker valueSafetyChecker;
     
     static final String[] SETTING_NAMES = new String[] {
             // Must be sorted alphabetically!
@@ -112,7 +112,7 @@ final class PropertySetting extends TemplateElement {
         this.value = value;
 
         if (key.equals(Configurable.C_FORMAT_KEY_SNAKE_CASE) || key.equals(Configurable.C_FORMAT_KEY_CAMEL_CASE)) {
-            valueSafeyChecker = new ValueSafetyChecker() {
+            valueSafetyChecker = new ValueSafetyChecker() {
                 @Override
                 public void check(Environment env, String actualValue) throws TemplateException {
                     if (actualValue.startsWith("@")
@@ -128,7 +128,7 @@ final class PropertySetting extends TemplateElement {
                 }
             };
         } else {
-            valueSafeyChecker = null;
+            valueSafetyChecker = null;
         }
     }
 
@@ -145,8 +145,8 @@ final class PropertySetting extends TemplateElement {
         } else {
             strval = value.evalAndCoerceToStringOrUnsupportedMarkup(env);
         }
-        if (valueSafeyChecker != null) {
-            valueSafeyChecker.check(env, strval);
+        if (valueSafetyChecker != null) {
+            valueSafetyChecker.check(env, strval);
         }
         env.setSetting(key, strval);
         return null;
