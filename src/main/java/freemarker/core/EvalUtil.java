@@ -277,8 +277,7 @@ class EvalUtil {
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
-            // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
-            cmpResult = env.getCollator().compare(leftString, rightString);
+            cmpResult = leftString.compareTo(rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new _MiscTemplateException(defaultBlamed, env,
