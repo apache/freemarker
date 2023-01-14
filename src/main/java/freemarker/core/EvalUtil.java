@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Normalizer;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
@@ -275,8 +276,10 @@ class EvalUtil {
                 throw new _MiscTemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
-            String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = Normalizer.normalize(
+                    EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env), Normalizer.Form.NFKC);
+            String rightString = Normalizer.normalize(
+                    EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env), Normalizer.Form.NFKC);
             cmpResult = leftString.compareTo(rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
