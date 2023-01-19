@@ -237,6 +237,11 @@ public class FMParser {
                 outputFormat = outputFormatFromExt;
             }
         }
+	if (!(outputFormat instanceof MarkupOutputFormat)
+	    && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+	    throw new IllegalArgumentException(
+                    "Non-markup output format cannot be used when auto-escaping is forced.");
+	}
         recalculateAutoEscapingField();
 
         token_source.setParser(this);
@@ -358,7 +363,8 @@ public class FMParser {
         if (outputFormat instanceof MarkupOutputFormat) {
             if (autoEscapingPolicy == Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY) {
                 autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapedByDefault();
-            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY) {
+            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
+	        || autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
                 autoEscaping = true;
             } else if (autoEscapingPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
                 autoEscaping = false;
@@ -2214,15 +2220,22 @@ Expression BuiltIn(Expression lhoExp) :
         }
         
         if (result instanceof BuiltInBannedWhenAutoEscaping) {
-	        if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
-	            throw new ParseException(
-	                    "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "
-	                    + "a markup output format (" + outputFormat.getName() + "), to avoid double-escaping mistakes.",
-	                    template, t);
-	        }
+	    if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
+	        throw new ParseException(
+	                "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "
+	                + "a markup output format (" + outputFormat.getName() + "), to avoid double-escaping mistakes.",
+	                template, t);
+	    }
             
             return result;
         }
+
+	if (result instanceof BuiltInBannedWhenForcedAutoEscaping) {
+	    if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+	        throw new ParseException(
+		        "Using ?" + t.image + " is not allowed while auto-escaping is forced.", template, t);
+	    }
+	}
 
         if (result instanceof MarkupOutputFormatBoundBuiltIn) {
             if (!(outputFormat instanceof MarkupOutputFormat)) {
@@ -4046,6 +4059,11 @@ OutputFormatBlock OutputFormat() :
             } else {
                 outputFormat = template.getConfiguration().getOutputFormat(paramStr);
             }
+	    if (!(outputFormat instanceof MarkupOutputFormat)
+	    	&& autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+	        throw new ParseException(
+			"Non-markup output format cannot be used when auto-escaping is forced.", template, start);
+	    }
             recalculateAutoEscapingField();
         } catch (IllegalArgumentException e) {
             throw new ParseException("Invalid format name: " + e.getMessage(), template, start, e.getCause());
@@ -4100,6 +4118,10 @@ NoAutoEscBlock NoAutoEsc() :
 {
     start = <NOAUTOESC>
     {
+	if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+	    throw new ParseException(
+	    	"Auto-escaping mode is forced; <#noautoesc> cannot be used.", template, start);
+	}
         lastAutoEscapingPolicy = autoEscapingPolicy;
         autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
@@ -4539,6 +4561,10 @@ void HeaderElement() :
                                 autoEscRequester = key;
                                 autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
                             } else {
+				if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+				    throw new ParseException(
+				            "Auto-escaping is forced and cannot be disabled.", exp);
+				}
                                 autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }
                             recalculateAutoEscapingField();

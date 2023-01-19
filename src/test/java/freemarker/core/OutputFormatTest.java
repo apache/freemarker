@@ -842,7 +842,29 @@ public class OutputFormatTest extends TemplateTest {
                     + dExpted);
         }
     }
-    
+
+    @Test
+    public void testForcedAutoEsc() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setRegisteredCustomOutputFormats(ImmutableList.of(
+                SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
+        cfg.setAutoEscapingPolicy(Configuration.FORCE_AUTO_ESCAPING_POLICY);
+
+        String commonFTL = "${'.'} ${.autoEsc?c}";
+        String esced = "\\. true";
+
+        cfg.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
+        assertOutput(commonFTL, esced);
+
+        cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+        assertOutput(commonFTL, esced);
+
+        cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+        assertErrorContains("<#outputformat 'plainText'></#outputformat>", "auto-escaping is forced");
+        assertErrorContains("<#noAutoEsc></#noAutoEsc>", "Auto-escaping mode is forced");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", "auto-escaping is forced");
+    }
+
     @Test
     public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
         // Dynamic parser BI-s are supposed to use the parserConfiguration of the calling template, and ignore anything

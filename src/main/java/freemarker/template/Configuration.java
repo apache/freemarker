@@ -432,7 +432,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY = 21;
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
     public static final int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
-    
+    /** Require auto-escaping always. */
+    public static final int FORCE_AUTO_ESCAPING_POLICY = 23;
+
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -2121,7 +2123,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @param autoEscapingPolicy
      *          One of the {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
-     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, and {@link #DISABLE_AUTO_ESCAPING_POLICY} constants.  
+     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, {@link #DISABLE_AUTO_ESCAPING_POLICY}, and
+     *          {@link #FORCE_AUTO_ESCAPING_POLICY} constants.  
      * 
      * @see TemplateConfiguration#setAutoEscapingPolicy(int)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -3317,6 +3320,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setAutoEscapingPolicy(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
                 } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
                     setAutoEscapingPolicy(ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+                } else if ("force".equals(value)) {
+                    setAutoEscapingPolicy(FORCE_AUTO_ESCAPING_POLICY);
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
                 } else {
