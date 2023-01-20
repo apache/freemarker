@@ -276,11 +276,14 @@ class EvalUtil {
                 throw new _MiscTemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
-            String leftString = Normalizer.normalize(
-                    EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env), Normalizer.Form.NFKC);
-            String rightString = Normalizer.normalize(
-                    EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env), Normalizer.Form.NFKC);
-            cmpResult = leftString.compareTo(rightString);
+            String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
+            String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
+            if (env.getConfiguration().getIncompatibleImprovements().intValue() <= _VersionInts.V_2_3_32) {
+                cmpResult = env.getCollator().compare(leftString, rightString);
+            } else {
+                cmpResult = Normalizer.normalize(leftString, Normalizer.Form.NFKC)
+                         .compareTo(Normalizer.normalize(rightString, Normalizer.Form.NFKC));
+            }
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new _MiscTemplateException(defaultBlamed, env,
