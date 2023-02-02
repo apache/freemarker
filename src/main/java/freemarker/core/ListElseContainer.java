@@ -37,10 +37,10 @@ class ListElseContainer extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        if (!listPart.acceptWithResult(env)) {
-            return elsePart.accept(env);
+        if (listPart.acceptWithResult(env)) {
+            return null;
         }
-        return null;
+        return new TemplateElement[] { elsePart };
     }
 
     @Override
