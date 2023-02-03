@@ -188,6 +188,8 @@ public final class Environment extends Configurable {
 
     private boolean fastInvalidReferenceExceptions;
 
+    private TemplateProcessingTracer currentTracer;
+
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
      * processing going on in this thread. Data model implementations that need access to the environment can call this
@@ -301,6 +303,13 @@ public final class Environment extends Configurable {
     }
 
     /**
+     * Sets the tracer to use for this environment.
+     */
+    public void setTracer(TemplateProcessingTracer tracer) {
+        currentTracer = tracer;
+    }
+
+    /**
      * Processes the template to which this environment belongs to.
      */
     public void process() throws TemplateException, IOException {
@@ -311,12 +320,14 @@ public final class Environment extends Configurable {
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
+                if (currentTracer != null) currentTracer.start();
                 visit(getTemplate().getRootTreeNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
                 }
             } finally {
+                if (currentTracer != null) currentTracer.end();
                 // It's just to allow the GC to free memory...
                 clearCachedValues();
             }
@@ -2883,6 +2894,10 @@ public final class Environment extends Configurable {
             this.instructionStack = instructionStack;
         }
         instructionStack[newSize - 1] = element;
+        if (currentTracer != null) {
+            currentTracer.trace(element.getTemplate(), element.getBeginColumn(), element.getBeginLine(),
+                    element.getEndColumn(), element.getEndLine(), element.isLeaf());
+        }
     }
 
     private void popElement() {
