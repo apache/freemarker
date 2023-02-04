@@ -41,7 +41,7 @@ public class TemplateProcessingTracerTest {
             "Nope.\n" +
             "</#list>\n" +
             "<#list [] as item>\n" +
-            "${item}<#else>\n" +
+            "${item}<#else>" +
             "Yup.\n" +
             "</#list>\n";
 
@@ -50,31 +50,34 @@ public class TemplateProcessingTracerTest {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         Template t = new Template("test.ftl", TEMPLATE_TEXT, cfg);
         StringWriter sw = new StringWriter();
-        Tracer tracer = new Tracer();
+        Tracer tracer = new Tracer(TEMPLATE_TEXT);
         Environment env = t.createProcessingEnvironment(null, sw);
         env.setTracer(tracer);
         env.process();
 
-        List<Integer> expected = Arrays.asList(2, 3, 5, 5, 5, 9);
-        assertEquals(expected, tracer.linesVisited);
+        List<String> expected = Arrays.asList("Yup.", "Always.", "${item}", "${item}", "${item}", "Yup.");
+        assertEquals(expected, tracer.elementsVisited);
     }
 
     private static class Tracer implements TemplateProcessingTracer {
-        ArrayList<Integer> linesVisited;
+        final ArrayList<String> elementsVisited;
+        final String[] templateLines;
 
-        Tracer() {
-            linesVisited = new ArrayList<>();
+        Tracer(String template) {
+            elementsVisited = new ArrayList<>();
+            templateLines = template.split("\\n");
         }
 
-        public void start() {}
-        public void end() {}
-
-        public void trace(Template template, int beginColumn, int beginLine, int endColumn, int endLine,
+        public void enterElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine,
             boolean isLeafElement) {
             if (isLeafElement) {
-                linesVisited.add(beginLine);
+                String line = templateLines[beginLine - 1];
+                String elementText = line.substring(beginColumn - 1,
+                        endLine == beginLine ? Math.min(endColumn, line.length()) : line.length());
+                elementsVisited.add(elementText);
             }
         }
 
+        public void exitElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine) {}
     }
 }

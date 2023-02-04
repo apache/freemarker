@@ -37,27 +37,20 @@ import freemarker.template.utility.ObjectFactory;
 public interface TemplateProcessingTracer {
 
     /**
-     * Invoked when {@link Template.process()} starts processing the template.
-     * 
-     * @since 2.3.23
-     */
-    void start();
-
-    /**
      * Invoked by {@link Environment} whenever it starts processing a new template element. {@code
      * isLeafElement} indicates whether this element is a leaf, or whether the tracer should expect
      * to receive lower-level elements within the context of this one.
      * 
      * @since 2.3.23
      */
-    void trace(Template template, int beginColumn, int beginLine, int endColumn, int endLine,
+    void enterElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine,
             boolean isLeafElement);
 
     /**
-     * Invoked when template processing is finished.
+     * Invoked by {@link Environment} whenever it completes processing a new template element.
      * 
      * @since 2.3.23
      */
-    void end();
+    void exitElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine);
 
 }

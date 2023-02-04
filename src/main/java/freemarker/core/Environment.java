@@ -303,13 +303,6 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets the tracer to use for this environment.
-     */
-    public void setTracer(TemplateProcessingTracer tracer) {
-        currentTracer = tracer;
-    }
-
-    /**
      * Processes the template to which this environment belongs to.
      */
     public void process() throws TemplateException, IOException {
@@ -320,14 +313,12 @@ public final class Environment extends Configurable {
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
-                if (currentTracer != null) currentTracer.start();
                 visit(getTemplate().getRootTreeNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
                 }
             } finally {
-                if (currentTracer != null) currentTracer.end();
                 // It's just to allow the GC to free memory...
                 clearCachedValues();
             }
@@ -2882,6 +2873,13 @@ public final class Environment extends Configurable {
         };
     }
 
+    /**
+     * Sets the tracer to use for this environment.
+     */
+    public void setTracer(TemplateProcessingTracer tracer) {
+        currentTracer = tracer;
+    }
+
     private void pushElement(TemplateElement element) {
         final int newSize = ++instructionStackSize;
         TemplateElement[] instructionStack = this.instructionStack;
@@ -2895,12 +2893,19 @@ public final class Environment extends Configurable {
         }
         instructionStack[newSize - 1] = element;
         if (currentTracer != null) {
-            currentTracer.trace(element.getTemplate(), element.getBeginColumn(), element.getBeginLine(),
+            currentTracer.enterElement(element.getTemplate(),
+                    element.getBeginColumn(), element.getBeginLine(),
                     element.getEndColumn(), element.getEndLine(), element.isLeaf());
         }
     }
 
     private void popElement() {
+        if (currentTracer != null) {
+            TemplateElement element = instructionStack[instructionStackSize - 1];
+            currentTracer.exitElement(element.getTemplate(),
+                    element.getBeginColumn(), element.getBeginLine(),
+                    element.getEndColumn(), element.getEndLine());
+        }
         instructionStackSize--;
     }
 
