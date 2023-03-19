@@ -7923,7 +7923,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
         <para>FTL's type system is technically represented by the
         <literal>TemplateModel</literal> sub-interfaces that were introduced
         earlier (<literal>TemplateScalarModel</literal>,
-        <literal>TemplateHashMode</literal>,
+        <literal>TemplateHashModel</literal>,
         <literal>TemplateSequenceModel</literal>, etc). To map a Java object
         to FTL's type system, object wrapper's <literal>TemplateModel
         wrap(java.lang.Object obj)</literal> method will be called.</para>
