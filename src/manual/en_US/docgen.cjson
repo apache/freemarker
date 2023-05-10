@@ -1,4 +1,4 @@
-﻿//charset: UTF-8
+//charset: UTF-8
 
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
@@ -70,7 +70,7 @@ olinks: {
   mailing-lists: "https://freemarker.apache.org/mailing-lists.html"
   
   // External URL-s:
-  onlineTemplateTester: "http://try.freemarker.org/"
+  onlineTemplateTester: "https://try.freemarker.apache.org/"
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
