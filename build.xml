@@ -155,11 +155,6 @@
     <delete dir="build/javacc-home.tmp" />
 
     <replace
-      file="${_javaccOutputDir}/FMParser.java"
-      token="private final LookaheadSuccess"
-      value="private static final LookaheadSuccess"
-    />
-    <replace
       file="${_javaccOutputDir}/FMParserConstants.java"
       token="public interface FMParserConstants"
       value="interface FMParserConstants"
