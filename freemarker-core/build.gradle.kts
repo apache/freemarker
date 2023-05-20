@@ -37,7 +37,7 @@ dependencies {
 val compileJavacc = tasks.register<org.apache.freemarker.build.core.CompileJavaccTask>("compileJavacc") {
     sourceDirectory.set(file("src/main/javacc"))
     destinationDirectory.set(buildDir.toPath().resolve("generated").resolve("javacc").toFile())
-    javaccVersion.set("6.1.2")
+    javaccVersion.set("7.0.12")
 
     fileNameOverrides.addAll(
         "ParseException.java",

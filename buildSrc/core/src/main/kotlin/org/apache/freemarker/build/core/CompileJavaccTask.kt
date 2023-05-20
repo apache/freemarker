@@ -19,15 +19,6 @@
 
 package org.apache.freemarker.build.core
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.attribute.BasicFileAttributes
-import java.util.*
-import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.EmptyFileVisitor
 import org.gradle.api.file.FileSystemOperations
@@ -43,6 +34,15 @@ import org.gradle.process.ExecOperations
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+import java.util.*
+import javax.inject.Inject
 
 private const val JAVACC_MAIN_CLASS = "org.javacc.parser.Main"
 
@@ -63,7 +63,7 @@ open class CompileJavaccTask @Inject constructor(
     val sourceDirectory = objects.directoryProperty().value(layout.projectDirectory.dir("src/main/javacc"))
 
     @Input
-    val javaccVersion = objects.property<String>().value("6.1.2")
+    val javaccVersion = objects.property<String>().value("7.0.12")
 
     private val javaccClasspath = objects.fileCollection().apply {
         val dependencies = project.dependencies
