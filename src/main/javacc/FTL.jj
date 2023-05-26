@@ -240,7 +240,7 @@ public class FMParser {
 	if (!(outputFormat instanceof MarkupOutputFormat)
 	    && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 	    throw new IllegalArgumentException(
-                    "Non-markup output format cannot be used when auto-escaping is forced.");
+                    "Non-markup output format cannot be used when auto_scaping_policy is FORCE_AUTO_ESCAPING_POLICY.");
 	}
         recalculateAutoEscapingField();
 
@@ -2233,7 +2233,8 @@ Expression BuiltIn(Expression lhoExp) :
 	if (result instanceof BuiltInBannedWhenForcedAutoEscaping) {
 	    if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 	        throw new ParseException(
-		        "Using ?" + t.image + " is not allowed while auto-escaping is forced.", template, t);
+		        "Using ?" + t.image + " is not allowed while auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY.",
+			template, t);
 	    }
 	}
 
@@ -4062,7 +4063,8 @@ OutputFormatBlock OutputFormat() :
 	    if (!(outputFormat instanceof MarkupOutputFormat)
 	    	&& autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 	        throw new ParseException(
-			"Non-markup output format cannot be used when auto-escaping is forced.", template, start);
+			"Non-markup output format cannot be used when auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY.",
+			template, start);
 	    }
             recalculateAutoEscapingField();
         } catch (IllegalArgumentException e) {
@@ -4120,7 +4122,8 @@ NoAutoEscBlock NoAutoEsc() :
     {
 	if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 	    throw new ParseException(
-	    	"Auto-escaping mode is forced; <#noautoesc> cannot be used.", template, start);
+	    	"<#noautoesc> cannot be used when auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY.",
+		template, start);
 	}
         lastAutoEscapingPolicy = autoEscapingPolicy;
         autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
@@ -4563,7 +4566,8 @@ void HeaderElement() :
                             } else {
 				if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 				    throw new ParseException(
-				            "Auto-escaping is forced and cannot be disabled.", exp);
+				            "auto_esc setting cannot be used when auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY.",
+					    exp);
 				}
                                 autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }

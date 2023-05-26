@@ -860,9 +860,9 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(commonFTL, esced);
 
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
-        assertErrorContains("<#outputformat 'plainText'></#outputformat>", "auto-escaping is forced");
-        assertErrorContains("<#noAutoEsc></#noAutoEsc>", "Auto-escaping mode is forced");
-        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", "auto-escaping is forced");
+        assertErrorContains("<#outputformat 'plainText'></#outputformat>", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
+        assertErrorContains("<#noAutoEsc></#noAutoEsc>", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
     }
 
     @Test
