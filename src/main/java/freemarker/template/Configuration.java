@@ -231,16 +231,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
     /**
      * Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_CAMEL_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
     /**
      * Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints.
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
@@ -1611,7 +1614,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * or {@code setTemplateLoader(new WebappTemplateLoader(sctxt))} if {@code path} was
      * {@code null}, so see {@code freemarker.cache.WebappTemplateLoader} for more details.
      * 
-     * @param servletContext the {@code javax.servlet.ServletContext} object. (The declared type is {@link Object}
+     * @param servletContext the {@code jakarta.servlet.ServletContext} object. (The declared type is {@link Object}
      *        to prevent class loading error when using FreeMarker in an environment where
      *        there's no servlet classes available.)
      * @param path the path relative to the ServletContext.
@@ -1624,7 +1627,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             final Class webappTemplateLoaderClass = ClassUtil.forName("freemarker.cache.WebappTemplateLoader");
             
             // Don't introduce linking-time dependency on servlets
-            final Class servletContextClass = ClassUtil.forName("javax.servlet.ServletContext");
+            final Class servletContextClass = ClassUtil.forName("jakarta.servlet.ServletContext");
             
             final Class[] constructorParamTypes;
             final Object[] constructorParams;
@@ -3172,6 +3175,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.21
      * @deprecated Use {@link #setSharedVariables(Map)} instead. 
      */
+    @Deprecated
     public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
         setSharedVariables(map);
     }

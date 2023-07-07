@@ -21,11 +21,11 @@ package freemarker.ext.jsp.taglibmembers;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.JspFragment;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
+import jakarta.servlet.jsp.JspContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.JspFragment;
+import jakarta.servlet.jsp.tagext.SimpleTagSupport;
 
 public class TestSimpleTag extends SimpleTagSupport {
     private int bodyLoopCount = 1;

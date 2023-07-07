@@ -22,9 +22,6 @@ package freemarker.ext.servlet;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import freemarker.template.ObjectWrapper;
 import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.SimpleCollection;
@@ -32,6 +29,8 @@ import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.

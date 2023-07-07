@@ -36,6 +36,7 @@ import freemarker.template.TemplateModelException;
  * returns a bit mask of various <tt>TYPE_xxx</tt> constants flagging which
  * template models are implemented by the mirrored object.
  */
+@Deprecated
 public interface DebugModel extends Remote {
     public static final int TYPE_SCALAR        =    1;
     public static final int TYPE_NUMBER        =    2;

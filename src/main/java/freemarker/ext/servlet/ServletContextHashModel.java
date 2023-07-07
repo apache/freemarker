@@ -19,13 +19,12 @@
 
 package freemarker.ext.servlet;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletContext;
-
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletContext;
 
 /**
  * TemplateHashModel wrapper for a ServletContext attributes.

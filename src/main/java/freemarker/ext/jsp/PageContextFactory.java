@@ -19,12 +19,11 @@
 
 package freemarker.ext.jsp;
 
-import javax.servlet.jsp.PageContext;
-
 import freemarker.core.Environment;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.UndeclaredThrowableException;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  */

@@ -31,6 +31,6 @@ trivial.jsp
 
 WEB-INF/el-function-tag-name-clash.tld
 WEB-INF/el-functions.tld
-WEB-INF/expected
+WEB-INF/expected/
 WEB-INF/test.tld
 WEB-INF/web.xml

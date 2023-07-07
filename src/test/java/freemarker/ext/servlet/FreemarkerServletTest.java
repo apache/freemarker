@@ -18,18 +18,23 @@
  */
 package freemarker.ext.servlet;
 
-import static freemarker.ext.servlet.FreemarkerServlet.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_CONTENT_TYPE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_LOCALE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_RESPONSE_CHARACTER_ENCODING;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_ALWAYS;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_NEVER;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +53,10 @@ import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class FreemarkerServletTest {
 

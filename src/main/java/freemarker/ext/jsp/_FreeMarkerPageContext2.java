@@ -21,15 +21,14 @@ package freemarker.ext.jsp;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.jsp.JspFactory;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
-
 import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
+import jakarta.el.ELException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.jsp.JspFactory;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.el.ExpressionEvaluator;
+import jakarta.servlet.jsp.el.VariableResolver;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
@@ -37,6 +36,7 @@ import freemarker.template.TemplateModelException;
  * 
  * Implementation of PageContext that contains JSP 2.0 specific methods.
  */
+@Deprecated(forRemoval = true, since = "2.4.0")
 public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 

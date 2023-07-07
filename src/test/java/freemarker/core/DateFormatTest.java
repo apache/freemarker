@@ -340,7 +340,7 @@ public class DateFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testAlieses() throws Exception {
+    public void testAliases() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.setCustomDateFormats(ImmutableMap.of(
                 "d", new AliasTemplateDateFormatFactory("yyyy-MMM-dd"),
@@ -364,9 +364,9 @@ public class DateFormatTest extends TemplateTest {
         assertOutputForNamed("t1.ftl", "2015-Sep-06 2015-Sep 2015-sept. E");
         assertOutputForNamed("t2.ftl", "2015-Sep-06 2015-September 2015-septembre " + T);
     }
-    
+
     @Test
-    public void testAlieses2() throws Exception {
+    public void testAliases2() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.setCustomDateFormats(ImmutableMap.of(
                 "d", new AliasTemplateDateFormatFactory("yyyy-MMM",
@@ -382,9 +382,9 @@ public class DateFormatTest extends TemplateTest {
                 + "<#setting locale='en_GB_Win'>${d} "
                 + "<#setting locale='fr_FR'>${d} "
                 + "<#setting locale='hu_HU'>${d}",
-                "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
+                "2015-Sep_en 2015-Sept_en_GB 2015-Sept_en_GB 2015-sept._fr_FR 2015-szept.");
     }
-    
+
     /**
      * ?date() and such are new in 2.3.24.
      */

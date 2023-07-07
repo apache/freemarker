@@ -19,7 +19,10 @@
 
 package freemarker.ext.jsp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.AbstractList;
@@ -33,10 +36,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,6 +57,9 @@ import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.test.servlet.DefaultModel2TesterAction;
 import freemarker.test.servlet.WebAppTestCase;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Tests {@link FreemarkerServlet} on a real (embedded) Servlet container.
@@ -135,7 +137,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    public void tldDiscoveryBasicDefultOverride() throws Exception {
+    public void tldDiscoveryBasicDefaultOverride() throws Exception {
         try {
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
             assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt",
@@ -297,13 +299,13 @@ public class RealServletContainertTest extends WebAppTestCase {
             req.setAttribute("linkedList", initTestCollection(new LinkedList<Integer>()));
             req.setAttribute("arrayList", initTestCollection(new ArrayList<Integer>()));
             req.setAttribute("myList", new MyList());
-            
-            req.setAttribute("linkedHashMap", initTestMap(new LinkedHashMap()));
-            req.setAttribute("treeMap", initTestMap(new TreeMap()));
+
+            req.setAttribute("linkedHashMap", initTestMap(new LinkedHashMap<>()));
+            req.setAttribute("treeMap", initTestMap(new TreeMap<>()));
             req.setAttribute("myMap", new MyMap());
-            
-            req.setAttribute("treeSet", initTestCollection(new TreeSet()));
-            
+
+            req.setAttribute("treeSet", initTestCollection(new TreeSet<>()));
+
             return super.execute(req, resp);
         }
         

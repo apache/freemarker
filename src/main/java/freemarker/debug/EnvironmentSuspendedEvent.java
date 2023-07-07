@@ -25,6 +25,7 @@ import java.util.EventObject;
  * Event describing a suspension of an environment (ie because it hit a
  * breakpoint).
  */
+@Deprecated
 public class EnvironmentSuspendedEvent extends EventObject {
     private static final long serialVersionUID = 1L;
 

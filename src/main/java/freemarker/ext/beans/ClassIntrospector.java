@@ -113,7 +113,7 @@ class ClassIntrospector {
         if (jRebelAvailable) {
             try {
                 classChangeNotifier = (ClassChangeNotifier)
-                        Class.forName("freemarker.ext.beans.JRebelClassChangeNotifier").newInstance();
+                        Class.forName("freemarker.ext.beans.JRebelClassChangeNotifier").getDeclaredConstructor().newInstance();
             } catch (Throwable e) {
                 classChangeNotifier = null;
                 try {
@@ -412,12 +412,12 @@ class ClassIntrospector {
         PropertyDescriptor[] introspectorPDsArray = beanInfo.getPropertyDescriptors();
         List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
                 : Collections.<PropertyDescriptor>emptyList();
-        
-        if (!treatDefaultMethodsAsBeanMembers || _JavaVersions.JAVA_8 == null) {
+
+        if (!treatDefaultMethodsAsBeanMembers || !_JavaVersions.IS_AT_LEAST_8) {
             // java.beans.Introspector was good enough then.
             return introspectorPDs;
         }
-        
+
         // introspectorPDs contains each property exactly once. But as now we will search them manually too, it can
         // happen that we find the same property for multiple times. Worse, because of indexed properties, it's possible
         // that we have to merge entries (like one has the normal reader method, the other has the indexed reader
@@ -434,7 +434,7 @@ class ClassIntrospector {
         // (Note that java.beans.Introspector discovers non-accessible public methods, and to emulate that behavior
         // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
         for (Method method : clazz.getMethods()) {
-            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && method.getReturnType() != void.class
+            if (method.isDefault() && method.getReturnType() != void.class
                     && !method.isBridge()) {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
@@ -607,14 +607,14 @@ class ClassIntrospector {
         List<MethodDescriptor> introspectionMDs = introspectorMDArray != null && introspectorMDArray.length != 0
                 ? Arrays.asList(introspectorMDArray) : Collections.<MethodDescriptor>emptyList();
 
-        if (!treatDefaultMethodsAsBeanMembers || _JavaVersions.JAVA_8 == null) {
+        if (!treatDefaultMethodsAsBeanMembers || !_JavaVersions.IS_AT_LEAST_8) {
             // java.beans.Introspector was good enough then.
             return introspectionMDs;
         }
 
         Map<String, List<Method>> defaultMethodsToAddByName = null;
         for (Method method : clazz.getMethods()) {
-            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && !method.isBridge()) {
+            if (method.isDefault() && !method.isBridge()) {
                 if (defaultMethodsToAddByName == null) {
                     defaultMethodsToAddByName = new HashMap<>();
                 }

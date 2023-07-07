@@ -24,13 +24,12 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest parameters.

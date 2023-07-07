@@ -23,18 +23,17 @@ import java.util.List;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.xml.utils.PrefixResolver;
+import org.apache.xpath.XPath;
+import org.apache.xpath.XPathContext;
+import org.apache.xpath.objects.XBoolean;
+import org.apache.xpath.objects.XNodeSet;
+import org.apache.xpath.objects.XNull;
+import org.apache.xpath.objects.XNumber;
+import org.apache.xpath.objects.XObject;
+import org.apache.xpath.objects.XString;
 import org.w3c.dom.Node;
 import org.w3c.dom.traversal.NodeIterator;
-
-import com.sun.org.apache.xml.internal.utils.PrefixResolver;
-import com.sun.org.apache.xpath.internal.XPath;
-import com.sun.org.apache.xpath.internal.XPathContext;
-import com.sun.org.apache.xpath.internal.objects.XBoolean;
-import com.sun.org.apache.xpath.internal.objects.XNodeSet;
-import com.sun.org.apache.xpath.internal.objects.XNull;
-import com.sun.org.apache.xpath.internal.objects.XNumber;
-import com.sun.org.apache.xpath.internal.objects.XObject;
-import com.sun.org.apache.xpath.internal.objects.XString;
 
 import freemarker.core.Environment;
 import freemarker.template.SimpleNumber;

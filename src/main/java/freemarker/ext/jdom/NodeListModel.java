@@ -675,7 +675,7 @@ implements
                 else if ("data".equals(localName))
                     attr = new Attribute("data", pi.getData());
                 else
-                    attr = new Attribute(localName, pi.getValue(localName));
+                    attr = new Attribute(localName, pi.getPseudoAttributeValue(localName));
             } else if (node instanceof DocType) {
                 DocType doctype = (DocType) node;
                 if ("publicId".equals(localName))
@@ -781,17 +781,17 @@ implements
 
     private static final Element getParent(Object node) {
         if (node instanceof Element)
-            return((Element) node).getParent();
+            return((Element) node).getParentElement();
         else if (node instanceof Attribute)
             return((Attribute) node).getParent();
         else if (node instanceof Text)
-            return((Text) node).getParent();
+            return((Text) node).getParentElement();
         else if (node instanceof ProcessingInstruction)
-            return((ProcessingInstruction) node).getParent();
+            return((ProcessingInstruction) node).getParentElement();
         else if (node instanceof Comment)
-            return((Comment) node).getParent();
+            return((Comment) node).getParentElement();
         else if (node instanceof EntityRef)
-            return((EntityRef) node).getParent();
+            return((EntityRef) node).getParentElement();
         else
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -815,7 +815,7 @@ implements
             LinkedList list = new LinkedList();
             do {
                 list.addFirst(parent);
-                parent = parent.getParent();
+                parent = parent.getParentElement();
             } while (parent != null);
             return list;
         }
@@ -830,7 +830,7 @@ implements
             list.addFirst(node);
             do {
                 list.addFirst(parent);
-                parent = parent.getParent();
+                parent = parent.getParentElement();
             } while (parent != null);
             return list;
         }
@@ -885,7 +885,7 @@ implements
                 Element parent = ((Attribute) node).getParent();
                 doc = parent == null ? null : parent.getDocument();
             } else if (node instanceof Text) {
-                Element parent = ((Text) node).getParent();
+                Element parent = ((Text) node).getParentElement();
                 doc = parent == null ? null : parent.getDocument();
             } else if (node instanceof Document)
                 doc = (Document) node;

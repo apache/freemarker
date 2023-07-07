@@ -17,11 +17,11 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<taglib xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
-  version="2.1">
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_1.xsd"
+	version="3.1">
   <tlib-version>2.0</tlib-version>
-  <short-name>For ClassPathTlds testing - 1</short-name>
+  <short-name>ClassPathTlds-testing-1</short-name>
   <uri>http://freemarker.org/taglibs/test/ClassPathTlds-1</uri>
   <tag>
     <name>simpletag</name>

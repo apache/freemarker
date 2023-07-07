@@ -53,6 +53,11 @@ class JRebelClassChangeNotifier implements ClassChangeNotifier {
                 ci.remove(pClass);
             }
         }
+
+		@Override
+		public int priority() {
+			return PRIORITY_DEFAULT;
+		}
     }
 
 }

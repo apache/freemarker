@@ -54,9 +54,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.tagext.Tag;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -86,6 +83,9 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.tagext.Tag;
 
 /**
  * A hash model associated with a servlet context that can load JSP tag libraries associated with that servlet context.
@@ -440,26 +440,32 @@ public class TaglibFactory implements TemplateHashModel {
     private void addTldLocationsFromWebInfTlds()
             throws IOException, SAXException {
         LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/**/*.tld");
-        addTldLocationsFromServletContextResourceTlds("/WEB-INF");
+        addTldLocationsFromServletContextResourceTlds("/WEB-INF/");
     }
 
     private void addTldLocationsFromServletContextResourceTlds(String basePath)
             throws IOException, SAXException {
-        Set unsortedResourcePaths = servletContext.getResourcePaths(basePath);
+    	LOG.debug("Adding TLD locations from servlet context resource TLDs for " + basePath);
+
+        Set<String> unsortedResourcePaths = servletContext.getResourcePaths(basePath);
+
         if (unsortedResourcePaths != null) {
-            List/*<String>*/ resourcePaths = new ArrayList/*<String>*/(unsortedResourcePaths);
+            List<String> resourcePaths = new ArrayList<>(unsortedResourcePaths);
             Collections.sort(resourcePaths);
             // First process the files...
-            for (Iterator it = resourcePaths.iterator(); it.hasNext(); ) {
-                String resourcePath = (String) it.next();
+            for (String resourcePath: resourcePaths) {
                 if (resourcePath.endsWith(".tld")) {
                     addTldLocationFromTld(new ServletContextTldLocation(resourcePath));
                 }
             }
             // ... only later the directories
-            for (Iterator it = resourcePaths.iterator(); it.hasNext(); ) {
-                String resourcePath = (String) it.next();
-                if (resourcePath.endsWith("/")) {
+            for (String resourcePath: resourcePaths) {
+
+            	// This has been added as a workaround for a bug in Jetty
+            	// See https://github.com/eclipse/jetty.project/issues/10084
+            	String realPath = servletContext.getRealPath(resourcePath);
+
+                if (new File(realPath).isDirectory()) {
                     addTldLocationsFromServletContextResourceTlds(resourcePath);
                 }
             }
@@ -766,6 +772,8 @@ public class TaglibFactory implements TemplateHashModel {
      * Adds the TLD location mapping from the TLD itself.
      */
     private void addTldLocationFromTld(TldLocation tldLocation) throws IOException, SAXException {
+    	LOG.debug("Adding TLD location for " + tldLocation);
+
         try (InputStream in = tldLocation.getInputStream()) {
             addTldLocationFromTld(in, tldLocation);
         }
@@ -781,8 +789,10 @@ public class TaglibFactory implements TemplateHashModel {
     private void addTldLocationFromTld(InputStream reusedIn, TldLocation tldLocation) throws SAXException,
             IOException {
         String taglibUri;
+        String xmlSystemId = tldLocation.getXmlSystemId();
+
         try {
-            taglibUri = getTaglibUriFromTld(reusedIn, tldLocation.getXmlSystemId());
+            taglibUri = getTaglibUriFromTld(reusedIn, xmlSystemId);
         } catch (SAXException e) {
             LOG.error("Error while parsing TLD; skipping: " + tldLocation, e);
             synchronized (failedTldLocations) {
@@ -790,6 +800,9 @@ public class TaglibFactory implements TemplateHashModel {
             }
             taglibUri = null;
         }
+
+        LOG.debug("Adding taglib URI '" + taglibUri + "' for system ID '" + xmlSystemId + "'");
+
         if (taglibUri != null) {
                 addTldLocation(tldLocation, taglibUri);
         }

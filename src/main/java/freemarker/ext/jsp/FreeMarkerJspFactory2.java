@@ -19,12 +19,22 @@
 
 package freemarker.ext.jsp;
 
-
 /**
  */
+@Deprecated(forRemoval = true, since = "2.4.0")
 class FreeMarkerJspFactory2 extends FreeMarkerJspFactory {
+
+    private static final String JSPCTX_KEY =  
+    		FreeMarkerJspFactory2.class.getName() + "#jspAppContext";
+
+	@Override
+	protected String getJspApplicationContextKey() {
+		return JSPCTX_KEY;
+	}
+
     @Override
     protected String getSpecificationVersion() {
         return "2.0";
     }
+
 }

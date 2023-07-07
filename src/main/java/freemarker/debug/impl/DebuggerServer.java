@@ -38,6 +38,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  */
+@Deprecated
 class DebuggerServer {
     private static final Logger LOG = Logger.getLogger("freemarker.debug.server");
     // TODO: Eventually replace with Yarrow    

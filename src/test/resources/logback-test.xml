@@ -24,7 +24,11 @@
 			<pattern>%d{HH:mm:ss.SSS} %-5level [%c] %C{20}:%L - %msg%n</pattern>
 		</encoder>
 	</appender>
-	
+
+	<logger name="org.apache.commons.beanutils.converters" level="INFO" />
+	<logger name="org.apache.jasper.compiler" level="INFO" />
+	<logger name="org.apache.jasper.servlet.TldScanner" level="INFO" />
+	<logger name="org.apache.tomcat" level="INFO" />
 	<logger name="org.eclipse.jetty" level="INFO" />
 
 	<root level="debug">

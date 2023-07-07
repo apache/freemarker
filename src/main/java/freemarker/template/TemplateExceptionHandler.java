@@ -76,7 +76,7 @@ public interface TemplateExceptionHandler {
             throw te;
         }
     };
-        
+
     /**
      * {@link TemplateExceptionHandler} useful when you are developing non-HTML templates. This 
      * handler outputs the stack trace information to the client and then re-throws the exception.
@@ -86,16 +86,17 @@ public interface TemplateExceptionHandler {
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
             if (!env.isInAttemptBlock()) {
-                PrintWriter pw = (out instanceof PrintWriter) ? (PrintWriter) out : new PrintWriter(out);
+            	boolean externalPw = out instanceof PrintWriter;
+                PrintWriter pw = externalPw ? (PrintWriter) out : new PrintWriter(out);
                 pw.print("FreeMarker template error (DEBUG mode; use RETHROW in production!):\n");
                 te.printStackTrace(pw, false, true, true);
-                
                 pw.flush();  // To commit the HTTP response
+                pw.close();
             }
             throw te;
         }
     }; 
-    
+
     /**
      * {@link TemplateExceptionHandler} useful when you are developing HTML templates. This handler
      * outputs the stack trace information to the client, formatting it so that it will be usually 
@@ -139,7 +140,7 @@ public interface TemplateExceptionHandler {
                     stackPW.close();
                     pw.println();
                     pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
-                    
+
                     pw.println("</pre></div></html>");
                     pw.flush();  // To commit the HTTP response
                 } finally {
@@ -149,11 +150,11 @@ public interface TemplateExceptionHandler {
             
             throw te;
         }
-        
+
         private static final String FONT_RESET_CSS =
                 "color:#A80000; font-size:12px; font-style:normal; font-variant:normal; "
                 + "font-weight:normal; text-decoration:none; text-transform: none";
-        
+
     };
     
 }

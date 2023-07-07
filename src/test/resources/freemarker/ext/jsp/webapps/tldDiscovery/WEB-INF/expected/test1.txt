@@ -44,12 +44,12 @@ Executed TestSimpleTag3
 Executed TestSimpleTag2
 Executed TestSimpleTag3
 
-<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
+<!-- Test loading from Jakarta TLDs -->
 a+b
 
 <!-- Test loading from "MetaInfTldSources", set via init-param -->
 Executed TestSimpleTag3
-<table>
+<table class="table">
 <thead>
 <tr>
 <th>Name</th>

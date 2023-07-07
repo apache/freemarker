@@ -22,9 +22,8 @@ package freemarker.ext.jsp;
 import java.io.IOException;
 import java.io.Writer;
 
-import javax.servlet.jsp.JspWriter;
-
 import freemarker.template.utility.SecurityUtilities;
+import jakarta.servlet.jsp.JspWriter;
 
 class JspWriterAdapter extends JspWriter {
     static final char[] NEWLINE = SecurityUtilities.getSystemProperty("line.separator", "\n").toCharArray();

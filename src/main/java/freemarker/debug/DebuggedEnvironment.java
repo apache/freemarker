@@ -35,6 +35,7 @@ import java.rmi.RemoteException;
  * {@link freemarker.core.Configurable} objects. 
 
  */
+@Deprecated
 public interface DebuggedEnvironment extends DebugModel {
     /**
      * Resumes the processing of the environment in the remote VM after it was 

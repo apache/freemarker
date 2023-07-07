@@ -19,10 +19,9 @@
 
 package freemarker.ext.jsp.taglibmembers;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
-
 import freemarker.template.utility.StringUtil;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.SimpleTagSupport;
 
 public abstract class AttributeAccessorTag extends SimpleTagSupport {
 

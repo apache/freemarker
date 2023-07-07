@@ -22,18 +22,13 @@ package freemarker.ext.jsp;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import javax.el.ELContext;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspFactory;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
-
 import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.ClassUtil;
+import jakarta.el.ELException;
+import jakarta.servlet.jsp.JspFactory;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.el.ExpressionEvaluator;
+import jakarta.servlet.jsp.el.VariableResolver;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
@@ -98,24 +93,4 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
         };
     }
 
-    private ELContext elContext;
-    
-    @Override
-    public ELContext getELContext() {
-        if (elContext == null) { 
-            JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
-            if (jspctx instanceof FreeMarkerJspApplicationContext) {
-                elContext = ((FreeMarkerJspApplicationContext) jspctx).createNewELContext(this);
-                elContext.putContext(JspContext.class, this);
-            } else {
-                throw new UnsupportedOperationException(
-                        "Can not create an ELContext using a foreign JspApplicationContext (of class "
-                        + ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
-                        "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
-                        + "In that case, know that that's not really suppored, and you are supposed to use FTL "
-                        + "constrcuts instead, like #list instead of JSTL's forEach, etc.");
-            }
-        }
-        return elContext;
-    }
 }

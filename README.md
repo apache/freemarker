@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-[![Build Status](https://travis-ci.org/apache/freemarker.svg?branch=2.3-gae)](https://travis-ci.org/apache/freemarker)
+[![Build Status](https://travis-ci.org/apache/freemarker.svg?branch=2.4-gae)](https://travis-ci.org/apache/freemarker)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
@@ -83,7 +83,7 @@ dependency, as freemarker.ext.dom can't use the XPath support
 included in OpenJDK anymore. It's not needed on Oracle Java 9,
 or if FreeMarker is configured to use Jaxen for XPath.
 
-The minimum required Java version is currently Java SE 7. (The presence
+The minimum required Java version is currently Java SE 17. (The presence
 of a later version may be detected on runtime and utilized by
 FreeMarker.)
 
@@ -106,9 +106,9 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
-You need JDK 8 (not JDK 9!), Apache Ant (tested with 1.9.6) and Ivy (tested
-with 2.5.0) to be installed. To install Ivy (but be sure it's not already
-installed), issue `ant download-ivy`; it will copy Ivy under `~/.ant/lib`.
+You need JDK 17, Apache Ant (tested with 1.9.6) and Ivy (tested with 2.5.0)
+to be installed. To install Ivy (but be sure it's not already installed),
+issue `ant download-ivy`; it will copy Ivy under `~/.ant/lib`.
 (Alternatively, you can copy `ivy-<version>.jar` into the Ant home `lib`
 subfolder manually.)
 
@@ -165,7 +165,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 8 installed, and that it was added to Eclipse.
+    Ensure that you have JDK 17 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
@@ -188,13 +188,13 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 17"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.7" (you will have to uncheck
+  - Set "Compiler Compliance Level" to "17" (you will have to uncheck
     "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
@@ -206,7 +206,6 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
     _Jython22*.java,
     _FreeMarkerPageContext2.java,
     FreeMarkerJspFactory2.java,
-    Java8*.java
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
@@ -233,15 +232,15 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
 
 - "New" -> "Project". In order as the IntelliJ will prompt you:
 
-  - Select "Java" on the left side, and "1.8" for SDK on the right side. Press "Next".
+  - Select "Java" on the left side, and "17" for SDK on the right side. Press "Next".
   
   - Template selection: Don't chose anything, "Next"
   
-  - Project name: "FreeMarker-2.3-gae".
-    Project location: Wherever you have checked out the 2.3-gae branch from Git.
+  - Project name: "FreeMarker-2.4-gae".
+    Project location: Wherever you have checked out the 2.4-gae branch from Git.
     Press "Finish"
 
-- Open your newly created "FreeMarker-2.3-gae" project
+- Open your newly created "FreeMarker-2.4-gae" project
 
 - "File" -> "Project Structure..."
 
@@ -264,10 +263,9 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
 
     - Test Resource Folders:  
       src/test/resources
-      
-  - Still inside the "Sources" tab, change the "Language level" to "7". (Yes, we use Java 8 SDK with
-    language level 7 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
-    
+
+  - Still inside the "Sources" tab, change the "Language level" to "17".
+
   - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
     all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon
     at the right edge, select "JARs or directory", navigate to `ide-dependencies` directory, expand
@@ -281,7 +279,6 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     _Jython22*.java,  
     _FreeMarkerPageContext2.java,  
     FreeMarkerJspFactory2.java,  
-    Java8*.java  
 
 - You may do "Build" / "Build project" (Ctrl+F9) to see if everything compiles now.
     

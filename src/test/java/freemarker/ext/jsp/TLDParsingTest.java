@@ -19,17 +19,15 @@
 
 package freemarker.ext.jsp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.Before;
@@ -47,6 +45,10 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.Version;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 @RunWith(JUnit4.class)
 public class TLDParsingTest {

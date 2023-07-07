@@ -33,13 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -66,6 +59,12 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNotFoundException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
@@ -612,83 +611,99 @@ public class FreemarkerServlet extends HttpServlet {
                         "init-param " + StringUtil.jQuote(name) + " without param-value. "
                         + "Maybe the web.xml is not well-formed?");
             }
-            
+
             try {
-                if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
-                        || name.equals(Configurable.OBJECT_WRAPPER_KEY)
-                        || name.equals(INIT_PARAM_TEMPLATE_PATH)
-                        || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS)) {
-                    // ignore: we have already processed these
-                } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
-                    if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {
-                        throw new ConflictingInitParamsException(
-                                Configuration.DEFAULT_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
-                    }
-                    config.setDefaultEncoding(value);
-                } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
-                    if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
-                        throw new ConflictingInitParamsException(
-                                Configuration.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
-                    }
-                    try {
-                        config.setTemplateUpdateDelay(Integer.parseInt(value));
-                    } catch (NumberFormatException e) {
-                        // Intentionally ignored
-                    }
-                } else if (name.equals(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER)) { // BC
-                    if (getInitParameter(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY) != null) {
-                        throw new ConflictingInitParamsException(
-                                Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
-                    }
-    
-                    if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-                    } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
-                    } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-                    } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
-                    } else {
-                        throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
-                                "Not one of the supported values.");
-                    }
-                } else if (name.equals(INIT_PARAM_NO_CACHE)) {
-                    noCache = StringUtil.getYesNo(value);
-                } else if (name.equals(INIT_PARAM_BUFFER_SIZE)) {
-                    bufferSize = Integer.valueOf(parseSize(value));
-                } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
-                    if (getInitParameter(INIT_PARAM_DEBUG) != null) {
-                        throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
-                    }
-                    debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INIT_PARAM_DEBUG)) {
-                    debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
-                    contentType = new ContentType(value);
-                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
-                    overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
-                } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
-                    responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
-                    if (responseCharacterEncoding == ResponseCharacterEncoding.FORCE_CHARSET) {
-                        String charsetName = value.substring(INIT_PARAM_VALUE_FORCE_PREFIX.length()).trim();
-                        forcedResponseCharacterEncoding = Charset.forName(charsetName);
-                    }
-                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE)) {
-                    overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
-                } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
-                    exceptionOnMissingTemplate = StringUtil.getYesNo(value);
-                } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
-                    metaInfTldSources = parseAsMetaInfTldLocations(value);
-                } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
-                    List newClasspathTlds = new ArrayList();
-                    if (classpathTlds != null) {
-                        newClasspathTlds.addAll(classpathTlds);
-                    }
-                    newClasspathTlds.addAll(InitParamParser.parseCommaSeparatedList(value));
-                    classpathTlds = newClasspathTlds;
-                } else {
-                    config.setSetting(name, value);
+                switch(name) {
+                    case DEPR_INITPARAM_OBJECT_WRAPPER:
+                    case Configurable.OBJECT_WRAPPER_KEY:
+                    case INIT_PARAM_TEMPLATE_PATH:
+                    case Configuration.INCOMPATIBLE_IMPROVEMENTS:
+                        // ignore: we have already processed these
+                        break;
+                    case DEPR_INITPARAM_ENCODING: // BC
+                        if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {
+                            throw new ConflictingInitParamsException(
+                                    Configuration.DEFAULT_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
+                        }
+                        config.setDefaultEncoding(value);
+                        break;
+                    case DEPR_INITPARAM_TEMPLATE_DELAY: // BC
+                        if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
+                            throw new ConflictingInitParamsException(
+                                    Configuration.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
+                        }
+                        try {
+                            config.setTemplateUpdateDelay(Integer.parseInt(value));
+                        } catch (NumberFormatException e) {
+                            // Intentionally ignored
+                        }
+                        break;
+                    case DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER: //BC
+                        if (getInitParameter(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY) != null) {
+                            throw new ConflictingInitParamsException(
+                                    Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
+                        }
+
+                        if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
+                            config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+                        } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
+                            config.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+                        } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
+                            config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+                        } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
+                            config.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+                        } else {
+                            throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
+                                    "Not one of the supported values.");
+                        }
+                        break;
+                    case INIT_PARAM_NO_CACHE:
+                        noCache = StringUtil.getYesNo(value);
+                        break;
+                    case INIT_PARAM_BUFFER_SIZE:
+                        bufferSize = Integer.valueOf(parseSize(value));
+                        break;
+                    case DEPR_INITPARAM_DEBUG: // BC
+                        if (getInitParameter(INIT_PARAM_DEBUG) != null) {
+                            throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
+                        }
+                        debug = StringUtil.getYesNo(value);
+                        break;
+                    case INIT_PARAM_DEBUG:
+                        debug = StringUtil.getYesNo(value);
+                        break;
+                    case INIT_PARAM_CONTENT_TYPE:
+                        contentType = new ContentType(value);
+                        break;
+                    case INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE:
+                        overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
+                        break;
+                    case INIT_PARAM_RESPONSE_CHARACTER_ENCODING:
+                        responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
+                        if (responseCharacterEncoding == ResponseCharacterEncoding.FORCE_CHARSET) {
+                            String charsetName = value.substring(INIT_PARAM_VALUE_FORCE_PREFIX.length()).trim();
+                            forcedResponseCharacterEncoding = Charset.forName(charsetName);
+                        }
+                        break;
+                    case INIT_PARAM_OVERRIDE_RESPONSE_LOCALE:
+                        overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
+                        break;
+                    case INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE:
+                        exceptionOnMissingTemplate = StringUtil.getYesNo(value);
+                        break;
+                    case INIT_PARAM_META_INF_TLD_LOCATIONS:
+                        metaInfTldSources = parseAsMetaInfTldLocations(value);
+                        break;
+                    case INIT_PARAM_CLASSPATH_TLDS:
+                        List<String> newClasspathTlds = new ArrayList<>();
+                        if (classpathTlds != null) {
+                            newClasspathTlds.addAll(classpathTlds);
+                        }
+                        newClasspathTlds.addAll(InitParamParser.parseCommaSeparatedList(value));
+                        classpathTlds = newClasspathTlds;
+                        break;
+                    default:
+                        config.setSetting(name, value);
                 }
             } catch (ConflictingInitParamsException e) {
                 throw e;
@@ -1008,11 +1023,11 @@ public class FreemarkerServlet extends HttpServlet {
                 if (this.servletContextModel == null) {
                     servletContextModel = new ServletContextHashModel(this, objectWrapper);
                     taglibFactory = createTaglibFactory(objectWrapper, servletContext);
-                    
+
                     // For backward compatibility only. We don't use these:
                     servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
                     servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibFactory);
-                    
+
                     initializeServletContext(request, response);
 
                     this.taglibFactory = taglibFactory;
@@ -1198,11 +1213,11 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected String requestUrlToTemplatePath(HttpServletRequest request) throws ServletException {
         // First, see if it's an included request
-        String includeServletPath  = (String) request.getAttribute("javax.servlet.include.servlet_path");
+        String includeServletPath  = (String) request.getAttribute("jakarta.servlet.include.servlet_path");
         if (includeServletPath != null) {
             // Try path info; only if that's null (servlet is mapped to an
             // URL extension instead of to prefix) use servlet path.
-            String includePathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
+            String includePathInfo = (String) request.getAttribute("jakarta.servlet.include.path_info");
             return includePathInfo == null ? includeServletPath : includePathInfo;
         } 
         // Seems that the servlet was not called as the result of a 

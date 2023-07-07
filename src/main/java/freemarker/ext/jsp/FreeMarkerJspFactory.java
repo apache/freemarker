@@ -19,16 +19,20 @@
 
 package freemarker.ext.jsp;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.jsp.JspEngineInfo;
-import javax.servlet.jsp.JspFactory;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.jsp.JspApplicationContext;
+import jakarta.servlet.jsp.JspEngineInfo;
+import jakarta.servlet.jsp.JspFactory;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  */
 abstract class FreeMarkerJspFactory extends JspFactory {
+
+	protected abstract String getJspApplicationContextKey();
     protected abstract String getSpecificationVersion();
     
     @Override
@@ -39,6 +43,22 @@ abstract class FreeMarkerJspFactory extends JspFactory {
                 return FreeMarkerJspFactory.this.getSpecificationVersion();
             }
         };
+    }
+
+    @Override
+    public JspApplicationContext getJspApplicationContext(ServletContext ctx) {
+        JspApplicationContext jspctx = (JspApplicationContext) ctx.getAttribute(
+        		getJspApplicationContextKey());
+        if (jspctx == null) {
+            synchronized (ctx) {
+                jspctx = (JspApplicationContext) ctx.getAttribute(getJspApplicationContextKey());
+                if (jspctx == null) {
+                    jspctx = new FreeMarkerJspApplicationContext();
+                    ctx.setAttribute(getJspApplicationContextKey(), jspctx);
+                }
+            }
+        }
+        return jspctx;
     }
 
     @Override

@@ -26,7 +26,7 @@
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-1"].simpletag/>
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-2"].simpletag/>
 <#attempt><#assign _ = JspTaglibs["http://freemarker.org/taglibs/test/MetaInfTldSources-1"]><#recover>missing</#attempt>
-<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
-${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
+<!-- Test loading from Jakarta TLDs -->
+<#attempt><#assign _ = JspTaglibs["jakarta.tags.functions"]><#recover>missing</#attempt>
 <!-- Test loading from "MetaInfTldSources", set via init-param -->
 <#attempt><#assign _ = JspTaglibs["http://displaytag.sf.net"]><#recover>missing</#attempt>

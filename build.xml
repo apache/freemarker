@@ -37,39 +37,30 @@
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
-  <property name="moduleBranch" value="2.3" />
+  <property name="moduleBranch" value="2.4" />
 
   <!-- Will be overidden on the Continous Integration server: -->
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
 
   <property file="build.properties"/>
-  <condition property="has.explicit.boot.classpath.j2se1.7">
-    <isset property="boot.classpath.j2se1.7"/>
-  </condition>
-  <condition property="has.explicit.boot.classpath.j2se1.8">
-    <isset property="boot.classpath.j2se1.8"/>
+  <condition property="has.explicit.java.home.17">
+    <isset property="java.home.17"/>
   </condition>
   <condition property="has.all.explicit.boot.classpaths">
     <and>
-      <isset property="has.explicit.boot.classpath.j2se1.7"/>
-      <isset property="has.explicit.boot.classpath.j2se1.8"/>
+      <isset property="has.explicit.java.home.17"/>
     </and>
   </condition>
-  <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
+  <available property="atLeastJDK17" classname="java.util.function.Predicate"/>
 
-  <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
+  <!-- When java.home.* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
-  <property name="boot.classpath.j2se1.7" value="${sun.boot.class.path}" />
-  <property name="boot.classpath.j2se1.8" value="${sun.boot.class.path}" />
+  <property name="java.home.17" value="${sun.boot.class.path}" />
 
   <!-- For checking the correctness of the boot.classpath.j2se* -->
-  <available classpath="${boot.classpath.j2se1.7}"
-    classname="java.nio.file.Path" ignoresystemclasses="true"
-    property="boot.classpath.j2se1.7.correct"
-  />
-  <available classpath="${boot.classpath.j2se1.8}"
-    classname="java.time.Instant" ignoresystemclasses="true"
-    property="boot.classpath.j2se1.8.correct"
+  <available classpath="${java.home.17}"
+    classname="java.time.Instant"
+    property="java.home.17.correct"
   />
 
   <!-- Set up version/timestamp filters and the version property: -->
@@ -101,7 +92,6 @@
   <!-- ================================================================== -->
   <!-- Initialization                                                     -->
   <!-- ================================================================== -->
-
 
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
@@ -192,22 +182,15 @@
   </target>
 
   <target name="compile" depends="javacc">
-    <fail unless="boot.classpath.j2se1.7.correct"><!--
-      -->The "boot.classpath.j2se1.7" property value (${boot.classpath.j2se1.7}) <!--
-      -->seems to be an incorrect boot classpath. Please fix it in <!--
-      -->the &lt;projectDir>/build.properties file, or wherever you <!--
-      -->set it.<!--
-    --></fail>
-    <fail unless="boot.classpath.j2se1.8.correct"><!--
-      -->The "boot.classpath.j2se1.8" property value (${boot.classpath.j2se1.8}) <!--
+    <fail unless="java.home.17.correct"><!--
+      -->The "java.home.17" property value (${java.home.17}) <!--
       -->seems to be an incorrect boot classpath. Please fix it in <!--
       -->the &lt;projectDir>/build.properties file, or wherever you <!--
       -->set it.<!--
     --></fail>
     <echo level="info"><!--
       -->Using boot classpaths: <!--
-      -->Java 7: ${boot.classpath.j2se1.7};<!--
-      -->Java 8: ${boot.classpath.j2se1.8}<!--
+      -->Java 17: ${java.home.17};<!--
     --></echo>
 
     <!-- Comment out @SuppressFBWarnings, as it causes compilation warnings in dependent Gradle projects -->
@@ -234,10 +217,10 @@
     <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      executable="${java.home.17}/bin/javac"
       excludes="
         freemarker/core/_Java?*Impl.java,
         freemarker/ext/jsp/**,
@@ -256,25 +239,19 @@
 
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
-      bootclasspath="${boot.classpath.j2se1.8}"
-      includes="freemarker/core/_Java8Impl.java"
-    />
-
-    <rmic
-      base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
-      classpathref="ivy.dep"
-      verify="yes" stubversion="1.2"
+      executable="${java.home.17}/bin/javac"
+      includes="freemarker/core/_Java17Impl.java"
     />
 
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.0"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      executable="${java.home.17}/bin/javac"
       includes="
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
@@ -289,10 +266,10 @@
 
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      executable="${java.home.17}/bin/javac"
       includes="
         freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
@@ -301,10 +278,10 @@
 
     <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.0"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      executable="${java.home.17}/bin/javac"
       includes="
         freemarker/ext/ant/**,
         freemarker/template/utility/JythonRuntime.java,
@@ -316,27 +293,22 @@
 
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.2"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      executable="${java.home.17}/bin/javac"
       includes="
         freemarker/ext/jython/_Jython22VersionAdapter.java"
     />
 
-    <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
+    <ivy:cachepath conf="build.jython2.7" pathid="ivy.dep.jython2.7" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
-      classpathref="ivy.dep.jython2.5"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      classpathref="ivy.dep.jython2.7"
+      executable="${java.home.17}/bin/javac"
       includes="
         freemarker/ext/jython/_Jython25VersionAdapter.java"
-    />
-
-    <rmic base="build/classes" classpathref="ivy.dep"
-      includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
-      verify="yes" stubversion="1.2"
     />
 
     <copy toDir="build/classes">
@@ -362,11 +334,11 @@
 
     <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off"
-      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
+      debug="on" optimize="off" target="17" source="17" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.build.test"
-      bootclasspath="${boot.classpath.j2se1.8}"
+      executable="${java.home.17}/bin/javac"
     />
     <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"
@@ -1017,8 +989,6 @@ Proceed? </input>
           <expandproperties />
       </filterchain>
     </copy>
-
-
 
   </target>
 

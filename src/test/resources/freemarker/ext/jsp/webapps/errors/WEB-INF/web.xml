@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -18,9 +18,9 @@
   under the License.
 -->
 
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
-	version="2.4">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+	version="6.0">
 
     <servlet>
         <servlet-name>tester</servlet-name>
@@ -41,12 +41,10 @@
 			<param-value>/</param-value>
 		</init-param>
 
-        <!-- This is the default anyway:
 		<init-param>
-			<param-name>template_exception_handler</param-name>
-			<param-value>html_debug</param-value>
+			<param-name>templateExceptionHandler</param-name>
+			<param-value>debug</param-value>
 		</init-param>
-        -->
 
 		<load-on-startup>1</load-on-startup>
 	</servlet>

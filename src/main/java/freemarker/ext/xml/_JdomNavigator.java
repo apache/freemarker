@@ -122,7 +122,7 @@ public class _JdomNavigator extends Navigator {
             } else if ("data".equals(localName)) {
                 result.add(new Attribute("data", pi.getData()));
             } else {
-                result.add(new Attribute(localName, pi.getValue(localName)));
+                result.add(new Attribute(localName, pi.getPseudoAttributeValue(localName)));
             }
         } else if (node instanceof DocType) {
             DocType doctype = (DocType) node;
@@ -186,7 +186,7 @@ public class _JdomNavigator extends Navigator {
             Element parent = ((Attribute) node).getParent();
             return parent == null ? null : parent.getDocument();
         } else if (node instanceof Text) {
-            Element parent = ((Text) node).getParent();
+            Element parent = ((Text) node).getParentElement();
             return parent == null ? null : parent.getDocument();
         } else if (node instanceof Document)
             return node;

@@ -54,7 +54,6 @@ import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
 import freemarker.core._CoreAPI;
-import freemarker.debug.impl.DebuggerService;
 
 /**
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
@@ -275,7 +274,6 @@ public class Template extends Configurable {
         // Throws any exception that JavaCC has silently treated as EOF:
         ltbReader.throwFailure();
         
-        DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
@@ -303,7 +301,6 @@ public class Template extends Configurable {
     Template(String name, TemplateElement root, Configuration cfg) {
         this(name, null, cfg, (ParserConfiguration) null);
         this.rootElement = root;
-        DebuggerService.registerTemplate(this);
     }
     
     /**
@@ -336,7 +333,6 @@ public class Template extends Configurable {
             throw new BugException("Plain text template creation failed", e);
         }
         _CoreAPI.replaceText((TextBlock) template.rootElement, content);
-        DebuggerService.registerTemplate(template);
         return template;
     }
 

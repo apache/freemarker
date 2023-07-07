@@ -29,22 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.BodyContent;
-
 import freemarker.core.Environment;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
@@ -62,17 +46,38 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template._VersionInts;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
+import jakarta.el.ELContext;
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspApplicationContext;
+import jakarta.servlet.jsp.JspContext;
+import jakarta.servlet.jsp.JspFactory;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.BodyContent;
 
 /**
  */
 abstract class FreeMarkerPageContext extends PageContext implements TemplateModel {
-    private static final Class OBJECT_CLASS = Object.class;
-        
+    private static final Class<Object> OBJECT_CLASS = Object.class;
+
+    private ELContext elContext;
     private final Environment environment;
     private final int incompatibleImprovements;
-    private List tags = new ArrayList();
-    private List outs = new ArrayList();
+    private List tags = new ArrayList<>();
+    private List outs = new ArrayList<>();
     private final GenericServlet servlet;
     private HttpSession session;
     private final HttpServletRequest request;
@@ -80,7 +85,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final ObjectWrapper wrapper;
     private final ObjectWrapperAndUnwrapper unwrapper;
     private JspWriter jspOut;
-    
+
     protected FreeMarkerPageContext() throws TemplateModelException {
         environment = Environment.getCurrentEnvironment();
         incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
@@ -133,7 +138,26 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         setAttribute(PAGECONTEXT, this);
         setAttribute(APPLICATION, servlet.getServletContext());
     }    
-            
+
+    @Override
+    public ELContext getELContext() {
+        if (elContext == null) { 
+            JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
+            if (jspctx instanceof FreeMarkerJspApplicationContext) {
+                elContext = ((FreeMarkerJspApplicationContext) jspctx).createNewELContext(this);
+                elContext.putContext(JspContext.class, this);
+            } else {
+                throw new UnsupportedOperationException(
+                        "Can not create an ELContext using a foreign JspApplicationContext (of class "
+                        + ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
+                        "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
+                        + "In that case, know that that's not really suppored, and you are supposed to use FTL "
+                        + "constrcuts instead, like #list instead of JSTL's forEach, etc.");
+            }
+        }
+        return elContext;
+    }
+
     ObjectWrapper getObjectWrapper() {
         return wrapper;
     }
@@ -317,7 +341,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                 if (session != null) {
                     return session.getAttributeNames();
                 }
-                return Collections.enumeration(Collections.EMPTY_SET);
+                return Collections.enumeration(Collections.emptySet());
             }
             case APPLICATION_SCOPE: {
                 return getServletContext().getAttributeNames();

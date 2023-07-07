@@ -26,6 +26,7 @@ import java.util.EventListener;
 /**
  * An interface for components that wish to receive debugging events.
  */
+@Deprecated
 public interface DebuggerListener extends Remote, EventListener {
     /**
      * Called whenever an environment gets suspended (ie hits a breakpoint).

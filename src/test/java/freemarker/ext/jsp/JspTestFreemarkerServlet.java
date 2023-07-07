@@ -19,11 +19,10 @@
 
 package freemarker.ext.jsp;
 
-import javax.servlet.ServletContext;
-
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateModelException;
+import jakarta.servlet.ServletContext;
 
 public class JspTestFreemarkerServlet extends FreemarkerServlet {
 

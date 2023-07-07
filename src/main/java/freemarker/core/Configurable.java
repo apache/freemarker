@@ -1244,6 +1244,9 @@ public class Configurable {
      * </ul> 
      * 
      * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
+     *
+     * <p>From Java 9 onwards, <a href="https://openjdk.org/jeps/252">the CLDR Locale Data is used by default</a>,
+     * which can introduce discrepancies with older versions.</p>
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);

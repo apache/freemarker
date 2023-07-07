@@ -21,9 +21,32 @@
   AFTER CHANGING THIS FILE don't forget to issue: ant update-deps
 -->
 <!DOCTYPE ivy-module [
-    <!ENTITY jetty.version "7.6.21.v20160908">
-    <!ENTITY slf4j.version "1.6.1">
-    <!ENTITY spring.version "2.5.6.SEC03">
+    <!ENTITY ant.version "1.10.13">
+    <!ENTITY apache-rat-tasks.version "0.15">
+    <!ENTITY bnd.version "2.4.0">
+    <!ENTITY commons-io.version "2.13.0">
+    <!ENTITY commons-lang3.version "3.12.0">
+    <!ENTITY displaytag.version "3.0.0-M1">
+    <!ENTITY dom4j.version "2.1.4">
+    <!ENTITY freemarker-docgen-ant.version "0.0.2-SNAPSHOT">
+    <!ENTITY guava.version "32.1.1-jre">
+    <!ENTITY hamcrest.version "2.2">
+    <!ENTITY jakarta-servlet-api.version "6.0.0">
+    <!ENTITY jakarta-servlet-jsp-api.version "3.1.1">
+    <!ENTITY jakarta-servlet-jsp-jstl-api "3.0.0">
+    <!ENTITY javacc.version "7.0.12">
+    <!ENTITY jaxen.version "2.0.0">
+    <!ENTITY jdom.version "1.1.3">
+    <!ENTITY jetty.version "12.0.0.beta3">
+    <!ENTITY jrebel.version "2.0.2">
+    <!ENTITY junit.version "4.13.2">
+    <!ENTITY jython.version "2.7.3">
+    <!ENTITY logback.version "1.4.8">
+    <!ENTITY rhino.version "1.7.14">
+    <!ENTITY slf4j.version "2.0.7">
+    <!ENTITY spotbugs.version "4.7.3">
+    <!ENTITY spring.version "6.0.10">
+    <!ENTITY xalan.version "2.7.3">
 ]>
 <ivy-module version="2.0">
   <info organisation="org.freemarker" module="freemarker">
@@ -36,13 +59,13 @@
   </info>
   <configurations>
     <conf name="default" extends="runtime" />
-    
+
     <conf name="runtime"
-        description="for using FreeMarker under J2SE 1.4+ (no optional dependencies included)"
+        description="for using FreeMarker with Java 17+ (no optional dependencies included)"
     />
 
     <conf name="build.base" extends="default" visibility="private"
-        description="for building FreeMarker without dependencies that optinal dependencies"
+        description="for building FreeMarker without optional dependencies"
     />
 
     <conf name="build.jsp2.0" extends="build.base"
@@ -58,11 +81,11 @@
     <conf name="build.jython2.2" extends="build.base"
         description="for building FreeMarker with Jython 2.2 support"
     />
-    <conf name="build.jython2.5" extends="build.base"
-        description="for building FreeMarker with Jython 2.5 support"
+    <conf name="build.jython2.7" extends="build.base"
+        description="for building FreeMarker with Jython 2.7 support"
     />
-    
-    <conf name="test" extends="build.jython2.5"
+
+    <conf name="test" extends="build.jython2.7"
         description="commons for both building and running the FreeMarker test suite"
     />
     <conf name="build.test" extends="test"
@@ -75,9 +98,9 @@
     <conf name="IDE" extends="build.test"
         description="to be used in IDE-s (maybe with the Ivy plugin)"
     />
-    
+
     <conf name="parser" extends="default" description="for generating parser" />
-    
+
     <conf name="manual" description="for generating the manual with Docgen" />
 
     <conf name="rat" description="for generating the Rat report" />
@@ -89,101 +112,69 @@
   </publications>
   <dependencies>
     <!-- build -->
-    
-    <dependency org="jaxen" name="jaxen" rev="1.0-FCS" conf="build.base->default" />
-    <dependency org="saxpath" name="saxpath" rev="1.0-FCS" conf="build.base->default" />
-    <dependency org="xalan" name="xalan" rev="2.7.0" conf="build.base->default">
-      <!-- The lowerst supported xml-apis version depends on JDK version; prevent any collision: -->
-      <exclude org="xml-apis" module="xml-apis" />
-    </dependency>
-    <dependency org="org.dom4j" name="dom4j" rev="2.1.3" conf="build.base->default" /> <!-- legacy -->
-    <dependency org="jdom" name="jdom" rev="1.0b8" conf="build.base->default" /> <!-- legacy -->
 
-    <dependency org="ant" name="ant" rev="1.6.5" conf="build.base->default">
-      <!-- The lowerst supported xml-apis version depends on JDK version; prevent any collision: -->
-      <exclude org="xml-apis" module="xml-apis" />
-    </dependency>
-    
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default" />
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
-    
-    <dependency org="rhino" name="js" rev="1.6R1" conf="build.base->default" />
+    <!-- Dependencies build.base->default -->
+
+    <dependency org="jakarta.servlet" name="jakarta.servlet-api" rev="&jakarta-servlet-api.version;" conf="build.base->default" />
+    <dependency org="jakarta.servlet.jsp" name="jakarta.servlet.jsp-api" rev="&jakarta-servlet-jsp-api.version;" conf="build.base->default" />
+    <dependency org="jakarta.servlet.jsp.jstl" name="jakarta.servlet.jsp.jstl-api" rev="&jakarta-servlet-jsp-jstl-api;" conf="build.base->default"/>
+    <dependency org="jaxen" name="jaxen" rev="&jaxen.version;" conf="build.base->default" />
+    <dependency org="org.apache.ant" name="ant" rev="&ant.version;" conf="build.base->default" />
+    <dependency org="org.mozilla" name="rhino" rev="&rhino.version;" conf="build.base->default" />
+    <dependency org="org.slf4j" name="log4j-over-slf4j" rev="&slf4j.version;" conf="build.base->default" />
+    <dependency org="org.slf4j" name="slf4j-api" rev="&slf4j.version;" conf="build.base->default" />
+    <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="&jrebel.version;" conf="build.base->default" />
+    <dependency org="xalan" name="xalan" rev="&xalan.version;" conf="build.base->default" />
+
+    <!-- Legacy dependencies -->
+    <dependency org="org.dom4j" name="dom4j" rev="&dom4j.version;" conf="build.base->default" />
+    <dependency org="org.jdom" name="jdom" rev="&jdom.version;" conf="build.base->default" />
 
     <!-- We use Jython 2.1 because there was no 2.0 in central; the relevant methods are the same. -->
     <dependency org="jython" name="jython" rev="2.1" conf="build.jython2.0->default" />
     <dependency org="org.python" name="jython" rev="2.2.1" conf="build.jython2.2->default" />
-    <dependency org="org.python" name="jython" rev="2.5.0" conf="build.jython2.5->default" />
-    
-    <dependency org="avalon-logkit" name="avalon-logkit" rev="2.0" conf="build.base->default" />
-    <dependency org="org.slf4j" name="slf4j-api" rev="&slf4j.version;" conf="build.base->default" />
-    <dependency org="org.slf4j" name="log4j-over-slf4j" rev="&slf4j.version;" conf="build.base->default" />
-    <dependency org="org.slf4j" name="jcl-over-slf4j" rev="&slf4j.version;" conf="build.base->default" />
-    <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="build.base->default" />
-    
-    <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="1.2.2" conf="build.base->default" />
+    <dependency org="org.python" name="jython-standalone" rev="&jython.version;" conf="build.jython2.7->default" />
 
     <!-- Not for build.base, as @SuppressFBWarnings causes compilation warnings in dependent Gradle projects -->
-    <dependency org="com.google.code.findbugs" name="annotations" rev="3.0.0" conf="IDE->default; test->default" />
-    
-    <!--dependency org="javax.script" name="script-api" rev="1.0" conf="build.base->default" /-->
-    <!--dependency org="org.visigoths" name="cavalry" rev="1.0" conf="build.base->default" /-->
-    
+    <dependency org="com.github.spotbugs" name="spotbugs-annotations" rev="&spotbugs.version;" conf="IDE->default; test->default" />
+
     <!-- test -->
-    
+
     <!-- Note: Ant doesn't contain junit.jar any more -->
-    <dependency org="junit" name="junit" rev="4.12" conf="test->default" />
-    <dependency org="org.hamcrest" name="hamcrest-library" rev="1.3" conf="test->default" />
-
-    <dependency org="ch.qos.logback" name="logback-classic" rev="1.1.2" conf="test->default" />
-
-    <dependency org="commons-io" name="commons-io" rev="2.7" conf="test->default" />
-    <dependency org="com.google.guava" name="guava" rev="29.0-jre" conf="test->default" />
-
-    <dependency org="org.eclipse.jetty" name="jetty-server" rev="&jetty.version;" conf="test->default" />
-    <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="&jetty.version;" conf="test->default" />
-    <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="&jetty.version;" conf="test->default" />
-    <dependency org="org.eclipse.jetty" name="jetty-util" rev="&jetty.version;" conf="test->default" />
-    
-    <dependency org="displaytag" name="displaytag" rev="1.2" conf="test->default">
-      <exclude org="com.lowagie" name="itext" />
-      <exclude org="org.slf4j" name="slf4j-log4j12" />
-      <exclude org="org.slf4j" name="jcl104-over-slf4j" />
-      <exclude org="log4j" name="log4j" />
+    <dependency org="ch.qos.logback" name="logback-classic" rev="&logback.version;" conf="test->default" />
+    <dependency org="com.github.hazendaz" name="displaytag" rev="&displaytag.version;" conf="test->default" />
+    <dependency org="com.google.guava" name="guava" rev="&guava.version;" conf="test->default" />
+    <dependency org="commons-io" name="commons-io" rev="&commons-io.version;" conf="test->default" />
+    <dependency org="junit" name="junit" rev="&junit.version;" conf="test->default">
+      <exclude org="org.hamcrest" module="hamcrest-core" />
     </dependency>
-    <!-- Override Java 9 incompatible version (coming from displaytag): -->
-    <dependency org="commons-lang" name="commons-lang" rev="2.6" conf="test->default" />
-
-    <dependency org="org.springframework" name="spring-core" rev="&spring.version;" conf="test->default">
-      <exclude org="commons-logging" name="commons-logging" />
-    </dependency>
-    <dependency org="org.springframework" name="spring-test" rev="&spring.version;" conf="test->default">
-      <exclude org="commons-logging" name="commons-logging" />
-    </dependency>
+    <dependency org="org.apache.commons" name="commons-lang3" rev="&commons-lang3.version;" conf="test->default" />
+    <dependency org="org.hamcrest" name="hamcrest" rev="&hamcrest.version;" conf="test->default" />
+    <dependency org="org.eclipse.jetty.ee10" name="jetty-ee10-apache-jsp" rev="&jetty.version;" conf="test->default" />
+    <dependency org="org.eclipse.jetty.ee10" name="jetty-ee10-webapp" rev="&jetty.version;" conf="test->default" />
+    <dependency org="org.springframework" name="spring-core" rev="&spring.version;" conf="test->default" />
+    <dependency org="org.springframework" name="spring-test" rev="&spring.version;" conf="test->default" />
+    <dependency org="org.springframework" name="spring-web" rev="&spring.version;" conf="test->default" />
 
     <!-- docs -->
-    
-    <dependency org="org.apache.freemarker.docgen" name="freemarker-docgen-ant" rev="0.0.2-SNAPSHOT" conf="manual->default" changing="true" />
-    
+
+    <dependency org="org.apache.freemarker.docgen" name="freemarker-docgen-ant" rev="&freemarker-docgen-ant.version;" conf="manual->default" changing="true" />
+
     <!-- parser -->
-    
-    <dependency org="net.java.dev.javacc" name="javacc" rev="7.0.12" conf="parser->default" />
-    
+
+    <dependency org="net.java.dev.javacc" name="javacc" rev="&javacc.version;" conf="parser->default" />
+
     <!-- bnd -->
-    
-    <dependency org="biz.aQute" name="bnd" rev="1.50.0" conf="bnd->default" />
+
+    <dependency org="biz.aQute.bnd" name="bnd" rev="&bnd.version;" conf="bnd->default" />
 
     <!-- Rat -->
-    
-    <dependency org="org.apache.rat" name="apache-rat-tasks" rev="0.11" conf="rat->default" />
+
+    <dependency org="org.apache.rat" name="apache-rat-tasks" rev="&apache-rat-tasks.version;" conf="rat->default" />
 
     <!-- As the tests *run* on Ant, so it's a provided dependency there. -->
-    <exclude org="ant" module="ant" conf="run.test" />
-    
-    <!-- Ensure that JSP versions don't accidentally hide each-other -->
-    
-    <conflict org="javax.servlet.jsp" module="jsp-api" manager="strict" />
-    
+    <dependency org="org.apache.ant" name="ant-junit" rev="&ant.version;" conf="run.test->default" />
+    <exclude org="org.apache.ant" module="ant" conf="run.test" />
+
   </dependencies>
 </ivy-module>

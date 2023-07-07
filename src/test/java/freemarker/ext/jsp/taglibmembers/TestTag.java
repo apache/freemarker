@@ -21,12 +21,12 @@ package freemarker.ext.jsp.taglibmembers;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.BodyTagSupport;
-import javax.servlet.jsp.tagext.IterationTag;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TryCatchFinally;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.jsp.tagext.IterationTag;
+import jakarta.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.tagext.TryCatchFinally;
 
 /**
  */

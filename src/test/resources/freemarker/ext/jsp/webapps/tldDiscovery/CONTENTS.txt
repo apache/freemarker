@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 // Only the files listed here will be part of the tested Web application deployment! 
+
+not-auto-scanned/fmtesttag.tld
+
+subdir/test-rel.ftl
 
 test-noClasspath.ftl
 test1.ftl
 
 WEB-INF/fmtesttag 2.tld
 WEB-INF/fmtesttag4.tld
-WEB-INF/web.xml
-
-WEB-INF/taglib 2.jar/META-INF/taglib.tld
-
 WEB-INF/lib/taglib-foo.jar/META-INF/foo bar.tld
-
 WEB-INF/subdir-with-tld/fmtesttag3.tld
-
-not-auto-scanned/fmtesttag.tld
-
-subdir/test-rel.ftl
+WEB-INF/taglib 2.jar/META-INF/taglib.tld
+WEB-INF/web.xml

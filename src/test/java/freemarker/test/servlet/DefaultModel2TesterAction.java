@@ -22,10 +22,10 @@ package freemarker.test.servlet;
 import java.util.Arrays;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.common.collect.ImmutableMap;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Used by {@link Model2TesterServlet} if no action was explicitly specified.

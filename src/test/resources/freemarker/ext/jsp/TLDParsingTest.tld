@@ -17,9 +17,9 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_1.xsd"
+	version="3.1">
 
   <description>Test Tag Library</description>
   <tlib-version>1.0</tlib-version>

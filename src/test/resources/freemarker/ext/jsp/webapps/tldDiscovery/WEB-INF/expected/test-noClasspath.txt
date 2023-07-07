@@ -26,7 +26,7 @@ TestTag3.doEndTag() called here
 Executed TestSimpleTag2
 Executed TestSimpleTag3
 missing
-<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
-a+b
+<!-- Test loading from Jakarta TLDs -->
+missing
 <!-- Test loading from "MetaInfTldSources", set via init-param -->
 missing

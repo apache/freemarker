@@ -69,6 +69,11 @@ public final class LegacyCFormat extends CFormat {
     static {
         LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.setGroupingUsed(false);
         LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.setDecimalSeparatorAlwaysShown(false);
+
+        DecimalFormatSymbols symbols = LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.getDecimalFormatSymbols();
+        symbols.setInfinity("\u221E");
+        symbols.setNaN("\uFFFD");
+        LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0.setDecimalFormatSymbols(symbols);
     }
 
     /**
@@ -122,7 +127,7 @@ public final class LegacyCFormat extends CFormat {
     }
 
     NumberFormat getLegacyNumberFormat(int iciVersion) {
-        NumberFormat numberFormatPrototype;
+    	NumberFormat numberFormatPrototype;
         if (iciVersion < _VersionInts.V_2_3_21) {
             numberFormatPrototype = LEGACY_NUMBER_FORMAT_PROTOTYPE_2_3_0;
         } else {

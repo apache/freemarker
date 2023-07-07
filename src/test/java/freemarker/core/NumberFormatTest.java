@@ -332,17 +332,18 @@ public class NumberFormatTest extends TemplateTest {
             boolean cBuiltInBroken = ici.intValue() < Configuration.VERSION_2_3_21.intValue();
             boolean cNumberFormatBroken = ici.intValue() < Configuration.VERSION_2_3_31.intValue();
 
-            String humanAudienceOutput = "\u221e -\u221e \ufffd";
+            String humanAudienceOutput = "\u221e -\u221e NaN";
+            String legacyComputerAudienceOutput = "\u221e -\u221e \ufffd";
             String computerAudienceOutput = ici.intValue() < Configuration.VERSION_2_3_32.intValue()
                     ? "INF -INF NaN" : "Infinity -Infinity NaN";
 
             assertOutput(
                     "${pInf?c} ${nInf?c} ${nan?c}",
-                    cBuiltInBroken ? humanAudienceOutput : computerAudienceOutput);
+                    cBuiltInBroken ? legacyComputerAudienceOutput : computerAudienceOutput);
 
             assertOutput(
                     "<#setting numberFormat='computer'>${pInf} ${nInf} ${nan}",
-                    cNumberFormatBroken ? humanAudienceOutput : computerAudienceOutput);
+                    cNumberFormatBroken ? legacyComputerAudienceOutput : computerAudienceOutput);
 
             assertOutput(
                     "${pInf} ${nInf} ${nan}",
@@ -351,7 +352,7 @@ public class NumberFormatTest extends TemplateTest {
             Environment env = new Template(null, "", cfg)
                     .createProcessingEnvironment(null, null);
             assertEquals(
-                    cNumberFormatBroken ? humanAudienceOutput : computerAudienceOutput,
+                    cNumberFormatBroken ? legacyComputerAudienceOutput : computerAudienceOutput,
                     env.getCNumberFormat().format(Double.POSITIVE_INFINITY)
                             + " " + env.getCNumberFormat().format(Double.NEGATIVE_INFINITY)
                             + " " + env.getCNumberFormat().format(Double.NaN));

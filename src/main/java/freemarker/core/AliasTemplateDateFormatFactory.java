@@ -51,7 +51,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
      * @param localizedTargetFormatStrings
      *            Maps {@link Locale}-s to format strings. If the desired locale doesn't occur in the map, a less
      *            specific locale is tried, repeatedly until only the language part remains. For example, if locale is
-     *            {@code new Locale("en", "US", "Linux")}, then these keys will be attempted untol a match is found, in
+     *            {@code new Locale("en", "US", "Linux")}, then these keys will be attempted until a match is found, in
      *            this order: {@code new Locale("en", "US", "Linux")}, {@code new Locale("en", "US")},
      *            {@code new Locale("en")}. If there's still no matching key, the value of the
      *            {@code targetFormatString} will be used.

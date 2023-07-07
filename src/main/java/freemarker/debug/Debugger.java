@@ -28,6 +28,7 @@ import java.util.List;
  * The main debugger interface. Allows management of breakpoints as well as
  * installation of listeners for debug events.
  */
+@Deprecated
 public interface Debugger extends Remote {
     public static final int DEFAULT_PORT = 7011;
 

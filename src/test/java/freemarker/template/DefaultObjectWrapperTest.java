@@ -19,9 +19,19 @@
 
 package freemarker.template;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -107,7 +117,8 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.33
 
         List<Version> actual = new ArrayList<>();
-        for (int i = _VersionInts.V_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
+        // Version 2.3.33 is the last from release 2.3
+        for (int i = _VersionInts.V_2_3_0; i <= new Version(2, 3, 33).intValue(); i++) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;

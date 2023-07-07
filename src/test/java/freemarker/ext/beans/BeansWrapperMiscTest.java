@@ -101,9 +101,9 @@ public class BeansWrapperMiscTest {
 
     @Test
     public void java8InaccessibleIndexedAccessibleNonIndexedReadMethodTest() throws TemplateModelException {
-        assertTrue("This test case must be ran on Java 8 or later", _JavaVersions.JAVA_8 != null);
+        assertTrue("This test case must be ran on Java 8 or later", _JavaVersions.IS_AT_LEAST_8);
         assertFalse(Modifier.isPublic(BeanWithInaccessibleIndexedProperty.class.getModifiers()));
-        
+
         for (Version ici : new Version[] { Configuration.VERSION_2_3_26, Configuration.VERSION_2_3_27 }) {
             BeansWrapper bw = new BeansWrapper(ici);
             TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithInaccessibleIndexedProperty());

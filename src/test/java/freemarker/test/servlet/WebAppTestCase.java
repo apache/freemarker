@@ -19,7 +19,8 @@
 
 package freemarker.test.servlet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +36,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.jasper.Constants;
+import org.apache.jasper.servlet.JasperInitializer;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -64,8 +69,6 @@ public class WebAppTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        // Work around Java 5 bug(?) that causes Jasper to fail with "zip file closed" when it reads the JSTL jar:
-        org.eclipse.jetty.util.resource.Resource.setDefaultUseCaches(false);
 
         LOG.info("Starting embedded Jetty...");
 
@@ -111,7 +114,7 @@ public class WebAppTestCase {
 
         ensureWebAppIsDeployed(webAppName);
 
-        final URI uri = new URI("http://localhost:" + server.getConnectors()[0].getLocalPort()
+        final URI uri = new URI("http://localhost:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort()
                 + "/" + webAppName + "/" + webAppRelURL);
 
         final HttpURLConnection httpCon = (HttpURLConnection) uri.toURL().openConnection();
@@ -124,7 +127,7 @@ public class WebAppTestCase {
             final String content;
             if (responseCode == 200) {
                 try (InputStream in = httpCon.getInputStream()) {
-                    content = IOUtils.toString(in, "UTF-8");
+                    content = IOUtils.toString(in, StandardCharsets.UTF_8);
                 }
             } else {
                 content = null;
@@ -228,7 +231,15 @@ public class WebAppTestCase {
 
         final String webAppDirURL = createWebAppDirAndGetURI(webAppName);
 
+        // Ivy doesn't seem to handle nested dependencies correctly
+        System.setProperty(
+        		  org.apache.tomcat.util.scan.Constants.SKIP_JARS_PROPERTY,
+        		  "serializer.jar,xercesImpl.jar,xml-apis.jar");
+
         WebAppContext context = new WebAppContext(webAppDirURL, "/" + webAppName);
+        context.addServletContainerInitializer(new JasperInitializer());
+        context.setInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM, Boolean.FALSE.toString());
+        context.setInitParameter(Constants.XML_BLOCK_EXTERNAL_INIT_PARAM, Boolean.TRUE.toString());
 
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(

@@ -18,62 +18,111 @@
  */
 package freemarker.core;
 
-import freemarker.log.Logger;
 import freemarker.template.Version;
-import freemarker.template.utility.SecurityUtilities;
 
 /**
  * Used internally only, might change without notice!
  */
 public final class _JavaVersions {
-    
-    private _JavaVersions() {
-        // Not meant to be instantiated
-    }
 
-    private static final boolean IS_AT_LEAST_8;
-    static {
-        boolean result = false;
-        String vStr = SecurityUtilities.getSystemProperty("java.version", null);
-        if (vStr != null) {
-            try {
-                Version v = new Version(vStr);
-                result = v.getMajor() == 1 && v.getMinor() >= 8 || v.getMajor() > 1;
-            } catch (Exception e) {
-                // Ignore
-            }
-        } else {
-            try {
-                Class.forName("java.time.Instant");
-                result = true;
-            } catch (Exception e) {
-                // Ignore
-            }
+	private static final int JAVA_8_VERSION = 8;
+	private static final int JAVA_17_VERSION = 17;
+
+	public static final boolean IS_AT_LEAST_8 = getJavaVersion() >= JAVA_8_VERSION;
+	public static final boolean IS_AT_LEAST_17 = getJavaVersion() >= JAVA_17_VERSION;
+
+	/**
+	 * Determines the version of the JVM running the application. This method will
+	 * initially rely on the {@literal java.version} system property but, if unsuccessful,
+	 * will try to detect JDK classes according to the version they were introduced in.
+	 *
+	 * @return The Java version of the current JVM.
+	 */
+	private static final int getJavaVersion() {
+
+		int javaSystemVersion = getJavaVersionFromSystem();
+		
+		System.out.println("Java version from system = "+ javaSystemVersion);
+
+		if (javaSystemVersion == -1) {
+			if (isJava17ClassDetected()) {
+				return JAVA_17_VERSION;
+			}
+			else {
+				if (isJava8ClassDetected()) {
+					return JAVA_8_VERSION;
+				}
+			}
+		}
+
+		return javaSystemVersion;
+	}
+
+	/**
+	 * Determines the version of the JVM running the application by relying on the
+	 * {@literal java.version} system property.
+	 *
+	 * @return The Java version of the current JVM, read from the {@literal java.version}
+	 *         system property.
+	 */
+	private static final int getJavaVersionFromSystem() {
+
+		String javaVersion = System.getProperty("java.version");
+
+		if (javaVersion != null) {
+			try {
+				return Integer.valueOf(javaVersion);
+			}
+			catch (NumberFormatException e) {
+				Version v = new Version(javaVersion);
+
+				if (v.getMajor() == 1) {
+					return v.getMinor();
+				}
+				else {
+					return v.getMajor();
+				}
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Detects whether a Java 8 class is present on the classpath or not.
+	 *
+	 * @return {@code true} if a Java 8 class was detected, {@code false otherwise}.
+	 */
+	private static boolean isJava8ClassDetected() {
+
+		try {
+            Class.forName("java.time.Instant");
+            return true;
+        } catch (Exception e) {
+        	return false;
         }
-        IS_AT_LEAST_8 = result;
-    }
-    
-    /**
-     * {@code null} if Java 8 is not available, otherwise the object through with the Java 8 operations are available.
-     */
-    static public final _Java8 JAVA_8;
-    static {
-        _Java8 java8;
-        if (IS_AT_LEAST_8) {
-            try {
-                java8 = (_Java8) Class.forName("freemarker.core._Java8Impl").getField("INSTANCE").get(null);
-            } catch (Exception e) {
-                try {
-                    Logger.getLogger("freemarker.runtime").error("Failed to access Java 8 functionality", e);
-                } catch (Exception e2) {
-                    // Suppressed
-                }
-                java8 = null;
-            }
-        } else {
-            java8 = null;
+	}
+
+	/**
+	 * Detects whether a Java 17 class is present on the classpath or not.
+	 *
+	 * @return {@code true} if a Java 17 class was detected, {@code false otherwise}.
+	 */
+	private static boolean isJava17ClassDetected() {
+
+		try {
+            Class.forName("java.util.random.RandomGenerator");
+            return true;
+        } catch (Exception e) {
+        	return false;
         }
-        JAVA_8 = java8;
-    }
-    
+	}
+
+	/**
+	 * Default private constructor to avoid instantiating this class.
+	 */
+	private _JavaVersions() {
+		super();
+	}
+
 }

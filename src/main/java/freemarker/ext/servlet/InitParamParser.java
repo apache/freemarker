@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
-
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
@@ -38,6 +36,7 @@ import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template._VersionInts;
 import freemarker.template.utility.StringUtil;
+import jakarta.servlet.ServletContext;
 
 
 final class InitParamParser {
