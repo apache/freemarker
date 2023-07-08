@@ -168,7 +168,7 @@
     
     <!-- parser -->
     
-    <dependency org="net.java.dev.javacc" name="javacc" rev="6.1.2" conf="parser->default" />
+    <dependency org="net.java.dev.javacc" name="javacc" rev="7.0.12" conf="parser->default" />
     
     <!-- bnd -->
     
