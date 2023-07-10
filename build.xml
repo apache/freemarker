@@ -281,8 +281,12 @@
         freemarker/cache/WebappTemplateLoader.java"
       excludes="
         freemarker/ext/jsp/_FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext31.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+        freemarker/ext/jsp/FreeMarkerJspFactory31.java,
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
+        freemarker/ext/jsp/Jakarta*.java,
+        freemarker/ext/servlet/Jakarta*.java"
     />
 
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
@@ -297,6 +301,18 @@
         freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+    />
+
+    <ivy:cachepath conf="build.jsp3.1" pathid="ivy.dep.jsp3.1" />
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
+           debug="on" optimize="off" target="11" source="11" encoding="utf-8"
+           includeantruntime="false"
+           classpathref="ivy.dep.jsp3.1"
+           includes="
+        freemarker/ext/jsp/_FreeMarkerPageContext31.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory31.java,
+        freemarker/ext/jsp/Jakarta*.java,
+        freemarker/ext/servlet/Jakarta*.java"
     />
 
     <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />

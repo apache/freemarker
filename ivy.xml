@@ -51,6 +51,9 @@
     <conf name="build.jsp2.1" extends="build.base"
         description="for building FreeMarker with JSP 2.1 support"
     />
+    <conf name="build.jsp3.1" extends="build.base"
+          description="for building FreeMarker with JSP 3.1 support"
+    />
 
     <conf name="build.jython2.0" extends="build.base"
         description="for building FreeMarker with Jython 2.0 support"
@@ -108,6 +111,9 @@
     <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
     <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
+    <dependency org="jakarta.servlet.jsp" name="jakarta.servlet.jsp-api" rev="3.1.1" conf="IDE->default; build.jsp3.1->default" />
+    <dependency org="jakarta.servlet" name="jakarta.servlet-api" rev="6.0.0" conf="IDE->default; build.jsp3.1->default" />
+    <dependency org="jakarta.el" name="jakarta.el-api" rev="5.0.0" conf="IDE->default; build.jsp3.1->default" />
     
     <dependency org="rhino" name="js" rev="1.6R1" conf="build.base->default" />
 
@@ -184,6 +190,7 @@
     <!-- Ensure that JSP versions don't accidentally hide each-other -->
     
     <conflict org="javax.servlet.jsp" module="jsp-api" manager="strict" />
+    <conflict org="jakarta.servlet.jsp" module="jakarta.servlet.jsp-api" manager="strict" />
     
   </dependencies>
 </ivy-module>
