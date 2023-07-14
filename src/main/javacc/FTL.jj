@@ -240,7 +240,7 @@ public class FMParser {
 	if (!(outputFormat instanceof MarkupOutputFormat)
 	    && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
 	    throw new IllegalArgumentException(
-                    "Non-markup output format cannot be used when auto_scaping_policy is FORCE_AUTO_ESCAPING_POLICY.");
+                    "Non-markup output format cannot be used when auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY.");
 	}
         recalculateAutoEscapingField();
 
