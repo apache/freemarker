@@ -3850,16 +3850,16 @@ Jerry</programlisting>
               <literal>!</literal>, like <literal>1 + x</literal>,
               <emphasis>always</emphasis> use parentheses, like
               <literal>${x!(1 + y)}</literal> or <literal>${(x!1) +
-              y)}</literal>, depending on which interpretation you meant.
+              y}</literal>, depending on which interpretation you meant.
               That's needed because due to a programming mistake in FreeMarker
               2.3.x, the precedence of <literal>!</literal> (when it's used as
               default value operator) is very low at its right side. This
               means that, for example, <literal>${x!1 + y}</literal> is
               misinterpreted by FreeMarker as <literal>${x!(1 + y)}</literal>
               while it should mean <literal>${(x!1) + y}</literal>. This
-              programming error will be fixed in FreeMarker 2.4, so you should
-              not utilize this wrong behavior, or else your templates will
-              break with FreeMarker 2.4!</para>
+              programming error will be possibly fixed in some future version
+              (maybe 2.4), and you should not utilize this wrong behavior, so
+              that the fix can be enabled in your project!</para>
             </warning>
 
             <para>If the default value is omitted, then it will be empty
