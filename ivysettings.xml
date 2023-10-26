@@ -33,7 +33,7 @@
         <ivy pattern="${localMaveRepoDir}/[organisation]/[module]/[revision]/[module]-[revision].pom" />
       </filesystem>
       -->
-      <ibiblio name="mavenCentral" m2compatible="true" />
+      <ibiblio name="mavenCentral" m2compatible="true" root="https://nexus.intern/repository/central/" />
       <ibiblio name="mavenApacheStaging" m2compatible="true" root="https://repository.apache.org/content/repositories/staging/" />
       <ibiblio name="mavenApacheSnapshot" m2compatible="true" root="https://repository.apache.org/content/repositories/snapshots/" />
     </chain>
