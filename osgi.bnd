@@ -64,4 +64,4 @@ Implementation-Title: FreeMarker
 Implementation-Version: ${versionForMf}
 Implementation-Vendor: freemarker.org
 # TODO: This should be different for each module. Also, migrate to using module-info.class.
-Automatic-Module-Name: org.freemarker
+Automatic-Module-Name: org.apache.freemarker
