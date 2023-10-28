@@ -637,4 +637,4 @@ Core / Miscellaneous
 Build / development process changes
 -----------------------------------
 
-- Migrated buiding from Ant to Gradle. [TODO: This is only partially done; jar building, testing and javadoc works.]
+- Migrated building from Ant to Gradle.

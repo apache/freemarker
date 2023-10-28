@@ -63,4 +63,5 @@ Specification-Vendor: freemarker.org
 Implementation-Title: FreeMarker
 Implementation-Version: ${versionForMf}
 Implementation-Vendor: freemarker.org
-Automatic-Module-Name: freemarker
+# TODO: This should be different for each module. Also, migrate to using module-info.class.
+Automatic-Module-Name: org.freemarker
