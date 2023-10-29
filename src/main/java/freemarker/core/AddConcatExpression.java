@@ -196,22 +196,29 @@ final class AddConcatExpression extends Expression {
         TemplateSequenceModel {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
+        private final int leftSize;
+        private final int totalSize;
 
-        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right) {
+        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right) throws TemplateModelException {
             this.left = left;
             this.right = right;
+            // Calculate sizes only once and reuse them below
+            this.leftSize = left.size();
+            this.totalSize = leftSize + right.size();
+            
         }
 
         @Override
         public int size()
         throws TemplateModelException {
-            return left.size() + right.size();
+        	// No more expensive computations here
+            return totalSize;
         }
 
         @Override
         public TemplateModel get(int i)
         throws TemplateModelException {
-            int ls = left.size();
+            int ls = leftSize;
             return i < ls ? left.get(i) : right.get(i - ls);
         }
     }
