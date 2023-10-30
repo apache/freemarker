@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.HashSet;
 import java.util.Set;
 
+import freemarker.template.Configuration;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -36,6 +37,7 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template._ObjectWrappers;
+import freemarker.template._VersionInts;
 
 /**
  * An operator for the + operator. Note that this is treated
@@ -73,7 +75,17 @@ final class AddConcatExpression extends Expression {
             Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
             return _evalOnNumbers(env, parent, first, second);
         } else if (leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel) {
-            return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
+            if (env.getConfiguration().getIncompatibleImprovements().intValue() >= _VersionInts.V_2_3_33) {
+                // performance optimization: we do assume that the size of underlying sequences won't change.
+                // This is a BC breaking change and requires incompatibleImprovements >= 2.3.33
+                return new ConcatenatedSequenceFixedSize((TemplateSequenceModel) leftModel,
+                        (TemplateSequenceModel) rightModel);
+            } else {
+                // legacy "view" behavior before 2.3.33
+                // this version has performance problems pretty quickly when iterating over the concatenated list of a
+                // certain size
+                return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
+            }
         } else {
             boolean hashConcatPossible
                     = leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel;
@@ -191,33 +203,69 @@ final class AddConcatExpression extends Expression {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
+    /**
+     * @deprecated legacy behavior just providing a "view" on the passed {@link TemplateSequenceModel} assuming they
+     *             could be changed after being added. This past design desicion has negative effects on performance,
+     *             {@link ConcatenatedSequenceFixedSize} improves this with incompatible improvements in
+     *             {@link Configuration#VERSION_2_3_33}
+     */
     private static final class ConcatenatedSequence
     implements
         TemplateSequenceModel {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
-        private final int leftSize;
-        private final int totalSize;
 
-        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right) throws TemplateModelException {
+        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right) {
             this.left = left;
             this.right = right;
-            // Calculate sizes only once and reuse them below
-            this.leftSize = left.size();
-            this.totalSize = leftSize + right.size();
             
         }
 
         @Override
         public int size()
         throws TemplateModelException {
-        	// No more expensive computations here
-            return totalSize;
+        	return left.size() + right.size();
         }
 
         @Override
         public TemplateModel get(int i)
         throws TemplateModelException {
+            int ls = left.size();
+            return i < ls ? left.get(i) : right.get(i - ls);
+        }
+    }
+    
+    /**
+     * Optimized version of {@link ConcatenatedSequence} which assumes that passed {@link TemplateSequenceModel}s do not
+     * change after being added. This assumption allows performance optimizations which are not possible with with the
+     * legacy {@link ConcatenatedSequence}.
+     * 
+     * Requires incompatible improvements {@link Configuration#VERSION_2_3_33}
+     */
+    private static final class ConcatenatedSequenceFixedSize implements TemplateSequenceModel {
+        private final TemplateSequenceModel left;
+        private final TemplateSequenceModel right;
+        private final int leftSize;
+        private final int totalSize;
+
+        ConcatenatedSequenceFixedSize(TemplateSequenceModel left, TemplateSequenceModel right)
+                throws TemplateModelException {
+            this.left = left;
+            this.right = right;
+            // Calculate sizes only once and reuse them below
+            this.leftSize = left.size();
+            this.totalSize = leftSize + right.size();
+
+        }
+
+        @Override
+        public int size() throws TemplateModelException {
+            // No more expensive computations here
+            return totalSize;
+        }
+
+        @Override
+        public TemplateModel get(int i) throws TemplateModelException {
             int ls = leftSize;
             return i < ls ? left.get(i) : right.get(i - ls);
         }
