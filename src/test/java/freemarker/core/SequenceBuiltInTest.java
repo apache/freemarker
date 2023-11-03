@@ -18,10 +18,16 @@
  */
 package freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 
@@ -92,6 +98,62 @@ public class SequenceBuiltInTest extends TemplateTest {
         getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_23);
         // As it returns the sequence as is, it works with an infinite sequence:
         assertOutput("${(11..)?sequence[1]}", "12");
+    }
+    
+    
+    /**
+     * test sequence concatenation before and after 2.3.33 
+     * in 2.3.33 a performance improvement was added
+     * see ConcatenatedSequence vs. ConcatenatedSequenceFixedSize
+     * in {@link AddConcatExpression}
+     * But since the optimization is not BC
+     * we test both via setIncompatibleImprovements
+     * 
+     * @throws TemplateException
+     * @throws IOException
+     */
+    @Test
+    public void testSequenceConcatenation() throws TemplateException, IOException {
+        
+       int maxElements = 200;
+        String ftl = "<#assign s = []><#list 1.."+ maxElements + " as i><#assign s = s + ['foo' + i]></#list>${s?join(',')}";
+        // e.g. foo1,foo2,foo3,etc.
+        String expected = IntStream.rangeClosed(1, maxElements).mapToObj(i -> "foo" + i).collect(Collectors.joining(","));
+        
+        assertOutput(ftl, expected);
+
+        // small performance comparison 
+        int numIterations = 100;
+        
+        // Before 2.3.33
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < numIterations ; i++) {
+            assertOutput(ftl, expected);
+        }
+        long endTime = System.currentTimeMillis();
+        double duration1 = (endTime - startTime) / 1000.0;
+        System.out.println(getConfiguration().getIncompatibleImprovements() + " : Time taken: " + duration1 + " s");
+        
+        // now test after 2.3.33 which has a performance improvement which should be just a fraction
+        // of the duration1 
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_33);
+        assertOutput(ftl, expected);
+        
+        
+        long startTime2 = System.currentTimeMillis();
+        for (int i = 0; i < numIterations ; i++) {
+            assertOutput(ftl, expected);
+        }
+        long  endTime2 = System.currentTimeMillis();
+        
+        double duration2 = (endTime2 - startTime2) / 1000.0;
+        System.out.println(getConfiguration().getIncompatibleImprovements() + " : Time taken: " + duration2 + " s");
+        
+        
+        // check that new version is at least twice as fast
+        assertTrue("Duration2 should be twice as fast, but was: 1. " + duration1 + " vs. 2. " + duration2,
+                duration2 < duration1 / 2);
+        
     }
 
 }
