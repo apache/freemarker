@@ -63,4 +63,4 @@ Specification-Vendor: freemarker.org
 Implementation-Title: FreeMarker
 Implementation-Version: ${versionForMf}
 Implementation-Vendor: freemarker.org
-Automatic-Module-Name: freemarker
+Automatic-Module-Name: org.apache.freemarker
