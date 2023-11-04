@@ -20,7 +20,7 @@ github:
   dependabot_alerts: true
   features:
     wiki: false
-    issues: true
+    issues: false
     projects: true
   enabled_merge_buttons:
     squash:  false
