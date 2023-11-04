@@ -55,3 +55,5 @@ bnd.bnd
 
 **/adhoctest/
 AdhocTest*.*
+
+junit*.properties
