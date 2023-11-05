@@ -61,4 +61,4 @@ jobs:
 
       - name: Build with Ant and ivy
         shell: bash
-        run: ant jar test
+        run: ant ci
