@@ -21,15 +21,12 @@
 # imports by examining the class files, and generates the OSGi meta-info
 # based on that and this file.
 
--classpath: build/classes
 -failok: false
 
 Bundle-SymbolicName: ${moduleOrg}.${moduleName}
 Bundle-Version: ${versionForOSGi}
 Bundle-License: Apache License, Version 2.0; see: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-Vendor: freemarker.org
-
-Include-Resource: META-INF=src/dist/jar/META-INF
 
 Export-Package: !freemarker.test.*, freemarker.*;version="${versionForOSGi}"
 # Important:
