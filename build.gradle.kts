@@ -26,6 +26,7 @@ plugins {
     `maven-publish`
     signing
     id("biz.aQute.bnd.builder") version "6.1.0"
+    id("eclipse")
 }
 
 group = "org.freemarker"
@@ -459,6 +460,19 @@ fun registerDistRatTask(taskName: String, excludeFile: File, srcArchiveTaskRef: 
 
 registerDistRatTask("ratDistBin", file("src/dist/bin/rat-excludes"), distBin)
 registerDistRatTask("ratDistSrc", file("rat-excludes"), distSrc)
+
+eclipse {
+    classpath {
+        // Eclipse sees only a single classpath,
+        // so make a best effort for a combined classpath.
+        plusConfigurations = listOf(
+            configurations["combinedClasspath"],
+            configurations["core16CompileClasspath"],
+            configurations["testUtilsCompileClasspath"],
+            configurations["jsp21TestCompileClasspath"]
+        )
+    }
+}
 
 // Choose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
 // what we declare below, because the same classes will come from Jetty as well. For example, Jetty depends
