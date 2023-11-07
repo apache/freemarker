@@ -238,6 +238,10 @@ publishing {
             setUrl(providers.gradleProperty("freemarkerDeployUrl").getOrElse(defaultDeployUrl))
             name = providers.gradleProperty("freemarkerDeployServerId").getOrElse("apache.releases.https")
         }
+        maven {
+            name = "local"
+            setUrl(layout.buildDirectory.map { it.dir("local-deployment") })
+        }
     }
 
     publications {
