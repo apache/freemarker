@@ -336,6 +336,17 @@ publishing {
     }
 }
 
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (repository.name != "local") {
+        doFirst {
+            if (fmExt.versionService.developmentBuild) {
+                throw IllegalStateException("Cannot deploy to ${repository.name} in a development build." +
+                        " Start the build with -PdevelopmentBuild=false")
+            }
+        }
+    }
+}
+
 val distArchiveBaseName = "apache-${name}"
 val distDir = buildDir.toPath().resolve("distributions")
 
