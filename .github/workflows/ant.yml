@@ -55,10 +55,21 @@ jobs:
           echo "mvnCommand=$(which mvn)" >> build.properties;
           echo "gpgCommand=$(which gpg)" >> build.properties;
 
+      - name: Create a gpg key for signing
+        shell: bash
+        run: >-
+          gpg --quick-gen-key --batch --passphrase '' github-build@apache.invalid;
+          echo "batch" >> "/home/runner/.gnupg/gpg.conf";
+          echo "pinentry-mode=loopback" >> "/home/runner/.gnupg/gpg.conf";
+
       - name: Prepare ant with ivy
         shell: bash
         run: ant download-ivy
 
       - name: Build with Ant and ivy
         shell: bash
-        run: ant ci
+        run: ant ci -Dci=true
+
+      - name: RAT check
+        shell: bash
+        run: ant rat
