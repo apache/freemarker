@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-[![Build Status](https://travis-ci.org/apache/freemarker.svg?branch=2.3-gae)](https://travis-ci.org/apache/freemarker)
+![Build status](https://github.com/apache/freemarker/actions/workflows/ant.yml/badge.svg)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
