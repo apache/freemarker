@@ -25,6 +25,8 @@
   xmlns:bnd="http://www.aqute.biz/bnd"
   xmlns:rat="antlib:org.apache.rat.anttasks"
   xmlns:u="http://freemarker.org/util"
+  xmlns:if="ant:if"
+  xmlns:unless="ant:unless"
 >
 
   <!-- ================================================================== -->
@@ -748,11 +750,12 @@
       <input
          validargs="y,n"
          addproperty="signatureGood"
+         unless:set="ci"
       >Is the above signer the intended one for Apache releases?</input>
-      <condition property="signatureGood.y">
+      <condition property="signatureGood.y" unless:set="ci">
         <equals arg1="y" arg2="${signatureGood}"/>
       </condition>
-      <fail unless="signatureGood.y" message="Task aborted by user." />
+      <fail unless:set="ci" unless="signatureGood.y" message="Task aborted by user." />
 
       <echo>Creating checksum file for "${archive.gzip}"...</echo>
       <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
@@ -952,7 +955,7 @@ Proceed? </input>
   </target>
 
   <target name="ci"
-  	depends="ci-setup, clean, jar, test, javadoc"
+  	depends="ci-setup, clean, _dist"
   	description="CI should invoke this task"
   />
 
