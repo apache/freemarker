@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-![Build status](https://github.com/apache/freemarker/actions/workflows/ant.yml/badge.svg)
+![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
