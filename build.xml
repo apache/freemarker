@@ -19,14 +19,13 @@
 -->
 
 <project basedir="." default="jar" name="freemarker"
-  xmlns:ivy="antlib:org.apache.ivy.ant"
-  xmlns:javacc="http://javacc.dev.java.net/"
-  xmlns:docgen="http://freemarker.org/docgen"
-  xmlns:bnd="http://www.aqute.biz/bnd"
-  xmlns:rat="antlib:org.apache.rat.anttasks"
-  xmlns:u="http://freemarker.org/util"
-  xmlns:if="ant:if"
-  xmlns:unless="ant:unless"
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:javacc="http://javacc.dev.java.net/"
+         xmlns:docgen="http://freemarker.org/docgen"
+         xmlns:bnd="http://www.aqute.biz/bnd"
+         xmlns:rat="antlib:org.apache.rat.anttasks"
+         xmlns:u="http://freemarker.org/util"
+         xmlns:unless="ant:unless"
 >
 
   <!-- ================================================================== -->
@@ -59,7 +58,7 @@
   </condition>
   <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
 
-  <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
+  <!-- When boot.classpath.j* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
   <property name="boot.classpath.j2se1.7" value="${sun.boot.class.path}" />
   <property name="boot.classpath.j2se1.8" value="${sun.boot.class.path}" />
@@ -265,10 +264,12 @@
       includes="freemarker/core/_Java8Impl.java"
     />
 
-    <rmic
-      base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
-      classpathref="ivy.dep"
-      verify="yes" stubversion="1.2"
+    <ivy:cachepath conf="build.base" pathid="ivy.dep" />
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
+           debug="on" optimize="off" release="16" encoding="utf-8"
+           includeantruntime="false"
+           classpathref="ivy.dep"
+           includes="freemarker/core/_Java16Impl.java"
     />
 
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
@@ -336,11 +337,6 @@
         freemarker/ext/jython/_Jython25VersionAdapter.java"
     />
 
-    <rmic base="build/classes" classpathref="ivy.dep"
-      includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
-      verify="yes" stubversion="1.2"
-    />
-
     <copy toDir="build/classes">
       <fileset dir="src/main/resources"
         excludes="
@@ -364,11 +360,10 @@
 
     <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off"
-      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
+      debug="on" optimize="off" release="16" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.build.test"
-      bootclasspath="${boot.classpath.j2se1.8}"
     />
     <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"

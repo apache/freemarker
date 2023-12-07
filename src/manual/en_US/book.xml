@@ -20,10 +20,7 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns4="http://www.w3.org/2000/svg"
-      xmlns:ns3="http://www.w3.org/1999/xhtml"
-      xmlns:ns="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -16105,8 +16102,9 @@ rif: foo XYr baar</programlisting>
                   setting</link> is less than 2.3.21: Gives what
                   <literal>java.text.DecimalFormat</literal> does with US
                   locale, which are <literal>∞</literal>,
-                  <literal>-∞</literal>, and <literal>�</literal> (U+FFFD,
-                  replacement character).</para>
+                  <literal>-∞</literal>, and <literal>NaN</literal> (before
+                  Java 11 was <literal>�</literal>, i.e., U+FFFD, replacement
+                  character).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -30087,6 +30085,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               parser) from 6.1.2 to 7.0.12, to avoid creating new
               <literal>LookAheadSuccess</literal> with stack trace instance
               for each <literal>FMParser</literal> instance.</para>
+            </listitem>
+
+            <listitem>
+              <para>We don't generate RMIC stub classes for
+              <literal>freemarker.debug.impl.Rmi*Impl</literal> classes
+              anymore. Almost nobody uses that API, but if you do, you
+              certainly already rely on dynamic stubs anyway. (The
+              <literal>rmic</literal> tool used to generate the stub classes
+              was removed from the JDK, starting with JDK 15.)</para>
+            </listitem>
+
+            <listitem>
+              <para>To build FreeMarker itself (not for just using it), now
+              you need JDK 16 (or later). This doesn't influence the minimum
+              Java version requirement for using FreeMarker.</para>
             </listitem>
           </itemizedlist>
         </section>

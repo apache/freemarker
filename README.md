@@ -106,7 +106,7 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
-You need JDK 8 (not JDK 9!), Apache Ant (tested with 1.9.6) and Ivy (tested
+You need JDK 16, Apache Ant (tested with 1.10.6) and Ivy (integrated into
 with 2.5.0) to be installed. To install Ivy (but be sure it's not already
 installed), issue `ant download-ivy`; it will copy Ivy under `~/.ant/lib`.
 (Alternatively, you can copy `ivy-<version>.jar` into the Ant home `lib`
@@ -114,7 +114,7 @@ subfolder manually.)
 
 It's recommended to copy `build.properties.sample` into `build.properties`,
 and edit its content to fit your system. (Although basic jar building should
-succeeds without the build.properties file too.)
+succeed without the build.properties file too.)
 
 To build `freemarker.jar`, just issue `ant` in the project root directory, and
 it should download all dependencies automatically and build `freemarker.jar`. 
@@ -165,7 +165,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 8 installed, and that it was added to Eclipse.
+    Ensure that you have JDK 16 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
@@ -188,7 +188,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 16"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
    - Press "Finish"
@@ -206,7 +206,6 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
     _Jython22*.java,
     _FreeMarkerPageContext2.java,
     FreeMarkerJspFactory2.java,
-    Java8*.java
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
@@ -233,7 +232,7 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
 
 - "New" -> "Project". In order as the IntelliJ will prompt you:
 
-  - Select "Java" on the left side, and "1.8" for SDK on the right side. Press "Next".
+  - Select "Java" on the left side, and "16" for SDK on the right side. Press "Next".
   
   - Template selection: Don't chose anything, "Next"
   
@@ -265,7 +264,7 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     - Test Resource Folders:  
       src/test/resources
       
-  - Still inside the "Sources" tab, change the "Language level" to "7". (Yes, we use Java 8 SDK with
+  - Still inside the "Sources" tab, change the "Language level" to "7". (Yes, we use Java 16 SDK with
     language level 7 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
     
   - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
@@ -281,7 +280,6 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     _Jython22*.java,  
     _FreeMarkerPageContext2.java,  
     FreeMarkerJspFactory2.java,  
-    Java8*.java  
 
 - You may do "Build" / "Build project" (Ctrl+F9) to see if everything compiles now.
     
