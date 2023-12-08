@@ -58,6 +58,10 @@ import freemarker.template.TemplateModel;
  * {@link Object#equals(Object)} implementation if possible.
  *
  * @since 2.3.30
+ *
+ * @see DefaultMemberAccessPolicy
+ * @see WhitelistMemberAccessPolicy
+ * @see LegacyDefaultMemberAccessPolicy
  */
 public interface MemberAccessPolicy {
     /**

@@ -332,7 +332,7 @@ public class NumberFormatTest extends TemplateTest {
             boolean cBuiltInBroken = ici.intValue() < Configuration.VERSION_2_3_21.intValue();
             boolean cNumberFormatBroken = ici.intValue() < Configuration.VERSION_2_3_31.intValue();
 
-            String humanAudienceOutput = "\u221e -\u221e \ufffd";
+            String humanAudienceOutput = "\u221e -\u221e NaN"; // NaN was \uFFFD before Java 11
             String computerAudienceOutput = ici.intValue() < Configuration.VERSION_2_3_32.intValue()
                     ? "INF -INF NaN" : "Infinity -Infinity NaN";
 

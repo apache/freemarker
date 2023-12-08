@@ -26,6 +26,8 @@
 	</appender>
 	
 	<logger name="org.eclipse.jetty" level="INFO" />
+	<logger name="org.apache.tomcat" level="INFO" />
+	<logger name="org.apache.jasper" level="INFO" />
 	<logger name="freemarker.runtime.attempt" level="INFO" />
 
 	<root level="debug">

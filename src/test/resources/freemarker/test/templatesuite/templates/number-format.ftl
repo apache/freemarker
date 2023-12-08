@@ -58,5 +58,5 @@ ${100000.5}
 <#else>
   <@assertEquals expected="\x221E" actual="INF"?number?string />
   <@assertEquals expected="-\x221E" actual="-INF"?number?string />
-  <@assertEquals expected="\xFFFD" actual="NaN"?number?string />
+  <@assertEquals expected="NaN"<#-- was \xFFFD before Java 11 --> actual="NaN"?number?string />
 </#if>

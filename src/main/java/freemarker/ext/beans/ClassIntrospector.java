@@ -221,7 +221,7 @@ class ClassIntrospector {
      * 
      * @return A {@link Map} where each key is a property/method/field name (or a special {@link Object} key like
      *         {@link #CONSTRUCTORS_KEY}), each value is a {@link FastPropertyDescriptor} or {@link Method} or
-     *         {@link OverloadedMethods} or {@link Field} (but better check the source code...).
+     *         {@link OverloadedMethods} or {@link Field} (but, you better check the source code).
      */
     Map<Object, Object> get(Class<?> clazz) {
         {
@@ -247,7 +247,7 @@ class ClassIntrospector {
                     introspData = cache.get(clazz);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(
-                            "Class inrospection data lookup aborded: " + e);
+                            "Class introspection data lookup aborted: " + e);
                 }
             }
             if (introspData != null) return introspData;
@@ -387,7 +387,7 @@ class ClassIntrospector {
                             ((OverloadedMethods) previous).addMethod(method);
                         } else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof FastPropertyDescriptor)) {
-                            // Simple method (this far)
+                            // Simple method (so far)
                             introspData.put(methodKey, method);
                             Class<?>[] replaced = getArgTypesByMethod(introspData).put(method,
                                     method.getParameterTypes());

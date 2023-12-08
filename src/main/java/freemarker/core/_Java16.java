@@ -16,15 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-1
-1
-1 234 567,89
-1234567.886
-1,00
-1
-1234567,89
-1234567.886
-1
-100000.5
-100000.5
-100 000,5
+package freemarker.core;
+
+import java.lang.reflect.Method;
+import java.util.Set;
+
+/**
+ * Used internally only, might change without notice!
+ * Used for accessing functionality that's only present in Java 8 or later.
+ */
+public interface _Java16 {
+
+    boolean isRecord(Class<?> cl);
+
+    Set<Method> getComponentAccessors(Class<?> recordClass);
+
+}

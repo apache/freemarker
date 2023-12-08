@@ -67,7 +67,7 @@ public interface MethodAppearanceFineTuner {
      *     The property name in the {@link PropertyDescriptor} can be anything,
      *     but the method (or methods) in it must belong to the class that
      *     is given as the <tt>clazz</tt> parameter or it must be inherited from
-     *     that class, or else whatever errors can occur later.
+     *     that class, otherwise the behavior is undefined, and errors can occur later.
      *     {@link IndexedPropertyDescriptor}-s are supported.
      *     If a real JavaBean property of the same name exists, or a fake property
      *     of the same name was already assigned earlier, it won't be

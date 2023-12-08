@@ -34,6 +34,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.annotations.ServletContainerInitializersStarter;
+import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
+import org.eclipse.jetty.plus.annotation.ContainerInitializer;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -111,7 +115,7 @@ public class WebAppTestCase {
 
         ensureWebAppIsDeployed(webAppName);
 
-        final URI uri = new URI("http://localhost:" + server.getConnectors()[0].getLocalPort()
+        final URI uri = new URI("http://localhost:" + ((NetworkConnector) server.getConnectors()[0]).getLocalPort()
                 + "/" + webAppName + "/" + webAppRelURL);
 
         final HttpURLConnection httpCon = (HttpURLConnection) uri.toURL().openConnection();
@@ -234,12 +238,29 @@ public class WebAppTestCase {
         context.setAttribute(
                 ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN,
                 ".*taglib.*\\.jar$");
+
+        addJasperInitializer(context);
+
         contextHandlers.addHandler(context);
         // As we add this after the Server was started, it has to be started manually:
         context.start();
 
         deployedWebApps.put(webAppName, context);
         LOG.info("Deployed web app.: {}", webAppName);
+    }
+
+    /**
+     * Without this, we will have this error when loading a taglib:
+     * NullPointerException: Cannot invoke "org.apache.jasper.compiler.TldCache.getTldResourcePath(String)" because the
+     * return value of "org.apache.jasper.Options.getTldCache()" is null
+     */
+    private static void addJasperInitializer(WebAppContext context) {
+        JettyJasperInitializer jettyJasperInitializer = new JettyJasperInitializer();
+        ServletContainerInitializersStarter servletContainerInitializersStarter
+                = new ServletContainerInitializersStarter(context);
+        ContainerInitializer containerInitializer = new ContainerInitializer(jettyJasperInitializer, null);
+        context.setAttribute("org.eclipse.jetty.containerInitializers", List.of(containerInitializer));
+        context.addBean(servletContainerInitializersStarter, true);
     }
 
     private static void deleteTemporaryDirectories() throws IOException {

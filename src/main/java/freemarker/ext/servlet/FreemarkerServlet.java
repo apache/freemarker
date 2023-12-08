@@ -883,13 +883,29 @@ public class FreemarkerServlet extends HttpServlet {
                 }
             }
         } catch (TemplateException e) {
+            boolean suppressServletException;
+
             final TemplateExceptionHandler teh = config.getTemplateExceptionHandler();
             // Ensure that debug handler responses aren't rolled back:
             if (teh == TemplateExceptionHandler.HTML_DEBUG_HANDLER || teh == TemplateExceptionHandler.DEBUG_HANDLER
-                    || teh.getClass().getName().indexOf("Debug") != -1) {
+                    || teh.getClass().getName().contains("Debug")) {
                 response.flushBuffer();
+
+                // Apparently, if the status is 200, yet the servlet throw an exception, Jetty (9.4.53) closes the
+                // connection, so the developer possibly won't see the debug error page (or not all of it).
+                suppressServletException = true;
+            } else {
+                suppressServletException = false;
             }
-            throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
+
+            if (suppressServletException) {
+                logSerlvetExceptionWithFreemarkerLog("Error executing FreeMarker template", e);
+                log("Error executing FreeMarker template. " +
+                        "Servlet-level exception was suppressed to show debug page with HTTP 200. " +
+                        "See earlier FreeMarker log message for details!");
+            } else {
+                throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
+            }
         }
     }
 
@@ -937,13 +953,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
-        if (cause instanceof TemplateException) {
-            // For backward compatibility, we log into the same category as Environment did when
-            // log_template_exceptions was true.
-            LOG_RT.error(message, cause);
-        } else {
-            LOG.error(message, cause);
-        }
+        logSerlvetExceptionWithFreemarkerLog(message, cause);
 
         ServletException e = new ServletException(message, cause);
         try {
@@ -955,7 +965,17 @@ public class FreemarkerServlet extends HttpServlet {
         }
         throw e;
     }
-    
+
+    private static void logSerlvetExceptionWithFreemarkerLog(String message, Throwable cause) {
+        if (cause instanceof TemplateException) {
+            // For backward compatibility, we log into the same category as Environment did when
+            // log_template_exceptions was true.
+            LOG_RT.error(message, cause);
+        } else {
+            LOG.error(message, cause);
+        }
+    }
+
     @SuppressFBWarnings(value={ "MSF_MUTABLE_SERVLET_FIELD", "DC_DOUBLECHECK" }, justification="Performance trick")
     private void logWarnOnObjectWrapperMismatch() {
         // Deliberately uses double check locking.

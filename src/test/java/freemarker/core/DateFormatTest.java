@@ -382,7 +382,7 @@ public class DateFormatTest extends TemplateTest {
                 + "<#setting locale='en_GB_Win'>${d} "
                 + "<#setting locale='fr_FR'>${d} "
                 + "<#setting locale='hu_HU'>${d}",
-                "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
+                "2015-Sep_en 2015-Sept_en_GB 2015-Sept_en_GB 2015-sept._fr_FR 2015-szept.");
     }
     
     /**
