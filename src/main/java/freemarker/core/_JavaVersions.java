@@ -31,31 +31,6 @@ public final class _JavaVersions {
         // Not meant to be instantiated
     }
 
-    private static final boolean IS_AT_LEAST_8 = isAtLeast(8, "java.time.Instant");
-
-    /**
-     * {@code null} if Java 8 is not available, otherwise the object through with the Java 8 operations are available.
-     */
-    static public final _Java8 JAVA_8;
-    static {
-        _Java8 java8;
-        if (IS_AT_LEAST_8) {
-            try {
-                java8 = (_Java8) Class.forName("freemarker.core._Java8Impl").getField("INSTANCE").get(null);
-            } catch (Exception e) {
-                try {
-                    Logger.getLogger("freemarker.runtime").error("Failed to access Java 8 functionality", e);
-                } catch (Exception e2) {
-                    // Suppressed
-                }
-                java8 = null;
-            }
-        } else {
-            java8 = null;
-        }
-        JAVA_8 = java8;
-    }
-
     private static final boolean IS_AT_LEAST_16 = isAtLeast(16, "java.net.UnixDomainSocketAddress");
 
     /**

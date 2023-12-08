@@ -83,7 +83,7 @@ dependency, as freemarker.ext.dom can't use the XPath support
 included in OpenJDK anymore. It's not needed on Oracle Java 9,
 or if FreeMarker is configured to use Jaxen for XPath.
 
-The minimum required Java version is currently Java SE 7. (The presence
+The minimum required Java version is currently Java SE 8. (The presence
 of a later version may be detected on runtime and utilized by
 FreeMarker.)
 
@@ -194,14 +194,12 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.7" (you will have to uncheck
-    "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
 - You will still have errors on these java files (because different java
   files depend on different versions of the same library, and Eclipse can't
   handle that). Exclude those java files from the Build Path (in the Package
-  Explorer, right click on the problematic file -> "Build Path" -> "Exclude"):
+  Explorer, right-click on the problematic file -> "Build Path" -> "Exclude"):
     _Jython20*.java,
     _Jython22*.java,
     _FreeMarkerPageContext2.java,
