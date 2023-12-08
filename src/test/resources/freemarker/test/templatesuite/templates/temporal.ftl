@@ -16,16 +16,16 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=dateTime?string />
-<@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=instant?string />
-<@assertEquals expected="Apr 5, 2003 6:07:08 AM" actual=localDateTime?string />
+<@assertEquals expected="Apr 5, 2003, 7:07:08 AM" actual=dateTime?string />
+<@assertEquals expected="Apr 5, 2003, 7:07:08 AM" actual=instant?string />
+<@assertEquals expected="Apr 5, 2003, 6:07:08 AM" actual=localDateTime?string />
 <@assertEquals expected="Apr 5, 2003" actual=localDate?string />
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
-<@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=offsetDateTime?string />
+<@assertEquals expected="Apr 5, 2003, 7:07:08 AM" actual=offsetDateTime?string />
 <@assertFails message="Daylight Saving">${offsetTime}</@>
 <@assertEquals expected="2003" actual=year?string />
 <@assertEquals expected="2003-04" actual=yearMonth?string />
-<@assertEquals expected="Apr 5, 2003 7:07:08 AM" actual=zonedDateTime?string />
+<@assertEquals expected="Apr 5, 2003, 7:07:08 AM" actual=zonedDateTime?string />
 
 <#setting timeZone="America/New_York">
 <@assertEquals expected="6:07:08 AM" actual=localTime?string />
@@ -64,26 +64,27 @@
 
 <#setting timeZone="America/New_York">
 <#setting locale="fr_FR">
-<@assertEquals expected="05/04/03 01:07" actual=instant?string.short />
-<@assertEquals expected="5 avr. 2003 01:07:08" actual=instant?string.medium />
-<@assertEquals expected="5 avril 2003 01:07:08 EST" actual=instant?string.long />
-<@assertEquals expected="samedi 5 avril 2003 01 h 07 EST" actual=instant?string.full />
+<@assertEquals expected="05/04/2003 01:07" actual=instant?string.short />
+<@assertEquals expected="5 avr. 2003, 01:07:08" actual=instant?string.medium />
+<@assertEquals expected="5 avril 2003 à 01:07:08 EST" actual=instant?string.long />
+<@assertEquals expected="samedi 5 avril 2003 à 01:07:08 heure normale de l’Est nord-américain" actual=instant?string.full
+ />
 
-<@assertEquals expected="05/04/03 01:07" actual=offsetDateTime?string.short />
-<@assertEquals expected="5 avr. 2003 01:07:08" actual=offsetDateTime?string.medium />
-<@assertEquals expected="5 avril 2003 06:07:08 Z" actual=offsetDateTime?string.long />
-<@assertEquals expected="samedi 5 avril 2003 06 h 07 Z" actual=offsetDateTime?string.full />
+<@assertEquals expected="05/04/2003 01:07" actual=offsetDateTime?string.short />
+<@assertEquals expected="5 avr. 2003, 01:07:08" actual=offsetDateTime?string.medium />
+<@assertEquals expected="5 avril 2003 à 06:07:08 Z" actual=offsetDateTime?string.long />
+<@assertEquals expected="samedi 5 avril 2003 à 06:07:08 Z" actual=offsetDateTime?string.full />
 
-<@assertEquals expected="05/04/03 06:07" actual=localDateTime?string.short />
-<@assertEquals expected="5 avr. 2003 06:07:08" actual=localDateTime?string.medium />
-<#-- Java 8 JDK-8085887 workaround test: -->
-<@assertEquals expected="5 avril 2003 06:07:08" actual=localDateTime?string.long />
-<@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full />
+<@assertEquals expected="05/04/2003 06:07" actual=localDateTime?string.short />
+<@assertEquals expected="5 avr. 2003, 06:07:08" actual=localDateTime?string.medium />
+<#-- Java 8 JDK-8085887 workaround test (it was, but we are running on Java 16): -->
+<@assertEquals expected="5 avril 2003, 06:07:08" actual=localDateTime?string.long />
+<@assertEquals expected="samedi 5 avril 2003, 06:07:08" actual=localDateTime?string.full />
 
 <@assertFails message="Daylight Saving">${offsetTime?string.short}</@>
 <@assertFails message="Daylight Saving">${offsetTime?string.medium}</@>
 <@assertEquals expected="06:07:08 Z" actual=offsetTime?string.long />
-<@assertEquals expected="06 h 07 Z" actual=offsetTime?string.full />
+<@assertEquals expected="06:07:08 Z" actual=offsetTime?string.full />
 
 <#-- There combinations are clearly not supported by the "localized pattern" API. -->
 <@assertFails message="not supported for java.time.Year">${year?string.short}</@>
@@ -95,27 +96,27 @@
 <@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.long}</@>
 <@assertFails message="not supported for java.time.YearMonth">${yearMonth?string.full}</@>
 
-<@assertEquals expected="05/04/03 01:07" actual=zonedDateTime?string.short />
-<@assertEquals expected="5 avr. 2003 01:07:08" actual=zonedDateTime?string.medium />
-<@assertEquals expected="5 avril 2003 06:07:08 UTC" actual=zonedDateTime?string.long />
-<@assertEquals expected="samedi 5 avril 2003 06 h 07 UTC" actual=zonedDateTime?string.full />
+<@assertEquals expected="05/04/2003 01:07" actual=zonedDateTime?string.short />
+<@assertEquals expected="5 avr. 2003, 01:07:08" actual=zonedDateTime?string.medium />
+<@assertEquals expected="5 avril 2003 à 06:07:08 UTC" actual=zonedDateTime?string.long />
+<@assertEquals expected="samedi 5 avril 2003 à 06:07:08 Temps universel coordonné" actual=zonedDateTime?string.full />
 
-<@assertEquals expected="05/04/03 06:07" actual=localDateTime?string.short_short />
-<@assertEquals expected="05/04/03 06:07:08" actual=localDateTime?string.short_medium />
+<@assertEquals expected="05/04/2003 06:07" actual=localDateTime?string.short_short />
+<@assertEquals expected="05/04/2003 06:07:08" actual=localDateTime?string.short_medium />
 <#-- Java 8 JDK-8085887 workaround test: -->
-<@assertEquals expected="05/04/03 06:07:08" actual=localDateTime?string.short_long />
-<@assertEquals expected="05/04/03 06:07:08" actual=localDateTime?string.short_full />
+<@assertEquals expected="05/04/2003 06:07:08" actual=localDateTime?string.short_long />
+<@assertEquals expected="05/04/2003 06:07:08" actual=localDateTime?string.short_full />
 
-<@assertEquals expected="5 avr. 2003 06:07:08" actual=localDateTime?string.medium_medium />
-<@assertEquals expected="5 avril 2003 06:07:08" actual=localDateTime?string.long_medium />
-<@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full_medium />
-
-<#-- Java 8 JDK-8085887 workaround test: -->
-<@assertEquals expected="5 avril 2003 06:07:08" actual=localDateTime?string.long_long />
-<@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full_long />
+<@assertEquals expected="5 avr. 2003, 06:07:08" actual=localDateTime?string.medium_medium />
+<@assertEquals expected="5 avril 2003, 06:07:08" actual=localDateTime?string.long_medium />
+<@assertEquals expected="samedi 5 avril 2003, 06:07:08" actual=localDateTime?string.full_medium />
 
 <#-- Java 8 JDK-8085887 workaround test: -->
-<@assertEquals expected="samedi 5 avril 2003 06:07:08" actual=localDateTime?string.full_full />
+<@assertEquals expected="5 avril 2003, 06:07:08" actual=localDateTime?string.long_long />
+<@assertEquals expected="samedi 5 avril 2003, 06:07:08" actual=localDateTime?string.full_long />
+
+<#-- Java 8 JDK-8085887 workaround test: -->
+<@assertEquals expected="samedi 5 avril 2003, 06:07:08" actual=localDateTime?string.full_full />
 
 <@assertEquals expected="2003-04-05" actual=localDateTime?string('yyyy-MM-dd') />
 <@assertEquals expected="2003-04-05 06:07:08" actual=localDateTime?string('yyyy-MM-dd HH:mm:ss') />
