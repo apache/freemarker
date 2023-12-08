@@ -107,7 +107,7 @@ public class CAndCnBuiltInTest extends TemplateTest {
                 expectedNaN = "NaN";
             } else {
                 expectedInf = "\u221E";
-                expectedNaN = "\uFFFD";
+                expectedNaN = "NaN"; // was \uFFFD before Java 11
             }
 
             assertOutput("${" + type + "Inf?" + builtInName + "}", expectedInf);
