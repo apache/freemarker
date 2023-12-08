@@ -30088,6 +30088,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>When <literal>FreemarkerServlet</literal> was used with
+              the <literal>TemplateExceptionHandler.DEBUG_HANDLER</literal> or
+              <literal>HTML_DEBUG_HANDLER</literal>, on Jetty the response web
+              page was possibly empty or partial, as the Jetty has abruptly
+              closed the connection after we flushed the HTTP response with
+              status code 200, and yet thrown an exception. Now in this
+              situation we only log the exception, but don't throw it.
+              (Production system should always use
+              <literal>RETHROW_HANDLER</literal>, and this change has no
+              effect there.)</para>
+            </listitem>
+
+            <listitem>
               <para>We don't generate RMIC stub classes for
               <literal>freemarker.debug.impl.Rmi*Impl</literal> classes
               anymore. Almost nobody uses that API, but if you do, you
