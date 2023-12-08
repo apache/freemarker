@@ -264,15 +264,10 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
     - Test Resource Folders:  
       src/test/resources
       
-  - Still inside the "Sources" tab, change the "Language level" to "7". (Yes, we use Java 16 SDK with
-    language level 7 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
-    
   - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
     all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon
     at the right edge, select "JARs or directory", navigate to `ide-dependencies` directory, expand
-    it, then range-select all the jars in it. Thus you add all of them at once.) After all jar-s were added,
-    find  dom4j-*.jar in the table, and move it to the bottom of the table (otherwise it shadows some
-    Jaxen classes with a too old version).
+    it, then range-select all the jars in it. Thus, you add all of them at once.)
 
 - "File" -> "Settings" -> "Build, Execution, Deployment" -> "Compiler" -> "Excludes":
   Add source files that match these (you simply find them manually, and add their absolute path):  
