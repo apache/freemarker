@@ -21,7 +21,7 @@
   AFTER CHANGING THIS FILE don't forget to issue: ant update-deps
 -->
 <!DOCTYPE ivy-module [
-    <!ENTITY jetty.version "7.6.21.v20160908">
+    <!ENTITY jetty.version "9.4.53.v20231009">
     <!ENTITY slf4j.version "1.6.1">
     <!ENTITY spring.version "2.5.6.SEC03">
 ]>
@@ -143,9 +143,12 @@
 
     <dependency org="org.eclipse.jetty" name="jetty-server" rev="&jetty.version;" conf="test->default" />
     <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="&jetty.version;" conf="test->default" />
-    <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="&jetty.version;" conf="test->default" />
     <dependency org="org.eclipse.jetty" name="jetty-util" rev="&jetty.version;" conf="test->default" />
-    
+    <dependency org="org.eclipse.jetty" name="apache-jsp" rev="&jetty.version;" conf="test->default" />
+    <!-- JPS JSTL: -->
+    <dependency org="org.apache.taglibs" name="taglibs-standard-impl" rev="1.2.5" conf="test->default" />
+    <dependency org="org.apache.taglibs" name="taglibs-standard-spec" rev="1.2.5" conf="test->default" />
+
     <dependency org="displaytag" name="displaytag" rev="1.2" conf="test->default">
       <exclude org="com.lowagie" name="itext" />
       <exclude org="org.slf4j" name="slf4j-log4j12" />
