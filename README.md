@@ -199,7 +199,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
 - You will still have errors on these java files (because different java
   files depend on different versions of the same library, and Eclipse can't
   handle that). Exclude those java files from the Build Path (in the Package
-  Explorer, right click on the problematic file -> "Build Path" -> "Exclude"):
+  Explorer, right-click on the problematic file -> "Build Path" -> "Exclude"):
     _Jython20*.java,
     _Jython22*.java,
     _FreeMarkerPageContext2.java,

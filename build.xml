@@ -218,7 +218,7 @@
 
     <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
-    <javac destdir="build/classes" deprecation="off" 
+    <javac destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
@@ -248,11 +248,11 @@
     />
 
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.0"
-      bootclasspath="${boot.classpath.j2se1.8}"
+      bootclasspath="${boot.classpath.j2se1.7}"
       includes="
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
@@ -266,7 +266,7 @@
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
 
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
@@ -278,7 +278,7 @@
     />
 
     <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.0"
@@ -293,7 +293,7 @@
     />
 
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.2"
@@ -303,7 +303,7 @@
     />
 
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
       debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.5"
