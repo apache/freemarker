@@ -372,7 +372,7 @@ public class NumberFormatTest extends TemplateTest {
         addToDataModel("nInf", Double.NEGATIVE_INFINITY);
         addToDataModel("nan", Double.NaN);
 
-        String humanAudienceOutput = "\u221e -\u221e \ufffd";
+        String humanAudienceOutput = "\u221e -\u221e NaN";
         String computerAudienceOutput = "Infinity -Infinity NaN";
 
         assertOutput("${pInf?c} ${nInf?c} ${nan?c}", computerAudienceOutput);

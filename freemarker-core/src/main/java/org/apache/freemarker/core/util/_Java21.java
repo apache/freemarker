@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-1
-1
-1 234 567,89
-1234567.886
-1,00
-1
-1234567,89
-1234567.886
-1
-1
-1.000000000000001
-1E-16
--1E-16
-1
-1E-16
-100000.5
-100 000,5
+
+package org.apache.freemarker.core.util;
+
+/**
+ * Used internally only, might change without notice!
+ */
+public interface _Java21 {
+    // This is currently to demonstrate how to support Java features beyond the minimum required version.
+    // You could add methods here that can only be implemented if we are running on Java 21 or later.
+    void example();
+}

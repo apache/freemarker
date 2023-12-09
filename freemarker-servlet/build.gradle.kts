@@ -33,22 +33,28 @@ dependencies {
     api(project(":freemarker-core"))
     api(libs.legacyFreemarker)
 
-    // Because of the limitations of Eclipse dependency handling, we have to use the dependency artifacts from
-    // Jetty ${jettyVersion} here, which is the Jetty version used for the tests. When the jettyVersion changes, run
-    // `gradlew :freemarker-servlet:dependencies` and copy-paste the exact versions to here:
-    compileOnly("org.eclipse.jetty.orbit:javax.servlet:3.0.0.v201112011016")
-    compileOnly("org.eclipse.jetty.orbit:javax.servlet.jsp:2.2.0.v201112011158")
-    compileOnly("org.eclipse.jetty.orbit:javax.el:2.2.0.v201108011116")
+    // Servlet, JSP, and EL related classes
+    compileOnly("javax.servlet:javax.servlet-api:3.1.0")
+    compileOnly("javax.servlet.jsp:javax.servlet.jsp-api:2.3.3")
+    compileOnly("javax.el:javax.el-api:3.0.0") // EL is not included in jsp-api anymore (was there in jsp-api 2.1)
 
-    // When changing this, the non-test org.eclipse.jetty.orbit dependencies must be updated as well! Thus, it must use
-    // exactly the same Servlet/JSP-related specification versions as the minimal requirements of FreeMarker.
-    val jettyVersion = "8.1.22.v20160922"
-
+    // Chose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
+    // than what we declare above, because the same classes will come from Jetty as well. For example, Jetty depends
+    // on org.mortbay.jasper:apache-el, which contains the javax.el classes, along with non-javax.el classes, so you
+    // can't even exclude it. Similarly, org.eclipse.jetty:apache-jsp contains the JSP API javax.servlet.jsp classes,
+    // yet again along with other classes. Anyway, this mess is temporary, as we will migrate to Jakarta, and only
+    // support that.
+    val jettyVersion = "9.4.53.v20231009"
     testImplementation("org.eclipse.jetty:jetty-server:$jettyVersion")
     testImplementation("org.eclipse.jetty:jetty-webapp:$jettyVersion")
-    testImplementation("org.eclipse.jetty:jetty-jsp:$jettyVersion")
     testImplementation("org.eclipse.jetty:jetty-util:$jettyVersion")
+    testImplementation("org.eclipse.jetty:apache-jsp:$jettyVersion")
     // Jetty also contains the servlet-api and jsp-api classes
+
+    // JSP JSTL (not included in Jetty):
+    val apacheStandardTaglibsVersion = "1.2.5"
+    testImplementation("org.apache.taglibs:taglibs-standard-impl:$apacheStandardTaglibsVersion")
+    testImplementation("org.apache.taglibs:taglibs-standard-spec:$apacheStandardTaglibsVersion")
 
     testImplementation("displaytag:displaytag:1.2") {
         exclude(group = "com.lowagie", module = "itext")

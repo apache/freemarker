@@ -52,7 +52,7 @@ DynamicImport-Package: *
 # The required minimum is 1.7, but we utilize versions up to 1.8 if available.
 # See also: http://wiki.eclipse.org/Execution_Environments, "Compiling
 # against more than is required"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 
 # Non-OSGi meta:
 Main-Class: freemarker.core.CommandLine

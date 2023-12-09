@@ -19,47 +19,31 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import static org.apache.freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import javax.annotation.PostConstruct;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.*;
+
+import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
+
 public class RestrictedObjectWrapperTest {
 
     @Test
     public void testBasics() throws TemplateException {
-        PostConstruct.class.toString();
         RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         testCustomizationCommonPart(ow);
         assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);

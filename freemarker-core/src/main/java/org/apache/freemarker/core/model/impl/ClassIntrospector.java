@@ -19,12 +19,16 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.beans.BeanInfo;
-import java.beans.IndexedPropertyDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyDescriptor;
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core._CoreAPI;
+import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.CommonBuilder;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.beans.*;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -32,30 +36,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._JavaVersions;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Returns information about a {@link Class} that's useful for FreeMarker. Encapsulates a cache for this. Thread-safe,
@@ -394,11 +377,6 @@ class ClassIntrospector {
         List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
                 : Collections.emptyList();
 
-        if (_JavaVersions.JAVA_8 == null) {
-            // java.beans.Introspector was good enough then.
-            return introspectorPDs;
-        }
-
         // introspectorPDs contains each property exactly once. But as now we will search them manually too, it can
         // happen that we find the same property for multiple times. Worse, because of indexed properties, it's possible
         // that we have to merge entries (like one has the normal reader method, the other has the indexed reader
@@ -415,7 +393,7 @@ class ClassIntrospector {
         // (Note that java.beans.Introspector discovers non-accessible public methods, and to emulate that behavior
         // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
         for (Method method : clazz.getMethods()) {
-            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && method.getReturnType() != void.class
+            if (method.isDefault() && method.getReturnType() != void.class
                     && !method.isBridge()) {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
@@ -588,14 +566,9 @@ class ClassIntrospector {
         List<MethodDescriptor> introspectionMDs = introspectorMDArray != null && introspectorMDArray.length != 0
                 ? Arrays.asList(introspectorMDArray) : Collections.emptyList();
 
-        if (_JavaVersions.JAVA_8 == null) {
-            // java.beans.Introspector was good enough then.
-            return introspectionMDs;
-        }
-
         Map<String, List<Method>> defaultMethodsToAddByName = null;
         for (Method method : clazz.getMethods()) {
-            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && !method.isBridge()) {
+            if (method.isDefault() && !method.isBridge()) {
                 if (defaultMethodsToAddByName == null) {
                     defaultMethodsToAddByName = new HashMap<>();
                 }

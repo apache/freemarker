@@ -34,7 +34,7 @@ import org.gradle.kotlin.dsl.withType
 fun getDefaultJavaVersion(project: Project): JavaLanguageVersion {
     return project.providers
         .gradleProperty("freemarkerDefaultJavaVersion")
-        .getOrElse("8")
+        .getOrElse("17")
         .let { JavaLanguageVersion.of(it) }
 }
 

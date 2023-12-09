@@ -20,39 +20,21 @@
 package org.apache.freemarker.dom;
 
 
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateNodeModelEx;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SingleItemTemplateModelIterator;
 import org.slf4j.Logger;
-import org.w3c.dom.Attr;
-import org.w3c.dom.CDATASection;
 import org.w3c.dom.CharacterData;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.ProcessingInstruction;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
+
+import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A base class for wrapping a single W3C DOM_WRAPPER Node as a FreeMarker template model.
@@ -461,16 +443,6 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             }
             
             if (xpathSupportClass == null) try {
-                useSunInternalXPathSupport();
-            } catch (Exception e) {
-                LOG.debug("Failed to use Sun internal XPath support.", e);
-            } catch (IllegalAccessError e) {
-                // Happens on OpenJDK 9 (but not on Oracle Java 9)
-                LOG.debug("Failed to use Sun internal XPath support. "
-                        + "Tip: On Java 9+, you may need Xalan or Jaxen+Saxpath.", e);
-            }
-            
-            if (xpathSupportClass == null) try {
                 useJaxenXPathSupport();
             } catch (ClassNotFoundException e) {
                 // Expected
@@ -508,17 +480,6 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Using Xalan classes for XPath support");
-        }
-    }
-    
-    static public void useSunInternalXPathSupport() throws Exception {
-        Class.forName("com.sun.org.apache.xpath.internal.XPath");
-        Class c = Class.forName("org.apache.freemarker.dom.SunInternalXalanXPathSupport");
-        synchronized (STATIC_LOCK) {
-            xpathSupportClass = c;
-        }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using Sun's internal Xalan classes for XPath support");
         }
     }
     

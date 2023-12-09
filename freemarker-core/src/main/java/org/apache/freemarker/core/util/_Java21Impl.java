@@ -16,20 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-1
-1
-1 234 567,89
-1234567.886
-1,00
-1
-1234567,89
-1234567.886
-1
-1
-1.000000000000001
-1E-16
--1E-16
-1
-1E-16
-100000.5
-100 000,5
+
+package org.apache.freemarker.core.util;
+
+class _Java21Impl implements _Java21 {
+    @Override
+    public void example() {
+        //
+    }
+}

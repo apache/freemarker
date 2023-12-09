@@ -18,66 +18,31 @@
  */
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._Java8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Used internally only, might change without notice!
  */
 public final class _JavaVersions {
 
-    private static final Logger LOG = LoggerFactory.getLogger(_JavaVersions.class);
-
     private _JavaVersions() {
         // Not meant to be instantiated
     }
 
-    private static final boolean IS_AT_LEAST_8;
-    static {
-        boolean result = false;
-        String vStr = _SecurityUtils.getSystemProperty("java.version", null);
-        if (vStr != null) {
-            try {
-                Version v = new Version(vStr);
-                result = v.getMajor() == 1 && v.getMinor() >= 8 || v.getMajor() > 1;
-            } catch (Exception e) {
-                // Ignore
-            }
-        } else {
-            try {
-                Class.forName("java.time.Instant");
-                result = true;
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-        IS_AT_LEAST_8 = result;
-    }
-    
+    private static final boolean IS_AT_LEAST_21 = Runtime.version().feature() >= 21;
+
     /**
      * {@code null} if Java 8 is not available, otherwise the object through with the Java 8 operations are available.
      */
-    static public final _Java8 JAVA_8;
+    static public final _Java21 JAVA_21;
     static {
-        _Java8 java8;
-        if (IS_AT_LEAST_8) {
+        if (IS_AT_LEAST_21) {
             try {
-                java8 = (_Java8) Class.forName("org.apache.freemarker.core._Java8Impl")
-                        .getField("INSTANCE").get(null);
+                JAVA_21 = (_Java21) Class.forName("freemarker.core._Java21Impl").getField("INSTANCE").get(null);
             } catch (Exception e) {
-                try {
-                    LOG.error("Failed to access Java 8 functionality", e);
-                } catch (Exception e2) {
-                    // Suppressed
-                }
-                java8 = null;
+                throw new RuntimeException("Failed to create _Java21Impl", e);
             }
         } else {
-            java8 = null;
+            JAVA_21 = null;
         }
-        JAVA_8 = java8;
     }
-    
+
 }

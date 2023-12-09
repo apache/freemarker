@@ -18,8 +18,18 @@
  */
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.impl.SimpleDate;
+import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
+import org.apache.freemarker.core.userpkg.*;
+import org.apache.freemarker.core.valueformat.TemplateDateFormat;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
+import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
+import org.apache.freemarker.test.TemplateTest;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -29,23 +39,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.impl.SimpleDate;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.userpkg.AppMetaTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.HTMLISOTemplateDateFormatFactory;
-import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateDateFormat;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
-import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
-import org.apache.freemarker.test.TemplateTest;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
 
 public class DateFormatTest extends TemplateTest {
     
@@ -372,7 +367,7 @@ public class DateFormatTest extends TemplateTest {
                 + "<#setting locale='en_GB_Win'>${d} "
                 + "<#setting locale='fr_FR'>${d} "
                 + "<#setting locale='hu_HU'>${d}",
-                "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
+                "2015-Sep_en 2015-Sept_en_GB 2015-Sept_en_GB 2015-sept._fr_FR 2015-szept.");
     }
     
     /**

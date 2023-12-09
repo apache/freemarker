@@ -24,8 +24,6 @@ apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("defaultJava", "8")
-
             version("junit", "4.12")
             version("slf4j", "1.7.25")
 

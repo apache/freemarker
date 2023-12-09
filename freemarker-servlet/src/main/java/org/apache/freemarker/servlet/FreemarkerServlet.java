@@ -19,37 +19,8 @@
 
 package org.apache.freemarker.servlet;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
-import org.apache.freemarker.core.ConfigurationException;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.MutableProcessingConfiguration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.TemplateExceptionHandler;
-import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -69,6 +40,21 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory.ClasspathMetaInfTldSource
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
@@ -821,13 +807,29 @@ public class FreemarkerServlet extends HttpServlet {
                 }
             }
         } catch (TemplateException e) {
+            boolean suppressServletException;
+
             final TemplateExceptionHandler teh = config.getTemplateExceptionHandler();
             // Ensure that debug handler responses aren't rolled back:
             if (teh == TemplateExceptionHandler.HTML_DEBUG || teh == TemplateExceptionHandler.DEBUG
-                    || teh.getClass().getName().indexOf("Debug") != -1) {
+                    || teh.getClass().getName().contains("Debug")) {
                 response.flushBuffer();
+
+                // Apparently, if the status is 200, yet the servlet throw an exception, Jetty (9.4.53) closes the
+                // connection, so the developer possibly won't see the debug error page (or not all of it).
+                suppressServletException = true;
+            } else {
+                suppressServletException = false;
             }
-            throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
+
+            if (suppressServletException) {
+                logServletExceptionWithFreemarkerLog("Error executing FreeMarker template", e);
+                log("Error executing FreeMarker template. " +
+                        "Servlet-level exception was suppressed to show debug page with HTTP 200. " +
+                        "See earlier FreeMarker log message for details!");
+            } else {
+                throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
+            }
         }
     }
 
@@ -878,21 +880,16 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
+        logServletExceptionWithFreemarkerLog(message, cause);
+        return new ServletException(message, cause);
+    }
+
+    private static void logServletExceptionWithFreemarkerLog(String message, Throwable cause) {
         if (cause instanceof TemplateException) {
             LOG.error(message, cause);
         }
-
-        ServletException e = new ServletException(message, cause);
-        try {
-            // Prior to Servlet 2.5, the cause exception wasn't set by the above constructor.
-            // If we are on 2.5+ then this will throw an exception as the cause was already set.
-            e.initCause(cause);
-        } catch (Exception ex) {
-            // Ignored; see above
-        }
-        throw e;
     }
-    
+
     /**
      * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call (as far as the
      * {@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE} Servlet init-param allows that). The base implementation in
