@@ -899,7 +899,7 @@ public class FreemarkerServlet extends HttpServlet {
             }
 
             if (suppressServletException) {
-                logSerlvetExceptionWithFreemarkerLog("Error executing FreeMarker template", e);
+                logServletExceptionWithFreemarkerLog("Error executing FreeMarker template", e);
                 log("Error executing FreeMarker template. " +
                         "Servlet-level exception was suppressed to show debug page with HTTP 200. " +
                         "See earlier FreeMarker log message for details!");
@@ -953,7 +953,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
-        logSerlvetExceptionWithFreemarkerLog(message, cause);
+        logServletExceptionWithFreemarkerLog(message, cause);
 
         ServletException e = new ServletException(message, cause);
         try {
@@ -963,10 +963,10 @@ public class FreemarkerServlet extends HttpServlet {
         } catch (Exception ex) {
             // Ignored; see above
         }
-        throw e;
+        return e;
     }
 
-    private static void logSerlvetExceptionWithFreemarkerLog(String message, Throwable cause) {
+    private static void logServletExceptionWithFreemarkerLog(String message, Throwable cause) {
         if (cause instanceof TemplateException) {
             // For backward compatibility, we log into the same category as Environment did when
             // log_template_exceptions was true.
