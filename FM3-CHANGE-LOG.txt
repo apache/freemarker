@@ -573,10 +573,10 @@ models by default like FreemarkerServlet does.
 Core / Miscellaneous
 ....................
 
-- Minimum Java version increased to 8
+- Minimum Java version increased to 17
 - Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
 - Removed legacy extensions (so these have no module): rhino, jython, xml (not to be confused with dom), jdom, ant.
-- Servlet 3.0 and JSP 2.2 and is the minimum requirement now (if Serlvet/JSP features are used at all).
+- Servlet 3.1 and JSP 2.3 and is the minimum requirement now (if Serlvet/JSP features are used at all).
 - Log categories are now simply the full qualified class name of the logging classes. There are no predefined log
   categories (such as "freemarker.runtime", etc.) anymore. This is to follow the common practices in logging.
 - #include-d/#import-ed templates don't inherit the charset (encoding) of the #include-ing/#import-ing template.
