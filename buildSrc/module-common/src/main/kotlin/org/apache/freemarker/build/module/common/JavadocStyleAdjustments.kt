@@ -19,14 +19,14 @@
 
 package org.apache.freemarker.build.module.common
 
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import org.gradle.api.Action
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 
 fun configureJavadocDefaults(javadoc: Javadoc) {
     javadoc.group = JavaBasePlugin.DOCUMENTATION_GROUP
@@ -46,7 +46,7 @@ fun configureJavadocDefaults(javadoc: Javadoc) {
         charSet = javadocEncoding.name()
 
         // There are too many to check
-        addStringOption("Xdoclint:-missing", "-quiet")
+        addStringOption("Xdoclint:all,-missing", "-quiet")
     }
 
     javadoc.doLast(JavadocStyleAdjustments())
