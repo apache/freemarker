@@ -459,7 +459,7 @@
       encoding="UTF-8"
       locale="en_US"
     >
-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+      <link href="https://docs.oracle.com/en/java/javase/16/docs/api/"/>
     </javadoc>
     <delete dir="build/javadoc-sources" />
   </target>
