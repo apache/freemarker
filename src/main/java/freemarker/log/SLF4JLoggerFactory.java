@@ -40,7 +40,7 @@ public class SLF4JLoggerFactory implements LoggerFactory {
 
     /**
      * Logger where the log entry issuer (class, method) will be correctly
-     * shown to be the caller of <tt>LocationAwareSLF4JLogger</tt> methods.
+     * shown to be the caller of {@code LocationAwareSLF4JLogger} methods.
      */
     private static final class LocationAwareSLF4JLogger extends Logger {
             

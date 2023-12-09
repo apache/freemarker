@@ -84,7 +84,7 @@ class OverloadedNumberUtil {
      * type and the coerced type, all encoded into the class of the value, which is used as the overloaded method lookup
      * cache key.
      *  
-     * <p>See also: <tt>src\main\misc\overloadedNumberRules\prices.ods</tt>.
+     * <p>See also: {@code src\main\misc\overloadedNumberRules\prices.ods}.
      * 
      * @param num the number to coerce
      * @param typeFlags the type flags of the target parameter position; see {@link TypeFlags}

@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 
 /**
- * A simple implementation of the <tt>TemplateNumberModel</tt>
+ * A simple implementation of the {@code TemplateNumberModel}
  * interface. Note that this class is immutable.
  *
  * <p>This class is thread-safe.
@@ -31,7 +31,7 @@ import java.io.Serializable;
 public final class SimpleNumber implements TemplateNumberModel, Serializable {
 
     /**
-     * @serial the value of this <tt>SimpleNumber</tt> 
+     * @serial the value of this {@code SimpleNumber} 
      */
     private final Number value;
 

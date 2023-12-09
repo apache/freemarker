@@ -31,7 +31,7 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * <p>A class that will wrap an arbitrary array into {@link TemplateCollectionModel}
- * and {@link TemplateSequenceModel} interfaces. It supports element retrieval through the <tt>array[index]</tt>
+ * and {@link TemplateSequenceModel} interfaces. It supports element retrieval through the {@code array[index]}
  * syntax and can be iterated as a list.
  */
 public class ArrayModel

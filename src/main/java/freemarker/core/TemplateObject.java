@@ -199,7 +199,7 @@ public abstract class TemplateObject {
     
     /**
      * A very sort single-line string that describes what kind of AST node this is, without describing any 
-     * embedded expression or child element. Examples: {@code "#if"}, {@code "+"}, <tt>"${...}</tt>. These values should
+     * embedded expression or child element. Examples: {@code "#if"}, {@code "+"}, <code>"${...}</code>. These values should
      * be suitable as tree node labels in a tree view. Yet, they should be consistent and complete enough so that an AST
      * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
      * leaf nodes the symbols should be the canonical form of value.

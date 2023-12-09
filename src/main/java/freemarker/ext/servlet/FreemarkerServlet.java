@@ -115,9 +115,9 @@ import freemarker.template.utility.StringUtil;
  * this is interpreted as a {@link ServletContext} resource path, which practically means a web application directory
  * relative path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last haven't always
  * worked before FreeMarker 2.3.23).<br>
- * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
- * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
- * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
+ * Alternatively, you can prepend it with {@code file://} to indicate a literal path in the file system (i.e.
+ * {@code file:///var/www/project/templates/}). Note that three slashes were used to specify an absolute path.<br>
+ * Also, you can prepend it with {@code classpath:}, like in {@code classpath:com/example/templates}, to indicate that
  * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
  * thread that initializes this servlet.<br>
  * If {@code incompatible_improvements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
@@ -130,10 +130,10 @@ import freemarker.template.utility.StringUtil;
  * {@link WebappTemplateLoader#setAttemptFileAccess(boolean)} and
  * {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. For
  * backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
- * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
+ * {@code class://com/example/templates} format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template-not-found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
- * The default value is <tt>class://</tt> (that is, the root of the class hierarchy), which is not recommended anymore,
+ * The default value is {@code class://} (that is, the root of the class hierarchy), which is not recommended anymore,
  * and should be overwritten with the {@value #INIT_PARAM_TEMPLATE_PATH} init-param.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to {@code true}, generates headers in the response that
@@ -147,8 +147,8 @@ import freemarker.template.utility.StringUtil;
  * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (the
  * default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is used
  * if that's non-{@code null}.
- * <li>The template's <tt>content_type</tt> custom attribute, usually specified via the <tt>attributes</tt> parameter of
- * the <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
+ * <li>The template's {@code content_type} custom attribute, usually specified via the {@code attributes} parameter of
+ * the <code>&lt;#ftl&gt;</code> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
  * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
  * ({@link OutputFormat#getMimeType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
  * is used, which has {@code null} MIME-type. (The output format of a template is deduced from {@link Configuration}
@@ -159,9 +159,9 @@ import freemarker.template.utility.StringUtil;
  * (the default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is
  * used if that's non-{@code null}.
  * </ol>
- * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. If and only if
+ * If none of the above gives a MIME type, then this init-param does. Defaults to {@code "text/html"}. If and only if
  * the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING} init-param is set to {@value #INIT_PARAM_VALUE_LEGACY} (which is
- * the default of it), the content type may include the charset (as in <tt>"text/html; charset=utf-8"</tt>), in which
+ * the default of it), the content type may include the charset (as in {@code "text/html; charset=utf-8"}), in which
  * case that specifies the actual charset of the output. If the the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
  * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the
  * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.</li>
@@ -173,7 +173,7 @@ import freemarker.template.utility.StringUtil;
  * type in the response, unless {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value
  * is {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either
  * the template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it
- * has a custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is
+ * has a custom attribute with name {@code content_type}, or {@link HttpServletResponse#getContentType()} is
  * {@code null}. Setting this init-param allows you to specify the content type before forwarding to
  * {@link FreemarkerServlet}.</li>
  *

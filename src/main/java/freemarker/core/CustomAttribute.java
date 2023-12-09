@@ -66,7 +66,7 @@ public class CustomAttribute {
     
     /**
      * Creates a new custom attribute with the specified scope
-     * @param scope one of <tt>SCOPE_</tt> constants. 
+     * @param scope one of {@code SCOPE_} constants. 
      */
     public CustomAttribute(int scope) {
         if (scope != SCOPE_ENVIRONMENT && 

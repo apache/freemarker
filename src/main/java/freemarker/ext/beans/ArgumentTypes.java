@@ -474,7 +474,7 @@ final class ArgumentTypes {
      * parameter types represented by this ArgumentTypes object, also tells
      * how difficult that conversion is.
      * 
-     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
+     * @return One of the {@code CONVERSION_DIFFICULTY_...} constants.
      */
     private int isApplicable(ReflectionCallableMemberDescriptor memberDesc, boolean varArg) {
         final Class<?>[] paramTypes = memberDesc.getParamTypes(); 
@@ -527,7 +527,7 @@ final class ArgumentTypes {
      * parameter type should be convertible; possibly a primitive type
      * @param actual the argument type; not a primitive type, maybe {@link Null}.
      * 
-     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
+     * @return One of the {@code CONVERSION_DIFFICULTY_...} constants.
      */
     private int isMethodInvocationConvertible(final Class<?> formal, final Class<?> actual) {
         // Check for identity or widening reference conversion

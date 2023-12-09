@@ -688,7 +688,7 @@ class BuiltInsForSequences {
         }
 
         /**
-         * Sorts a sequence for the <tt>sort</tt> and <tt>sort_by</tt>
+         * Sorts a sequence for the {@code sort} and {@code sort_by}
          * built-ins.
          * 
          * @param seq the sequence to sort.

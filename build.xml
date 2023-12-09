@@ -453,7 +453,7 @@
       windowtitle="FreeMarker ${version} API"
       classpath="build/classes"
       classpathref="ivy.dep"
-      failonerror="false"
+      failonerror="true"
       charset="UTF-8"
       docencoding="UTF-8"
       encoding="UTF-8"

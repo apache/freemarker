@@ -61,9 +61,9 @@ public interface TransformControl {
      * Called before the body is evaluated for the first time.
      * @return 
      * <ul>
-     * <li><tt>SKIP_BODY</tt> if the transform wants to ignore the body. In this
+     * <li>{@code SKIP_BODY} if the transform wants to ignore the body. In this
      * case, only {@link java.io.Writer#close()} is called next and processing ends.</li>
-     * <li><tt>EVALUATE_BODY</tt> to normally evaluate the body of the transform
+     * <li>{@code EVALUATE_BODY} to normally evaluate the body of the transform
      * and feed it to the writer</li>
      * </ul>
      */
@@ -73,8 +73,8 @@ public interface TransformControl {
      * Called after the body has been evaluated.
      * @return
      * <ul>
-     * <li><tt>END_EVALUATION</tt> if the transformation should be ended.</li>
-     * <li><tt>REPEAT_EVALUATION</tt> to have the engine re-evaluate the 
+     * <li>{@code END_EVALUATION} if the transformation should be ended.</li>
+     * <li>{@code REPEAT_EVALUATION} to have the engine re-evaluate the 
      * transform body and feed it again to the writer.</li>
      * </ul>
      */

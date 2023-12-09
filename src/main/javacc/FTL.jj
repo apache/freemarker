@@ -2367,7 +2367,7 @@ LambdaParameterList LambdaExpressionParameterList() :
 }
 
 /**
- * production for when a key is specified by <DOT> + keyname
+ * production for when a key is specified by {@code <DOT>} + keyname
  */
 Expression DotVariable(Expression exp) :
 {

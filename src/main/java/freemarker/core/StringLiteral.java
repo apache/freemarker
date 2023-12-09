@@ -139,7 +139,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
     
     /**
-     * Tells if this is something like <tt>"${foo}"</tt>, which is usually a user mistake.
+     * Tells if this is something like <code>"${foo}"</code>, which is usually a user mistake.
      */
     boolean isSingleInterpolationLiteral() {
         return dynamicValue != null && dynamicValue.size() == 1

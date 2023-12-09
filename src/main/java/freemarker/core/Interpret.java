@@ -40,7 +40,7 @@ import freemarker.template._VersionInts;
  * transform model that evaluates the template in place.
  * The template inherits the configuration and environment of the executing
  * template. By default, its name will be equal to 
- * <tt>executingTemplate.getName() + "$anonymous_interpreted"</tt>. You can
+ * {@code executingTemplate.getName() + "$anonymous_interpreted"}. You can
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
  */
@@ -58,8 +58,8 @@ class Interpret extends OutputFormatBoundBuiltIn {
      * template a name.
      * 
      * @return a {@link TemplateTransformModel} that when executed inside
-     * a <tt>&lt;transform></tt> block will process the generated template
-     * just as if it had been <tt>&lt;transform></tt>-ed at that point.
+     * a <code>&lt;transform></code> block will process the generated template
+     * just as if it had been <code>&lt;transform></code>-ed at that point.
      */
     @Override
     protected TemplateModel calculateResult(Environment env) throws TemplateException {

@@ -62,114 +62,115 @@ import freemarker.template.utility.SecurityUtilities;
  * destination directory.</p>
  * <p>It makes the following variables available to the template in the data model:</p>
  * <ul>
- * <li><tt>document</tt>: <em>Deprecated!</em> The DOM tree of the currently processed XML file wrapped
+ * <li>{@code document}: <em>Deprecated!</em> The DOM tree of the currently processed XML file wrapped
       with the legacy {@link freemarker.ext.xml.NodeListModel}.
-      For new projects you should use the <tt>.node</tt> instead, which initially
+      For new projects you should use the {@code .node} instead, which initially
       contains the DOM Document wrapped with {@link freemarker.ext.dom.NodeModel}.</li>
- * <li><tt>properties</tt>: a {@link freemarker.template.SimpleHash} containing
+ * <li>{@code properties}: a {@link freemarker.template.SimpleHash} containing
  * properties of the project that executes the task</li>
- * <li><tt>userProperties</tt>: a {@link freemarker.template.SimpleHash} containing
+ * <li>{@code userProperties}: a {@link freemarker.template.SimpleHash} containing
  * user properties of the project that executes the task</li>
- * <li><tt>project</tt>: the DOM tree of the XML file specified by the
- * <tt>projectfile</tt>. It will not be available if you didn't specify the
- * <tt>projectfile</tt> attribute.</li>
+ * <li>{@code project}: the DOM tree of the XML file specified by the
+ * {@code projectfile}. It will not be available if you didn't specify the
+ * {@code projectfile} attribute.</li>
  * <li>further custom models can be instantiated and made available to the 
- * templates using the <tt>models</tt> attribute.</li>
+ * templates using the {@code models} attribute.</li>
  * </ul>
  * <p>It supports the following attributes:</p>
- * <table style="width: auto; border-collapse: collapse" border="1" summary="FreeMarker XML ant task attributes">
+ * <table style="width: auto; border-collapse: collapse" border="1">
+ *   <caption style="display: none">FreeMarker XML ant task attributes</caption>
  *   <tr>
- *     <th valign="top" align="left">Attribute</th>
- *     <th valign="top" align="left">Description</th>
+ *     <th valign="top">Attribute</th>
+ *     <th valign="top">Description</th>
  *     <th valign="top">Required</th>
  *   </tr>
  *   <tr>
  *     <td valign="top">basedir</td>
  *     <td valign="top">location of the XML files. Defaults to the project's
  *       basedir.</td>
- *     <td align="center" valign="top">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">destdir</td>
  *     <td valign="top">location to store the generated files.</td>
- *     <td align="center" valign="top">Yes</td>
+ *     <td valign="top">Yes</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">includes</td>
  *     <td valign="top">comma-separated list of patterns of files that must be
  *       included; all files are included when omitted.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">includesfile</td>
  *     <td valign="top">the name of a file that contains
  *       include patterns.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">excludes</td>
  *     <td valign="top">comma-separated list of patterns of files that must be
  *       excluded; no files (except default excludes) are excluded when omitted.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">excludesfile</td>
  *     <td valign="top">the name of a file that contains
  *       exclude patterns.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">defaultexcludes</td>
  *     <td valign="top">indicates whether default excludes should be used
  *       (<code>yes</code> | <code>no</code>); default excludes are used when omitted.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">extension</td>
  *     <td valign="top">extension of generated files. Defaults to .html.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">template</td>
  *     <td valign="top">name of the FreeMarker template file that will be
  *       applied by default to XML files</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">templateDir</td>
  *     <td valign="top">location of the FreeMarker template(s) to be used, defaults
  *                       to the project's baseDir</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">projectfile</td>
  *     <td valign="top">path to the project file. The poject file must be an XML file.
  *       If omitted, it will not be available to templates </td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">incremental</td>
  *     <td valign="top">indicates whether all files should be regenerated (no), or
  *       only those that are older than the XML file, the template file, or the
  *       project file (yes). Defaults to yes. </td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">encoding</td>
  *     <td valign="top">The encoding of the output files. Defaults to platform
  *       default encoding.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">templateEncoding</td>
  *     <td valign="top">The encoding of the template files. Defaults to platform
  *       default encoding.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">validation</td>
  *     <td valign="top">Whether to validate the XML input. Defaults to off.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">models</td>
@@ -178,16 +179,17 @@ import freemarker.template.utility.SecurityUtilities;
  *      available to templates. If name is omitted, the unqualified class name
  *      is used as the name. Every class that is specified must implement the
  *      TemplateModel interface and have a no-args constructor.</td>
- *     <td valign="top" align="center">No</td>
+ *     <td valign="top">No</td>
  *   </tr>
  * </table>
  * 
  * <p>It supports the following nesed elements:</p>
  * 
- * <table style="width: auto; border-collapse: collapse" border="1" summary="FreeMarker XML ant task nested elements">
+ * <table style="width: auto; border-collapse: collapse" border="1">
+ *   <caption style="display: none">FreeMarker XML ant task nested elements</caption>
  *   <tr>
- *     <th valign="top" align="left">Element</th>
- *     <th valign="top" align="left">Description</th>
+ *     <th valign="top">Element</th>
+ *     <th valign="top">Description</th>
  *     <th valign="top">Required</th>
  *   </tr>
  *   <tr>
@@ -196,35 +198,35 @@ import freemarker.template.utility.SecurityUtilities;
  *      This element executes Jython script before the processing of each XML
  *      files, that you can use to modify the data model.
  *      You either enter the Jython script directly nested into this
- *      element, or specify a Jython script file with the <tt>file</tt>
+ *      element, or specify a Jython script file with the {@code file}
  *      attribute.
  *      The following variables are added to the Jython runtime's local
  *      namespace before the script is invoked:
  *      <ul>
- *        <li><tt>model</tt>: The data model as <code>java.util.HashMap</code>.
+ *        <li>{@code model}: The data model as <code>java.util.HashMap</code>.
  *           You can read and modify the data model with this variable.
- *        <li><tt>doc</tt>: The XML document as <code>org.w3c.dom.Document</code>.
- *        <li><tt>project</tt>: The project document (if used) as
+ *        <li>{@code doc}: The XML document as <code>org.w3c.dom.Document</code>.
+ *        <li>{@code project}: The project document (if used) as
  *           <code>org.w3c.dom.Document</code>.
  *      </ul>
  *      <i>If this element is used, Jython classes (tried with Jython 2.1)
  *      must be available.</i>
  *    </td>
- *    <td valign="top" align="center">No</td>
+ *    <td valign="top">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">prepareEnvironment</td>
  *     <td valign="top">This element executes Jython script before the processing
  *      of each XML files, that you can use to modify the freemarker environment
  *      ({@link freemarker.core.Environment}). The script is executed after the
- *      <tt>prepareModel</tt> element. The accessible Jython variables are the
- *      same as with the <tt>prepareModel</tt> element, except that there is no
- *      <tt>model</tt> variable, but there is <tt>env</tt> variable, which is
+ *      {@code prepareModel} element. The accessible Jython variables are the
+ *      same as with the {@code prepareModel} element, except that there is no
+ *      {@code model} variable, but there is {@code env} variable, which is
  *      the FreeMarker environment ({@link freemarker.core.Environment}).
  *      <i>If this element is used, Jython classes (tried with Jython 2.1)
  *      must be available.</i>
  *    </td>
- *    <td valign="top" align="center">No</td>
+ *    <td valign="top">No</td>
  *   </tr>
  * </table>
  * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
@@ -299,7 +301,7 @@ extends
     }
 
     /**
-     * Set the base directory. Defaults to <tt>.</tt>
+     * Set the base directory. Defaults to {@code .}
      */
     public void setBasedir(File dir) {
         baseDir = dir;
@@ -315,7 +317,7 @@ extends
     }
 
     /**
-     * Set the output file extension. <tt>.html</tt> by default.
+     * Set the output file extension. {@code .html} by default.
      */
     public void setExtension(String extension) {
         this.extension = extension;

@@ -37,8 +37,8 @@ import javax.servlet.http.HttpSessionListener;
 import freemarker.log.Logger;
 
 /**
- * An instance of this class should be registered as a <tt>&lt;listener&gt;</tt> in
- * the <tt>web.xml</tt> descriptor in order to correctly dispatch events to
+ * An instance of this class should be registered as a <code>&lt;listener&gt;</code> in
+ * the {@code web.xml} descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
  */
 public class EventForwarding

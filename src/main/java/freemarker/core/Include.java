@@ -41,7 +41,7 @@ final class Include extends TemplateElement {
     private final Boolean ignoreMissingExpPrecalcedValue;
 
     /**
-     * @param template the template that this <tt>#include</tt> is a part of.
+     * @param template the template that this {@code #include} is a part of.
      * @param includedTemplatePathExp the path of the template to be included.
      * @param encodingExp the encoding to be used or null, if it's the default.
      * @param parseExp whether the template should be parsed (or is raw text)

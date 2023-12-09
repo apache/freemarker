@@ -38,35 +38,35 @@ public interface MethodAppearanceFineTuner {
      * Implement this to tweak certain aspects of how methods appear in the
      * data-model. {@link BeansWrapper} will pass in all Java methods here that
      * it intends to expose in the data-model as methods (so you can do
-     * <tt>obj.foo()</tt> in the template).
+     * {@code obj.foo()} in the template).
      * With this method you can do the following tweaks:
      * <ul>
      *   <li>Hide a method that would be otherwise shown by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
-     *     with <tt>null</tt> parameter. Note that you can't un-hide methods
+     *     with {@code null} parameter. Note that you can't un-hide methods
      *     that are not public or are considered to by unsafe
      *     (like {@link Object#wait()}) because
      *     {@link #process} is not called for those.</li>
      *   <li>Show the method with a different name in the data-model than its
      *     real name by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
-     *     with non-<tt>null</tt> parameter.
+     *     with non-{@code null} parameter.
      *   <li>Create a fake JavaBean property for this method by calling
      *     {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}.
-     *     For example, if you have <tt>int size()</tt> in a class, but you
-     *     want it to be accessed from the templates as <tt>obj.size</tt>,
-     *     rather than as <tt>obj.size()</tt>, you can do that with this
+     *     For example, if you have {@code int size()} in a class, but you
+     *     want it to be accessed from the templates as {@code obj.size},
+     *     rather than as {@code obj.size()}, you can do that with this
      *     (but remember calling
      *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)
      *     setMethodShadowsProperty(false)} as well, if the method name is exactly
      *     the same as the property name).
      *     The default is {@code null}, which means that no fake property is
      *     created for the method. You need not and shouldn't set this
-     *     to non-<tt>null</tt> for the getter methods of real JavaBean
+     *     to non-{@code null} for the getter methods of real JavaBean
      *     properties, as those are automatically shown as properties anyway.
      *     The property name in the {@link PropertyDescriptor} can be anything,
      *     but the method (or methods) in it must belong to the class that
-     *     is given as the <tt>clazz</tt> parameter or it must be inherited from
+     *     is given as the {@code clazz} parameter or it must be inherited from
      *     that class, otherwise the behavior is undefined, and errors can occur later.
      *     {@link IndexedPropertyDescriptor}-s are supported.
      *     If a real JavaBean property of the same name exists, or a fake property
@@ -76,9 +76,9 @@ public interface MethodAppearanceFineTuner {
      *   <li>Prevent the method to hide a JavaBean property (fake or real) of
      *     the same name by calling
      *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)}
-     *     with <tt>false</tt>. The default is <tt>true</tt>, so if you have
+     *     with {@code false}. The default is {@code true}, so if you have
      *     both a property and a method called "foo", then in the template
-     *     <tt>myObject.foo</tt> will return the method itself instead
+     *     {@code myObject.foo} will return the method itself instead
      *     of the property value, which is often undesirable.
      * </ul>
      * 

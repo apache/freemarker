@@ -24,7 +24,7 @@ import freemarker.template.Version;
 import freemarker.template.utility.DateUtil;
 
 /**
- * FreeMarker command-line utility, the Main-Class of <tt>freemarker.jar</tt>.
+ * FreeMarker command-line utility, the Main-Class of {@code freemarker.jar}.
  * Currently it just prints the version number.
  * 
  * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").

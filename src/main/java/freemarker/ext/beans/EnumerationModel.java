@@ -58,7 +58,7 @@ implements
     }
 
     /**
-     * This allows the enumeration to be used in a <tt>&lt;#list&gt;</tt> block.
+     * This allows the enumeration to be used in a <code>&lt;#list&gt;</code> block.
      * @return "this"
      */
     @Override

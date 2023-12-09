@@ -33,7 +33,7 @@ import freemarker.template.TemplateModelIterator;
  * </p>
  * <p>It differs from the {@link freemarker.template.SimpleCollection} in that 
  * it inherits from {@link BeanModel}, and therefore you can call methods on 
- * it directly, even to the effect of calling <tt>iterator.remove()</tt> in 
+ * it directly, even to the effect of calling {@code iterator.remove()} in 
  * the template.</p> <p>Using the model as a collection model is NOT 
  * thread-safe, as iterators are inherently not thread-safe.
  * Further, you can iterate over it only once. Attempts to call the
@@ -62,7 +62,7 @@ implements
     }
 
     /**
-     * This allows the iterator to be used in a <tt>&lt;#list&gt;</tt> block.
+     * This allows the iterator to be used in a <code>&lt;#list&gt;</code> block.
      * @return "this"
      */
     @Override

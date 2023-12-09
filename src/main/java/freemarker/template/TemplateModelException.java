@@ -31,7 +31,7 @@ public class TemplateModelException extends TemplateException {
     private final boolean replaceWithCause;
 
     /**
-     * Constructs a <tt>TemplateModelException</tt> with no
+     * Constructs a {@code TemplateModelException} with no
      * specified detail message.
      */
     public TemplateModelException() {
@@ -39,7 +39,7 @@ public class TemplateModelException extends TemplateException {
     }
 
     /**
-     * Constructs a <tt>TemplateModelException</tt> with the
+     * Constructs a {@code TemplateModelException} with the
      * specified detail message.
      *
      * @param description the detail message.
@@ -57,7 +57,7 @@ public class TemplateModelException extends TemplateException {
     }
 
     /**
-     * Constructs a <tt>TemplateModelException</tt> with the given underlying
+     * Constructs a {@code TemplateModelException} with the given underlying
      * Exception, but no detail message.
      *
      * @param cause the underlying {@link Exception} that caused this
