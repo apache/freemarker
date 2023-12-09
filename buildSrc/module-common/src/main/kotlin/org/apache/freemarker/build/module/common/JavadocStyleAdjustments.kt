@@ -38,7 +38,7 @@ fun configureJavadocDefaults(javadoc: Javadoc) {
         locale = "en_US"
         encoding = javadocEncoding.name()
 
-        links("http://docs.oracle.com/javase/8/docs/api/")
+        links("https://docs.oracle.com/en/java/javase/17/docs/api/")
 
         author(true)
         version(true)
