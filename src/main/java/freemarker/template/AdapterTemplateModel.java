@@ -37,8 +37,8 @@ public interface AdapterTemplateModel extends TemplateModel {
      * class, but if that is impossible, it must at least return the underlying 
      * object as-is. As a minimal requirement, an implementation must always 
      * return the exact underlying object when 
-     * <tt>hint.isInstance(underlyingObject)</tt> holds. When called 
-     * with <tt>java.lang.Object.class</tt>, it should return a generic Java 
+     * {@code hint.isInstance(underlyingObject)} holds. When called 
+     * with {@code java.lang.Object.class}, it should return a generic Java 
      * object (i.e. if the model is wrapping a scripting language object that is
      * further wrapping a Java object, the deepest underlying Java object should
      * be returned). 

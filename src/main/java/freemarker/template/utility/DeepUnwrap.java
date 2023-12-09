@@ -51,7 +51,7 @@ public class DeepUnwrap {
      * The converting of the {@link TemplateModel} object happens with the following rules:
      * <ol>
      *   <li>If the object implements {@link AdapterTemplateModel}, then the result
-     *       of {@link AdapterTemplateModel#getAdaptedObject(Class)} for <tt>Object.class</tt> is returned.
+     *       of {@link AdapterTemplateModel#getAdaptedObject(Class)} for {@code Object.class} is returned.
      *   <li>If the object implements {@link WrapperTemplateModel}, then the result
      *       of {@link WrapperTemplateModel#getWrappedObject()} is returned.
      *   <li>If the object is identical to the null model of the current object 

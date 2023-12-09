@@ -48,7 +48,7 @@ public interface TemplateMethodModel extends TemplateModel {
      * objects instead of on their string representations, implement the 
      * {@link TemplateMethodModelEx} instead.
      * 
-     * @param arguments a <tt>List</tt> of <tt>String</tt> objects
+     * @param arguments a {@code List} of {@code String} objects
      *     containing the values of the arguments passed to the method.
      *  
      * @return the return value of the method, or {@code null}. If the returned value

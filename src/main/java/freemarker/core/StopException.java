@@ -25,7 +25,7 @@ import java.io.PrintWriter;
 import freemarker.template.TemplateException;
 
 /**
- * This exception is thrown when a <tt>#stop</tt> directive is encountered. 
+ * This exception is thrown when a {@code #stop} directive is encountered. 
  */
 public class StopException extends TemplateException {
     

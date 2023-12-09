@@ -22,8 +22,8 @@ package freemarker.template;
 import java.io.Serializable;
 
 /**
- * A simple implementation of the <tt>TemplateScalarModel</tt>
- * interface, using a <tt>String</tt>.
+ * A simple implementation of the {@code TemplateScalarModel}
+ * interface, using a {@code String}.
  * As of version 2.0 this object is immutable.
  *
  * <p>This class is thread-safe.
@@ -35,13 +35,13 @@ public final class SimpleScalar
 implements TemplateScalarModel, Serializable {
     
     /**
-     * @serial the value of this <tt>SimpleScalar</tt> if it wraps a
-     * <tt>String</tt>.
+     * @serial the value of this {@code SimpleScalar} if it wraps a
+     * {@code String}.
      */
     private final String value;
 
     /**
-     * Constructs a <tt>SimpleScalar</tt> containing a string value.
+     * Constructs a {@code SimpleScalar} containing a string value.
      * @param value the string value. If this is {@code null}, its value in FTL will be {@code ""}.
      */
     public SimpleScalar(String value) {

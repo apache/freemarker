@@ -252,8 +252,8 @@ public class StringUtil {
     }
 
     /**
-     *  XML encoding for attribute values quoted with <tt>"</tt> (not with <tt>'</tt>!).
-     *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
+     *  XML encoding for attribute values quoted with {@code "} (not with {@code '}!).
+     *  Also can be used for HTML attributes that are quoted with {@code "}.
      *  @see #XMLEnc(String)
      */
     public static String XMLEncQAttr(String s) {
@@ -1268,7 +1268,7 @@ public class StringUtil {
      *
      * <p>All characters under UCS code point 0x20 will be escaped.
      * Where they have no dedicated escape sequence in Java, they will
-     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
+     * be replaced with hexadecimal escape ({@code \}<code>u<i>XXXX</i></code>). 
      * 
      * @see #jQuote(String)
      */ 
@@ -1375,44 +1375,45 @@ public class StringUtil {
      * touching pieces that were escaped with this, no character sequence can occur that closes the
      * JavaScript/JSON string literal, or has a meaning in HTML/XML that causes the HTML script section to be closed.
      * (If, however, the escaped section is preceded by or followed by strings from other sources, this can't be
-     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?js_string}"</tt> might closes the "script"
+     * guaranteed in some rare cases. Like <code>x = "&lt;/${a?js_string}"</code> might closes the "script"
      * element if {@code a} is {@code "script>"}.)
      *
      * The escaped characters are:
      *
-     * <table style="width: auto; border-collapse: collapse" border="1" summary="Characters escaped by jsStringEnc">
+     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <caption style="display: none">Characters escaped by jsStringEnc</caption>
      * <tr>
      *   <th>Input
      *   <th>Output
      * <tr>
-     *   <td><tt>"</tt>
-     *   <td><tt>\"</tt>
+     *   <td>{@code "}
+     *   <td>{@code \"}
      * <tr>
-     *   <td><tt>'</tt> if not in JSON-mode, nor is the {@code quited} argument {@code true}
-     *   <td><tt>\'</tt>
+     *   <td>{@code '} if not in JSON-mode, nor is the {@code quited} argument {@code true}
+     *   <td>{@code \'}
      * <tr>
-     *   <td><tt>\</tt>
-     *   <td><tt>\\</tt>
+     *   <td>{@code \}
+     *   <td>{@code \\}
      * <tr>
-     *   <td><tt>/</tt> if the method can't know that it won't be directly after <tt>&lt;</tt>
-     *   <td><tt>\/</tt>
+     *   <td>{@code /} if the method can't know that it won't be directly after <code>&lt;</code>
+     *   <td>{@code \/}
      * <tr>
-     *   <td><tt>&gt;</tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
-     *   <td>JavaScript: <tt>\&gt;</tt>; JSON: <tt>\</tt><tt>u003E</tt>
+     *   <td><code>&gt;</code> if the method can't know that it won't be directly after {@code ]]} or {@code --}
+     *   <td>JavaScript: <code>\&gt;</code>; JSON: {@code \}{@code u003E}
      * <tr>
-     *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt>
-     *   <td><tt><tt>\</tt>u003C</tt>
+     *   <td><code>&lt;</code> if the method can't know that it won't be directly followed by {@code !} or {@code ?}
+     *   <td><code>\{@code u}003C</code>
      * <tr>
      *   <td>
      *     u0000-u001f (UNICODE control characters - disallowed by JSON)<br>
      *     u007f-u009f (UNICODE control characters - disallowed by JSON)
-     *   <td><tt>\n</tt>, <tt>\r</tt> and such, or if there's no such dedicated escape:
-     *       JavaScript: <tt>\x<i>XX</i></tt>, JSON: <tt>\<tt>u</tt><i>XXXX</i></tt>
+     *   <td>{@code \n}, {@code \r} and such, or if there's no such dedicated escape:
+     *       JavaScript: <code>\x<i>XX</i></code>, JSON: <code>\{@code u}<i>XXXX</i></code>
      * <tr>
      *   <td>
      *     u2028 (Line separator - source code line-break in ECMAScript)<br>
      *     u2029 (Paragraph separator - source code line-break in ECMAScript)<br>
-     *   <td><tt>\<tt>u</tt><i>XXXX</i></tt>
+     *   <td><code>\{@code u}<i>XXXX</i></code>
      * </table>
      *
      * @param s The string to escape
@@ -1555,7 +1556,7 @@ public class StringUtil {
     /**
      * Parses a name-value pair list, where the pairs are separated with comma,
      * and the name and value is separated with colon.
-     * The keys and values can contain only letters, digits and <tt>_</tt>. They
+     * The keys and values can contain only letters, digits and {@code _}. They
      * can't be quoted. White-space around the keys and values are ignored. The
      * value can be omitted if <code>defaultValue</code> is not null. When a
      * value is omitted, then the colon after the key must be omitted as well.

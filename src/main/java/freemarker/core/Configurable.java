@@ -655,40 +655,40 @@ public class Configurable {
      *   "expr" evaluates to null:
      *   <ul>
      *     <li>
-     *       in <tt>&lt;assign varname=expr&gt;</tt> directive, 
-     *       or in <tt>${expr}</tt> directive,
-     *       or in <tt>otherexpr == expr</tt>,
-     *       or in <tt>otherexpr != expr</tt>, 
-     *       or in <tt>hash[expr]</tt>,
-     *       or in <tt>expr[keyOrIndex]</tt> (since 2.3.20),
-     *       or in <tt>expr.key</tt> (since 2.3.20),
+     *       in <code>&lt;assign varname=expr&gt;</code> directive, 
+     *       or in <code>${expr}</code> directive,
+     *       or in {@code otherexpr == expr},
+     *       or in {@code otherexpr != expr}, 
+     *       or in {@code hash[expr]},
+     *       or in {@code expr[keyOrIndex]} (since 2.3.20),
+     *       or in {@code expr.key} (since 2.3.20),
      *       then it's treated as empty string.
      *     </li>
-     *     <li>as argument of <tt>&lt;list expr as item&gt;</tt> or 
-     *       <tt>&lt;foreach item in expr&gt;</tt>, the loop body is not executed
+     *     <li>as argument of <code>&lt;list expr as item&gt;</code> or 
+     *       <code>&lt;foreach item in expr&gt;</code>, the loop body is not executed
      *       (as if it were a 0-length list)
      *     </li>
-     *     <li>as argument of <tt>&lt;if&gt;</tt> directive, or on other places where a
+     *     <li>as argument of <code>&lt;if&gt;</code> directive, or on other places where a
      *       boolean expression is expected, it's treated as false
      *     </li>
      *   </ul>
      * </li>
-     * <li>Non-boolean models are accepted in <tt>&lt;if&gt;</tt> directive,
+     * <li>Non-boolean models are accepted in <code>&lt;if&gt;</code> directive,
      *   or as operands of logical operators. "Empty" models (zero-length string,
      * empty sequence or hash) are evaluated as false, all others are evaluated as
      * true.</li>
      * <li>When boolean value is treated as a string (i.e. output in 
-     *   <tt>${...}</tt> directive, or concatenated with other string), true 
+     *   <code>${...}</code> directive, or concatenated with other string), true 
      * values are converted to string "true", false values are converted to 
-     * empty string. Except, if the value of the setting is <tt>2</tt>, it will be
-     * formatted according the <tt>boolean_format</tt> setting, just like in
+     * empty string. Except, if the value of the setting is {@code 2}, it will be
+     * formatted according the {@code boolean_format} setting, just like in
      * 2.3.20 and later.
      * </li>
-     * <li>Scalar models supplied to <tt>&lt;list&gt;</tt> and 
-     *   <tt>&lt;foreach&gt;</tt> are treated as a one-element list consisting
+     * <li>Scalar models supplied to <code>&lt;list&gt;</code> and 
+     *   <code>&lt;foreach&gt;</code> are treated as a one-element list consisting
      *   of the passed model.
      * </li>
-     * <li>Paths parameter of <tt>&lt;include&gt;</tt> will be interpreted as
+     * <li>Paths parameter of <code>&lt;include&gt;</code> will be interpreted as
      * absolute path.
      * </li>
      * </ul>
@@ -930,7 +930,7 @@ public class Configurable {
      *   </li>
      * </ul>
      *
-     * <p>Defaults to <tt>"number"</tt>.
+     * <p>Defaults to {@code "number"}.
      */
     public void setNumberFormat(String numberFormat) {
         NullArgumentException.check("numberFormat", numberFormat);
@@ -1903,7 +1903,7 @@ public class Configurable {
      * 
      * <p>Using {@code false} is needed for example when a Web page is composed
      * from several boxes (like portlets, GUI panels, etc.) that aren't inserted
-     * with <tt>#include</tt> (or with similar directives) into a master
+     * with {@code #include} (or with similar directives) into a master
      * FreeMarker template, rather they are all processed with a separate
      * {@link Template#process(Object, Writer)} call. In a such scenario the
      * automatic flushes would commit the HTTP response after each box, hence
@@ -2624,8 +2624,8 @@ public class Configurable {
      *             with {@code "allowed_classes:"} (or {@code "allowedClasses:"}) and/or
      *             {@code "trusted_templates:"} (or {@code "trustedTemplates:"}). Examples of valid values:
      *             
-     *             <table style="width: auto; border-collapse: collapse" border="1"
-     *                  summary="trusted_template value examples">
+     *             <table style="width: auto; border-collapse: collapse" border="1">
+ *                   <caption style="display: none">trusted_templates value examples</caption>
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
@@ -2748,7 +2748,8 @@ public class Configurable {
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1" summary="cache_storage value examples">
+     *       <table style="width: auto; border-collapse: collapse" border="1">
+     *         <caption style="display: none">cache_storage value examples</caption>
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}
@@ -2758,7 +2759,7 @@ public class Configurable {
      *         <tr><td>{@code "soft"}<td>0<td>{@code Integer.MAX_VALUE}
      *       </table>
      *       
-     *       <p>The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
+     *       <p>The value is not case sensitive. The order of {@code soft} and {@code strong}
      *       entries is not significant.
      *       
      *   <li><p>{@code "template_update_delay"}:
@@ -2834,42 +2835,42 @@ public class Configurable {
      *       See {@link Configuration#setTabSize(int)}.
      * </ul>
      * 
-     * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
+     * <p id="fm_obe">Regarding <em>object builder expressions</em> (used by the setting values where it was
      * indicated):
      * <ul>
      *   <li><p>Before FreeMarker 2.3.21 it had to be a fully qualified class name, and nothing else.</li>
      *   <li><p>Since 2.3.21, the generic syntax is:
-     *       <tt><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
+     *       <code><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
      *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
-     *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
+     *       <i>propNameN</i>=<i>propValueN</i>)</code>,
      *       where
-     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to create (except if we have
-     *       builder class or <tt>INSTANCE</tt> field around, but see that later),
-     *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
-     *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
-     *       <tt>setX(1)</tt>) on the created instance. You can have any number of constructor arguments and property
+     *       <code><i>className</i></code> is the fully qualified class name of the instance to create (except if we have
+     *       builder class or {@code INSTANCE} field around, but see that later),
+     *       <code><i>constrArg</i></code>-s are the values of constructor arguments,
+     *       and <code><i>propName</i>=<i>propValue</i></code>-s set JavaBean properties (like {@code x=1} means
+     *       {@code setX(1)}) on the created instance. You can have any number of constructor arguments and property
      *       setters, including 0. Constructor arguments must precede any property setters.   
      *   </li>
      *   <li>
-     *     Example: <tt>com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)</tt> is nearly
+     *     Example: {@code com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)} is nearly
      *     equivalent with this Java code:
-     *     <tt>obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);</tt>
+     *     {@code obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);}
      *   </li>
      *   <li>
-     *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
+     *      <p>If you have no constructor arguments and property setters, and the <code><i>className</i></code> class has
      *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
      *      the constructor won't be called. Note that if you use the backward compatible
      *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
      *   </li>
      *   <li>
-     *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
+     *      <p>If there exists a class named <code><i>className</i>Builder</code>, then that class will be instantiated
      *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
-     *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
-     *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
+     *      set. After that, the public {@code build()} method of the instance will be called, whose return value
+     *      will be the value of the whole expression. (The builder class and the {@code build()} method is simply
      *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
      *      syntax, where these's no parenthesis after the class name, then it will not look for builder class. Note
-     *      that if you have a builder class, you don't actually need a <tt><i>className</i></tt> class (since 2.3.24);
-     *      after all, <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
+     *      that if you have a builder class, you don't actually need a <code><i>className</i></code> class (since 2.3.24);
+     *      after all, <code><i>className</i>Builder.build()</code> can return any kind of object. 
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -2883,8 +2884,8 @@ public class Configurable {
      *        {@code BigDecimal} and "bi" for {@code BigInteger}.</li>
      *        <li>A boolean literal: {@code true} or {@code false}
      *        <li>The null literal: {@code null}
-     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
-     *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>A string literal with FTL syntax, except that  it can't contain <code>${...}</code>-s and
+     *            <code>#{...}</code>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
      *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code [ 'foo', 2, true ]}.
      *            If the parameter is expected to be array, the list will be automatically converted to array.
      *            The list items can be any kind of expression, like even object builder expressions.
@@ -3228,7 +3229,7 @@ public class Configurable {
     
     /**
      * Returns the textual representation of a setting.
-     * @param key the setting key. Can be any of standard <tt>XXX_KEY</tt>
+     * @param key the setting key. Can be any of standard {@code XXX_KEY}
      * constants, or a custom key.
      *
      * @deprecated It's not possible in general to convert setting values to string,
@@ -3468,7 +3469,7 @@ public class Configurable {
      * @param name the name of the custom attribute
      *
      * @return the value of the custom attribute. Note that if the custom attribute
-     * was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this value is already
+     * was created with <code>&lt;#ftl&nbsp;attributes={...}&gt;</code>, then this value is already
      * unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a
      * <code>Map</code>, ...etc., not a FreeMarker specific class).
      */

@@ -53,7 +53,7 @@ final class StaticModel implements TemplateHashModelEx {
     }
 
     /**
-     * Returns the field or method named by the <tt>key</tt>
+     * Returns the field or method named by the {@code key}
      * parameter.
      */
     @Override

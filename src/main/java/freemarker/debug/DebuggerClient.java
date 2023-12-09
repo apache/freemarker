@@ -44,8 +44,8 @@ public class DebuggerClient {
     /**
      * Connects to the FreeMarker debugger service running on a specific host
      * and port. The Java VM to which the connection is made must have defined
-     * the system property <tt>freemarker.debug.password</tt> in order to enable
-     * the debugger service. Additionally, the <tt>freemarker.debug.port</tt>
+     * the system property {@code freemarker.debug.password} in order to enable
+     * the debugger service. Additionally, the {@code freemarker.debug.port}
      * system property can be set to specify the port where the debugger service
      * is listening. When not specified, it defaults to 
      * {@link Debugger#DEFAULT_PORT}.

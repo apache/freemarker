@@ -34,7 +34,7 @@ import freemarker.template.TemplateModel;
 
 /**
  * A unary operator that calls a TemplateMethodModel.  It associates with the
- * <tt>Identifier</tt> or <tt>Dot</tt> to its left.
+ * {@code Identifier} or {@code Dot} to its left.
  */
 final class MethodCall extends Expression {
 

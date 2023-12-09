@@ -21,7 +21,7 @@ package freemarker.template;
 import java.time.temporal.Temporal;
 
 /**
- * A simple implementation of the <tt>TemplateDateModel</tt>
+ * A simple implementation of the {@link TemplateTemporalModel}
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
  */

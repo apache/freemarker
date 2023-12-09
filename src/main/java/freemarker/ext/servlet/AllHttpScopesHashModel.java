@@ -38,10 +38,10 @@ import freemarker.template.utility.NullArgumentException;
  * and "Request" keys largely obsolete, however we keep them for backward
  * compatibility (also, "Request" is required for proper operation of JSP
  * taglibs).
- * It is on purpose that we didn't override <tt>keys</tt> and <tt>values</tt>
+ * It is on purpose that we didn't override {@code keys} and {@code values}
  * methods. That way, only those variables assigned into the hash directly by a
- * subclass of <tt>FreemarkerServlet</tt> that overrides
- * <tt>preTemplateProcess</tt>) are discovered as "page" variables by the FM
+ * subclass of {@code FreemarkerServlet} that overrides
+ * {@code preTemplateProcess}) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
  */
 public class AllHttpScopesHashModel extends SimpleHash {
@@ -65,8 +65,8 @@ public class AllHttpScopesHashModel extends SimpleHash {
     }
     
     /**
-     * Stores a model in the hash so that it doesn't show up in <tt>keys()</tt>
-     * and <tt>values()</tt> methods. Used to put the Application, Session,
+     * Stores a model in the hash so that it doesn't show up in {@code keys()}
+     * and {@code values()} methods. Used to put the Application, Session,
      * Request, RequestParameters and JspTaglibs objects.
      * @param key the key under which the model is stored
      * @param model the stored model

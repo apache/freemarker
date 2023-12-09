@@ -56,7 +56,7 @@ import freemarker.template.utility.StringUtil;
  *   cfg.setTemplateLoader(stringLoader);
  * </pre>
  * <p>After that you should be able to use the templates as usual. Often you will
- * want to combine a <tt>StringTemplateLoader</tt> with another loader. You can
+ * want to combine a {@code StringTemplateLoader} with another loader. You can
  * do so using a {@link freemarker.cache.MultiTemplateLoader}.
  */
 public class StringTemplateLoader implements TemplateLoader {
@@ -66,7 +66,7 @@ public class StringTemplateLoader implements TemplateLoader {
     /**
      * Puts a template into the loader. A call to this method is identical to 
      * the call to the three-arg {@link #putTemplate(String, String, long)} 
-     * passing <tt>System.currentTimeMillis()</tt> as the third argument.
+     * passing {@code System.currentTimeMillis()} as the third argument.
      * 
      * <p>Note that this method is not thread safe! Don't call it after FreeMarker has started using this template
      * loader.
@@ -95,7 +95,7 @@ public class StringTemplateLoader implements TemplateLoader {
      * @param name the name of the template.
      * @param templateContent the source code of the template.
      * @param lastModified the time of last modification of the template in 
-     * terms of <tt>System.currentTimeMillis()</tt>
+     * terms of {@code System.currentTimeMillis()}
      */
     public void putTemplate(String name, String templateContent, long lastModified) {
         templates.put(name, new StringTemplateSource(name, templateContent, lastModified));

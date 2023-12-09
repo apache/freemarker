@@ -24,7 +24,7 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * Encapsulates an array of <tt>TemplateElement</tt> objects. 
+ * Encapsulates an array of {@code TemplateElement} objects. 
  */
 final class MixedContent extends TemplateElement {
 
@@ -54,7 +54,7 @@ final class MixedContent extends TemplateElement {
     }
 
     /**
-     * Processes the contents of the internal <tt>TemplateElement</tt> list,
+     * Processes the contents of the internal {@code TemplateElement} list,
      * and outputs the resulting text.
      */
     @Override

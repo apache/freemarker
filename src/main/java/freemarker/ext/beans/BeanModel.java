@@ -54,8 +54,8 @@ import freemarker.template.utility.StringUtil;
  * A class that will wrap an arbitrary object into {@link freemarker.template.TemplateHashModel}
  * interface allowing calls to arbitrary property getters and invocation of
  * accessible methods on the object from a template using the
- * <tt>object.foo</tt> to access properties and <tt>object.bar(arg1, arg2)</tt> to
- * invoke methods on it. You can also use the <tt>object.foo[index]</tt> syntax to
+ * {@code object.foo} to access properties and {@code object.bar(arg1, arg2)} to
+ * invoke methods on it. You can also use the {@code object.foo[index]} syntax to
  * access indexed properties. It uses Beans {@link java.beans.Introspector}
  * to dynamically discover the properties and methods. 
  */
@@ -131,12 +131,12 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * they reload a web application) and flushes the cache. If no method or
      * property matching the key is found, the framework will try to invoke
      * methods with signature
-     * <tt>non-void-return-type get(java.lang.String)</tt>,
-     * then <tt>non-void-return-type get(java.lang.Object)</tt>, or 
+     * {@code non-void-return-type get(java.lang.String)},
+     * then {@code non-void-return-type get(java.lang.Object)}, or 
      * alternatively (if the wrapped object is a resource bundle) 
-     * <tt>Object getObject(java.lang.String)</tt>.
+     * {@code Object getObject(java.lang.String)}.
      * @throws TemplateModelException if there was no property nor method nor
-     * a generic <tt>get</tt> method to invoke.
+     * a generic {@code get} method to invoke.
      */
     @Override
     public TemplateModel get(String key)
@@ -364,7 +364,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
     /**
      * Helper method to support TemplateHashModelEx. Returns the Set of
      * Strings which are available via the TemplateHashModel
-     * interface. Subclasses that override <tt>invokeGenericGet</tt> to
+     * interface. Subclasses that override {@code invokeGenericGet} to
      * provide additional hash keys should also override this method.
      */
     protected Set/*<Object>*/ keySet() {

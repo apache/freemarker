@@ -201,7 +201,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     /**
      * Puts a boolean in the map
      *
-     * @param key the name by which the resulting <tt>TemplateModel</tt>
+     * @param key the name by which the resulting {@code TemplateModel}
      * is identified in the template.
      * @param b the boolean to store.
      */

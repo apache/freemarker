@@ -424,7 +424,7 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target name="_rawJavadoc" depends="compile">
+  <target name="javadoc" depends="compile" description="Build the JavaDocs">
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
@@ -471,85 +471,15 @@
       windowtitle="FreeMarker ${version} API"
       classpath="build/classes"
       classpathref="ivy.dep"
-      failonerror="false"
+      failonerror="true"
       charset="UTF-8"
       docencoding="UTF-8"
       encoding="UTF-8"
       locale="en_US"
     >
-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+      <link href="https://docs.oracle.com/en/java/javase/16/docs/api/"/>
     </javadoc>
     <delete dir="build/javadoc-sources" />
-  </target>
-
-  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" description="Build the JavaDocs" />
-
-  <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
-    <property name="file" value="build/api/stylesheet.css" />
-
-    <available file="${file}" property="stylesheet.available"/>
-    <fail unless="stylesheet.available">CSS file not found: ${file}</fail>
-    <echo>Fixing JDK 8 CSS in ${file}</echo>
-
-    <!-- Tell that it's modified: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="/\* (Javadoc style sheet) \*/" replace="/\* \1 - JDK 8 usability fix regexp substitutions applied \*/"
-    />
-
-    <!-- Remove broken link: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="@import url\('resources/fonts/dejavu.css'\);\s*" replace=""
-    />
-
-    <!-- Font family fixes: -->
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Sans['&quot;]" replace="Arial"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Sans Mono['&quot;]" replace="'Courier New'"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Serif['&quot;]" replace="Arial"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])serif\b" replace="sans-serif"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Georgia,\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]Times New Roman['&quot;],\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Times,\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Arial\s*,\s*Arial\b" replace="Arial"
-    />
-
-    <!-- "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes: -->
-    <property name="ddSelectorStart" value="(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b" />
-    <property name="ddPropertyEnd" value="\b.+?;" />
-    <!-- - Put back description (dd) indentation: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="(${ddSelectorStart})margin${ddPropertyEnd}" replace="\1margin: 5px 0 10px 20px;"
-    />
-    <!-- - No monospace font for the description (dd) part: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="(${ddSelectorStart})font-family${ddPropertyEnd}" replace="\1"
-    />
   </target>
 
   <!-- ====================== -->
