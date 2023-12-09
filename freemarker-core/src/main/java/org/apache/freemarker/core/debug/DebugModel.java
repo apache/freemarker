@@ -19,11 +19,11 @@
 
 package org.apache.freemarker.core.debug;
 
+import org.apache.freemarker.core.TemplateException;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Date;
-
-import org.apache.freemarker.core.TemplateException;
 
 /**
  * Represents the debugger-side mirror of a TemplateModel object, a Template
@@ -33,7 +33,7 @@ import org.apache.freemarker.core.TemplateException;
  * almost all of FreeMarker template models with identical method signatures.
  * For purposes of optimizing network traffic there are bulk retrieval methods
  * for sequences and hashes, as well as a {@link #getModelTypes()} method that
- * returns a bit mask of various <tt>TYPE_xxx</tt> constants flagging which
+ * returns a bit mask of various {@code TYPE_xxx} constants flagging which
  * template models are implemented by the mirrored object.
  */
 public interface DebugModel extends Remote {

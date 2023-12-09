@@ -1543,7 +1543,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     /**
      * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
-     * <tt>&lt;#directiveName ...&gt;</tt>.
+     * <code>&lt;#directiveName ...&gt;</code>.
      */
     public Set<String> getSupportedBuiltInDirectiveNames() {
         return ASTDirective.BUILT_IN_DIRECTIVE_NAMES;

@@ -19,26 +19,15 @@
 
 package org.apache.freemarker.core.util;
 
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
-import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNullModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
 
 /**
  * Utility methods for unwrapping {@link TemplateModel}-s.
@@ -50,7 +39,7 @@ public class DeepUnwrap {
      * The converting of the {@link TemplateModel} object happens with the following rules:
      * <ol>
      *   <li>If the object implements {@link AdapterTemplateModel}, then the result
-     *       of {@link AdapterTemplateModel#getAdaptedObject(Class)} for <tt>Object.class</tt> is returned.
+     *       of {@link AdapterTemplateModel#getAdaptedObject(Class)} for {@code Object.class} is returned.
      *   <li>If the object implements {@link WrapperTemplateModel}, then the result
      *       of {@link WrapperTemplateModel#getWrappedObject()} is returned.
      *   <li>If the object is identical to the null model of the current object 

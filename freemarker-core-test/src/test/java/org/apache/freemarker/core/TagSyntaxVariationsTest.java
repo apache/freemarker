@@ -19,17 +19,16 @@
 
 package org.apache.freemarker.core;
 
+import junit.framework.TestCase;
+import org.apache.freemarker.core.userpkg.UpperCaseDirective;
+import org.apache.freemarker.core.util._StringUtils;
+import org.apache.freemarker.test.TestConfigurationBuilder;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Map;
-
-import org.apache.freemarker.core.userpkg.UpperCaseDirective;
-import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.test.TestConfigurationBuilder;
-
-import junit.framework.TestCase;
 
 /**
  * Test various generated templates (permutations), including some deliberately
@@ -109,7 +108,7 @@ public class TagSyntaxVariationsTest extends TestCase {
     }
     
     /**
-     * @param expected the expected output or <tt>null</tt> if we expect
+     * @param expected the expected output or {@code null} if we expect
      * a parsing error.
      */
     private static void test(

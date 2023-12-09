@@ -19,7 +19,14 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.CallableUtils.*;
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.impl.SequenceTemplateModelIterator;
+import org.apache.freemarker.core.model.impl.SimpleNumber;
+import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
+import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util._StringUtils;
 
 import java.io.Serializable;
 import java.text.Collator;
@@ -28,25 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
-import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.SequenceTemplateModelIterator;
-import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleString;
-import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
-import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._StringUtils;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 /**
  * A holder for builtins that operate on sequence (or some even on iterable) left-hand value.
@@ -616,7 +605,7 @@ class BuiltInsForSequences {
         }
 
         /**
-         * Sorts a sequence for the <tt>sort</tt> and <tt>sort_by</tt>
+         * Sorts a sequence for the {@code sort} and {@code sort_by}
          * built-ins.
          * 
          * @param seq the sequence to sort.

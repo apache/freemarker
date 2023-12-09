@@ -19,12 +19,12 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NumberUtils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Everything related to coercion to ambiguous numerical types.  
@@ -84,7 +84,7 @@ class OverloadedNumberUtils {
      * type and the coerced type, all encoded into the class of the value, which is used as the overloaded method lookup
      * cache key.
      *  
-     * <p>See also: <tt>src\main\misc\overloadedNumberRules\prices.ods</tt>.
+     * <p>See also: {@code src\main\misc\overloadedNumberRules\prices.ods}.
      * 
      * @param num the number to coerce
      * @param typeFlags the type flags of the target parameter position; see {@link TypeFlags}

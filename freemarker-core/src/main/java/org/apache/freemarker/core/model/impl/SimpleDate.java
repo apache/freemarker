@@ -19,12 +19,12 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
-
 import org.apache.freemarker.core.model.TemplateDateModel;
 
+import java.io.Serializable;
+
 /**
- * A simple implementation of the <tt>TemplateDateModel</tt>
+ * A simple implementation of the {@code TemplateDateModel}
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
  */

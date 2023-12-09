@@ -25,9 +25,9 @@ import org.apache.freemarker.core.model.TemplateModel;
 /**
  * Utility class for instantiating {@link StaticModel} instances from
  * templates. If your template's data model contains an instance of
- * StaticModels (named, say <tt>StaticModels</tt>), then you can
+ * StaticModels (named, say {@code StaticModels}), then you can
  * instantiate an arbitrary StaticModel using get syntax (i.e.
- * <tt>StaticModels["java.lang.System"].currentTimeMillis()</tt>).
+ * {@code StaticModels["java.lang.System"].currentTimeMillis()}).
  */
 class StaticModels extends ClassBasedModelFactory {
     

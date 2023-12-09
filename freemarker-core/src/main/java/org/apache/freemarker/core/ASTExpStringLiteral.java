@@ -19,15 +19,15 @@
 
 package org.apache.freemarker.core;
 
-import java.io.StringReader;
-import java.util.List;
-
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
+
+import java.io.StringReader;
+import java.util.List;
 
 /**
  * AST expression node: string literal
@@ -144,7 +144,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateStringM
     }
     
     /**
-     * Tells if this is something like <tt>"${foo}"</tt>, which is usually a user mistake.
+     * Tells if this is something like <code>"${foo}"</code>, which is usually a user mistake.
      */
     boolean isSingleInterpolationLiteral() {
         return dynamicValue != null && dynamicValue.size() == 1

@@ -39,7 +39,7 @@ final class ASTImplicitParent extends ASTElement {
     }
 
     /**
-     * Processes the contents of the internal <tt>ASTElement</tt> list,
+     * Processes the contents of the internal {@code ASTElement} list,
      * and outputs the resulting text.
      */
     @Override

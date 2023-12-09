@@ -1989,7 +1989,7 @@ ASTExpression BuiltIn(ASTExpression lhoExp) :
 
 
 /**
- * production for when a key is specified by <DOT> + keyname
+ * production for when a key is specified by {@code <DOT>} + keyname
  */
 ASTExpression DotVariable(ASTExpression exp) :
 {

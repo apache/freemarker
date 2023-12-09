@@ -19,74 +19,38 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.beans.IntrospectionException;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeSet;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipInputStream;
+import org.apache.freemarker.core.ConfigurationException;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.util.*;
+import org.apache.freemarker.servlet.FreemarkerServlet;
+import org.apache.freemarker.servlet.HttpRequestHashModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.tagext.Tag;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-
-import org.apache.freemarker.core.ConfigurationException;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._ClassUtils;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.HttpRequestHashModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
+import java.beans.IntrospectionException;
+import java.io.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
 
 /**
  * A hash model associated with a servlet context that can load JSP tag libraries associated with that servlet context.
@@ -227,7 +191,7 @@ public class TaglibFactory implements TemplateHashModel {
      *            {@code http://example.com/foo}), root relative URI (like {@code /bar/foo.tld}) and non-root relative
      *            URI (like {@code bar/foo.tld}). Note that if a non-root relative URI is used it's resolved relative to
      *            the URL of the current request. In this case, the current request is obtained by looking up a
-     *            {@link HttpRequestHashModel} object named <tt>Request</tt> in the root data model.
+     *            {@link HttpRequestHashModel} object named {@code Request} in the root data model.
      *            {@link FreemarkerServlet} provides this object under the expected name, and custom servlets that want
      *            to integrate JSP taglib support should do the same.
      * 
@@ -1134,7 +1098,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</tt><tt>/*.tld</tt>, as requested by
+     * To search TLD-s under <code>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</code>{@code /*.tld}, as requested by
      * the JSP specification. Note that these also used to be in the classpath, so it's redundant to use this together
      * with a sufficiently permissive {@link ClasspathMetaInfTldSource}.
      */

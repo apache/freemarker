@@ -18,16 +18,16 @@
  */
 package org.apache.freemarker.core.model.impl;
 
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util._ClassUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * The argument types of a method call; usable as cache key.
@@ -439,7 +439,7 @@ final class ArgumentTypes {
      * parameter types represented by this ArgumentTypes object, also tells
      * how difficult that conversion is.
      * 
-     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
+     * @return One of the {@code CONVERSION_DIFFICULTY_...} constants.
      */
     private int isApplicable(ReflectionCallableMemberDescriptor memberDesc, boolean varArg) {
         final Class<?>[] paramTypes = memberDesc.getParamTypes(); 
@@ -492,7 +492,7 @@ final class ArgumentTypes {
      * parameter type should be convertible; possibly a primitive type
      * @param actual the argument type; not a primitive type, maybe {@link Null}.
      * 
-     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
+     * @return One of the {@code CONVERSION_DIFFICULTY_...} constants.
      */
     private int isMethodInvocationConvertible(final Class<?> formal, final Class<?> actual) {
         // Check for identity or widening reference conversion

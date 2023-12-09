@@ -19,14 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.Set;
-
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -36,6 +28,9 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
 
+import java.text.MessageFormat;
+import java.util.*;
+
 /**
  * <p>A hash model that wraps a resource bundle. Makes it convenient to store
  * localized content in the data model. It also acts as a method model that will
@@ -44,10 +39,10 @@ import org.apache.freemarker.core.util.CallableUtils;
  *
  * <p>Typical usages:</p>
  * <ul>
- * <li><tt>bundle.resourceKey</tt> will retrieve the object from resource bundle
- * with key <tt>resourceKey</tt></li>
- * <li><tt>bundle("patternKey", arg1, arg2, arg3)</tt> will retrieve the string
- * from resource bundle with key <tt>patternKey</tt>, and will use it as a pattern
+ * <li>{@code bundle.resourceKey} will retrieve the object from resource bundle
+ * with key {@code resourceKey}</li>
+ * <li>{@code bundle("patternKey", arg1, arg2, arg3)} will retrieve the string
+ * from resource bundle with key {@code patternKey}, and will use it as a pattern
  * for MessageFormat with arguments arg1, arg2 and arg3</li>
  * </ul>
  */

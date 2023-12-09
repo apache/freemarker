@@ -24,7 +24,7 @@ package org.apache.freemarker.core.model;
  * the Java {@code null} value, and {@code null} represents that the value (or rather what holds it) doesn't exist
  * at all.
  *
- * <p>Some examples to make this more understandable:<p>
+ * <p>Some examples to make this more understandable:</p>
  * <ul>
  *   <li>If you try to read the variable {@code myVar}, but such a variable was never declared anywhere, then that's
  *       a {@code null}. If the variable itself exists, but was set to {@code null}, then that's a

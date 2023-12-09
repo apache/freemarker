@@ -19,27 +19,22 @@
 
 package org.apache.freemarker.servlet.jsp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeEvent;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * An instance of this class should be registered as a <tt>&lt;listener&gt;</tt> in
- * the <tt>web.xml</tt> descriptor in order to correctly dispatch events to
+ * An instance of this class should be registered as a <code>&lt;listener&gt;</code> in
+ * the {@code web.xml} descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
  */
 public class EventForwarding

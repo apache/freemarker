@@ -18,12 +18,12 @@
  */
 package org.apache.freemarker.core.templateresolver;
 
-import java.io.IOException;
-import java.io.Serializable;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * FreeMarker loads template "files" through objects that implement this interface, thus the templates need not be real
@@ -73,7 +73,7 @@ public interface TemplateLoader {
      *            loader-defined root location (often referred as the "template root directory"), and will never start
      *            with a slash, nor will they contain a path component consisting of either a single or a double dot --
      *            these are all resolved by the template cache before passing the name to the loader. As a side effect,
-     *            paths that trivially reach outside template root directory, such as <tt>../my.f3ah</tt>, will be
+     *            paths that trivially reach outside template root directory, such as {@code ../my.f3ah}, will be
      *            rejected by the template cache, so they never reach the template loader. Note again, that if the path
      *            uses backslash as path separator instead of slash as (the template loader should not accept that), the
      *            normalization will not properly happen, as FreeMarker (the cache) recognizes only the slashes as

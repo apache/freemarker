@@ -19,18 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.Writer;
-
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -38,6 +27,10 @@ import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.util.CallableUtils;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
 
 class BuiltInsForStringsMisc {
 
@@ -161,7 +154,7 @@ class BuiltInsForStringsMisc {
      * transform model that evaluates the template in place.
      * The template inherits the configuration and environment of the executing
      * template. By default, its name will be equal to
-     * <tt>executingTemplate.getLookupName() + "$anonymous_interpreted"</tt>. You can
+     * {@code executingTemplate.getLookupName() + "$anonymous_interpreted"}. You can
      * specify another parameter to the method call in which case the
      * template name suffix is the specified id instead of "anonymous_interpreted".
      */
@@ -179,8 +172,8 @@ class BuiltInsForStringsMisc {
          * template a name.
          * 
          * @return a {@link TemplateDirectiveModel} that when executed inside
-         * a <tt>&lt;transform></tt> block will process the generated template
-         * just as if it had been <tt>&lt;transform></tt>-ed at that point.
+         * a <code>&lt;transform></code> block will process the generated template
+         * just as if it had been <code>&lt;transform></code>-ed at that point.
          */
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
@@ -283,7 +276,7 @@ class BuiltInsForStringsMisc {
 
     /**
      * A built-in that allows us to instantiate an instance of a java class.
-     * Usage is something like: <tt>&lt;#assign foobar = "foo.bar.MyClass"?new()></tt>;
+     * Usage is something like: <code>&lt;#assign foobar = "foo.bar.MyClass"?new()></code>;
      */
     static class newBI extends ASTExpBuiltIn {
         

@@ -19,18 +19,18 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.ListIterator;
-
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.ListIterator;
+
 /**
- * AST expression node: <tt>{ keyExp: valueExp, ... }</tt> 
+ * AST expression node: <code>{ keyExp: valueExp, ... }</code> 
  */
 final class ASTExpHashLiteral extends ASTExpression {
 

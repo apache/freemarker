@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
-
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.util._StringUtils;
+
+import java.io.IOException;
 
 /**
  * AST directive node: {@code #include} 
@@ -33,7 +33,7 @@ final class ASTDirInclude extends ASTDirective {
     private final Boolean ignoreMissingExpPrecalcedValue;
 
     /**
-     * @param template the template that this <tt>#include</tt> is a part of.
+     * @param template the template that this {@code #include} is a part of.
      * @param includedTemplateNameExp the path of the template to be included.
      */
     ASTDirInclude(Template template,

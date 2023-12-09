@@ -268,7 +268,7 @@ public interface ParsingConfiguration {
      * {@link Configuration} level.
      * <p>
      * Individual templates may specify their own charset by starting with
-     * <tt>&lt;#ftl sourceEncoding="..."&gt;</tt>. However, before that's detected, at least part of template must be
+     * <code>&lt;#ftl sourceEncoding="..."&gt;</code>. However, before that's detected, at least part of template must be
      * decoded with some charset first, so this setting (and
      * {@link Configuration#getTemplateConfigurations() templateConfigurations}) still have role.
      */

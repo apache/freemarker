@@ -19,16 +19,12 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.*;
+
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
  * A simple implementation of {@link TemplateIterableModel}.
@@ -67,10 +63,10 @@ implements TemplateIterableModel, Serializable {
     /**
      * Retrieves a template model iterator that is used to iterate over the elements in this iterable.
      *  
-     * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
-     * only one of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
-     * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
-     * {@link TemplateException} when you try to call their methods, since the wrapped <tt>Iterator</tt>
+     * <p>When you wrap an {@code Iterator} and you get {@code TemplateModelIterator} for multiple times,
+     * only one of the returned {@code TemplateModelIterator} instances can be really used. When you have called a
+     * method of a {@code TemplateModelIterator} instance, all other instance will throw a
+     * {@link TemplateException} when you try to call their methods, since the wrapped {@code Iterator}
      * can't return the first element anymore.
      */
     @Override

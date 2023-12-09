@@ -559,7 +559,7 @@ public interface ProcessingConfiguration {
      * (and its overloads). Its {@link Configuration}-level default is {@code true}.
      * <p>
      * Using {@code false} is needed for example when a Web page is composed from several boxes (like portlets, GUI
-     * panels, etc.) that aren't inserted with <tt>#include</tt> (or with similar directives) into a master FreeMarker
+     * panels, etc.) that aren't inserted with {@code #include} (or with similar directives) into a master FreeMarker
      * template, rather they are all processed with a separate {@link Template#process(Object, Writer)} call. In a such
      * scenario the automatic flushes would commit the HTTP response after each box, hence interfering with full-page
      * buffering, and also possibly decreasing performance with too frequent and too early response buffer flushes.
@@ -731,7 +731,7 @@ public interface ProcessingConfiguration {
      * @return The value of the custom setting; possibly {@code null}, as that's a legal attribute value. The content
      * of the value object shouldn't be changed after it was added as an attribute (ideally, it should be an
      * immutable object); if you need to change the content, certainly you should use the {@link CustomStateScope}
-     * API. Note that if the custom setting was created with <tt>&lt;#ftl&nbsp;customSettings={...}&gt;</tt>, then
+     * API. Note that if the custom setting was created with <code>&lt;#ftl&nbsp;customSettings={...}&gt;</code>, then
      * this value is already unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a <code>Map</code>,
      * ...etc., not a FreeMarker specific class).
      *

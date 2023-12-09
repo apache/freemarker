@@ -19,13 +19,13 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.IdentityHashMap;
-
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CommonSupplier;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.IdentityHashMap;
 
 /**
  * The place (in a template, usually) from where a directive (like a macro) or function was called;
@@ -157,7 +157,7 @@ public interface CallPlace {
     /**
      * Tells if the output of the nested content can be safely cached, as it only depends on the template content (not
      * on variable values and such) and has no side-effects (other than writing to the output). Examples of cases that
-     * give {@code false}: {@code <@foo>Name: } <tt>${name}</tt>{@code</@foo>}, {@code <@foo>Name: <#if
+     * give {@code false}: {@code <@foo>Name: } <code>${name}</code>{@code</@foo>}, {@code <@foo>Name: <#if
      * condition>bar</#if></@foo>}. Examples of cases that give {@code true}: {@code <@foo>Name: Joe</@foo>}, {@code
      * <@foo />}. Note that we get {@code true} for no nested content, because that's equivalent to 0-length nested
      * content.

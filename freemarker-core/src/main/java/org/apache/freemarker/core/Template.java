@@ -467,7 +467,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     /**
      * Like {@link #process(Object, Writer)}, but also sets a (XML-)node to be recursively processed by the template.
-     * That node is accessed in the template with <tt>.node</tt>, <tt>#recurse</tt>, etc. See the
+     * That node is accessed in the template with {@code .node}, {@code #recurse}, etc. See the
      * <a href="http://freemarker.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
      * typical example of recursive node processing.
      * 
@@ -512,7 +512,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     * <pre>
     * myTemplate.process(root, out);</pre>
     * 
-    * <p>But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
+    * <p>But with {@code createProcessingEnvironment}, you can manipulate the environment
     * before and after the processing:
     * 
     * <pre>

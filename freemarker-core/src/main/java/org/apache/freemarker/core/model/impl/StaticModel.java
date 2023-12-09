@@ -19,13 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -33,6 +26,13 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Wraps the static fields and methods of a class in a {@link org.apache.freemarker.core.model.TemplateHashModel}.
@@ -55,7 +55,7 @@ final class StaticModel implements TemplateHashModelEx {
     }
 
     /**
-     * Returns the field or method named by the <tt>key</tt>
+     * Returns the field or method named by the {@code key}
      * parameter.
      */
     @Override

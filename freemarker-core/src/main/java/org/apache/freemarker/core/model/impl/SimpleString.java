@@ -19,13 +19,13 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
-
 import org.apache.freemarker.core.model.TemplateStringModel;
 
+import java.io.Serializable;
+
 /**
- * A simple implementation of the <tt>TemplateStringModel</tt>
- * interface, using a <tt>String</tt>.
+ * A simple implementation of the {@code TemplateStringModel}
+ * interface, using a {@code String}.
  *
  * <p>This class is thread-safe.
  *
@@ -36,13 +36,13 @@ public final class SimpleString
 implements TemplateStringModel, Serializable {
     
     /**
-     * @serial the value of this <tt>SimpleString</tt> if it wraps a
-     * <tt>String</tt>.
+     * @serial the value of this {@code SimpleString} if it wraps a
+     * {@code String}.
      */
     private final String value;
 
     /**
-     * Constructs a <tt>SimpleString</tt> containing a string value.
+     * Constructs a {@code SimpleString} containing a string value.
      * @param value the string value. If this is {@code null}, its value in FTL will be {@code ""}.
      */
     public SimpleString(String value) {

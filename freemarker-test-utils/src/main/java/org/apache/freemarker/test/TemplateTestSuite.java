@@ -49,10 +49,10 @@ import java.util.regex.Pattern;
  * To add a test-case, go to the resource directory that corresponds to the package of the {@link TemplateTestSuite}
  * subclass and inside that directory:</p>
  * <ol>
- * <li>Add a new <tt>testcase</tt> element to <tt>testcases.xml</tt></li>
- * <li>Add a template to <tt>templates/</tt> with fits the <tt>testcase</tt> added to the XML (by default it's the test
+ * <li>Add a new {@code testcase} element to {@code testcases.xml}</li>
+ * <li>Add a template to {@code templates/} with fits the {@code testcase} added to the XML (by default it's the test
  * case name + ".f3ac")</li>
- * <li>Add the expected output to <tt>references/</tt> with fits the <tt>testcase</tt> added to the XML (by default
+ * <li>Add the expected output to {@code references/} with fits the {@code testcase} added to the XML (by default
  * it's the test name + ".txt")</li>
  * <li>If you want to add items to the data-model or change the {@link Configuration}, modify the
  * {@link #setUpTestCase(String, Map, Configuration.ExtendableBuilder)}} method in the {@link TemplateTestSuite}

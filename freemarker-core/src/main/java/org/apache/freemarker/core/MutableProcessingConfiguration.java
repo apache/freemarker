@@ -1453,8 +1453,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *             with {@code "allowedClasses:"} and/or
      *             {@code "trustedTemplates:"}. Examples of valid values:
      *             
-     *             <table style="width: auto; border-collapse: collapse" border="1"
-     *                  summary="trustedTemplate value examples">
+     *             <table style="width: auto; border-collapse: collapse" border="1">
+     *               <caption style="display: none">trustedTemplates value examples</caption>
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
@@ -1574,8 +1574,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1" summary="templateCacheStorage value
-     *       examples">
+     *       <table style="width: auto; border-collapse: collapse" border="1">
+     *         <caption style="display: none">templateCacheStorage value examples</caption>
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}
@@ -1585,7 +1585,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *         <tr><td>{@code "soft"}<td>0<td>{@code Integer.MAX_VALUE}
      *       </table>
      *       
-     *       <p>The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
+     *       <p>The value is not case sensitive. The order of {@code soft} and {@code strong}
      *       entries is not significant.
      *       
      *   <li><p>{@code "templateUpdateDelay"}:
@@ -1626,40 +1626,40 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@link DefaultTemplateNameFormat#INSTANCE}.
      * </ul>
      * 
-     * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
+     * <p id="fm_obe">Regarding <em>object builder expressions</em> (used by the setting values where it was
      * indicated):
      * <ul>
      *   <li><p>Before FreeMarker 2.3.21 it had to be a fully qualified class name, and nothing else.</li>
      *   <li><p>Since 2.3.21, the generic syntax is:
-     *       <tt><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
+     *       <code><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
      *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
-     *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
+     *       <i>propNameN</i>=<i>propValueN</i>)</code>,
      *       where
-     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to invoke (except if we have
-     *       builder class or <tt>INSTANCE</tt> field around, but see that later),
-     *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
-     *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
-     *       <tt>setX(1)</tt>) on the created instance. You can have any number of constructor arguments and property
+     *       <code><i>className</i></code> is the fully qualified class name of the instance to invoke (except if we have
+     *       builder class or {@code INSTANCE} field around, but see that later),
+     *       <code><i>constrArg</i></code>-s are the values of constructor arguments,
+     *       and <code><i>propName</i>=<i>propValue</i></code>-s set JavaBean properties (like {@code x=1} means
+     *       {@code setX(1)}) on the created instance. You can have any number of constructor arguments and property
      *       setters, including 0. Constructor arguments must precede any property setters.   
      *   </li>
      *   <li>
-     *     Example: <tt>com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)</tt> is nearly
+     *     Example: {@code com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)} is nearly
      *     equivalent with this Java code:
-     *     <tt>obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);</tt>
+     *     {@code obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);}
      *   </li>
      *   <li>
-     *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
+     *      <p>If you have no constructor arguments and property setters, and the <code><i>className</i></code> class has
      *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
      *      the constructor won't be called.
      *   </li>
      *   <li>
-     *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
+     *      <p>If there exists a class named <code><i>className</i>Builder</code>, then that class will be instantiated
      *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
-     *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
-     *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
+     *      set. After that, the public {@code build()} method of the instance will be called, whose return value
+     *      will be the value of the whole expression. (The builder class and the {@code build()} method is simply
      *      found by name, there's no special interface to implement.)Note that if you have a builder class, you don't
-     *      actually need a <tt><i>className</i></tt> class (since 2.3.24); after all,
-     *      <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
+     *      actually need a <code><i>className</i></code> class (since 2.3.24); after all,
+     *      <code><i>className</i>Builder.build()</code> can return any kind of object. 
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -1673,7 +1673,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *        {@code BigDecimal} and "bi" for {@code BigInteger}.</li>
      *        <li>A boolean literal: {@code true} or {@code false}
      *        <li>The null literal: {@code null}
-     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s.
+     *        <li>A string literal with FTL syntax, except that  it can't contain <code>${...}</code>-s.
      *            Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
      *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code [ 'foo', 2, true ]}.
      *            If the parameter is expected to be array, the list will be automatically converted to array.

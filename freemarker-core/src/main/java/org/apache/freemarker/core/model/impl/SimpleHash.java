@@ -19,21 +19,11 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.WrappingTemplateModel;
+import org.apache.freemarker.core.model.*;
+
+import java.util.*;
 
 /**
  * A simple implementation of the {@link TemplateHashModelEx} interface, using its own underlying {@link Map} or
@@ -154,7 +144,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     /**
      * Puts a boolean in the map
      *
-     * @param key the name by which the resulting <tt>TemplateModel</tt>
+     * @param key the name by which the resulting {@code TemplateModel}
      * is identified in the template.
      * @param b the boolean to store.
      */

@@ -53,15 +53,15 @@ import static org.apache.freemarker.core.util.CallableUtils._newNullOrOmittedArg
 
 /**
  * Object that represents the runtime environment during template processing. For every invocation of a
- * <tt>Template.process()</tt> method, a new instance of this object is created, and then discarded when
- * <tt>process()</tt> returns. This object stores the set of temporary variables created by the template, the value of
+ * {@code Template.process()} method, a new instance of this object is created, and then discarded when
+ * {@code process()} returns. This object stores the set of temporary variables created by the template, the value of
  * settings set by the template, the reference to the data model root, etc. Everything that is needed to fulfill the
  * template processing job.
  * <p>
- * Data models that need to access the <tt>Environment</tt> object that represents the template processing on the
+ * Data models that need to access the {@code Environment} object that represents the template processing on the
  * current thread can use the {@link #getCurrentEnvironment()} method.
  * <p>
- * If you need to modify or read this object before or after the <tt>process</tt> call, use
+ * If you need to modify or read this object before or after the {@code process} call, use
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  * <p>
  * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link CoreSettingValueNotSetException}
@@ -493,9 +493,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
+     * Tells if we are inside an {@code #attempt} block (but before {@code #recover}). This can be useful for
      * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
-     * <tt>#attempt</tt> will roll it back anyway.
+     * {@code #attempt} will roll it back anyway.
      */
     public boolean isInAttemptBlock() {
         return inAttemptBlock;
@@ -922,7 +922,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /*
-     * Note that although it's not allowed to set this setting with the <tt>setting</tt> directive, it still must be
+     * Note that although it's not allowed to set this setting with the {@code setting} directive, it still must be
      * allowed to set it from Java code while the template executes, since some frameworks allow templates to actually
      * change the output encoding on-the-fly.
      */
@@ -2425,7 +2425,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * sets TemplateNodeModel as the current visitor node. <tt>.node</tt>
+     * sets TemplateNodeModel as the current visitor node. {@code .node}
      */
     public void setCurrentVisitorNode(TemplateNodeModel node) {
         currentVisitorNode = node;

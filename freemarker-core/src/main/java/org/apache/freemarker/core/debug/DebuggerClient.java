@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.debug;
 
+import org.apache.freemarker.core.util.UndeclaredThrowableException;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -31,8 +33,6 @@ import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
-
 /**
  * A utility class that allows you to connect to the FreeMarker debugger service
  * running on a specific host and port. 
@@ -44,8 +44,8 @@ public class DebuggerClient {
     /**
      * Connects to the FreeMarker debugger service running on a specific host
      * and port. The Java VM to which the connection is made must have defined
-     * the system property <tt>org.apache.freemarker.core.debug.password</tt> in order to enable
-     * the debugger service. Additionally, the <tt>org.apache.freemarker.core.debug.port</tt>
+     * the system property {@code org.apache.freemarker.core.debug.password} in order to enable
+     * the debugger service. Additionally, the {@code org.apache.freemarker.core.debug.port}
      * system property can be set to specify the port where the debugger service
      * is listening. When not specified, it defaults to 
      * {@link Debugger#DEFAULT_PORT}.
