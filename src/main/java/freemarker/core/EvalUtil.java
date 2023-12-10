@@ -20,6 +20,7 @@
 package freemarker.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Normalizer;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
@@ -277,8 +278,12 @@ class EvalUtil {
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
-            // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
-            cmpResult = env.getCollator().compare(leftString, rightString);
+            if (env.getConfiguration().getIncompatibleImprovements().intValue() <= _VersionInts.V_2_3_32) {
+                cmpResult = env.getCollator().compare(leftString, rightString);
+            } else {
+                cmpResult = Normalizer.normalize(leftString, Normalizer.Form.NFKC)
+                         .compareTo(Normalizer.normalize(rightString, Normalizer.Form.NFKC));
+            }
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new _MiscTemplateException(defaultBlamed, env,
