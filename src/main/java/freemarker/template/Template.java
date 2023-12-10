@@ -413,11 +413,12 @@ public class Template extends Configurable {
     }
     
    /**
-    * Creates a {@link freemarker.core.Environment Environment} object, using this template, the data-model provided as
-    * parameter. You have to call {@link Environment#process()} on the return value to set off the actual rendering.
+    * Creates a {@link freemarker.core.Environment Environment} object, with this template as the main (top-level
+    * template), and the data-model provided as parameter. You have to call {@link Environment#process()} on the return
+    * value to start actual template processing (that is, to run the template, to generate output).
     * 
     * <p>Use this method if you want to do some special initialization on the {@link Environment} before template
-    * processing, or if you want to read the {@link Environment} after template processing. Otherwise using
+    * processing, or if you want to read the {@link Environment} after template processing. Otherwise, using
     * {@link Template#process(Object, Writer)} is simpler.
     *
     * <p>Example:
@@ -445,12 +446,12 @@ public class Template extends Configurable {
     * TemplateModel x = env.getVariable("x");  // read back a variable set by the template</pre>
     *
     * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
-    *     more details.
+    *     more details. If {@code null}, the data model will be empty.
     * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
     *     instances. Normally you left it {@code null}, in which case {@link Configurable#getObjectWrapper()} will be
     *     used.
     * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
-    *     more details.
+    *     more details. Can't be {@code null}.
     *     
     * @return the {@link Environment} object created for processing. Call {@link Environment#process()} to process the
     *    template.

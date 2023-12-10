@@ -202,6 +202,14 @@ public final class Environment extends Configurable {
         threadEnv.set(env);
     }
 
+    /**
+     * Creates an environment with the given main (top-level) template that it intends to {@linkplain #process()} later;
+     * typically, it's better to use {@link Template#createProcessingEnvironment(Object, Writer)} instead of this.
+     *
+     * @param template Not {@code null}
+     * @param rootDataModel Not {@code null}
+     * @param out Not {@code null}
+     */
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
