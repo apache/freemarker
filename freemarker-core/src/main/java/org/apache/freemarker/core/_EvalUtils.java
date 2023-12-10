@@ -33,6 +33,7 @@ import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.text.Normalizer;
 import java.util.Date;
 
 import static org.apache.freemarker.core.MessageUtils.*;
@@ -267,8 +268,8 @@ public class _EvalUtils {
             }
             String leftString = _EvalUtils.modelToString((TemplateStringModel) leftValue, leftExp);
             String rightString = _EvalUtils.modelToString((TemplateStringModel) rightValue, rightExp);
-            // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
-            cmpResult = env.getCollator().compare(leftString, rightString);
+            cmpResult = Normalizer.normalize(leftString, Normalizer.Form.NFKC)
+                    .compareTo(Normalizer.normalize(rightString, Normalizer.Form.NFKC));
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new TemplateException(defaultBlamed, env,
