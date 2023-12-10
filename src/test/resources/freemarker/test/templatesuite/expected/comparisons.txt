@@ -88,6 +88,5 @@
    <p>Item is: 12</p>
    <p>Item is greater than two.</p>
    <p>Item is greater than or equal to ten.</p>
-
 </body>
 </html>

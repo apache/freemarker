@@ -30070,7 +30070,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[TODO]</para>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/87">GitHub
+              PR 87</link> Comparing string is now way faster, if the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> is at least 2.3.33. If your template does lot of
+              string comparisons, this can mean very significant speedup. With
+              this enabled, we use a simpler way of comparing strings, and
+              because templates were only ever allowed equality comparisons
+              between strings (not less-than, or greater-than), it's very
+              unlikely to change the behavior of your templates. (Technically,
+              what changes is that instead of using Java's localized
+              <literal>Collator</literal>-s, we switch to a simple binary
+              comparison after UNICODE NFKC normalization. So, in theory it's
+              possible that for some locales two different but similarly
+              looking characters were treated as equal by the collator, but
+              will count as different now. But it's very unlikely that anyone
+              wanted to depend on such fragile logic anyway. Note again that
+              we still do UNICODE normalization, so combining characters won't
+              break your comparison.)</para>
             </listitem>
           </itemizedlist>
         </section>

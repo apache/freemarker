@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -975,6 +976,21 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *         </ul>
      *       </li>
      *     </ul>
+     *   </li>
+     *   <li>
+     *       <p>
+     *       2.3.33 (or higher):
+     *       <ul>
+     *           <li><p>Comparing string is now way faster. If your template does lot of string comparisons, this can
+     *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
+     *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
+     *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
+     *           Java's localized {@link Collator}-s, we switch to a simple binary comparison after UNICODE NFKC
+     *           normalization. So, in theory it's possible that for some locales two different but similarly looking
+     *           characters were treated as equal by the collator, but will count as different now. But it's very
+     *           unlikely that anyone wanted to depend on such fragile logic anyway. Note again that we still do UNICODE
+     *           normalization, so combining characters won't break your comparison.)</p></li>
+     *       </ul>
      *   </li>
      * </ul>
      * 
