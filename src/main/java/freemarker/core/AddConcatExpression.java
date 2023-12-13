@@ -19,7 +19,10 @@
 
 package freemarker.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import freemarker.template.SimpleNumber;
@@ -204,9 +207,40 @@ final class AddConcatExpression extends Expression {
         }
 
         @Override
-        public int size()
-        throws TemplateModelException {
-            return left.size() + right.size();
+        public int size() throws TemplateModelException {
+            int totalSize = 0;
+
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                totalSize += left.size();
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    totalSize += right.size();
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return totalSize;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
         }
 
         @Override
@@ -225,7 +259,8 @@ final class AddConcatExpression extends Expression {
 
     private static class ConcatenatedSequenceIterator implements TemplateModelIterator {
         /** The path from the root down to the parent of {@link #currentSegment} */
-        private ParentStep parentStep = null;
+        private final List<ConcatenatedSequence> concSeqsWithRightPending = new ArrayList<>();
+        private ConcatenatedSequence concSeqWithLeftDescentPending;
 
         private TemplateSequenceModel currentSegment;
         private int currentSegmentNextIndex;
@@ -237,18 +272,7 @@ final class AddConcatExpression extends Expression {
 
         public ConcatenatedSequenceIterator(ConcatenatedSequence concatSeq) throws TemplateModelException {
             // Descent down to the first nested sequence, and memorize the path down there
-            descendToLeftmostSubsequence(concatSeq);
-        }
-
-        private void setCurrentSegment(TemplateSequenceModel currentSegment) throws TemplateModelException {
-            if (currentSegment instanceof TemplateCollectionModel) {
-                this.currentSegmentIterator = ((TemplateCollectionModel) currentSegment).iterator();
-                this.currentSegment = null;
-            } else {
-                this.currentSegment = currentSegment;
-                this.currentSegmentNextIndex = 0;
-                this.currentSegmentIterator = null;
-            }
+            concSeqWithLeftDescentPending = concatSeq;
         }
 
         @Override
@@ -285,6 +309,9 @@ final class AddConcatExpression extends Expression {
                         prefetchedHasNext = true;
                         hasPrefetchedResult = true;
                         return;
+                    } else {
+                        currentSegmentIterator = null;
+                        // Falls through
                     }
                 } else if (currentSegment != null) {
                     int size = currentSegment.size();
@@ -293,69 +320,50 @@ final class AddConcatExpression extends Expression {
                         prefetchedHasNext = true;
                         hasPrefetchedResult = true;
                         return;
+                    } else {
+                        currentSegment = null;
+                        // Falls through
                     }
-                } else {
-                    // No current segment => We have already reached the end of the last segment in the past
+                } else if (concSeqWithLeftDescentPending != null) { // Nothing to fetch from, has to descend left first
+                    ConcatenatedSequence leftDescentCurrentConcSeq = concSeqWithLeftDescentPending;
+                    concSeqWithLeftDescentPending = null;
+                    concSeqsWithRightPending.add(leftDescentCurrentConcSeq);
+
+                    TemplateSequenceModel leftSeq;
+                    while ((leftSeq = leftDescentCurrentConcSeq.left) instanceof ConcatenatedSequence) {
+                        leftDescentCurrentConcSeq = (ConcatenatedSequence) leftSeq;
+                        concSeqsWithRightPending.add(leftDescentCurrentConcSeq);
+                    }
+                    setCurrentSegment(leftSeq);
+                    continue; // Jump to fetching from current segment
+                }
+
+                // If we reach this, then the current segment was fully consumed, so we have to switch to the next segment.
+
+                if (concSeqsWithRightPending.isEmpty()) {
+                    prefetchedNext = null;
                     prefetchedHasNext = false;
                     hasPrefetchedResult = true;
                     return;
                 }
 
-                // If we reach this, then the current segment was fully consumed, so we switch to the next segment.
-
-                if (parentStep == null) {
-                    setIteratorEndWasReached();
-                    return;
-                }
-
-                if (!parentStep.rightVisited) {
-                    parentStep.rightVisited = true;
-                    descendToLeftmostSubsequence(parentStep.concSeq.right);
+                TemplateSequenceModel right = concSeqsWithRightPending.remove(concSeqsWithRightPending.size() - 1).right;
+                if (right instanceof ConcatenatedSequence) {
+                    concSeqWithLeftDescentPending = (ConcatenatedSequence) right;
                 } else {
-                    while (true) {
-                        // Ascend one level
-                        parentStep = parentStep.parentStep;
-
-                        if (parentStep == null) {
-                            setIteratorEndWasReached();
-                            return;
-                        }
-
-                        if (!parentStep.rightVisited) {
-                            parentStep.rightVisited = true;
-                            descendToLeftmostSubsequence(parentStep.concSeq.right);
-                            break;
-                        }
-                    }
+                    setCurrentSegment(right);
                 }
             }
         }
 
-        private void descendToLeftmostSubsequence(TemplateSequenceModel maybeConcSeq) throws TemplateModelException {
-            while (maybeConcSeq instanceof ConcatenatedSequence) {
-                ConcatenatedSequence concSeq = (ConcatenatedSequence) maybeConcSeq;
-                parentStep = new ParentStep(concSeq, parentStep);
-                maybeConcSeq = concSeq.left;
-            }
-            setCurrentSegment(maybeConcSeq);
-        }
-
-        private void setIteratorEndWasReached() {
-            currentSegment = null;
-            currentSegmentIterator = null;
-            prefetchedNext = null;
-            prefetchedHasNext = false;
-            hasPrefetchedResult = true;
-        }
-
-        private static class ParentStep {
-            private final ConcatenatedSequence concSeq;
-            private final ParentStep parentStep;
-            private boolean rightVisited;
-
-            public ParentStep(ConcatenatedSequence concSeq, ParentStep parentStep) {
-                this.concSeq = concSeq;
-                this.parentStep = parentStep;
+        private void setCurrentSegment(TemplateSequenceModel currentSegment) throws TemplateModelException {
+            if (currentSegment instanceof TemplateCollectionModel) {
+                this.currentSegmentIterator = ((TemplateCollectionModel) currentSegment).iterator();
+                this.currentSegment = null;
+            } else {
+                this.currentSegment = currentSegment;
+                this.currentSegmentNextIndex = 0;
+                this.currentSegmentIterator = null;
             }
         }
     }

@@ -211,6 +211,12 @@ public class ConcatenatedSequenceTest {
             }
             assertEquals(Arrays.asList(expectedItems), actualItems);
         }
+
+        if (repeatable) {
+            seq = seqSupplier.get();
+        }
+
+        assertEquals(expectedItems.length, seq.size());
     }
 
 }

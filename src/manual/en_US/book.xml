@@ -30094,19 +30094,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>When concatenating many sequences (like Java
               <literal>List</literal>-s) with the <literal>+</literal>
-              operator, iterating through the resulting sequence has become
-              very slow as the number of sequences added increased. Now
-              iteration is reasonably fast, regardless of the number of
-              sequences added. But this still only applies to mere iteration
-              (like using <literal>&lt;#list seq as
-              <replaceable>...</replaceable>&gt;</literal>, or
-              <literal>seq?join(', ')</literal>). Accessing items by index
-              (like <literal>seq[n]</literal>) is still as slow as it always
-              was. (Note that <literal>+</literal> is still only meant to be
-              used to quickly create a concatenated view from a few sequences,
-              and not for constructing sequences from hundreds of small
-              sequences. So it's still not recommended to concatenate more
-              then a few tens of sequences.)</para>
+              operator:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>In previous versions iIterating through the resulting
+                  sequence has become very slow as the number of sequences
+                  added increased. Now iteration is reasonably fast,
+                  regardless of the number of sequences added. But this still
+                  only applies to mere iteration (like using
+                  <literal>&lt;#list <replaceable>seq</replaceable> as
+                  <replaceable>...</replaceable>&gt;</literal>, or
+                  <literal><replaceable>seq</replaceable>?join(',
+                  ')</literal>). Accessing items by index (like
+                  <literal><replaceable>seq</replaceable>[n]</literal>) is
+                  still as slow as it always was. (Note that
+                  <literal>+</literal> is still only meant to be used to
+                  quickly create a concatenated view from a few sequences, and
+                  not for constructing sequences from hundreds of small
+                  sequences. So it's still not recommended to concatenate more
+                  then a few tens of sequences.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>In previous versions
+                  <literal><replaceable>seq</replaceable>?size</literal> could
+                  cause stack overflow (if you have concatenated thousands of
+                  sequences). Now the impementation is not recursive.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
