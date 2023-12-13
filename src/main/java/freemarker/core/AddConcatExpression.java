@@ -191,9 +191,10 @@ final class AddConcatExpression extends Expression {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
-    private static final class ConcatenatedSequence
+    // Non-private for unit testing
+    static final class ConcatenatedSequence
     implements
-        TemplateSequenceModel {
+        TemplateSequenceModel, TemplateCollectionModel {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
@@ -213,6 +214,149 @@ final class AddConcatExpression extends Expression {
         throws TemplateModelException {
             int ls = left.size();
             return i < ls ? left.get(i) : right.get(i - ls);
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateModelException {
+            return new ConcatenatedSequenceIterator(this);
+        }
+
+    }
+
+    private static class ConcatenatedSequenceIterator implements TemplateModelIterator {
+        /** The path from the root down to the parent of {@link #currentSegment} */
+        private ParentStep parentStep = null;
+
+        private TemplateSequenceModel currentSegment;
+        private int currentSegmentNextIndex;
+        private TemplateModelIterator currentSegmentIterator;
+
+        private boolean hasPrefetchedResult;
+        private TemplateModel prefetchedNext;
+        private boolean prefetchedHasNext;
+
+        public ConcatenatedSequenceIterator(ConcatenatedSequence concatSeq) throws TemplateModelException {
+            // Descent down to the first nested sequence, and memorize the path down there
+            descendToLeftmostSubsequence(concatSeq);
+        }
+
+        private void setCurrentSegment(TemplateSequenceModel currentSegment) throws TemplateModelException {
+            if (currentSegment instanceof TemplateCollectionModel) {
+                this.currentSegmentIterator = ((TemplateCollectionModel) currentSegment).iterator();
+                this.currentSegment = null;
+            } else {
+                this.currentSegment = currentSegment;
+                this.currentSegmentNextIndex = 0;
+                this.currentSegmentIterator = null;
+            }
+        }
+
+        @Override
+        public TemplateModel next() throws TemplateModelException {
+            ensureHasPrefetchedResult();
+
+            if (!prefetchedHasNext) {
+                throw new TemplateModelException("The collection has no more elements.");
+            }
+
+            TemplateModel result = prefetchedNext;
+            hasPrefetchedResult = false; // To consume prefetched element
+            prefetchedNext = null; // To not prevent GC
+            return result;
+        }
+
+        @Override
+        public boolean hasNext() throws TemplateModelException {
+            ensureHasPrefetchedResult();
+            return prefetchedHasNext;
+        }
+
+        private void ensureHasPrefetchedResult() throws TemplateModelException {
+            if (hasPrefetchedResult) {
+                return;
+            }
+
+            while (true) {
+                // Try to fetch the next value from the current segment:
+                if (currentSegmentIterator != null) {
+                    boolean hasNext = currentSegmentIterator.hasNext();
+                    if (hasNext) {
+                        prefetchedNext = currentSegmentIterator.next();
+                        prefetchedHasNext = true;
+                        hasPrefetchedResult = true;
+                        return;
+                    }
+                } else if (currentSegment != null) {
+                    int size = currentSegment.size();
+                    if (currentSegmentNextIndex < size) {
+                        prefetchedNext = currentSegment.get(currentSegmentNextIndex++);
+                        prefetchedHasNext = true;
+                        hasPrefetchedResult = true;
+                        return;
+                    }
+                } else {
+                    // No current segment => We have already reached the end of the last segment in the past
+                    prefetchedHasNext = false;
+                    hasPrefetchedResult = true;
+                    return;
+                }
+
+                // If we reach this, then the current segment was fully consumed, so we switch to the next segment.
+
+                if (parentStep == null) {
+                    setIteratorEndWasReached();
+                    return;
+                }
+
+                if (!parentStep.rightVisited) {
+                    parentStep.rightVisited = true;
+                    descendToLeftmostSubsequence(parentStep.concSeq.right);
+                } else {
+                    while (true) {
+                        // Ascend one level
+                        parentStep = parentStep.parentStep;
+
+                        if (parentStep == null) {
+                            setIteratorEndWasReached();
+                            return;
+                        }
+
+                        if (!parentStep.rightVisited) {
+                            parentStep.rightVisited = true;
+                            descendToLeftmostSubsequence(parentStep.concSeq.right);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void descendToLeftmostSubsequence(TemplateSequenceModel maybeConcSeq) throws TemplateModelException {
+            while (maybeConcSeq instanceof ConcatenatedSequence) {
+                ConcatenatedSequence concSeq = (ConcatenatedSequence) maybeConcSeq;
+                parentStep = new ParentStep(concSeq, parentStep);
+                maybeConcSeq = concSeq.left;
+            }
+            setCurrentSegment(maybeConcSeq);
+        }
+
+        private void setIteratorEndWasReached() {
+            currentSegment = null;
+            currentSegmentIterator = null;
+            prefetchedNext = null;
+            prefetchedHasNext = false;
+            hasPrefetchedResult = true;
+        }
+
+        private static class ParentStep {
+            private final ConcatenatedSequence concSeq;
+            private final ParentStep parentStep;
+            private boolean rightVisited;
+
+            public ParentStep(ConcatenatedSequence concSeq, ParentStep parentStep) {
+                this.concSeq = concSeq;
+                this.parentStep = parentStep;
+            }
         }
     }
 

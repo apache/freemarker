@@ -981,7 +981,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <p>
      *       2.3.33 (or higher):
      *       <ul>
-     *           <li><p>Comparing string is now way faster. If your template does lot of string comparisons, this can
+     *           <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
      *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
      *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
      *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
