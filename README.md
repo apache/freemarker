@@ -261,7 +261,12 @@ Originally done on IntelliJ IDEA Community 2018.2.4:
 
     - Test Resource Folders:  
       src/test/resources
-      
+
+  - Still inside the "Sources" tab, change the "Language level" to "8". (Yes, we use Java 16 SDK with
+    language level 8 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
+    Then, in "File" -> "Settings" -> "Editor" -> "Inspections", uncheck "Uses of API which isn't available at the 
+    configured language level".
+
   - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
     all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon
     at the right edge, select "JARs or directory", navigate to `ide-dependencies` directory, expand
