@@ -23,14 +23,23 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import org.junit.Test;
 
 import freemarker.core.AddConcatExpression.ConcatenatedSequence;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultListAdapter;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleCollection;
+import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateCollectionModelEx;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
@@ -43,11 +52,42 @@ public class ConcatenatedSequenceTest {
     }
 
     @Test
-    public void testForSequences() throws TemplateModelException {
-        test(new SeqFactory() {
+    public void testForSimpleSequences() throws TemplateModelException {
+        testWithSegmentFactory(new SeqFactory() {
             @Override
             public TemplateSequenceModel create(String... items) {
-                return new SimpleSequence(List.of(items));
+                return new SimpleSequence(Arrays.asList(items));
+            }
+
+            @Override
+            public boolean isUnrepeatable() {
+                return false;
+            }
+        });
+    }
+
+    @Test
+    public void testForListAdapter() throws TemplateModelException {
+        DefaultObjectWrapper objectWrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_32).build();
+        testWithSegmentFactory(new SeqFactory() {
+            @Override
+            public TemplateSequenceModel create(String... items) {
+                return DefaultListAdapter.adapt(Arrays.asList(items), objectWrapper);
+            }
+
+            @Override
+            public boolean isUnrepeatable() {
+                return false;
+            }
+        });
+    }
+
+    @Test
+    public void testForSequenceAndCollectionModelEx() throws TemplateModelException {
+        testWithSegmentFactory(new SeqFactory() {
+            @Override
+            public TemplateSequenceModel create(String... items) {
+                return new SequenceAndCollectionModelEx(Arrays.asList(items));
             }
 
             @Override
@@ -59,7 +99,7 @@ public class ConcatenatedSequenceTest {
 
     @Test
     public void testForCollectionsWrappingIterable() throws TemplateModelException {
-        test(new SeqFactory() {
+        testWithSegmentFactory(new SeqFactory() {
             @Override
             public TemplateSequenceModel create(String... items) {
                 return new CollectionAndSequence(new SimpleCollection(Arrays.asList(items)));
@@ -74,7 +114,7 @@ public class ConcatenatedSequenceTest {
 
     @Test
     public void testForCollectionsWrappingIterator() throws TemplateModelException {
-        test(new SeqFactory() {
+        testWithSegmentFactory(new SeqFactory() {
             @Override
             public TemplateSequenceModel create(String... items) {
                 return new CollectionAndSequence(new SimpleCollection(Arrays.asList(items).iterator()));
@@ -87,7 +127,7 @@ public class ConcatenatedSequenceTest {
         });
     }
 
-    public void test(SeqFactory segmentFactory) throws TemplateModelException {
+    public void testWithSegmentFactory(SeqFactory segmentFactory) throws TemplateModelException {
         assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
                 new ConcatenatedSequence(segmentFactory.create(), segmentFactory.create()));
         assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
@@ -99,6 +139,94 @@ public class ConcatenatedSequenceTest {
         assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
                 new ConcatenatedSequence(segmentFactory.create("a"), segmentFactory.create("b")),
                 "a", "b");
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                new ConcatenatedSequence(
+                        new ConcatenatedSequence(
+                                segmentFactory.create(),
+                                segmentFactory.create()),
+                        new ConcatenatedSequence(
+                                segmentFactory.create(),
+                                segmentFactory.create())
+                )
+        );
+
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                new ConcatenatedSequence(
+                        new ConcatenatedSequence(
+                                segmentFactory.create("a", "b"),
+                                segmentFactory.create()),
+                        new ConcatenatedSequence(
+                                segmentFactory.create(),
+                                segmentFactory.create())
+                ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create("a", "b")),
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create())
+                        ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create()),
+                                new ConcatenatedSequence(
+                                        segmentFactory.create("a", "b"),
+                                        segmentFactory.create())
+                        ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create()),
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create("a", "b"))
+                        ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                new ConcatenatedSequence(
+                        new ConcatenatedSequence(
+                                segmentFactory.create("a"),
+                                segmentFactory.create("b")),
+                        new ConcatenatedSequence(
+                                segmentFactory.create(),
+                                segmentFactory.create())
+                ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create("a")),
+                                new ConcatenatedSequence(
+                                        segmentFactory.create("b"),
+                                        segmentFactory.create())
+                        ),
+                "a", "b"
+        );
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(),
+                                        segmentFactory.create()),
+                                new ConcatenatedSequence(
+                                        segmentFactory.create("a"),
+                                        segmentFactory.create("b"))
+                        ),
+                "a", "b"
+        );
 
         assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
                 new ConcatenatedSequence(
@@ -169,6 +297,15 @@ public class ConcatenatedSequenceTest {
                     },
                     "a", "b", "a", "b", "a", "b", "a", "b");
         }
+
+        assertConcatenationResult(segmentFactory.isUnrepeatable(), () ->
+                        new ConcatenatedSequence(
+                                new ConcatenatedSequence(
+                                        segmentFactory.create(null, "a"),
+                                        segmentFactory.create("b", null)),
+                                segmentFactory.create((String) null)
+                        ),
+                null, "a", "b", null, null);
     }
 
     private void assertConcatenationResult(
@@ -181,7 +318,7 @@ public class ConcatenatedSequenceTest {
         {
             List<String> actualItems = new ArrayList<>();
             for (TemplateModelIterator iter = seq.iterator(); iter.hasNext(); ) {
-                actualItems.add(((TemplateScalarModel) iter.next()).getAsString());
+                actualItems.add(asNullableString((TemplateScalarModel) iter.next()));
             }
             assertEquals(Arrays.asList(expectedItems), actualItems);
         }
@@ -194,7 +331,7 @@ public class ConcatenatedSequenceTest {
             List<String> actualItems = new ArrayList<>();
             for (TemplateModelIterator iter = seq.iterator(); iter.hasNext(); ) {
                 assertTrue(iter.hasNext());
-                actualItems.add(((TemplateScalarModel) iter.next()).getAsString());
+                actualItems.add(asNullableString((TemplateScalarModel) iter.next()));
             }
             assertEquals(Arrays.asList(expectedItems), actualItems);
         }
@@ -207,7 +344,7 @@ public class ConcatenatedSequenceTest {
             List<String> actualItems = new ArrayList<>();
             int size = seq.size();
             for (int i = 0; i < size; i++) {
-                actualItems.add(((TemplateScalarModel) seq.get(i)).getAsString());
+                actualItems.add(asNullableString((TemplateScalarModel) seq.get(i)));
             }
             assertEquals(Arrays.asList(expectedItems), actualItems);
             assertNull(seq.get(-1));
@@ -220,6 +357,65 @@ public class ConcatenatedSequenceTest {
         }
 
         assertEquals(expectedItems.length, seq.size());
+
+        if (repeatable) {
+            seq = seqSupplier.get();
+        }
+
+        assertEquals(expectedItems.length == 0, seq.isEmpty());
+    }
+
+    private String asNullableString(TemplateScalarModel model) throws TemplateModelException {
+        return model != null ? model.getAsString() : null;
+    }
+
+    /**
+     * This is to test {@link TemplateSequenceModel} that's also a {@link TemplateCollectionModelEx}.
+     */
+    private static class SequenceAndCollectionModelEx implements TemplateSequenceModel, TemplateCollectionModelEx {
+        private final List<String> items;
+
+        public SequenceAndCollectionModelEx(List<String> items) {
+            this.items = items;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateModelException {
+            return new TemplateModelIterator() {
+                    private final Iterator<String> it = items.iterator();
+
+                    @Override
+                    public TemplateModel next() throws TemplateModelException {
+                        try {
+                            String value = it.next();
+                            return value != null ? new SimpleScalar(value) : null;
+                        } catch (NoSuchElementException e) {
+                            throw new TemplateModelException("The collection has no more items.", e);
+                        }
+                    }
+
+                    @Override
+                    public boolean hasNext() throws TemplateModelException {
+                        return it.hasNext();
+                    }
+            };
+        }
+
+        @Override
+        public boolean isEmpty() throws TemplateModelException {
+            return items.isEmpty();
+        }
+
+        @Override
+        public TemplateModel get(int index) throws TemplateModelException {
+            String value = items.get(index);
+            return value != null ? new SimpleScalar(value) : null;
+        }
+
+        @Override
+        public int size() throws TemplateModelException {
+            return items.size();
+        }
     }
 
 }

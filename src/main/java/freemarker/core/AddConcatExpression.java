@@ -29,6 +29,7 @@ import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
@@ -197,7 +198,7 @@ final class AddConcatExpression extends Expression {
     // Non-private for unit testing
     static final class ConcatenatedSequence
     implements
-        TemplateSequenceModel, TemplateCollectionModel {
+        TemplateSequenceModel, TemplateCollectionModelEx {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
@@ -241,6 +242,50 @@ final class AddConcatExpression extends Expression {
                     concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
                 }
             }
+        }
+
+        @Override
+        public boolean isEmpty() throws TemplateModelException {
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                if (!isEmpty(left)) {
+                    return false;
+                }
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    if (!isEmpty(right)) {
+                        return false;
+                    }
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return true;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
+        }
+
+        private static boolean isEmpty(TemplateSequenceModel seq) throws TemplateModelException {
+            return seq instanceof TemplateCollectionModelEx ? ((TemplateCollectionModelEx) seq).isEmpty()
+                    : seq.size() == 0;
         }
 
         @Override

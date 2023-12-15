@@ -30176,7 +30176,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>List</literal>-s) with the <literal>+</literal>
               operation in templates, the resulting
               <literal>TemplateSequenceModel</literal> now also implements
-              <literal>TemplateCollectionModel</literal> (with is similar to
+              <literal>TemplateCollectionModelEx</literal> (with is similar to
               Java's <literal>Iterable</literal>). It's because using that is
               much more efficient then indexed access, if the sequence was
               concatenated together from a lot of sequences.</para>
