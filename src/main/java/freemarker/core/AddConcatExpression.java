@@ -244,10 +244,56 @@ final class AddConcatExpression extends Expression {
         }
 
         @Override
-        public TemplateModel get(int i)
-        throws TemplateModelException {
-            int ls = left.size();
-            return i < ls ? left.get(i) : right.get(i - ls);
+        public TemplateModel get(int index) throws TemplateModelException {
+            if (index < 0) {
+                return null;
+            }
+
+            int totalSize = 0;
+
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                {
+                    int segmentSize = left.size();
+                    totalSize += segmentSize;
+                    if (totalSize > index) {
+                        return left.get(index - (totalSize - segmentSize));
+                    }
+                }
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    {
+                        int segmentSize = right.size();
+                        totalSize += segmentSize;
+                        if (totalSize > index) {
+                            return right.get(index - (totalSize - segmentSize));
+                        }
+                    }
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return null;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
         }
 
         @Override

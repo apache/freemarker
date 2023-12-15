@@ -210,6 +210,9 @@ public class ConcatenatedSequenceTest {
                 actualItems.add(((TemplateScalarModel) seq.get(i)).getAsString());
             }
             assertEquals(Arrays.asList(expectedItems), actualItems);
+            assertNull(seq.get(-1));
+            assertNull(seq.get(size));
+            assertNull(seq.get(size + 1));
         }
 
         if (repeatable) {
