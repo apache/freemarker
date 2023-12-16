@@ -437,7 +437,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY = 21;
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
     public static final int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
-    /** Require auto-escaping always. */
+    /**
+     * This policy is to always require auto-escaping, to avoid accidents where because of misconfiguration, or a
+     * mistake of the template author it's disabled. With this policy, using output formats that don't support escaping
+     * will not be allowed. Using built-ins, and directives that disable auto-escaping (like {@code ?no_esc}) will also
+     * be errors (on parse-time). Note that if markup (like HTML) comers from the data model, then with this policy you
+     * will have to ensure that they come as {@link TemplateMarkupOutputModel}-s (which won't be auto-escaped even with
+     * this policy), not as {@link String}-s, because the template authors can't disable escaping for the value anymore.
+     */
     public static final int FORCE_AUTO_ESCAPING_POLICY = 23;
 
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */

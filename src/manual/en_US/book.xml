@@ -9625,10 +9625,10 @@ cfg.setTemplateConfigurations(
         <literal>auto_escaping_policy</literal>, which can be used to disable
         auto-escaping even if the current output format supports it, or enable
         auto-escaping even if the format by default doesn't escape (but it
-        supports it). Using this setting rarely advisable, as it's potentially
-        confusing for the template authors. (Instead, escaping can be turned
-        on/off explicitly inside the templates with the
-        <literal>auto_esc</literal> parameter of the <link
+        supports it), or to enforce auto-escaping. Using this setting rarely
+        advisable, as it's potentially confusing for the template authors.
+        (Instead, escaping can be turned on/off explicitly inside the
+        templates with the <literal>auto_esc</literal> parameter of the <link
         linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>,
         or with the <link
         linkend="ref_directive_autoesc"><literal>noautoesc</literal></link>
@@ -30147,6 +30147,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/88">GitHub
+              PR 88</link>: Added a new possible value for the
+              <literal>auto_escaping_policy</literal> configuration setting,
+              <literal>force</literal>
+              (<literal>Configuration.FORCE_AUTO_ESCAPING_POLICY</literal>).
+              This policy is to always require auto-escaping, to avoid
+              accidents where because of misconfiguration, or a mistake of the
+              template author it's disabled. With this policy, using output
+              formats that don't support escaping will not be allowed. Using
+              built-ins, and directives that disable auto-escaping (like
+              <literal>?no_esc</literal>) will also be errors (on parse-time).
+              Note that if markup (like HTML) comers from the data model, then
+              with this policy you will have to ensure that they come as
+              <literal>TemplateMarkupOutputModel</literal>-s (which won't be
+              auto-escaped even with this policy), not as
+              <literal>String</literal>-s, because the template authors can't
+              disable escaping for the value anymore.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-214">FREEMARKER-214</link>,
