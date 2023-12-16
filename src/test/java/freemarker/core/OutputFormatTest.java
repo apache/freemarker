@@ -868,10 +868,27 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
         assertOutput(commonFTL, esced);
 
+        // TODO Should work:
+        // cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        // assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, esced);
+
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", esced);
+
+        cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        assertErrorContains("", IllegalArgumentException.class,
+                "plainText", "auto_escaping_policy", "force");
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
-        assertErrorContains("<#outputformat 'plainText'></#outputformat>", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
-        assertErrorContains("<#noAutoEsc></#noAutoEsc>", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
-        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", "auto_escaping_policy is FORCE_AUTO_ESCAPING_POLICY");
+        assertErrorContains("<#outputformat 'plainText'></#outputformat>", ParseException.class,
+                "plainText", "auto_escaping_policy", "force");
+        assertErrorContains("<#noAutoEsc></#noAutoEsc>", ParseException.class,
+                "noAutoEsc", "auto_escaping_policy", "force");
+        assertErrorContains("<#noautoesc></#noautoesc>", ParseException.class,
+                "noautoesc", "auto_escaping_policy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?no_esc}", ParseException.class,
+                "?no_esc", "auto_escaping_policy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", ParseException.class,
+                "?noEsc", "auto_escaping_policy", "force");
     }
 
     @Test
