@@ -868,9 +868,8 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
         assertOutput(commonFTL, esced);
 
-        // TODO Should work:
-        // cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
-        // assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, esced);
+        cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, esced);
 
         cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
         assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", esced);

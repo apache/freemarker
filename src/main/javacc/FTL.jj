@@ -237,9 +237,6 @@ public class FMParser {
                 outputFormat = outputFormatFromExt;
             }
         }
-        if (!(outputFormat instanceof MarkupOutputFormat) && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
-            throw new IllegalArgumentException(forcedAutoEscapingPolicyExceptionMessage(outputFormat));
-        }
         recalculateAutoEscapingField();
 
         token_source.setParser(this);
@@ -4754,6 +4751,11 @@ TemplateElement Root() :
         LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
+    {
+        if (!(outputFormat instanceof MarkupOutputFormat) && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+            throw new IllegalArgumentException(forcedAutoEscapingPolicyExceptionMessage(outputFormat));
+        }
+    }
     children = MixedContentElements()
     <EOF>
     {
