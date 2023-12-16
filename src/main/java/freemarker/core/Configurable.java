@@ -2394,7 +2394,8 @@ public class Configurable {
      *       <br>String value: {@code "enable_if_default"} or {@code "enableIfDefault"} for
      *       {@link Configuration#ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
      *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
-     *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
+     *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY},
+     *       {@code "force" for {@link Configuration#FORCE_AUTO_ESCAPING_POLICY}, or
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
      *   <li><p>{@code "default_encoding"}:
