@@ -878,6 +878,8 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains("", IllegalArgumentException.class,
                 "plainText", "auto_escaping_policy", "force");
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+        assertErrorContains("<#ftl auto_esc=false>", ParseException.class,
+                "auto_esc=false", "auto_escaping_policy", "force");
         assertErrorContains("<#outputformat 'plainText'></#outputformat>", ParseException.class,
                 "plainText", "auto_escaping_policy", "force");
         assertErrorContains("<#noAutoEsc></#noAutoEsc>", ParseException.class,
