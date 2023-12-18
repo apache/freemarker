@@ -188,6 +188,8 @@ public final class Environment extends Configurable {
 
     private boolean fastInvalidReferenceExceptions;
 
+    private TemplateProcessingTracer currentTracer;
+
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
      * processing going on in this thread. Data model implementations that need access to the environment can call this
@@ -2879,6 +2881,13 @@ public final class Environment extends Configurable {
         };
     }
 
+    /**
+     * Sets the tracer to use for this environment.
+     */
+    public void setTracer(TemplateProcessingTracer tracer) {
+        currentTracer = tracer;
+    }
+
     private void pushElement(TemplateElement element) {
         final int newSize = ++instructionStackSize;
         TemplateElement[] instructionStack = this.instructionStack;
@@ -2891,9 +2900,20 @@ public final class Environment extends Configurable {
             this.instructionStack = instructionStack;
         }
         instructionStack[newSize - 1] = element;
+        if (currentTracer != null) {
+            currentTracer.enterElement(element.getTemplate(),
+                    element.getBeginColumn(), element.getBeginLine(),
+                    element.getEndColumn(), element.getEndLine(), element.isLeaf());
+        }
     }
 
     private void popElement() {
+        if (currentTracer != null) {
+            TemplateElement element = instructionStack[instructionStackSize - 1];
+            currentTracer.exitElement(element.getTemplate(),
+                    element.getBeginColumn(), element.getBeginLine(),
+                    element.getEndColumn(), element.getEndLine());
+        }
         instructionStackSize--;
     }
 
