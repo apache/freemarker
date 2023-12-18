@@ -188,7 +188,7 @@ public final class Environment extends Configurable {
 
     private boolean fastInvalidReferenceExceptions;
 
-    private TemplateProcessingTracer currentTracer;
+    private TemplateProcessingTracer templateProcessingTracer;
 
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
@@ -2882,10 +2882,22 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets the tracer to use for this environment.
+     * Sets the {@link TemplateProcessingTracer} to use for this {@link Environment};
+     * can be {@code null} to not have one. The default is also {@code null}.
+     *
+     * @since 2.3.33
      */
-    public void setTracer(TemplateProcessingTracer tracer) {
-        currentTracer = tracer;
+    public void setTemplateProcessingTracer(TemplateProcessingTracer templateProcessingTracer) {
+        this.templateProcessingTracer = templateProcessingTracer;
+    }
+
+    /**
+     * Getter pair of {@link #setTemplateProcessingTracer(TemplateProcessingTracer)}. Can be {@code null}.
+     *
+     * @since 2.3.33
+     */
+    public TemplateProcessingTracer getTemplateProcessingTracer() {
+        return templateProcessingTracer;
     }
 
     private void pushElement(TemplateElement element) {
@@ -2900,19 +2912,15 @@ public final class Environment extends Configurable {
             this.instructionStack = instructionStack;
         }
         instructionStack[newSize - 1] = element;
-        if (currentTracer != null) {
-            currentTracer.enterElement(element.getTemplate(),
-                    element.getBeginColumn(), element.getBeginLine(),
-                    element.getEndColumn(), element.getEndLine(), element.isLeaf());
+        if (templateProcessingTracer != null) {
+            templateProcessingTracer.enterElement(this, element);
         }
     }
 
     private void popElement() {
-        if (currentTracer != null) {
+        if (templateProcessingTracer != null) {
             TemplateElement element = instructionStack[instructionStackSize - 1];
-            currentTracer.exitElement(element.getTemplate(),
-                    element.getBeginColumn(), element.getBeginLine(),
-                    element.getEndColumn(), element.getEndLine());
+            templateProcessingTracer.exitElement(this);
         }
         instructionStackSize--;
     }

@@ -86,21 +86,33 @@ public abstract class TemplateObject {
         this.endColumn = endColumn;
         this.endLine = endLine;
     }
-    
-    public final int getBeginColumn() {
-        return beginColumn;
-    }
 
+    /**
+     * 1-based index of the line (row) of the first character of the element in the template.
+     */
     public final int getBeginLine() {
         return beginLine;
     }
 
-    public final int getEndColumn() {
-        return endColumn;
+    /**
+     * 1-based index of the column of the first character of the element in the template.
+     */
+    public final int getBeginColumn() {
+        return beginColumn;
     }
 
+    /**
+     * 1-based index of the line (row) of the last character of the element in the template.
+     */
     public final int getEndLine() {
         return endLine;
+    }
+
+    /**
+     * 1-based index of the column of the last character of the element in the template.
+     */
+    public final int getEndColumn() {
+        return endColumn;
     }
 
     /**

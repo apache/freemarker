@@ -37,9 +37,24 @@ class ListElseContainer extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        if (listPart.acceptWithResult(env)) {
+        boolean hadItems;
+
+        TemplateProcessingTracer templateProcessingTracer = env.getTemplateProcessingTracer();
+        if (templateProcessingTracer == null) {
+            hadItems = listPart.acceptWithResult(env);
+        } else {
+            templateProcessingTracer.enterElement(env, listPart);
+            try {
+                hadItems = listPart.acceptWithResult(env);
+            } finally {
+                templateProcessingTracer.exitElement(env);
+            }
+        }
+
+        if (hadItems) {
             return null;
         }
+
         return new TemplateElement[] { elsePart };
     }
 

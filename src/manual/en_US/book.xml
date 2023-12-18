@@ -30140,6 +30140,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/89">GitHub
+              PR 89</link>: Added <literal>TemplateProcessingTracer</literal>
+              mechanism, that can be used to monitor coverage, and performance
+              <emphasis>inside</emphasis> templates as they are being
+              processed. For example, you could construct a heat map for how
+              often the different parts run, or finding the performance hot
+              spots. (There can be other creative uses, like watching for a
+              variable to have a certain value.) Use
+              <literal>Environment.setTemplateProcessingTracer(TemplateProcessingTracer)</literal>
+              to enable this kind of monitoring. (See the API docs for
+              more.)</para>
+            </listitem>
           </itemizedlist>
         </section>
 

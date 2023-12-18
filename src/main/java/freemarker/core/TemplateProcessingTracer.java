@@ -19,38 +19,77 @@
 
 package freemarker.core;
 
-import freemarker.ext.util.IdentityHashMap;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateDirectiveModel;
-import freemarker.template.TemplateTransformModel;
-import freemarker.template.utility.ObjectFactory;
 
 /**
- * Run-time tracer plug-in. This may be * used to implement profiling, coverage analytis, execution tracing,
+ * Hooks to monitor as templates run. This may be used to implement profiling, coverage analysis, execution tracing,
  * and other on-the-fly debugging mechanisms.
  * <p>
- * Use {@link Environment#setTracer(TemplateProcessingTracer)} to configure a tracer for the current environment.
+ * Use {@link Environment#setTemplateProcessingTracer(TemplateProcessingTracer)} to set a tracer for the current
+ * environment.
  * 
  * @since 2.3.33
  */
 public interface TemplateProcessingTracer {
 
     /**
-     * Invoked by {@link Environment} whenever it starts processing a new template element. {@code
-     * isLeafElement} indicates whether this element is a leaf, or whether the tracer should expect
-     * to receive lower-level elements within the context of this one.
+     * Invoked by {@link Environment} whenever it starts processing a new template element. A template element is a
+     * directive call, an interpolation (like <code>${...}</code>), a comment block, or static text. Expressions
+     * are not template elements.
      * 
      * @since 2.3.23
      */
-    void enterElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine,
-            boolean isLeafElement);
+    void enterElement(Environment env, TracedElement tracedElement);
 
     /**
      * Invoked by {@link Environment} whenever it completes processing a new template element.
+     *
+     * @see #enterElement(Environment, TracedElement)
      * 
      * @since 2.3.23
      */
-    void exitElement(Template template, int beginColumn, int beginLine, int endColumn, int endLine);
+    void exitElement(Environment env);
+
+    /**
+     * Information about the template element that we enter of exit.
+     */
+    interface TracedElement {
+        /**
+         * The {@link Template} that contains this element.
+         */
+        Template getTemplate();
+
+        /**
+         * 1-based index of the line (row) of the first character of the element in the template.
+         */
+        int getBeginLine();
+
+        /**
+         * 1-based index of the column of the first character of the element in the template.
+         */
+        int getBeginColumn();
+
+        /**
+         * 1-based index of the line (row) of the last character of the element in the template.
+         */
+        int getEndColumn();
+
+        /**
+         * 1-based index of the column of the last character of the element in the template.
+         */
+        int getEndLine();
+
+        /**
+         * If this is an element that has no nested elements.
+         */
+        boolean isLeaf();
+
+        /**
+         * One-line description of the element, that also contains the parameter expressions, but not the nested content
+         * (child elements). There are no hard backward-compatibility guarantees regarding the format used, although
+         * it shouldn't change unless to fix a bug.
+         */
+        String getDescription();
+    }
 
 }

@@ -764,7 +764,8 @@ public class Template extends Configurable {
      * 
      * @param beginColumn the first column of the requested source, 1-based
      * @param beginLine the first line of the requested source, 1-based
-     * @param endColumn the last column of the requested source, 1-based
+     * @param endColumn the last column of the requested source, 1-based. If this is beyond the last character of the
+     *                  line, it assumes that you want to whole line.
      * @param endLine the last line of the requested source, 1-based
      * 
      * @see freemarker.core.TemplateObject#getSource()
@@ -787,7 +788,7 @@ public class Template extends Configurable {
             }
         }
         int lastLineLength = lines.get(endLine).toString().length();
-        int trailingCharsToDelete = lastLineLength - endColumn - 1;
+        int trailingCharsToDelete = endColumn < lastLineLength ? lastLineLength - endColumn - 1 : 0;
         buf.delete(0, beginColumn);
         buf.delete(buf.length() - trailingCharsToDelete, buf.length());
         return buf.toString();
