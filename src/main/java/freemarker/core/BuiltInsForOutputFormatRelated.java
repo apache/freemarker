@@ -23,7 +23,7 @@ import freemarker.template.TemplateModel;
 
 class BuiltInsForOutputFormatRelated {
 
-    static class no_escBI extends AbstractConverterBI {
+    static class no_escBI extends AbstractConverterBI implements BuiltInBannedWhenForcedAutoEscaping {
 
         @Override
         protected TemplateModel calculateResult(String lho, MarkupOutputFormat outputFormat, Environment env)

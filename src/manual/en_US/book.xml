@@ -9625,10 +9625,10 @@ cfg.setTemplateConfigurations(
         <literal>auto_escaping_policy</literal>, which can be used to disable
         auto-escaping even if the current output format supports it, or enable
         auto-escaping even if the format by default doesn't escape (but it
-        supports it). Using this setting rarely advisable, as it's potentially
-        confusing for the template authors. (Instead, escaping can be turned
-        on/off explicitly inside the templates with the
-        <literal>auto_esc</literal> parameter of the <link
+        supports it), or to enforce auto-escaping. Using this setting rarely
+        advisable, as it's potentially confusing for the template authors.
+        (Instead, escaping can be turned on/off explicitly inside the
+        templates with the <literal>auto_esc</literal> parameter of the <link
         linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>,
         or with the <link
         linkend="ref_directive_autoesc"><literal>noautoesc</literal></link>
@@ -30070,7 +30070,90 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[TODO]</para>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/87">GitHub
+              PR 87</link> Comparing strings is now way faster, if the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> is at least 2.3.33. If your template does lot of
+              string comparisons, this can mean very significant speedup. With
+              this enabled, we use a simpler way of comparing strings, and
+              because templates were only ever allowed equality comparisons
+              between strings (not less-than, or greater-than), it's very
+              unlikely to change the behavior of your templates. (Technically,
+              what changes is that instead of using Java's localized
+              <literal>Collator</literal>-s, we switch to a simple binary
+              comparison after UNICODE NFKC normalization. So, in theory it's
+              possible that for some locales two different but similarly
+              looking characters were treated as equal by the collator, but
+              will count as different now. But it's very unlikely that anyone
+              wanted to depend on such fragile logic anyway. Note again that
+              we still do UNICODE normalization, so combining characters won't
+              break your comparison.)</para>
+            </listitem>
+
+            <listitem>
+              <para>When concatenating many sequences (like of Java
+              <literal>List</literal>-s) with the <literal>+</literal>
+              operator, the resulting sequence is now much less slow to read.
+              (Background: the <literal>+</literal> operator, when applied on
+              two sequences, produces a result sequence that just view, not a
+              copy of the original sequences. Thus is very fast to add
+              together long sequences. But, if you concatenate many, like
+              hundreds, of sequences, reading the sequence back will become
+              expensive. It was always like that, so it's still not
+              recommended to concatenate more then a few tens of sequences.
+              But if that recommendation is not kept, now the slowdown can be
+              way less punishing.)</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Iteration (like listing) is now reasonably fast, and
+                  need not be concerned about. The speed of fetching the next
+                  item is now mostly independent of the number of sequences
+                  concatenated, while earlier it has become slower as that
+                  number grew. By iteration we mean going through all the
+                  items, strictly in order, without using an index explicitly.
+                  Examples of iteration are <literal>&lt;#list
+                  <replaceable>concatedSeq</replaceable> as
+                  <replaceable>...</replaceable>&gt;</literal>, and
+                  <literal><replaceable>concatedSeq</replaceable>?join(',
+                  ')</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Accessing items by index, like
+                  <literal><replaceable>concatedSeq</replaceable>[i]</literal>,
+                  is now much faster than before, but still can be slow if you
+                  had concatenated a lot of sequences. Item access speed is
+                  now roughly O(N), where N is number of concatenated
+                  sequences (not the number of items!), so traversing the
+                  whole sequence by index is O(N²).</para>
+                </listitem>
+
+                <listitem>
+                  <para>In previous versions
+                  <literal><replaceable>concatedSeq</replaceable>?size</literal>
+                  could cause stack overflow if it
+                  <literal><replaceable>concatedSeq</replaceable></literal>
+                  was concatenated together from thousands of sequences. Now
+                  the stack usage is constant and negligible.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/89">GitHub
+              PR 89</link>: Added <literal>TemplateProcessingTracer</literal>
+              mechanism, that can be used to monitor coverage, and performance
+              <emphasis>inside</emphasis> templates as they are being
+              processed. For example, you could construct a heat map for how
+              often the different parts run, or finding the performance hot
+              spots. (There can be other creative uses, like watching for a
+              variable to have a certain value.) Use
+              <literal>Environment.setTemplateProcessingTracer(TemplateProcessingTracer)</literal>
+              to enable this kind of monitoring. (See the API docs for
+              more.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -30079,6 +30162,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/88">GitHub
+              PR 88</link>: Added a new possible value for the
+              <literal>auto_escaping_policy</literal> configuration setting,
+              <literal>force</literal>
+              (<literal>Configuration.FORCE_AUTO_ESCAPING_POLICY</literal>).
+              This policy is to always require auto-escaping, to avoid
+              accidents where because of misconfiguration, or a mistake of the
+              template author it's disabled. With this policy, using output
+              formats that don't support escaping will not be allowed. Using
+              built-ins, and directives that disable auto-escaping (like
+              <literal>?no_esc</literal>) will also be errors (on parse-time).
+              Note that if markup (like HTML) comers from the data model, then
+              with this policy you will have to ensure that they come as
+              <literal>TemplateMarkupOutputModel</literal>-s (which won't be
+              auto-escaped even with this policy), not as
+              <literal>String</literal>-s, because the template authors can't
+              disable escaping for the value anymore.</para>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-214">FREEMARKER-214</link>,
@@ -30101,6 +30205,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (Production system should always use
               <literal>RETHROW_HANDLER</literal>, and this change has no
               effect there.)</para>
+            </listitem>
+
+            <listitem>
+              <para>When concatenating sequences (like Java
+              <literal>List</literal>-s) with the <literal>+</literal>
+              operation in templates, the resulting
+              <literal>TemplateSequenceModel</literal> now also implements
+              <literal>TemplateCollectionModelEx</literal> (with is similar to
+              Java's <literal>Iterable</literal>). It's because using that is
+              much more efficient then indexed access, if the sequence was
+              concatenated together from a lot of sequences.</para>
             </listitem>
 
             <listitem>

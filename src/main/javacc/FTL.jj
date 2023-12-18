@@ -281,17 +281,17 @@ public class FMParser {
             _TemplateAPI.setOutputFormat(template, outputFormat);
         }
     }
-    
+
     void setupStringLiteralMode(FMParser parentParser, OutputFormat outputFormat) {
         FMParserTokenManager parentTokenSource = parentParser.token_source;
-         
+
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
         token_source.SwitchTo(NO_DIRECTIVE);
-        
+
         this.outputFormat = outputFormat;
-        recalculateAutoEscapingField();                                
+        recalculateAutoEscapingField();
         if (incompatibleImprovements < _VersionInts.V_2_3_24) {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
             incompatibleImprovements = _VersionInts.V_2_3_0;
@@ -358,7 +358,8 @@ public class FMParser {
         if (outputFormat instanceof MarkupOutputFormat) {
             if (autoEscapingPolicy == Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY) {
                 autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapedByDefault();
-            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY) {
+            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
+	        || autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
                 autoEscaping = true;
             } else if (autoEscapingPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
                 autoEscaping = false;
@@ -521,6 +522,15 @@ public class FMParser {
         }
     }
 
+    private static String forcedAutoEscapingPolicyExceptionMessage(OutputFormat outputFormat) {
+        return forcedAutoEscapingPolicyExceptionMessage("Non-markup output format " + outputFormat);
+    }
+
+    private static String forcedAutoEscapingPolicyExceptionMessage(String whatCanNotBeUsed) {
+        return whatCanNotBeUsed + " can't be used when the \"" + Configuration.AUTO_ESCAPING_POLICY_KEY + "\" "
+                + "configuration setting was set to \"force\" (FORCE_AUTO_ESCAPING_POLICY).";
+    }
+
     private ParserIteratorBlockContext pushIteratorBlockContext() {
         if (iteratorBlockContexts == null) {
             iteratorBlockContexts = new ArrayList<ParserIteratorBlockContext>(4);
@@ -565,7 +575,7 @@ public class FMParser {
 	    // [2.4] Use camel case as the default
 	    return token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "#forEach" : "#foreach";
 	}
-    
+
 }
 
 PARSER_END(FMParser)
@@ -2214,14 +2224,22 @@ Expression BuiltIn(Expression lhoExp) :
         }
         
         if (result instanceof BuiltInBannedWhenAutoEscaping) {
-	        if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
-	            throw new ParseException(
-	                    "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "
-	                    + "a markup output format (" + outputFormat.getName() + "), to avoid double-escaping mistakes.",
-	                    template, t);
-	        }
+	    if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
+	        throw new ParseException(
+	                "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "
+	                + "a markup output format (" + outputFormat.getName() + "), to avoid double-escaping mistakes.",
+	                template, t);
+	    }
             
             return result;
+        }
+
+        if (result instanceof BuiltInBannedWhenForcedAutoEscaping) {
+            if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+                throw new ParseException(
+                        forcedAutoEscapingPolicyExceptionMessage("The ?" + t.image + " expression"),
+                        template, t);
+            }
         }
 
         if (result instanceof MarkupOutputFormatBoundBuiltIn) {
@@ -4046,6 +4064,10 @@ OutputFormatBlock OutputFormat() :
             } else {
                 outputFormat = template.getConfiguration().getOutputFormat(paramStr);
             }
+            if (!(outputFormat instanceof MarkupOutputFormat)
+                    && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+                throw new ParseException(forcedAutoEscapingPolicyExceptionMessage(outputFormat), template, start);
+            }
             recalculateAutoEscapingField();
         } catch (IllegalArgumentException e) {
             throw new ParseException("Invalid format name: " + e.getMessage(), template, start, e.getCause());
@@ -4100,6 +4122,12 @@ NoAutoEscBlock NoAutoEsc() :
 {
     start = <NOAUTOESC>
     {
+        if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+            throw new ParseException(
+                    forcedAutoEscapingPolicyExceptionMessage(
+                            "<#" + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noAutoEsc" : "noautoesc") + ">"),
+                    template, start);
+        }
         lastAutoEscapingPolicy = autoEscapingPolicy;
         autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
@@ -4539,6 +4567,11 @@ void HeaderElement() :
                                 autoEscRequester = key;
                                 autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
                             } else {
+                                if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+                                    throw new ParseException(
+                                            forcedAutoEscapingPolicyExceptionMessage(ks + "=false"),
+                                            exp);
+                                }
                                 autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }
                             recalculateAutoEscapingField();
@@ -4718,6 +4751,11 @@ TemplateElement Root() :
         LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
+    {
+        if (!(outputFormat instanceof MarkupOutputFormat) && autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+            throw new IllegalArgumentException(forcedAutoEscapingPolicyExceptionMessage(outputFormat));
+        }
+    }
     children = MixedContentElements()
     <EOF>
     {

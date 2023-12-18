@@ -19,13 +19,17 @@
 
 package freemarker.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
@@ -191,9 +195,10 @@ final class AddConcatExpression extends Expression {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
-    private static final class ConcatenatedSequence
+    // Non-private for unit testing
+    static final class ConcatenatedSequence
     implements
-        TemplateSequenceModel {
+        TemplateSequenceModel, TemplateCollectionModelEx {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
@@ -203,16 +208,254 @@ final class AddConcatExpression extends Expression {
         }
 
         @Override
-        public int size()
-        throws TemplateModelException {
-            return left.size() + right.size();
+        public int size() throws TemplateModelException {
+            int totalSize = 0;
+
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                totalSize += left.size();
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    totalSize += right.size();
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return totalSize;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
         }
 
         @Override
-        public TemplateModel get(int i)
-        throws TemplateModelException {
-            int ls = left.size();
-            return i < ls ? left.get(i) : right.get(i - ls);
+        public boolean isEmpty() throws TemplateModelException {
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                if (!isEmpty(left)) {
+                    return false;
+                }
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    if (!isEmpty(right)) {
+                        return false;
+                    }
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return true;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
+        }
+
+        private static boolean isEmpty(TemplateSequenceModel seq) throws TemplateModelException {
+            return seq instanceof TemplateCollectionModelEx ? ((TemplateCollectionModelEx) seq).isEmpty()
+                    : seq.size() == 0;
+        }
+
+        @Override
+        public TemplateModel get(int index) throws TemplateModelException {
+            if (index < 0) {
+                return null;
+            }
+
+            int totalSize = 0;
+
+            ConcatenatedSequence[] concSeqsWithRightPending = new ConcatenatedSequence[2];
+            int concSeqsWithRightPendingLength = 0;
+            ConcatenatedSequence concSeqInFocus = this;
+
+            while (true) {
+                TemplateSequenceModel left;
+                while ((left = concSeqInFocus.left) instanceof ConcatenatedSequence) {
+                    if (concSeqsWithRightPendingLength == concSeqsWithRightPending.length) {
+                        concSeqsWithRightPending = Arrays.copyOf(concSeqsWithRightPending, concSeqsWithRightPendingLength * 2);
+                    }
+                    concSeqsWithRightPending[concSeqsWithRightPendingLength++] = concSeqInFocus;
+                    concSeqInFocus = (ConcatenatedSequence) left;
+                }
+                {
+                    int segmentSize = left.size();
+                    totalSize += segmentSize;
+                    if (totalSize > index) {
+                        return left.get(index - (totalSize - segmentSize));
+                    }
+                }
+
+                while (true) {
+                    TemplateSequenceModel right = concSeqInFocus.right;
+                    if (right instanceof ConcatenatedSequence) {
+                        concSeqInFocus = (ConcatenatedSequence) right;
+                        break; // To jump at the left-descending loop
+                    }
+                    {
+                        int segmentSize = right.size();
+                        totalSize += segmentSize;
+                        if (totalSize > index) {
+                            return right.get(index - (totalSize - segmentSize));
+                        }
+                    }
+
+                    if (concSeqsWithRightPendingLength == 0) {
+                        return null;
+                    }
+
+                    concSeqsWithRightPendingLength--;
+                    concSeqInFocus = concSeqsWithRightPending[concSeqsWithRightPendingLength];
+                }
+            }
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateModelException {
+            return new ConcatenatedSequenceIterator(this);
+        }
+
+    }
+
+    private static class ConcatenatedSequenceIterator implements TemplateModelIterator {
+        /** The path from the root down to the parent of {@link #currentSegment} */
+        private final List<ConcatenatedSequence> concSeqsWithRightPending = new ArrayList<>();
+        private ConcatenatedSequence concSeqWithLeftDescentPending;
+
+        private TemplateSequenceModel currentSegment;
+        private int currentSegmentNextIndex;
+        private TemplateModelIterator currentSegmentIterator;
+
+        private boolean hasPrefetchedResult;
+        private TemplateModel prefetchedNext;
+        private boolean prefetchedHasNext;
+
+        public ConcatenatedSequenceIterator(ConcatenatedSequence concatSeq) throws TemplateModelException {
+            // Descent down to the first nested sequence, and memorize the path down there
+            concSeqWithLeftDescentPending = concatSeq;
+        }
+
+        @Override
+        public TemplateModel next() throws TemplateModelException {
+            ensureHasPrefetchedResult();
+
+            if (!prefetchedHasNext) {
+                throw new TemplateModelException("The collection has no more elements.");
+            }
+
+            TemplateModel result = prefetchedNext;
+            hasPrefetchedResult = false; // To consume prefetched element
+            prefetchedNext = null; // To not prevent GC
+            return result;
+        }
+
+        @Override
+        public boolean hasNext() throws TemplateModelException {
+            ensureHasPrefetchedResult();
+            return prefetchedHasNext;
+        }
+
+        private void ensureHasPrefetchedResult() throws TemplateModelException {
+            if (hasPrefetchedResult) {
+                return;
+            }
+
+            while (true) {
+                // Try to fetch the next value from the current segment:
+                if (currentSegmentIterator != null) {
+                    boolean hasNext = currentSegmentIterator.hasNext();
+                    if (hasNext) {
+                        prefetchedNext = currentSegmentIterator.next();
+                        prefetchedHasNext = true;
+                        hasPrefetchedResult = true;
+                        return;
+                    } else {
+                        currentSegmentIterator = null;
+                        // Falls through
+                    }
+                } else if (currentSegment != null) {
+                    int size = currentSegment.size();
+                    if (currentSegmentNextIndex < size) {
+                        prefetchedNext = currentSegment.get(currentSegmentNextIndex++);
+                        prefetchedHasNext = true;
+                        hasPrefetchedResult = true;
+                        return;
+                    } else {
+                        currentSegment = null;
+                        // Falls through
+                    }
+                } else if (concSeqWithLeftDescentPending != null) { // Nothing to fetch from, has to descend left first
+                    ConcatenatedSequence leftDescentCurrentConcSeq = concSeqWithLeftDescentPending;
+                    concSeqWithLeftDescentPending = null;
+                    concSeqsWithRightPending.add(leftDescentCurrentConcSeq);
+
+                    TemplateSequenceModel leftSeq;
+                    while ((leftSeq = leftDescentCurrentConcSeq.left) instanceof ConcatenatedSequence) {
+                        leftDescentCurrentConcSeq = (ConcatenatedSequence) leftSeq;
+                        concSeqsWithRightPending.add(leftDescentCurrentConcSeq);
+                    }
+                    setCurrentSegment(leftSeq);
+                    continue; // Jump to fetching from current segment
+                }
+
+                // If we reach this, then the current segment was fully consumed, so we have to switch to the next segment.
+
+                if (concSeqsWithRightPending.isEmpty()) {
+                    prefetchedNext = null;
+                    prefetchedHasNext = false;
+                    hasPrefetchedResult = true;
+                    return;
+                }
+
+                TemplateSequenceModel right = concSeqsWithRightPending.remove(concSeqsWithRightPending.size() - 1).right;
+                if (right instanceof ConcatenatedSequence) {
+                    concSeqWithLeftDescentPending = (ConcatenatedSequence) right;
+                } else {
+                    setCurrentSegment(right);
+                }
+            }
+        }
+
+        private void setCurrentSegment(TemplateSequenceModel currentSegment) throws TemplateModelException {
+            if (currentSegment instanceof TemplateCollectionModel) {
+                this.currentSegmentIterator = ((TemplateCollectionModel) currentSegment).iterator();
+                this.currentSegment = null;
+            } else {
+                this.currentSegment = currentSegment;
+                this.currentSegmentNextIndex = 0;
+                this.currentSegmentIterator = null;
+            }
         }
     }
 

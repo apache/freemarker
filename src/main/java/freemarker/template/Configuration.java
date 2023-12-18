@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.temporal.Temporal;
@@ -441,7 +442,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY = 21;
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
     public static final int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
-    
+    /**
+     * This policy is to always require auto-escaping, to avoid accidents where because of misconfiguration, or a
+     * mistake of the template author it's disabled. With this policy, using output formats that don't support escaping
+     * will not be allowed. Using built-ins, and directives that disable auto-escaping (like {@code ?no_esc}) will also
+     * be errors (on parse-time). Note that if markup (like HTML) comers from the data model, then with this policy you
+     * will have to ensure that they come as {@link TemplateMarkupOutputModel}-s (which won't be auto-escaped even with
+     * this policy), not as {@link String}-s, because the template authors can't disable escaping for the value anymore.
+     */
+    public static final int FORCE_AUTO_ESCAPING_POLICY = 23;
+
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -991,6 +1001,21 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       {@link SimpleTemporal}. Before that, {@link Temporal}-s were treated as generic Java objects;
      *       see {@link BeansWrapper#BeansWrapper(Version)}.
      *     </ul>
+     *   </li>
+     *   <li>
+     *       <p>
+     *       2.3.33 (or higher):
+     *       <ul>
+     *           <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
+     *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
+     *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
+     *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
+     *           Java's localized {@link Collator}-s, we switch to a simple binary comparison after UNICODE NFKC
+     *           normalization. So, in theory it's possible that for some locales two different but similarly looking
+     *           characters were treated as equal by the collator, but will count as different now. But it's very
+     *           unlikely that anyone wanted to depend on such fragile logic anyway. Note again that we still do UNICODE
+     *           normalization, so combining characters won't break your comparison.)</p></li>
+     *       </ul>
      *   </li>
      * </ul>
      * 
@@ -2174,7 +2199,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @param autoEscapingPolicy
      *          One of the {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
-     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, and {@link #DISABLE_AUTO_ESCAPING_POLICY} constants.  
+     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, {@link #DISABLE_AUTO_ESCAPING_POLICY}, and
+     *          {@link #FORCE_AUTO_ESCAPING_POLICY} constants.
      * 
      * @see TemplateConfiguration#setAutoEscapingPolicy(int)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -3405,6 +3431,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setAutoEscapingPolicy(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
                 } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
                     setAutoEscapingPolicy(ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+                } else if ("force".equals(value)) {
+                    setAutoEscapingPolicy(FORCE_AUTO_ESCAPING_POLICY);
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
                 } else {

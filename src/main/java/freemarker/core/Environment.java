@@ -314,6 +314,8 @@ public final class Environment extends Configurable {
 
     private boolean fastInvalidReferenceExceptions;
 
+    private TemplateProcessingTracer templateProcessingTracer;
+
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
      * processing going on in this thread. Data model implementations that need access to the environment can call this
@@ -328,6 +330,14 @@ public final class Environment extends Configurable {
         threadEnv.set(env);
     }
 
+    /**
+     * Creates an environment with the given main (top-level) template that it intends to {@linkplain #process()} later;
+     * typically, it's better to use {@link Template#createProcessingEnvironment(Object, Writer)} instead of this.
+     *
+     * @param template Not {@code null}
+     * @param rootDataModel Not {@code null}
+     * @param out Not {@code null}
+     */
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
@@ -3667,6 +3677,25 @@ public final class Environment extends Configurable {
         };
     }
 
+    /**
+     * Sets the {@link TemplateProcessingTracer} to use for this {@link Environment};
+     * can be {@code null} to not have one. The default is also {@code null}.
+     *
+     * @since 2.3.33
+     */
+    public void setTemplateProcessingTracer(TemplateProcessingTracer templateProcessingTracer) {
+        this.templateProcessingTracer = templateProcessingTracer;
+    }
+
+    /**
+     * Getter pair of {@link #setTemplateProcessingTracer(TemplateProcessingTracer)}. Can be {@code null}.
+     *
+     * @since 2.3.33
+     */
+    public TemplateProcessingTracer getTemplateProcessingTracer() {
+        return templateProcessingTracer;
+    }
+
     private void pushElement(TemplateElement element) {
         final int newSize = ++instructionStackSize;
         TemplateElement[] instructionStack = this.instructionStack;
@@ -3679,9 +3708,16 @@ public final class Environment extends Configurable {
             this.instructionStack = instructionStack;
         }
         instructionStack[newSize - 1] = element;
+        if (templateProcessingTracer != null) {
+            templateProcessingTracer.enterElement(this, element);
+        }
     }
 
     private void popElement() {
+        if (templateProcessingTracer != null) {
+            TemplateElement element = instructionStack[instructionStackSize - 1];
+            templateProcessingTracer.exitElement(this);
+        }
         instructionStackSize--;
     }
 

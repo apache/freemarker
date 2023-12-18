@@ -851,7 +851,47 @@ public class OutputFormatTest extends TemplateTest {
                     + dExpted);
         }
     }
-    
+
+    @Test
+    public void testForcedAutoEsc() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setRegisteredCustomOutputFormats(ImmutableList.of(
+                SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
+        cfg.setAutoEscapingPolicy(Configuration.FORCE_AUTO_ESCAPING_POLICY);
+
+        String commonFTL = "${'.'} ${.autoEsc?c}";
+        String esced = "\\. true";
+
+        cfg.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
+        assertOutput(commonFTL, esced);
+
+        cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+        assertOutput(commonFTL, esced);
+
+        cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, esced);
+
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", esced);
+
+        cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        assertErrorContains("", IllegalArgumentException.class,
+                "plainText", "auto_escaping_policy", "force");
+        cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+        assertErrorContains("<#ftl auto_esc=false>", ParseException.class,
+                "auto_esc=false", "auto_escaping_policy", "force");
+        assertErrorContains("<#outputformat 'plainText'></#outputformat>", ParseException.class,
+                "plainText", "auto_escaping_policy", "force");
+        assertErrorContains("<#noAutoEsc></#noAutoEsc>", ParseException.class,
+                "noAutoEsc", "auto_escaping_policy", "force");
+        assertErrorContains("<#noautoesc></#noautoesc>", ParseException.class,
+                "noautoesc", "auto_escaping_policy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?no_esc}", ParseException.class,
+                "?no_esc", "auto_escaping_policy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", ParseException.class,
+                "?noEsc", "auto_escaping_policy", "force");
+    }
+
     @Test
     public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
         // Dynamic parser BI-s are supposed to use the parserConfiguration of the calling template, and ignore anything
