@@ -213,8 +213,6 @@ tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
     }
 
     classpath = files(configurations.named("combinedClasspath"))
-
-    doLast(freemarker.build.JavadocStyleAdjustments())
 }
 
 fun registerManualTask(taskName: String, localeValue: String, offlineValue: Boolean) {
