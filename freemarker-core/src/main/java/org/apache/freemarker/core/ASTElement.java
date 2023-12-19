@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
  * or other such non-expression node in the parsed template.
  */
 //TODO [FM3] will be public
-abstract class ASTElement extends ASTNode {
+abstract class ASTElement extends ASTNode implements TemplateProcessingTracer.TracedElement {
 
     private static final int INITIAL_CHILD_BUFFER_CAPACITY = 6;
 
@@ -72,8 +72,9 @@ abstract class ASTElement extends ASTNode {
     /**
      * Single line description of the element, which contain information about what kind of element it is, what are its
      * parameters, but doesn't contain the child nodes. Meant to be used for stack traces, also for tree views (that
-     * don't want to show the parameters as spearate nodes). There are no backward-compatibility guarantees regarding
-     * the format used at the moment.
+     * don't want to go down to the expression-level. There are no backward-compatibility guarantees regarding the
+     * format used, although it shouldn't change unless to fix a bug. It must be regular enough to be machine-parseable,
+     * and it must contain all information necessary for restoring an AST equivalent to the original.
      * 
      * @see #getLabelWithoutParameters()
      * @see #getCanonicalForm()
@@ -142,6 +143,11 @@ abstract class ASTElement extends ASTNode {
 
     public final int getChildCount() {
         return childCount;
+    }
+
+    @Override
+    public final boolean isLeaf() {
+        return getChildCount() == 0;
     }
 
     /**

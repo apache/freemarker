@@ -161,6 +161,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     private boolean fastInvalidReferenceExceptions;
 
+    private TemplateProcessingTracer templateProcessingTracer;
+
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
      * processing going on in this thread. Data model implementations that need access to the environment can call this
@@ -330,6 +332,21 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
+     * Sets the {@link TemplateProcessingTracer} to use for this {@link Environment};
+     * can be {@code null} to not have one. The default is also {@code null}.
+     */
+    public void setTemplateProcessingTracer(TemplateProcessingTracer templateProcessingTracer) {
+        this.templateProcessingTracer = templateProcessingTracer;
+    }
+
+    /**
+     * Getter pair of {@link #setTemplateProcessingTracer(TemplateProcessingTracer)}. Can be {@code null}.
+     */
+    public TemplateProcessingTracer getTemplateProcessingTracer() {
+        return templateProcessingTracer;
+    }
+
+    /**
      * "Visit" the template element.
      */
     // TODO [FM3] will be public
@@ -351,7 +368,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         } finally {
             popElement();
         }
-        // ATTENTION: This method body above is manually "inlined" into visit(ASTElement[]); keep them in sync!
+        // ATTENTION: This method body above is manually "inlined" into executeElements(ASTElement[]); keep them in sync!
     }
 
     // TODO [FM3] will be public
@@ -2410,9 +2427,16 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             this.instructionStack = instructionStack;
         }
         instructionStack[newSize - 1] = element;
+        if (templateProcessingTracer != null) {
+            templateProcessingTracer.enterElement(this, element);
+        }
     }
 
     void popElement() {
+        if (templateProcessingTracer != null) {
+            ASTElement element = instructionStack[instructionStackSize - 1];
+            templateProcessingTracer.exitElement(this);
+        }
         instructionStackSize--;
     }
 

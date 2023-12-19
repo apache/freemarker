@@ -19,17 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.util.Arrays;
-
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
@@ -38,6 +28,8 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
+
+import java.util.Arrays;
 
 /**
  * Utilities for creating error messages (and other messages).
@@ -200,7 +192,8 @@ class MessageUtils {
                 && !(argExp instanceof ASTExpDot)
                 && !(argExp instanceof ASTExpDynamicKeyName)
                 && !(argExp instanceof ASTExpFunctionCall)
-                && !(argExp instanceof ASTExpBuiltIn);
+                && !(argExp instanceof ASTExpBuiltIn)
+                && !(argExp instanceof ASTExpParenthesis);
         if (needParen) sb.append('(');
         sb.append(argExp.getCanonicalForm());
         if (needParen) sb.append(')');

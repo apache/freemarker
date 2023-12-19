@@ -40,12 +40,24 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     @Override
     ASTElement[] execute(Environment env) throws TemplateException, IOException {
         int ln  = getChildCount();
-        for (int i = 0; i < ln; i++) {
-            ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(i);
-            ASTExpression condition = cblock.condition;
-            env.replaceElementStackTop(cblock);
-            if (condition == null || condition.evalToBoolean(env)) {
-                return cblock.getChildBuffer();
+        if (env.getTemplateProcessingTracer() == null) {
+            for (int i = 0; i < ln; i++) {
+                ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(i);
+                ASTExpression condition = cblock.condition;
+                env.replaceElementStackTop(cblock);
+                if (condition == null || condition.evalToBoolean(env)) {
+                    return cblock.getChildBuffer();
+                }
+            }
+        } else {
+            for (int i = 0; i < ln; i++) {
+                ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) fastGetChild(i);
+                ASTExpression condition = cblock.condition;
+                env.replaceElementStackTop(cblock);
+                if (condition == null || condition.evalToBoolean(env)) {
+                    env.executeElement(cblock);
+                    return null;
+                }
             }
         }
         return null;

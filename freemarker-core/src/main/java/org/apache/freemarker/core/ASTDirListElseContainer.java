@@ -38,10 +38,25 @@ class ASTDirListElseContainer extends ASTDirective {
 
     @Override
     ASTElement[] execute(Environment env) throws TemplateException, IOException {
-        if (!listPart.acceptWithResult(env)) {
-            return elsePart.execute(env);
+        boolean hadItems;
+
+        TemplateProcessingTracer templateProcessingTracer = env.getTemplateProcessingTracer();
+        if (templateProcessingTracer == null) {
+            hadItems = listPart.acceptWithResult(env);
+        } else {
+            templateProcessingTracer.enterElement(env, listPart);
+            try {
+                hadItems = listPart.acceptWithResult(env);
+            } finally {
+                templateProcessingTracer.exitElement(env);
+            }
         }
-        return null;
+
+        if (hadItems) {
+            return null;
+        }
+
+        return new ASTElement[] { elsePart };
     }
 
     @Override
