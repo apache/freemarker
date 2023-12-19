@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 import static org.apache.freemarker.core.AutoEscapingPolicy.*;
 import static org.junit.Assert.assertEquals;
@@ -814,6 +815,51 @@ public class OutputFormatTest extends TemplateTest {
                 .autoEscapingPolicy(autoEscPolicy)
                 .outputFormat(outpoutFormat)
                 .build();
+    }
+
+    @Test
+    public void testForcedAutoEsc() throws Exception {
+        String commonFTL = "${'.'} ${.autoEsc?c}";
+        String esced = "\\. true";
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE));
+        assertOutput(commonFTL, esced);
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(DummyOutputFormat.INSTANCE));
+        assertOutput(commonFTL, esced);
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(PlainTextOutputFormat.INSTANCE));
+        assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, esced);
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(HTMLOutputFormat.INSTANCE));
+        assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", esced);
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(PlainTextOutputFormat.INSTANCE));
+        assertErrorContains("", IllegalArgumentException.class,
+                "plainText", "autoEscapingPolicy", "force");
+
+        setConfigurationForTestForceAutoEsc(cfgBuilder -> cfgBuilder.setOutputFormat(DummyOutputFormat.INSTANCE));
+        assertErrorContains("<#ftl autoEsc=false>", ParseException.class,
+                "autoEsc=false", "autoEscapingPolicy", "force");
+        assertErrorContains("<#outputFormat 'plainText'></#outputformat>", ParseException.class,
+                "plainText", "autoEscapingPolicy", "force");
+        assertErrorContains("<#noAutoEsc></#noAutoEsc>", ParseException.class,
+                "noAutoEsc", "autoEscapingPolicy", "force");
+        assertErrorContains("<#noAutoEsc></#noautoesc>", ParseException.class,
+                "noAutoEsc", "autoEscapingPolicy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", ParseException.class,
+                "?noEsc", "autoEscapingPolicy", "force");
+        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", ParseException.class,
+                "?noEsc", "autoEscapingPolicy", "force");
+    }
+
+    private void setConfigurationForTestForceAutoEsc(Consumer<Configuration.ExtendableBuilder<?>> cfgBuilderAdjuster) {
+        setConfiguration(cfgBuilder -> {
+            cfgBuilder.setRegisteredCustomOutputFormats(ImmutableList.of(
+                    SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
+            cfgBuilder.setAutoEscapingPolicy(AutoEscapingPolicy.FORCE);
+            cfgBuilderAdjuster.accept(cfgBuilder);
+        });
     }
 
     @Test

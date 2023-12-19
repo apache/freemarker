@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Set;
-
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -30,6 +26,10 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
+
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Set;
 
 public abstract class MutableParsingAndProcessingConfiguration<
         SelfT extends MutableParsingAndProcessingConfiguration<SelfT>>
@@ -98,6 +98,8 @@ public abstract class MutableParsingAndProcessingConfiguration<
                     setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
                 } else if ("enableIfSupported".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
+                } else if ("force".equals(value)) {
+                    setAutoEscapingPolicy(AutoEscapingPolicy.FORCE);
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
                 } else {
@@ -237,7 +239,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * * Setter pair of {@link #getAutoEscapingPolicy()}.
+     * Setter pair of {@link #getAutoEscapingPolicy()}.
      */
     public void setAutoEscapingPolicy(AutoEscapingPolicy autoEscapingPolicy) {
         _NullArgumentException.check("autoEscapingPolicy", autoEscapingPolicy);

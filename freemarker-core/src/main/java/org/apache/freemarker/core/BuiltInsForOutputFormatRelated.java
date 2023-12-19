@@ -24,7 +24,7 @@ import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 
 class BuiltInsForOutputFormatRelated {
 
-    static class no_escBI extends AbstractConverterBI {
+    static class no_escBI extends AbstractConverterBI implements BuiltInBannedWhenForcedAutoEscaping {
 
         @Override
         protected TemplateModel calculateResult(String lho, MarkupOutputFormat outputFormat, Environment env)

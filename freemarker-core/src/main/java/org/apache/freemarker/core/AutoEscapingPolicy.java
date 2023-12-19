@@ -40,5 +40,7 @@ public enum AutoEscapingPolicy {
     ENABLE_IF_DEFAULT,
 
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
-    ENABLE_IF_SUPPORTED
+    ENABLE_IF_SUPPORTED,
+
+    FORCE
 }

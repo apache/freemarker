@@ -19,29 +19,10 @@
 
 package org.apache.freemarker.test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
-import java.io.FilterWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Properties;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.TemplateConfiguration.Builder;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
@@ -49,7 +30,13 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtils;
 import org.junit.Ignore;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Consumer;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
 
 /**
  * Superclass of JUnit tests that process templates.
@@ -102,6 +89,12 @@ public abstract class TemplateTest {
      */
     protected final void setConfiguration(Configuration.ExtendableBuilder<?> configurationBuilder) {
         setConfiguration(configurationBuilder.build());
+    }
+
+    protected final void setConfiguration(Consumer<Configuration.ExtendableBuilder<?>> cfgBuilderAdjuster) {
+        Configuration.ExtendableBuilder<?> configBuilder = newConfigurationBuilder();
+        cfgBuilderAdjuster.accept(configBuilder);
+        setConfiguration(configBuilder.build());
     }
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {

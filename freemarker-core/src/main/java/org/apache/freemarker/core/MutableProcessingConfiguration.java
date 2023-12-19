@@ -1532,7 +1532,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>String value: {@code "enableIfDefault"} or {@code "enableIfDefault"} for
      *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT},
      *       {@code "enableIfDefault"} or {@code "enableIfSupported"} for
-     *       {@link AutoEscapingPolicy#ENABLE_IF_SUPPORTED}
+     *       {@link AutoEscapingPolicy#ENABLE_IF_SUPPORTED},
+     *       {@code "enableIfDefault"} or {@code "force"} for
+     *       {@link AutoEscapingPolicy#FORCE}
      *       {@code "disable"} for {@link AutoEscapingPolicy#DISABLE}.
      *       
      *   <li><p>{@code "sourceEncoding"}:

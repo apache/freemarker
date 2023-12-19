@@ -191,7 +191,8 @@ public class FMParser {
         if (outputFormat instanceof MarkupOutputFormat) {
             if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_DEFAULT) {
                 autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapedByDefault();
-            } else if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_SUPPORTED) {
+            } else if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_SUPPORTED
+                    || autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
                 autoEscaping = true;
             } else if (autoEscapingPolicy == AutoEscapingPolicy.DISABLE) {
                 autoEscaping = false;
@@ -354,7 +355,16 @@ public class FMParser {
                     template, start);
         }
     }    
-    
+
+    private static String forcedAutoEscapingPolicyExceptionMessage(OutputFormat outputFormat) {
+        return forcedAutoEscapingPolicyExceptionMessage("Non-markup output format " + outputFormat);
+    }
+
+    private static String forcedAutoEscapingPolicyExceptionMessage(String whatCanNotBeUsed) {
+        return whatCanNotBeUsed + " can't be used when the \"" + MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY + "\" "
+                + "configuration setting was set to \"force\" (AutoEscapingPolicy.FORCE).";
+    }
+
     private ParserIteratorBlockContext pushIteratorBlockContext() {
         if (iteratorBlockContexts == null) {
             iteratorBlockContexts = new ArrayList(4);
@@ -1951,6 +1961,14 @@ ASTExpression BuiltIn(ASTExpression lhoExp) :
 	        }
             
             return result;
+        }
+
+        if (result instanceof BuiltInBannedWhenForcedAutoEscaping) {
+            if (autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
+                throw new ParseException(
+                        forcedAutoEscapingPolicyExceptionMessage("The ?" + t.image + " expression"),
+                        template, t);
+            }
         }
 
         if (result instanceof MarkupOutputFormatBoundBuiltIn) {
@@ -3742,6 +3760,9 @@ ASTDirOutputFormat OutputFormat() :
             } else {
                 outputFormat = template.getConfiguration().getOutputFormat(paramStr);
             }
+            if (!(outputFormat instanceof MarkupOutputFormat) && autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
+                throw new ParseException(forcedAutoEscapingPolicyExceptionMessage(outputFormat), template, start);
+            }
             recalculateAutoEscapingField();
         } catch (IllegalArgumentException e) {
             throw new ParseException("Invalid format name: " + e.getMessage(), template, start, e.getCause());
@@ -3796,6 +3817,11 @@ ASTDirNoAutoEsc NoAutoEsc() :
 {
     start = <NOAUTOESC>
     {
+        if (autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
+            throw new ParseException(
+                    forcedAutoEscapingPolicyExceptionMessage("<#noAutoEsc>"),
+                    template, start);
+        }
         lastAutoEscapingPolicy = autoEscapingPolicy;
         autoEscapingPolicy = AutoEscapingPolicy.DISABLE;
         recalculateAutoEscapingField();
@@ -4146,6 +4172,11 @@ void HeaderElement() :
                                 autoEscRequester = key;
                                 autoEscapingPolicy = AutoEscapingPolicy.ENABLE_IF_SUPPORTED;
                             } else {
+                                if (autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
+                                    throw new ParseException(
+                                            forcedAutoEscapingPolicyExceptionMessage(ks + "=false"),
+                                            exp);
+                                }
                                 autoEscapingPolicy = AutoEscapingPolicy.DISABLE;
                             }
                             recalculateAutoEscapingField();
@@ -4364,6 +4395,10 @@ ASTElement Root() :
         HeaderElement()
     ]
     {
+        if (!(outputFormat instanceof MarkupOutputFormat) && autoEscapingPolicy == AutoEscapingPolicy.FORCE) {
+            throw new IllegalArgumentException(forcedAutoEscapingPolicyExceptionMessage(outputFormat));
+        }
+
         // There will be no WrongEncodingException exception, release mark buffer:
         if (streamToUnmarkWhenEncEstabd != null) {
             streamToUnmarkWhenEncEstabd.mark(0);
