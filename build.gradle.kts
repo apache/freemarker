@@ -51,7 +51,7 @@ freemarkerRoot {
 
 val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJavacc") {
     sourceDirectory.set(file("freemarker-core/src/main/javacc"))
-    destinationDirectory.set(buildDir.toPath().resolve("generated").resolve("javacc").toFile())
+    destinationDirectory.set(project.layout.buildDirectory.map { it.dir("generated").dir("javacc") })
     javaccVersion.set("7.0.12")
 
     fileNameOverrides.addAll(
@@ -346,7 +346,7 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 }
 
 val distArchiveBaseName = "apache-${name}"
-val distDir = buildDir.toPath().resolve("distributions")
+val distDir = layout.buildDirectory.map { it.dir("distributions") }
 
 fun registerDistSupportTasks(archiveTask: TaskProvider<Tar>) {
     val signTask = tasks.register<freemarker.build.SignatureTask>("${archiveTask.name}Signature") {
@@ -378,7 +378,7 @@ fun registerCommonFiles(tar: Tar) {
 val distBin = tasks.register<Tar>("distBin") {
     compression = Compression.GZIP
     archiveBaseName.set(distArchiveBaseName)
-    destinationDirectory.set(distDir.toFile())
+    destinationDirectory.set(distDir)
     archiveAppendix.set("bin")
 
     registerCommonFiles(this)
@@ -405,7 +405,7 @@ registerDistSupportTasks(distBin)
 val distSrc = tasks.register<Tar>("distSrc") {
     compression = Compression.GZIP
     archiveBaseName.set(distArchiveBaseName)
-    destinationDirectory.set(distDir.toFile())
+    destinationDirectory.set(distDir)
     archiveAppendix.set("src")
 
     registerCommonFiles(this)
@@ -454,7 +454,7 @@ fun registerDistRatTask(taskName: String, excludeFile: File, srcArchiveTaskRef: 
     val ratInputTask = tasks.register<Sync>(inputTaskName) {
         dependsOn(srcArchiveTaskRef)
 
-        destinationDir = buildDir.toPath().resolve("rat-prep").resolve(taskName).toFile()
+        destinationDir = layout.buildDirectory.get().asFile.resolve("rat-prep").resolve(taskName)
         from(tarTree(srcArchiveTaskRef.flatMap { it.archiveFile }))
     }
 
