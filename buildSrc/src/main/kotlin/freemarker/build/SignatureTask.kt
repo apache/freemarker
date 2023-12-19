@@ -39,18 +39,12 @@ open class SignatureTask @Inject constructor(
 
     @InputFile
     @PathSensitive(PathSensitivity.NONE)
-    val inputFile: RegularFileProperty
+    val inputFile: RegularFileProperty = objects.fileProperty()
 
     @OutputFile
-    val outputFile: Provider<File>
+    val outputFile: Provider<File> = this.inputFile.map { f -> File("${f.asFile}.asc") }
 
-    private val signing : SigningExtension
-
-    init {
-        this.inputFile = objects.fileProperty()
-        this.outputFile = this.inputFile.map { f -> File("${f.asFile}.asc") }
-        this.signing = project.the()
-    }
+    private val signing : SigningExtension = project.the()
 
     @TaskAction
     fun signFile() {
