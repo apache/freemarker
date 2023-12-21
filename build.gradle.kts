@@ -233,6 +233,17 @@ publishing {
             val defaultDeployUrl = if (snapshot) "https://repository.apache.org/content/repositories/snapshots" else "https://repository.apache.org/service/local/staging/deploy/maven2"
             setUrl(providers.gradleProperty("freemarkerDeployUrl").getOrElse(defaultDeployUrl))
             name = providers.gradleProperty("freemarkerDeployServerId").getOrElse("apache.releases.https")
+
+            val apacheUser = providers.gradleProperty("freemarker.deploy.apache.user")
+                .getOrElse("")
+
+            if (apacheUser.isNotEmpty()) {
+                credentials {
+                    username = apacheUser
+                    password = providers.gradleProperty("freemarker.deploy.apache.password")
+                        .getOrElse("")
+                }
+            }
         }
         maven {
             name = "local"
