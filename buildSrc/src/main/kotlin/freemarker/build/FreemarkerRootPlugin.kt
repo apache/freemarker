@@ -91,7 +91,7 @@ open class FreemarkerRootPlugin : Plugin<Project> {
                     if (ext.versionService.developmentBuild) {
                         throw IllegalStateException("The development build configuration is active!")
                     }
-                    if (!ext.doSignPackages.get()) {
+                    if (!ext.signMethod.needSignature()) {
                         throw IllegalStateException("Package signing is disabled!")
                     }
                 }

@@ -201,10 +201,10 @@ class FreemarkerRootExtension constructor(
         .gradleProperty("freemarker.javadoc.javaVersion")
         .get()
 
-    val doSignPackages = context.providers
-        .gradleProperty("signPublication")
-        .map { it.toBoolean() }
-        .orElse(true)
+    val signMethod = context.providers
+        .gradleProperty("freemarker.signMethod")
+        .map { SignatureConfiguration.valueOf(it.uppercase()) }
+        .get()
 
     private val allConfiguredSourceSetNamesRef = project.objects.setProperty<String>()
     val allConfiguredSourceSetNames: Provider<Set<String>> = allConfiguredSourceSetNamesRef

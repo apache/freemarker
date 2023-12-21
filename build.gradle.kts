@@ -337,7 +337,8 @@ publishing {
                 }
             }
         }
-        if (fmExt.doSignPackages.get()) {
+        if (fmExt.signMethod.needSignature()) {
+            fmExt.signMethod.configure(signing)
             signing.sign(mainPublication)
         }
     }
@@ -359,6 +360,7 @@ val distDir = layout.buildDirectory.map { it.dir("distributions") }
 
 fun registerDistSupportTasks(archiveTask: TaskProvider<Tar>) {
     val signTask = tasks.register<freemarker.build.SignatureTask>("${archiveTask.name}Signature") {
+        signatureConfiguration.set(fmExt.signMethod)
         inputFile.set(archiveTask.flatMap { task -> task.archiveFile })
     }
 
@@ -370,7 +372,7 @@ fun registerDistSupportTasks(archiveTask: TaskProvider<Tar>) {
         dependsOn(archiveTask)
         dependsOn(checksumTask)
 
-        if (fmExt.doSignPackages.get()) {
+        if (fmExt.signMethod.needSignature()) {
             dependsOn(signTask)
         }
     }

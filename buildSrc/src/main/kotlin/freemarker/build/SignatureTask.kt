@@ -24,18 +24,23 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
 
 open class SignatureTask @Inject constructor(
     objects: ObjectFactory
 ) : DefaultTask() {
+    @Input
+    val signatureConfiguration: Property<SignatureConfiguration> = objects.property()
 
     @InputFile
     @PathSensitive(PathSensitivity.NONE)
@@ -48,6 +53,10 @@ open class SignatureTask @Inject constructor(
 
     @TaskAction
     fun signFile() {
-        signing.sign(inputFile.get().asFile)
+        val config = signatureConfiguration.get()
+        if (config.needSignature()) {
+            config.configure(signing)
+            signing.sign(inputFile.get().asFile)
+        }
     }
 }
