@@ -40,8 +40,7 @@ open class FreemarkerRootPlugin : Plugin<Project> {
     private class Configurer(
         private val project: Project,
         private val ext: FreemarkerRootExtension
-        ) {
-
+    ) {
         private val tasks = project.tasks
         private val java = project.the<JavaPluginExtension>()
         private val mainSourceSet = java.sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get()
@@ -55,7 +54,7 @@ open class FreemarkerRootPlugin : Plugin<Project> {
                 withJavadocJar()
 
                 toolchain {
-                    languageVersion.set(JavaLanguageVersion.of(ext.defaultJavaVersion))
+                    languageVersion.set(JavaLanguageVersion.of(ext.javaVersion))
                 }
             }
 

@@ -19,6 +19,7 @@
 
 package freemarker.build
 
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -64,13 +65,6 @@ internal class JavaProjectContext constructor(
             .requiredVersion
     }
 
-    fun javaVersion(preferredJavaVersion: String, javaVersionOverride: Provider<String>): JavaLanguageVersion {
-        return javaVersionOverride
-            .orElse(providers.gradleProperty("java${preferredJavaVersion}CompilerOverride"))
-            .getOrElse(preferredJavaVersion)
-            .let { JavaLanguageVersion.of(it) }
-    }
-
     fun inheritConfig(child: SourceSet, parent: SourceSet, nameProvider: ((SourceSet) -> String)) {
         val configurations = project.configurations
         val childConfigRef = configurations.named(nameProvider.invoke(child))
@@ -97,13 +91,8 @@ class FreemarkerModuleDef internal constructor(
     private val context: JavaProjectContext,
     private val ext: FreemarkerRootExtension,
     val sourceSetName: String,
-    defaultCompilerVersion: String
+    val compilerVersion: JavaLanguageVersion
 ) {
-    val compilerVersion = context.javaVersion(
-        defaultCompilerVersion,
-        ext.freemarkerCompilerVersionOverrideRef
-    )
-
     val main = sourceSetName == SourceSet.MAIN_SOURCE_SET_NAME
     val baseDirName = if (main) "core" else sourceSetName
 
@@ -112,8 +101,8 @@ class FreemarkerModuleDef internal constructor(
     val sourceSetRootDirName = "freemarker-${baseDirName}"
     val sourceSetSrcPath = "${sourceSetRootDirName}/src"
 
-    fun enableTests(preferredTestJavaVersion: String = ext.testJavaVersion) {
-        configureTests(context.javaVersion(preferredTestJavaVersion, ext.testRunnerJavaVersionOverrideRef))
+    fun enableTests(testJavaVersion: String = ext.testJavaVersion) {
+        configureTests(JavaLanguageVersion.of(testJavaVersion))
     }
 
     private fun configureTests(testJavaVersion: JavaLanguageVersion) {
@@ -200,22 +189,17 @@ class FreemarkerRootExtension constructor(
 
     val versionDef = versionService.versionDef
 
-    val freemarkerCompilerVersionOverrideRef = context.providers
-        .gradleProperty("freemarkerCompilerVersionOverride")
+    val javaVersion = context.providers
+        .gradleProperty("freemarker.javaVersion")
+        .get()
 
-    val defaultJavaVersion = freemarkerCompilerVersionOverrideRef
-        .orElse(context.providers.gradleProperty("freemarkerDefaultJavaVersion"))
-        .getOrElse(context.version("defaultJava"))
-
-    val testJavaVersion = context.providers.gradleProperty("freeMarkerTestJavaVersion")
-        .getOrElse("16")
-
-    val testRunnerJavaVersionOverrideRef = context.providers
-        .gradleProperty("freeMarkerTestRunnerJavaVersionOverride")
+    val testJavaVersion = context.providers
+        .gradleProperty("freemarker.test.javaVersion")
+        .get()
 
     val javadocJavaVersion = context.providers
-        .gradleProperty("freeMarkerJavadocJavaVersion")
-        .getOrElse(defaultJavaVersion)
+        .gradleProperty("freemarker.javadoc.javaVersion")
+        .get()
 
     val doSignPackages = context.providers
         .gradleProperty("signPublication")
@@ -228,13 +212,14 @@ class FreemarkerRootExtension constructor(
     private val tasks = project.tasks
     private val java = project.the<JavaPluginExtension>()
     private val sourceSets = java.sourceSets
+    private val testUtilsConfigured = AtomicBoolean(false)
 
     fun isPublishedVersion(): Boolean {
         return !versionDef.version.endsWith("-SNAPSHOT") ||
                 !versionDef.displayVersion.contains("-nightly")
-}
+    }
 
-    fun configureTestUtils(preferredJavaVersion: String) {
+    private fun configureTestUtils() {
         sourceSets.register(TEST_UTILS_SOURCE_SET_NAME) {
             val baseDir = "freemarker-${TEST_UTILS_SOURCE_SET_NAME}/src/main"
             java.setSrcDirs(listOf("${baseDir}/java"))
@@ -242,7 +227,7 @@ class FreemarkerRootExtension constructor(
 
             tasks.named<JavaCompile>(compileJavaTaskName) {
                 javaCompiler.set(context.javaToolchains.compilerFor {
-                    languageVersion.set(context.javaVersion(preferredJavaVersion, freemarkerCompilerVersionOverrideRef))
+                    languageVersion.set(JavaLanguageVersion.of(testJavaVersion))
                 })
             }
         }
@@ -250,12 +235,23 @@ class FreemarkerRootExtension constructor(
 
     fun configureSourceSet(
         sourceSetName: String,
+        configuration: FreemarkerModuleDef.() -> Unit = { }
+    ) {
+        configureSourceSet(sourceSetName, javaVersion, configuration)
+    }
+
+    fun configureSourceSet(
+        sourceSetName: String,
         sourceSetVersion: String,
-        configuration: FreemarkerModuleDef.() -> Unit = { }) {
+        configuration: FreemarkerModuleDef.() -> Unit = { }
+    ) {
+        if (testUtilsConfigured.compareAndSet(false, true)) {
+            configureTestUtils()
+        }
 
         allConfiguredSourceSetNamesRef.add(sourceSetName)
 
-        FreemarkerModuleDef(context, this, sourceSetName, sourceSetVersion).apply {
+        FreemarkerModuleDef(context, this, sourceSetName, JavaLanguageVersion.of(sourceSetVersion)).apply {
             val sourceSetSrcMainPath = "${sourceSetSrcPath}/main"
 
             sourceSet.apply {

@@ -38,14 +38,12 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 freemarkerRoot {
-    configureTestUtils("16")
-
-    configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME, "8") { enableTests() }
-    configureSourceSet("jsp20", "8")
-    configureSourceSet("jsp21", "8") { enableTests() }
-    configureSourceSet("jython20", "8")
-    configureSourceSet("jython22", "8")
-    configureSourceSet("jython25", "8") { enableTests() }
+    configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
+    configureSourceSet("jsp20")
+    configureSourceSet("jsp21") { enableTests() }
+    configureSourceSet("jython20")
+    configureSourceSet("jython22")
+    configureSourceSet("jython25") { enableTests() }
     configureSourceSet("core16", "16")
 }
 
