@@ -55,8 +55,8 @@ import freemarker.template.utility.ClassUtil;
  * <p><strong>Implementation note:</strong> If you are using W3C DOM documents
  * built by the Crimson XML parser (or you are using the built-in JDK 1.4 XML
  * parser, which is essentially Crimson), make sure you call
- * <tt>setNamespaceAware(true)</tt> on the 
- * <tt>javax.xml.parsers.DocumentBuilderFactory</tt> instance used for document
+ * {@code setNamespaceAware(true)} on the 
+ * {@code javax.xml.parsers.DocumentBuilderFactory} instance used for document
  * building even when your documents don't use XML namespaces. Failing to do so,
  * you will experience incorrect behavior when using the documents wrapped with
  * this model.</p>
@@ -210,78 +210,79 @@ implements
      * Returns a new NodeListModel containing the nodes that result from applying
      * an operator to this model's nodes.
      * @param key the operator to apply to nodes. Available operators are:
-     * <table style="width: auto; border-collapse: collapse" border="1" summary="XML node hash keys">
+     * <table style="width: auto; border-collapse: collapse" border="1">
+     *   <caption style="display: none">XML node hash keys</caption>
      *   <thead>
      *     <tr>
-     *       <th align="left">Key name</th>
-     *       <th align="left">Evaluates to</th>
+     *       <th>Key name</th>
+     *       <th>Evaluates to</th>
      *     </tr>  
      *   </thead>
      *   <tbody>
      *     <tr>
-     *       <td><tt>*</tt> or <tt>_children</tt></td>
+     *       <td>{@code *} or {@code _children}</td>
      *       <td>all direct element children of current nodes (non-recursive).
      *         Applicable to element and document nodes.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>@*</tt> or <tt>_attributes</tt></td>
+     *       <td>{@code @*} or {@code _attributes}</td>
      *       <td>all attributes of current nodes. Applicable to elements only.
      *         </td>
      *     </tr>
      *     <tr>
-     *       <td><tt>@<i>attributeName</i></tt></td>
+     *       <td><code>@<i>attributeName</i></code></td>
      *       <td>named attributes of current nodes. Applicable to elements, 
      *         doctypes and processing instructions. On doctypes it supports 
-     *         attributes <tt>publicId</tt>, <tt>systemId</tt> and 
-     *         <tt>elementName</tt>. On processing instructions, it supports 
-     *         attributes <tt>target</tt> and <tt>data</tt>, as well as any 
+     *         attributes {@code publicId}, {@code systemId} and 
+     *         {@code elementName}. On processing instructions, it supports 
+     *         attributes {@code target} and {@code data}, as well as any 
      *         other attribute name specified in data as 
-     *         <tt>name=&quot;value&quot;</tt> pair on dom4j or JDOM models. 
+     *         <code>name=&quot;value&quot;</code> pair on dom4j or JDOM models. 
      *         The attribute nodes for doctype and processing instruction are 
      *         synthetic, and as such have no parent. Note, however that 
-     *         <tt>@*</tt> does NOT operate on doctypes or processing 
+     *         {@code @*} does NOT operate on doctypes or processing 
      *         instructions.</td>
      *     </tr>  
      * 
      *     <tr>
-     *       <td><tt>_ancestor</tt></td>
+     *       <td>{@code _ancestor}</td>
      *       <td>all ancestors up to root element (recursive) of current nodes.
-     *         Applicable to same node types as <tt>_parent</tt>.</td>
+     *         Applicable to same node types as {@code _parent}.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>_ancestorOrSelf</tt></td>
+     *       <td>{@code _ancestorOrSelf}</td>
      *       <td>all ancestors of current nodes plus current nodes. Applicable 
-     *         to same node types as <tt>_parent</tt>.</td>
+     *         to same node types as {@code _parent}.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>_content</tt></td>
+     *       <td>{@code _content}</td>
      *       <td>the complete content of current nodes, including children 
      *         elements, text, entity references, and processing instructions 
      *         (non-recursive). Applicable to elements and documents.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>_descendant</tt></td>
+     *       <td>{@code _descendant}</td>
      *       <td>all recursive descendant element children of current nodes. 
      *         Applicable to document and element nodes.</td>
      *     </tr>  
      *     <tr>
-     *       <td><tt>_descendantOrSelf</tt></td>
+     *       <td>{@code _descendantOrSelf}</td>
      *       <td>all recursive descendant element children of current nodes 
      *         plus current nodes. Applicable to document and element nodes.
      *         </td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_document</tt></td>
+     *       <td>{@code _document}</td>
      *       <td>all documents the current nodes belong to. Applicable to all 
      *       nodes except text.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_doctype</tt></td>
+     *       <td>{@code _doctype}</td>
      *       <td>doctypes of the current nodes. Applicable to document nodes 
      *       only.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_filterType</tt></td>
+     *       <td>{@code _filterType}</td>
      *       <td>is a filter-by-type template method model. When called, it 
      *         will yield a node list that contains only those current nodes 
      *         whose type matches one of types passed as argument. You can pass
@@ -294,7 +295,7 @@ implements
      *         &quot;text&quot;.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_name</tt></td>
+     *       <td>{@code _name}</td>
      *       <td>the names of current nodes, one string per node 
      *         (non-recursive). Applicable to elements and attributes 
      *         (returns their local names), entity references, processing 
@@ -302,34 +303,34 @@ implements
      *         ID)</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_nsprefix</tt></td>
+     *       <td>{@code _nsprefix}</td>
      *       <td>the namespace prefixes of current nodes, one string per node 
      *         (non-recursive). Applicable to elements and attributes</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_nsuri</tt></td>
+     *       <td>{@code _nsuri}</td>
      *       <td>the namespace URIs of current nodes, one string per node 
      *       (non-recursive). Applicable to elements and attributes</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_parent</tt></td>
+     *       <td>{@code _parent}</td>
      *       <td>parent elements of current nodes. Applicable to element, 
      *       attribute, comment, entity, processing instruction.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_qname</tt></td>
+     *       <td>{@code _qname}</td>
      *       <td>the qualified names of current nodes in 
-     *         <tt>[namespacePrefix:]localName</tt> form, one string per node 
+     *         {@code [namespacePrefix:]localName} form, one string per node 
      *         (non-recursive). Applicable to elements and attributes</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_registerNamespace(prefix, uri)</tt></td>
+     *       <td>{@code _registerNamespace(prefix, uri)}</td>
      *       <td>register a XML namespace with the specified prefix and URI for
      *         the current node list and all node lists that are derived from 
      *         the current node list. After registering, you can use the
-     *         <tt>nodelist[&quot;prefix:localname&quot;]</tt>, or
-     *         <tt>nodelist[&quot;@prefix:localname&quot;]</tt> syntax
-     *          (or <tt>nodelist.prefix\:localname</tt>, or <tt>nodelist.@prefix\:localname</tt>)
+     *         <code>nodelist[&quot;prefix:localname&quot;]</code>, or
+     *         <code>nodelist[&quot;@prefix:localname&quot;]</code> syntax
+     *          (or {@code nodelist.prefix\:localname}, or {@code nodelist.@prefix\:localname})
      *         to reach elements, and attributes whose names are namespace-scoped.
      *         Note that the namespace prefix need not match the actual prefix 
      *         used by the XML document itself since namespaces are compared 
@@ -339,7 +340,7 @@ implements
      *         example, you certainly should have used {@code doc._registerNamespace(...)}.
      *     </tr>
      *     <tr>
-     *       <td><tt>_text</tt></td>
+     *       <td>{@code _text}</td>
      *       <td>the text of current nodes, one string per node 
      *         (non-recursive). Applicable to elements, attributes, comments, 
      *         processing instructions (returns its data) and CDATA sections. 
@@ -347,7 +348,7 @@ implements
      *         escaped.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_type</tt></td>
+     *       <td>{@code _type}</td>
      *       <td>Returns a string describing the type of nodes, one
      *         string per node. The returned values are &quot;attribute&quot;,
      *         &quot;cdata&quot;, &quot;comment&quot;, &quot;document&quot;,
@@ -357,23 +358,23 @@ implements
      *         &quot;text&quot;, or &quot;unknown&quot;.</td>
      *     </tr>
      *     <tr>
-     *       <td><tt>_unique</tt></td>
+     *       <td>{@code _unique}</td>
      *       <td>a copy of the current nodes that keeps only the first 
      *         occurrence of every node, eliminating duplicates. Duplicates can
      *         occur in the node list by applying uptree-traversals 
-     *         <tt>_parent</tt>, <tt>_ancestor</tt>, <tt>_ancestorOrSelf</tt>,
-     *         and <tt>_document</tt> on a node list with multiple elements. 
-     *         I.e. <tt>foo._children._parent</tt> will return a node list that
+     *         {@code _parent}, {@code _ancestor}, {@code _ancestorOrSelf},
+     *         and {@code _document} on a node list with multiple elements. 
+     *         I.e. {@code foo._children._parent} will return a node list that
      *         has duplicates of nodes in foo - each node will have the number 
      *         of occurrences equal to the number of its children. In these 
-     *         cases, use <tt>foo._children._parent._unique</tt> to eliminate 
+     *         cases, use {@code foo._children._parent._unique} to eliminate 
      *         duplicates. Applicable to all node types.</td>
      *     </tr>
      *     <tr>
      *       <td>any other key</td>
      *       <td>element children of current nodes with name matching the key. 
      *       This allows for convenience child traversal in 
-     *       <tt>book.chapter.title</tt> style syntax. Applicable to document 
+     *       {@code book.chapter.title} style syntax. Applicable to document 
      *       and element nodes.</td>
      *     </tr>
      *   </tbody>

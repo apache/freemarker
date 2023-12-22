@@ -32,9 +32,9 @@ public class TransformMethodWrapper2 implements TemplateMethodModel {
     /**
      * Executes a method call.
      *
-     * @param arguments a <tt>List</tt> of <tt>String</tt> objects containing
+     * @param arguments a {@code List} of {@code String} objects containing
      * the values of the arguments passed to the method.
-     * @return the <tt>TemplateModel</tt> produced by the method, or null.
+     * @return the {@code TemplateModel} produced by the method, or null.
      */
     public Object exec(List arguments) {
         TransformModel1 cTransformer = new TransformModel1();

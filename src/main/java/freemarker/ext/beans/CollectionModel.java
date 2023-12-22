@@ -33,7 +33,7 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * <p>A special case of {@link BeanModel} that can wrap Java collections
  * and that implements the {@link TemplateCollectionModel} in order to be usable 
- * in a <tt>&lt;#list&gt;</tt> block.</p>
+ * in a <code>&lt;#list&gt;</code> block.</p>
  */
 public class CollectionModel
 extends

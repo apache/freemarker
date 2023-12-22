@@ -39,7 +39,7 @@ import freemarker.template.WrappingTemplateModel;
 import freemarker.template.utility.RichObjectWrapper;
 
 /**
- * Model used by {@link BeansWrapper} when <tt>simpleMapWrapper</tt>
+ * Model used by {@link BeansWrapper} when {@code simpleMapWrapper}
  * mode is enabled. Provides a simple hash model interface to the
  * underlying map (does not copy like {@link freemarker.template.SimpleHash}),
  * and a method interface to non-string keys.

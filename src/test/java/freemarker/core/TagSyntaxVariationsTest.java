@@ -206,7 +206,7 @@ public class TagSyntaxVariationsTest extends TestCase {
     }
     
     /**
-     * @param expected the expected output or <tt>null</tt> if we expect
+     * @param expected the expected output or {@code null} if we expect
      * a parsing error.
      */
     private static final void test(

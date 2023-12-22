@@ -32,14 +32,14 @@ import freemarker.template.TemplateModelException;
 /**
  * <p>A special case of {@link BeanModel} that adds implementation
  * for {@link TemplateMethodModelEx} on map objects that is a shortcut for the
- * <tt>Map.get()</tt> method. Note that if the passed argument itself is a
+ * {@code Map.get()} method. Note that if the passed argument itself is a
  * reflection-wrapper model, then the map lookup will be performed using the
- * wrapped object as the key. Note that you can call <tt>get()</tt> using the
- * <tt>map.key</tt> syntax inherited from {@link BeanModel} as well, 
+ * wrapped object as the key. Note that you can call {@code get()} using the
+ * {@code map.key} syntax inherited from {@link BeanModel} as well, 
  * however in that case the key is always a string.</p>
  * <p>The class itself does not implement the {@link freemarker.template.TemplateCollectionModel}.
- * You can, however use <tt>map.entrySet()</tt>, <tt>map.keySet()</tt>, or
- * <tt>map.values()</tt> to obtain {@link freemarker.template.TemplateCollectionModel} instances for 
+ * You can, however use {@code map.entrySet()}, {@code map.keySet()}, or
+ * {@code map.values()} to obtain {@link freemarker.template.TemplateCollectionModel} instances for 
  * various aspects of the map.</p>
  */
 public class MapModel
@@ -69,7 +69,7 @@ implements
     }
 
     /**
-     * The first argument is used as a key to call the map's <tt>get</tt> method.
+     * The first argument is used as a key to call the map's {@code get} method.
      */
     @Override
     public Object exec(List arguments)

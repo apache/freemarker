@@ -167,7 +167,7 @@ public class TaglibFactory implements TemplateHashModel {
      *            {@code http://example.com/foo}), root relative URI (like {@code /bar/foo.tld}) and non-root relative
      *            URI (like {@code bar/foo.tld}). Note that if a non-root relative URI is used it's resolved relative to
      *            the URL of the current request. In this case, the current request is obtained by looking up a
-     *            {@link HttpRequestHashModel} object named <tt>Request</tt> in the root data model.
+     *            {@link HttpRequestHashModel} object named {@code Request} in the root data model.
      *            {@link FreemarkerServlet} provides this object under the expected name, and custom servlets that want
      *            to integrate JSP taglib support should do the same.
      * 
@@ -1116,7 +1116,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</tt><tt>/*.tld</tt>, as requested by
+     * To search TLD-s under <code>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</code>{@code /*.tld}, as requested by
      * the JSP specification. Note that these also used to be in the classpath, so it's redundant to use this together
      * with a sufficiently permissive {@link ClasspathMetaInfTldSource}.
      * 

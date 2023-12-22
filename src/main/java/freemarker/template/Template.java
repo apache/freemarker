@@ -385,7 +385,7 @@ public class Template extends Configurable {
 
     /**
      * Like {@link #process(Object, Writer)}, but also sets a (XML-)node to be recursively processed by the template.
-     * That node is accessed in the template with <tt>.node</tt>, <tt>#recurse</tt>, etc. See the
+     * That node is accessed in the template with {@code .node}, {@code #recurse}, etc. See the
      * <a href="https://freemarker.apache.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
      * typical example of recursive node processing.
      * 
@@ -415,11 +415,12 @@ public class Template extends Configurable {
     }
     
    /**
-    * Creates a {@link freemarker.core.Environment Environment} object, using this template, the data-model provided as
-    * parameter. You have to call {@link Environment#process()} on the return value to set off the actual rendering.
+    * Creates a {@link freemarker.core.Environment Environment} object, with this template as the main (top-level
+    * template), and the data-model provided as parameter. You have to call {@link Environment#process()} on the return
+    * value to start actual template processing (that is, to run the template, to generate output).
     * 
     * <p>Use this method if you want to do some special initialization on the {@link Environment} before template
-    * processing, or if you want to read the {@link Environment} after template processing. Otherwise using
+    * processing, or if you want to read the {@link Environment} after template processing. Otherwise, using
     * {@link Template#process(Object, Writer)} is simpler.
     *
     * <p>Example:
@@ -433,7 +434,7 @@ public class Template extends Configurable {
     * <pre>
     * myTemplate.process(root, out);</pre>
     * 
-    * <p>But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
+    * <p>But with {@code createProcessingEnvironment}, you can manipulate the environment
     * before and after the processing:
     * 
     * <pre>
@@ -447,12 +448,12 @@ public class Template extends Configurable {
     * TemplateModel x = env.getVariable("x");  // read back a variable set by the template</pre>
     *
     * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
-    *     more details.
+    *     more details. If {@code null}, the data model will be empty.
     * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
     *     instances. Normally you left it {@code null}, in which case {@link Configurable#getObjectWrapper()} will be
     *     used.
     * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
-    *     more details.
+    *     more details. Can't be {@code null}.
     *     
     * @return the {@link Environment} object created for processing. Call {@link Environment#process()} to process the
     *    template.
@@ -765,7 +766,8 @@ public class Template extends Configurable {
      * 
      * @param beginColumn the first column of the requested source, 1-based
      * @param beginLine the first line of the requested source, 1-based
-     * @param endColumn the last column of the requested source, 1-based
+     * @param endColumn the last column of the requested source, 1-based. If this is beyond the last character of the
+     *                  line, it assumes that you want to whole line.
      * @param endLine the last line of the requested source, 1-based
      * 
      * @see freemarker.core.TemplateObject#getSource()
@@ -788,7 +790,7 @@ public class Template extends Configurable {
             }
         }
         int lastLineLength = lines.get(endLine).toString().length();
-        int trailingCharsToDelete = lastLineLength - endColumn - 1;
+        int trailingCharsToDelete = endColumn < lastLineLength ? lastLineLength - endColumn - 1 : 0;
         buf.delete(0, beginColumn);
         buf.delete(buf.length() - trailingCharsToDelete, buf.length());
         return buf.toString();

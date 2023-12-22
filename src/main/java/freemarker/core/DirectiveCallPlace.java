@@ -126,7 +126,7 @@ public interface DirectiveCallPlace {
     /**
      * Tells if the nested content (the body) can be safely cached, as it only depends on the template content (not on
      * variable values and such) and has no side-effects (other than writing to the output). Examples of cases that give
-     * {@code false}: {@code <@foo>Name: } <tt>${name}</tt>{@code</@foo>},
+     * {@code false}: {@code <@foo>Name: } <code>${name}</code>{@code</@foo>},
      * {@code <@foo>Name: <#if showIt>Joe</#if></@foo>}. Examples of cases that give {@code true}:
      * {@code <@foo>Name: Joe</@foo>}, {@code <@foo />}. Note that we get {@code true} for no nested content, because
      * that's equivalent with 0-length nested content in FTL.

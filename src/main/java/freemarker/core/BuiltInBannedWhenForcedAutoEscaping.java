@@ -16,15 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-1
-1
-1 234 567,89
-1234567.886
-1,00
-1
-1234567,89
-1234567.886
-1
-100000.5
-100000.5
-100 000,5
+package freemarker.core;
+
+/**
+ * A built-in whose usage is banned when auto-escaping is in the "forced" state.
+ * This is just a marker; the actual checking is in {@code FTL.jj}. 
+ */
+interface BuiltInBannedWhenForcedAutoEscaping {}

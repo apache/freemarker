@@ -207,13 +207,13 @@ public class RealServletContainertTest extends WebAppTestCase {
     public void tldDiscoveryRelative() throws Exception {
         assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.ftl");
     }
-    
+
     @Test
     public void errorStatusCodes() throws Exception {
         assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS, "missing.jsp"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-runtime.jsp"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-parsetime.jsp"));
-        
+
         assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
                 "tester?view=not-failing.ftl&viewServlet=freemarker-default-dev"));
         assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS,

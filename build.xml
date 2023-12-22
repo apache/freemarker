@@ -19,12 +19,13 @@
 -->
 
 <project basedir="." default="jar" name="freemarker"
-  xmlns:ivy="antlib:org.apache.ivy.ant"
-  xmlns:javacc="http://javacc.dev.java.net/"
-  xmlns:docgen="http://freemarker.org/docgen"
-  xmlns:bnd="http://www.aqute.biz/bnd"
-  xmlns:rat="antlib:org.apache.rat.anttasks"
-  xmlns:u="http://freemarker.org/util"
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:javacc="http://javacc.dev.java.net/"
+         xmlns:docgen="http://freemarker.org/docgen"
+         xmlns:bnd="http://www.aqute.biz/bnd"
+         xmlns:rat="antlib:org.apache.rat.anttasks"
+         xmlns:u="http://freemarker.org/util"
+         xmlns:unless="ant:unless"
 >
 
   <!-- ================================================================== -->
@@ -43,30 +44,21 @@
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
 
   <property file="build.properties"/>
-  <condition property="has.explicit.boot.classpath.j2se1.7">
-    <isset property="boot.classpath.j2se1.7"/>
-  </condition>
   <condition property="has.explicit.boot.classpath.j2se1.8">
     <isset property="boot.classpath.j2se1.8"/>
   </condition>
   <condition property="has.all.explicit.boot.classpaths">
     <and>
-      <isset property="has.explicit.boot.classpath.j2se1.7"/>
       <isset property="has.explicit.boot.classpath.j2se1.8"/>
     </and>
   </condition>
   <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
 
-  <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
+  <!-- When boot.classpath.j* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
-  <property name="boot.classpath.j2se1.7" value="${sun.boot.class.path}" />
   <property name="boot.classpath.j2se1.8" value="${sun.boot.class.path}" />
 
   <!-- For checking the correctness of the boot.classpath.j2se* -->
-  <available classpath="${boot.classpath.j2se1.7}"
-    classname="java.nio.file.Path" ignoresystemclasses="true"
-    property="boot.classpath.j2se1.7.correct"
-  />
   <available classpath="${boot.classpath.j2se1.8}"
     classname="java.time.Instant" ignoresystemclasses="true"
     property="boot.classpath.j2se1.8.correct"
@@ -155,11 +147,6 @@
     <delete dir="build/javacc-home.tmp" />
 
     <replace
-      file="${_javaccOutputDir}/FMParser.java"
-      token="private final LookaheadSuccess"
-      value="private static final LookaheadSuccess"
-    />
-    <replace
       file="${_javaccOutputDir}/FMParserConstants.java"
       token="public interface FMParserConstants"
       value="interface FMParserConstants"
@@ -197,12 +184,6 @@
   </target>
 
   <target name="compile" depends="javacc">
-    <fail unless="boot.classpath.j2se1.7.correct"><!--
-      -->The "boot.classpath.j2se1.7" property value (${boot.classpath.j2se1.7}) <!--
-      -->seems to be an incorrect boot classpath. Please fix it in <!--
-      -->the &lt;projectDir>/build.properties file, or wherever you <!--
-      -->set it.<!--
-    --></fail>
     <fail unless="boot.classpath.j2se1.8.correct"><!--
       -->The "boot.classpath.j2se1.8" property value (${boot.classpath.j2se1.8}) <!--
       -->seems to be an incorrect boot classpath. Please fix it in <!--
@@ -211,8 +192,8 @@
     --></fail>
     <echo level="info"><!--
       -->Using boot classpaths: <!--
-      -->Java 7: ${boot.classpath.j2se1.7};<!--
       -->Java 8: ${boot.classpath.j2se1.8}<!--
+      -->Java 16: Current JDK classpath<!--
     --></echo>
 
     <!-- Comment out @SuppressFBWarnings, as it causes compilation warnings in dependent Gradle projects -->
@@ -239,10 +220,10 @@
     <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       excludes="
         freemarker/core/_Java?*Impl.java,
         freemarker/ext/jsp/**,
@@ -261,25 +242,18 @@
 
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep"
-      bootclasspath="${boot.classpath.j2se1.8}"
-      includes="freemarker/core/_Java8Impl.java"
-    />
-
-    <rmic
-      base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
-      classpathref="ivy.dep"
-      verify="yes" stubversion="1.2"
+           debug="on" optimize="off" release="16" encoding="utf-8"
+           includeantruntime="false"
+           classpathref="ivy.dep"
+           includes="freemarker/core/_Java16Impl.java"
     />
 
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.0"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       includes="
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
@@ -294,10 +268,10 @@
 
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       includes="
         freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
@@ -306,10 +280,10 @@
 
     <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.0"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       includes="
         freemarker/ext/ant/**,
         freemarker/template/utility/JythonRuntime.java,
@@ -321,27 +295,22 @@
 
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.2"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       includes="
         freemarker/ext/jython/_Jython22VersionAdapter.java"
     />
 
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off"
-      debug="on" optimize="off" target="1.7" source="1.7" encoding="utf-8"
+      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.5"
-      bootclasspath="${boot.classpath.j2se1.7}"
+      bootclasspath="${boot.classpath.j2se1.8}"
       includes="
         freemarker/ext/jython/_Jython25VersionAdapter.java"
-    />
-
-    <rmic base="build/classes" classpathref="ivy.dep"
-      includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
-      verify="yes" stubversion="1.2"
     />
 
     <copy toDir="build/classes">
@@ -367,11 +336,10 @@
 
     <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off"
-      debug="on" optimize="off" target="1.8" source="1.8" encoding="utf-8"
+      debug="on" optimize="off" release="16" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.build.test"
-      bootclasspath="${boot.classpath.j2se1.8}"
     />
     <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"
@@ -438,7 +406,7 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target name="_rawJavadoc" depends="compile">
+  <target name="javadoc" depends="compile" description="Build the JavaDocs">
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
@@ -491,79 +459,9 @@
       encoding="UTF-8"
       locale="en_US"
     >
-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+      <link href="https://docs.oracle.com/en/java/javase/16/docs/api/"/>
     </javadoc>
     <delete dir="build/javadoc-sources" />
-  </target>
-
-  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" description="Build the JavaDocs" />
-
-  <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
-    <property name="file" value="build/api/stylesheet.css" />
-
-    <available file="${file}" property="stylesheet.available"/>
-    <fail unless="stylesheet.available">CSS file not found: ${file}</fail>
-    <echo>Fixing JDK 8 CSS in ${file}</echo>
-
-    <!-- Tell that it's modified: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="/\* (Javadoc style sheet) \*/" replace="/\* \1 - JDK 8 usability fix regexp substitutions applied \*/"
-    />
-
-    <!-- Remove broken link: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="@import url\('resources/fonts/dejavu.css'\);\s*" replace=""
-    />
-
-    <!-- Font family fixes: -->
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Sans['&quot;]" replace="Arial"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Sans Mono['&quot;]" replace="'Courier New'"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]DejaVu Serif['&quot;]" replace="Arial"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])serif\b" replace="sans-serif"
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Georgia,\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]Times New Roman['&quot;],\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Times,\s*" replace=""
-    />
-    <replaceregexp
-        file="${file}" flags="gsi" encoding="utf-8"
-        match="(?&lt;=[\s,:])Arial\s*,\s*Arial\b" replace="Arial"
-    />
-
-    <!-- "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes: -->
-    <property name="ddSelectorStart" value="(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b" />
-    <property name="ddPropertyEnd" value="\b.+?;" />
-    <!-- - Put back description (dd) indentation: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="(${ddSelectorStart})margin${ddPropertyEnd}" replace="\1margin: 5px 0 10px 20px;"
-    />
-    <!-- - No monospace font for the description (dd) part: -->
-    <replaceregexp
-        file="${file}" flags="gs" encoding="utf-8"
-        match="(${ddSelectorStart})font-family${ddPropertyEnd}" replace="\1"
-    />
   </target>
 
   <!-- ====================== -->
@@ -753,11 +651,12 @@
       <input
          validargs="y,n"
          addproperty="signatureGood"
+         unless:set="ci"
       >Is the above signer the intended one for Apache releases?</input>
-      <condition property="signatureGood.y">
+      <condition property="signatureGood.y" unless:set="ci">
         <equals arg1="y" arg2="${signatureGood}"/>
       </condition>
-      <fail unless="signatureGood.y" message="Task aborted by user." />
+      <fail unless:set="ci" unless="signatureGood.y" message="Task aborted by user." />
 
       <echo>Creating checksum file for "${archive.gzip}"...</echo>
       <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
@@ -956,7 +855,7 @@ Proceed? </input>
   </target>
 
   <target name="ci"
-  	depends="ci-setup, clean, jar, test, javadoc"
+  	depends="ci-setup, clean, _dist"
   	description="CI should invoke this task"
   />
 

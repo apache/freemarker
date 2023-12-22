@@ -30,11 +30,11 @@ import freemarker.template.TemplateModel;
 public class BooleanHash1 implements TemplateHashModel {
 
     /**
-     * Gets a <tt>TemplateModel</tt> from the hash.
+     * Gets a {@code TemplateModel} from the hash.
      *
-     * @param key the name by which the <tt>TemplateModel</tt>
+     * @param key the name by which the {@code TemplateModel}
      * is identified in the template.
-     * @return the <tt>TemplateModel</tt> referred to by the key,
+     * @return the {@code TemplateModel} referred to by the key,
      * or null if not found.
      */
     public TemplateModel get(String key) {

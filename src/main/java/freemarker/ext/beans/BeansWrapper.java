@@ -98,8 +98,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * At this level of exposure, all methods and properties of the
-     * wrapped objects are exposed to the template, and the {@link MemberAccessPolicy}
-     * will be ignored.
+     * wrapped objects are exposed to the template, and even the {@link MemberAccessPolicy}
+     * is ignored.
      */
     public static final int EXPOSE_ALL = 0;
     
@@ -113,6 +113,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * java.lang.Thread and java.lang.ThreadGroup methods that can change its 
      * state, as well as the usual suspects in java.lang.System and
      * java.lang.Runtime.
+     *
+     * <p>Note that the {@link MemberAccessPolicy} will further restrict what's visible. That mechanism was introduced
+     * much later than "exposure levels", and it's the primary place to look at if you are concerned with safety.
      */
     public static final int EXPOSE_SAFE = 1;
     
@@ -120,6 +123,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * At this level of exposure, only property getters are exposed.
      * Additionally, property getters that map to unsafe methods are not
      * exposed (i.e. Class.classLoader and Thread.contextClassLoader).
+     *
+     * <p>Note that the {@link MemberAccessPolicy} will further restrict what's visible.
      */
     public static final int EXPOSE_PROPERTIES_ONLY = 2;
 
@@ -128,7 +133,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Only map items, resource bundle items, and objects retrieved through
      * the generic get method (on objects of classes that have a generic get
      * method) can be retrieved through the hash interface. You might want to 
-     * call {@link #setMethodsShadowItems(boolean)} with <tt>false</tt> value to
+     * call {@link #setMethodsShadowItems(boolean)} with {@code false} value to
      * speed up map item retrieval.
      */
     public static final int EXPOSE_NOTHING = 3;
@@ -444,19 +449,19 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Specifies if an attempt to read a bean property that doesn't exist in the
      * wrapped object should throw an {@link InvalidPropertyException}.
      * 
-     * <p>If this property is <tt>false</tt> (the default) then an attempt to read
+     * <p>If this property is {@code false} (the default) then an attempt to read
      * a missing bean property is the same as reading an existing bean property whose
-     * value is <tt>null</tt>. The template can't tell the difference, and thus always
-     * can use <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins
+     * value is {@code null}. The template can't tell the difference, and thus always
+     * can use {@code ?default('something')} and {@code ?exists} and similar built-ins
      * to handle the situation.
      *
-     * <p>If this property is <tt>true</tt> then an attempt to read a bean propertly in
-     * the template (like <tt>myBean.aProperty</tt>) that doesn't exist in the bean
-     * object (as opposed to just holding <tt>null</tt> value) will cause
+     * <p>If this property is {@code true} then an attempt to read a bean propertly in
+     * the template (like {@code myBean.aProperty}) that doesn't exist in the bean
+     * object (as opposed to just holding {@code null} value) will cause
      * {@link InvalidPropertyException}, which can't be suppressed in the template
-     * (not even with <tt>myBean.noSuchProperty?default('something')</tt>). This way
-     * <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins can be used to
-     * handle existing properties whose value is <tt>null</tt>, without the risk of
+     * (not even with {@code myBean.noSuchProperty?default('something')}). This way
+     * {@code ?default('something')} and {@code ?exists} and similar built-ins can be used to
+     * handle existing properties whose value is {@code null}, without the risk of
      * hiding typos in the property names. Typos will always cause error. But mind you, it
      * goes against the basic approach of FreeMarker, so use this feature only if you really
      * know what you are doing.
@@ -481,7 +486,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     /**
-     * By default returns <tt>this</tt>.
+     * By default returns {@code this}.
      * @see #setOuterIdentity(ObjectWrapper)
      */
     public ObjectWrapper getOuterIdentity() {
@@ -564,6 +569,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
      * constants.
+     * Note that {@link #setMemberAccessPolicy(MemberAccessPolicy)} further restricts what's visible, unless this is
+     * set to {@link #EXPOSE_ALL}.
      */
     public void setExposureLevel(int exposureLevel) {
         checkModifiable();
@@ -797,8 +804,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * Sets the default date type to use for date models that result from
-     * a plain <tt>java.util.Date</tt> instead of <tt>java.sql.Date</tt> or
-     * <tt>java.sql.Time</tt> or <tt>java.sql.Timestamp</tt>. Default value is 
+     * a plain {@code java.util.Date} instead of {@code java.sql.Date} or
+     * {@code java.sql.Time} or {@code java.sql.Timestamp}. Default value is 
      * {@link TemplateDateModel#UNKNOWN}.
      * @param defaultDateType the new default date type.
      */

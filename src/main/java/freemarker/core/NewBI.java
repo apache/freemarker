@@ -32,7 +32,7 @@ import freemarker.template.TemplateModelException;
 
 /**
  * A built-in that allows us to instantiate an instance of a java class.
- * Usage is something like: <tt>&lt;#assign foobar = "foo.bar.MyClass"?new()></tt>;
+ * Usage is something like: <code>&lt;#assign foobar = "foo.bar.MyClass"?new()></code>;
  */
 class NewBI extends BuiltIn {
     

@@ -25,7 +25,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 
 /**
- * A simple implementation of the <tt>TemplateNumberModel</tt>
+ * A simple implementation of the {@code TemplateNumberModel}
  * interface. Note that this class is immutable.
  */
 final class NumberLiteral extends Expression implements TemplateNumberModel {

@@ -27,7 +27,7 @@ import java.util.Map;
 
 /**
  * Delegates logger creation to an actual logging library. By default it looks for logger libraries in this order (in
- * FreeMarker 2.3.x): Log4J, Avalon LogKit, JUL (i.e., <tt>java.util.logging</tt>). Prior to FreeMarker 2.4, SLF4J and
+ * FreeMarker 2.3.x): Log4J, Avalon LogKit, JUL (i.e., {@code java.util.logging}). Prior to FreeMarker 2.4, SLF4J and
  * Apache Commons Logging aren't searched automatically due to backward compatibility constraints. But if you have
  * {@code log4j-over-slf4j} properly installed (means, you have no real Log4j in your class path, and SLF4J has a
  * backing implementation like {@code logback-classic}), then FreeMarker will use SLF4J directly instead of Log4j (since
@@ -214,7 +214,7 @@ public abstract class Logger {
      * subsystem, the change in this value will have no effect on them.
      * 
      * @param libraryEnum
-     *            One of <tt>LIBRARY_...</tt> constants. By default, {@link #LIBRARY_AUTO} is used.
+     *            One of {@code LIBRARY_...} constants. By default, {@link #LIBRARY_AUTO} is used.
      * 
      * @throws ClassNotFoundException
      *             if an explicit logging library is asked for (that is, not {@value #LIBRARY_AUTO} or

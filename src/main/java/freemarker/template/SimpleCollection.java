@@ -25,15 +25,15 @@ import java.util.Iterator;
 
 /**
  * A simple implementation of {@link TemplateCollectionModel}.
- * It's able to wrap <tt>java.util.Iterator</tt>-s and <tt>java.util.Collection</tt>-s.
- * If you wrap an <tt>Iterator</tt>, the variable can be &lt;#list&gt;-ed only once!
+ * It's able to wrap {@code java.util.Iterator}-s and {@code java.util.Collection}-s.
+ * If you wrap an {@code Iterator}, the variable can be &lt;#list&gt;-ed only once!
  *
- * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap <tt>Iterator</tt>s.
- * <tt>SimpleSequence</tt> will read all elements of the <tt>Iterator</tt>, and store them in a <tt>List</tt>
+ * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap {@code Iterator}s.
+ * {@code SimpleSequence} will read all elements of the {@code Iterator}, and store them in a {@code List}
  * (this may cause too high resource consumption in some applications), so you can list the variable
- * for unlimited times. Also, if you want to wrap <tt>Collection</tt>s, and then list the resulting
- * variable for many times, <tt>SimpleSequence</tt> may gives better performance, as the
- * wrapping of non-<tt>TemplateModel</tt> objects happens only once.
+ * for unlimited times. Also, if you want to wrap {@code Collection}s, and then list the resulting
+ * variable for many times, {@code SimpleSequence} may gives better performance, as the
+ * wrapping of non-{@code TemplateModel} objects happens only once.
  *
  * <p>This class is thread-safe. The returned {@link TemplateModelIterator}-s
  * are <em>not</em> thread-safe.
@@ -98,10 +98,10 @@ implements TemplateCollectionModel, Serializable {
     /**
      * Retrieves a template model iterator that is used to iterate over the elements in this collection.
      *  
-     * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
-     * only on of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
-     * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
-     * <tt>TemplateModelException</tt> when you try to call their methods, since the wrapped <tt>Iterator</tt>
+     * <p>When you wrap an {@code Iterator} and you get {@code TemplateModelIterator} for multiple times,
+     * only on of the returned {@code TemplateModelIterator} instances can be really used. When you have called a
+     * method of a {@code TemplateModelIterator} instance, all other instance will throw a
+     * {@code TemplateModelException} when you try to call their methods, since the wrapped {@code Iterator}
      * can't return the first element anymore.
      */
     @Override

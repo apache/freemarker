@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -436,7 +437,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY = 21;
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
     public static final int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
-    
+    /**
+     * This policy is to always require auto-escaping, to avoid accidents where because of misconfiguration, or a
+     * mistake of the template author it's disabled. With this policy, using output formats that don't support escaping
+     * will not be allowed. Using built-ins, and directives that disable auto-escaping (like {@code ?no_esc}) will also
+     * be errors (on parse-time). Note that if markup (like HTML) comers from the data model, then with this policy you
+     * will have to ensure that they come as {@link TemplateMarkupOutputModel}-s (which won't be auto-escaped even with
+     * this policy), not as {@link String}-s, because the template authors can't disable escaping for the value anymore.
+     */
+    public static final int FORCE_AUTO_ESCAPING_POLICY = 23;
+
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -649,8 +659,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *   <li><p>
      *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
      *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
-     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'&gt;</tt>) instead of plain quotation mark
-     *     (<tt>&lt;foo bar="${val}"&gt;</tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     apostrophe-quotation (<code>&lt;foo bar='${val}'&gt;</code>) instead of plain quotation mark
+     *     (<code>&lt;foo bar="${val}"&gt;</code>), they might produce HTML/XML that's not well-formed. Note that
      *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
      *     concern anymore.
      *   </li>
@@ -801,7 +811,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *               {@code <param-value>[ WEB-INF/templates, classpath:com/example/myapp/templates ]</param-value>}
      *             </li>
      *             <li><p>
-     *               Initial <tt>"{"</tt> in the {@code TemplatePath} init-param is reserved for future purposes, and
+     *               Initial <code>"{"</code> in the {@code TemplatePath} init-param is reserved for future purposes, and
      *               thus will throw exception.
      *             </li>
      *          </ul>
@@ -975,6 +985,21 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *         </ul>
      *       </li>
      *     </ul>
+     *   </li>
+     *   <li>
+     *       <p>
+     *       2.3.33 (or higher):
+     *       <ul>
+     *           <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
+     *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
+     *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
+     *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
+     *           Java's localized {@link Collator}-s, we switch to a simple binary comparison after UNICODE NFKC
+     *           normalization. So, in theory it's possible that for some locales two different but similarly looking
+     *           characters were treated as equal by the collator, but will count as different now. But it's very
+     *           unlikely that anyone wanted to depend on such fragile logic anyway. Note again that we still do UNICODE
+     *           normalization, so combining characters won't break your comparison.)</p></li>
+     *       </ul>
      *   </li>
      * </ul>
      * 
@@ -1178,7 +1203,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
      * 
-     * <table style="width: auto; border-collapse: collapse" border="1" summary="preset language to encoding mapping">
+     * <table style="width: auto; border-collapse: collapse" border="1">
+     *   <caption style="display: none">Preset language to encoding mapping</caption>
      *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
      *   <tr><td>be</td><td>ISO-8859-5</td></tr>
      *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
@@ -2157,7 +2183,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @param autoEscapingPolicy
      *          One of the {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
-     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, and {@link #DISABLE_AUTO_ESCAPING_POLICY} constants.  
+     *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, {@link #DISABLE_AUTO_ESCAPING_POLICY}, and
+     *          {@link #FORCE_AUTO_ESCAPING_POLICY} constants.  
      * 
      * @see TemplateConfiguration#setAutoEscapingPolicy(int)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -2532,8 +2559,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>The {@code tagSyntax} parameter must be one of:
      * <ul>
      *   <li>{@link Configuration#AUTO_DETECT_TAG_SYNTAX}:
-     *     Use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
-     *     <tt>#include</tt>, user defined, etc.)
+     *     Use the syntax of the first FreeMarker tag (can be anything, like {@code #list},
+     *     {@code #include}, user defined, etc.)
      *   <li>{@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}:
      *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}
      *   <li>{@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}:
@@ -2990,7 +3017,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * {@code "UTF-8"} is usually a good choice.
      * 
      * <p>Note that individual templates may specify their own charset by starting with
-     * <tt>&lt;#ftl encoding="..."&gt;</tt>
+     * <code>&lt;#ftl encoding="..."&gt;</code>
      * 
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
@@ -3091,7 +3118,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * configuration, if the data model does not contain a
      * variable with the same name.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
+     * <p>Never use {@code TemplateModel} implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      * 
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
@@ -3198,7 +3225,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * {@link #setSharedVariable(String, Object)} calls, one for each hash entry. It doesn't remove the already added
      * shared variable before doing this.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared shared variable values,
+     * <p>Never use {@code TemplateModel} implementation that is not thread-safe for shared shared variable values,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      *
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
@@ -3388,6 +3415,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setAutoEscapingPolicy(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
                 } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
                     setAutoEscapingPolicy(ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+                } else if ("force".equals(value)) {
+                    setAutoEscapingPolicy(FORCE_AUTO_ESCAPING_POLICY);
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
                 } else {
@@ -3693,7 +3722,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       when micro was 0 the version strings was like major.minor instead of the proper major.minor.0, but that's
      *       not like that anymore.)
      *   <li>When only the micro version is increased, compatibility with previous versions with the same
-     *       major.minor is kept. Thus <tt>freemarker.jar</tt> can be replaced in an existing application without
+     *       major.minor is kept. Thus {@code freemarker.jar} can be replaced in an existing application without
      *       breaking it.</li>
      *   <li>For non-final/unstable versions (that almost nobody uses), the format is:
      *       <ul>
@@ -3767,7 +3796,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
-     * <tt>&lt;#directiveName ...&gt;</tt>.
+     * <code>&lt;#directiveName ...&gt;</code>.
      * 
      * @param namingConvention
      *            One of {@link #AUTO_DETECT_NAMING_CONVENTION}, {@link #LEGACY_NAMING_CONVENTION}, and

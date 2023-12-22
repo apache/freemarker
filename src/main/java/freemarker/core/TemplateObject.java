@@ -86,21 +86,33 @@ public abstract class TemplateObject {
         this.endColumn = endColumn;
         this.endLine = endLine;
     }
-    
-    public final int getBeginColumn() {
-        return beginColumn;
-    }
 
+    /**
+     * 1-based index of the line (row) of the first character of the element in the template.
+     */
     public final int getBeginLine() {
         return beginLine;
     }
 
-    public final int getEndColumn() {
-        return endColumn;
+    /**
+     * 1-based index of the column of the first character of the element in the template.
+     */
+    public final int getBeginColumn() {
+        return beginColumn;
     }
 
+    /**
+     * 1-based index of the line (row) of the last character of the element in the template.
+     */
     public final int getEndLine() {
         return endLine;
+    }
+
+    /**
+     * 1-based index of the column of the last character of the element in the template.
+     */
+    public final int getEndColumn() {
+        return endColumn;
     }
 
     /**
@@ -199,7 +211,7 @@ public abstract class TemplateObject {
     
     /**
      * A very sort single-line string that describes what kind of AST node this is, without describing any 
-     * embedded expression or child element. Examples: {@code "#if"}, {@code "+"}, <tt>"${...}</tt>. These values should
+     * embedded expression or child element. Examples: {@code "#if"}, {@code "+"}, <code>"${...}</code>. These values should
      * be suitable as tree node labels in a tree view. Yet, they should be consistent and complete enough so that an AST
      * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
      * leaf nodes the symbols should be the canonical form of value.

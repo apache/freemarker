@@ -19,16 +19,16 @@
 package freemarker.core;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * Used internally only, might change without notice!
  * Used for accessing functionality that's only present in Java 8 or later.
  */
-public interface _Java8 {
+public interface _Java16 {
 
-    /**
-     * Returns if it's a Java 8 "default method".
-     */
-    boolean isDefaultMethod(Method method);
-    
+    boolean isRecord(Class<?> cl);
+
+    Set<Method> getComponentAccessors(Class<?> recordClass);
+
 }

@@ -82,6 +82,7 @@
    <p>Item is greater than or equal to ten.</p>
    </#if>
 </#foreach>
+<@noOutput>
 
 <#-- Signum-based optimization test, all 9 permutations: -->
 <#-- 1 -->
@@ -214,5 +215,26 @@
 <@assert test= (p3 >= m3) />
 <@assert test= !(p3 < m3) />
 <@assert test= !(p3 <= m3) />
+
+<#-- String comparison: -->
+<#assign s = 'a'>
+<@assert test= '' == '' />
+<@assert test= 'a' == 'a' />
+<@assert test= s == 'a' />
+<@assert test= s + 'b' == 'ab' />
+<@assert test= 'á' == 'a\x0301' />
+<@assert test= 'a\x0301' == 'á'/>
+<@assert test= 'a' != 'A' />
+<@assert test= s != 'A' />
+<@assert test= 'A' != 'a' />
+<@assert test= '' != 'a' />
+<@assert test= 'a' != '' />
+<@assert test= 'ab' != 'ac' />
+<@assertFails message="Can't use operator \"<\" on string values.">${s < s}</@>
+<@assertFails message="Can't use operator \">\" on string values.">${s > s}</@>
+<@assertFails message="Can't use operator \"<=\" on string values.">${s <= s}</@>
+<@assertFails message="Can't use operator \">=\" on string values.">${(s >= s)}</@>
+
+</@noOutput>
 </body>
 </html>

@@ -42,12 +42,24 @@ final class IfBlock extends TemplateElement {
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         int ln  = getChildCount();
-        for (int i = 0; i < ln; i++) {
-            ConditionalBlock cblock = (ConditionalBlock) getChild(i);
-            Expression condition = cblock.condition;
-            env.replaceElementStackTop(cblock);
-            if (condition == null || condition.evalToBoolean(env)) {
-                return cblock.getChildBuffer();
+        if (env.getTemplateProcessingTracer() == null) {
+            for (int i = 0; i < ln; i++) {
+                ConditionalBlock cblock = (ConditionalBlock) getChild(i);
+                Expression condition = cblock.condition;
+                env.replaceElementStackTop(cblock);
+                if (condition == null || condition.evalToBoolean(env)) {
+                    return cblock.getChildBuffer();
+                }
+            }
+        } else {
+            for (int i = 0; i < ln; i++) {
+                ConditionalBlock cblock = (ConditionalBlock) getChild(i);
+                Expression condition = cblock.condition;
+                env.replaceElementStackTop(cblock);
+                if (condition == null || condition.evalToBoolean(env)) {
+                    env.visit(cblock);
+                    return null;
+                }
             }
         }
         return null;

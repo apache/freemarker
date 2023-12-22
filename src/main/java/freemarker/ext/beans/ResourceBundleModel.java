@@ -45,10 +45,10 @@ import freemarker.template.TemplateModelException;
  *
  * <p>Typical usages:</p>
  * <ul>
- * <li><tt>bundle.resourceKey</tt> will retrieve the object from resource bundle
- * with key <tt>resourceKey</tt></li>
- * <li><tt>bundle("patternKey", arg1, arg2, arg3)</tt> will retrieve the string
- * from resource bundle with key <tt>patternKey</tt>, and will use it as a pattern
+ * <li>{@code bundle.resourceKey} will retrieve the object from resource bundle
+ * with key {@code resourceKey}</li>
+ * <li>{@code bundle("patternKey", arg1, arg2, arg3)} will retrieve the string
+ * from resource bundle with key {@code patternKey}, and will use it as a pattern
  * for MessageFormat with arguments arg1, arg2 and arg3</li>
  * </ul>
  */

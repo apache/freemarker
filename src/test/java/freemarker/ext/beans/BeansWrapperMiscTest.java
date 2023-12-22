@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import freemarker.core._JavaVersions;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateHashModel;
@@ -101,7 +100,6 @@ public class BeansWrapperMiscTest {
 
     @Test
     public void java8InaccessibleIndexedAccessibleNonIndexedReadMethodTest() throws TemplateModelException {
-        assertTrue("This test case must be ran on Java 8 or later", _JavaVersions.JAVA_8 != null);
         assertFalse(Modifier.isPublic(BeanWithInaccessibleIndexedProperty.class.getModifiers()));
         
         for (Version ici : new Version[] { Configuration.VERSION_2_3_26, Configuration.VERSION_2_3_27 }) {

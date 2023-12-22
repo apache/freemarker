@@ -27,10 +27,10 @@ import freemarker.template.TemplateTransformModel;
 
 /**
  * Performs an XML escaping of a given template fragment. Specifically,
- * <tt>&lt;</tt> <tt>&gt;</tt> <tt>&quot;</tt> <tt>'</tt> and <tt>&amp;</tt> are all turned into entity references.
+ * <code>&lt;</code> <code>&gt;</code> <code>&quot;</code> {@code '} and <code>&amp;</code> are all turned into entity references.
  *
  * <p>An instance of this transform is initially visible as shared
- * variable called <tt>xml_escape</tt>.</p>
+ * variable called {@code xml_escape}.</p>
  */
 public class XmlEscape implements TemplateTransformModel {
 

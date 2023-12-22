@@ -38,7 +38,7 @@ public final class LibraryLoad extends TemplateElement {
     private String targetNsVarName;
 
     /**
-     * @param template the template that this <tt>Include</tt> is a part of.
+     * @param template the template that this {@code Include} is a part of.
      * @param templateName the name of the template to be included.
      * @param targetNsVarName the name of the  variable to assign this library's namespace to
      */
