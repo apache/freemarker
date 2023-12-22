@@ -30228,9 +30228,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>To build FreeMarker itself (not for just using it), now
-              you need JDK 16 (or later). This doesn't influence the minimum
-              Java version requirement for using FreeMarker.</para>
+              <para>Build changes (in case you build FreeMarker itself, not
+              just depend on it):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><link
+                  xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-204">FREEMARKER-204</link>,
+                  <link
+                  xlink:href="https://github.com/apache/freemarker/pull/79">GitHub
+                  PR 79</link>: Switched from Ant, to Gradle. IDE setup now
+                  involves no lengthy manual adjustments, assuming it's fairly
+                  recent IDE with decent Gradle support. There's on
+                  <literal>build.properties</literal> to set up either, but
+                  you need to ensure that you have both JDK 8, and JDK 16m and
+                  that Gradle finds them. See the <literal>README.md</literal>
+                  for more instructions. (Gradle itself is self-installing, of
+                  course.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>JavaDoc is now generated with JDK 16 (so now we have
+                  search on it)</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
