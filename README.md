@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)
+[![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/freemarker/actions/workflows/ci.yml)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
@@ -62,12 +62,12 @@ If you are using Maven, just add this dependency:
   -->
   <dependency>
     <groupId>org.freemarker</groupId>
-    <artifactId>freemarker</artifactId>
+    <artifactId>freemarker-gae</artifactId>
     <version>{version}</version>
   </dependency>
 ```
 
-Otherwise simply copy freemarker.jar to a location where your Java
+Otherwise, simply copy `freemarker.jar` to a location where your Java
 application's ClassLoader will find it. For example, if you are using
 FreeMarker in a web application, you probably want to put
 freemarker.jar into the WEB-INF/lib directory of your web application.
@@ -109,15 +109,19 @@ https://freemarker.apache.org/sourcecode.html
 You need JDK 8 and JDK 16 to be installed
 (and [visible to Gradle](https://docs.gradle.org/current/userguide/toolchains.html)).
 
-To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory, and
-it should download all dependencies automatically and build `freemarker.jar`.
+To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory,
+and it should download all dependencies automatically and build `freemarker.jar`.
 
 To run all checks, issue `./gradlew check`.
 
 To generate documentation, issue `./gradlew javadoc` and `./gradlew manualOffline`.
 
-To see how the project would be deployed to Maven Central, issue `./gradlew publishAllPublicationsToLocalRepository`,
+To see how the project would be deployed to Maven Central, issue
+`./gradlew publishAllPublicationsToLocalRepository`,
 and check the `build/local-deployment` directory.
+
+See `gradle.properties` for some Gradle properties that you may what to set,
+especially if you are building a release.
 
 IDE setup
 ---------
