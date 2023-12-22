@@ -112,6 +112,12 @@ You need JDK 8 and JDK 16 to be installed
 Be sure that your default Java version (which Gradle should use automatically) is at
 least 16!
 
+If you are building from the official source *release* (not from source that you
+got from Git), `gradle/wrapper/gradle-wrapper.jar` is missing from that, and you
+have to add it yourself! You can download it
+[from GitHub source code page](https://github.com/apache/freemarker/tree/2.3-gae/gradle/wrapper)!
+(Or, use your own Gradle installation instead of `gradlew`.)
+
 To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory,
 and it should download all dependencies automatically and build `freemarker.jar`.
 

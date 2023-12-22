@@ -431,13 +431,14 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "**/*.kts",
                 "*.txt",
                 "osgi.bnd",
-                "rat-excludes"
+                "rat-excludes",
+                "gradlew*",
+                "gradle/**"
         )
         exclude(
                 "/build",
                 "/*/build",
-                "/gradle/wrapper",
-                "/gradlew*",
+                "/gradle/wrapper/gradle-wrapper.jar",
                 "**/*.bak",
                 "**/*.~*",
                 "*/*.*~"
