@@ -101,7 +101,7 @@ public interface TemplateDirectiveModel extends TemplateCallableModel {
     /**
      * Returns the argument array layout to use when calling the {@code {@link #execute(TemplateModel[], CallPlace,
      * Writer, Environment)}} method, or rarely {@code null}. If it's {@code null} then there can only be positional
-     * arguments, any number of them (though of course the {@code execute} method implementation itself may restricts
+     * arguments, any number of them (though of course the {@code execute} method implementation itself may restrict
      * the acceptable argument count), and the argument array will be simply as long as the number of arguments
      * specified at the call place.
      */

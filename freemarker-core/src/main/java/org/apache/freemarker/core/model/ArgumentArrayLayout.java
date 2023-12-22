@@ -35,7 +35,7 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  * usually stored in a static final field of the {@link TemplateCallableModel} implementation class. Said constant
  * indexes are also usually defined in the {@link TemplateCallableModel} implementation as static final constants
  * (then feed into the {@link ArgumentArrayLayout}). Some {@link TemplateCallableModel} implementations, such as those
- * stand for macros and functions defined in the template, decide the layout on runtime instead. None the less, once
+ * stand for macros and functions defined in the template, decide the layout on runtime instead. Nonetheless, once
  * the {@link TemplateCallableModel} was created, the layout is fixed.
  * <p>
  * The layout of the array is as follows:
