@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)
+[![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/freemarker/actions/workflows/ci.yml)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
@@ -62,12 +62,12 @@ If you are using Maven, just add this dependency:
   -->
   <dependency>
     <groupId>org.freemarker</groupId>
-    <artifactId>freemarker</artifactId>
+    <artifactId>freemarker-gae</artifactId>
     <version>{version}</version>
   </dependency>
 ```
 
-Otherwise simply copy freemarker.jar to a location where your Java
+Otherwise, simply copy `freemarker.jar` to a location where your Java
 application's ClassLoader will find it. For example, if you are using
 FreeMarker in a web application, you probably want to put
 freemarker.jar into the WEB-INF/lib directory of your web application.
@@ -106,37 +106,25 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
-You need JDK 16, Apache Ant (tested with 1.10.6) and Ivy (integrated into
-with 2.5.0) to be installed. To install Ivy (but be sure it's not already
-installed), issue `ant download-ivy`; it will copy Ivy under `~/.ant/lib`.
-(Alternatively, you can copy `ivy-<version>.jar` into the Ant home `lib`
-subfolder manually.)
+You need JDK 8 and JDK 16 to be installed
+(and [visible to Gradle](https://docs.gradle.org/current/userguide/toolchains.html)).
 
-It's recommended to copy `build.properties.sample` into `build.properties`,
-and edit its content to fit your system. (Although basic jar building should
-succeed without the build.properties file too.)
+To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory,
+and it should download all dependencies automatically and build `freemarker.jar`.
 
-To build `freemarker.jar`, just issue `ant` in the project root directory, and
-it should download all dependencies automatically and build `freemarker.jar`. 
-(Depencies will be cached into the `.ivy/cache` subdirectory of the project.)
+To run all checks, issue `./gradlew check`.
 
-To test your build, issue `ant test`.
+To generate documentation, issue `./gradlew javadoc` and `./gradlew manualOffline`.
 
-To generate documentation, issue `ant javadoc` and `ant manualOffline`.
+To see how the project would be deployed to Maven Central, issue
+`./gradlew publishAllPublicationsToLocalRepository`,
+and check the `build/local-deployment` directory.
 
+See `gradle.properties` for some Gradle properties that you may what to set,
+especially if you are building a release.
 
 IDE setup
 ---------
-
-### First steps for all IDE-s
-
-Do these first, regardless of which IDE you are using:
-
-- Install Ant and Ivy, if you haven't yet; see earlier.
-
-- From the command line, run  `ant clean jar ide-dependencies`
-  (Note that now the folders `ide-dependencies`, `build/generated-sources` and
-  `META-INF` were created.)
 
 ### Eclipse
 
@@ -174,24 +162,7 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
     "Missing tag descriptions": Validate @return tags
     "Missing Javadoc tags": Ignore
     "Missing Javadoc comments": Ignore
-- Create new "Java Project" in Eclipse:
-  - In the first window popping up:
-    - Change the "location" to the directory of the FreeMarker project
-    - Press "Next"
-  - In the next window, you see the build path settings:
-    - On "Source" tab, ensure that exactly these are marked as source
-      directories (be careful, Eclipse doesn't auto-detect these well):
-        build/generated-sources/java
-        src/main/java,
-        src/main/resources,
-        src/test/java,
-        src/test/resources
-    - On the "Libraries" tab:
-      - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 16"
-      - Add all jar-s that are directly under the "ide-dependencies" directory
-        (use the "Add JARs..." and select all those files).
-   - Press "Finish"
+- Import the project as any other Gradle project.
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
   - In Errors/Warnings, check in "Enable project specific settings", then set
@@ -226,61 +197,15 @@ Below you find the step-by-step setup for Eclipse (originally done on Mars.1):
 
 ### IntelliJ IDEA
 
-Originally done on IntelliJ IDEA Community 2018.2.4:
+Originally done on IntelliJ IDEA Community 2023.3.2:
 
-- "New" -> "Project". In order as the IntelliJ will prompt you:
+- "File" -> "Open": Select the "settings.gradle.kts" within the freemarker root directory.
+- If the project fails to load (or build), then adjust the following configuration
+  in "File" -> "Settings" -> "Build, Execution, Deployment" -> "Build Tools" -> "Gradle":
+  - Gradle JVM: JDK 8+
+  - Build and run using: "Gradle"
+  - Run tests using: "Gradle"
 
-  - Select "Java" on the left side, and "16" for SDK on the right side. Press "Next".
-  
-  - Template selection: Don't chose anything, "Next"
-  
-  - Project name: "FreeMarker-2.3-gae".
-    Project location: Wherever you have checked out the 2.3-gae branch from Git.
-    Press "Finish"
-
-- Open your newly created "FreeMarker-2.3-gae" project
-
-- "File" -> "Project Structure..."
-
-  - Select "Modules" (on the left) / "Sources" (tab on the right). Now you see a Content Root
-    that was automatically added (at the rightmost side, under the "Add Content Root" button).
-    Remove it (click the "X" next to it); no Content Root should remain.
-    Now "Add Content Root", and select the FreeMarker project folder. IntelliJ will now add the new
-    Content Root, and automatically add some "Source Folders" and maybe some more under it, but it
-    won't be correct, so edit it until your newly added Source Root has this content:
-    
-    - Source Folders:  
-      src/main/java,  
-      build/generated-sources/java [generated]
-    
-    - Test Source folders:  
-      src/test/java  
-      
-    - Resource Folders:  
-      src/main/resources
-
-    - Test Resource Folders:  
-      src/test/resources
-
-  - Still inside the "Sources" tab, change the "Language level" to "8". (Yes, we use Java 16 SDK with
-    language level 8 in the IDE, due to the tricks FreeMarker uses to support different Java versions.)
-    Then, in "File" -> "Settings" -> "Editor" -> "Inspections", uncheck "Uses of API which isn't available at the 
-    configured language level".
-
-  - Switch over to the "Dependencies" tab (still inside "Project Structure" / "Modules"), and add
-    all the jar-s inside the `ide-dependencies` directory as dependency. (How: Click the "+" icon
-    at the right edge, select "JARs or directory", navigate to `ide-dependencies` directory, expand
-    it, then range-select all the jars in it. Thus, you add all of them at once.)
-
-- "File" -> "Settings" -> "Build, Execution, Deployment" -> "Compiler" -> "Excludes":
-  Add source files that match these (you simply find them manually, and add their absolute path):  
-    _Jython20*.java,  
-    _Jython22*.java,  
-    _FreeMarkerPageContext2.java,  
-    FreeMarkerJspFactory2.java,  
-
-- You may do "Build" / "Build project" (Ctrl+F9) to see if everything compiles now.
-    
 - "File" -> "Settings"
   - Under "Editor" / "Code style", import and use
     freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml

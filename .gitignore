@@ -18,6 +18,7 @@
 /.ivy/
 /.bin/
 /build/
+/*/build/
 /build.properties
 /archive/
 /ide-dependencies/
