@@ -20,7 +20,6 @@
 
 # Generated files basically; see details in the files:
 freemarker-manual/src/main/docgen/en_US/docgen-misc/googleAnalytics.html
-freemarker-manual/src/main/docgen/zh_CN/docgen-misc/googleAnalytics.html
 
 # Binaries/archives created in the FreeMarker project:
 src/main/misc/overloadedNumberRules/prices.ods
@@ -32,11 +31,6 @@ freemarker-manual/src/main/docgen/en_US/figures/model2sketch.png
 freemarker-manual/src/main/docgen/en_US/figures/overview.png
 freemarker-manual/src/main/docgen/en_US/figures/tree.png
 freemarker-manual/src/main/docgen/en_US/logo.png
-freemarker-manual/src/main/docgen/zh_CN/favicon.png
-freemarker-manual/src/main/docgen/zh_CN/figures/model2sketch.png
-freemarker-manual/src/main/docgen/zh_CN/figures/overview.png
-freemarker-manual/src/main/docgen/zh_CN/figures/tree.png
-freemarker-manual/src/main/docgen/zh_CN/logo.png
 
 # Rat thinks it's a binary, but it's UTF-16 text:
 src/test/resources/freemarker/test/templatesuite/expected/output-encoding2.txt
