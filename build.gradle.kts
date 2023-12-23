@@ -37,6 +37,17 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+  isPreserveFileTimestamps = false
+  isReproducibleFileOrder = true
+  filePermissions {
+    unix("rw-r--r--")
+  }
+  dirPermissions {
+    unix("rwxr-xr-x")
+  }
+}
+
 freemarkerRoot {
     configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
     configureSourceSet("jsp20")
