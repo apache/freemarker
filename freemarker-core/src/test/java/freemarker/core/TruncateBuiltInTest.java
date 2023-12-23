@@ -71,7 +71,8 @@ public class TruncateBuiltInTest extends TemplateTest {
 
     @Test
     public void testTruncateM() throws IOException, TemplateException {
-        assertOutput("${t?truncateM(15)}", "Some text <span class='truncateTerminator'>[&#8230;]</span>"); // String arg allowed...
+        assertOutput("${t?truncateM(15)}",
+                "Some text <span class='truncateTerminator'>[&#8230;]</span>"); // String arg allowed...
         assertOutput("${t?truncate_m(15, mTerm)}", "Some text for " + M_TERM_SRC);
         assertOutput("${t?truncateM(15, mTerm)}", "Some text for " + M_TERM_SRC);
         assertOutput("${t?truncateM(15, mTerm, 3)}", "Some text " + M_TERM_SRC);
@@ -150,4 +151,20 @@ public class TruncateBuiltInTest extends TemplateTest {
         assertOutput("${t?truncateM(20)}", "Some text for " + M_TERM_SRC);
     }
 
+    @Test
+    public void testJiraIssueFREEMARKER219() throws IOException, TemplateException {
+        assertOutput("${'1 3'?truncate_c(2, '|')}", "|");
+        assertOutput("${' 2 '?truncate_c(2, '|')}", "|");
+        assertOutput("${'1 '?truncate_c(1, '|')}", "|");
+        assertOutput("${' 2'?truncate_c(1, '|')}", "|");
+        assertOutput("${'1234 SOMESTREETSSS AVE NE 123'?truncate_c(25, '|')}", "1234 SOMESTREETSSS AVE N|");
+
+        assertOutput("${'1 3'?truncate_c(2, '')}", "1");
+        assertOutput("${' 2 '?truncate_c(2, '')}", " 2");
+        assertOutput("${'1 '?truncate_c(1, '')}", "1");
+        assertOutput("${' 2'?truncate_c(1, '')}", "");
+        assertOutput("${'1234 SOMESTREETSSS AVE NE 123'?truncate_c(25, '')}", "1234 SOMESTREETSSS AVE NE");
+        assertOutput("${'1234 SOMESTREETSSS AVE NE 123'?truncate_c(24, '')}", "1234 SOMESTREETSSS AVE N");
+        assertOutput("${'1234 SOMESTREETSSS AVE NE 123'?truncate_c(23, '')}", "1234 SOMESTREETSSS AVE");
+    }
 }
