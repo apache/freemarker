@@ -30,9 +30,11 @@ import javax.servlet.jsp.PageContext;
 
 class FreeMarkerJspFactory extends JspFactory {
     private static final String SPECIFICATION_VERSION = "2.2";
+
+    // This still ends with "21", just in case someone used that key for some workaround.
     private static final String JSPCTX_KEY = "freemarker.ext.jsp.FreeMarkerJspFactory21#jspAppContext";
 
-    protected String getSpecificationVersion() {
+    String getSpecificationVersion() {
         return SPECIFICATION_VERSION;
     }
     

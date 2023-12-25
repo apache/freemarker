@@ -498,12 +498,6 @@ eclipse {
     }
 }
 
-// Choose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
-// what we declare below, because the same classes will come from Jetty as well. For example, Jetty depends
-// on org.mortbay.jasper:apache-el, which contains the javax.el classes, along with non-javax.el classes, so you
-// can't even exclude it. Similarly, org.eclipse.jetty:apache-jsp contains the JSP API javax.servlet.jsp classes,
-// yet again along with other classes. Anyway, this mess is temporary, as we will migrate to Jakarta, and only
-// support that.
 val jettyVersion = "9.4.53.v20231009"
 val slf4jVersion = "1.6.1"
 val springVersion = "2.5.6.SEC03"
@@ -516,8 +510,10 @@ configurations {
 
     "javaxServletTestImplementation" {
         extendsFrom(compileClasspath.get())
+        // Exclude classes that are also coming from Jetty, which we use for testing:
         exclude(group = "javax.servlet.jsp")
         exclude(group = "javax.servlet", module = "servlet-api")
+        exclude(group = "javax.el", module = "el-api")
     }
 }
 
@@ -543,14 +539,15 @@ dependencies {
 
     testImplementation(xalan)
 
-    "javaxServletCompileOnly"("javax.servlet.jsp:jsp-api:2.1")
-    "javaxServletCompileOnly"("javax.servlet:servlet-api:2.5")
+    "javaxServletCompileOnly"("javax.servlet:javax.servlet-api:3.0.1")
+    "javaxServletCompileOnly"("javax.servlet.jsp:jsp-api:2.2")
+    "javaxServletCompileOnly"("javax.el:el-api:2.2")
 
     "javaxServletTestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
     "javaxServletTestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
     "javaxServletTestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
     "javaxServletTestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
-    // Jetty also contains the servlet-api and jsp-api classes
+    // Jetty also contains the servlet-api and jsp-api and el-api classes
 
     // JSP JSTL (not included in Jetty):
     "javaxServletTestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")

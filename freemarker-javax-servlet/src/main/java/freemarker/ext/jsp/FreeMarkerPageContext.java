@@ -86,8 +86,6 @@ class FreeMarkerPageContext extends PageContext implements TemplateModel {
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
-    private static final Class OBJECT_CLASS = Object.class;
-
     private final Environment environment;
     private final int incompatibleImprovements;
     private List tags = new ArrayList();
@@ -219,7 +217,7 @@ class FreeMarkerPageContext extends PageContext implements TemplateModel {
                         return unwrapper.unwrap(tm);
                     } else { // Legacy behavior branch
                         if (tm instanceof AdapterTemplateModel) {
-                            return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
+                            return ((AdapterTemplateModel) tm).getAdaptedObject(Object.class);
                         }
                         if (tm instanceof WrapperTemplateModel) {
                             return ((WrapperTemplateModel) tm).getWrappedObject();
