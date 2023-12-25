@@ -23,12 +23,15 @@ package freemarker.ext.jsp;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.el.ELContext;
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -41,8 +44,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.JspApplicationContext;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import freemarker.core.Environment;
@@ -50,6 +59,7 @@ import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.ObjectWrapperAndUnwrapper;
@@ -62,13 +72,20 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template._VersionInts;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
-/**
- */
-abstract class FreeMarkerPageContext extends PageContext implements TemplateModel {
-    private static final Class OBJECT_CLASS = Object.class;
-        
+class FreeMarkerPageContext extends PageContext implements TemplateModel {
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
+
+    static {
+        if (JspFactory.getDefaultFactory() == null) {
+            JspFactory.setDefaultFactory(new FreeMarkerJspFactory());
+        }
+        LOG.debug("Using JspFactory implementation class " +
+                JspFactory.getDefaultFactory().getClass().getName());
+    }
+
     private final Environment environment;
     private final int incompatibleImprovements;
     private List tags = new ArrayList();
@@ -80,7 +97,8 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final ObjectWrapper wrapper;
     private final ObjectWrapperAndUnwrapper unwrapper;
     private JspWriter jspOut;
-    
+    private ELContext elContext;
+
     protected FreeMarkerPageContext() throws TemplateModelException {
         environment = Environment.getCurrentEnvironment();
         incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
@@ -94,15 +112,15 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         if (appModel instanceof ServletContextHashModel) {
             this.servlet = ((ServletContextHashModel) appModel).getServlet();
         } else {
-            throw new  TemplateModelException("Could not find an instance of " + 
-                    ServletContextHashModel.class.getName() + 
-                    " in the data model under either the name " + 
-                    FreemarkerServlet.KEY_APPLICATION_PRIVATE + " or " + 
+            throw new TemplateModelException("Could not find an instance of " +
+                    ServletContextHashModel.class.getName() +
+                    " in the data model under either the name " +
+                    FreemarkerServlet.KEY_APPLICATION_PRIVATE + " or " +
                     FreemarkerServlet.KEY_APPLICATION);
         }
-        
-        TemplateModel requestModel = 
-            environment.getGlobalVariable(FreemarkerServlet.KEY_REQUEST_PRIVATE);
+
+        TemplateModel requestModel =
+                environment.getGlobalVariable(FreemarkerServlet.KEY_REQUEST_PRIVATE);
         if (!(requestModel instanceof HttpRequestHashModel)) {
             requestModel = environment.getGlobalVariable(
                     FreemarkerServlet.KEY_REQUEST);
@@ -116,10 +134,10 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             unwrapper = this.wrapper instanceof ObjectWrapperAndUnwrapper
                     ? (ObjectWrapperAndUnwrapper) this.wrapper : null;
         } else {
-            throw new  TemplateModelException("Could not find an instance of " + 
-                    HttpRequestHashModel.class.getName() + 
-                    " in the data model under either the name " + 
-                    FreemarkerServlet.KEY_REQUEST_PRIVATE + " or " + 
+            throw new TemplateModelException("Could not find an instance of " +
+                    HttpRequestHashModel.class.getName() +
+                    " in the data model under either the name " +
+                    FreemarkerServlet.KEY_REQUEST_PRIVATE + " or " +
                     FreemarkerServlet.KEY_REQUEST);
         }
 
@@ -132,17 +150,17 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         setAttribute(CONFIG, servlet.getServletConfig());
         setAttribute(PAGECONTEXT, this);
         setAttribute(APPLICATION, servlet.getServletContext());
-    }    
-            
+    }
+
     ObjectWrapper getObjectWrapper() {
         return wrapper;
     }
-    
+
     @Override
     public void initialize(
-        Servlet servlet, ServletRequest request, ServletResponse response,
-        String errorPageURL, boolean needsSession, int bufferSize, 
-        boolean autoFlush) {
+            Servlet servlet, ServletRequest request, ServletResponse response,
+            String errorPageURL, boolean needsSession, int bufferSize,
+            boolean autoFlush) {
         throw new UnsupportedOperationException();
     }
 
@@ -157,7 +175,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public void setAttribute(String name, Object value, int scope) {
-        switch(scope) {
+        switch (scope) {
             case PAGE_SCOPE: {
                 try {
                     environment.setGlobalVariable(name, wrapper.wrap(value));
@@ -199,7 +217,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                         return unwrapper.unwrap(tm);
                     } else { // Legacy behavior branch
                         if (tm instanceof AdapterTemplateModel) {
-                            return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
+                            return ((AdapterTemplateModel) tm).getAdaptedObject(Object.class);
                         }
                         if (tm instanceof WrapperTemplateModel) {
                             return ((WrapperTemplateModel) tm).getWrappedObject();
@@ -263,7 +281,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public void removeAttribute(String name, int scope) {
-        switch(scope) {
+        switch (scope) {
             case PAGE_SCOPE: {
                 environment.getGlobalNamespace().remove(name);
                 break;
@@ -300,11 +318,11 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public Enumeration getAttributeNamesInScope(int scope) {
-        switch(scope) {
+        switch (scope) {
             case PAGE_SCOPE: {
                 try {
-                    return 
-                        new TemplateHashModelExEnumeration(environment.getGlobalNamespace());
+                    return
+                            new TemplateHashModelExEnumeration(environment.getGlobalNamespace());
                 } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException(e);
                 }
@@ -347,7 +365,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     public HttpSession getSession() {
         return getSession(false);
     }
-    
+
     @Override
     public Object getPage() {
         return servlet;
@@ -401,7 +419,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             public PrintWriter getWriter() {
                 return pw;
             }
-            
+
             @Override
             public ServletOutputStream getOutputStream() {
                 throw new UnsupportedOperationException("JSP-included resource must use getWriter()");
@@ -422,13 +440,13 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public BodyContent pushBody() {
-      return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
-  }
+        return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
+    }
 
-  @Override
-public JspWriter pushBody(Writer w) {
-      return pushWriter(new JspWriterAdapter(w));
-  }
+    @Override
+    public JspWriter pushBody(Writer w) {
+        return pushWriter(new JspWriterAdapter(w));
+    }
 
     @Override
     public JspWriter popBody() {
@@ -444,35 +462,95 @@ public JspWriter pushBody(Writer w) {
             }
         }
         return null;
-    }  
-    
+    }
+
     void popTopTag() {
         tags.remove(tags.size() - 1);
-    }  
+    }
 
     void popWriter() {
         jspOut = (JspWriter) outs.remove(outs.size() - 1);
         setAttribute(OUT, jspOut);
     }
-    
+
     void pushTopTag(Object tag) {
         tags.add(tag);
-    } 
-    
+    }
+
     JspWriter pushWriter(JspWriter out) {
         outs.add(jspOut);
         jspOut = out;
         setAttribute(OUT, jspOut);
         return out;
-    } 
-    
+    }
+
+    /**
+     * Attempts to locate and manufacture an expression evaulator instance. For this to work you <b>must</b> have the
+     * Apache Commons-EL package in the classpath. If Commons-EL is not available, this method will throw an
+     * UnsupportedOperationException.
+     */
+    @Override
+    public ExpressionEvaluator getExpressionEvaluator() {
+        try {
+            Class type = ((ClassLoader) AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        @Override
+                        public Object run() {
+                            return Thread.currentThread().getContextClassLoader();
+                        }
+                    })).loadClass
+                    ("org.apache.commons.el.ExpressionEvaluatorImpl");
+            return (ExpressionEvaluator) type.newInstance();
+        } catch (Exception e) {
+            throw new UnsupportedOperationException("In order for the getExpressionEvaluator() " +
+                    "method to work, you must have downloaded the apache commons-el jar and " +
+                    "made it available in the classpath.");
+        }
+    }
+
+    /**
+     * Returns a variable resolver that will resolve variables by searching through the page scope, request scope,
+     * session scope and application scope for an attribute with a matching name.
+     */
+    @Override
+    public VariableResolver getVariableResolver() {
+        final PageContext ctx = this;
+
+        return new VariableResolver() {
+            @Override
+            public Object resolveVariable(String name) throws ELException {
+                return ctx.findAttribute(name);
+            }
+        };
+    }
+
+    @Override
+    public ELContext getELContext() {
+        if (elContext == null) {
+            JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
+            if (jspctx instanceof FreeMarkerJspApplicationContext) {
+                elContext = ((FreeMarkerJspApplicationContext) jspctx).createNewELContext(this);
+                elContext.putContext(JspContext.class, this);
+            } else {
+                throw new UnsupportedOperationException(
+                        "Can not create an ELContext using a foreign JspApplicationContext (of class "
+                                + ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
+                                "Hint: The cause of this is often that you are trying to use JSTL tags/functions in " +
+                                "FTL. "
+                                + "In that case, know that that's not really suppored, and you are supposed to use FTL "
+                                + "constrcuts instead, like #list instead of JSTL's forEach, etc.");
+            }
+        }
+        return elContext;
+    }
+
     private static class TemplateHashModelExEnumeration implements Enumeration {
         private final TemplateModelIterator it;
-            
+
         private TemplateHashModelExEnumeration(TemplateHashModelEx hashEx) throws TemplateModelException {
             it = hashEx.keys().iterator();
         }
-        
+
         @Override
         public boolean hasMoreElements() {
             try {
@@ -481,7 +559,7 @@ public JspWriter pushBody(Writer w) {
                 throw new UndeclaredThrowableException(tme);
             }
         }
-        
+
         @Override
         public Object nextElement() {
             try {

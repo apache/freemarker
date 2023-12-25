@@ -109,6 +109,15 @@ https://freemarker.apache.org/sourcecode.html
 You need JDK 8 and JDK 16 to be installed
 (and [visible to Gradle](https://docs.gradle.org/current/userguide/toolchains.html)).
 
+Be sure that your default Java version (which Gradle should use automatically) is at
+least 16!
+
+If you are building from the official source *release* (not from source that you
+got from Git), `gradle/wrapper/gradle-wrapper.jar` is missing from that, and you
+have to add it yourself! You can download it
+[from GitHub source code page](https://github.com/apache/freemarker/tree/2.3-gae/gradle/wrapper)!
+(Or, use your own Gradle installation instead of `gradlew`.)
+
 To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory,
 and it should download all dependencies automatically and build `freemarker.jar`.
 
@@ -122,6 +131,7 @@ and check the `build/local-deployment` directory.
 
 See `gradle.properties` for some Gradle properties that you may what to set,
 especially if you are building a release.
+
 
 IDE setup
 ---------
@@ -202,7 +212,7 @@ Originally done on IntelliJ IDEA Community 2023.3.2:
 - "File" -> "Open": Select the "settings.gradle.kts" within the freemarker root directory.
 - If the project fails to load (or build), then adjust the following configuration
   in "File" -> "Settings" -> "Build, Execution, Deployment" -> "Build Tools" -> "Gradle":
-  - Gradle JVM: JDK 8+
+  - Gradle JVM: JDK 16 (or higher)
   - Build and run using: "Gradle"
   - Run tests using: "Gradle"
 
