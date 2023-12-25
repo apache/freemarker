@@ -38,13 +38,17 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
-  isPreserveFileTimestamps = false
-  isReproducibleFileOrder = true
-  filePermissions {
-    unix("rw-r--r--")
-  }
-  dirPermissions {
-    unix("rwxr-xr-x")
+
+  if (name == "jar") {  
+    // make contents of freemarker.jar reproducible
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+    filePermissions {
+        unix("rw-r--r--")
+    }
+    dirPermissions {
+        unix("rwxr-xr-x")
+    }
   }
 }
 
