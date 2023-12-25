@@ -15115,11 +15115,27 @@ foobar</programlisting>
             <primary>truncate_w_m built-in</primary>
           </indexterm>
 
+          <note>
+            <para>If you just want to limit the length of string with
+            straightforward behavior, then do not use this built in, but the
+            <link linkend="dgui_template_exp_seqenceop_slice">sequence
+            slicing</link>, and <link
+            linkend="dgui_template_exp_direct_ranges">..* length limited
+            range</link> operators. For example, <literal>s[0 ..*
+            10]</literal> will give the first 10 characters of
+            <literal>s</literal>, if <literal>s</literal> is longer than that,
+            otherwise it just gives <literal>s</literal> as is. While
+            <literal>s?truncate(10, '')</literal> expresses similar intent, it
+            has complicated rules to give a result that looks nicer for
+            humans, like it trims the right side at the cut, and sometimes
+            cuts a bit early to avoid cutting into the last word.</para>
+          </note>
+
           <para>Cuts off the end of a string if that's necessary to keep it
-          under a the length given as parameter, and appends a terminator
-          string (<literal>[...]</literal> by default) to indicate that the
-          string was truncated. Example (assuming default FreeMarker
-          configuration settings):</para>
+          under the length given as parameter, and appends a terminator string
+          (<literal>[...]</literal> by default) to indicate that the string
+          was truncated. Example (assuming default FreeMarker configuration
+          settings):</para>
 
           <programlisting role="template">&lt;#assign shortName='This is short'&gt;
 &lt;#assign longName='This is a too long name'&gt;
@@ -15143,7 +15159,7 @@ This is a [...]
 Truncated at "character boundary":
 This isonev[...]</programlisting>
 
-          <para>Things to note above:</para>
+          <para>Notes on some tricky aspects for truncation:</para>
 
           <itemizedlist>
             <listitem>
@@ -15159,9 +15175,9 @@ This isonev[...]</programlisting>
               better look (see later). Actually, the result length can also be
               longer than the parameter length, when the desired length is
               shorter than the terminator string alone, in which case the
-              terminator is still returned as is. Also, an algorithms other
+              terminator is still returned as is. Also, an algorithm other
               than the default might choses to return a longer string, as the
-              length parameter is in principle just hint for the desired
+              length parameter is in principle just a hint for the desired
               visual length.</para>
             </listitem>
 
@@ -15180,7 +15196,21 @@ This isonev[...]</programlisting>
               between the word end and the terminator string, otherwise
               there's no space between them. Only whitespace is treated as
               word separator, not punctuation, so this generally gives
-              intuitive results.</para>
+              intuitive results. (Except, if the terminator string is set to
+              be 0 length, no space is added before it, starting from
+              FreeMarker 2.3.33.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Before adding the terminator string (possibly with a word
+              boundary space before it, as explained above) after the string
+              whose length was already cut, trailing whitespace is removed
+              from that. For example <literal>'1
+              67890A'?truncate(10)</literal>, where there are 4 spaces between
+              the <literal>1</literal> and <literal>6</literal>, will give
+              <quote><literal>1 [...]</literal></quote> (7 characters), not
+              <quote><literal>1 [...]</literal></quote> (10
+              characters).</para>
             </listitem>
           </itemizedlist>
 
@@ -15220,7 +15250,11 @@ This isonev[...]</programlisting>
                     to give a string length closer to the length specified,
                     but still not an exact length, as it removes white-space
                     before the terminator string, and re-adds a space if we
-                    are just after the end of a word, etc.</para>
+                    are just after the end of a word, etc. (Except, space is
+                    not re-added if the terminator string is set to be 0
+                    length, starting from FreeMarker 2.3.33.) If you need
+                    exact length, simply use <literal>longName[0 ..*
+                    16]</literal>.</para>
                   </listitem>
                 </itemizedlist>
               </listitem>
@@ -15229,11 +15263,11 @@ This isonev[...]</programlisting>
                 <para>Specifying the terminator string (instead of relying on
                 its default): <literal>truncate</literal> and all
                 <literal>truncate_<replaceable>...</replaceable></literal>
-                built-ins have an additional optional parameter for it. After
-                that, a further optional parameter can specify the assumed
-                length of the terminator string (otherwise its real length
-                will be used). If you find yourself specifying the terminator
-                string often, then certainly the defaults should be configured
+                built-ins have an optional 2nd parameter for that. After that,
+                a further optional parameter can specify the assumed length of
+                the terminator string (otherwise its real length will be
+                used). If you find yourself specifying the terminator string
+                often, then certainly the defaults should be configured
                 instead (via <literal>truncate_builtin_algorithm
                 configuration</literal> - see earlier). Example:</para>
 
@@ -30063,7 +30097,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Release date: [TODO]</para>
 
         <para>Please note that with this version the minimum required Java
-        version was increased from Java 7 to Java 8.</para>
+        version was increased from Java 7 to Java 8. Also for the few who
+        relly on Servlet and/or JSP support, the minimum is now increased to
+        Servlet 3.0, and JSP 2.2 (which are still very old versions from
+        2011).</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30139,6 +30176,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the stack usage is constant and negligible.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-219">FREEMARKER-219</link>:
+              The <link linkend="ref_builtin_truncate"><quote>truncate</quote>
+              family of built-ins</link>, as in
+              <literal>maybeLong?truncate(10, '')</literal>, if the terminator
+              string is set to 0 length, now it will not add a space before
+              the terminator string when the cut happened exactly after the
+              end of a word. (Note that if you are using something like
+              <literal>maybeLong?truncate_c(10, '')</literal>, then certainly
+              what you really want is <literal>maybeLong[0 ..* 10]</literal>,
+              as that doesn't do trimming at the cut.)</para>
             </listitem>
 
             <listitem>
@@ -30250,6 +30301,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>JavaDoc is now generated with JDK 16 (so now we have
                   search on it)</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Minimum requirements were increased:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Java 8 (or higher)</para>
+                </listitem>
+
+                <listitem>
+                  <para>If Servlet-related features are used, Servlet 3.0 (or
+                  higher)</para>
+                </listitem>
+
+                <listitem>
+                  <para>If JSP-related features are used, JSP 2.2 (or
+                  higher)</para>
                 </listitem>
               </itemizedlist>
             </listitem>

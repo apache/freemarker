@@ -19,7 +19,6 @@
 
 package freemarker.build
 
-import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -42,6 +41,7 @@ import org.gradle.kotlin.dsl.the
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.testing.base.TestingExtension
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TEST_UTILS_SOURCE_SET_NAME = "test-utils"
 
@@ -94,7 +94,7 @@ class FreemarkerModuleDef internal constructor(
     val compilerVersion: JavaLanguageVersion
 ) {
     val main = sourceSetName == SourceSet.MAIN_SOURCE_SET_NAME
-    val baseDirName = if (main) "core" else sourceSetName
+    val baseDirName = if (main) "core" else sourceSetName.camelCaseToDashed()
 
     val sourceSet = context.sourceSets.maybeCreate(sourceSetName)
 
