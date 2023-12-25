@@ -30097,7 +30097,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Release date: [TODO]</para>
 
         <para>Please note that with this version the minimum required Java
-        version was increased from Java 7 to Java 8.</para>
+        version was increased from Java 7 to Java 8. Also for the few who
+        relly on Servlet and/or JSP support, the minimum is now increased to
+        Servlet 3.0, and JSP 2.2 (which are still very old versions from
+        2011).</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30298,6 +30301,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>JavaDoc is now generated with JDK 16 (so now we have
                   search on it)</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Minimum requirements were increased:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Java 8 (or higher)</para>
+                </listitem>
+
+                <listitem>
+                  <para>If Servlet-related features are used, Servlet 3.0 (or
+                  higher)</para>
+                </listitem>
+
+                <listitem>
+                  <para>If JSP-related features are used, JSP 2.2 (or
+                  higher)</para>
                 </listitem>
               </itemizedlist>
             </listitem>

@@ -39,8 +39,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 freemarkerRoot {
     configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
-    configureSourceSet("jsp20")
-    configureSourceSet("jsp21") { enableTests() }
+    configureSourceSet("javaxServlet") { enableTests() }
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
@@ -105,7 +104,7 @@ tasks.jar.configure {
 configurations {
     register("combinedClasspath") {
         extendsFrom(named("jython25CompileClasspath").get())
-        extendsFrom(named("jsp21CompileClasspath").get())
+        extendsFrom(named("javaxServletCompileClasspath").get())
     }
 }
 
@@ -494,7 +493,7 @@ eclipse {
             configurations["combinedClasspath"],
             configurations["core16CompileClasspath"],
             configurations["testUtilsCompileClasspath"],
-            configurations["jsp21TestCompileClasspath"]
+            configurations["javaxServletTestCompileClasspath"]
         )
     }
 }
@@ -515,7 +514,7 @@ configurations {
         exclude(group = "xml-apis", module = "xml-apis")
     }
 
-    "jsp21TestImplementation" {
+    "javaxServletTestImplementation" {
         extendsFrom(compileClasspath.get())
         exclude(group = "javax.servlet.jsp")
         exclude(group = "javax.servlet", module = "servlet-api")
@@ -544,27 +543,23 @@ dependencies {
 
     testImplementation(xalan)
 
-    "jsp20CompileOnly"("javax.servlet.jsp:jsp-api:2.0")
-    "jsp20CompileOnly"("javax.servlet:servlet-api:2.4")
+    "javaxServletCompileOnly"("javax.servlet.jsp:jsp-api:2.1")
+    "javaxServletCompileOnly"("javax.servlet:servlet-api:2.5")
 
-    "jsp21CompileOnly"(sourceSets["jsp20"].output)
-    "jsp21CompileOnly"("javax.servlet.jsp:jsp-api:2.1")
-    "jsp21CompileOnly"("javax.servlet:servlet-api:2.5")
-
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
     // Jetty also contains the servlet-api and jsp-api classes
 
     // JSP JSTL (not included in Jetty):
-    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
-    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
+    "javaxServletTestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
+    "javaxServletTestImplementation"("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
 
-    "jsp21TestImplementation"("org.springframework:spring-core:${springVersion}") {
+    "javaxServletTestImplementation"("org.springframework:spring-core:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    "jsp21TestImplementation"("org.springframework:spring-test:${springVersion}") {
+    "javaxServletTestImplementation"("org.springframework:spring-test:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
 

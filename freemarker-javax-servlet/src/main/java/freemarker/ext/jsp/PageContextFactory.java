@@ -19,12 +19,21 @@
 
 package freemarker.ext.jsp;
 
+import javax.servlet.jsp.PageContext;
 
-/**
- */
-class FreeMarkerJspFactory2 extends FreeMarkerJspFactory {
-    @Override
-    protected String getSpecificationVersion() {
-        return "2.0";
+import freemarker.core.Environment;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
+class PageContextFactory {
+    static FreeMarkerPageContext getCurrentPageContext() throws TemplateModelException {
+        Environment env = Environment.getCurrentEnvironment();
+        TemplateModel pageContextModel = env.getGlobalVariable(PageContext.PAGECONTEXT);
+        if (pageContextModel instanceof FreeMarkerPageContext) {
+            return (FreeMarkerPageContext) pageContextModel;
+        }
+        FreeMarkerPageContext pageContext = new FreeMarkerPageContext();
+        env.setGlobalVariable(PageContext.PAGECONTEXT, pageContext);
+        return pageContext;
     }
 }
