@@ -20,50 +20,38 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.util.UndeclaredThrowableException;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.servlet.FreemarkerServlet;
+import org.apache.freemarker.servlet.HttpRequestHashModel;
+import org.apache.freemarker.servlet.ServletContextHashModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.el.ELContext;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.*;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.tagext.BodyContent;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.*;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
-import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.HttpRequestHashModel;
-import org.apache.freemarker.servlet.ServletContextHashModel;
+class FreeMarkerPageContext extends PageContext implements TemplateModel {
+    private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerPageContext.class);
 
-/**
- */
-abstract class FreeMarkerPageContext extends PageContext implements TemplateModel {
-    private static final Class OBJECT_CLASS = Object.class;
-        
     private final Environment environment;
     private List tags = new ArrayList();
     private List outs = new ArrayList();
@@ -73,7 +61,15 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final HttpServletResponse response;
     private final ObjectWrapperAndUnwrapper wrapper;
     private JspWriter jspOut;
-    
+
+    static {
+        if (JspFactory.getDefaultFactory() == null) {
+            JspFactory.setDefaultFactory(new FreeMarkerJspFactory());
+        }
+        LOG.debug("Using JspFactory implementation class {}",
+                JspFactory.getDefaultFactory().getClass().getName());
+    }
+
     protected FreeMarkerPageContext() throws TemplateException {
         environment = Environment.getCurrentEnvironment();
 
@@ -431,8 +427,70 @@ public JspWriter pushBody(Writer w) {
         jspOut = out;
         setAttribute(OUT, jspOut);
         return out;
-    } 
-    
+    }
+
+    /**
+     * Attempts to locate and manufacture an expression evaulator instance. For this
+     * to work you <b>must</b> have the Apache Commons-EL package in the classpath. If
+     * Commons-EL is not available, this method will throw an UnsupportedOperationException.
+     */
+    @Override
+    public ExpressionEvaluator getExpressionEvaluator() {
+        try {
+            Class type = ((ClassLoader) AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        @Override
+                        public Object run() {
+                            return Thread.currentThread().getContextClassLoader();
+                        }
+                    })).loadClass
+                    ("org.apache.commons.el.ExpressionEvaluatorImpl");
+            return (ExpressionEvaluator) type.newInstance();
+        } catch (Exception e) {
+            throw new UnsupportedOperationException("In order for the getExpressionEvaluator() " +
+                    "method to work, you must have downloaded the apache commons-el jar and " +
+                    "made it available in the classpath.");
+        }
+    }
+
+    /**
+     * Returns a variable resolver that will resolve variables by searching through
+     * the page scope, request scope, session scope and application scope for an
+     * attribute with a matching name.
+     */
+    @Override
+    public VariableResolver getVariableResolver() {
+        final PageContext ctx = this;
+
+        return new VariableResolver() {
+            @Override
+            public Object resolveVariable(String name) throws ELException {
+                return ctx.findAttribute(name);
+            }
+        };
+    }
+
+    private ELContext elContext;
+
+    @Override
+    public ELContext getELContext() {
+        if (elContext == null) {
+            JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
+            if (jspctx instanceof FreeMarkerJspApplicationContext) {
+                elContext = ((FreeMarkerJspApplicationContext) jspctx).createNewELContext(this);
+                elContext.putContext(JspContext.class, this);
+            } else {
+                throw new UnsupportedOperationException(
+                        "Can not invoke an ELContext using a foreign JspApplicationContext (of class "
+                                + _ClassUtils.getShortClassNameOfObject(jspctx) + ").\n" +
+                                "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
+                                + "In that case, know that that's not really suppored, and you are supposed to use FTL "
+                                + "constrcuts instead, like #list instead of JSTL's forEach, etc.");
+            }
+        }
+        return elContext;
+    }
+
     private static class TemplateHashModelExEnumeration implements Enumeration {
         private final TemplateModelIterator it;
             

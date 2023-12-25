@@ -36,7 +36,7 @@ dependencies {
     // Servlet, JSP, and EL related classes
     compileOnly("javax.servlet:javax.servlet-api:3.1.0")
     compileOnly("javax.servlet.jsp:javax.servlet.jsp-api:2.3.3")
-    compileOnly("javax.el:javax.el-api:3.0.0") // EL is not included in jsp-api anymore (was there in jsp-api 2.1)
+    compileOnly("javax.el:javax.el-api:3.0.0")
 
     // Chose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
     // than what we declare above, because the same classes will come from Jetty as well. For example, Jetty depends
@@ -49,7 +49,7 @@ dependencies {
     testImplementation("org.eclipse.jetty:jetty-webapp:$jettyVersion")
     testImplementation("org.eclipse.jetty:jetty-util:$jettyVersion")
     testImplementation("org.eclipse.jetty:apache-jsp:$jettyVersion")
-    // Jetty also contains the servlet-api and jsp-api classes
+    // Jetty also contains the servlet-api and jsp-api and el-api classes
 
     // JSP JSTL (not included in Jetty):
     val apacheStandardTaglibsVersion = "1.2.5"

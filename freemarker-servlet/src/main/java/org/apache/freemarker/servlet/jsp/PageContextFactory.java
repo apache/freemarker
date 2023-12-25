@@ -19,48 +19,24 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import javax.servlet.jsp.PageContext;
-
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
+
+import javax.servlet.jsp.PageContext;
 
 /**
  */
 class PageContextFactory {
-    private static final Class pageContextImpl = getPageContextImpl();
-    
-    private static Class getPageContextImpl() {
-        try {
-            try {
-                PageContext.class.getMethod("getELContext", (Class[]) null);
-                return Class.forName("org.apache.freemarker.servlet.jsp._FreeMarkerPageContext21");
-            } catch (NoSuchMethodException e1) {
-                throw new IllegalStateException(
-                        "Since FreeMarker 3.0.0, JSP support requires at least JSP 2.1.");
-            }
-        } catch (ClassNotFoundException e) {
-            throw new NoClassDefFoundError(e.getMessage());
-        }
-    }
-
     static FreeMarkerPageContext getCurrentPageContext() throws TemplateException {
         Environment env = Environment.getCurrentEnvironment();
         TemplateModel pageContextModel = env.getGlobalVariable(PageContext.PAGECONTEXT);
         if (pageContextModel instanceof FreeMarkerPageContext) {
             return (FreeMarkerPageContext) pageContextModel;
         }
-        try {
-            FreeMarkerPageContext pageContext = 
-                (FreeMarkerPageContext) pageContextImpl.newInstance();
-            env.setGlobalVariable(PageContext.PAGECONTEXT, pageContext);
-            return pageContext;
-        } catch (IllegalAccessException e) {
-            throw new IllegalAccessError(e.getMessage());
-        } catch (InstantiationException e) {
-            throw new UndeclaredThrowableException(e);
-        }
+        FreeMarkerPageContext pageContext = new FreeMarkerPageContext();
+        env.setGlobalVariable(PageContext.PAGECONTEXT, pageContext);
+        return pageContext;
     }
     
 }
