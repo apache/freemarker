@@ -39,7 +39,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.withType<AbstractArchiveTask>().configureEach {
 
-  if (name == "jar") {  
+  if (archiveFileName.get().endsWith(".jar")) {  
     // make contents of freemarker.jar reproducible
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
