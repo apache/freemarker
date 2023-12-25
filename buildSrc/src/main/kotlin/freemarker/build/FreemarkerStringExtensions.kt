@@ -17,14 +17,9 @@
  * under the License.
  */
 
-package freemarker.ext.jsp;
+package freemarker.build
 
+private val CAMEL_HUMP = "(?<=[A-Za-z0-9])[A-Z]".toRegex()
 
-/**
- */
-class FreeMarkerJspFactory2 extends FreeMarkerJspFactory {
-    @Override
-    protected String getSpecificationVersion() {
-        return "2.0";
-    }
-}
+fun String.camelCaseToDashed(): String =
+    replace(CAMEL_HUMP) { "-" + it.value.replaceFirstChar(Char::lowercaseChar) }

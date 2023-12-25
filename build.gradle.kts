@@ -39,8 +39,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 freemarkerRoot {
     configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
-    configureSourceSet("jsp20")
-    configureSourceSet("jsp21") { enableTests() }
+    configureSourceSet("javaxServlet") { enableTests() }
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
@@ -105,7 +104,7 @@ tasks.jar.configure {
 configurations {
     register("combinedClasspath") {
         extendsFrom(named("jython25CompileClasspath").get())
-        extendsFrom(named("jsp21CompileClasspath").get())
+        extendsFrom(named("javaxServletCompileClasspath").get())
     }
 }
 
@@ -431,13 +430,14 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "**/*.kts",
                 "*.txt",
                 "osgi.bnd",
-                "rat-excludes"
+                "rat-excludes",
+                "gradlew*",
+                "gradle/**"
         )
         exclude(
                 "/build",
                 "/*/build",
-                "/gradle/wrapper",
-                "/gradlew*",
+                "/gradle/wrapper/gradle-wrapper.jar",
                 "**/*.bak",
                 "**/*.~*",
                 "*/*.*~"
@@ -493,17 +493,11 @@ eclipse {
             configurations["combinedClasspath"],
             configurations["core16CompileClasspath"],
             configurations["testUtilsCompileClasspath"],
-            configurations["jsp21TestCompileClasspath"]
+            configurations["javaxServletTestCompileClasspath"]
         )
     }
 }
 
-// Choose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
-// what we declare below, because the same classes will come from Jetty as well. For example, Jetty depends
-// on org.mortbay.jasper:apache-el, which contains the javax.el classes, along with non-javax.el classes, so you
-// can't even exclude it. Similarly, org.eclipse.jetty:apache-jsp contains the JSP API javax.servlet.jsp classes,
-// yet again along with other classes. Anyway, this mess is temporary, as we will migrate to Jakarta, and only
-// support that.
 val jettyVersion = "9.4.53.v20231009"
 val slf4jVersion = "1.6.1"
 val springVersion = "2.5.6.SEC03"
@@ -514,10 +508,12 @@ configurations {
         exclude(group = "xml-apis", module = "xml-apis")
     }
 
-    "jsp21TestImplementation" {
+    "javaxServletTestImplementation" {
         extendsFrom(compileClasspath.get())
+        // Exclude classes that are also coming from Jetty, which we use for testing:
         exclude(group = "javax.servlet.jsp")
         exclude(group = "javax.servlet", module = "servlet-api")
+        exclude(group = "javax.el", module = "el-api")
     }
 }
 
@@ -543,27 +539,24 @@ dependencies {
 
     testImplementation(xalan)
 
-    "jsp20CompileOnly"("javax.servlet.jsp:jsp-api:2.0")
-    "jsp20CompileOnly"("javax.servlet:servlet-api:2.4")
+    "javaxServletCompileOnly"("javax.servlet:javax.servlet-api:3.0.1")
+    "javaxServletCompileOnly"("javax.servlet.jsp:jsp-api:2.2")
+    "javaxServletCompileOnly"("javax.el:el-api:2.2")
 
-    "jsp21CompileOnly"(sourceSets["jsp20"].output)
-    "jsp21CompileOnly"("javax.servlet.jsp:jsp-api:2.1")
-    "jsp21CompileOnly"("javax.servlet:servlet-api:2.5")
-
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
-    "jsp21TestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
-    // Jetty also contains the servlet-api and jsp-api classes
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-webapp:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:jetty-util:${jettyVersion}")
+    "javaxServletTestImplementation"("org.eclipse.jetty:apache-jsp:${jettyVersion}")
+    // Jetty also contains the servlet-api and jsp-api and el-api classes
 
     // JSP JSTL (not included in Jetty):
-    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
-    "jsp21TestImplementation"("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
+    "javaxServletTestImplementation"("org.apache.taglibs:taglibs-standard-impl:${tagLibsVersion}")
+    "javaxServletTestImplementation"("org.apache.taglibs:taglibs-standard-spec:${tagLibsVersion}")
 
-    "jsp21TestImplementation"("org.springframework:spring-core:${springVersion}") {
+    "javaxServletTestImplementation"("org.springframework:spring-core:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    "jsp21TestImplementation"("org.springframework:spring-test:${springVersion}") {
+    "javaxServletTestImplementation"("org.springframework:spring-test:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
 

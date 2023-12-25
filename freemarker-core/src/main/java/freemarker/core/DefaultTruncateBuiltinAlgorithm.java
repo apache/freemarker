@@ -143,9 +143,9 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
      * @param defaultTerminator
      *            The terminator to use if the invocation (like {@code s?truncate(20)}) doesn't specify it. The
      *            terminator is the text appended after a truncated string, to indicate that it was truncated.
-     *            Typically it's {@code "[...]"} or {@code "..."}, or the same with UNICODE ellipsis character.
+     *            Typically, it's {@code "[...]"} or {@code "..."}, or the same with UNICODE ellipsis character.
      * @param defaultTerminatorLength
-     *            The assumed length of {@code defaultTerminator}, or {@code null} if it should be get via
+     *            The assumed length of {@code defaultTerminator}, or {@code null} if the assumed length is simply
      *            {@code defaultTerminator.length()}.
      * @param defaultTerminatorRemovesDots
      *            Whether dots and ellipsis characters that the {@code defaultTerminator} touches should be removed. If
@@ -157,8 +157,12 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
      *            in which case {@code defaultTerminator} will be used even if {@code ?truncate_m} or similar built-in
      *            is called.
      * @param defaultMTerminatorLength
-     *            The assumed length of the terminator, or {@code null} if it should be get via
-     *            {@link #getMTerminatorLength}.
+     *            The assumed length of the terminator, or {@code null} if the assumed length will be
+     *            {@link #getMTerminatorLength(TemplateMarkupOutputModel)}. Note that if you have HTML tags, or entity
+     *            references in the {@code defaultMTerminator}, then the visual length differs from the string length,
+     *            and {@link #getMTerminatorLength(TemplateMarkupOutputModel)} accounts for these complications to an
+     *            extent, but it for example it won't know what CSS does, or if the nested content of some HTML elements
+     *            are not displayed.
      * @param defaultMTerminatorRemovesDots
      *            Similar to {@code defaultTerminatorRemovesDots}, but for {@code defaultMTerminator}. If {@code
      *            null}, and {@code defaultMTerminator} is HTML/XML/XHTML, then it will be examined of the
@@ -168,17 +172,17 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
      * @param addSpaceAtWordBoundary,
      *            Whether to add a space before the terminator if the truncation happens directly after the end of a
      *            word. For example, when "too long sentence" is truncated, it will be a like "too long [...]"
-     *            instead of "too long[...]". When the truncation happens inside a word, this has on effect, i.e., it
+     *            instead of "too long[...]". When the truncation happens inside a word, this has no effect, i.e., it
      *            will be always like "too long se[...]" (no space before the terminator). Note that only whitespace is
      *            considered to be a word separator, not punctuation, so if this is {@code true}, you get results
      *            like "Some sentence. [...]".
      * @param wordBoundaryMinLength
      *            Used when {@link #truncate} or {@link #truncateM} has to decide between
-     *            word boundary truncation and character boundary truncation; it's the minimum length, given as
+     *            word boundary truncation, and character boundary truncation; it's the minimum length, given as
      *            proportion of {@code maxLength}, that word boundary truncation has to produce. If the resulting
      *            length is less, we do character boundary truncation instead. For example, if {@code maxLength} is
-     *            30, and this parameter is 0.85, then: 30*0.85 = 25.5, rounded up that's 26, so the resulting length
-     *            must be at least 26. The result of character boundary truncation will be always accepted, even if its
+     *            30, and this parameter is 0.85, then: 30 * 0.85 = 25.5, rounded up that's 26, so the resulting length
+     *            must be at least 26. The result of character boundary truncation will always be accepted, even if it's
      *            still too short. If this parameter is {@code null}, then {@link #DEFAULT_WORD_BOUNDARY_MIN_LENGTH}
      *            will be used. If this parameter is 0, then truncation always happens at word boundary. If this
      *            parameter is 1.0, then truncation doesn't prefer word boundaries over other places.
@@ -355,7 +359,7 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
      *
      * <p>In the implementation in {@link DefaultTruncateBuiltinAlgorithm}, if the markup is HTML/XML/XHTML, then this
      * counts the characters outside tags and comments, and inside CDATA sections (ignoring the CDATA section
-     * delimiters). Furthermore then it counts character and entity references as having length of 1. If the markup
+     * delimiters). Furthermore, then it counts character and entity references as having length of 1. If the markup
      * is not HTML/XML/XHTML (or subclasses of those {@link MarkupOutputFormat}-s) then it doesn't know how to
      * measure it, and simply returns 3.
      */
@@ -394,9 +398,6 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
                 : true;
     }
 
-    /**
-     * Deals with both CB and WB truncation, hence it's unified.
-     */
     private TemplateModel unifiedTruncate(
             String s, int maxLength,
             TemplateModel terminator, Integer terminatorLength,
@@ -437,7 +438,7 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
                 terminator, terminatorLength, terminatorRemovesDots,
                 mode);
 
-        // The terminator is always shown, even if with that we exceed maxLength. Otherwise the user couldn't
+        // The terminator is always shown, even if with that we exceed maxLength. Otherwise, the user couldn't
         // see that the string was truncated.
         if (truncatedS == null || truncatedS.length() == 0) {
             return terminator;
@@ -447,7 +448,7 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
             truncatedS.append(((TemplateScalarModel) terminator).getAsString());
             return new SimpleScalar(truncatedS.toString());
         } else if (terminator instanceof TemplateMarkupOutputModel) {
-            TemplateMarkupOutputModel markup = (TemplateMarkupOutputModel) terminator;
+            TemplateMarkupOutputModel markup = (TemplateMarkupOutputModel<?>) terminator;
             MarkupOutputFormat outputFormat = markup.getOutputFormat();
             return outputFormat.concat(outputFormat.fromPlainTextByEscaping(truncatedS.toString()), markup);
         } else {
@@ -469,6 +470,8 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
         if (cbLastCIdx < 0) {
             return null;
         }
+
+        boolean addSpaceAtWordBoundary = this.addSpaceAtWordBoundary && terminatorLength != 0;
 
         if (mode == TruncationMode.AUTO && wordBoundaryMinLength < 1.0 || mode == TruncationMode.WORD_BOUNDARY) {
             // Do word boundary truncation. Might not be possible due to minLength restriction (see below), in which
@@ -527,7 +530,7 @@ public class DefaultTruncateBuiltinAlgorithm extends TruncateBuiltinAlgorithm {
 
         // If the truncation point is a word boundary, and thus we add a space before the terminator, then we may run
         // out of the maxLength by 1. In that case we have to truncate one character earlier.
-        if (cbLastCIdx == cbInitialLastCIdx && addSpaceAtWordBoundary  && isWordEnd(s, cbLastCIdx)) {
+        if (cbLastCIdx == cbInitialLastCIdx && addSpaceAtWordBoundary && isWordEnd(s, cbLastCIdx)) {
             cbLastCIdx--;
             if (cbLastCIdx < 0) {
                 return null;

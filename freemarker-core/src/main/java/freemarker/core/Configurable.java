@@ -2000,10 +2000,10 @@ public class Configurable {
     }
 
     /**
-     * Specifies the algorithm used for {@code ?truncate}. Defaults to
+     * Specifies the algorithm used for {@code ?truncate}, {@code ?truncate_w}, and {@code ?truncate_c}. Defaults to
      * {@link DefaultTruncateBuiltinAlgorithm#ASCII_INSTANCE}. Most customization needs can be addressed by
-     * creating a new {@link DefaultTruncateBuiltinAlgorithm} with the proper constructor parameters. Otherwise users
-     * my use their own {@link TruncateBuiltinAlgorithm} implementation.
+     * creating a new {@link DefaultTruncateBuiltinAlgorithm} with the proper constructor parameters. Otherwise, users
+     * may use their own {@link TruncateBuiltinAlgorithm} implementation.
      *
      * <p>In case you need to set this with {@link Properties}, or a similar configuration approach that doesn't let you
      * create the value in Java, see examples at {@link #setSetting(String, String)}.
