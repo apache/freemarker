@@ -89,7 +89,8 @@ open class FreemarkerRootPlugin : Plugin<Project> {
                     }
                     if (!ext.signMethod.needSignature() && !ext.allowUnsignedReleaseBuild) {
                         throw IllegalStateException("Package signing is disabled, which is not allowed for release versions! "
-                                + "(For testing purposes only, you may set the   Gradle property to false)")
+                                + "(For testing purposes only, you may set the freemarker.allowUnsignedReleaseBuild "
+                                + "Gradle property to true.)")
                     }
                 }
             }
