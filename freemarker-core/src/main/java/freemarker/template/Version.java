@@ -42,7 +42,6 @@ public final class Version implements Serializable {
     private final String originalStringValue;
     
     private final Boolean gaeCompliant;
-    private final Date buildDate;
     
     private final int intValue;
     private volatile String calculatedStringValue;  // not final because it's calculated on demand
@@ -116,7 +115,6 @@ public final class Version implements Serializable {
         intValue = calculateIntValue();
         
         this.gaeCompliant = gaeCompliant;
-        this.buildDate = buildDate;
         
     }
 
@@ -142,7 +140,6 @@ public final class Version implements Serializable {
         
         this.extraInfo = null;
         this.gaeCompliant = null;
-        this.buildDate = null;
         originalStringValue = null;
     }
     
@@ -152,7 +149,6 @@ public final class Version implements Serializable {
         this.micro = micro;
         this.extraInfo = extraInfo;
         this.gaeCompliant = gaeCompatible;
-        this.buildDate = buildDate;
         intValue = calculateIntValue();
         originalStringValue = null;
     }
@@ -229,10 +225,11 @@ public final class Version implements Serializable {
     }
 
     /**
+     * @deprecated will be removed. Always returns <code>null</code>. 
      * @return The build date if known, or {@code null}.
      */
     public Date getBuildDate() {
-        return buildDate;
+        return null;
     }
 
     /**
@@ -250,7 +247,6 @@ public final class Version implements Serializable {
             if (hashCode == 0) {
                 final int prime = 31;
                 int result = 1;
-                result = prime * result + (buildDate == null ? 0 : buildDate.hashCode());
                 result = prime * result + (extraInfo == null ? 0 : extraInfo.hashCode());
                 result = prime * result + (gaeCompliant == null ? 0 : gaeCompliant.hashCode());
                 result = prime * result + intValue;
@@ -272,12 +268,6 @@ public final class Version implements Serializable {
         if (intValue != other.intValue) return false;
         
         if (other.hashCode() != hashCode()) return false;
-        
-        if (buildDate == null) {
-            if (other.buildDate != null) return false;
-        } else if (!buildDate.equals(other.buildDate)) {
-            return false;
-        }
         
         if (extraInfo == null) {
             if (other.extraInfo != null) return false;

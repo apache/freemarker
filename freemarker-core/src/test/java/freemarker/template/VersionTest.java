@@ -47,7 +47,7 @@ public class VersionTest {
         assertEquals("1.2.3-beta8", v.toString());
         assertEquals("beta8", v.getExtraInfo());
         assertTrue(v.isGAECompliant().booleanValue());
-        assertEquals(new Date(5000), v.getBuildDate());
+        assertNull(v.getBuildDate());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class VersionTest {
         assertEquals("2.3.24-rc01-incubating", v.toString());
         assertEquals("rc01-incubating", v.getExtraInfo());
         assertFalse(v.isGAECompliant().booleanValue());
-        assertEquals(new Date(5000), v.getBuildDate());
+        assertNull(v.getBuildDate());
     }
     
     @Test
@@ -89,7 +89,7 @@ public class VersionTest {
         assertEquals(30, v.getMicro());
         assertNull(v.getExtraInfo());
         assertTrue(v.isGAECompliant().booleanValue());
-        assertEquals(new Date(5000), v.getBuildDate());
+        assertNull(v.getBuildDate());
     }
 
     @Test
@@ -147,8 +147,8 @@ public class VersionTest {
         assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version(1, 2, 3, "beta2", null, new Date(5000));
-        assertTrue(!v1.equals(v2));
-        assertTrue(v1.hashCode() != v2.hashCode());
+        assertTrue(v1.equals(v2));
+        assertTrue(v1.hashCode() == v2.hashCode());
         
         v2 = new Version("1.2.9-beta2");
         assertTrue(!v1.equals(v2));
