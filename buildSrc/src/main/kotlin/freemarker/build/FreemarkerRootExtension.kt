@@ -206,6 +206,11 @@ class FreemarkerRootExtension constructor(
         .map { SignatureConfiguration.valueOf(it.uppercase()) }
         .get()
 
+    val allowUnsignedReleaseBuild = context.providers
+        .gradleProperty("allowUnsignedReleaseBuild")
+        .map { it.toBoolean() }
+        .getOrElse(false)
+
     private val allConfiguredSourceSetNamesRef = project.objects.setProperty<String>()
     val allConfiguredSourceSetNames: Provider<Set<String>> = allConfiguredSourceSetNamesRef
 

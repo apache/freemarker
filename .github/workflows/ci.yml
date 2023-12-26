@@ -52,7 +52,7 @@ jobs:
         uses: gradle/wrapper-validation-action@v1.1.0
       - name: Run Build
         id: build_step
-        run: './gradlew "-Pfreemarker.signMethod=none" --continue clean build'
+        run: './gradlew "-Pfreemarker.signMethod=none" "-Pfreemarker.allowUnsignedReleaseBuild=true" --continue clean build'
       - name: Upload Failed Report
         uses: actions/upload-artifact@v2.3.1
         if: failure() && steps.build_step.outcome == 'failure'

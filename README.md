@@ -129,8 +129,10 @@ To see how the project would be deployed to Maven Central, issue
 `./gradlew publishAllPublicationsToLocalRepository`,
 and check the `build/local-deployment` directory.
 
-To also build the distribution artifacts (the `tgz`-s that people can download), run `./gradlew build`. However,
-for a stable version you will also need to set up signing; see `gradle.properties` in this project for pointers.  
+To build the distribution artifacts (the `tgz`-s that people can download), run `./gradlew build`.However,
+
+For a stable (non-SNAPSHOT) version number, you will need to set up signing, or disable that verification;
+see `gradle.properties` in this project for those!  
 
 See `gradle.properties` for some Gradle properties that you may what to set,
 especially if you are building a release.
