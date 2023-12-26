@@ -54,6 +54,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-16, JavaSE-15, JavaSE-14, JavaSE-13,
 # for reproducible build (see https://bnd.bndtools.org/instructions/reproducible.html 
 # and https://bnd.bndtools.org/instructions/noextraheaders.html)
 -reproducible: true
+-noextraheaders: true
 
 # Non-OSGi meta:
 Main-Class: freemarker.core.CommandLine
