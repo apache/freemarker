@@ -105,6 +105,12 @@ tasks.sourcesJar.configure {
     from(files("LICENSE", "NOTICE")) {
         into("META-INF")
     }
+
+    // Depend on the createBuildInfo task and include the generated file
+    dependsOn(createBuildInfo)
+    from(File(project.buildDir, "tmp/buildinfo")) {
+        include(".buildinfo")
+    }
 }
 
 tasks.javadocJar.configure {
