@@ -26,7 +26,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.32</productname>
+    <productname>Freemarker 2.3.33</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -6659,7 +6659,7 @@ That's all.</programlisting>
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
 // version (here 2.3.32) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_33);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -6958,7 +6958,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_33);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         // Recommended settings for new projects:
         cfg.setDefaultEncoding("UTF-8");
