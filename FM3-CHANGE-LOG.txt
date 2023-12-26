@@ -634,7 +634,9 @@ Core / Miscellaneous
   better practice is to set the format to "c", if you generate computer language output), but it's hardly a good practice
   to use.
 
-Build / development process changes
------------------------------------
+Things not yet forward-ported from 2.3-gae 
+------------------------------------------
 
-- Migrated building from Ant to Gradle.
+- Lambda-like expressions: The way those work in 2.x is limited because of BC restrictions. So it should work differently here.
+- ?with_args/?with_args_last: Have to implement the better null handling in the template language first
+- Some of the Gradle build refinements, like signature related and, rebroducible build stuff
