@@ -24,13 +24,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.test.ResourcesExtractor;
 import org.apache.freemarker.test.TestUtils;
-import org.eclipse.jetty.annotations.ServletContainerInitializersStarter;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
+import org.eclipse.jetty.ee10.apache.jsp.JettyJasperInitializer;
+import org.eclipse.jetty.ee10.servlet.listener.ContainerInitializer;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -69,9 +68,6 @@ public class WebAppTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        // Work around Java 5 bug(?) that causes Jasper to fail with "zip file closed" when it reads the JSTL jar:
-        org.eclipse.jetty.util.resource.Resource.setDefaultUseCaches(false);
-
         LOG.info("Starting embedded Jetty...");
 
         server = new Server(0);
@@ -265,12 +261,9 @@ public class WebAppTestCase {
      * return value of "org.apache.jasper.Options.getTldCache()" is null
      */
     private static void addJasperInitializer(WebAppContext context) {
-        JettyJasperInitializer jettyJasperInitializer = new JettyJasperInitializer();
-        ServletContainerInitializersStarter servletContainerInitializersStarter
-                = new ServletContainerInitializersStarter(context);
-        ContainerInitializer containerInitializer = new ContainerInitializer(jettyJasperInitializer, null);
-        context.setAttribute("org.eclipse.jetty.containerInitializers", List.of(containerInitializer));
-        context.addBean(servletContainerInitializersStarter, true);
+        context.addEventListener(
+                ContainerInitializer.asContextListener(
+                        new JettyJasperInitializer()));
     }
 
     private static void deleteTemporaryDirectories() throws IOException {

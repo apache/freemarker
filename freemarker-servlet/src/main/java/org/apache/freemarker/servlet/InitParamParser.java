@@ -18,15 +18,7 @@
  */
 package org.apache.freemarker.servlet;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.freemarker.core._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core._SettingEvaluationEnvironment;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -36,6 +28,13 @@ import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 
 final class InitParamParser {

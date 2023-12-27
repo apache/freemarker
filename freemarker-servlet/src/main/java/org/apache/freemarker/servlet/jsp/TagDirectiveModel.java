@@ -19,18 +19,9 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.beans.IntrospectionException;
-import java.io.IOException;
-import java.io.Writer;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.IterationTag;
-import javax.servlet.jsp.tagext.SimpleTag;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TryCatchFinally;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.*;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -40,6 +31,10 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.beans.IntrospectionException;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Adapts a {@link Tag}-based custom JSP tag to be a value that's callable in templates as an user-defined directive.

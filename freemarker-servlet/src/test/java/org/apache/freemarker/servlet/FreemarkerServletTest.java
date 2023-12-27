@@ -18,31 +18,12 @@
  */
 package org.apache.freemarker.servlet;
 
-import static org.apache.freemarker.servlet.FreemarkerServlet.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.Locale;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.templateresolver.*;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +31,17 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.Locale;
+
+import static org.apache.freemarker.servlet.FreemarkerServlet.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
 
 public class FreemarkerServletTest {
 

@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Provides <code>TemplateModel</code> for data-binding-aware multiple HTML '{@code <input type="radio"/>}' elements.

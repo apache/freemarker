@@ -18,16 +18,16 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import java.io.IOException;
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import java.io.IOException;
 
 /**
  * A built-in internal servlet class to be used as page object in JSP tag libraries used in FreeMarker templates.
- * JSP Tag Library implementations may invoke <code>javax.servlet.jsp.PageContext#getPage()</code> to get the
+ * JSP Tag Library implementations may invoke <code>jakarta.servlet.jsp.PageContext#getPage()</code> to get the
  * reference of the servlet. So, this internal servlet implementation is provided for that.
  */
 @SuppressWarnings("serial")

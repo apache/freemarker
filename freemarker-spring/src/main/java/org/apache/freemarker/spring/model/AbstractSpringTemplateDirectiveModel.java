@@ -19,12 +19,8 @@
 
 package org.apache.freemarker.spring.model;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -32,6 +28,9 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.springframework.web.servlet.support.RequestContext;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.

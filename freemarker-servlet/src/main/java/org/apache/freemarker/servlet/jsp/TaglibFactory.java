@@ -19,6 +19,9 @@
 
 package org.apache.freemarker.servlet.jsp;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -32,9 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.tagext.Tag;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.beans.IntrospectionException;

@@ -19,9 +19,8 @@
 
 package org.apache.freemarker.servlet;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletContext;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;

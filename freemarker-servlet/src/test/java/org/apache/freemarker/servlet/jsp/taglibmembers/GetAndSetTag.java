@@ -19,13 +19,12 @@
 
 package org.apache.freemarker.servlet.jsp.taglibmembers;
 
-import java.io.IOException;
-
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-
+import jakarta.servlet.jsp.JspContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
 import org.apache.freemarker.core.util._NullArgumentException;
+
+import java.io.IOException;
 
 public class GetAndSetTag extends AttributeAccessorTag {
     

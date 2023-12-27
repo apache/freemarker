@@ -19,20 +19,15 @@
 
 package org.apache.freemarker.servlet;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleString;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.

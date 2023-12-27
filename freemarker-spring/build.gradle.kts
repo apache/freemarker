@@ -32,30 +32,25 @@ dependencies {
     api(project(":freemarker-core"))
     api(project(":freemarker-servlet"))
 
-    val geronimoServletSpec3Version = "1.0"
-    val geronimoJspSpec22Version = "1.2"
-    val geronimoELSpec22Version = "1.0.4"
+    val springVersion = "6.0.15"
 
-    val springVersion = "4.0.9.RELEASE"
-
-    compileOnly("org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}")
     compileOnly("org.springframework:spring-core:$springVersion")
     compileOnly("org.springframework:spring-beans:$springVersion")
     compileOnly("org.springframework:spring-context:$springVersion")
     compileOnly("org.springframework:spring-web:$springVersion")
     compileOnly("org.springframework:spring-webmvc:$springVersion")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    compileOnly("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.0")
+    compileOnly("jakarta.el:jakarta.el-api:5.0.0")
 
-    val taglibsStandardVersion = "1.2.1"
-
-    testImplementation("org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}")
     testImplementation("org.springframework:spring-core:$springVersion")
     testImplementation("org.springframework:spring-beans:$springVersion")
     testImplementation("org.springframework:spring-context:$springVersion")
     testImplementation("org.springframework:spring-web:$springVersion")
     testImplementation("org.springframework:spring-webmvc:$springVersion")
     testImplementation("org.springframework:spring-test:$springVersion")
-    testImplementation("org.apache.geronimo.specs:geronimo-jsp_2.2_spec:${geronimoJspSpec22Version}")
-    testImplementation("org.apache.geronimo.specs:geronimo-el_2.2_spec:${geronimoELSpec22Version}")
-    testImplementation("org.apache.taglibs:taglibs-standard-spec:${taglibsStandardVersion}")
+    testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    testImplementation("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.0")
+    testImplementation("jakarta.el:jakarta.el-api:5.0.0")
     testImplementation(project(":freemarker-test-utils"))
 }

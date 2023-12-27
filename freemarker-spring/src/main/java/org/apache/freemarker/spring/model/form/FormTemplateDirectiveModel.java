@@ -19,13 +19,8 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -43,6 +38,9 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriUtils;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code form}' element whose inner directives
@@ -338,21 +336,15 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
             String requestUri = requestContext.getRequestUri();
             String encoding = getResponse().getCharacterEncoding();
 
-            try {
-                requestUri = UriUtils.encodePath(requestUri, encoding);
-            } catch (UnsupportedEncodingException ex) {
-                // According to Spring MVC Javadoc, it shouldn't happen.
-            }
+            requestUri = UriUtils.encodePath(requestUri, encoding);
 
             HttpServletResponse response = getResponse();
 
-            if (response != null) {
-                requestUri = response.encodeURL(requestUri);
-                String queryString = requestContext.getQueryString();
+            requestUri = response.encodeURL(requestUri);
+            String queryString = requestContext.getQueryString();
 
-                if (StringUtils.hasText(queryString)) {
-                    requestUri += "?" + HtmlUtils.htmlEscape(queryString);
-                }
+            if (StringUtils.hasText(queryString)) {
+                requestUri += "?" + HtmlUtils.htmlEscape(queryString);
             }
 
             if (StringUtils.hasText(requestUri)) {

@@ -19,30 +19,16 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
-import javax.el.ArrayELResolver;
-import javax.el.BeanELResolver;
-import javax.el.CompositeELResolver;
-import javax.el.ELContext;
-import javax.el.ELContextEvent;
-import javax.el.ELContextListener;
-import javax.el.ELResolver;
-import javax.el.ExpressionFactory;
-import javax.el.FunctionMapper;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.ResourceBundleELResolver;
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.el.ImplicitObjectELResolver;
-import javax.servlet.jsp.el.ScopedAttributeELResolver;
-
+import jakarta.el.*;
+import jakarta.servlet.jsp.JspApplicationContext;
+import jakarta.servlet.jsp.el.ImplicitObjectELResolver;
+import jakarta.servlet.jsp.el.ScopedAttributeELResolver;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  */

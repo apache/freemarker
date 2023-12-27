@@ -19,14 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.BodyContent;
 
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
+import java.io.*;
 
 /**
  * An implementation of BodyContent that buffers it's input to a char[].

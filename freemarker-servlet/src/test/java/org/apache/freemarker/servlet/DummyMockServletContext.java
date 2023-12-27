@@ -18,9 +18,10 @@
  */
 package org.apache.freemarker.servlet;
 
-import javax.servlet.*;
-import javax.servlet.ServletRegistration.Dynamic;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.*;
+import jakarta.servlet.ServletRegistration.Dynamic;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -112,32 +113,12 @@ public class DummyMockServletContext implements ServletContext {
     }
 
     @Override
-    public Servlet getServlet(String arg0) throws ServletException {
-        return null;
-    }
-
-    @Override
     public String getServletContextName() {
         return "MyApp";
     }
 
     @Override
-    public Enumeration getServletNames() {
-        return null;
-    }
-
-    @Override
-    public Enumeration getServlets() {
-        return null;
-    }
-
-    @Override
     public void log(String arg0) {
-        
-    }
-
-    @Override
-    public void log(Exception arg0, String arg1) {
         
     }
 
@@ -178,6 +159,11 @@ public class DummyMockServletContext implements ServletContext {
     }
 
     @Override
+    public Dynamic addJspFile(String s, String s1) {
+        return null;
+    }
+
+    @Override
     public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
         return null;
     }
@@ -193,19 +179,19 @@ public class DummyMockServletContext implements ServletContext {
     }
 
     @Override
-    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className)
+    public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className)
             throws IllegalArgumentException, IllegalStateException {
         return null;
     }
 
     @Override
-    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
+    public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
             throws IllegalArgumentException, IllegalStateException {
         return null;
     }
 
     @Override
-    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass)
+    public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass)
             throws IllegalArgumentException, IllegalStateException {
         return null;
     }
@@ -252,6 +238,36 @@ public class DummyMockServletContext implements ServletContext {
     }
 
     @Override
+    public int getSessionTimeout() {
+        return 0;
+    }
+
+    @Override
+    public void setSessionTimeout(int i) {
+
+    }
+
+    @Override
+    public String getRequestCharacterEncoding() {
+        return null;
+    }
+
+    @Override
+    public void setRequestCharacterEncoding(String s) {
+
+    }
+
+    @Override
+    public String getResponseCharacterEncoding() {
+        return null;
+    }
+
+    @Override
+    public void setResponseCharacterEncoding(String s) {
+
+    }
+
+    @Override
     public SessionCookieConfig getSessionCookieConfig() {
         return null;
     }
@@ -282,7 +298,7 @@ public class DummyMockServletContext implements ServletContext {
 
     @Override
     public ClassLoader getClassLoader() {
-        return null;
+        return this.getClassLoader();
     }
 
     @Override

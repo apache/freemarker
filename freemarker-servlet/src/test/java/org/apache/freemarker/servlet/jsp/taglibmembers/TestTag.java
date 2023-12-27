@@ -19,14 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp.taglibmembers;
 
-import java.io.IOException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.*;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.BodyTagSupport;
-import javax.servlet.jsp.tagext.IterationTag;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TryCatchFinally;
+import java.io.IOException;
 
 /**
  */

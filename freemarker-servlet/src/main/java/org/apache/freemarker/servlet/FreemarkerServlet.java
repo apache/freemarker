@@ -19,6 +19,12 @@
 
 package org.apache.freemarker.servlet;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -41,12 +47,6 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -1080,11 +1080,11 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected String requestUrlToTemplatePath(HttpServletRequest request) throws ServletException {
         // First, see if it's an included request
-        String includeServletPath  = (String) request.getAttribute("javax.servlet.include.servlet_path");
+        String includeServletPath  = (String) request.getAttribute("jakarta.servlet.include.servlet_path");
         if (includeServletPath != null) {
             // Try path info; only if that's null (servlet is mapped to an
             // URL extension instead of to prefix) use servlet path.
-            String includePathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
+            String includePathInfo = (String) request.getAttribute("jakarta.servlet.include.path_info");
             return includePathInfo == null ? includeServletPath : includePathInfo;
         } 
         // Seems that the servlet was not called as the result of a 

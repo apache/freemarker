@@ -34,29 +34,24 @@ dependencies {
     api(libs.legacyFreemarker)
 
     // Servlet, JSP, and EL related classes
-    compileOnly("javax.servlet:javax.servlet-api:3.1.0")
-    compileOnly("javax.servlet.jsp:javax.servlet.jsp-api:2.3.3")
-    compileOnly("javax.el:javax.el-api:3.0.0")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:5.0.0")
+    compileOnly("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0")
+    compileOnly("jakarta.el:jakarta.el-api:4.0.0")
 
-    // Chose the Jetty version very carefully, as it should implement the same Servlet API, JSP API, and EL API
-    // than what we declare above, because the same classes will come from Jetty as well. For example, Jetty depends
-    // on org.mortbay.jasper:apache-el, which contains the javax.el classes, along with non-javax.el classes, so you
-    // can't even exclude it. Similarly, org.eclipse.jetty:apache-jsp contains the JSP API javax.servlet.jsp classes,
-    // yet again along with other classes. Anyway, this mess is temporary, as we will migrate to Jakarta, and only
-    // support that.
-    val jettyVersion = "9.4.53.v20231009"
-    testImplementation("org.eclipse.jetty:jetty-server:$jettyVersion")
-    testImplementation("org.eclipse.jetty:jetty-webapp:$jettyVersion")
-    testImplementation("org.eclipse.jetty:jetty-util:$jettyVersion")
-    testImplementation("org.eclipse.jetty:apache-jsp:$jettyVersion")
+    // Jetty 12 is Servlet 6 (jakarta), Jetty 11 was Servlet 5 (also jakarta). But Spring Servlet API mocks,
+    // which we use in tests, jump from Servlet 4 (javax) to 6 (jakarta). So, we have to go with 12.
+    // (Note that Jetty artifact names, package names were completely changed in 12, also some old API-s
+    // were replaced with something else. So our test utility code is affected by this as well.)
+    val jettyVersion = "12.0.5"
+    // ".ee10" means Jakarta EE 10 => Servlet 6, JSP 3.1, JSTL 3.0
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-annotations:$jettyVersion")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-apache-jsp:$jettyVersion")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-glassfish-jstl:$jettyVersion")
+    testImplementation("org.eclipse.jetty:jetty-slf4j-impl:$jettyVersion")
     // Jetty also contains the servlet-api and jsp-api and el-api classes
 
-    // JSP JSTL (not included in Jetty):
-    val apacheStandardTaglibsVersion = "1.2.5"
-    testImplementation("org.apache.taglibs:taglibs-standard-impl:$apacheStandardTaglibsVersion")
-    testImplementation("org.apache.taglibs:taglibs-standard-spec:$apacheStandardTaglibsVersion")
-
-    testImplementation("displaytag:displaytag:1.2") {
+    testImplementation("com.github.hazendaz:displaytag:2.5.3") {
         exclude(group = "com.lowagie", module = "itext")
         // We manage logging centrally:
         exclude(group = "org.slf4j", module = "slf4j-log4j12")
@@ -67,8 +62,9 @@ dependencies {
     // Override Java 9 incompatible version (coming from displaytag):
     testImplementation("commons-lang:commons-lang:2.6")
 
-    val springVersion = "2.5.6.SEC03"
+    val springVersion = "6.0.15"
     testImplementation("org.springframework:spring-core:$springVersion")
+    testImplementation("org.springframework:spring-web:$springVersion")
     testImplementation("org.springframework:spring-test:$springVersion")
 
     testImplementation(project(":freemarker-test-utils"))

@@ -19,34 +19,22 @@
 
 package org.apache.freemarker.spring.model;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._KeyValuePair;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.UriUtils;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A <code>TemplateFunctionModel</code> providing functionality equivalent to the Spring Framework's
@@ -217,9 +205,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
                 try {
                     uri = uri.replace(template, UriUtils.encodePath(paramValue, encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw CallableUtils.newGenericExecuteException("Unsupported servlet response encoding: " + encoding,
-                            this);
+                } catch (Exception e) {
+                    throw newUrlParameterValueSubstitutionException(e, encoding);
                 }
             } else {
                 template = URL_TEMPLATE_DELIMITER_PREFIX + '/' + paramName + URL_TEMPLATE_DELIMITER_SUFFIX;
@@ -229,9 +216,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
                     try {
                         uri = uri.replace(template, UriUtils.encodePathSegment(paramValue, encoding));
-                    } catch (UnsupportedEncodingException e) {
-                        throw CallableUtils
-                                .newGenericExecuteException("Unsupported servlet response encoding: " + encoding, this);
+                    } catch (Exception e) {
+                        throw newUrlParameterValueSubstitutionException(e, encoding);
                     }
                 }
             }
@@ -263,14 +249,19 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                         queryStringBuilder.append('=');
                         queryStringBuilder.append(UriUtils.encodeQueryParam(paramValue, encoding));
                     }
-                } catch (UnsupportedEncodingException e) {
-                    throw CallableUtils.newGenericExecuteException("Unsupported servlet response encoding: " + encoding,
-                            this);
+                } catch (Exception e) {
+                    throw newUrlParameterValueSubstitutionException(e, encoding);
                 }
             }
         }
 
         return queryStringBuilder.toString();
+    }
+
+    private TemplateException newUrlParameterValueSubstitutionException(Exception e, String encoding) {
+        return CallableUtils.newGenericExecuteException(
+                "Failed to put parameter value into URI with encoding \"" + encoding + "\"",
+                this, e);
     }
 
     private enum UrlType {

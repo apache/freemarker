@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp.taglibmembers;
 
-import java.io.IOException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.SimpleTagSupport;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
+import java.io.IOException;
 
 public class TestSimpleTag3 extends SimpleTagSupport {
     @Override

@@ -19,17 +19,16 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.beans.PropertyEditor;
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.spring.model.AbstractSpringTemplateDirectiveModel;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
+
+import java.beans.PropertyEditor;
+import java.io.IOException;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractFormTag</code>.

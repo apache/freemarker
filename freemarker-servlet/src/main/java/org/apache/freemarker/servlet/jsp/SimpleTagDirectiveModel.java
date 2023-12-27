@@ -19,17 +19,12 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import java.beans.IntrospectionException;
-import java.io.IOException;
-import java.io.Writer;
-
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.JspFragment;
-import javax.servlet.jsp.tagext.JspTag;
-import javax.servlet.jsp.tagext.SimpleTag;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.JspFragment;
+import jakarta.servlet.jsp.tagext.JspTag;
+import jakarta.servlet.jsp.tagext.SimpleTag;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -37,6 +32,10 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
+
+import java.beans.IntrospectionException;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Adapts a {@link SimpleTag}-based custom JSP tag to be a value that's callable in templates as an user-defined

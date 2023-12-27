@@ -7067,7 +7067,7 @@ public class Product {
         <literal>TemplateModel</literal> interface. This makes it possible,
         for example, to access <literal>java.sql.ResultSet</literal> as
         sequence variable in templates, or to access
-        <literal>javax.servlet.ServletRequest</literal> objects as a hash
+        <literal>jakarta.servlet.ServletRequest</literal> objects as a hash
         variable that contains the request attributes, or even to traverse XML
         documents as FTL variables (<link linkend="xgui">see here</link>). To
         wrap (convert) these objects, however, you need to plug the proper
@@ -12101,7 +12101,7 @@ ${bar?trim}</programlisting>
           between the <quote>beans</quote> of JSP scopes and FTL variables.
           For the custom JSP tags, the request, session and application scopes
           are exactly the same as with real JSP: the attributes of the
-          <literal>javax.servlet.ServletContext</literal>,
+          <literal>jakarta.servlet.ServletContext</literal>,
           <literal>HttpSession</literal> and <literal>ServletRequest</literal>
           objects. From the FTL side you see these 3 scopes together as the
           data-model, as it was explained earlier. The page scope corresponds
@@ -12151,7 +12151,7 @@ ${bar?trim}</programlisting>
 
           <para>Note that you can use JSP taglibs with FreeMarker even if the
           servlet container has no native JSP support, just make sure that the
-          <literal>javax.servlet.jsp.*</literal> packages for JSP 2.0 (or
+          <literal>jakarta.servlet.jsp.*</literal> packages for JSP 2.0 (or
           later) are available to your Web application.</para>
 
           <para>As of this writing, JSP features up to JSP 2.1 are
@@ -36883,7 +36883,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed: When using FreeMarker's JSP support with JSP
               tags that use
-              <literal>javax.servlet.jsp.PageContext.pushBody</literal> (like
+              <literal>jakarta.servlet.jsp.PageContext.pushBody</literal> (like
               some Stripes tags), <literal>"ArrayIndexOutOfBoundsException:
               -1"</literal> occurred inside
               <literal>freemarker.ext.jsp.FreeMarkerPageContext.popWriter</literal>.</para>
@@ -38316,7 +38316,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <para>There is a bugfix that may affect the behavior of you Web
           application if you use JSP tags in FreeMarker templates:
           FreeMarker's implementation of
-          <literal>javax.servlet.jsp.PageContext.getSession()</literal> was
+          <literal>jakarta.servlet.jsp.PageContext.getSession()</literal> was
           incorrect. The <literal>getSession()</literal> method is a
           convenience method by which the custom tag can get the current
           <literal>HttpSession</literal> object (possibly
@@ -38477,7 +38477,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bugfix: FreeMarker's implementation of
-              <literal>javax.servlet.jsp.PageContext.getSession()</literal>
+              <literal>jakarta.servlet.jsp.PageContext.getSession()</literal>
               was incorrect. The <literal>getSession()</literal> method is a
               convenience method by which the custom tag can get the current
               <literal>HttpSession</literal> object (possibly
@@ -40553,10 +40553,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configuration.setServletContextForTemplateLoading</literal>
               has been changed: the first parameter is now
               <literal>Object</literal> instead of
-              <literal>javax.servlet.ServletContext</literal>. Thus, you have
+              <literal>jakarta.servlet.ServletContext</literal>. Thus, you have
               to recompile your classes that call this method. The change was
               required to prevent class-loading failure when
-              <literal>javax.servlet</literal> classes are not available and
+              <literal>jakarta.servlet</literal> classes are not available and
               you would not call this method.</para>
             </listitem>
 
@@ -41082,9 +41082,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bugfix: FreeMarker didn't work if the
-              <literal>javax.servlet</literal> classes was not available,
+              <literal>jakarta.servlet</literal> classes was not available,
               because <literal>Configuration</literal> explicitly referred to
-              <literal>javax.servlet.ServletContext</literal>.</para>
+              <literal>jakarta.servlet.ServletContext</literal>.</para>
             </listitem>
 
             <listitem>
@@ -42866,7 +42866,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         </listitem>
 
         <listitem>
-          <para>Obviously, <literal>javax.servlet</literal> classes are needed
+          <para>Obviously, <literal>jakarta.servlet</literal> classes are needed
           for <literal>FreemarkerServlet</literal>. Servlet version 2.2 or
           later is needed.</para>
         </listitem>

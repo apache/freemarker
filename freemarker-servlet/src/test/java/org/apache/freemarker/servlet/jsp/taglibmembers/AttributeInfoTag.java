@@ -19,15 +19,14 @@
 
 package org.apache.freemarker.servlet.jsp.taglibmembers;
 
-import java.io.IOException;
-import java.util.Date;
-
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-
+import jakarta.servlet.jsp.JspContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._DateUtils.TrivialDateToISO8601CalendarFactory;
+
+import java.io.IOException;
+import java.util.Date;
 
 public class AttributeInfoTag extends AttributeAccessorTag {
 

@@ -18,13 +18,8 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
@@ -36,6 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.view.AbstractTemplateView;
+
+import java.io.IOException;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Adapter base class for FreeMarker template-based views, with the ability to access {@link Configuration}

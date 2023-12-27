@@ -18,27 +18,20 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import java.util.Map;
-
-import javax.servlet.GenericServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.servlet.AllHttpScopesHashModel;
-import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.HttpRequestHashModel;
-import org.apache.freemarker.servlet.HttpRequestParametersHashModel;
-import org.apache.freemarker.servlet.HttpSessionHashModel;
-import org.apache.freemarker.servlet.IncludePage;
-import org.apache.freemarker.servlet.ServletContextHashModel;
+import org.apache.freemarker.servlet.*;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.apache.freemarker.spring.model.AbstractDelegatingTemplateHashModel;
 import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
 import org.apache.freemarker.spring.model.form.SpringFormTemplateCallableHashModel;
+
+import java.util.Map;
 
 /**
  * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
@@ -48,7 +41,7 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
 
     /**
      * Internal servlet instance to provide a page object in JSP tag library usages.
-     * @see javax.servlet.jsp.PageContext#getPage()
+     * @see jakarta.servlet.jsp.PageContext#getPage()
      */
     private GenericServlet pageContextServlet;
 

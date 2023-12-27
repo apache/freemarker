@@ -19,11 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp;
 
+import jakarta.servlet.jsp.PageContext;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-
-import javax.servlet.jsp.PageContext;
 
 /**
  */

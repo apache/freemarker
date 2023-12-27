@@ -18,10 +18,10 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import java.io.IOException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
+import java.io.IOException;
 
 /**
  * Simple Example JSP Tag Library for unit test.

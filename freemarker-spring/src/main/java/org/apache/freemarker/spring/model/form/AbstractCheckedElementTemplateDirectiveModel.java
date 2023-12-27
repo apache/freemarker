@@ -19,13 +19,12 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
+
+import java.io.IOException;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractCheckedElementTag</code>.

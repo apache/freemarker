@@ -19,17 +19,16 @@
 
 package org.apache.freemarker.servlet;
 
-import java.io.Serializable;
-
-import javax.servlet.GenericServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+
+import java.io.Serializable;
 
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.

@@ -19,28 +19,23 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.beans.PropertyEditor;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
+
+import java.beans.PropertyEditor;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code select}' element.

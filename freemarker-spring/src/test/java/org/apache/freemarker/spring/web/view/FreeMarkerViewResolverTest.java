@@ -18,14 +18,7 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.junit.Before;
@@ -35,6 +28,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class FreeMarkerViewResolverTest {
 

@@ -18,11 +18,11 @@
  */
 package org.apache.freemarker.spring.web.view;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+
 import java.util.Collections;
 import java.util.Enumeration;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 
 /**
  * A built-in internal {@link ServletConfig} class used when initializing the page context servlet

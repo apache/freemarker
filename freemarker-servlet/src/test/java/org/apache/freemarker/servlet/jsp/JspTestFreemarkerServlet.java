@@ -19,8 +19,7 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.servlet.FreemarkerServlet;

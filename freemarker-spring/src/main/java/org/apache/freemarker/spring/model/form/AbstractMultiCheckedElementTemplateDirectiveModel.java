@@ -19,25 +19,14 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
-import org.apache.freemarker.core.model.TemplateIterableModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.beans.BeanWrapper;
@@ -45,6 +34,11 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContext;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractMultiCheckedElementTag</code>.

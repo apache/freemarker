@@ -19,18 +19,7 @@
 
 package org.apache.freemarker.servlet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Objects;
-
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
@@ -43,6 +32,16 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Objects;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source

@@ -19,18 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import static org.junit.Assert.*;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Map;
-
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
-import javax.xml.parsers.SAXParserFactory;
-
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -46,6 +38,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+
+import javax.xml.parsers.SAXParserFactory;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class TLDParsingTest {

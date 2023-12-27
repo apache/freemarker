@@ -18,9 +18,8 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletException;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -56,7 +55,7 @@ public class FreeMarkerViewResolver extends AbstractTemplateViewResolver impleme
 
     /**
      * Internal servlet instance to provide a page object in JSP tag library usages.
-     * @see javax.servlet.jsp.PageContext#getPage()
+     * @see jakarta.servlet.jsp.PageContext#getPage()
      */
     private GenericServlet pageContextServlet;
 
