@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.*
 import java.util.stream.Collectors
-import java.util.Properties
-import java.io.FileOutputStream
 
 plugins {
     `freemarker-root`
@@ -99,6 +99,9 @@ val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJ
 }
 sourceSets.main.get().java.srcDir(compileJavacc)
 
+fun buildInfoFile(): File
+        = project.layout.buildDirectory.get().asFile.resolve("buildinfo").resolve(".buildinfo")
+
 tasks.sourcesJar.configure {
     from(compileJavacc.flatMap { it.sourceDirectory })
 
@@ -108,9 +111,7 @@ tasks.sourcesJar.configure {
 
     // Depend on the createBuildInfo task and include the generated file
     dependsOn(createBuildInfo)
-    from(File(project.buildDir, "tmp/buildinfo")) {
-        include(".buildinfo")
-    }
+    from(buildInfoFile())
 }
 
 tasks.javadocJar.configure {
@@ -422,7 +423,7 @@ val distBin = tasks.register<Tar>("distBin") {
 
     val jarFile = tasks.named<Jar>("jar").flatMap { jar -> jar.archiveFile }
     from(jarFile) {
-        rename { name -> "freemarker.jar" }
+        rename { _ -> "freemarker.jar" }
     }
 
     from(tasks.named("manualOffline")) {
@@ -435,10 +436,9 @@ val distBin = tasks.register<Tar>("distBin") {
 }
 registerDistSupportTasks(distBin)
 
-// Task to generate buildinfo.properties
 val createBuildInfo = tasks.register("createBuildInfo") {
     doLast {
-        val buildInfoFile = File(project.buildDir, "tmp/buildinfo/.buildinfo")
+        val buildInfoFile = buildInfoFile()
         buildInfoFile.parentFile.mkdirs()
 
         val props = Properties().apply {
@@ -458,7 +458,7 @@ val createBuildInfo = tasks.register("createBuildInfo") {
         }
 
         FileOutputStream(buildInfoFile).use { outputStream ->
-            props.store(outputStream, "Effective recorded build environment information")
+            props.store(outputStream, " Build environment information recorded for reproducible builds")
         }
     }
 }
@@ -495,12 +495,9 @@ val distSrc = tasks.register<Tar>("distSrc") {
         )
     }
 
-
     // Depend on the createBuildInfo task and include the generated file
     dependsOn(createBuildInfo)
-    from(File(project.buildDir, "tmp/buildinfo")) {
-        include(".buildinfo")
-    }
+    from(buildInfoFile())
 }
 registerDistSupportTasks(distSrc)
 

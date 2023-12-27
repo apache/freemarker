@@ -229,7 +229,9 @@ public final class Version implements Serializable {
     }
 
     /**
-     * @deprecated do not used anymore
+     * @deprecated Will always return {@code null} for the FreeMarker version, as we can't store the build date anymore
+     * in the jar, in order to have a reproducible build.
+     *
      * @return The build date if known, or {@code null}.
      */
     public Date getBuildDate() {

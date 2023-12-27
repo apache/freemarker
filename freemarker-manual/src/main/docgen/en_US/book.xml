@@ -30279,6 +30279,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>Configuration.getVersion().getBuildDate()</literal>
+              will now always return <literal>null</literal>, as we don't
+              store the build date anymore, to make the build reproducible.
+              For same reason, <literal>META-INF/MANIFEST.FM</literal> now
+              will not store any timestamps, nor information about the build
+              environment.</para>
+            </listitem>
+
+            <listitem>
               <para>Build changes (in case you build FreeMarker itself, not
               just depend on it):</para>
 
@@ -30301,6 +30310,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>JavaDoc is now generated with JDK 16 (so now we have
                   search on it)</para>
+                </listitem>
+
+                <listitem>
+                  <para>The build is now reproducible (see <link
+                  xlink:href="https://reproducible-builds.org">reproducible-builds.org</link>).
+                  However, therefore it doesn't contain any build timestamps
+                  anymore.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

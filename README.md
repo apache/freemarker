@@ -137,6 +137,9 @@ see `gradle.properties` in this project for those!
 See `gradle.properties` for some Gradle properties that you may what to set,
 especially if you are building a release.
 
+Reproducible builds: If the resulting `freemarker.jar` is not identical with the official jar, see the build environment
+in the `.buildinfo` file packed into the official source distribution, and also into the Maven "sources" artifact!  
+
 
 IDE setup
 ---------
