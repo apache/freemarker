@@ -19,6 +19,7 @@
 
 package freemarker.build
 
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -29,6 +30,7 @@ import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.plugins.jvm.JvmTestSuiteTarget
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
@@ -36,12 +38,12 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.the
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.testing.base.TestingExtension
-import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TEST_UTILS_SOURCE_SET_NAME = "test-utils"
 
@@ -90,6 +92,7 @@ internal class JavaProjectContext constructor(
 class FreemarkerModuleDef internal constructor(
     private val context: JavaProjectContext,
     private val ext: FreemarkerRootExtension,
+    private val generated: Boolean,
     val sourceSetName: String,
     val compilerVersion: JavaLanguageVersion
 ) {
@@ -99,27 +102,71 @@ class FreemarkerModuleDef internal constructor(
     val sourceSet = context.sourceSets.maybeCreate(sourceSetName)
 
     val sourceSetRootDirName = "freemarker-${baseDirName}"
-    val sourceSetSrcPath = "${sourceSetRootDirName}/src"
+    val sourceSetSrcPath = sourceSetRoot(context, generated, sourceSetRootDirName)
 
-    fun enableTests(testJavaVersion: String = ext.testJavaVersion) {
-        configureTests(JavaLanguageVersion.of(testJavaVersion))
+    fun generateJakartaSources(
+        baseSourceSetName: String,
+        sourceSetKind: String = SourceSet.MAIN_SOURCE_SET_NAME,
+        targetSourceSet: SourceSet = sourceSet
+    ): List<TaskProvider<JakartaSourceRootGeneratorTask>> {
+        val baseSourceSetRef = context.sourceSets.named(baseSourceSetName)
+        val taskNameClassifier = if (SourceSet.MAIN_SOURCE_SET_NAME == sourceSetKind) {
+            ""
+        } else {
+            sourceSetKind.replaceFirstChar { it.uppercaseChar() }
+        }
+
+        val generateJakartaSources = context.tasks
+            .register<JakartaSourceRootGeneratorTask>("generateJakarta${taskNameClassifier}Sources") {
+                sourceDirectory.set(baseSourceSetRef.get().java.srcDirs.single())
+                destinationDirectory.set(project.file(sourceSetSrcPath).resolve(sourceSetKind).resolve("java"))
+            }
+        targetSourceSet.java.srcDir(generateJakartaSources)
+
+        val generateJakartaResources = context.tasks
+            .register<JakartaSourceRootGeneratorTask>("generateJakarta${taskNameClassifier}Resources") {
+                sourceDirectory.set(baseSourceSetRef.get().resources.srcDirs.single())
+                destinationDirectory.set(project.file(sourceSetSrcPath).resolve(sourceSetKind).resolve("resources"))
+            }
+        targetSourceSet.resources.srcDir(generateJakartaResources)
+        return listOf(generateJakartaSources, generateJakartaResources)
     }
 
-    private fun configureTests(testJavaVersion: JavaLanguageVersion) {
-        getOrCreateTestSuiteRef().configure {
+    private fun sourceSetRoot(
+        context: JavaProjectContext,
+        generated: Boolean,
+        sourceSetRootDirName: String
+    ): String {
+        return if (generated) {
+            context.project.layout.buildDirectory.get().asFile
+                .resolve("generated")
+                .resolve(sourceSetRootDirName)
+                .toString()
+        } else {
+            "${sourceSetRootDirName}/src"
+        }
+    }
+
+    fun enableTests(testJavaVersion: String = ext.testJavaVersion) =
+        configureTests(JavaLanguageVersion.of(testJavaVersion))
+
+    private fun configureTests(testJavaVersion: JavaLanguageVersion): NamedDomainObjectProvider<JvmTestSuite> {
+        val testSuitRef = getOrCreateTestSuiteRef()
+        testSuitRef.configure {
             useJUnit(context.version("junit"))
 
             configureSources(sources, testJavaVersion)
             targets.all { configureTarget(this, sources, testJavaVersion) }
         }
+        return testSuitRef
     }
 
     private fun getOrCreateTestSuiteRef(): NamedDomainObjectProvider<JvmTestSuite> {
         val suites = context.testing.suites
-        if (main) {
-            return suites.named<JvmTestSuite>(JvmTestSuitePlugin.DEFAULT_TEST_SUITE_NAME)
+        return if (main) {
+            suites.named<JvmTestSuite>(JvmTestSuitePlugin.DEFAULT_TEST_SUITE_NAME)
         } else {
-            return suites.register("${sourceSetName}Test", JvmTestSuite::class.java)
+            suites.register("${sourceSetName}Test", JvmTestSuite::class.java)
         }
     }
 
@@ -134,9 +181,14 @@ class FreemarkerModuleDef internal constructor(
 
     private fun configureSources(sources: SourceSet, testJavaVersion: JavaLanguageVersion) {
         sources.apply {
-            val testSrcPath = "${sourceSetSrcPath}/test"
-            java.setSrcDirs(listOf("${testSrcPath}/java"))
-            resources.setSrcDirs(listOf("${testSrcPath}/resources"))
+            if (generated) {
+                java.setSrcDirs(emptyList<String>())
+                resources.setSrcDirs(emptyList<String>())
+            } else {
+                val testSrcPath = "${sourceSetSrcPath}/test"
+                java.setSrcDirs(listOf("${testSrcPath}/java"))
+                resources.setSrcDirs(listOf("${testSrcPath}/resources"))
+            }
 
             if (!main) {
                 context.inheritCompileRuntimeAndOutput(this, sourceSet)
@@ -238,6 +290,21 @@ class FreemarkerRootExtension constructor(
         }
     }
 
+    fun configureGeneratedSourceSet(
+        sourceSetName: String,
+        configuration: FreemarkerModuleDef.() -> Unit = { }
+    ) {
+        configureGeneratedSourceSet(sourceSetName, javaVersion, configuration)
+    }
+
+    fun configureGeneratedSourceSet(
+        sourceSetName: String,
+        sourceSetVersion: String,
+        configuration: FreemarkerModuleDef.() -> Unit = { }
+    ) {
+        configureSourceSet(true, sourceSetName, sourceSetVersion, configuration)
+    }
+
     fun configureSourceSet(
         sourceSetName: String,
         configuration: FreemarkerModuleDef.() -> Unit = { }
@@ -250,18 +317,31 @@ class FreemarkerRootExtension constructor(
         sourceSetVersion: String,
         configuration: FreemarkerModuleDef.() -> Unit = { }
     ) {
+        configureSourceSet(false, sourceSetName, sourceSetVersion, configuration)
+    }
+
+    private fun configureSourceSet(
+        generated: Boolean,
+        sourceSetName: String,
+        sourceSetVersion: String,
+        configuration: FreemarkerModuleDef.() -> Unit = { }
+    ) {
         if (testUtilsConfigured.compareAndSet(false, true)) {
             configureTestUtils()
         }
 
         allConfiguredSourceSetNamesRef.add(sourceSetName)
 
-        FreemarkerModuleDef(context, this, sourceSetName, JavaLanguageVersion.of(sourceSetVersion)).apply {
-            val sourceSetSrcMainPath = "${sourceSetSrcPath}/main"
-
+        FreemarkerModuleDef(context, this, generated, sourceSetName, JavaLanguageVersion.of(sourceSetVersion)).apply {
             sourceSet.apply {
-                java.setSrcDirs(listOf("${sourceSetSrcMainPath}/java"))
-                resources.setSrcDirs(listOf("${sourceSetSrcMainPath}/resources"))
+                if (generated) {
+                    java.setSrcDirs(emptyList<String>())
+                    resources.setSrcDirs(emptyList<String>())
+                } else {
+                    val sourceSetSrcMainPath = "${sourceSetSrcPath}/main"
+                    java.setSrcDirs(listOf("${sourceSetSrcMainPath}/java"))
+                    resources.setSrcDirs(listOf("${sourceSetSrcMainPath}/resources"))
+                }
             }
 
             if (!main) {

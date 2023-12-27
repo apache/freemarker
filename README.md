@@ -106,7 +106,7 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
-You need JDK 8 and JDK 16 to be installed
+You need JDK 8, JDK 16 and JDK 17 (only for some tests) to be installed
 (and [visible to Gradle](https://docs.gradle.org/current/userguide/toolchains.html)).
 
 Be sure that your default Java version (which Gradle should use automatically) is at
