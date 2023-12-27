@@ -40,8 +40,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
-
-  if (archiveFileName.get().endsWith(".jar")) {  
+  if (archiveFileName.get().endsWith(".jar")) {
     // make contents of freemarker.jar reproducible
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
@@ -482,7 +481,7 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "*.txt",
                 "osgi.bnd",
                 "rat-excludes",
-                "gradlew*",
+                "gradlew.bat",
                 "gradle/**"
         )
         exclude(
@@ -495,7 +494,15 @@ val distSrc = tasks.register<Tar>("distSrc") {
         )
     }
 
-    // Depend on the createBuildInfo task and include the generated file
+    from(projectDir) {
+        include(
+            "gradlew"
+        )
+        filePermissions {
+            unix("rwxr-xr-x")
+        }
+    }
+
     dependsOn(createBuildInfo)
     from(buildInfoFile())
 }
