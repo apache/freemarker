@@ -229,6 +229,7 @@ public final class Version implements Serializable {
     }
 
     /**
+     * @deprecated do not used anymore
      * @return The build date if known, or {@code null}.
      */
     public Date getBuildDate() {

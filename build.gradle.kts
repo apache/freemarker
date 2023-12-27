@@ -20,6 +20,8 @@
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.stream.Collectors
+import java.util.Properties
+import java.io.FileOutputStream
 
 plugins {
     `freemarker-root`
@@ -35,6 +37,21 @@ val fmExt = freemarkerRoot
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+tasks.withType<AbstractArchiveTask>().configureEach {
+
+  if (archiveFileName.get().endsWith(".jar")) {  
+    // make contents of freemarker.jar reproducible
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+    filePermissions {
+        unix("rw-r--r--")
+    }
+    dirPermissions {
+        unix("rwxr-xr-x")
+    }
+  }
 }
 
 freemarkerRoot {
@@ -87,6 +104,12 @@ tasks.sourcesJar.configure {
 
     from(files("LICENSE", "NOTICE")) {
         into("META-INF")
+    }
+
+    // Depend on the createBuildInfo task and include the generated file
+    dependsOn(createBuildInfo)
+    from(File(project.buildDir, "tmp/buildinfo")) {
+        include(".buildinfo")
     }
 }
 
@@ -412,6 +435,34 @@ val distBin = tasks.register<Tar>("distBin") {
 }
 registerDistSupportTasks(distBin)
 
+// Task to generate buildinfo.properties
+val createBuildInfo = tasks.register("createBuildInfo") {
+    doLast {
+        val buildInfoFile = File(project.buildDir, "tmp/buildinfo/.buildinfo")
+        buildInfoFile.parentFile.mkdirs()
+
+        val props = Properties().apply {
+            // see https://reproducible-builds.org/docs/jvm/
+            setProperty("buildinfo.version", "1.0-SNAPSHOT")
+            
+            setProperty("java.version", System.getProperty("java.version"))
+            setProperty("java.vendor", System.getProperty("java.vendor"))
+            setProperty("os.name", System.getProperty("os.name"))
+            
+            setProperty("source.scm.uri", "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git")
+            setProperty("source.scm.tag", "v${fmExt.versionDef.version}")
+            
+            setProperty("build-tool", "gradle")
+            setProperty("build.setup", "https://github.com/apache/freemarker/blob/2.3-gae/README.md#building-freemarker")
+
+        }
+
+        FileOutputStream(buildInfoFile).use { outputStream ->
+            props.store(outputStream, "Effective recorded build environment information")
+        }
+    }
+}
+
 val distSrc = tasks.register<Tar>("distSrc") {
     compression = Compression.GZIP
     archiveBaseName.set(distArchiveBaseName)
@@ -442,6 +493,13 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "**/*.~*",
                 "*/*.*~"
         )
+    }
+
+
+    // Depend on the createBuildInfo task and include the generated file
+    dependsOn(createBuildInfo)
+    from(File(project.buildDir, "tmp/buildinfo")) {
+        include(".buildinfo")
     }
 }
 registerDistSupportTasks(distSrc)

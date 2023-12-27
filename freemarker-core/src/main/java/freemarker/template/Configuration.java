@@ -515,22 +515,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             
             String versionString  = getRequiredVersionProperty(props, "version");
             
-            Date buildDate;
-            {
-                String buildDateStr = getRequiredVersionProperty(props, "buildTimestamp");
-                if (buildDateStr.endsWith("Z")) {
-                    buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
-                }
-                try {
-                    buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-                } catch (java.text.ParseException e) {
-                    buildDate = null;
-                }
-            }
-            
             final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(props, "isGAECompliant"));
             
-            VERSION = new Version(versionString, gaeCompliant, buildDate);
+            VERSION = new Version(versionString, gaeCompliant, null);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
