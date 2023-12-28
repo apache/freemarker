@@ -39,8 +39,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<AbstractArchiveTask>().configureEach {
-  if (archiveFileName.get().endsWith(".jar")) {
+tasks.withType<Jar>().configureEach {
     // make contents of freemarker.jar reproducible
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
@@ -50,7 +49,6 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     dirPermissions {
         unix("rwxr-xr-x")
     }
-  }
 }
 
 freemarkerRoot {
