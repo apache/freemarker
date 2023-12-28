@@ -630,7 +630,7 @@ dependencies {
     "jython25CompileOnly"(sourceSets["jython20"].output)
     "jython25CompileOnly"("org.python:jython:2.5.0")
 
-    "testUtilsImplementation"("displaytag:displaytag:1.2") {
+    "testUtilsImplementation"("com.github.hazendaz:displaytag:2.5.3") {
         exclude(group = "com.lowagie", module = "itext")
         // We manage logging centrally:
         exclude(group = "org.slf4j", module = "slf4j-log4j12")
