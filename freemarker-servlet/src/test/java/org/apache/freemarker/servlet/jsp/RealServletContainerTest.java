@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
  */
 @SuppressWarnings("boxing")
 @SuppressFBWarnings(value="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification="Hack needed for testing only")
-public class RealServletContainertTest extends WebAppTestCase {
+public class RealServletContainerTest extends WebAppTestCase {
 
     private static final String WEBAPP_BASIC = "basic";
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";

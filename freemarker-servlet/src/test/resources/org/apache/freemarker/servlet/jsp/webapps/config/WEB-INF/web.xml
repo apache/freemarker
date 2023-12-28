@@ -87,7 +87,7 @@
 
     <servlet>
         <servlet-name>freemarker-assertDefaultsFreemarkerServlet</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertDefaultsFreemarkerServlet</servlet-class>
+        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainerTest$AssertDefaultsFreemarkerServlet</servlet-class>
         <init-param>
             <param-name>incompatibleImprovements</param-name>
             <param-value>3.0.0</param-value>
@@ -95,15 +95,15 @@
     </servlet>
     <servlet>
         <servlet-name>freemarker-assertCustomizedDefaultsFreemarkerServlet</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertCustomizedDefaultsFreemarkerServlet</servlet-class>
+        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainerTest$AssertCustomizedDefaultsFreemarkerServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>freemarker-assertObjectWrapperDefaults1FreemarkerServlet</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertObjectWrapperDefaults1FreemarkerServlet</servlet-class>
+        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainerTest$AssertObjectWrapperDefaults1FreemarkerServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>freemarker-assertObjectWrapperDefaults2FreemarkerServlet</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertObjectWrapperDefaults2FreemarkerServlet</servlet-class>
+        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainerTest$AssertObjectWrapperDefaults2FreemarkerServlet</servlet-class>
     </servlet>
 
 </web-app>
