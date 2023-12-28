@@ -633,12 +633,3 @@ Core / Miscellaneous
   that setting value, it will give an error. On the other hand, "true,false" is now a legit setting value (although the
   better practice is to set the format to "c", if you generate computer language output), but it's hardly a good practice
   to use.
-
-Things not yet forward-ported from 2.3-gae
-------------------------------------------
-
-- Lambda-like expressions: The way those work in 2.x is limited because of BC restrictions. So it should work differently here.
-- ?with_args/?with_args_last: Have to implement the better null handling in the template language first
-- Some of the Gradle build refinements, like signature related and, rebroducible build stuff
-- JSP taglib support is broken with Jakarta, and Jetty 11. See @Ignored-s in RealServletContainerTest. But, we probably don't
-  want to support JSP taglibs anymore, and the feature should be removed.

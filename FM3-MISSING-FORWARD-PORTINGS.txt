@@ -1,0 +1,8 @@
+Things not yet forward-ported from 2.3-gae
+------------------------------------------
+
+- Lambda-like expressions: The way those work in 2.x is limited because of BC restrictions. So it should work differently here.
+
+- ?with_args/?with_args_last: Have to implement the better null handling in the template language first
+
+- Some of the Gradle build refinements, like signature related and, rebroducible build stuff
