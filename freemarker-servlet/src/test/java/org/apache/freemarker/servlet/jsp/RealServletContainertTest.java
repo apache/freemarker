@@ -59,7 +59,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     private static final String WEBAPP_MULTIPLE_LOADERS = "multipleLoaders";
 
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
+    @Ignore // Doesn't work since switched to Jetty 11 (Jakarta)
     public void basicTrivial() throws Exception {
         assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=trivial");
     }
@@ -103,7 +103,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
     
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
     public void tldDiscoveryBasic() throws Exception {
         try {
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
@@ -114,7 +113,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
     public void tldDiscoveryBasicDefultOverride() throws Exception {
         try {
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
@@ -126,7 +124,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
     
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
     public void tldDiscoveryEmulatedProblems1() throws Exception {
         try {
             JspTestFreemarkerServlet.emulateNoJarURLConnections = true;
@@ -138,7 +135,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
     public void tldDiscoveryEmulatedProblems2() throws Exception {
         try {
             JspTestFreemarkerServlet.emulateNoJarURLConnections = true;
@@ -156,7 +152,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
     public void tldDiscoveryClasspathOnly() throws Exception {
         try {
             System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, classpath");
@@ -174,7 +169,7 @@ public class RealServletContainertTest extends WebAppTestCase {
      * Jetty container's JSTL jar-s will still be discovered.
      */
     @Test
-    @Ignore // Doesn't work since switched to Jakarta (with Jetty 12)
+    @Ignore // Doesn't work since switched to Jetty 11 (Jakarta)
     public void tldDiscoveryNoClasspath() throws Exception {
         try {
             System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, webInfPerLibJars");

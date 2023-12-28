@@ -42,16 +42,17 @@ dependencies {
     // which we use in tests, jump from Servlet 4 (javax) to 6 (jakarta). So, we have to go with 12.
     // (Note that Jetty artifact names, package names were completely changed in 12, also some old API-s
     // were replaced with something else. So our test utility code is affected by this as well.)
-    val jettyVersion = "12.0.5"
-    // ".ee10" means Jakarta EE 10 => Servlet 6, JSP 3.1, JSTL 3.0
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion")
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-annotations:$jettyVersion")
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-apache-jsp:$jettyVersion")
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-glassfish-jstl:$jettyVersion")
+    val jettyVersion = "11.0.19"
+    testImplementation("org.eclipse.jetty:jetty-webapp:$jettyVersion")
+    testImplementation("org.eclipse.jetty:jetty-annotations:$jettyVersion")
+    testImplementation("org.eclipse.jetty:apache-jsp:$jettyVersion")
     testImplementation("org.eclipse.jetty:jetty-slf4j-impl:$jettyVersion")
     // Jetty also contains the servlet-api and jsp-api and el-api classes
 
-    testImplementation("com.github.hazendaz:displaytag:2.5.3") {
+    // JSP JSTL (not included in Jetty):
+    testImplementation("org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1")
+
+    testImplementation("com.github.hazendaz:displaytag:3.0.0-M2") {
         exclude(group = "com.lowagie", module = "itext")
         // We manage logging centrally:
         exclude(group = "org.slf4j", module = "slf4j-log4j12")
@@ -59,10 +60,7 @@ dependencies {
         exclude(group = "log4j", module = "log4j")
     }
 
-    // Override Java 9 incompatible version (coming from displaytag):
-    testImplementation("commons-lang:commons-lang:2.6")
-
-    val springVersion = "6.0.15"
+    val springVersion = "6.1.2"
     testImplementation("org.springframework:spring-core:$springVersion")
     testImplementation("org.springframework:spring-web:$springVersion")
     testImplementation("org.springframework:spring-test:$springVersion")

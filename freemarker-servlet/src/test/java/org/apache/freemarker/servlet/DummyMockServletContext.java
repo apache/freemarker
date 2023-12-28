@@ -83,6 +83,21 @@ public class DummyMockServletContext implements ServletContext {
     }
 
     @Override
+    public Servlet getServlet(String s) throws ServletException {
+        return null;
+    }
+
+    @Override
+    public Enumeration<Servlet> getServlets() {
+        return null;
+    }
+
+    @Override
+    public Enumeration<String> getServletNames() {
+        return null;
+    }
+
+    @Override
     public String getRealPath(String arg0) {
         return null;
     }
@@ -120,6 +135,11 @@ public class DummyMockServletContext implements ServletContext {
     @Override
     public void log(String arg0) {
         
+    }
+
+    @Override
+    public void log(Exception e, String s) {
+
     }
 
     @Override
