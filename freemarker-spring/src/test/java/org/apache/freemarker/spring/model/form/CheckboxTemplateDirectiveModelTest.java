@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.apache.freemarker.spring.example.mvc.users.User;
 import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.junit.Before;
@@ -36,6 +32,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -58,7 +58,7 @@ public class CheckboxTemplateDirectiveModelTest {
     @Test
     public void testSingleCheckboxWithNotChecked() throws Exception {
         final User user = userRepository.getUserByEmail("john@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@value").string("true"))
@@ -69,7 +69,7 @@ public class CheckboxTemplateDirectiveModelTest {
     @Test
     public void testSingleCheckboxWithChecked() throws Exception {
         final User user = userRepository.getUserByEmail("jane@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='receiveNewsletter1' and @name='receiveNewsletter']/@value").string("true"))
@@ -80,7 +80,7 @@ public class CheckboxTemplateDirectiveModelTest {
     @Test
     public void testMultipleCheckboxes101() throws Exception {
         final User user = userRepository.getUserByEmail("john@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood1' and @name='favoriteFood' and @value='Sandwich' and @checked='checked']").exists())
@@ -93,7 +93,7 @@ public class CheckboxTemplateDirectiveModelTest {
     @Test
     public void testMultipleCheckboxes102() throws Exception {
         final User user = userRepository.getUserByEmail("jane@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkbox-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//input[@type='checkbox' and @id='favoriteFood1' and @name='favoriteFood' and @value='Sandwich' and @checked='checked']").exists())

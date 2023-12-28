@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.apache.freemarker.spring.example.mvc.users.User;
 import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.junit.Before;
@@ -36,6 +32,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -58,7 +58,7 @@ public class CheckboxesTemplateDirectiveModelTest {
     @Test
     public void testCheckboxesWithSequence() throws Exception {
         final User user = userRepository.getUserByEmail("john@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//span/input[@type='checkbox' and @id='favoriteFoodInForm11' and @name='favoriteFood' and @checked='checked']/@value").string("Sandwich"))
@@ -73,7 +73,7 @@ public class CheckboxesTemplateDirectiveModelTest {
     @Test
     public void testCheckboxesWithHash() throws Exception {
         final User user = userRepository.getUserByEmail("john@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form2']//span/input[@type='checkbox' and @id='favoriteFoodInForm21' and @name='favoriteFood' and @checked='checked']/@value").string("Sandwich"))
@@ -88,7 +88,7 @@ public class CheckboxesTemplateDirectiveModelTest {
     @Test
     public void testCheckboxesWithEnclosingElementNameAndDelimiter() throws Exception {
         final User user = userRepository.getUserByEmail("john@example.com");
-        mockMvc.perform(get("/users/{userId}/", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
+        mockMvc.perform(get("/users/{userId}", user.getId()).param("viewName", "test/model/form/checkboxes-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form3']//div/input[@type='checkbox' and @id='favoriteFoodInForm31' and @name='favoriteFood' and @checked='checked']/@value").string("Sandwich"))

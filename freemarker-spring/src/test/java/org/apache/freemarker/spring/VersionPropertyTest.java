@@ -18,8 +18,6 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.junit.Assert.*;
-
 import org.apache.freemarker.core.Version;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +25,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.GenericApplicationContext;
+
+import static org.junit.Assert.assertEquals;
 
 public class VersionPropertyTest {
 
@@ -41,7 +41,6 @@ public class VersionPropertyTest {
     public void tearDown() throws Exception {
         if (appContext.isActive()) {
             appContext.stop();
-            appContext.destroy();
             appContext.close();
         }
     }

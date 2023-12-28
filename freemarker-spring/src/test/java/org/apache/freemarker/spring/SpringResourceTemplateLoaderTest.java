@@ -18,11 +18,6 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -30,6 +25,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.GenericApplicationContext;
+
+import java.io.IOException;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.junit.Assert.*;
 
 public class SpringResourceTemplateLoaderTest {
 
@@ -52,7 +53,6 @@ public class SpringResourceTemplateLoaderTest {
     public void tearDown() throws Exception {
         if (appContext.isActive()) {
             appContext.stop();
-            appContext.destroy();
             appContext.close();
         }
     }

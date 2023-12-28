@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.apache.freemarker.spring.example.mvc.users.User;
 import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.apache.freemarker.spring.model.ElementAttributeMatcher;
@@ -40,6 +36,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.XpathResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -66,7 +66,7 @@ public class SelectTemplateDirectiveModelTest {
         final String favoriteSport = user.getFavoriteSport();
 
         final ResultActions resultAcctions =
-                mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/select-directive-usages")
+                mockMvc.perform(get("/users/{userId}", userId).param("viewName", "test/model/form/select-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print());
 

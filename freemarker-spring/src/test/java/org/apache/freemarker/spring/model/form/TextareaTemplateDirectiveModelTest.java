@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.spring.model.form;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.apache.freemarker.spring.example.mvc.users.User;
 import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.hamcrest.Matchers;
@@ -37,6 +33,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -60,7 +60,7 @@ public class TextareaTemplateDirectiveModelTest {
     public void testBasicUsages() throws Exception {
         final Long userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
-        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/textarea-directive-usages")
+        mockMvc.perform(get("/users/{userId}", userId).param("viewName", "test/model/form/textarea-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
                 .andExpect(xpath("//form[@id='form1']//textarea[@name='description']/@rows").string("10"))

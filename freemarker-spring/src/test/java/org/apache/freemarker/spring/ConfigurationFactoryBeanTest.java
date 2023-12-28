@@ -18,20 +18,8 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.junit.Assert.*;
-
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.freemarker.core.AutoEscapingPolicy;
-import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
-import org.apache.freemarker.core.DefaultTemplateLanguage;
-import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
@@ -43,6 +31,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.GenericApplicationContext;
+
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.junit.Assert.*;
 
 public class ConfigurationFactoryBeanTest {
 
@@ -57,7 +52,6 @@ public class ConfigurationFactoryBeanTest {
     public void tearDown() throws Exception {
         if (appContext.isActive()) {
             appContext.stop();
-            appContext.destroy();
             appContext.close();
         }
     }
