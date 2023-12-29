@@ -59,7 +59,6 @@ public class RealServletContainerTest extends WebAppTestCase {
     private static final String WEBAPP_MULTIPLE_LOADERS = "multipleLoaders";
 
     @Test
-    @Ignore // Doesn't work since switched to Jetty 11 (Jakarta)
     public void basicTrivial() throws Exception {
         assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=trivial");
     }
@@ -169,7 +168,6 @@ public class RealServletContainerTest extends WebAppTestCase {
      * Jetty container's JSTL jar-s will still be discovered.
      */
     @Test
-    @Ignore // Doesn't work since switched to Jetty 11 (Jakarta)
     public void tldDiscoveryNoClasspath() throws Exception {
         try {
             System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, webInfPerLibJars");
