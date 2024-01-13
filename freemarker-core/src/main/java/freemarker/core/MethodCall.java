@@ -66,6 +66,9 @@ final class MethodCall extends Expression {
         } else {
             throw new NonMethodException(target, targetModel, true, false, null, env);
         }
+        // ATTENTION! If you add support for calling any new type, ensure that
+        // freemarker.ext.beans.BeanModel.invokeThroughDescriptor sees that type as callable too,
+        // where it deals with the beforeMethodCall logic!
     }
 
     @Override

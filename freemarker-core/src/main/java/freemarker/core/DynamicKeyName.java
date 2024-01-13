@@ -43,7 +43,7 @@ import freemarker.template.utility.Constants;
  * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
  * and {@code target} can be a hash or a sequence.
  */
-final class DynamicKeyName extends Expression {
+class DynamicKeyName extends Expression {
 
     private static final int UNKNOWN_RESULT_SIZE = -1;
 
@@ -56,6 +56,13 @@ final class DynamicKeyName extends Expression {
         this.keyExpression = keyExpression;
 
         target.enableLazilyGeneratedResult();
+    }
+
+    DynamicKeyName(DynamicKeyName dynamicKeyName) {
+        this(dynamicKeyName.target, dynamicKeyName.keyExpression);
+        this.lazilyGeneratedResultEnabled = dynamicKeyName.lazilyGeneratedResultEnabled;
+        this.constantValue = dynamicKeyName.constantValue; // Probably always will be null here
+        copyFieldsFrom(dynamicKeyName);
     }
 
     @Override
@@ -163,9 +170,14 @@ final class DynamicKeyName extends Expression {
     private TemplateModel dealWithStringKey(TemplateModel targetModel, String key, Environment env)
         throws TemplateException {
         if (targetModel instanceof TemplateHashModel) {
-            return((TemplateHashModel) targetModel).get(key);
+            return getFromHashModelWithStringKey((TemplateHashModel) targetModel, key);
         }
         throw new NonHashException(target, targetModel, env);
+    }
+
+    protected TemplateModel getFromHashModelWithStringKey(TemplateHashModel targetModel, String key)
+            throws TemplateException {
+        return targetModel.get(key);
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)

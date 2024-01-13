@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import freemarker.core._JavaVersions;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
@@ -46,6 +47,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
     private boolean exposeFields;
     private MemberAccessPolicy memberAccessPolicy;
     private boolean treatDefaultMethodsAsBeanMembers;
+    private ZeroArgumentNonVoidMethodPolicy nonRecordZeroArgumentNonVoidMethodPolicy;
+    private ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy;
     private MethodAppearanceFineTuner methodAppearanceFineTuner;
     private MethodSorter methodSorter;
     // Attention:
@@ -60,6 +63,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
         exposeFields = ci.exposeFields;
         memberAccessPolicy = ci.memberAccessPolicy;
         treatDefaultMethodsAsBeanMembers = ci.treatDefaultMethodsAsBeanMembers;
+        nonRecordZeroArgumentNonVoidMethodPolicy = ci.nonRecordZeroArgumentNonVoidMethodPolicy;
+        recordZeroArgumentNonVoidMethodPolicy = ci.recordZeroArgumentNonVoidMethodPolicy;
         methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
         methodSorter = ci.methodSorter;
     }
@@ -69,15 +74,18 @@ final class ClassIntrospectorBuilder implements Cloneable {
         // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
         // to some version changes that affects BeansWrapper, but not the other way around.
         this.incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
-        treatDefaultMethodsAsBeanMembers
-                = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_26;
+        treatDefaultMethodsAsBeanMembers = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_26;
+        nonRecordZeroArgumentNonVoidMethodPolicy = ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY;
+        recordZeroArgumentNonVoidMethodPolicy = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 && _JavaVersions.JAVA_16 != null
+                ? ZeroArgumentNonVoidMethodPolicy.BOTH_PROPERTY_AND_METHOD : ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY;
         memberAccessPolicy = DefaultMemberAccessPolicy.getInstance(this.incompatibleImprovements);
     }
 
     private static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         // All breakpoints here must occur in BeansWrapper.normalizeIncompatibleImprovements!
-        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_30 ? Configuration.VERSION_2_3_30
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_30 ? Configuration.VERSION_2_3_30
                 : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21 ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;
     }
@@ -98,6 +106,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
         result = prime * result + incompatibleImprovements.hashCode();
         result = prime * result + (exposeFields ? 1231 : 1237);
         result = prime * result + (treatDefaultMethodsAsBeanMembers ? 1231 : 1237);
+        result = prime * result + nonRecordZeroArgumentNonVoidMethodPolicy.hashCode();
+        result = prime * result + recordZeroArgumentNonVoidMethodPolicy.hashCode();
         result = prime * result + exposureLevel;
         result = prime * result + memberAccessPolicy.hashCode();
         result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
@@ -115,6 +125,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
         if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
         if (exposeFields != other.exposeFields) return false;
         if (treatDefaultMethodsAsBeanMembers != other.treatDefaultMethodsAsBeanMembers) return false;
+        if (nonRecordZeroArgumentNonVoidMethodPolicy != other.nonRecordZeroArgumentNonVoidMethodPolicy) return false;
+        if (recordZeroArgumentNonVoidMethodPolicy != other.recordZeroArgumentNonVoidMethodPolicy) return false;
         if (exposureLevel != other.exposureLevel) return false;
         if (!memberAccessPolicy.equals(other.memberAccessPolicy)) return false;
         if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
@@ -151,6 +163,36 @@ final class ClassIntrospectorBuilder implements Cloneable {
 
     public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
         this.treatDefaultMethodsAsBeanMembers = treatDefaultMethodsAsBeanMembers;
+    }
+
+    /**
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getNonRecordZeroArgumentNonVoidMethodPolicy() {
+        return nonRecordZeroArgumentNonVoidMethodPolicy;
+    }
+
+    /**
+     * @since 2.3.33
+     */
+    public void setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy nonRecordZeroArgumentNonVoidMethodPolicy) {
+        NullArgumentException.check(nonRecordZeroArgumentNonVoidMethodPolicy);
+        this.nonRecordZeroArgumentNonVoidMethodPolicy = nonRecordZeroArgumentNonVoidMethodPolicy;
+    }
+
+    /**
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getRecordZeroArgumentNonVoidMethodPolicy() {
+        return recordZeroArgumentNonVoidMethodPolicy;
+    }
+
+    /**
+     * @since 2.3.33
+     */
+    public void setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy) {
+        NullArgumentException.check(recordZeroArgumentNonVoidMethodPolicy);
+        this.recordZeroArgumentNonVoidMethodPolicy = recordZeroArgumentNonVoidMethodPolicy;
     }
 
     public MemberAccessPolicy getMemberAccessPolicy() {

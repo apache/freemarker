@@ -42,6 +42,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
+import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
@@ -146,7 +147,8 @@ public abstract class TemplateTest {
     
     protected String getOutput(Template t) throws TemplateException, IOException {
         StringWriter out = new StringWriter();
-        t.process(getDataModel(), new FilterWriter(out) {
+        Object dataModelObject = getDataModel();
+        t.process(dataModelObject, new FilterWriter(out) {
             private boolean closed;
 
             @Override
@@ -196,6 +198,11 @@ public abstract class TemplateTest {
             dataModelCreated = true;
         }
         return dataModel;
+    }
+
+    protected void setDataModel(Object dataModel) {
+        this.dataModel = dataModel;
+        dataModelCreated = true;
     }
     
     protected Object createDataModel() {
@@ -248,6 +255,7 @@ public abstract class TemplateTest {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected void addToDataModel(String name, Object value) {
         Object dm = getDataModel();
         if (dm == null) {
@@ -256,6 +264,9 @@ public abstract class TemplateTest {
         }
         if (dm instanceof Map) {
             ((Map) dm).put(name, value);
+        } else if (dm instanceof SimpleHash) {
+            // SimpleHash is interesting, as it caches the top-level TemplateDateModel-s
+            ((SimpleHash) dm).put(name, value);
         } else {
             throw new IllegalStateException("Can't add to non-Map data-model: " + dm);
         }
@@ -289,7 +300,7 @@ public abstract class TemplateTest {
                 t = new Template("adhoc", ftl, getConfiguration());
             }
             t.process(getDataModel(), new StringWriter());
-            fail("The tempalte had to fail");
+            fail("The template had to fail");
             return null;
         } catch (TemplateException e) {
             if (exceptionClass != null) {

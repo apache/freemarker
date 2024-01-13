@@ -19,6 +19,7 @@
 
 package freemarker.ext.beans;
 
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
@@ -153,7 +154,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * performance. In theory that's not needed, but apps might fail to keep the rules.
      */
     private ClassIntrospector classIntrospector;
-    
+
     /**
      * {@link String} class name to {@link StaticModel} cache.
      * This object only belongs to a single {@link BeansWrapper}.
@@ -193,9 +194,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private boolean simpleMapWrapper;  // initialized from the BeansWrapperConfiguration
     private boolean strict;  // initialized from the BeansWrapperConfiguration
     private boolean preferIndexedReadMethod; // initialized from the BeansWrapperConfiguration
-    
+
     private final Version incompatibleImprovements;
-    
+
+
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
@@ -262,6 +264,16 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       The default of the {@link #setPreferIndexedReadMethod(boolean) preferIndexedReadMethod} setting changes
      *       from {@code true} to {@code false}.
      *     </li>  
+     *     <li>
+     *       <p>2.3.33 (or higher):
+     *       The default of {@link BeansWrapper#setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}
+     *       has changed to {@link ZeroArgumentNonVoidMethodPolicy#BOTH_PROPERTY_AND_METHOD}, from
+     *       {@link ZeroArgumentNonVoidMethodPolicy#METHOD_ONLY}. This means that Java records public methods with
+     *       0-arguments and non-void return type are now exposed both as properties, and as methods, while earlier they
+     *       were only exposed as methods. That is, if in a record you have {@code public String name()}, now in
+     *       templates the value can be accessed both as {@code obj.name} (like a property), and as {@code obj.name()}
+     *       (for better backward compatibility only - it's bad style).
+     *     </li>
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
@@ -289,7 +301,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
+     * Initializes the instance based on the {@link BeansWrapperConfiguration} specified.
      * 
      * @param writeProtected Makes the instance's configuration settings read-only via
      *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
@@ -320,7 +332,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 }
             } catch (Throwable e) {
                 // The security manager sometimes doesn't allow this
-                LOG.info("Failed to check if finetuneMethodAppearance is overidden in " + thisClass.getName()
+                LOG.info("Failed to check if finetuneMethodAppearance is overridden in " + thisClass.getName()
                         + "; acting like if it was, but this way it won't utilize the shared class introspection "
                         + "cache.",
                         e);
@@ -353,7 +365,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         defaultDateType = bwConf.getDefaultDateType();
         outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
         strict = bwConf.isStrict();
-        
+
         if (!writeProtected) {
             // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
@@ -367,7 +379,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             classIntrospector = _BeansAPI.getClassIntrospectorBuilder(bwConf).build();
             sharedIntrospectionLock = classIntrospector.getSharedLock(); 
         }
-        
+
         falseModel = new BooleanModel(Boolean.FALSE, this);
         trueModel = new BooleanModel(Boolean.TRUE, this);
         
@@ -633,7 +645,45 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             replaceClassIntrospector(builder);
         }
     }
-    
+
+    /**
+     * Sets the {@link ZeroArgumentNonVoidMethodPolicy} for classes that are not Java records;
+     * defaults to {@link ZeroArgumentNonVoidMethodPolicy#METHOD_ONLY}.
+     *
+     * <p>Note that methods in this class are inherited by {@link DefaultObjectWrapper}, which is what you normally use.
+     *
+     * @since 2.3.33
+     */
+    public void setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy nonRecordZeroArgumentNonVoidMethodPolicy) {
+        checkModifiable();
+
+        if (classIntrospector.getNonRecordZeroArgumentNonVoidMethodPolicy() != nonRecordZeroArgumentNonVoidMethodPolicy) {
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setNonRecordZeroArgumentNonVoidMethodPolicy(nonRecordZeroArgumentNonVoidMethodPolicy);
+            replaceClassIntrospector(builder);
+        }
+    }
+
+    /**
+     * Sets the {@link ZeroArgumentNonVoidMethodPolicy} for classes that are Java records; if the
+     * {@code BeansWrapper#BeansWrapper(Version) incompatibleImprovements} of the object wrapper is at least 2.3.33,
+     * then this defaults to {@link ZeroArgumentNonVoidMethodPolicy#BOTH_PROPERTY_AND_METHOD}, otherwise this defaults
+     * to {@link ZeroArgumentNonVoidMethodPolicy#METHOD_ONLY}.
+     *
+     * <p>Note that methods in this class are inherited by {@link DefaultObjectWrapper}, which is what you normally use.
+     *
+     * @since 2.3.33
+     */
+    public void setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy) {
+        checkModifiable();
+
+        if (classIntrospector.getRecordZeroArgumentNonVoidMethodPolicy() != recordZeroArgumentNonVoidMethodPolicy) {
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setRecordZeroArgumentNonVoidMethodPolicy(recordZeroArgumentNonVoidMethodPolicy);
+            replaceClassIntrospector(builder);
+        }
+    }
+
     /**
      * Returns whether exposure of public instance fields of classes is 
      * enabled. See {@link #setExposeFields(boolean)} for details.
@@ -651,7 +701,25 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     public boolean getTreatDefaultMethodsAsBeanMembers() {
         return classIntrospector.getTreatDefaultMethodsAsBeanMembers();
     }
-    
+
+    /**
+     * See {@link #setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}.
+     *
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getNonRecordZeroArgumentNonVoidMethodPolicy() {
+        return classIntrospector.getNonRecordZeroArgumentNonVoidMethodPolicy();
+    }
+
+    /**
+     * See {@link #setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}.
+     *
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getRecordZeroArgumentNonVoidMethodPolicy() {
+        return classIntrospector.getRecordZeroArgumentNonVoidMethodPolicy();
+    }
+
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
         return classIntrospector.getMethodAppearanceFineTuner();
     }
@@ -865,7 +933,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * Returns the version given with {@link #BeansWrapper(Version)}, normalized to the lowest version where a change
      * has occurred. Thus, this is not necessarily the same version than that was given to the constructor.
-     * 
+     *
      * @since 2.3.21
      */
     public Version getIncompatibleImprovements() {
@@ -894,7 +962,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_27 ? Configuration.VERSION_2_3_27
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_27 ? Configuration.VERSION_2_3_27
                 : incompatibleImprovements.intValue() == _VersionInts.V_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
@@ -937,7 +1006,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * <li>if the object is an Iterator, returns a {@link IteratorModel} for it
      * <li>if the object is an Enumeration, returns a {@link EnumerationModel} for it
      * <li>if the object is a String, returns a {@link StringModel} for it
-     * <li>otherwise, returns a generic {@link StringModel} for it.
+     * <li>otherwise, returns a {@link GenericObjectModel} for it.
      * </ul>
      */
     @Override
@@ -1033,7 +1102,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (clazz.isArray()) {
             return ArrayModel.FACTORY;
         }
-        return StringModel.FACTORY;
+        return GenericObjectModel.FACTORY;
     }
 
     /**
@@ -1855,15 +1924,33 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     static public final class MethodAppearanceDecision {
         private PropertyDescriptor exposeAsProperty;
+        private boolean methodInsteadOfPropertyValueBeforeCall;
         private boolean replaceExistingProperty;
         private String exposeMethodAs;
         private boolean methodShadowsProperty;
-        
-        void setDefaults(Method m) {
-            exposeAsProperty = null;
-            replaceExistingProperty = false;
-            exposeMethodAs = m.getName();
+
+        /**
+         * @param appliedZeroArgumentNonVoidMethodPolicy
+         *      {@code null} if this is not a zero argument method with non-void return type.
+         */
+        void setDefaults(Method m, ZeroArgumentNonVoidMethodPolicy appliedZeroArgumentNonVoidMethodPolicy) {
+            if (appliedZeroArgumentNonVoidMethodPolicy != null
+                    && appliedZeroArgumentNonVoidMethodPolicy != ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY) {
+                try {
+                    exposeAsProperty = new PropertyDescriptor(m.getName(), m, null);
+                } catch (IntrospectionException e) {
+                    throw new BugException("Failed to create PropertyDescriptor for " + m, e);
+                }
+                methodInsteadOfPropertyValueBeforeCall = appliedZeroArgumentNonVoidMethodPolicy ==
+                        ZeroArgumentNonVoidMethodPolicy.BOTH_PROPERTY_AND_METHOD;
+            } else {
+                exposeAsProperty = null;
+                methodInsteadOfPropertyValueBeforeCall = false;
+            }
+            exposeMethodAs = appliedZeroArgumentNonVoidMethodPolicy != ZeroArgumentNonVoidMethodPolicy.PROPERTY_ONLY
+                    ? m.getName() : null;
             methodShadowsProperty = true;
+            replaceExistingProperty = false;
         }
         
         /**
@@ -1935,6 +2022,23 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             this.methodShadowsProperty = shadowEarlierProperty;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}.
+         *
+         * @since 2.3.33
+         */
+        public boolean isMethodInsteadOfPropertyValueBeforeCall() {
+            return methodInsteadOfPropertyValueBeforeCall;
+        }
+
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}.
+         *
+         * @since 2.3.33
+         */
+        public void setMethodInsteadOfPropertyValueBeforeCall(boolean methodInsteadOfPropertyValueBeforeCall) {
+            this.methodInsteadOfPropertyValueBeforeCall = methodInsteadOfPropertyValueBeforeCall;
+        }
     }
     
     /**

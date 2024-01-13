@@ -20,7 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:ns5="http://www.w3.org/1999/xhtml"
+      xmlns:ns4="http://www.w3.org/2000/svg"
+      xmlns:ns3="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -30128,6 +30131,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-183">FREEMARKER-183</link>:
+              If FreeMarker is configured like so, values in Java records can
+              now be referred like <literal>obj.price</literal>, instead of
+              like <literal>obj.price()</literal>. Furthermore, FreeMarker can
+              now be configured to allow this for all 0-argument
+              non-<literal>void</literal> methods. See more details in the
+              <link linkend="version_hisotry_freemarker_183_java_side">Changes
+              on the Java side</link> section below.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
               xlink:href="https://github.com/apache/freemarker/pull/87">GitHub
               PR 87</link> Comparing strings is now way faster, if the <link
               linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
@@ -30229,10 +30244,121 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </itemizedlist>
         </section>
 
-        <section>
+        <section xml:id="version_hisotry_freemarker_183_java_side">
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-183">FREEMARKER-183</link>:
+              Better support for Java records, if you set the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> to 2.3.33 or higher (or if you create your own
+              <literal>ObjectWrapper</literal>, then set its
+              <literal>incompatible_improvements</literal>, or just its
+              <literal>recordZeroArgumentNonVoidMethodPolicy</literal>
+              property to <literal>BOTH_PROPERTY_AND_METHOD</literal>). If in
+              a Java record you have something like <literal>int
+              price()</literal>, earlier you could only read the value in
+              templates as <literal>obj.price()</literal>. With this
+              improvement <literal>obj.price</literal> will do the same (and
+              similarly, <literal>obj["price"]()</literal>, and
+              <literal>obj["price"]</literal> will do the same). This has
+              always worked for JavaBeans properties, like <literal>int
+              getPrice()</literal> could always be used in templates as
+              <literal>obj.price</literal>, in additionally to as
+              <literal>obj.getPrice()</literal>. Now this also works for Java
+              records, as there we simply treat all methods that has 0
+              arguments, and non-<literal>void</literal> return type as if it
+              was a JavaBean property read method. Except, here the name of
+              the method is exactly the same as the name of the faked
+              JavaBeans property (<literal>price</literal>), while with real
+              JavaBeans the read method name typically would be
+              <literal>getPrice</literal>, and the property name would be
+              <literal>price</literal> (so we have two separate names). There
+              are some strange technical tricks involved for the same name to
+              be usable in both ways, but as far as most users care, it just
+              works.</para>
+
+              <para>Some more technical changes:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added two new settings to
+                  <literal>BeansWrapper</literal>, and therefore
+                  <literal>DefaultObjectWrapper</literal>:
+                  <literal>recordZeroArgumentNonVoidMethodPolicy</literal>,
+                  and
+                  <literal>nonRecordZeroArgumentNonVoidMethodPolicy</literal>.
+                  Each has enum type
+                  <literal>freemarker.ext.beans.ZeroArgumentNonVoidMethodPolicy</literal>,
+                  that can be <literal>METHOD_ONLY</literal>,
+                  <literal>PROPERTY_ONLY</literal>, or
+                  <literal>BOTH_PROPERTY_AND_METHOD</literal>.
+                  Therefore:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Note that with
+                      <literal>nonRecordZeroArgumentNonVoidMethodPolicy</literal>
+                      you can set similar behavior to non-records. That is,
+                      you can call 0 argument non-void methods without
+                      <literal>()</literal>, if you want. It's only meant to
+                      be used for methods that are mere value readers, and has
+                      no side effect.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>For records, you can enforce proper style with
+                      setting
+                      <literal>recordZeroArgumentNonVoidMethodPolicy</literal>
+                      to <literal>PROPERTY_ONLY</literal>. The default with
+                      <literal>incompatible_improvements</literal> 2.3.33 is
+                      more lenient, as there using <literal>()</literal> is
+                      allowed (for backward compatibility, and because people
+                      often just use the Java syntax).</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>Added new interface,
+                  <literal>freemarker.template.MethodCallAwareTemplateHashModel</literal>,
+                  which adds <literal>getBeforeMethodCall(String
+                  key)</literal>. If you have something like
+                  <literal>obj.price()</literal> in a template, where
+                  <literal>obj</literal> (after wrapping) implements that
+                  interface, then
+                  <literal>getBeforeMethodCall("price")</literal> called
+                  instead of
+                  <literal>TemplateHashModel.get("price")</literal>. This is
+                  needed for
+                  <literal>ZeroArgumentNonVoidMethodPolicy.BOTH_PROPERTY_AND_METHOD</literal>
+                  to work.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>GenericObjectModel</literal>, which
+                  extends <literal>StringModel</literal> with implementing
+                  <literal>MethodCallAwareTemplateHashModel</literal>, and has
+                  a more telling name. <literal>BeansWrapper</literal>, and
+                  therefore <literal>DefaultObjectWrapper</literal> now
+                  creates <literal>GenericObjectModel</literal>-s instead of
+                  <literal>StringModel</literal>-s. This is like so regardless
+                  of any setting, like regardless of
+                  <literal>incompatible_improvements</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>You shouldn't override
+                  <literal>BeanModel.get(String)</literal> anymore, but
+                  <literal>BeanModel.get(String, boolean)</literal>. If you
+                  have overridden <literal>get</literal>, then see in the
+                  Javadoc for more.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
             <listitem>
               <para><link
               xlink:href="https://github.com/apache/freemarker/pull/88">GitHub

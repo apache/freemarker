@@ -20,25 +20,20 @@
 package freemarker.ext.beans;
 
 import freemarker.ext.util.ModelFactory;
-import freemarker.template.ObjectWrapper;
-import freemarker.template.TemplateModel;
+import freemarker.template.MethodCallAwareTemplateHashModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
  * Subclass of {@link BeanModel} that exposes the return value of the {@link
  * java.lang.Object#toString()} method through the {@link TemplateScalarModel}
  * interface.
+ *
+ * @deprecated Use {@link GenericObjectModel} instead, which implements {@link MethodCallAwareTemplateHashModel}.
  */
+@Deprecated
 public class StringModel extends BeanModel
 implements TemplateScalarModel {
-    static final ModelFactory FACTORY =
-        new ModelFactory()
-        {
-            @Override
-            public TemplateModel create(Object object, ObjectWrapper wrapper) {
-                return new StringModel(object, (BeansWrapper) wrapper);
-            }
-        };
+    static final ModelFactory FACTORY = (object, wrapper) -> new StringModel(object, (BeansWrapper) wrapper);
 
     // Package visible for testing
     static final String TO_STRING_NOT_EXPOSED = "[toString not exposed]";

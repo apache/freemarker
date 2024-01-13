@@ -48,11 +48,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import freemarker.core.BugException;
+import freemarker.core._JavaVersions;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
 import freemarker.log.Logger;
 import freemarker.template.Version;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -82,7 +84,7 @@ class ClassIntrospector {
     private static final ExecutableMemberSignature GET_OBJECT_SIGNATURE =
             new ExecutableMemberSignature("get", new Class[] { Object.class });
     private static final ExecutableMemberSignature TO_STRING_SIGNATURE =
-            new ExecutableMemberSignature("toString", new Class[0]);
+            new ExecutableMemberSignature("toString", CollectionUtils.EMPTY_CLASS_ARRAY);
 
     /**
      * When this property is true, some things are stricter. This is mostly to catch suspicious things in development
@@ -151,6 +153,9 @@ class ClassIntrospector {
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
     final boolean treatDefaultMethodsAsBeanMembers;
+    final ZeroArgumentNonVoidMethodPolicy nonRecordZeroArgumentNonVoidMethodPolicy;
+    final ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy;
+    final private boolean recordAware;
     final Version incompatibleImprovements;
 
     /** See {@link #getHasSharedInstanceRestrictions()} */
@@ -192,6 +197,14 @@ class ClassIntrospector {
         this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         this.methodSorter = builder.getMethodSorter();
         this.treatDefaultMethodsAsBeanMembers = builder.getTreatDefaultMethodsAsBeanMembers();
+        this.nonRecordZeroArgumentNonVoidMethodPolicy = builder.getNonRecordZeroArgumentNonVoidMethodPolicy();
+        this.recordZeroArgumentNonVoidMethodPolicy = builder.getRecordZeroArgumentNonVoidMethodPolicy();
+        this.recordAware = nonRecordZeroArgumentNonVoidMethodPolicy != recordZeroArgumentNonVoidMethodPolicy;
+        if (recordAware && _JavaVersions.JAVA_16 == null) {
+            throw new IllegalArgumentException(
+                    "nonRecordZeroArgumentNonVoidMethodPolicy != recordZeroArgumentNonVoidMethodPolicy, " +
+                    "but Java 16 support is not available.");
+        }
         this.incompatibleImprovements = builder.getIncompatibleImprovements();
 
         this.sharedLock = sharedLock;
@@ -329,13 +342,26 @@ class ClassIntrospector {
             Map<ExecutableMemberSignature, List<Method>> accessibleMethods,
             ClassMemberAccessPolicy effClassMemberAccessPolicy) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+
+        boolean treatClassAsRecord = recordAware && _JavaVersions.JAVA_16.isRecord(clazz);
+        ZeroArgumentNonVoidMethodPolicy zeroArgumentNonVoidMethodPolicy = treatClassAsRecord
+                ? recordZeroArgumentNonVoidMethodPolicy
+                : nonRecordZeroArgumentNonVoidMethodPolicy;
+
+        // For real Java Beans properties only, used to exclude them from creating fake properties based on ZeroArgumentNonVoidMethod.
+        Set<String> beanPropertyReadMethodNameCollector = zeroArgumentNonVoidMethodPolicy != ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY
+                ? new HashSet<>()
+                : null;
+
         List<PropertyDescriptor> pdas = getPropertyDescriptors(beanInfo, clazz);
         int pdasLength = pdas.size();
         // Reverse order shouldn't mater, but we keep it to not risk backward incompatibility.
         for (int i = pdasLength - 1; i >= 0; --i) {
             addPropertyDescriptorToClassIntrospectionData(
-                    introspData, pdas.get(i),
-                    accessibleMethods, effClassMemberAccessPolicy);
+                    introspData, pdas.get(i), false,
+                    accessibleMethods,
+                    beanPropertyReadMethodNameCollector,
+                    effClassMemberAccessPolicy);
         }
 
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
@@ -348,7 +374,11 @@ class ClassIntrospector {
             for (int i = mdsSize - 1; i >= 0; --i) {
                 final Method method = getMatchingAccessibleMethod(mds.get(i).getMethod(), accessibleMethods);
                 if (method != null && effClassMemberAccessPolicy.isMethodExposed(method)) {
-                    decision.setDefaults(method);
+                    ZeroArgumentNonVoidMethodPolicy appliedZeroArgumentNonVoidMethodPolicy =
+                            getAppliedZeroArgumentNonVoidMethodPolicy(
+                                    method, beanPropertyReadMethodNameCollector, zeroArgumentNonVoidMethodPolicy);
+
+                    decision.setDefaults(method, appliedZeroArgumentNonVoidMethodPolicy);
                     if (methodAppearanceFineTuner != null) {
                         if (decisionInput == null) {
                             decisionInput = new MethodAppearanceDecisionInput();
@@ -359,24 +389,31 @@ class ClassIntrospector {
                         methodAppearanceFineTuner.process(decisionInput, decision);
                     }
 
+                    String exposedMethodName = decision.getExposeMethodAs();
+
                     PropertyDescriptor propDesc = decision.getExposeAsProperty();
                     if (propDesc != null &&
                             (decision.getReplaceExistingProperty()
                                     || !(introspData.get(propDesc.getName()) instanceof FastPropertyDescriptor))) {
+                        boolean methodInsteadOfPropertyValueBeforeCall = decision.isMethodInsteadOfPropertyValueBeforeCall();
                         addPropertyDescriptorToClassIntrospectionData(
-                                introspData, propDesc, accessibleMethods, effClassMemberAccessPolicy);
+                                introspData, propDesc, methodInsteadOfPropertyValueBeforeCall,
+                                accessibleMethods, null, effClassMemberAccessPolicy);
+                        if (methodInsteadOfPropertyValueBeforeCall
+                                && exposedMethodName != null && exposedMethodName.equals(propDesc.getName())) {
+                            exposedMethodName = null; // We have already exposed this as property with the method name
+                        }
                     }
 
-                    String methodKey = decision.getExposeMethodAs();
-                    if (methodKey != null) {
-                        Object previous = introspData.get(methodKey);
+                    if (exposedMethodName != null) {
+                        Object previous = introspData.get(exposedMethodName);
                         if (previous instanceof Method) {
                             // Overloaded method - replace Method with a OverloadedMethods
                             OverloadedMethods overloadedMethods =
                                     new OverloadedMethods(is2321Bugfixed());
                             overloadedMethods.addMethod((Method) previous);
                             overloadedMethods.addMethod(method);
-                            introspData.put(methodKey, overloadedMethods);
+                            introspData.put(exposedMethodName, overloadedMethods);
                             // Remove parameter type information (unless an indexed property reader needs it):
                             if (argTypesUsedByIndexerPropReaders == null
                                     || !argTypesUsedByIndexerPropReaders.containsKey(previous)) {
@@ -388,7 +425,7 @@ class ClassIntrospector {
                         } else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof FastPropertyDescriptor)) {
                             // Simple method (so far)
-                            introspData.put(methodKey, method);
+                            introspData.put(exposedMethodName, method);
                             Class<?>[] replaced = getArgTypesByMethod(introspData).put(method,
                                     method.getParameterTypes());
                             if (replaced != null) {
@@ -402,6 +439,16 @@ class ClassIntrospector {
                 }
             } // for each in mds
         } // end if (exposureLevel < EXPOSE_PROPERTIES_ONLY)
+    }
+
+    private static ZeroArgumentNonVoidMethodPolicy getAppliedZeroArgumentNonVoidMethodPolicy(Method method, Set<String> beanPropertyReadMethodNameCollector, ZeroArgumentNonVoidMethodPolicy zeroArgumentNonVoidMethodPolicy) {
+        if (method.getParameterCount() == 0 && method.getReturnType() != void.class) {
+            return beanPropertyReadMethodNameCollector != null && beanPropertyReadMethodNameCollector.contains(method.getName())
+                    ? ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY
+                    : zeroArgumentNonVoidMethodPolicy;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -673,8 +720,9 @@ class ClassIntrospector {
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
-            PropertyDescriptor pd,
+            PropertyDescriptor pd, boolean methodInsteadOfPropertyValueBeforeCall,
             Map<ExecutableMemberSignature, List<Method>> accessibleMethods,
+            Set<String> beanPropertyReadMethodNameCollector,
             ClassMemberAccessPolicy effClassMemberAccessPolicy) {
         Method readMethod = getMatchingAccessibleMethod(pd.getReadMethod(), accessibleMethods);
         if (readMethod != null && !effClassMemberAccessPolicy.isMethodExposed(readMethod)) {
@@ -697,7 +745,13 @@ class ClassIntrospector {
         }
         
         if (readMethod != null || indexedReadMethod != null) {
-            introspData.put(pd.getName(), new FastPropertyDescriptor(readMethod, indexedReadMethod));
+            introspData.put(pd.getName(), new FastPropertyDescriptor(
+                    readMethod, indexedReadMethod,
+                    methodInsteadOfPropertyValueBeforeCall));
+        }
+
+        if (readMethod != null && beanPropertyReadMethodNameCollector != null) {
+            beanPropertyReadMethodNameCollector.add(readMethod.getName());
         }
     }
 
@@ -1074,6 +1128,14 @@ class ClassIntrospector {
 
     boolean getTreatDefaultMethodsAsBeanMembers() {
         return treatDefaultMethodsAsBeanMembers;
+    }
+
+    ZeroArgumentNonVoidMethodPolicy getNonRecordZeroArgumentNonVoidMethodPolicy() {
+        return nonRecordZeroArgumentNonVoidMethodPolicy;
+    }
+
+    ZeroArgumentNonVoidMethodPolicy getRecordZeroArgumentNonVoidMethodPolicy() {
+        return recordZeroArgumentNonVoidMethodPolicy;
     }
 
     MethodAppearanceFineTuner getMethodAppearanceFineTuner() {

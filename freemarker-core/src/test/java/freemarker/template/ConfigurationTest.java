@@ -90,10 +90,10 @@ import freemarker.core.XMLOutputFormat;
 import freemarker.core.XSCFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.beans.GenericObjectModel;
 import freemarker.ext.beans.LegacyDefaultMemberAccessPolicy;
 import freemarker.ext.beans.MemberAccessPolicy;
 import freemarker.ext.beans.MemberSelectorListMemberAccessPolicy;
-import freemarker.ext.beans.StringModel;
 import freemarker.ext.beans.WhitelistMemberAccessPolicy;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullArgumentException;
@@ -1316,7 +1316,7 @@ public class ConfigurationTest extends TestCase {
         {
             TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");
             assertEquals("aa", aVal.getAsString());
-            assertEquals(StringModel.class, aVal.getClass());
+            assertEquals(GenericObjectModel.class, aVal.getClass());
             
             TemplateScalarModel bVal = (TemplateScalarModel) cfg.getSharedVariable("b");
             assertEquals("bbLegacy", bVal.getAsString());

@@ -251,6 +251,42 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         classIntrospectorBuilder.setTreatDefaultMethodsAsBeanMembers(treatDefaultMethodsAsBeanMembers);
     }
 
+    /**
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getNonRecordZeroArgumentNonVoidMethodPolicy() {
+        return classIntrospectorBuilder.getNonRecordZeroArgumentNonVoidMethodPolicy();
+    }
+
+    /**
+     * See {@link BeansWrapper#setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}.
+     *
+     * <p>Note that methods in this class are inherited by {@link DefaultObjectWrapperBuilder}, which is what you normally use.
+     *
+     * @since 2.3.33
+     */
+    public void setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy nonRecordZeroArgumentNonVoidMethodPolicy) {
+        classIntrospectorBuilder.setNonRecordZeroArgumentNonVoidMethodPolicy(nonRecordZeroArgumentNonVoidMethodPolicy);
+    }
+
+    /**
+     * @since 2.3.33
+     */
+    public ZeroArgumentNonVoidMethodPolicy getRecordZeroArgumentNonVoidMethodPolicy() {
+        return classIntrospectorBuilder.getRecordZeroArgumentNonVoidMethodPolicy();
+    }
+
+    /**
+     * See {@link BeansWrapper#setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}
+     *
+     * <p>Note that methods in this class are inherited by {@link DefaultObjectWrapperBuilder}, which is what you normally use.
+     *
+     * @since 2.3.33
+     */
+    public void setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy) {
+        classIntrospectorBuilder.setRecordZeroArgumentNonVoidMethodPolicy(recordZeroArgumentNonVoidMethodPolicy);
+    }
+
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
         return classIntrospectorBuilder.getMethodAppearanceFineTuner();
     }

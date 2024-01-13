@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import freemarker.core.BugException;
 import freemarker.core.CollectionAndSequence;
+import freemarker.core.Macro;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
@@ -38,16 +40,20 @@ import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.MethodCallAwareTemplateHashModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -134,21 +140,55 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      * then {@code non-void-return-type get(java.lang.Object)}, or 
      * alternatively (if the wrapped object is a resource bundle) 
      * {@code Object getObject(java.lang.String)}.
+     *
+     * <p>As of 2.3.33, the default implementation of this method delegates to {@link #get(String, boolean)}. It's
+     * better to override that, instead of this method. Otherwise, unwanted behavior can arise if the model class also
+     * implements {@link MethodCallAwareTemplateHashModel}, as that will certainly call {@link #get(String, boolean)}
+     * internally, and not the overridden version of this method.
+     *
      * @throws TemplateModelException if there was no property nor method nor
      * a generic {@code get} method to invoke.
      */
     @Override
-    public TemplateModel get(String key)
-        throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateModelException {
+        try {
+            return get(key, false);
+        } catch (MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException e) {
+            throw new BugException(e);
+        }
+    }
+
+    /**
+     * Override this if you want to customize the behavior of {@link #get(String)}.
+     * In standard implementations at least, this is what {@link #get(String)}, and
+     * {@link MethodCallAwareTemplateHashModel#getBeforeMethodCall(String)} delegates to.
+     *
+     * @param key
+     *      Same as the parameter of {@link #get(String)}.
+     * @param beforeMethodCall
+     *      This is a hint that tells that the returned value will be called in the template. This was added to
+     *      implement {@link BeansWrapper.MethodAppearanceDecision#setMethodInsteadOfPropertyValueBeforeCall(boolean)}.
+     *      This parameter is {@code false} when {@link #get(String)} is called, and
+     *      {@code true} when {@link MethodCallAwareTemplateHashModel#getBeforeMethodCall(String)} is called.
+     *      If this is {@code true}, this method should return a {@link TemplateMethodModelEx}, or {@code null},
+     *      or fail with {@link MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException}.
+     *
+     * @since 2.3.33
+     */
+    // Before calling this from FreeMarker classes, consider that some users may have overridden {@link #get(String)}
+    // instead, as this class didn't exist before 2.3.33. So with incompatibleImprovements before that, that should be
+    // the only place where this gets called, or else the behavior of the model will be inconsistent.
+    protected TemplateModel get(String key, boolean beforeMethodCall)
+            throws TemplateModelException, MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException {
         Class<?> clazz = object.getClass();
         Map<Object, Object> classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
-        
+
         try {
             if (wrapper.isMethodsShadowItems()) {
                 Object fd = classInfo.get(key);
                 if (fd != null) {
-                    retval = invokeThroughDescriptor(fd, classInfo);
+                    retval = invokeThroughDescriptor(fd, classInfo, beforeMethodCall);
                 } else {
                     retval = invokeGenericGet(classInfo, clazz, key);
                 }
@@ -160,7 +200,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
                 }
                 Object fd = classInfo.get(key);
                 if (fd != null) {
-                    retval = invokeThroughDescriptor(fd, classInfo);
+                    retval = invokeThroughDescriptor(fd, classInfo, beforeMethodCall);
                     if (retval == UNKNOWN && model == nullModel) {
                         // This is the (somewhat subtle) case where the generic get() returns null
                         // and we have no bean info, so we respect the fact that
@@ -178,7 +218,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
                 retval = wrapper.wrap(null);
             }
             return retval;
-        } catch (TemplateModelException e) {
+        } catch (TemplateModelException | MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException e) {
             throw e;
         } catch (Exception e) {
             throw new _TemplateModelException(e,
@@ -187,6 +227,24 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
                     new _DelayedFTLTypeDescription(this)
             );
         }
+    }
+
+    /**
+     * Can be overridden to be public, to implement {@link MethodCallAwareTemplateHashModel}. We don't implement that
+     * in {@link BeanModel} for backward compatibility, but the functionality is present. If you expose this method by
+     * implementing {@link MethodCallAwareTemplateHashModel}, then be sure that {@link #get(String)} is
+     * not overridden in custom subclasses; if it is, then those subclasses should be modernized to override
+     * {@link #get(String, boolean)} instead.
+     *
+     * @since 2.3.33
+     */
+    protected TemplateModel getBeforeMethodCall(String key)
+            throws TemplateModelException, MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException {
+        TemplateModel result = get(key, true);
+        if (result instanceof  TemplateMethodModelEx || result == null) {
+            return result;
+        }
+        throw new MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException(result, null);
     }
 
     private void logNoSuchKey(String key, Map<?, ?> keyMap) {
@@ -203,8 +261,9 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
         return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
     }
     
-    private TemplateModel invokeThroughDescriptor(Object desc, Map<Object, Object> classInfo)
-            throws IllegalAccessException, InvocationTargetException, TemplateModelException {
+    private TemplateModel invokeThroughDescriptor(Object desc, Map<Object, Object> classInfo, boolean beforeMethodCall)
+            throws IllegalAccessException, InvocationTargetException, TemplateModelException,
+            MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException {
         // See if this particular instance has a cached implementation for the requested feature descriptor
         TemplateModel cachedModel;
         synchronized (this) {
@@ -214,6 +273,9 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
         if (cachedModel != null) {
             return cachedModel;
         }
+
+        // ATTENTION! As the value of beforeMethodCall is not part of the cache lookup key, it's very important that we
+        // don't cache the value for desc-s where beforeMethodCall can have influence on the result!
 
         TemplateModel resultModel = UNKNOWN;
         if (desc instanceof FastPropertyDescriptor) {
@@ -229,8 +291,30 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
                                 ClassIntrospector.getArgTypes(classInfo, indexedReadMethod), wrapper);
                 }
             } else {
-                resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
-                // cachedModel remains null, as we don't cache these
+                // cachedModel must remains null in this branch, because the result is influenced by beforeMethodCall,
+                // which wasn't part of the cache key!
+
+                if (!beforeMethodCall) {
+                    resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+                    // cachedModel remains null, as we don't cache these
+                } else {
+                    if (pd.isMethodInsteadOfPropertyValueBeforeCall()) {
+                        // Do not cache this result! See comments earlier!
+                        resultModel = new SimpleMethodModel(
+                                object, pd.getReadMethod(), CollectionUtils.EMPTY_CLASS_ARRAY, wrapper);
+                    } else {
+                        resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+
+                        // Checks if freemarker.core.MethodCall would accept this result:
+                        if (!(resultModel instanceof TemplateMethodModel || resultModel instanceof Macro)) {
+                            throw new MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException(
+                                    resultModel,
+                                    "This member of the parent object is seen by templates as a property of it "
+                                            + "(with other words, an attribute, or a field), not a method of it. "
+                                            + "Thus, to get its value, it must not be called as a method.");
+                        }
+                    }
+                }
             }
         } else if (desc instanceof Field) {
             resultModel = wrapper.readField(object, (Field) desc);
