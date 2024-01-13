@@ -121,7 +121,8 @@ have to add it yourself! You can download it
 To build `freemarker.jar`, just issue `./gradlew jar` in the project root directory,
 and it should download all dependencies automatically and build `freemarker.jar`.
 
-To run all checks, issue `./gradlew check`.
+To run all JUnit tests and some other checks, issue `./gradlew check`. (Avoid the
+`test` task, as that will only run the tests of the `core` source set.)
 
 To generate documentation, issue `./gradlew javadoc` and `./gradlew manualOffline`.
 

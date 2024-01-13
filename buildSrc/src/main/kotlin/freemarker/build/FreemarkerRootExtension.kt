@@ -97,11 +97,10 @@ class FreemarkerModuleDef internal constructor(
     val compilerVersion: JavaLanguageVersion
 ) {
     val main = sourceSetName == SourceSet.MAIN_SOURCE_SET_NAME
-    val baseDirName = if (main) "core" else sourceSetName.camelCaseToDashed()
 
     val sourceSet = context.sourceSets.maybeCreate(sourceSetName)
 
-    val sourceSetRootDirName = "freemarker-${baseDirName}"
+    val sourceSetRootDirName = "freemarker-${if (main) "core" else sourceSetName.camelCaseToDashed()}"
     val sourceSetSrcPath = sourceSetRoot(context, generated, sourceSetRootDirName)
 
     fun generateJakartaSources(
