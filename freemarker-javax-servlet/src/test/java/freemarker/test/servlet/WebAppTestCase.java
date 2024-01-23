@@ -237,7 +237,7 @@ public class WebAppTestCase {
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(
                 ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN,
-                ".*taglib.*\\.jar$");
+                ".*(taglib|jsp\\.jstl).*\\.jar$");
 
         addJasperInitializer(context);
 

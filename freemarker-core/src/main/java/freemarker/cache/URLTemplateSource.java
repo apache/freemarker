@@ -29,7 +29,7 @@ import java.net.URLConnection;
 /**
  * Wraps a {@link URL}, and implements methods required for a typical template source.
  */
-class URLTemplateSource {
+public class URLTemplateSource {
     private final URL url;
     private URLConnection conn;
     private InputStream inputStream;
@@ -38,7 +38,7 @@ class URLTemplateSource {
     /**
      * @param useCaches {@code null} if this aspect wasn't set in the parent {@link TemplateLoader}.
      */
-    URLTemplateSource(URL url, Boolean useCaches) throws IOException {
+    public URLTemplateSource(URL url, Boolean useCaches) throws IOException {
         this.url = url;
         this.conn = url.openConnection();
         this.useCaches = useCaches;
@@ -66,7 +66,7 @@ class URLTemplateSource {
         return url.toString();
     }
     
-    long lastModified() {
+    public long lastModified() {
         if (conn instanceof JarURLConnection) {
           // There is a bug in sun's jar url connection that causes file handle leaks when calling getLastModified()
           // (see https://bugs.openjdk.java.net/browse/JDK-6956385).
@@ -103,7 +103,7 @@ class URLTemplateSource {
         }
     }
 
-    InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() throws IOException {
         if (inputStream != null) {
             // Ensure that the returned InputStream reads from the beginning of the resource when getInputStream()
             // is called for the second time:
@@ -118,7 +118,7 @@ class URLTemplateSource {
         return inputStream;
     }
 
-    void close() throws IOException {
+    public void close() throws IOException {
         try {
           if (inputStream != null) {
               inputStream.close();

@@ -19,6 +19,10 @@
 
 package freemarker.cache;
 
+// #if jakarta
+//import freemarker.cache.*;
+// #endif jakarta
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
