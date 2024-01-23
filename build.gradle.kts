@@ -52,6 +52,10 @@ tasks.withType<Jar>().configureEach {
 }
 
 freemarkerRoot {
+    // FreeMarker 2.x build is unusual in that instead of using a nested Gradle project for each logical module,
+    // it uses a source set for each. This is because FreeMarker 2.x is a single monolithic artifact for historical
+    // reasons.
+
     configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
     configureSourceSet("javaxServlet") { enableTests() }
     configureSourceSet("jython20")

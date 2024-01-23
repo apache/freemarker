@@ -38,8 +38,11 @@ public interface MethodAppearanceFineTuner {
      * Implement this to tweak certain aspects of how methods appear in the
      * data-model. {@link BeansWrapper} will pass in all Java methods here that
      * it intends to expose in the data-model as methods (so you can do
-     * {@code obj.foo()} in the template).
-     * With this method you can do the following tweaks:
+     * {@code obj.foo()} in the template). This also applies to JavaBeans property read methods, like
+     * {@code public int getX()}, even if the bean property value itself is already exposed (with name {@code x}, in
+     * this example).
+     *
+     * <p>With this method you can do the following tweaks:
      * <ul>
      *   <li>Hide a method that would be otherwise shown by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
@@ -61,19 +64,19 @@ public interface MethodAppearanceFineTuner {
      *     setMethodShadowsProperty(false)} as well, if the method name is exactly
      *     the same as the property name).
      *     The default is {@code null}, which means that no fake property is
-     *     created for the method. You need not and shouldn't set this
-     *     to non-{@code null} for the getter methods of real JavaBean
-     *     properties, as those are automatically shown as properties anyway.
+     *     created for the method. You need not, and shouldn't set this
+     *     to non-{@code null} for the property read (get/is) methods of real JavaBeans
+     *     properties, as bean properties are not seen as methods, and are exposed independently of this mechanism.
      *     The property name in the {@link PropertyDescriptor} can be anything,
      *     but the method (or methods) in it must belong to the class that
-     *     is given as the {@code clazz} parameter or it must be inherited from
+     *     is given as the {@code clazz} parameter, or it must be inherited from
      *     that class, otherwise the behavior is undefined, and errors can occur later.
      *     {@link IndexedPropertyDescriptor}-s are supported.
-     *     If a real JavaBean property of the same name exists, or a fake property
+     *     If a real JavaBeans property of the same name exists, or a fake property
      *     of the same name was already assigned earlier, it won't be
      *     replaced by the new one by default, however this can be changed with
      *     {@link MethodAppearanceDecision#setReplaceExistingProperty(boolean)}.
-     *   <li>Prevent the method to hide a JavaBean property (fake or real) of
+     *   <li>Prevent the method to hide a JavaBeans property (fake or real) of
      *     the same name by calling
      *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)}
      *     with {@code false}. The default is {@code true}, so if you have
@@ -82,8 +85,8 @@ public interface MethodAppearanceFineTuner {
      *     of the property value, which is often undesirable.
      * </ul>
      * 
-     * <p>Note that you can expose a Java method both as a method and as a
-     * JavaBean property on the same time, however you have to chose different
+     * <p>Note that you can expose a Java method both as a method, and as a
+     * JavaBeans property on the same time, however you have to chose different
      * names for them to prevent shadowing. 
      * 
      * @param in Describes the method about which the decision will have to be made.

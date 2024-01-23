@@ -65,18 +65,17 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
     protected final Object object;
     protected final BeansWrapper wrapper;
-    
+
     // We use this to represent an unknown value as opposed to known value of null (JR)
     static final TemplateModel UNKNOWN = new SimpleScalar("UNKNOWN");
-    
+
     static final ModelFactory FACTORY =
-        new ModelFactory()
-        {
-            @Override
-            public TemplateModel create(Object object, ObjectWrapper wrapper) {
-                return new BeanModel(object, (BeansWrapper) wrapper);
-            }
-        };
+            new ModelFactory() {
+                @Override
+                public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                    return new BeanModel(object, (BeansWrapper) wrapper);
+                }
+            };
 
     // I've tried to use a volatile ConcurrentHashMap field instead of HashMap + synchronized(this), but oddly it was
     // a bit slower, at least on Java 8 u66. 
@@ -111,7 +110,7 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
             wrapper.getClassIntrospector().get(object.getClass());
         }
     }
-    
+
     /**
      * Uses Beans introspection to locate a property or method with name
      * matching the key name. If a method or property is found, it's wrapped

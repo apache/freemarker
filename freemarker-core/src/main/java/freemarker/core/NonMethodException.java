@@ -36,6 +36,10 @@ public class NonMethodException extends UnexpectedTypeException {
         super(env, "Expecting method value here");
     }
 
+    /**
+     * @param env Can be {@code null}, if we are in a thread that's running a template currently (because then we can
+     *            find the {@link Environment}).
+     */
     public NonMethodException(String description, Environment env) {
         super(env, description);
     }
