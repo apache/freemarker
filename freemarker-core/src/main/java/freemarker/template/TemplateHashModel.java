@@ -30,10 +30,11 @@ public interface TemplateHashModel extends TemplateModel {
     /**
      * Gets a {@code TemplateModel} from the hash.
      *
-     * @param key the name by which the {@code TemplateModel}
-     * is identified in the template.
-     * @return the {@code TemplateModel} referred to by the key,
-     * or null if not found.
+     * @param key
+     *      The name by which the {@code TemplateModel} is identified in the template.
+     *
+     * @return
+     *      The {@code TemplateModel} referred to by the key, or {@code null} if not found.
      */
     TemplateModel get(String key) throws TemplateModelException;
 

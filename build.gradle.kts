@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.Properties
 import java.util.stream.Collectors
 
 plugins {
@@ -37,13 +39,59 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.withType<Jar>().configureEach {
+    // make contents of freemarker.jar reproducible
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+    filePermissions {
+        unix("rw-r--r--")
+    }
+    dirPermissions {
+        unix("rwxr-xr-x")
+    }
+}
+
 freemarkerRoot {
+    // FreeMarker 2.x build is unusual in that instead of using a nested Gradle project for each logical module,
+    // it uses a source set for each. This is because FreeMarker 2.x is a single monolithic artifact for historical
+    // reasons.
+
     configureSourceSet(SourceSet.MAIN_SOURCE_SET_NAME) { enableTests() }
     configureSourceSet("javaxServlet") { enableTests() }
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
     configureSourceSet("core16", "16")
+
+    configureGeneratedSourceSet("jakartaServlet") {
+        val jakartaSourceGenerators = generateJakartaSources("javaxServlet")
+
+        val testSourceSet = enableTests("17").get().sources
+        val jakartaTestSourceGenerators = generateJakartaSources(
+            "javaxServletTest",
+            SourceSet.TEST_SOURCE_SET_NAME,
+            testSourceSet
+        )
+
+        (jakartaSourceGenerators + jakartaTestSourceGenerators).forEach { task ->
+            task.configure {
+                packageMappings.set(mapOf(
+                    "freemarker.ext.jsp" to "freemarker.ext.jakarta.jsp",
+                    "freemarker.ext.servlet" to "freemarker.ext.jakarta.servlet",
+                    "freemarker.cache" to "freemarker.ext.jakarta.servlet",
+                ))
+                noAutoReplacePackages.set(setOf("freemarker.cache"))
+                replacements.set(mapOf(
+                    "package freemarker.cache" to "package freemarker.ext.jakarta.servlet",
+                    "freemarker.cache.WebappTemplateLoader" to "freemarker.ext.jakarta.servlet.WebappTemplateLoader",
+                    "javax.servlet" to "jakarta.servlet",
+                    "javax.el" to "jakarta.el",
+                    "http://java.sun.com/jsp/jstl/core" to "jakarta.tags.core",
+                    "http://java.sun.com/jsp/jstl/functions" to "jakarta.tags.functions",
+                ))
+            }
+        }
+    }
 }
 
 val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJavacc") {
@@ -82,12 +130,19 @@ val compileJavacc = tasks.register<freemarker.build.CompileJavaccTask>("compileJ
 }
 sourceSets.main.get().java.srcDir(compileJavacc)
 
+fun buildInfoFile(): File
+        = project.layout.buildDirectory.get().asFile.resolve("buildinfo").resolve(".buildinfo")
+
 tasks.sourcesJar.configure {
     from(compileJavacc.flatMap { it.sourceDirectory })
 
     from(files("LICENSE", "NOTICE")) {
         into("META-INF")
     }
+
+    // Depend on the createBuildInfo task and include the generated file
+    dependsOn(createBuildInfo)
+    from(buildInfoFile())
 }
 
 tasks.javadocJar.configure {
@@ -105,6 +160,10 @@ configurations {
     register("combinedClasspath") {
         extendsFrom(named("jython25CompileClasspath").get())
         extendsFrom(named("javaxServletCompileClasspath").get())
+    }
+    register("javadocClasspath") {
+        extendsFrom(named("combinedClasspath").get())
+        extendsFrom(named("jakartaServletCompileClasspath").get())
     }
 }
 
@@ -209,7 +268,7 @@ tasks.named<Javadoc>(JavaPlugin.JAVADOC_TASK_NAME) {
         addStringOption("Xdoclint:-missing", "-quiet")
     }
 
-    classpath = files(configurations.named("combinedClasspath"))
+    classpath = files(configurations.named("javadocClasspath"))
 }
 
 fun registerManualTask(taskName: String, localeValue: String, offlineValue: Boolean) {
@@ -399,7 +458,7 @@ val distBin = tasks.register<Tar>("distBin") {
 
     val jarFile = tasks.named<Jar>("jar").flatMap { jar -> jar.archiveFile }
     from(jarFile) {
-        rename { name -> "freemarker.jar" }
+        rename { _ -> "freemarker.jar" }
     }
 
     from(tasks.named("manualOffline")) {
@@ -411,6 +470,33 @@ val distBin = tasks.register<Tar>("distBin") {
     }
 }
 registerDistSupportTasks(distBin)
+
+val createBuildInfo = tasks.register("createBuildInfo") {
+    doLast {
+        val buildInfoFile = buildInfoFile()
+        buildInfoFile.parentFile.mkdirs()
+
+        val props = Properties().apply {
+            // see https://reproducible-builds.org/docs/jvm/
+            setProperty("buildinfo.version", "1.0-SNAPSHOT")
+
+            setProperty("java.version", System.getProperty("java.version"))
+            setProperty("java.vendor", System.getProperty("java.vendor"))
+            setProperty("os.name", System.getProperty("os.name"))
+
+            setProperty("source.scm.uri", "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git")
+            setProperty("source.scm.tag", "v${fmExt.versionDef.version}")
+
+            setProperty("build-tool", "gradle")
+            setProperty("build.setup", "https://github.com/apache/freemarker/blob/2.3-gae/README.md#building-freemarker")
+
+        }
+
+        FileOutputStream(buildInfoFile).use { outputStream ->
+            props.store(outputStream, " Build environment information recorded for reproducible builds")
+        }
+    }
+}
 
 val distSrc = tasks.register<Tar>("distSrc") {
     compression = Compression.GZIP
@@ -431,7 +517,7 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "*.txt",
                 "osgi.bnd",
                 "rat-excludes",
-                "gradlew*",
+                "gradlew.bat",
                 "gradle/**"
         )
         exclude(
@@ -443,6 +529,18 @@ val distSrc = tasks.register<Tar>("distSrc") {
                 "*/*.*~"
         )
     }
+
+    from(projectDir) {
+        include(
+            "gradlew"
+        )
+        filePermissions {
+            unix("rwxr-xr-x")
+        }
+    }
+
+    dependsOn(createBuildInfo)
+    from(buildInfoFile())
 }
 registerDistSupportTasks(distSrc)
 
@@ -500,8 +598,12 @@ eclipse {
 
 val jettyVersion = "9.4.53.v20231009"
 val slf4jVersion = "1.6.1"
-val springVersion = "2.5.6.SEC03"
+val springVersion = "5.3.31"
 val tagLibsVersion = "1.2.5"
+
+val jakartaJettyVersion = "11.0.19"
+val jakartaSlf4jVersion = "2.0.9"
+val jakartaSpringVersion = "6.1.2"
 
 configurations {
     compileOnly {
@@ -539,6 +641,10 @@ dependencies {
 
     testImplementation(xalan)
 
+    "jakartaServletCompileOnly"("jakarta.servlet:jakarta.servlet-api:5.0.0")
+    "jakartaServletCompileOnly"("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0")
+    "jakartaServletCompileOnly"("jakarta.el:jakarta.el-api:4.0.0")
+
     "javaxServletCompileOnly"("javax.servlet:javax.servlet-api:3.0.1")
     "javaxServletCompileOnly"("javax.servlet.jsp:jsp-api:2.2")
     "javaxServletCompileOnly"("javax.el:el-api:2.2")
@@ -559,6 +665,39 @@ dependencies {
     "javaxServletTestImplementation"("org.springframework:spring-test:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
+    "javaxServletTestImplementation"("org.springframework:spring-web:${springVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    "javaxServletTestImplementation"("com.github.hazendaz:displaytag:2.5.3")
+
+    "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-server:${jakartaJettyVersion}")
+    "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-annotations:${jakartaJettyVersion}")
+    "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-webapp:${jakartaJettyVersion}")
+    "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-util:${jakartaJettyVersion}")
+    "jakartaServletTestImplementation"("org.eclipse.jetty:apache-jsp:${jakartaJettyVersion}")
+    // Jetty also contains the servlet-api and jsp-api and el-api classes
+
+    "jakartaServletTestImplementation"("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    "jakartaServletTestImplementation"("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0")
+    "jakartaServletTestImplementation"("jakarta.el:jakarta.el-api:4.0.0")
+
+    // JSP JSTL (not included in Jetty):
+    "jakartaServletTestImplementation"("com.github.hazendaz:displaytag:3.0.0-M2")
+
+    "jakartaServletTestImplementation"("org.springframework:spring-core:${jakartaSpringVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    "jakartaServletTestImplementation"("org.springframework:spring-test:${jakartaSpringVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    "jakartaServletTestImplementation"("org.springframework:spring-web:${jakartaSpringVersion}") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+
+    "jakartaServletTestRuntimeOnly"("org.slf4j:slf4j-api:${jakartaSlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("org.slf4j:log4j-over-slf4j:${jakartaSlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("org.slf4j:jcl-over-slf4j:${jakartaSlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("ch.qos.logback:logback-classic:1.3.14")
 
     "jython20CompileOnly"("jython:jython:2.1")
 
@@ -568,13 +707,6 @@ dependencies {
     "jython25CompileOnly"(sourceSets["jython20"].output)
     "jython25CompileOnly"("org.python:jython:2.5.0")
 
-    "testUtilsImplementation"("displaytag:displaytag:1.2") {
-        exclude(group = "com.lowagie", module = "itext")
-        // We manage logging centrally:
-        exclude(group = "org.slf4j", module = "slf4j-log4j12")
-        exclude(group = "rg.slf4j", module = "jcl104-over-slf4j")
-        exclude(group = "log4j", module = "log4j")
-    }
     "testUtilsImplementation"(sourceSets.main.get().output)
     "testUtilsImplementation"("com.google.code.findbugs:annotations:3.0.0")
     "testUtilsImplementation"(libs.junit)
@@ -583,7 +715,5 @@ dependencies {
     "testUtilsImplementation"("commons-io:commons-io:2.7")
     "testUtilsImplementation"("com.google.guava:guava:29.0-jre")
     "testUtilsImplementation"("commons-collections:commons-collections:3.1")
-
-    // Override Java 9 incompatible version (coming from displaytag):
     "testUtilsImplementation"("commons-lang:commons-lang:2.6")
 }

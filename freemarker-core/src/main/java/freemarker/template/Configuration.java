@@ -26,11 +26,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.Collator;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -519,23 +517,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             Properties props = ClassUtil.loadProperties(Configuration.class, VERSION_PROPERTIES_PATH);
             
             String versionString  = getRequiredVersionProperty(props, "version");
-            
-            Date buildDate;
-            {
-                String buildDateStr = getRequiredVersionProperty(props, "buildTimestamp");
-                if (buildDateStr.endsWith("Z")) {
-                    buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
-                }
-                try {
-                    buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-                } catch (java.text.ParseException e) {
-                    buildDate = null;
-                }
-            }
-            
+
             final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(props, "isGAECompliant"));
             
-            VERSION = new Version(versionString, gaeCompliant, buildDate);
+            VERSION = new Version(versionString, gaeCompliant, null);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
@@ -3730,8 +3715,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * do NOT use this as the value of the {@code incompatible_improvements} setting (as the parameter to
      * {@link Configuration#Configuration(Version)}), as then your application can break when you upgrade FreeMarker!
      * Use a constant value, like {@link #VERSION_2_3_28}, to protect your application from fixes/changes that aren't
-     * entirely backward compatible. Fixes and features that are backward compatible are always enabled. 
-     * 
+     * entirely backward compatible. Fixes and features that are backward compatible are always enabled.
+     *
      * On FreeMarker version numbering rules:
      * <ul>
      *   <li>For final/stable releases the version number is like major.minor.micro, like 2.3.19. (Historically,
@@ -3754,7 +3739,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             Also, "pre" and "rc" was lowercase, and was followd by a number without 0-padding.</li>
      *       </ul>
      * </ul>
-     * 
+     *
+     * <p>Starting from 2.3.33, {@link Version#getBuildDate()} will return {@code null}, as we don't store the build
+     * date anymore, to make the build reproducible.
+     *
      * @since 2.3.20
      */ 
     public static Version getVersion() {

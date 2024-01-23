@@ -58,6 +58,9 @@ import freemarker.template.utility.DeepUnwrap;
  * means that the include inherits the request parameters from the current 
  * request. In this case values in 'params' will get prepended to the existing
  * values of parameters.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.IncludePage} instead (since 2.3.33).
  */
 public class IncludePage implements TemplateDirectiveModel {
     private final HttpServletRequest request;

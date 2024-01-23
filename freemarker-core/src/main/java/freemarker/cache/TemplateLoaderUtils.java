@@ -21,7 +21,7 @@ package freemarker.cache;
 
 import freemarker.template.Configuration;
 
-final class TemplateLoaderUtils {
+public final class TemplateLoaderUtils {
 
     private TemplateLoaderUtils() {
         // Not meant to be instantiated

@@ -26,7 +26,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.32</productname>
+    <productname>Freemarker 2.3.33</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -6659,7 +6659,7 @@ That's all.</programlisting>
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
 // version (here 2.3.32) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_33);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -6958,7 +6958,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_33);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         // Recommended settings for new projects:
         cfg.setDefaultEncoding("UTF-8");
@@ -11590,6 +11590,10 @@ TemplateHashModel roundingModeEnums =
         </indexterm>
 
         <indexterm>
+          <primary>Jakarta</primary>
+        </indexterm>
+
+        <indexterm>
           <primary>Web application framework</primary>
         </indexterm>
 
@@ -11611,6 +11615,18 @@ TemplateHashModel roundingModeEnums =
         xlink:href="http://jakarta.apache.org/struts">Apache Struts</link>),
         then read on. For other frameworks please refer to the documentation
         of the framework.</para>
+
+        <note>
+          <para>FreeMarker supports both traditional <quote>javax</quote>
+          Servet/JSP, and Jakarta Servlet/JSP. However, you have to use a
+          different Java package for them:
+          <literal>freemarker.ext.servet</literal>, and
+          <literal>freemarker.ext.jsp</literal> for <quote>javax</quote>, and
+          <literal>freemarker.ext.jakarta.servet</literal>, and
+          <literal>freemarker.ext.jakarta.jsp</literal> for Jakarta. On modern
+          Servlet containers you must use the Jakarta packages, while on older
+          ones you must use the non-Jakarte packages.</para>
+        </note>
 
         <section xml:id="pgui_misc_servlet_model2">
           <title>Using FreeMarker for <quote>Model 2</quote></title>
@@ -11653,7 +11669,9 @@ TemplateHashModel roundingModeEnums =
 
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
+  
   &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
+  &lt;!-- Or freemarker.ext.<emphasis>jakarta</emphasis>.servlet.FreemarkerServlet! --&gt;
 
   &lt;!--
     Init-param documentation:
@@ -12162,6 +12180,7 @@ ${bar?trim}</programlisting>
 
           <programlisting role="unspecified">&lt;listener&gt;
   &lt;listener-class&gt;freemarker.ext.jsp.EventForwarding&lt;/listener-class&gt;
+  &lt;!-- Or freemarker.ext.<emphasis>jakarta</emphasis>.jsp.EventForwarding! --&gt;
 &lt;/listener&gt;</programlisting>
 
           <para>Note that you can use JSP taglibs with FreeMarker even if the
@@ -29280,8 +29299,9 @@ End book</programlisting>
 
             <para>If the FreeMarker support of the Web Application Framework
             is based on
-            <literal>freemarker.ext.servlet.FreemarkerServlet</literal>, then
-            you can also do this (since FreeMarker 2.3.15):</para>
+            <literal>freemarker.ext.servlet.FreemarkerServlet</literal>
+            (<literal>freemarker.ext.jakarta.servlet.FreemarkerServlet</literal>),
+            then you can also do this (since FreeMarker 2.3.15):</para>
 
             <programlisting role="template">&lt;@include_page path="/WEB-INF/just-an-example.jspf" /&gt;</programlisting>
 
@@ -30246,6 +30266,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-218">FREEMARKER-218</link>:
+              Servlet, and JSP support classes now has a Jakarta variant in
+              the new <literal>freemarker.ext.jakarta.jsp</literal> and
+              <literal>freemarker.ext.jakarta.servlet</literal> packages.
+              These are the slightly modified copies of
+              <literal>freemarker.ext.servlet</literal>,
+              <literal>freemarker.ext.jsp</literal> (which are also present in
+              the same FreeMarker jar), that depend on the Jakarata API-s
+              (<literal>jakarta.servlet</literal>,
+              <literal>jakarta.servlet.jsp</literal>,
+              <literal>jakarta.el</literal>, etc.), instead of the tradition
+              <literal>javax</literal> Serlvet/JSP/EL API-s. There's also
+              <literal>freemarker.ext.jakarta.servlet.WebappTemplateLoader</literal>,
+              which is the Jakarta equivalent of
+              <literal>freemarker.cache.WebappTemplateLoader</literal>. (Note
+              that Jakarta packages/classes are not visible in the FreeMarker
+              source code, as they are generated during build from the
+              pre-Jakarta classes.)</para>
+            </listitem>
+
+            <listitem>
               <para>When <literal>FreemarkerServlet</literal> was used with
               the <literal>TemplateExceptionHandler.DEBUG_HANDLER</literal> or
               <literal>HTML_DEBUG_HANDLER</literal>, on Jetty the response web
@@ -30279,6 +30321,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>Configuration.getVersion().getBuildDate()</literal>
+              will now always return <literal>null</literal>, as we don't
+              store the build date anymore, to make the build reproducible.
+              For same reason, <literal>META-INF/MANIFEST.FM</literal> now
+              will not store any timestamps, nor information about the build
+              environment.</para>
+            </listitem>
+
+            <listitem>
               <para>Build changes (in case you build FreeMarker itself, not
               just depend on it):</para>
 
@@ -30301,6 +30352,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>JavaDoc is now generated with JDK 16 (so now we have
                   search on it)</para>
+                </listitem>
+
+                <listitem>
+                  <para>The build is now reproducible (see <link
+                  xlink:href="https://reproducible-builds.org">reproducible-builds.org</link>).
+                  However, therefore it doesn't contain any build timestamps
+                  anymore.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

@@ -32,8 +32,10 @@ import freemarker.template.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.HttpSessionHashModel} instead (since 2.3.33).
  */
-
 public final class HttpSessionHashModel implements TemplateHashModel, Serializable {
     private static final long serialVersionUID = 1L;
     private transient HttpSession session;

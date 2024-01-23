@@ -43,6 +43,9 @@ import freemarker.template.utility.NullArgumentException;
  * subclass of {@code FreemarkerServlet} that overrides
  * {@code preTemplateProcess}) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.AllHttpScopesHashModel} instead (since 2.3.33).
  */
 public class AllHttpScopesHashModel extends SimpleHash {
     private final ServletContext context;

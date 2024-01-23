@@ -33,8 +33,8 @@ public class InvalidReferenceException extends TemplateException {
         try {
             Environment.setCurrentEnvironment(null);
             FAST_INSTANCE = new InvalidReferenceException(
-                    "Invalid reference. Details are unavilable, as this should have been handled by an FTL construct. "
-                    + "If it wasn't, that's problably a bug in FreeMarker.",
+                    "Invalid reference. Details are unavailable, as this should have been handled by an FTL construct. "
+                    + "If it wasn't, that's probably a bug in FreeMarker.",
                     null);
         } finally {
             Environment.setCurrentEnvironment(prevEnv);

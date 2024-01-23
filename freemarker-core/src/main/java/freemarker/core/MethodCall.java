@@ -74,7 +74,7 @@ final class MethodCall extends Expression {
         buf.append(target.getCanonicalForm());
         buf.append("(");
         String list = arguments.getCanonicalForm();
-        buf.append(list.substring(1, list.length() - 1));
+        buf.append(list, 1, list.length() - 1);
         buf.append(")");
         return buf.toString();
     }
