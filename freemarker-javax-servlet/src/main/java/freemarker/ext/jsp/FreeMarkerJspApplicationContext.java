@@ -43,8 +43,6 @@ import javax.servlet.jsp.el.ScopedAttributeELResolver;
 import freemarker.log.Logger;
 import freemarker.template.utility.ClassUtil;
 
-/**
- */
 class FreeMarkerJspApplicationContext implements JspApplicationContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     private static final ExpressionFactory expressionFactoryImpl = findExpressionFactoryImplementation();

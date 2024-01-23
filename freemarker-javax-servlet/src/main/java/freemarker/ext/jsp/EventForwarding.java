@@ -40,6 +40,9 @@ import freemarker.log.Logger;
  * An instance of this class should be registered as a <code>&lt;listener&gt;</code> in
  * the {@code web.xml} descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.jsp.EventForwarding} instead (since 2.3.33).
  */
 public class EventForwarding
     implements

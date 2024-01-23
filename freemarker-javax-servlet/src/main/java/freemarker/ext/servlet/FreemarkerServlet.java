@@ -70,8 +70,10 @@ import freemarker.template.utility.StringUtil;
  * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
  * HTTP servlet request attributes, then forward to an FTL file (instead of to a JSP file) that's mapped to this servet
  * (usually via the {@code <url-pattern>*.ftl<url-pattern>}). See web.xml example (and more) in the FreeMarker Manual!
- * 
- * 
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.FreemarkerServlet} instead (since 2.3.33).
+ *
  * <p>
  * <b>Main features</b>
  * </p>

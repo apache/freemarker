@@ -42,7 +42,10 @@ import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source
- * of templates.  
+ * of templates.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.WebappTemplateLoader} instead (since 2.3.33).
  */
 public class WebappTemplateLoader implements TemplateLoader {
 
