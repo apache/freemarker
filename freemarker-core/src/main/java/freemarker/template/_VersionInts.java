@@ -46,5 +46,6 @@ public final class _VersionInts {
     public static final int V_2_3_30 = Configuration.VERSION_2_3_30.intValue();
     public static final int V_2_3_31 = Configuration.VERSION_2_3_31.intValue();
     public static final int V_2_3_32 = Configuration.VERSION_2_3_32.intValue();
+    public static final int V_2_3_33 = Configuration.VERSION_2_3_33.intValue();
     public static final int V_2_4_0 = Version.intValueFor(2, 4, 0);
 }

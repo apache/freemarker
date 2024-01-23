@@ -106,7 +106,7 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 https://freemarker.apache.org/sourcecode.html
 
-You need JDK 8 and JDK 16 to be installed
+You need JDK 8, JDK 16 and JDK 17 (only for some tests) to be installed
 (and [visible to Gradle](https://docs.gradle.org/current/userguide/toolchains.html)).
 
 Be sure that your default Java version (which Gradle should use automatically) is at
@@ -129,8 +129,16 @@ To see how the project would be deployed to Maven Central, issue
 `./gradlew publishAllPublicationsToLocalRepository`,
 and check the `build/local-deployment` directory.
 
+To build the distribution artifacts (the `tgz`-s that people can download), run `./gradlew build`.However,
+
+For a stable (non-SNAPSHOT) version number, you will need to set up signing, or disable that verification;
+see `gradle.properties` in this project for those!  
+
 See `gradle.properties` for some Gradle properties that you may what to set,
 especially if you are building a release.
+
+Reproducible builds: If the resulting `freemarker.jar` is not identical with the official jar, see the build environment
+in the `.buildinfo` file packed into the official source distribution, and also into the Maven "sources" artifact!  
 
 
 IDE setup

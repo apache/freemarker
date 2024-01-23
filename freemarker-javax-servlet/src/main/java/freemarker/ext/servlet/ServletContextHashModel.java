@@ -29,6 +29,9 @@ import freemarker.template.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a ServletContext attributes.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.servlet.ServletContextHashModel} instead (since 2.3.33).
  */
 public final class ServletContextHashModel implements TemplateHashModel {
     private final GenericServlet servlet;

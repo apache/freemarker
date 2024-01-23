@@ -92,6 +92,9 @@ import freemarker.template.utility.StringUtil;
  * An instance of this class is made available in the root data model of templates executed by
  * {@link freemarker.ext.servlet.FreemarkerServlet} under key {@code JspTaglibs}. It can be added to custom servlets as
  * well to enable JSP taglib integration in them as well.
+ *
+ * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
+ * {@code freemarker.ext.jakarta.jsp.TaglibFactory} instead (since 2.3.33).
  */
 public class TaglibFactory implements TemplateHashModel {
 

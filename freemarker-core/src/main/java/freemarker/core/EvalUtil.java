@@ -278,7 +278,7 @@ class EvalUtil {
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
-            if (env.getConfiguration().getIncompatibleImprovements().intValue() <= _VersionInts.V_2_3_32) {
+            if (env.getConfiguration().getIncompatibleImprovements().intValue() < _VersionInts.V_2_3_33) {
                 cmpResult = env.getCollator().compare(leftString, rightString);
             } else {
                 cmpResult = Normalizer.normalize(leftString, Normalizer.Form.NFKC)
