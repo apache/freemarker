@@ -3,6 +3,10 @@ Things not yet forward-ported from 2.3-gae
 
 - Lambda-like expressions: The way those work in 2.x is limited because of BC restrictions. So it should work differently here.
 
+- MethodCallAwareTemplateHashModel, and anything related to it. This is what allows both myRecord.x and myRecord.x() give
+  the same result. But in FM3 we certainly should go for separate method and non-method namespace, which makes the 2.x
+  implementation unapplicable.
+
 - ?with_args/?with_args_last: Have to implement the better null handling in the template language first
 
-- Some of the Gradle build refinements, like signature related and, rebroducible build stuff
+- Some of the Gradle build refinements, like signature related and, reproducible build stuff
