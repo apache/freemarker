@@ -953,6 +953,8 @@ TOKEN:
     |
     <CASE : <START_TAG> "case" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
+    <ON : <START_TAG> "on" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
+    |
     <ASSIGN : <START_TAG> "assign" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <GLOBALASSIGN : <START_TAG> "global" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
@@ -3875,6 +3877,7 @@ SwitchBlock Switch() :
     SwitchBlock switchBlock;
     MixedContent ignoredSectionBeforeFirstCase = null;
     Case caseIns;
+    On onIns;
     Expression switchExp;
     Token start, end;
     boolean defaultFound = false;
@@ -3892,18 +3895,50 @@ SwitchBlock Switch() :
     }
     [
 	    (
-	        caseIns = Case()
-	        {
-	            if (caseIns.condition == null) {
-	                if (defaultFound) {
-	                    throw new ParseException(
-	                    "You can only have one default case in a switch statement", template, start);
-	                }
-	                defaultFound = true;
-	            }
-	            switchBlock.addCase(caseIns);
-	        }
-	    )+
+            (
+                caseIns = Case()
+                {
+                    if (caseIns.condition == null) {
+                        if (defaultFound) {
+                            throw new ParseException(
+                            "You can only have one default case in a switch statement", template, start);
+                        }
+                        defaultFound = true;
+                    }
+                    switchBlock.addCase(caseIns);
+                }
+            )+
+            |
+            (
+                {
+                    // A Switch with Case supports break, but not one with On.
+                    // Do it this way to ensure backwards compatibility.
+                    breakableDirectiveNesting--;
+                }
+
+                (
+                    onIns = On()
+                    {
+                        switchBlock.addOn(onIns);
+                    }
+                )+
+                [
+                    caseIns = Case()
+                    {
+                        // When using on, you can have a default, but not a normal case
+                        if (caseIns.condition != null) {
+                            throw new ParseException(
+                            "You cannot mix \"case\" and \"on\" in a switch statement", template, start);
+                        }
+                        switchBlock.addCase(caseIns);
+                    }
+                ]
+
+                {
+                    breakableDirectiveNesting++;
+                }
+            )
+	    )
 	    [<STATIC_TEXT_WS>]
     ]
     end = <END_SWITCH>
@@ -3929,6 +3964,24 @@ Case Case() :
     children = MixedContentElements()
     {
         Case result = new Case(exp, children);
+        result.setLocation(template, start, start, children);
+        return result;
+    }
+}
+
+On On() :
+{
+    ArrayList exps;
+    TemplateElements children;
+    Token start;
+}
+{
+    (
+        start = <ON> exps = PositionalArgs() <DIRECTIVE_END>
+    )
+    children = MixedContentElements()
+    {
+        On result = new On(exps, children);
         result.setLocation(template, start, start, children);
         return result;
     }

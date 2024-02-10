@@ -21,9 +21,10 @@
 3 <#assign x = 123><#assign x = 123 in ns><#global x = 123>
 4 <#if x + 1 == 0>foo${y}bar<#else>${"static"}${'x${baaz * 10}y'}</#if>
 5 <#switch x><#case 1>one<#case 2>two<#default>more</#switch>
-6 <#macro foo x y=2 z=y+1 q...><#nested x y></#macro>
-7 <#function foo x y><#local x = 123><#return 1></#function>
-8 <#list xs as x></#list>
-9 <#list xs>[<#items as x>${x}<#sep>, </#items>]<#else>None</#list>
-10 <#-- A comment -->
-11 <#outputFormat "XML"><#noAutoEsc>${a}<#autoEsc>${b}</#autoEsc>${c}</#noAutoEsc></#outputFormat>
+6 <#switch x><#on 1, 2>one or two<#on 3>three<#default>more</#switch>
+7 <#macro foo x y=2 z=y+1 q...><#nested x y></#macro>
+8 <#function foo x y><#local x = 123><#return 1></#function>
+9 <#list xs as x></#list>
+10 <#list xs>[<#items as x>${x}<#sep>, </#items>]<#else>None</#list>
+11 <#-- A comment -->
+12 <#outputFormat "XML"><#noAutoEsc>${a}<#autoEsc>${b}</#autoEsc>${c}</#noAutoEsc></#outputFormat>

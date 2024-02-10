@@ -112,6 +112,24 @@
                 - content: "more"  // String
     #text  // f.c.TextBlock
         - content: "\n6 "  // String
+    #switch  // f.c.SwitchBlock
+        - value: x  // f.c.Identifier
+        #on  // f.c.On
+            - condition: 1  // f.c.NumberLiteral
+            - condition: 2  // f.c.NumberLiteral
+            #text  // f.c.TextBlock
+                - content: "one or two"  // String
+        #on  // f.c.On
+            - condition: 3  // f.c.NumberLiteral
+            #text  // f.c.TextBlock
+                - content: "three"  // String
+        #default  // f.c.Case
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            #text  // f.c.TextBlock
+                - content: "more"  // String
+    #text  // f.c.TextBlock
+        - content: "\n7 "  // String
     #macro  // f.c.Macro
         - assignment target: "foo"  // String
         - parameter name: "x"  // String
@@ -128,7 +146,7 @@
             - passed value: x  // f.c.Identifier
             - passed value: y  // f.c.Identifier
     #text  // f.c.TextBlock
-        - content: "\n7 "  // String
+        - content: "\n8 "  // String
     #function  // f.c.Macro
         - assignment target: "foo"  // String
         - parameter name: "x"  // String
@@ -146,12 +164,12 @@
         #return  // f.c.ReturnInstruction
             - value: 1  // f.c.NumberLiteral
     #text  // f.c.TextBlock
-        - content: "\n8 "  // String
+        - content: "\n9 "  // String
     #list  // f.c.IteratorBlock
         - list source: xs  // f.c.Identifier
         - target loop variable: "x"  // String
     #text  // f.c.TextBlock
-        - content: "\n9 "  // String
+        - content: "\n10 "  // String
     #list-#else-container  // f.c.ListElseContainer
         #list  // f.c.IteratorBlock
             - list source: xs  // f.c.Identifier
@@ -170,11 +188,11 @@
             #text  // f.c.TextBlock
                 - content: "None"  // String
     #text  // f.c.TextBlock
-        - content: "\n10 "  // String
+        - content: "\n11 "  // String
     #--...--  // f.c.Comment
         - content: " A comment "  // String
     #text  // f.c.TextBlock
-        - content: "\n11 "  // String
+        - content: "\n12 "  // String
     #outputformat  // f.c.OutputFormatBlock
         - value: "XML"  // f.c.StringLiteral
         #noautoesc  // f.c.NoAutoEscBlock
