@@ -105,6 +105,7 @@ public class _CoreAPI {
         addName(allNames, lcNames, ccNames, "noescape", "noEscape");
         addName(allNames, lcNames, ccNames, "noparse", "noParse");
         addName(allNames, lcNames, ccNames, "nt");
+        addName(allNames, lcNames, ccNames, "on");
         addName(allNames, lcNames, ccNames, "outputformat", "outputFormat");
         addName(allNames, lcNames, ccNames, "recover");
         addName(allNames, lcNames, ccNames, "recurse");
