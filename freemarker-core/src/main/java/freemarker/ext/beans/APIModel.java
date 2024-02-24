@@ -19,6 +19,10 @@
 
 package freemarker.ext.beans;
 
+import freemarker.template.MethodCallAwareTemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
 /**
  * Exposes the Java API (and properties) of an object.
  * 
@@ -32,7 +36,7 @@ package freemarker.ext.beans;
  * 
  * @since 2.3.22
  */
-final class APIModel extends BeanModel {
+final class APIModel extends BeanModel implements MethodCallAwareTemplateHashModel {
 
     APIModel(Object object, BeansWrapper wrapper) {
         super(object, wrapper, false);
@@ -41,5 +45,10 @@ final class APIModel extends BeanModel {
     protected boolean isMethodsShadowItems() {
         return true;
     }
-    
+
+    @Override
+    public TemplateModel getBeforeMethodCall(String key) throws TemplateModelException,
+            ShouldNotBeGetAsMethodException {
+        return super.getBeforeMethodCall(key);
+    }
 }

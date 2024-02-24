@@ -61,7 +61,7 @@ freemarkerRoot {
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
-    configureSourceSet("core16", "16")
+    configureSourceSet("core16", "16") { enableTests() }
 
     configureGeneratedSourceSet("jakartaServlet") {
         val jakartaSourceGenerators = generateJakartaSources("javaxServlet")

@@ -27,25 +27,38 @@ import freemarker.template.TemplateModel;
  * The dot operator. Used to reference items inside a
  * <code>TemplateHashModel</code>.
  */
-final class Dot extends Expression {
+class Dot extends Expression {
     private final Expression target;
-    private final String key;
+    protected final String key;
 
     Dot(Expression target, String key) {
         this.target = target;
         this.key = key;
     }
 
+    /**
+     * Shallow copy constructor
+     */
+    Dot(Dot dot) {
+        this(dot.target, dot.key);
+        this.constantValue = dot.constantValue; // Probably always will be null here
+        copyFieldsFrom(dot);
+    }
+
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel leftModel = target.eval(env);
         if (leftModel instanceof TemplateHashModel) {
-            return ((TemplateHashModel) leftModel).get(key);
+            return evalOnHash((TemplateHashModel) leftModel);
         }
         if (leftModel == null && env.isClassicCompatible()) {
             return null; // ${noSuchVar.foo} has just printed nothing in FM 1.
         }
         throw new NonHashException(target, leftModel, env);
+    }
+
+    protected TemplateModel evalOnHash(TemplateHashModel leftModel) throws TemplateException {
+        return leftModel.get(key);
     }
 
     @Override

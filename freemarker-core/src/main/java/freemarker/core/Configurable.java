@@ -2553,7 +2553,7 @@ public class Configurable {
      *      <p>If you have no constructor arguments and property setters, and the <code><i>className</i></code> class has
      *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
      *      the constructor won't be called. Note that if you use the backward compatible
-     *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
+     *      syntax, where there's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
      *   </li>
      *   <li>
      *      <p>If there exists a class named <code><i>className</i>Builder</code>, then that class will be instantiated

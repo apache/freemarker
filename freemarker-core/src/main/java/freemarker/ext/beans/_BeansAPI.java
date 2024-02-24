@@ -116,7 +116,7 @@ public class _BeansAPI {
             
             packedArgs = new Object[fixedArgCnt + 1]; 
             for (int i = 0; i < fixedArgCnt; i++) {
-                packedArgs[i] = args[i];
+packedArgs[i] = args[i];
             }
             
             final Class<?> compType = paramTypes[fixedArgCnt].getComponentType();
@@ -226,5 +226,5 @@ public class _BeansAPI {
     public static ClassIntrospectorBuilder getClassIntrospectorBuilder(BeansWrapperConfiguration bwc) {
         return bwc.getClassIntrospectorBuilder();
     }
-    
+
 }

@@ -23,16 +23,20 @@ import java.lang.reflect.Method;
 
 /**
  * Used instead of {@link PropertyDescriptor}, because the methods of that are synchronized.
+ * Also, we use this for "fake" Java Beans properties too (see {@link BeansWrapper.MethodAppearanceDecision}).
  * 
  * @since 2.3.27
  */
 final class FastPropertyDescriptor {
     private final Method readMethod;
     private final Method indexedReadMethod;
-    
-    public FastPropertyDescriptor(Method readMethod, Method indexedReadMethod) {
+    private final boolean methodInsteadOfPropertyValueBeforeCall;
+
+    public FastPropertyDescriptor(
+            Method readMethod, Method indexedReadMethod, boolean methodInsteadOfPropertyValueBeforeCall) {
         this.readMethod = readMethod;
         this.indexedReadMethod = indexedReadMethod;
+        this.methodInsteadOfPropertyValueBeforeCall = methodInsteadOfPropertyValueBeforeCall;
     }
 
     public Method getReadMethod() {
@@ -42,5 +46,14 @@ final class FastPropertyDescriptor {
     public Method getIndexedReadMethod() {
         return indexedReadMethod;
     }
-    
+
+    /**
+     * If this is true, and the property value is referred directly before it's called in a template, then
+     * instead of the property value, the value should be the read method.
+     *
+     * @since 2.3.33
+     */
+    public boolean isMethodInsteadOfPropertyValueBeforeCall() {
+        return methodInsteadOfPropertyValueBeforeCall;
+    }
 }

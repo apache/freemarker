@@ -72,9 +72,8 @@ olinks: {
   // External URL-s:
   onlineTemplateTester: "https://try.freemarker.apache.org/"
   twitter: "https://twitter.com/freemarker"
-  sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
-  githubProject: "https://github.com/freemarker/freemarker"
-  reportBug: "https://issues.apache.org/jira/browse/FREEMARKER/"
+  githubProject: "https://github.com/apache/freemarker"
+  reportBug: "https://issues.apache.org/jira/projects/FREEMARKER"
   reportSecurityVulnerability: "https://freemarker.apache.org/report-security-vulnerabilities.html"
   askHelpOnStackOverflow: "https://stackoverflow.com/questions/ask?tags=freemarker"
   asfPrivacyPolicy: "https://privacy.apache.org/policies/privacy-policy-public.html"

@@ -53,7 +53,10 @@ public interface MethodAppearanceFineTuner {
      *   <li>Show the method with a different name in the data-model than its
      *     real name by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
-     *     with non-{@code null} parameter.
+     *     with non-{@code null} parameter. Also, if set to {@code null}, the method won't be exposed.
+     *     The default is the name of the method. Note that if {@code methodInsteadOfPropertyValueBeforeCall} is
+     *     {@code true}, the method is not exposed if the method name set here is the same as the name of the property
+     *     set for this method with {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}.
      *   <li>Create a fake JavaBean property for this method by calling
      *     {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}.
      *     For example, if you have {@code int size()} in a class, but you
@@ -76,6 +79,21 @@ public interface MethodAppearanceFineTuner {
      *     of the same name was already assigned earlier, it won't be
      *     replaced by the new one by default, however this can be changed with
      *     {@link MethodAppearanceDecision#setReplaceExistingProperty(boolean)}.
+     *   <li>If something is exposed as property via
+     *     {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)} (and not only because it's a real
+     *     JavaBeans property), and you also want the property value to be accessible in templates as the return value
+     *     of a 0-argument method of the same name, then call
+     *     {@link MethodAppearanceDecision#setMethodInsteadOfPropertyValueBeforeCall(boolean)} with {@code true}.
+     *     Here's an example to explain that. Let's say, you have a class that contains "public String name()", and you
+     *     exposed that as a property via {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}. So
+     *     far, you can access the property value from templates as {@code user.name}, but {@code user.name()} will
+     *     fail, saying that you try to call a {@code String} (because you apply the {@code ()} operator on the result
+     *     of {@code user.name}). But with
+     *     {@link MethodAppearanceDecision#setMethodInsteadOfPropertyValueBeforeCall(boolean)} {@code true},
+     *     both {@code user.name}, and {@code user.name()} will do the same.
+     *     The default of this is influenced by
+     *     {@link BeansWrapperConfiguration#setNonRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)},
+     *     {@link BeansWrapperConfiguration#setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}.
      *   <li>Prevent the method to hide a JavaBeans property (fake or real) of
      *     the same name by calling
      *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)}
