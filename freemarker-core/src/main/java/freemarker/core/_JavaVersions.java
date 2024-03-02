@@ -31,38 +31,46 @@ public final class _JavaVersions {
         // Not meant to be instantiated
     }
 
-    private static final boolean IS_AT_LEAST_16 = isAtLeast(16, "java.net.UnixDomainSocketAddress");
-
     /**
-     * {@code null} if Java 8 is not available, otherwise the object through with the Java 8 operations are available.
+     * {@code null} if Java 16 is not available, otherwise the object through with the Java 16 operations are available.
      */
-    static public final _Java16 JAVA_16;
-    static {
-        _Java16 java16;
-        if (IS_AT_LEAST_16) {
+    static public final _Java16 JAVA_16 = isAtLeast(16, "java.net.UnixDomainSocketAddress")
+            ? tryLoadJavaSupportSingleton(16, _Java16.class)
+            : null;
+
+    @SuppressWarnings("unchecked")
+    private static <T> T tryLoadJavaSupportSingleton(int javaVersion, Class<T> javaSupportInterface) {
+        String implClassName = "freemarker.core._Java" + javaVersion + "Impl";
+        try {
+            return (T) Class.forName(implClassName)
+                    .getField("INSTANCE")
+                    .get(null);
+        } catch (Exception e) {
             try {
-                java16 = (_Java16) Class.forName("freemarker.core._Java16Impl").getField("INSTANCE").get(null);
-            } catch (Exception e) {
-                try {
-                    Logger.getLogger("freemarker.runtime").error("Failed to access Java 16 functionality", e);
-                } catch (Exception e2) {
-                    // Suppressed
+                if (e instanceof ClassNotFoundException) {
+                    // Happens when we run JUnit tests
+                    Logger.getLogger("freemarker.runtime").warn(
+                            "Seems that the Java " + javaVersion + " support class (" + implClassName
+                                    + ") wasn't included in the build");
+                } else {
+                    Logger.getLogger("freemarker.runtime").error(
+                            "Failed to load Java " + javaVersion + " support class",
+                            e);
                 }
-                java16 = null;
+            } catch (Exception e2) {
+                // Suppressed
             }
-        } else {
-            java16 = null;
+            return null;
         }
-        JAVA_16 = java16;
     }
 
-    private static boolean isAtLeast(int minimumMinorVersion, String proofClassPresence) {
+    private static boolean isAtLeast(int minimumMajorVersion, String proofClassPresence) {
         boolean result = false;
         String vStr = SecurityUtilities.getSystemProperty("java.version", null);
         if (vStr != null) {
             try {
                 Version v = new Version(vStr);
-                result = v.getMajor() == 1 && v.getMinor() >= minimumMinorVersion || v.getMajor() > 1;
+                result = v.getMajor() >= minimumMajorVersion;
             } catch (Exception e) {
                 // Ignore
             }

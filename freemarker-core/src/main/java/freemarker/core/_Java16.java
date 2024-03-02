@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * Used internally only, might change without notice!
- * Used for accessing functionality that's only present in Java 8 or later.
+ * Used for accessing functionality that's only present in Java 16 or later.
  */
 public interface _Java16 {
 
