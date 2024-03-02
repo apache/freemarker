@@ -66,4 +66,9 @@ final class ExecutableMemberSignature {
     public int hashCode() {
         return name.hashCode() + args.length * 31;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "(" + name + ", " + Arrays.toString(args) + ")";
+    }
 }

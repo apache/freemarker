@@ -18,17 +18,12 @@
  */
 package freemarker.core;
 
-import java.lang.reflect.Method;
-import java.util.Set;
-
 /**
  * Used internally only, might change without notice!
- * Used for accessing functionality that's only present in Java 16 or later.
+ * Used for accessing functionality that's only present in Java 9 or later.
  */
-public interface _Java16 {
+public interface _Java9 {
 
-    boolean isRecord(Class<?> cl);
-
-    Set<Method> getComponentAccessors(Class<?> recordClass);
+    boolean isAccessibleAccordingToModuleExports(Class<?> m);
 
 }

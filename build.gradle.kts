@@ -20,7 +20,7 @@
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.util.Properties
+import java.util.*
 import java.util.stream.Collectors
 
 plugins {
@@ -61,7 +61,11 @@ freemarkerRoot {
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
-    configureSourceSet("core16", "16") { enableTests() }
+    configureSourceSet("core9", "9") { enableTests() }
+    configureSourceSet("core16", "16") {
+        enableTests();
+        addDependencySourceSet("core9");
+    }
 
     configureGeneratedSourceSet("jakartaServlet") {
         val jakartaSourceGenerators = generateJakartaSources("javaxServlet")
@@ -589,6 +593,7 @@ eclipse {
         // so make a best effort for a combined classpath.
         plusConfigurations = listOf(
             configurations["combinedClasspath"],
+            configurations["core9CompileClasspath"],
             configurations["core16CompileClasspath"],
             configurations["testUtilsCompileClasspath"],
             configurations["javaxServletTestCompileClasspath"]
@@ -602,8 +607,10 @@ val springVersion = "5.3.31"
 val tagLibsVersion = "1.2.5"
 
 val jakartaJettyVersion = "11.0.19"
-val jakartaSlf4jVersion = "2.0.9"
 val jakartaSpringVersion = "6.1.2"
+
+val jettySlf4jVersion = "2.0.9"
+val jettyLogbackClassicVersion = "1.3.14"
 
 configurations {
     compileOnly {
@@ -668,7 +675,14 @@ dependencies {
     "javaxServletTestImplementation"("org.springframework:spring-web:${springVersion}") {
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    "javaxServletTestImplementation"("com.github.hazendaz:displaytag:2.5.3")
+    "javaxServletTestImplementation"("com.github.hazendaz:displaytag:2.5.3") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
+
+    "javaxServletTestRuntimeOnly"("org.slf4j:slf4j-api:${jettySlf4jVersion}")
+    "javaxServletTestRuntimeOnly"("org.slf4j:log4j-over-slf4j:${jettySlf4jVersion}")
+    "javaxServletTestRuntimeOnly"("org.slf4j:jcl-over-slf4j:${jettySlf4jVersion}")
+    "javaxServletTestRuntimeOnly"("ch.qos.logback:logback-classic:${jettyLogbackClassicVersion}")
 
     "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-server:${jakartaJettyVersion}")
     "jakartaServletTestImplementation"("org.eclipse.jetty:jetty-annotations:${jakartaJettyVersion}")
@@ -681,7 +695,6 @@ dependencies {
     "jakartaServletTestImplementation"("jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0")
     "jakartaServletTestImplementation"("jakarta.el:jakarta.el-api:4.0.0")
 
-    // JSP JSTL (not included in Jetty):
     "jakartaServletTestImplementation"("com.github.hazendaz:displaytag:3.0.0-M2")
 
     "jakartaServletTestImplementation"("org.springframework:spring-core:${jakartaSpringVersion}") {
@@ -694,10 +707,10 @@ dependencies {
         exclude(group = "commons-logging", module = "commons-logging")
     }
 
-    "jakartaServletTestRuntimeOnly"("org.slf4j:slf4j-api:${jakartaSlf4jVersion}")
-    "jakartaServletTestRuntimeOnly"("org.slf4j:log4j-over-slf4j:${jakartaSlf4jVersion}")
-    "jakartaServletTestRuntimeOnly"("org.slf4j:jcl-over-slf4j:${jakartaSlf4jVersion}")
-    "jakartaServletTestRuntimeOnly"("ch.qos.logback:logback-classic:1.3.14")
+    "jakartaServletTestRuntimeOnly"("org.slf4j:slf4j-api:${jettySlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("org.slf4j:log4j-over-slf4j:${jettySlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("org.slf4j:jcl-over-slf4j:${jettySlf4jVersion}")
+    "jakartaServletTestRuntimeOnly"("ch.qos.logback:logback-classic:${jettyLogbackClassicVersion}")
 
     "jython20CompileOnly"("jython:jython:2.1")
 

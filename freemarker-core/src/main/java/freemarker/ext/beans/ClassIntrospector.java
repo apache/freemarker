@@ -823,7 +823,8 @@ class ClassIntrospector {
 
     private static void discoverAccessibleMethods(
             Class<?> clazz, Map<ExecutableMemberSignature, List<Method>> accessibles) {
-        if (Modifier.isPublic(clazz.getModifiers())) {
+        if (Modifier.isPublic(clazz.getModifiers())
+                && (_JavaVersions.JAVA_9 == null || _JavaVersions.JAVA_9.isAccessibleAccordingToModuleExports(clazz))) {
             try {
                 Method[] methods = clazz.getMethods();
                 for (int i = 0; i < methods.length; i++) {
@@ -860,8 +861,8 @@ class ClassIntrospector {
         }
 
         Class<?>[] interfaces = clazz.getInterfaces();
-        for (int i = 0; i < interfaces.length; i++) {
-            discoverAccessibleMethods(interfaces[i], accessibles);
+        for (Class<?> anInterface : interfaces) {
+            discoverAccessibleMethods(anInterface, accessibles);
         }
         Class<?> superclass = clazz.getSuperclass();
         if (superclass != null) {
