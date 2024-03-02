@@ -30215,6 +30215,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-216">FREEMARKER-216</link>:
+              Fixed <literal>IllegalAccessException</literal>-s on Java 16 and
+              later, when calling a public method that was last overridden by
+              a public class that's however JDK internal (see JEP 396). More
+              generally, we avoid this error if a class comes from the package
+              of a Java module that doesn't export that package to the module
+              where FreeMarker resides, by looking for an accessible public
+              method in a public class that the unaccessible one overrides
+              (maybe indirectly). If there's no such method, then the method
+              won't be visible (despite that both the method and the class is
+              public).</para>
+            </listitem>
+
+            <listitem>
+              <para><link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-219">FREEMARKER-219</link>:
               The <link linkend="ref_builtin_truncate"><quote>truncate</quote>
               family of built-ins</link>, as in
