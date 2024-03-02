@@ -19,7 +19,6 @@
 
 package freemarker.build
 
-import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -36,14 +35,11 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.setProperty
-import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.testing.base.TestingExtension
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TEST_UTILS_SOURCE_SET_NAME = "test-utils"
 
@@ -144,6 +140,11 @@ class FreemarkerModuleDef internal constructor(
         } else {
             "${sourceSetRootDirName}/src"
         }
+    }
+
+    fun addDependencySourceSet(dependencySourceSetName: String) {
+        val dependencySourceSet = context.sourceSets.named(dependencySourceSetName).get();
+        context.inheritCompileRuntimeAndOutput(sourceSet, dependencySourceSet)
     }
 
     fun enableTests(testJavaVersion: String = ext.testJavaVersion) =

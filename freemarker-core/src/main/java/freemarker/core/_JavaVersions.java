@@ -32,6 +32,13 @@ public final class _JavaVersions {
     }
 
     /**
+     * {@code null} if Java 9 is not available, otherwise the object through with the Java 9 operations are available.
+     */
+    static public final _Java9 JAVA_9 = isAtLeast(9, "java.lang.Module")
+            ? tryLoadJavaSupportSingleton(9, _Java9.class)
+            : null;
+
+    /**
      * {@code null} if Java 16 is not available, otherwise the object through with the Java 16 operations are available.
      */
     static public final _Java16 JAVA_16 = isAtLeast(16, "java.net.UnixDomainSocketAddress")

@@ -20,7 +20,7 @@
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.util.Properties
+import java.util.*
 import java.util.stream.Collectors
 
 plugins {
@@ -61,7 +61,11 @@ freemarkerRoot {
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
-    configureSourceSet("core16", "16") { enableTests() }
+    configureSourceSet("core9", "9") { enableTests() }
+    configureSourceSet("core16", "16") {
+        enableTests();
+        addDependencySourceSet("core9");
+    }
 
     configureGeneratedSourceSet("jakartaServlet") {
         val jakartaSourceGenerators = generateJakartaSources("javaxServlet")
@@ -589,6 +593,7 @@ eclipse {
         // so make a best effort for a combined classpath.
         plusConfigurations = listOf(
             configurations["combinedClasspath"],
+            configurations["core9CompileClasspath"],
             configurations["core16CompileClasspath"],
             configurations["testUtilsCompileClasspath"],
             configurations["javaxServletTestCompileClasspath"]
