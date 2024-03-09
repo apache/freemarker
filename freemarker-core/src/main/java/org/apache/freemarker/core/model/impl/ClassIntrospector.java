@@ -61,6 +61,8 @@ class ClassIntrospector {
     private static final String JREBEL_INTEGRATION_ERROR_MSG
             = "Error initializing JRebel integration. JRebel integration disabled.";
 
+    private static final Module ACCESSOR_MODULE = ClassIntrospector.class.getModule();
+
     private static final ExecutableMemberSignature GET_STRING_SIGNATURE =
             new ExecutableMemberSignature("get", new Class[] { String.class });
     private static final ExecutableMemberSignature GET_OBJECT_SIGNATURE =
@@ -69,6 +71,7 @@ class ClassIntrospector {
             new ExecutableMemberSignature("toString", new Class[0]);
 
     private static final ClassChangeNotifier CLASS_CHANGE_NOTIFIER;
+
     static {
         boolean jRebelAvailable;
         try {
@@ -706,7 +709,8 @@ class ClassIntrospector {
 
     private static void discoverAccessibleMethods(
             Class<?> clazz, Map<ExecutableMemberSignature, List<Method>> accessibles) {
-        if (Modifier.isPublic(clazz.getModifiers())) {
+        if (Modifier.isPublic(clazz.getModifiers())
+                && clazz.getModule().isExported(clazz.getPackage().getName(), ACCESSOR_MODULE)) {
             try {
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
