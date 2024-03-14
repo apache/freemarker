@@ -619,9 +619,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
      *
-     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
-     * {@link #VERSION_2_3_30}. Otherwise your application can break as you upgrade FreeMarker. (As of 2.3.30, doing
-     * this will be logged as an error. As of 2.4.0, it will be probably disallowed, by throwing exception.)
+     * <p><b>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value</b>,
+     * like {@link #VERSION_2_3_33}. Otherwise, your application can break as you upgrade FreeMarker. (As of 2.3.30,
+     * doing this will be logged as an error. As of 2.4.0, it will be probably disallowed, by throwing exception.)
      * 
      * <p>An important consequence of setting this setting is that now your application will check if the stated minimum
      * FreeMarker version requirement is met. Like if you set this setting to 2.3.22, but accidentally the application
@@ -630,7 +630,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <p>Note that as FreeMarker's minor (2nd) or major (1st) version number increments, it's possible that emulating
      * some of the old bugs will become unsupported, that is, even if you set this setting to a low value, it silently
-     * wont bring back the old behavior anymore. Information about that will be present here.
+     * won't bring back the old behavior anymore. Information about that will be present here.
+     *
+     * <p>Note that {@link DefaultObjectWrapper} (and {@link BeansWrapper}, which it extends) has its own "incompatible
+     * improvements" setting (see {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}), but if you leave the
+     * {@link #setObjectWrapper(ObjectWrapper) object_wrapper} setting at its default (and most do), then that will be
+     * kept the same as of the {@link Configuration}.
      * 
      * <p>Currently the effects of this setting are:
      * <ul>
@@ -892,16 +897,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *     2.3.26 (or higher):
      *     <ul>
      *       <li><p>
-     *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now exposes Java 8 default methods (and the bean
-     *          properties they define); see {@link BeansWrapper#BeansWrapper(Version)}. 
+     *          The default {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} now exposes Java
+     *          8 default methods (and the bean properties they define); see {@link BeansWrapper#BeansWrapper(Version)}. 
      *     </ul>
      *   </li>
      *   <li><p>
      *     2.3.27 (or higher):
      *     <ul>
      *       <li><p>
-     *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now prefers the non-indexed JavaBean property
-     *          read method over the indexed read method when Java 8 exposes both;
+     *          The default {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} now prefers the
+     *          non-indexed JavaBean property read method over the indexed read method when Java 8 exposes both;
      *          see {@link BeansWrapper#BeansWrapper(Version)}.
      *       <li><p>
      *          The following unchecked exceptions (but not their subclasses) will be wrapped into
@@ -978,7 +983,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <p>
      *       2.3.33 (or higher):
      *       <ul>
-     *           <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
+     *         <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
      *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
      *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
      *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
@@ -986,7 +991,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           normalization. So, in theory it's possible that for some locales two different but similarly looking
      *           characters were treated as equal by the collator, but will count as different now. But it's very
      *           unlikely that anyone wanted to depend on such fragile logic anyway. Note again that we still do UNICODE
-     *           normalization, so combining characters won't break your comparison.)</p></li>
+     *           normalization, so combining characters won't break your comparisons.)</p></li>
+     *       <li><p>
+     *          The default {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} now exposes Java
+     *          records public methods with 0-arguments and non-void return type are now exposed both as properties,
+     *          and as methods; see {@link BeansWrapper#BeansWrapper(Version)}.
      *       </ul>
      *   </li>
      * </ul>
@@ -1991,8 +2000,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
      * 
-     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
-     * {@link #VERSION_2_3_30}. Otherwise your application can break as you upgrade FreeMarker. (As of 2.3.30, doing
+     * <p><b>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements"! Always use a fixed value</b>,
+     * like {@link #VERSION_2_3_30}. Otherwise, your application can break as you upgrade FreeMarker. (As of 2.3.30, doing
      * this will be logged as an error. As of 2.4.0, it will be probably disallowed, by throwing exception.)
      * 
      * <p>If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting

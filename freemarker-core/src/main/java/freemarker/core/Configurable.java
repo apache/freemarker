@@ -1460,8 +1460,20 @@ public class Configurable {
     }
 
     /**
-     * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
-     * The default is {@link ObjectWrapper#DEFAULT_WRAPPER}.
+     * Sets the {@link ObjectWrapper} used to wrap objects to {@link TemplateModel}-s when using this
+     * {@link Configurable}.
+     *
+     * <p>On {@link Configuration} level, the default is a {@link DefaultObjectWrapper} instance with the same
+     * {@link Configuration#setIncompatibleImprovements incompatible_improvements} setting value as of the
+     * {@link Configuration}. (Also, with very low incompatible improvements it's
+     * {@link ObjectWrapper#DEFAULT_WRAPPER}.). Untill you called this method, the default value will be
+     * automatically replaced when {@link Configuration#setIncompatibleImprovements(Version)} is called, to follow
+     * the value of the {@code incompatible_improvements} setting.
+     *
+     * <p>Below {@link Configuration} level it's usually unset, so we fall back to
+     * what's coming from {@link Configuration}.
+     *
+     * @param objectWrapper Not null.
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         NullArgumentException.check("objectWrapper", objectWrapper);

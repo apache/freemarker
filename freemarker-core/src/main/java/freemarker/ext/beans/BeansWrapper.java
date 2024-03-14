@@ -226,10 +226,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *   the application, but again, see the list of effects below.
      *   
      *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
-     *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
-     *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
-     * 
-     *   <p>The changes enabled by {@code incompatibleImprovements} are:
+     *   {@link ObjectWrapper} objects are sometimes shared among multiple {@link Configuration}-s, so the two version
+     *   numbers are technically independent. But it's recommended to keep those two version numbers the same. Actually,
+     *   if you leave the {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} setting at its default
+     *   (and most do), then that will be kept the same as of the {@link Configuration}.
+     *
+     *   <p>The changes enabled by {@code incompatibleImprovements} are (but also check the changes at
+     *   {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}, if you are using {@link DefaultObjectWrapper}):
      *   <ul>
      *     <li>
      *       <p>2.3.0: No changes; this is the starting point, the version used in older projects.
@@ -268,7 +271,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       <p>2.3.33 (or higher):
      *       The default of {@link BeansWrapper#setRecordZeroArgumentNonVoidMethodPolicy(ZeroArgumentNonVoidMethodPolicy)}
      *       has changed to {@link ZeroArgumentNonVoidMethodPolicy#BOTH_PROPERTY_AND_METHOD}, from
-     *       {@link ZeroArgumentNonVoidMethodPolicy#METHOD_ONLY}. This means that Java records public methods with
+     *       {@link ZeroArgumentNonVoidMethodPolicy#METHOD_ONLY}. This means that Java record public methods with
      *       0-arguments and non-void return type are now exposed both as properties, and as methods, while earlier they
      *       were only exposed as methods. That is, if in a record you have {@code public String name()}, now in
      *       templates the value can be accessed both as {@code obj.name} (like a property), and as {@code obj.name()}
@@ -279,6 +282,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
      *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might return
      *   a lower version than what you have specified.
+     *
+     *   <p>Note again that most projects use {@link DefaultObjectWrapper} (which extends {@link BeansWrapper}), in
+     *   which case see the additional changes at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}!
+     *   </p>
      *
      * @since 2.3.21
      */
