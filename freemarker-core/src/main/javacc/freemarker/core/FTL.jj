@@ -3884,9 +3884,9 @@ SwitchBlock Switch() :
 }
 {
     (
-	    start = <SWITCH>
-	    switchExp = Expression()
-	    <DIRECTIVE_END>
+        start = <SWITCH>
+        switchExp = Expression()
+        <DIRECTIVE_END>
         [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
     )
     {
@@ -3894,7 +3894,7 @@ SwitchBlock Switch() :
         switchBlock = new SwitchBlock(switchExp, ignoredSectionBeforeFirstCase);
     }
     [
-	    (
+        (
             (
                 caseIns = Case()
                 {
@@ -3938,8 +3938,8 @@ SwitchBlock Switch() :
                     breakableDirectiveNesting++;
                 }
             )
-	    )
-	    [<STATIC_TEXT_WS>]
+        )
+        [<STATIC_TEXT_WS>]
     ]
     end = <END_SWITCH>
     {
