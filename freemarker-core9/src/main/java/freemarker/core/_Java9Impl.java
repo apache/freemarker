@@ -39,7 +39,10 @@ public class _Java9Impl implements _Java9 {
     @Override
     public boolean isAccessibleAccordingToModuleExports(Class<?> accessedClass) {
         Module accessedModule = accessedClass.getModule();
-        Package accessedPackage = accessedClass.getPackage();
+        Package accessedPackage = accessedClass.getPackage(); // null for arrays!
+        if (accessedPackage == null) {
+            return true;
+        }
 
         return accessedModule.isExported(accessedPackage.getName(), ACCESSOR_MODULE);
     }
