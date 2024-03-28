@@ -65,6 +65,15 @@ public class TemplateProcessingTracerTest {
             "<#case 2>C3<#break>" +
             "<#default>D" +
             "</#switch>" +
+            "<#switch 4>" +
+            "<#on 1>O1" +
+            "<#on 4>O4" +
+            "<#default>D" +
+            "</#switch>" +
+            "<#switch 5>" +
+            "<#on 1>O1" +
+            "<#default>OD" +
+            "</#switch>" +
             "<#macro m>Hello from m!</#macro>" +
             "Calling macro: <@m />" +
             "<#assign t>captured</#assign>" +
@@ -121,6 +130,8 @@ public class TemplateProcessingTracerTest {
                         "C2",
                         "<#break>",
                         "D",
+                        "O4",
+                        "OD",
                         "Calling macro: ",
                         "<@m />",
                         "Hello from m!",
@@ -191,6 +202,12 @@ public class TemplateProcessingTracerTest {
                         " #switch 3",
                         "  #default",
                         "   text \"D\"",
+                        " #switch 4",
+                        "  #on 4",
+                        "   text \"O4\"",
+                        " #switch 5",
+                        "  #default",
+                        "   text \"OD\"",
                         " #macro m",
                         " text \"Calling macro: \"",
                         " @m",
