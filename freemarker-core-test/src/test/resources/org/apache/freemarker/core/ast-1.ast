@@ -112,6 +112,24 @@
                 - content: "more"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n6 "  // String
+    #switch  // o.a.f.c.ASTDirSwitch
+        - value: x  // o.a.f.c.ASTExpVariable
+        #on  // o.a.f.c.ASTDirOn
+            - condition: 1  // o.a.f.c.ASTExpNumberLiteral
+            - condition: 2  // o.a.f.c.ASTExpNumberLiteral
+            #text  // o.a.f.c.ASTStaticText
+                - content: "one or two"  // String
+        #on  // o.a.f.c.ASTDirOn
+            - condition: 3  // o.a.f.c.ASTExpNumberLiteral
+            #text  // o.a.f.c.ASTStaticText
+                - content: "three"  // String
+        #default  // o.a.f.c.ASTDirCase
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            #text  // o.a.f.c.ASTStaticText
+                - content: "more"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n7 "  // String
     #macro  // o.a.f.c.ASTDirMacroOrFunction
         - assignment target: "foo"  // String
         - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
@@ -123,7 +141,7 @@
             - passed value: x  // o.a.f.c.ASTExpVariable
             - passed value: y  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
-        - content: "\n7 "  // String
+        - content: "\n8 "  // String
     #function  // o.a.f.c.ASTDirMacroOrFunction
         - assignment target: "foo"  // String
         - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
@@ -138,12 +156,12 @@
         #return  // o.a.f.c.ASTDirReturn
             - value: 1  // o.a.f.c.ASTExpNumberLiteral
     #text  // o.a.f.c.ASTStaticText
-        - content: "\n8 "  // String
+        - content: "\n9 "  // String
     #list  // o.a.f.c.ASTDirList
         - list source: xs  // o.a.f.c.ASTExpVariable
         - nested content parameter: "x"  // String
     #text  // o.a.f.c.ASTStaticText
-        - content: "\n9 "  // String
+        - content: "\n10 "  // String
     #list-#else-container  // o.a.f.c.ASTDirListElseContainer
         #list  // o.a.f.c.ASTDirList
             - list source: xs  // o.a.f.c.ASTExpVariable
@@ -162,11 +180,11 @@
             #text  // o.a.f.c.ASTStaticText
                 - content: "None"  // String
     #text  // o.a.f.c.ASTStaticText
-        - content: "\n10 "  // String
+        - content: "\n11 "  // String
     #--...--  // o.a.f.c.ASTComment
         - content: " A comment "  // String
     #text  // o.a.f.c.ASTStaticText
-        - content: "\n11 "  // String
+        - content: "\n12 "  // String
     #outputFormat  // o.a.f.c.ASTDirOutputFormat
         - value: "XML"  // o.a.f.c.ASTExpStringLiteral
         #noAutoEsc  // o.a.f.c.ASTDirNoAutoEsc

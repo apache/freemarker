@@ -27,8 +27,9 @@ import java.io.IOException;
 final class ASTDirSwitch extends ASTDirective {
 
     private ASTDirCase defaultCase;
+    private boolean usesOnDirective;
     private final ASTExpression searched;
-    private int firstCaseIndex;
+    private int firstCaseOrOnIndex;
 
     /**
      * @param searched the expression to be tested.
@@ -41,7 +42,7 @@ final class ASTDirSwitch extends ASTDirective {
         for (int i = 0; i < ignoredCnt; i++) {
             addChild(ignoredSectionBeforeFirstCase.fastGetChild(i));
         }
-        firstCaseIndex = ignoredCnt; // Note that normally postParseCleanup will overwrite this
+        firstCaseOrOnIndex = ignoredCnt; // Note that normally postParseCleanup will overwrite this
     }
 
     void addCase(ASTDirCase cas) {
@@ -51,39 +52,70 @@ final class ASTDirSwitch extends ASTDirective {
         addChild(cas);
     }
 
+    void addOn(ASTDirOn on) {
+        addChild(on);
+        usesOnDirective = true;
+    }
+
     @Override
     ASTElement[] execute(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getChildCount();
-        try {
-            for (int i = firstCaseIndex; i < ln; i++) {
-                ASTDirCase cas = (ASTDirCase) fastGetChild(i);
-                boolean processCase = false;
+        if (usesOnDirective) {
+            processOnDirectives: for (int i = firstCaseOrOnIndex; i < ln; i++) {
+                ASTElement tel = getChild(i);
 
-                // Fall through if a previous case tested true.
-                if (processedCase) {
-                    processCase = true;
-                } else if (cas.condition != null) {
-                    // Otherwise, if this case isn't the default, test it.
-                    processCase = _EvalUtils.compare(
+                // "default" is always the last; the parser ensures this
+                if (tel == defaultCase) {
+                    env.executeElement(defaultCase);
+                    break;
+                }
+
+                for (ASTExpression condition : ((ASTDirOn) tel).conditions) {
+                    boolean processOn = _EvalUtils.compare(
                             searched,
-                            _EvalUtils.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
-                }
-                if (processCase) {
-                    env.executeElement(cas);
-                    processedCase = true;
+                            _EvalUtils.CMP_OP_EQUALS, "on==", condition, condition, env);
+                    if (processOn) {
+                        env.executeElement(tel);
+                        break processOnDirectives;
+                    }
                 }
             }
+        } else { // case-s
+            try {
+                for (int i = firstCaseOrOnIndex; i < ln; i++) {
+                    ASTDirCase cas = (ASTDirCase) fastGetChild(i);
+                    boolean processCase = false;
 
-            // If we didn't process any nestedElements, and we have a default,
-            // process it.
-            if (!processedCase && defaultCase != null) {
-                env.executeElement(defaultCase);
+                    // Fall through if a previous case tested true.
+                    if (processedCase) {
+                        processCase = true;
+                    } else if (cas.condition != null) {
+                        // Otherwise, if this case isn't the default, test it.
+                        processCase = _EvalUtils.compare(
+                                searched,
+                                _EvalUtils.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
+                    }
+                    if (processCase) {
+                        env.executeElement(cas);
+                        processedCase = true;
+                    }
+                }
+
+                // If we didn't process any nestedElements, and we have a default,
+                // process it.
+                if (!processedCase && defaultCase != null) {
+                    env.executeElement(defaultCase);
+                }
+            } catch (BreakOrContinueException br) {
+                // Catch #break, but not #continue
+                if (br == BreakOrContinueException.CONTINUE_INSTANCE) {
+                    throw br;
+                }
             }
-        } catch (BreakOrContinueException br) {
-            // #break was called
         }
+
         return null;
     }
 
@@ -139,10 +171,10 @@ final class ASTDirSwitch extends ASTDirective {
         // The first #case might have shifted in the child array, so we have to find it again:
         int ln = getChildCount();
         int i = 0;
-        while (i < ln && !(fastGetChild(i) instanceof ASTDirCase)) {
+        while (i < ln && !(fastGetChild(i) instanceof ASTDirCase || fastGetChild(i) instanceof ASTDirOn)) {
             i++;
         }
-        firstCaseIndex = i;
+        firstCaseOrOnIndex = i;
 
         return result;
     }

@@ -710,6 +710,8 @@ TOKEN:
     |
     <CASE : <START_TAG> "case" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
+    <ON : <START_TAG> "on" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
+    |
     <ASSIGN : <START_TAG> "assign" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <GLOBALASSIGN : <START_TAG> "global" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
@@ -3567,9 +3569,12 @@ ASTDirSwitch Switch() :
     ASTDirSwitch switchBlock;
     ASTImplicitParent ignoredSectionBeforeFirstCase = null;
     ASTDirCase caseOrDefault;
+    ASTDirOn on;
+    boolean hadCase = false;
+    boolean hadDefault = false;
+    boolean hadOn = false;
     ASTExpression switchExp;
     Token start, end;
-    boolean defaultFound = false;
 }
 {
     (
@@ -3579,32 +3584,73 @@ ASTDirSwitch Switch() :
         [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
     )
     {
-        breakableDirectiveNesting++;
+        breakableDirectiveNesting++; // Note that this will be undone when we find an "on" directive call.
         switchBlock = new ASTDirSwitch(switchExp, ignoredSectionBeforeFirstCase);
     }
+
     [
         (
             caseOrDefault = DirCase()
             {
                 if (caseOrDefault.condition == null) {
-                    if (defaultFound) {
+                    if (hadDefault) {
                         throw new ParseException(
-                                "You can only have one default case in a switch statement", template, start);
-                    }
-                    defaultFound = true;
-                } else if (defaultFound) {
-                        throw new ParseException(
-                                "You can't have a \"case\" directive after the \"default\" directive",
+                               "You already had a #default in the #switch block",
                                 caseOrDefault);
+                    }
+                    hadDefault = true;
+                } else {
+                    if (hadOn) {
+                        throw new ParseException(
+                                "You can't use both #on, and #case in a #switch block, and you already had an #on.",
+                                caseOrDefault);
+                    }
+                    if (hadDefault) {
+                        throw new ParseException(
+                                "You can't have a #case directive after the #default directive",
+                                caseOrDefault);
+                    }
+                    hadCase = true;
                 }
                 switchBlock.addCase(caseOrDefault);
             }
+            |
+            (
+                {
+                    if (!hadOn) {
+                        // A #switch with #case handles #break specially, but not #switch with #on.
+                        // Also, this must be done before calling On(), as that consumes the nested #break already.
+                        breakableDirectiveNesting--;
+                    }
+                }
+
+                on = DirOn()
+                {
+                    if (hadCase) {
+                        throw new ParseException(
+                                "You can't use both #on, and #case in a #switch block, and you already had a #case.",
+                                on);
+                    }
+                    if (hadDefault) {
+                        throw new ParseException(
+                                "You can't use #on after #default in a #switch block; #default must come last.",
+                                on);
+                    }
+                    hadOn = true;
+
+                    switchBlock.addOn(on);
+                }
+            )
         )+
         [<STATIC_TEXT_WS>]
     ]
     end = <END_SWITCH>
     {
-        breakableDirectiveNesting--;
+        // If we had #on, then this was already decreased there
+        if (!hadOn) {
+            breakableDirectiveNesting--;
+        }
+
         switchBlock.setLocation(template, start, end);
         return switchBlock;
     }
@@ -3625,6 +3671,25 @@ ASTDirCase DirCase() :
     children = MixedContentElements()
     {
         ASTDirCase result = new ASTDirCase(exp, children);
+        result.setLocation(template, start, start, children);
+        return result;
+    }
+}
+
+
+ASTDirOn DirOn() :
+{
+    ArrayList exps;
+    TemplateElements children;
+    Token start;
+}
+{
+    (
+        start = <ON> exps = PositionalArgs() <DIRECTIVE_END>
+    )
+    children = MixedContentElements()
+    {
+        ASTDirOn result = new ASTDirOn(exps, children);
         result.setLocation(template, start, start, children);
         return result;
     }

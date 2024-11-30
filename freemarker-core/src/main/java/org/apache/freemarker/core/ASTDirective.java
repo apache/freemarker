@@ -18,11 +18,11 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.util.StringToIndexMap;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.freemarker.core.util.StringToIndexMap;
 
 /**
  * AST directive node superclass.
@@ -64,6 +64,7 @@ abstract class ASTDirective extends ASTElement {
         names.add("noEscape");
         names.add("noParse");
         names.add("nt");
+        names.add("on");
         names.add("outputFormat");
         names.add("recover");
         names.add("recurse");

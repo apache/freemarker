@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
-
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class BreakAndContinuePlacementTest extends TemplateTest {
     
@@ -43,7 +43,10 @@ public class BreakAndContinuePlacementTest extends TemplateTest {
                 + "<#list xs>[<#items as x>${x}</#items>]<#else><#break></#list>"
                 + "</#list>.",
                 "[12][34].");
-        assertOutput("<#switch 1><#case 1>1<#break></#switch>", "1");
+        assertOutput("<#list 1..2 as x><#switch x><#on 1>one<#break></#switch>;</#list>", "one");
+        assertOutput("<#list 1..2 as x><#switch x><#on 1>one<#continue></#switch>;</#list>", "one;");
+        assertOutput("<#switch 1><#case 1>1<#break>unreachable</#switch>.", "1.");
+        assertOutput("<#switch 1><#default>1<#break>unreachable</#switch>.", "1.");
     }
 
     @Test
@@ -51,6 +54,9 @@ public class BreakAndContinuePlacementTest extends TemplateTest {
         assertErrorContains("<#break>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#continue>", CONTINUE_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#switch 1><#case 1>1<#continue></#switch>", CONTINUE_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#switch 1><#on 1>1<#continue></#switch>", CONTINUE_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#switch 1><#on 1>1<#break></#switch>", BREAK_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#switch 1><#on 1>1<#default><#break></#switch>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list 1..2 as x>${x}</#list><#break>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#if false><#break></#if>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list xs><#break></#list>", BREAK_NESTING_ERROR_MESSAGE_PART);
