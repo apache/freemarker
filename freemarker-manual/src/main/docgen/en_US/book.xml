@@ -10434,14 +10434,14 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_28)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_34)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_28)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_34)</programlisting>
             </listitem>
 
             <listitem>
@@ -10449,7 +10449,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.28</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.34</programlisting>
             </listitem>
 
             <listitem>
@@ -10460,7 +10460,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.28&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.34&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -10497,7 +10497,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
             <para>Do not ever use
             <literal>Configuration.getVersion()</literal> to set the
             <quote>incompatible improvements</quote> setting. Always use a
-            fixed value, like <literal>Configuration.VERSION_2_3_28</literal>.
+            fixed value, like <literal>Configuration.VERSION_2_3_34</literal>.
             Otherwise your application can break as you upgrade FreeMarker.
             The whole point of <quote>incompatible improvements</quote> is to
             protect you from that, while you still always get the
@@ -20741,7 +20741,7 @@ Again:
 
           <programlisting role="template">&lt;@m?with_args(dynArgs) /&gt;</programlisting>
 
-          <programlisting role="output">a=1, b=1, c=1</programlisting>
+          <programlisting role="output">a=1, b=2, c=3</programlisting>
 
           <para>Below call also does the same, but combines dynamic arguments
           from <literal>dynArgsAB</literal>, assumed to be <literal>{'a': 1,
@@ -20750,7 +20750,7 @@ Again:
 
           <programlisting role="template">&lt;@m?with_args(dynArgsAB) c=3 /&gt;</programlisting>
 
-          <programlisting role="output">a=1, b=1, c=1</programlisting>
+          <programlisting role="output">a=1, b=2, c=3</programlisting>
 
           <para>To understand why this works, you need to realize that macros,
           custom directives, functions, and methods in FreeMarker are just
@@ -25282,7 +25282,7 @@ or
             </listitem>
 
             <listitem>
-              <para><literal>break</literal>: </para>
+              <para><literal>break</literal>:</para>
 
               <itemizedlist>
                 <listitem>
@@ -25330,7 +25330,7 @@ or
             <literal>on</literal> instead of <literal>case</literal>. In
             earlier versions use <link
             linkend="ref.directive.elseif"><literal>elseif</literal></link>-s
-            instead. </para>
+            instead.</para>
           </note>
 
           <para>Switch is used to choose a fragment of template depending on
@@ -30458,14 +30458,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_34">
         <title>2.3.34</title>
 
-        <para>Release date: TODO</para>
+        <para>Release date: 2024-12-01 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
             <listitem>
-              <para>Added <literal>#on</literal> directive that's now
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/114">GitHub
+              PR-114:</link> Added <literal>#on</literal> directive that's now
               recommended instead of <literal>#case</literal> inside
               <literal>#switch</literal>. It has no fall-through, so you need
               not, and must not use <literal>#break</literal> like you did
@@ -30478,8 +30480,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new built-ins that allow handling empty or blank
-              strings like the same way as if they were missing values (Java
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/111">GitHub
+              PR-111:</link> Added new built-ins that allow handling empty or
+              blank strings the same way as if they were missing values (Java
               <literal>null</literal>-s): <link
               linkend="ref_builtin_blank_to_null"><literal><replaceable>stringOrMissing?</replaceable>blank_to_null</literal></link>,
               <link
@@ -30489,9 +30493,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               For example, if somewhere you had <literal>${user.fullName!'Not
               specified'}</literal>, but then you realize that sometimes
               <literal>user.fullName</literal> is a blank string (and hence
-              the default value is not applied), you can write
+              the default value is not used), you can write
               <literal>${user.fullName?blank_to_null!'Not
               specified'}</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/119">GitHub
+              PR-119</link>: Fixed bug: Both <literal>[#sep]</literal> and
+              <literal>&lt;#sep&gt;</literal> were interpreted as a call to
+              the <literal>sep</literal> directive, regardless if the already
+              established tag syntax was angle bracket or square bracket tags.
+              For now on, the tag will be seen as just static text, if the
+              opposite tag syntax was already established, just as it's done
+              for all other FTL tags.</para>
             </listitem>
 
             <listitem>
@@ -30514,8 +30530,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Using multi-release JAR format (JEP 238) to put Java 9 and
-              Java 16 support files
+              <para><link
+              xlink:href="https://github.com/apache/freemarker/pull/110">GitHub
+              PR-110</link>: Using multi-release JAR format (JEP 238) to put
+              Java 9 and Java 16 support files
               (<literal>freemarker.core._Java9Impl</literal> and
               <literal>_Java16Impl</literal>) into
               <literal>freemarker.jar</literal>. This means that they are now
@@ -31538,8 +31556,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               This applies to said setting of
               <literal>Configuration</literal>,
               <literal>DefaultObjectWrapper</literal>, and
-              <literal>BeansWrapper</literal>. The typical bad pattern is
-              this: <literal>new
+              <literal>BeansWrapper</literal>. The typical
+              <emphasis>bad</emphasis> pattern is this: <literal>new
               Configuration(Configuration.getVersion())</literal>. Doing that
               defeats the purpose of
               <literal>incompatibleImprovements</literal>, and makes upgrading

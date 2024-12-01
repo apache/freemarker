@@ -140,7 +140,7 @@ class BuiltInsForExistenceHandling {
 
 		private static boolean isBlank(String s) {
             if (s == null) {
-                return false;
+                return true;
             }
 
 			int len = s.length();

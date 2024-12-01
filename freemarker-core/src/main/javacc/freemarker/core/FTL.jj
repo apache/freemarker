@@ -685,7 +685,7 @@ TOKEN_MGR_DECLS:
         }
         
         // For square bracket tags there's no non-strict token, so we are sure that it's an FTL tag.
-        // But if it's an angle bracket tag, we have to check if it's just static text or and FTL tag, because the
+        // But if it's an angle bracket tag, we have to check if it's just static text or an FTL tag, because the
         // tokenizer will emit the same kind of token for both.
         if (!squBracTagSyntax && !isStrictTag(image)) {
             tok.kind = STATIC_TEXT_NON_WS;
@@ -943,7 +943,7 @@ TOKEN:
     |
     <ITEMS : <START_TAG> "items" (<BLANK>)+ <AS> <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <SEP : <START_TAG> "sep" <CLOSE_TAG1>>
+    <SEP : <START_TAG> "sep" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
         handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
@@ -3916,11 +3916,9 @@ SwitchBlock Switch() :
                     hadDefault = true;
                 } else {
                     if (hadOn) {
-                        if (caseOrDefault.condition != null) {
-                            throw new ParseException(
-                                    "You can't use both #on, and #case in a #switch block, and you already had an #on.",
-                                    caseOrDefault);
-                        }
+                        throw new ParseException(
+                                "You can't use both #on, and #case in a #switch block, and you already had an #on.",
+                                caseOrDefault);
                     }
                     hadCase = true;
                 }

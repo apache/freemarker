@@ -60,6 +60,9 @@ public class StringBuiltInTest extends TemplateTest {
         // No consistent with ?trim (and String.trim()), as all UNICODE whitespace count as whitespace:
         assertOutput("${' \u2003  '?blank_to_null!'-'}", "-");
         assertOutput("${' \u00A0  '?blank_to_null!'-'}", "-"); // Even if it's non-breaking whitespace
+
+        // Camel case:
+        assertOutput("${nonExisting?blankToNull!'-'}", "-");
     }
 
     @Test
@@ -89,6 +92,9 @@ public class StringBuiltInTest extends TemplateTest {
 
         // To be consistent with ?trim (and String.trim()), only char <= 32 is whitespace, not all UNICODE whitespace:
         assertOutput("${'  \u2003  '?trim_to_null!'-'}", "\u2003");
+
+        // Camel case:
+        assertOutput("${nonExisting?trimToNull!'-'}", "-");
     }
 
     @Test
@@ -115,6 +121,9 @@ public class StringBuiltInTest extends TemplateTest {
         assertOutput("${(nonExisting + '.')?empty_to_null!'-'}", "-");
 
         assertOutput("${1234?empty_to_null!'-'}", "1,234");
+
+        // Camel case:
+        assertOutput("${nonExisting?emptyToNull!'-'}", "-");
     }
 
     @Test

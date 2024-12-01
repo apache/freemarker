@@ -2084,6 +2084,11 @@ public class StringUtil {
         return true;
     }
 
+    /**
+     * Like {@link Character#isWhitespace(char)}, but also considers non-breaking whitespace characters as whitespace.
+     *
+     * @since  2.3.34
+     */
     public static boolean isWhitespaceOrNonBreakingWhitespace(char c) {
         if (Character.isWhitespace(c)) {
             return true;

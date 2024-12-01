@@ -39,27 +39,27 @@ jobs:
         run: 'echo "Started with parameters: ${{ matrix.os }} because ${{ github.event_name }} on ${{ github.ref }}"'
       - uses: actions/checkout@v4
       - name: Set up JDK 8
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 8
           distribution: temurin
       - name: Set up JDK 16
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 16
           distribution: zulu
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: oracle
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1.1.0
+        uses: gradle/actions/wrapper-validation@v3
       - name: Run Build
         id: build_step
         run: './gradlew "-Pfreemarker.signMethod=none" "-Pfreemarker.allowUnsignedReleaseBuild=true" --continue clean build'
       - name: Upload Failed Report
-        uses: actions/upload-artifact@v4.4.0
+        uses: actions/upload-artifact@v4
         if: failure() && steps.build_step.outcome == 'failure'
         with:
           name: test-reports-${{ matrix.os }}
