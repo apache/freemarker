@@ -31,21 +31,27 @@ public class SepParsingBugTest extends TemplateTest {
     
     @Test
     public void testAutodetectTagSyntax() throws TemplateException, IOException {
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_34);
         getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
         assertOutput("<#list [1, 2] as i>${i}<#sep>, </#list>", "1, 2");
         assertOutput("[#list [1, 2] as i]${i}[#sep], [/#list]", "1, 2");
         assertOutput("<#list [1, 2] as i>${i}[#sep], </#list>", "1[#sep], 2[#sep], ");
         assertOutput("[#list [1, 2] as i]${i}<#sep>, [/#list]", "1<#sep>, 2<#sep>, ");
+        assertOutput("[#list [1, 2] as i]${i}[sep], [/#list]", "1[sep], 2[sep], ");
+        assertOutput("[#list [1, 2] as i]${i}<sep>, [/#list]", "1<sep>, 2<sep>, ");
         assertErrorContains("<#sep>", "#sep must be inside");
         assertErrorContains("[#sep]", "#sep must be inside");
     }
 
     @Test
     public void testAngleBracketsTagSyntax() throws TemplateException, IOException {
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_34);
         getConfiguration().setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         assertOutput("<#list [1, 2] as i>${i}<#sep>, </#list>", "1, 2");
         assertOutput("[#list [1, 2] as i]${i!'-'}[#sep], [/#list]", "[#list [1, 2] as i]-[#sep], [/#list]");
         assertOutput("<#list [1, 2] as i>${i}[#sep], </#list>", "1[#sep], 2[#sep], ");
+        assertOutput("<#list [1, 2] as i>${i}<sep>, </#list>", "1<sep>, 2<sep>, ");
+        assertOutput("<#list [1, 2] as i>${i}[sep], </#list>", "1[sep], 2[sep], ");
         assertErrorContains("[#list [1, 2] as i]${i}<#sep>, [/#list]", "#sep must be inside");
         assertErrorContains("<#sep>", "#sep must be inside");
         assertOutput("[#sep]", "[#sep]");
@@ -53,13 +59,26 @@ public class SepParsingBugTest extends TemplateTest {
 
     @Test
     public void testSquareBracketTagSyntax() throws TemplateException, IOException {
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_34);
         getConfiguration().setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
         assertOutput("<#list [1, 2] as i>${i!'-'}<#sep>, </#list>", "<#list [1, 2] as i>-<#sep>, </#list>");
         assertOutput("[#list [1, 2] as i]${i}[#sep], [/#list]", "1, 2");
         assertErrorContains("<#list [1, 2] as i>${i}[#sep], </#list>", "#sep must be inside");
         assertOutput("[#list [1, 2] as i]${i}<#sep>, [/#list]", "1<#sep>, 2<#sep>, ");
+        assertOutput("[#list [1, 2] as i]${i}[sep], [/#list]", "1[sep], 2[sep], ");
+        assertOutput("[#list [1, 2] as i]${i}<sep>, [/#list]", "1<sep>, 2<sep>, ");
         assertOutput("<#sep>", "<#sep>");
         assertErrorContains("[#sep]", "#sep must be inside");
     }
 
+    @Test
+    public void testPre2Dot3Dot34BugRecreated() throws TemplateException, IOException {
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_33);
+        getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+        assertOutput("<#list [1, 2] as i>${i}<sep>, </#list>", "1, 2");
+        assertOutput("<#list [1, 2] as i>${i}[#sep], </#list>", "1, 2");
+        // square bracket tags were always "strict":
+        assertOutput("[#list [1, 2] as i]${i}[sep], [/#list]", "1[sep], 2[sep], ");
+        assertOutput("[#list [1, 2] as i]${i}<#sep>, [/#list]", "1, 2");
+    }
 }

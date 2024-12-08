@@ -943,7 +943,9 @@ TOKEN:
     |
     <ITEMS : <START_TAG> "items" (<BLANK>)+ <AS> <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <SEP : <START_TAG> "sep" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
+    <SEP : <START_TAG> "sep" <CLOSE_TAG1>> {
+        if (incompatibleImprovements >= _VersionInts.V_2_3_34) handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
+    }
     |
     <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
         handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);

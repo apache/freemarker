@@ -347,7 +347,7 @@ publishing {
 
                 packaging = "jar"
                 name.set("Apache FreeMarker")
-                description.set("""
+                description.set("\n" + """
                     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
                     """.trimIndent().prependIndent("    ") + "\n  "
                 )

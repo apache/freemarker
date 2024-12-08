@@ -30458,7 +30458,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_34">
         <title>2.3.34</title>
 
-        <para>Release date: 2024-12-01 + release process</para>
+        <para>Release date: 2024-12-08 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30501,13 +30501,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><link
               xlink:href="https://github.com/apache/freemarker/pull/119">GitHub
-              PR-119</link>: Fixed bug: Both <literal>[#sep]</literal> and
-              <literal>&lt;#sep&gt;</literal> were interpreted as a call to
+              PR-119</link>: Fixed bug if you set the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> to 2.3.34 or higher: Both
+              <literal>[#sep]</literal>, <literal>&lt;#sep&gt;</literal>, and
+              <literal>&lt;sep&gt;</literal> were all interpreted as a call to
               the <literal>sep</literal> directive, regardless if the already
-              established tag syntax was angle bracket or square bracket tags.
-              For now on, the tag will be seen as just static text, if the
-              opposite tag syntax was already established, just as it's done
-              for all other FTL tags.</para>
+              established tag syntax was angle bracket or square bracket tags,
+              or if the tag syntax was <quote>strict</quote> (requiring
+              <literal>#</literal>) or not. With this fix enabled via
+              <literal>incompatible_improvements</literal>, a
+              <literal>sep</literal> with the tag syntax that doesn't match
+              the configured/estabilished tag syntax will be seen as just
+              static text, just as it's done for any other FTL tags.</para>
             </listitem>
 
             <listitem>
