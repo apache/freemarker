@@ -1001,6 +1001,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          and as methods; see {@link BeansWrapper#BeansWrapper(Version)}.
      *       </ul>
      *   </li>
+     *   <li>
+     *       <p>
+     *       2.3.34 (or higher):
+     *       <ul>
+     *       <li><p>
+     *          Fixes this parser bug, which can break already incorrect templates that accidentally worked so far:
+     *          {@code [#sep]}, {@code <#sep>}, and {@code <sep>} were all interpreted as a call to the {@code sep}
+     *          directive, regardless if the already established tag syntax was angle bracket or square bracket tags, or
+     *          if the tag syntax was strict (requiring {@code #}) or not. With this fix enabled, a {@code sep} tag with
+     *          the tag syntax that doesn't match the configured/established tag syntax will be seen as just static
+     *          text, just as it's done for any other FTL tags.
+     *       </ul>
+     *       </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException
