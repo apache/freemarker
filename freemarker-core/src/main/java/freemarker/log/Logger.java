@@ -42,7 +42,7 @@ public abstract class Logger {
     /**
      * The {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} system property is used to select a logger library explicitly,
      * rather than relying on automatic selection. You meant to set this system property where the JVM is started, like
-     * {@code java ... -Dorg.freemarker.loggerLibrary=SLF4j}. Setting it from Java code isn't reliable, also it can
+     * {@code java ... -Dorg.freemarker.loggerLibrary=SLF4J}. Setting it from Java code isn't reliable, also it can
      * cause confusion if you override the value set by others with {@code -D}.
      * 
      * <p>
