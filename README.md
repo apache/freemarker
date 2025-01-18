@@ -2,6 +2,7 @@ Apache FreeMarker™ {version}
 ============================
 
 [![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/freemarker/actions/workflows/ci.yml)
+![GraalVM Ready](https://img.shields.io/badge/GraalVM-Ready-orange)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
