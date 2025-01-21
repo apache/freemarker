@@ -58,6 +58,33 @@ jobs:
       - name: Run Build
         id: build_step
         run: './gradlew "-Pfreemarker.signMethod=none" "-Pfreemarker.allowUnsignedReleaseBuild=true" --continue clean build'
+      - name: Set up GraalVM 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: graalvm
+        # test pipeline to check native support
+        #
+        # - GraalVM is added to the runner
+        # - A simple native project is build and run
+        #
+        # At the something like that should be found in the log :
+        #
+        # INFO: name : FreeMarker Native Demo, version : 2.3.35-nightly
+        # Jan 15, 2025 4:28:19 PM freemarker.log._JULLoggerFactory$JULLogger info
+        # INFO: result :
+        # <html>
+        #    <head>
+        #        <title>Hello : FreeMarker GraalVM Native Demo</title>
+        #    </head>
+        #    <body>
+        #        <h1>Hello : FreeMarker GraalVM Native Demo</h1>
+        #        <p>Test template for Apache FreeMarker GraalVM native support (2.3.35-nightly)</p>
+        #    </body>
+        # </html>
+      - name: Test GraalVM native support (build and run)
+        id: native_test
+        run: './gradlew :freemarker-test-graalvm-native:nativeCompile;./freemarker-test-graalvm-native/build/native/nativeCompile/freemarker-test-graalvm-native'
       - name: Upload Failed Report
         uses: actions/upload-artifact@v4
         if: failure() && steps.build_step.outcome == 'failure'

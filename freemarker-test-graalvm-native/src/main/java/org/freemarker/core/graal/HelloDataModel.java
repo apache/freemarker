@@ -17,22 +17,28 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+package org.freemarker.core.graal;
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+public class HelloDataModel {
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
-}
+    private String name;
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            version("junit", "4.12")
+    private String version;
 
-            library("junit", "junit", "junit").versionRef("junit")
-        }
+    public String getVersion() {
+        return version;
     }
-}
 
-include("freemarker-test-graalvm-native")
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}
