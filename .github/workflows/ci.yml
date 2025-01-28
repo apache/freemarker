@@ -31,9 +31,9 @@ jobs:
   build:
     strategy:
         matrix:
-            os: [windows-latest, ubuntu-latest]
+            os: [windows-latest, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
-    concurrency: main_tests_${{ github.ref }}
+    concurrency: main_tests_${{ github.ref }}_${{ matrix.os }}
     steps:
       - name: Welcome Message
         run: 'echo "Started with parameters: ${{ matrix.os }} because ${{ github.event_name }} on ${{ github.ref }}"'
