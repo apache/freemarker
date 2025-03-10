@@ -20,7 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:ns5="http://www.w3.org/2000/svg"
+      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns3="http://www.w3.org/1999/xhtml"
+      xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -32,11 +35,11 @@
   <preface role="index.html" xml:id="preface">
     <title>What is Apache FreeMarker?</title>
 
-    <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
-    to generate text output (HTML web pages, e-mails, configuration files,
-    source code, etc.) based on templates and changing data. It's not an
-    application for end-users in itself, but a Java library, a component that
-    programmers can embed into their products.</para>
+    <para>FreeMarker® is a <emphasis>template engine</emphasis>: a generic
+    tool to generate text output (HTML web pages, e-mails, configuration
+    files, source code, etc.) based on templates and changing data. It's not
+    an application for end-users in itself, but a Java library, a component
+    that programmers can embed into their products.</para>
 
     <para>Templates are written in the FreeMarker Template Language (FTL).
     It's a simple, specialized language, <emphasis>not</emphasis> a full-blown
