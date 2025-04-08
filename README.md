@@ -253,3 +253,14 @@ Gradle project. After that, it's recommended to set these preferences (based on 
   - Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
+
+### GraalVM Native Support
+
+Apache FreeMarker is compatible with Ahead-of-Time (AOT) compilation using GraalVM as of version 2.3.35. However, any custom Java objects or resources used in the data model must still be registered for reflection.
+
+Refer to the [GraalVM documentation](https://www.graalvm.org/latest/docs/) for more details, especially:
+
+- [Reflection in Native Image](https://www.graalvm.org/jdk21/reference-manual/native-image/dynamic-features/Reflection/)
+- [Accessing Resources in Native Image](https://www.graalvm.org/jdk21/reference-manual/native-image/dynamic-features/Resources/)
+
+**TIP:** You can find many configuration samples in the [graalvm-reachability-metadata](https://github.com/oracle/graalvm-reachability-metadata) repository.
