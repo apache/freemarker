@@ -35,11 +35,12 @@
   <preface role="index.html" xml:id="preface">
     <title>What is Apache FreeMarker?</title>
 
-    <para>FreeMarker® is a <emphasis>template engine</emphasis>: a generic
-    tool to generate text output (HTML web pages, e-mails, configuration
-    files, source code, etc.) based on templates and changing data. It's not
-    an application for end-users in itself, but a Java library, a component
-    that programmers can embed into their products.</para>
+    <para>FreeMarker<superscript>®</superscript> is a <emphasis>template
+    engine</emphasis>: a generic tool to generate text output (HTML web pages,
+    e-mails, configuration files, source code, etc.) based on templates and
+    changing data. It's not an application for end-users in itself, but a Java
+    library, a component that programmers can embed into their
+    products.</para>
 
     <para>Templates are written in the FreeMarker Template Language (FTL).
     It's a simple, specialized language, <emphasis>not</emphasis> a full-blown
