@@ -127,7 +127,7 @@ project root directory, and it should download all dependencies automatically, a
 To run all JUnit tests and some other checks, issue `./gradlew check`. (Avoid the
 `test` task, as that will only run the tests of the `core` source set.)
 
-To generate documentation, issue `./gradlew javadoc` and `./gradlew manualOffline`.
+To generate offline documentation, issue `./gradlew javadoc` and `./gradlew manualOffline`.
 
 To build the distribution artifacts (the `tgz`-s that people can download), run `./gradlew build`. However,
 for a stable (non-`SNAPSHOT`) version number, you must set up signing, or disable that verification
@@ -154,6 +154,20 @@ issue `.\gradlew publish`. Note that for this the following Gradle properties mu
 (in `gradle.properties`, or pass them via `-P<name>=<value>` arguments):
 `freemarker.signMethod`, `freemarker.deploy.apache.user`, `freemarker.deploy.apache.password`.
 
+
+### FreeMarker website related build tasks
+
+The website (the FreeMarker homepage) is build by the `freemarker-site` project, not this project (`freemaker`). Except,
+the Manual and the API documentation (javadoc) is generated in this project.
+
+The online API documentation is the same as the offline one, generated with `./gradlew javadoc`. The output is uploaded
+manually into the `docs/api` directory of the website.
+
+The online Manual is generated with `./gradlew manualOnline`, and the output is uploaded manually into the `docs`
+directory of the webpage (without deleting `docs/api`). `manualOnline` requires Node.js to be already installed locally
+(see the `freemarker-docgen` project for the minimum version). Node.js is only used to generate the Pagefind index, and
+the output is purely static HTML. However, due to browser security restrictions, the search functionality will only work
+if you visit via HTTP(S), and not via a `file:` URL (so for local testing use `npx http-server`).
 
 
 IDE setup
