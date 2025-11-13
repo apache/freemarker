@@ -18,10 +18,10 @@
 -->
 <html>
     <head>
-        <title>Hello : ${data.name}</title>
+        <title>Hello : ${name}</title>
     </head>
     <body>
-        <h1>Hello : ${data.name}</h1>
-        <p>Test template for Apache FreeMarker GraalVM native support (${data.version})</p>
+        <h1>Hello : ${name}</h1>
+        <p>Test template for Apache FreeMarker GraalVM native support (${version})</p>
     </body>
 </html>

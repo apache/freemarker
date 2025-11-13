@@ -19,15 +19,37 @@
 
 package org.freemarker.core.graal;
 
+import java.io.StringWriter;
+
 import freemarker.log.Logger;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.Version;
 
 public class HelloFreeMarker {
-
+    // To test freemarker.log.Logger under GraalVM native
     private final static Logger log = Logger.getLogger(HelloFreeMarker.class.getName());
 
-    public static void main( String[] args ) throws Exception {
-        HelloHandler helloHandler = new HelloHandler();
-        helloHandler.sayHello();
+    public static void main(String[] args) throws Exception {
+        // To test native configuration
+        Class.forName("freemarker.ext.jython.JythonModel");
+
+        try (StringWriter buffer = new StringWriter()) {
+            // Creates FreeMarker configuration
+            Version version = new Version(Configuration.getVersion().toString());  // using latest version
+            Configuration cfg = new Configuration(version);
+            cfg.setClassForTemplateLoading(HelloDataModel.class, "/templates");
+
+            // Creates dataModel model
+            HelloDataModel dataModel = new HelloDataModel();
+            dataModel.setName("FreeMarker GraalVM Native Demo");
+            dataModel.setVersion(version.toString());
+
+            // Process template
+            Template template = cfg.getTemplate("hello-world.ftlh");
+            template.process(dataModel, buffer);
+            log.info(String.format("result :\n%s", buffer));
+        }
     }
 
 }

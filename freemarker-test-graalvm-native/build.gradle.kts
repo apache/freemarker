@@ -1,6 +1,3 @@
-import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
-import java.util.Arrays
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -43,10 +40,19 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks {
+    javadoc {
+        options {
+            (this as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
+        }
+    }
 }
 
 application {
@@ -64,8 +70,7 @@ graalvmNative {
     binaries.all {
         fallback.set(false)
         verbose.set(true)
+        configurationFileDirectories.from(file("src/main/graalvm-native-config"))
         resources.autodetect()
-        buildArgs.add( "-H:ReflectionConfigurationFiles=$projectDir/src/main/config/reflect-config.json" )
-        jvmArgs()
     }
 }
