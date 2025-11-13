@@ -17,22 +17,17 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+package org.freemarker.core.graal;
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+import freemarker.log.Logger;
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
-}
+public class HelloFreeMarker {
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            version("junit", "4.12")
+    private final static Logger log = Logger.getLogger(HelloFreeMarker.class.getName());
 
-            library("junit", "junit", "junit").versionRef("junit")
-        }
+    public static void main( String[] args ) throws Exception {
+        HelloHandler helloHandler = new HelloHandler();
+        helloHandler.sayHello();
     }
-}
 
-include("freemarker-test-graalvm-native")
+}

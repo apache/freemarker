@@ -17,22 +17,26 @@
  * under the License.
  */
 
-rootProject.name = "freemarker-gae"
+package org.freemarker.core.graal;
 
-apply(from = rootDir.toPath().resolve("gradle").resolve("repositories.gradle.kts"))
+import freemarker.log.Logger;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
-}
+class HelloFreeMarkerTest {
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            version("junit", "4.12")
+    private final static Logger log = Logger.getLogger(HelloFreeMarker.class.getName());
 
-            library("junit", "junit", "junit").versionRef("junit")
+    @Test
+    public void testMain() {
+        try {
+            HelloFreeMarker.main(new String[0]);
+            Assertions.assertTrue( Boolean.TRUE );
+        } catch (Exception e) {
+            String message = String.format( "Error : %s", e );
+            log.error( message , e );
+            Assertions.fail( message );
         }
     }
-}
 
-include("freemarker-test-graalvm-native")
+}

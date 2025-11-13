@@ -1,0 +1,9 @@
+[
+  {
+    "name": "org.freemarker.core.graal.HelloDataModel",
+    "methods": [
+      { "name": "getName", "parameterTypes": [] },
+      { "name": "getVersion", "parameterTypes": [] }
+    ]
+  }
+]

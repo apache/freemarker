@@ -32,7 +32,11 @@ import java.util.Map;
  * {@code log4j-over-slf4j} properly installed (means, you have no real Log4j in your class path, and SLF4J has a
  * backing implementation like {@code logback-classic}), then FreeMarker will use SLF4J directly instead of Log4j (since
  * FreeMarker 2.3.22).
- * 
+ *
+ * NOTE: When running on GraalVM native image (system property 'org.graalvm.nativeimage.imagecode' set),
+ * FreeMarker 2.4 behaviour will be anticipated (SLF4J / Apache Commons are auto-detected).
+ * Additionally, log4j-over-slf4j lookup is skipped.
+ *
  * <p>
  * If the auto detection sequence describet above doesn't give you the result that you want, see
  * {@link #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY}.
@@ -157,6 +161,9 @@ public abstract class Logger {
     private static final String REAL_LOG4J_PRESENCE_CLASS = "org.apache.log4j.FileAppender";
     private static final String LOG4J_OVER_SLF4J_TESTER_CLASS = "freemarker.log._Log4jOverSLF4JTester";
 
+    // it is true if running in a GraalVM native build (issue #229) - see https://www.graalvm.org/sdk/javadoc/org/graalvm/nativeimage/ImageInfo.html#PROPERTY_IMAGE_CODE_KEY
+    private static final boolean IS_GRAALVM_NATIVE = System.getProperty( "org.graalvm.nativeimage.imagecode" ) != null;
+
     /**
      * Order matters! Starts with the lowest priority.
      */
@@ -193,10 +200,20 @@ public abstract class Logger {
         return LIBRARIES_BY_PRIORITY[(libraryEnum - 1) * 2 + 1];
     }
 
-    private static boolean isAutoDetected(int libraryEnum) {
-        // 2.4: Remove libraryEnum == LIBRARY_SLF4J || libraryEnum == LIBRARY_COMMONS
+    // legacy auto-detection (until FreeMarker 2.3.X)
+    private static boolean isAutoDetectedLegacy( int libraryEnum ) {
         return !(libraryEnum == LIBRARY_AUTO || libraryEnum == LIBRARY_NONE
                 || libraryEnum == LIBRARY_SLF4J || libraryEnum == LIBRARY_COMMONS);
+    }
+
+    // next generation auto-detection (FreeMarker 2.4.X and on)
+    private static boolean isAutoDetectedNG( int libraryEnum ) {
+        return !(libraryEnum == LIBRARY_AUTO || libraryEnum == LIBRARY_NONE);
+    }
+
+    private static boolean isAutoDetected(int libraryEnum) {
+        // 2.4: Remove libraryEnum == LIBRARY_SLF4J || libraryEnum == LIBRARY_COMMONS (use isAutoDetectedNG())
+        return IS_GRAALVM_NATIVE ? isAutoDetectedNG(libraryEnum) : isAutoDetectedLegacy(libraryEnum);
     }
 
     private static int libraryEnum;
@@ -428,7 +445,8 @@ public abstract class Logger {
         if (libraryEnum == LIBRARY_AUTO) {
             for (int libraryEnumToTry = MAX_LIBRARY_ENUM; libraryEnumToTry >= MIN_LIBRARY_ENUM; libraryEnumToTry--) {
                 if (!isAutoDetected(libraryEnumToTry)) continue;
-                if (libraryEnumToTry == LIBRARY_LOG4J && hasLog4LibraryThatDelegatesToWorkingSLF4J()) {
+                // skip hasLog4LibraryThatDelegatesToWorkingSLF4J when running in GraalVM native image
+                if (!IS_GRAALVM_NATIVE && libraryEnumToTry == LIBRARY_LOG4J && hasLog4LibraryThatDelegatesToWorkingSLF4J()) {
                     libraryEnumToTry = LIBRARY_SLF4J;
                 }
 
@@ -443,7 +461,7 @@ public abstract class Logger {
                             e);
                 }
             }
-            logWarnInLogger("Auto detecton couldn't set up any logger libraries; FreeMarker logging suppressed.");
+            logWarnInLogger("Auto detection couldn't set up any logger libraries; FreeMarker logging suppressed.");
             return new _NullLoggerFactory();
         } else {
             return createLoggerFactoryForNonAuto(libraryEnum);
