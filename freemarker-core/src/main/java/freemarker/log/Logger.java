@@ -26,19 +26,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Delegates logger creation to an actual logging library. By default it looks for logger libraries in this order (in
- * FreeMarker 2.3.x): Log4J, Avalon LogKit, JUL (i.e., {@code java.util.logging}). Prior to FreeMarker 2.4, SLF4J and
- * Apache Commons Logging aren't searched automatically due to backward compatibility constraints. But if you have
- * {@code log4j-over-slf4j} properly installed (means, you have no real Log4j in your class path, and SLF4J has a
- * backing implementation like {@code logback-classic}), then FreeMarker will use SLF4J directly instead of Log4j (since
- * FreeMarker 2.3.22).
+ * Delegates logger creation to an actual logging library (this was written before SLF4J, or even Apache Commons Logging
+ * was widespread). This is used by FreeMarker internally for logging.
  *
- * NOTE: When running on GraalVM native image (system property 'org.graalvm.nativeimage.imagecode' set),
- * FreeMarker 2.4 behaviour will be anticipated (SLF4J / Apache Commons are auto-detected).
- * Additionally, log4j-over-slf4j lookup is skipped.
+ * <p>By default, it looks for logger classes via reflection, in the below order, and picks the first one that it
+ * founds:
+ * <ol>
+ *  <li>SLF4J:
+ *    <b>Skipped for backward compatibility</b>, except under GraalVM native, and FreeMarker 2.4.x (planned).
+ *  </li>
+ *  <li>Apache Commons Logging:
+ *    <b>Skipped for backward compatibility</b>, except under GraalVM native, and FreeMarker 2.4.x (planned).
+ *  </li>
+ *  <li>Log4J</li>
+ *  <li>Avalon LogKit</li>
+ *  <li>JUL (i.e., {@code java.util.logging})</li>
+ * </ol>
  *
- * <p>
- * If the auto detection sequence describet above doesn't give you the result that you want, see
+ * <p>Furthermore, if you have {@code log4j-over-slf4j} properly installed (means, you have no real Log4j in your class
+ * path, and SLF4J has a backing implementation like {@code logback-classic}), then FreeMarker will use SLF4J directly
+ * instead of Log4j (since FreeMarker 2.3.22). (This trick is, of course, irrelevant if SLF4J lookup is not skipped.)
+ *
+ * <p>If the auto-detection rule described above doesn't give you the result that you want, see
  * {@link #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY}.
  */
 public abstract class Logger {
@@ -162,7 +171,7 @@ public abstract class Logger {
     private static final String LOG4J_OVER_SLF4J_TESTER_CLASS = "freemarker.log._Log4jOverSLF4JTester";
 
     // it is true if running in a GraalVM native build (issue #229) - see https://www.graalvm.org/sdk/javadoc/org/graalvm/nativeimage/ImageInfo.html#PROPERTY_IMAGE_CODE_KEY
-    private static final boolean IS_GRAALVM_NATIVE = System.getProperty( "org.graalvm.nativeimage.imagecode" ) != null;
+    private static final boolean IS_GRAALVM_NATIVE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
 
     /**
      * Order matters! Starts with the lowest priority.
