@@ -25359,9 +25359,8 @@ or
   &lt;#on <replaceable>refValue2, refValue3</replaceable>&gt;
     <replaceable>... (Handles both refValue2 and refValue3)</replaceable>)
   <replaceable>...</replaceable>
-  &lt;#case <replaceable>refValueN</replaceable>&gt;
+  &lt;#on <replaceable>refValueN</replaceable>&gt;
     <replaceable>...</replaceable>
-    &lt;#break&gt;
   &lt;#default&gt;
     <replaceable>...</replaceable>
 &lt;/#switch&gt;</literal></programlisting>
