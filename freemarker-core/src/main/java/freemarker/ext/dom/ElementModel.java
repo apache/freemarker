@@ -151,7 +151,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     @Override
     public String getNodeName() {
         String result = node.getLocalName();
-        if (result == null || result.equals("")) {
+        if (result == null || result.isEmpty()) {
             result = node.getNodeName();
         }
         return result;

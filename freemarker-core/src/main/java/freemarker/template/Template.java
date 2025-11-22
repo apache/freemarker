@@ -966,7 +966,7 @@ public class Template extends Configurable {
      * @return the NamespaceUri mapped to this prefix in this template. (Or null if there is none.)
      */
     public String getNamespaceForPrefix(String prefix) {
-        if (prefix.equals("")) {
+        if (prefix.isEmpty()) {
             return defaultNS == null ? "" : defaultNS;
         }
         return (String) prefixToNamespaceURILookup.get(prefix);
