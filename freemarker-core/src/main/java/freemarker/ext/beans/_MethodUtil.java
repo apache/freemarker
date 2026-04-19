@@ -302,7 +302,7 @@ public final class _MethodUtil {
         int start;
         if (name.startsWith("get")) {
             start = 3;
-        } else if (returnType == boolean.class && name.startsWith("is")) {
+        } else if ((returnType == boolean.class || returnType == Boolean.class) && name.startsWith("is")) {
             start = 2;
         } else {
             return null;

@@ -30598,6 +30598,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               reflection and resource access for your application; <link
               linkend="pgui_misc_graalvm_native">see more here</link>!</para>
             </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-234">FREEMARKER-234</link>:
+              <literal>BeansWrapper</literal>, and therefore
+              <literal>DefaultObjectWrapper</literal>, now exposes
+              <literal>isFoo()</literal> methods that return
+              <literal>java.lang.Boolean</literal> (the wrapper class) as the
+              <literal>foo</literal> bean property, if you set the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> to 2.3.35 or higher. Earlier this only worked if
+              the return type was primitive <literal>boolean</literal>, which
+              contradicted the documented behavior stating that
+              <literal>model.foo</literal> invokes either
+              <literal>obj.getFoo()</literal> or
+              <literal>obj.isFoo()</literal>. Static methods, and
+              <literal>isFoo()</literal> methods with any other return type,
+              are still not exposed as properties.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

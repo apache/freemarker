@@ -36,11 +36,12 @@ public class GetPropertyNameFromReaderMethodNameTest {
        assertEquals("fooBar", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getFooBar", String.class));
        assertEquals("FOoBar", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getFOoBar", String.class));
 
-       assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getFoo", boolean.class)); 
-       assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isFoo", boolean.class)); 
-       assertNull(_MethodUtil.getBeanPropertyNameFromReaderMethodName("isFoo", Boolean.class));
+       assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getFoo", boolean.class));
+       assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isFoo", boolean.class));
+       assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isFoo", Boolean.class));
        assertNull(_MethodUtil.getBeanPropertyNameFromReaderMethodName("isFoo", String.class));
-       assertEquals("f", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isF", boolean.class)); 
+       assertEquals("f", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isF", boolean.class));
+       assertEquals("f", _MethodUtil.getBeanPropertyNameFromReaderMethodName("isF", Boolean.class));
        
        assertEquals("foo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getfoo", String.class)); 
        assertEquals("fo", _MethodUtil.getBeanPropertyNameFromReaderMethodName("getfo", String.class)); 
