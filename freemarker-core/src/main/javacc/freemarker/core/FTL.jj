@@ -677,7 +677,7 @@ TOKEN_MGR_DECLS:
         }
         
         if (!strictSyntaxMode) {
-            // Legacy feature (or bug?): Tag syntax never gets estabilished in non-strict mode.
+            // Legacy feature (or bug?): Tag syntax never gets established in non-strict mode.
             // We do establish the naming convention though.
             checkNamingConvention(tok, tokenNamingConvention);
             SwitchTo(newLexState);
@@ -748,7 +748,7 @@ TOKEN_MGR_DECLS:
                                     : "??? (internal error)"
                                     ))
                 + (namingConventionEstabilisher != null
-                        ? "estabilished by auto-detection at "
+                        ? "established by auto-detection at "
                             + _MessageUtil.formatPosition(
                                     namingConventionEstabilisher.beginLine, namingConventionEstabilisher.beginColumn)
                             + " by token " + StringUtil.jQuote(namingConventionEstabilisher.image.trim())
