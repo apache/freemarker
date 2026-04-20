@@ -11295,7 +11295,7 @@ TemplateHashModel fileStatics =
 
           <para>And you will get a template hash model that exposes all static
           methods and static fields (both final and non-final) of the
-          <literal>java.lang.System</literal> class as hash keys. Suppose that
+          <literal>java.io.File</literal> class as hash keys. Suppose that
           you put the previous model in your root model:</para>
 
           <programlisting role="unspecified">root.put("File", fileStatics);</programlisting>
