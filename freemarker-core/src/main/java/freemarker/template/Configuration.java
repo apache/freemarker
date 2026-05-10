@@ -19,6 +19,14 @@
 
 package freemarker.template;
 
+import freemarker.cache.*;
+import freemarker.cache.TemplateCache.MaybeMissingTemplate;
+import freemarker.core.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.log.Logger;
+import freemarker.template.utility.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -26,81 +34,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.Collator;
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import freemarker.cache.CacheStorage;
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.MruCacheStorage;
-import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.SoftCacheStorage;
-import freemarker.cache.TemplateCache;
-import freemarker.cache.TemplateCache.MaybeMissingTemplate;
-import freemarker.cache.TemplateConfigurationFactory;
-import freemarker.cache.TemplateLoader;
-import freemarker.cache.TemplateLookupContext;
-import freemarker.cache.TemplateLookupStrategy;
-import freemarker.cache.TemplateNameFormat;
-import freemarker.cache.URLTemplateLoader;
-import freemarker.core.BugException;
-import freemarker.core.CFormat;
-import freemarker.core.CSSOutputFormat;
-import freemarker.core.CombinedMarkupOutputFormat;
-import freemarker.core.Configurable;
-import freemarker.core.Environment;
-import freemarker.core.HTMLOutputFormat;
-import freemarker.core.JSONOutputFormat;
-import freemarker.core.JavaScriptOrJSONCFormat;
-import freemarker.core.JavaScriptOutputFormat;
-import freemarker.core.LegacyCFormat;
-import freemarker.core.MarkupOutputFormat;
-import freemarker.core.OutputFormat;
-import freemarker.core.ParseException;
-import freemarker.core.ParserConfiguration;
-import freemarker.core.PlainTextOutputFormat;
-import freemarker.core.RTFOutputFormat;
-import freemarker.core.TemplateConfiguration;
-import freemarker.core.TemplateMarkupOutputModel;
-import freemarker.core.UndefinedOutputFormat;
-import freemarker.core.UnregisteredOutputFormatException;
-import freemarker.core.XHTMLOutputFormat;
-import freemarker.core.XMLOutputFormat;
-import freemarker.core.XSCFormat;
-import freemarker.core._CoreAPI;
-import freemarker.core._DelayedJQuote;
-import freemarker.core._MiscTemplateException;
-import freemarker.core._ObjectBuilderSettingEvaluator;
-import freemarker.core._SettingEvaluationEnvironment;
-import freemarker.core._SortedArraySet;
-import freemarker.core._UnmodifiableCompositeSet;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.log.Logger;
-import freemarker.template.utility.CaptureOutput;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Constants;
-import freemarker.template.utility.HtmlEscape;
-import freemarker.template.utility.NormalizeNewlines;
-import freemarker.template.utility.NullArgumentException;
-import freemarker.template.utility.SecurityUtilities;
-import freemarker.template.utility.StandardCompress;
-import freemarker.template.utility.StringUtil;
-import freemarker.template.utility.XmlEscape;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -877,7 +814,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <li><p>
      *          {@link DefaultObjectWrapper} has some minor changes with {@code incompatibleImprovements} 2.3.24;
      *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
-     *          that if you set the {@code object_wrapper} setting (to an other value than {@code "default"}), rather
+     *          that if you set the {@code object_wrapper} setting (to another value than {@code "default"}), rather
      *          than leaving it on its default value, the {@code object_wrapper} won't inherit the
      *          {@code incompatibleImprovements} of the {@link Configuration}. In that case, if you want the 2.3.24
      *          improvements of {@link DefaultObjectWrapper}, you have to set it in the {@link DefaultObjectWrapper}
@@ -938,7 +875,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          exception (though almost all implementation does), you couldn't use said directives inside the
      *          transformed block. It's very unlikely that user code is affected by this, partially because these aren't
      *          commonly implemented interfaces (especially not {@link TransformControl}), and because it's unlikely
-     *          that templates utilize the the bug that's not fixed.
+     *          that templates utilize the bug that's not fixed.
      *     </ul>
      *   </li>
      *   <li><p>
@@ -997,7 +934,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <p>
      *       2.3.33 (or higher):
      *       <ul>
-     *         <li><p>Comparing strings is now way faster. If your template does lot of string comparisons, this can
+     *         <li><p>Comparing strings is now way faster. If your template does a lot of string comparisons, this can
      *           mean very significant speedup. We now use a simpler way of comparing strings, and because templates
      *           were only ever allowed equality comparisons between strings (not less-than, or greater-than), it's very
      *           unlikely to change the behavior of your templates. (Technically, what changes is that instead of using
@@ -1008,8 +945,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           normalization, so combining characters won't break your comparisons.)</p></li>
      *         <li><p>
      *          The default {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} now exposes Java
-     *          records public methods with 0-arguments and non-void return type are now exposed both as properties,
-     *          and as methods; see {@link BeansWrapper#BeansWrapper(Version)}.
+     *          records public methods with 0-arguments and non-void return type both as properties and as methods;
+     *          see {@link BeansWrapper#BeansWrapper(Version)}.
      *       </ul>
      *   </li>
      *   <li>
@@ -1024,6 +961,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           the tag syntax that doesn't match the configured/established tag syntax will be seen as just static
      *           text, just as it's done for any other FTL tags.
      *       </ul>
+     *   </li>
+     *   <li>
+     *       <p>
+     *       2.3.35 (or higher):
+     *       <ul>
+     *         <li><p>
+     *          The default {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper} now exposes "is"
+     *          methods (like {@code isExpired()}) as a JavaBeans property (like {@code obj.expirted}) even if the
+     *          return type is not primitive {@code boolean}, but {@code Boolean}. The method will be still also be
+     *          exposed as a plain method ({@code obj.isExpirted()}), so this is a mostly backward compatible change.
+     *          see {@link BeansWrapper#BeansWrapper(Version)}.
+     *         </li>
+     *      </ul>
      *   </li>
      * </ul>
      * 

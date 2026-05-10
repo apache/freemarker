@@ -19,33 +19,14 @@
 
 package freemarker.template;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.EnumerationModel;
+import freemarker.ext.beans.HashAdapter;
+import freemarker.ext.beans.WhitelistMemberAccessPolicy;
+import freemarker.ext.jython.JythonSequenceModel;
+import freemarker.ext.util.WrapperTemplateModel;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.python.core.PyString;
@@ -53,15 +34,17 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.*;
 
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.EnumerationModel;
-import freemarker.ext.beans.HashAdapter;
-import freemarker.ext.beans.WhitelistMemberAccessPolicy;
-import freemarker.ext.jython.JythonSequenceModel;
-import freemarker.ext.util.WrapperTemplateModel;
+import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class DefaultObjectWrapperTest {
 
@@ -106,7 +89,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.32
         expected.add(Configuration.VERSION_2_3_33);
         expected.add(Configuration.VERSION_2_3_33); // no non-BC change in 2.3.34
-        expected.add(Configuration.VERSION_2_3_33); // no non-BC change in 2.3.35
+        expected.add(Configuration.VERSION_2_3_35); // no non-BC change in 2.3.35
 
         List<Version> actual = new ArrayList<>();
         for (int i = _VersionInts.V_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
