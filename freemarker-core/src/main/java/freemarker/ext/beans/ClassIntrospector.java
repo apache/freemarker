@@ -154,7 +154,7 @@ class ClassIntrospector {
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
     final boolean treatDefaultMethodsAsBeanMembers;
-    final boolean treatBooleanWrapperIsGettersAsProperties;
+    final boolean treatBooleanWrapperIsMethodsAsPropertyReaders;
     final ZeroArgumentNonVoidMethodPolicy defaultZeroArgumentNonVoidMethodPolicy;
     final ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy;
     final private boolean recordAware;
@@ -199,7 +199,7 @@ class ClassIntrospector {
         this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         this.methodSorter = builder.getMethodSorter();
         this.treatDefaultMethodsAsBeanMembers = builder.getTreatDefaultMethodsAsBeanMembers();
-        this.treatBooleanWrapperIsGettersAsProperties = builder.getTreatBooleanWrapperIsGettersAsProperties();
+        this.treatBooleanWrapperIsMethodsAsPropertyReaders = builder.getTreatBooleanWrapperIsMethodsAsPropertyReaders();
         this.defaultZeroArgumentNonVoidMethodPolicy = builder.getDefaultZeroArgumentNonVoidMethodPolicy();
         this.recordZeroArgumentNonVoidMethodPolicy = builder.getRecordZeroArgumentNonVoidMethodPolicy();
         this.recordAware = defaultZeroArgumentNonVoidMethodPolicy != recordZeroArgumentNonVoidMethodPolicy;
@@ -473,7 +473,7 @@ class ClassIntrospector {
         List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
                 : Collections.<PropertyDescriptor>emptyList();
         
-        if (!treatDefaultMethodsAsBeanMembers && !treatBooleanWrapperIsGettersAsProperties) {
+        if (!treatDefaultMethodsAsBeanMembers && !treatBooleanWrapperIsMethodsAsPropertyReaders) {
             // java.beans.Introspector was good enough then.
             return introspectorPDs;
         }
@@ -490,9 +490,9 @@ class ClassIntrospector {
         // creating those and use the source objects as much as possible. Also note that we initialize this lazily.
         LinkedHashMap<String, Object /*PropertyReaderMethodPair|Method|PropertyDescriptor*/> mergedPRMPs = null;
 
-        // Collect methods that look like property readers but that java.beans.Introspector did not report as such:
-        // - Java 8 default interface methods (not reported by Introspector prior to its own support)
-        // - isXxx() returning Boolean wrapper (spec-wise Introspector only recognises primitive boolean here)
+        // Collect methods that look like property readers but that java.beans.Introspector doesn't report as such:
+        // - Java 8 default interface methods
+        // - isXxx() returning Boolean instead of primitive boolean (spec-wise Introspector only recognizes the last)
         // (Note that java.beans.Introspector discovers non-accessible public methods, and to emulate that behavior
         // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
         for (Method method : clazz.getMethods()) {
@@ -500,11 +500,11 @@ class ClassIntrospector {
                 continue;
             }
             boolean isDefaultMethodCandidate = treatDefaultMethodsAsBeanMembers && method.isDefault();
-            boolean isBooleanWrapperIsGetterCandidate = treatBooleanWrapperIsGettersAsProperties
+            boolean isBooleanWrapperIsReadMethodCandidate = treatBooleanWrapperIsMethodsAsPropertyReaders
                     && !Modifier.isStatic(method.getModifiers())
                     && method.getReturnType() == Boolean.class
                     && method.getName().startsWith("is");
-            if (isDefaultMethodCandidate || isBooleanWrapperIsGetterCandidate) {
+            if (isDefaultMethodCandidate || isBooleanWrapperIsReadMethodCandidate) {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
                         || paramTypes.length == 1 && paramTypes[0] == int.class /* indexed property reader */) {
@@ -1154,8 +1154,8 @@ class ClassIntrospector {
         return treatDefaultMethodsAsBeanMembers;
     }
 
-    boolean getTreatBooleanWrapperIsGettersAsProperties() {
-        return treatBooleanWrapperIsGettersAsProperties;
+    boolean getTreatBooleanWrapperIsMethodsAsPropertyReaders() {
+        return treatBooleanWrapperIsMethodsAsPropertyReaders;
     }
 
     ZeroArgumentNonVoidMethodPolicy getDefaultZeroArgumentNonVoidMethodPolicy() {

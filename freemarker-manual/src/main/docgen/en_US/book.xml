@@ -20,7 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
->
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:mml="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -30609,13 +30612,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>foo</literal> bean property, if you set the <link
               linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
               setting</link> to 2.3.35 or higher. Earlier this only worked if
-              the return type was primitive <literal>boolean</literal>, which
-              contradicted the documented behavior stating that
-              <literal>model.foo</literal> invokes either
-              <literal>obj.getFoo()</literal> or
-              <literal>obj.isFoo()</literal>. Static methods, and
-              <literal>isFoo()</literal> methods with any other return type,
-              are still not exposed as properties.</para>
+              the return type was primitive <literal>boolean</literal>,
+              consistently with the JavaBeans specification.</para>
             </listitem>
           </itemizedlist>
         </section>

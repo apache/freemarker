@@ -119,11 +119,11 @@ public class BeansWrapperMiscTest {
     }
     
     @Test
-    public void booleanWrapperIsGetterAsPropertyTest() throws TemplateModelException {
+    public void booleanWrapperIsMethodAsPropertyReaderTest() throws TemplateModelException {
         // Pre-2.3.35 (legacy): Boolean isXxx() is NOT exposed as a property, only as a method.
         {
             BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_34).build();
-            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsGetter());
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsMethod());
             assertNull(beanTM.get("obsolete"));
             assertThat(beanTM.get("isObsolete"), instanceOf(TemplateMethodModelEx.class));
         }
@@ -131,7 +131,7 @@ public class BeansWrapperMiscTest {
         // At 2.3.35+: Boolean isXxx() is exposed as a property (FREEMARKER-234).
         {
             BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_35).build();
-            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsGetter());
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsMethod());
 
             TemplateModel obsoleteTM = beanTM.get("obsolete");
             assertThat(obsoleteTM, instanceOf(TemplateBooleanModel.class));
@@ -150,10 +150,18 @@ public class BeansWrapperMiscTest {
 
             // The method form is still reachable (method exposure unchanged).
             assertThat(beanTM.get("isObsolete"), instanceOf(TemplateMethodModelEx.class));
+
+            // As per JavaBeans spec, both isLand() and island() work the same, so we also allow that for Boolean:
+            assertThat(beanTM.get("land"), instanceOf(TemplateBooleanModel.class));
+            assertThat(beanTM.get("island"), instanceOf(TemplateMethodModelEx.class));
+
+            // Also works for interface default methods:
+            assertThat(beanTM.get("default"), instanceOf(TemplateBooleanModel.class));
+            assertThat(beanTM.get("isDefault"), instanceOf(TemplateMethodModelEx.class));
         }
     }
 
-    public static class BeanWithBooleanWrapperIsGetter {
+    public static class BeanWithBooleanWrapperIsMethod implements BeanWithBooleanWrapperIsMethodInterface {
         public Boolean isObsolete() {
             return Boolean.TRUE;
         }
@@ -166,8 +174,18 @@ public class BeansWrapperMiscTest {
             return "not a property";
         }
 
+        public Boolean island() {
+            return true;
+        }
+
         public static Boolean isArchived() {
             return Boolean.TRUE;
+        }
+    }
+
+    public interface BeanWithBooleanWrapperIsMethodInterface {
+        default Boolean isDefault() {
+            return true;
         }
     }
 

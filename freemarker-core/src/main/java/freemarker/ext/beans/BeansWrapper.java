@@ -280,9 +280,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       bean property, just like {@code isFoo()} methods returning primitive {@code boolean} already were. Before
      *       this, {@link java.beans.Introspector} (which is spec-strict) reported only primitive-{@code boolean}
      *       {@code isFoo()} methods as property readers, so {@code Boolean isFoo()} was accessible only as a method
-     *       ({@code obj.isFoo()}), even though the documented behavior claims {@code obj.foo} should work for either
-     *       {@code getFoo()} or {@code isFoo()}. Static {@code isFoo()} methods and {@code isFoo()} methods with any
-     *       other return type are still not exposed as properties.
+     *       ({@code obj.isFoo()}).
      *     </li>
      *   </ul>
      *   
