@@ -54,7 +54,7 @@ jobs:
           java-version: 17
           distribution: oracle
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/setup-gradle@v6
       - name: Run Build
         id: build_step
         run: './gradlew "-Pfreemarker.signMethod=none" "-Pfreemarker.allowUnsignedReleaseBuild=true" --continue clean build'
