@@ -274,6 +274,16 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       templates the value can be accessed both as {@code obj.name} (like a property), and as {@code obj.name()}
      *       (for better backward compatibility only - it's bad style).
      *     </li>
+     *     <li>
+     *       <p>2.3.35 (or higher):
+     *       {@code isFoo()} methods that return {@link Boolean} (the wrapper class) are now exposed as the {@code foo}
+     *       bean property, just like {@code isFoo()} methods returning primitive {@code boolean} already were. Before
+     *       this, {@link java.beans.Introspector} (which is spec-strict) reported only primitive-{@code boolean}
+     *       {@code isFoo()} methods as property readers, so {@code Boolean isFoo()} was accessible only as a method
+     *       ({@code obj.isFoo()}), even though the documented behavior claims {@code obj.foo} should work for either
+     *       {@code getFoo()} or {@code isFoo()}. Static {@code isFoo()} methods and {@code isFoo()} methods with any
+     *       other return type are still not exposed as properties.
+     *     </li>
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
@@ -967,7 +977,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_35 ? Configuration.VERSION_2_3_35
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
                 : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_27 ? Configuration.VERSION_2_3_27
                 : incompatibleImprovements.intValue() == _VersionInts.V_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24

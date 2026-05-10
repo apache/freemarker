@@ -118,6 +118,59 @@ public class BeansWrapperMiscTest {
         }
     }
     
+    @Test
+    public void booleanWrapperIsGetterAsPropertyTest() throws TemplateModelException {
+        // Pre-2.3.35 (legacy): Boolean isXxx() is NOT exposed as a property, only as a method.
+        {
+            BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_34).build();
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsGetter());
+            assertNull(beanTM.get("obsolete"));
+            assertThat(beanTM.get("isObsolete"), instanceOf(TemplateMethodModelEx.class));
+        }
+
+        // At 2.3.35+: Boolean isXxx() is exposed as a property (FREEMARKER-234).
+        {
+            BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_35).build();
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBooleanWrapperIsGetter());
+
+            TemplateModel obsoleteTM = beanTM.get("obsolete");
+            assertThat(obsoleteTM, instanceOf(TemplateBooleanModel.class));
+            assertTrue(((TemplateBooleanModel) obsoleteTM).getAsBoolean());
+
+            // Primitive boolean isXxx() still works (unchanged).
+            TemplateModel activeTM = beanTM.get("active");
+            assertThat(activeTM, instanceOf(TemplateBooleanModel.class));
+            assertFalse(((TemplateBooleanModel) activeTM).getAsBoolean());
+
+            // String isXxx() is never a property (not a recognised reader).
+            assertNull(beanTM.get("label"));
+
+            // Static Boolean isXxx() must not be exposed as a property.
+            assertNull(beanTM.get("archived"));
+
+            // The method form is still reachable (method exposure unchanged).
+            assertThat(beanTM.get("isObsolete"), instanceOf(TemplateMethodModelEx.class));
+        }
+    }
+
+    public static class BeanWithBooleanWrapperIsGetter {
+        public Boolean isObsolete() {
+            return Boolean.TRUE;
+        }
+
+        public boolean isActive() {
+            return false;
+        }
+
+        public String isLabel() {
+            return "not a property";
+        }
+
+        public static Boolean isArchived() {
+            return Boolean.TRUE;
+        }
+    }
+
     public static class BeanWithBothIndexedAndArrayProperty {
         
         private final static String[] FOO = new String[] { "a", "b" };
