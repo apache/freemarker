@@ -85,7 +85,9 @@ jobs:
       - name: Test GraalVM native support (build and run)
         id: native_test
         if: runner.os != 'Windows'
-        run: './gradlew :freemarker-test-graalvm-native:nativeCompile./freemarker-test-graalvm-native/build/native/nativeCompile/freemarker-test-graalvm-native'
+        run: |
+          ./gradlew :freemarker-test-graalvm-native:nativeCompile
+          ./freemarker-test-graalvm-native/build/native/nativeCompile/freemarker-test-graalvm-native
       - name: Upload Failed Report
         uses: actions/upload-artifact@v4
         if: failure() && steps.build_step.outcome == 'failure'
