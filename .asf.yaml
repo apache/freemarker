@@ -23,11 +23,24 @@ github:
     issues: false
     projects: true
   enabled_merge_buttons:
-    squash:  false
-    merge:   true
-    rebase:  false
+    squash: false
+    merge: true
+    rebase: false
   autolink_jira:
     - FREEMARKER
 
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
 notifications:
   jira_options: link label
