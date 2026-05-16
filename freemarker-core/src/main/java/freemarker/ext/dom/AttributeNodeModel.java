@@ -38,7 +38,7 @@ class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
     @Override
     public String getNodeName() {
         String result = node.getLocalName();
-        if (result == null || result.equals("")) {
+        if (result == null || result.isEmpty()) {
             result = node.getNodeName();
         }
         return result;
@@ -52,7 +52,7 @@ class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
     @Override
     String getQualifiedName() {
         String nsURI = node.getNamespaceURI();
-        if (nsURI == null || nsURI.equals(""))
+        if (nsURI == null || nsURI.isEmpty())
             return node.getNodeName();
         Environment env = Environment.getCurrentEnvironment();
         String defaultNS = env.getDefaultNS();

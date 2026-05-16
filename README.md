@@ -2,6 +2,7 @@ Apache FreeMarker™ {version}
 ============================
 
 [![Build status](https://github.com/apache/freemarker/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/freemarker/actions/workflows/ci.yml)
+![GraalVM Ready](https://img.shields.io/badge/GraalVM-Ready-orange)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
@@ -16,7 +17,7 @@ Apache license. You grant the same rights (copyright license, patent
 license, etc.) to the Apache Software Foundation as if you have signed
 a [Contributor License Agreement](https://www.apache.org/dev/new-committers-guide.html#cla).
 For contributions that are judged to be non-trivial, you will be asked
-to actually signing a Contributor License Agreement.
+to actually sign a Contributor License Agreement.
 
 
 What is Apache FreeMarker™?
@@ -135,7 +136,7 @@ with `freemarker.allowUnsignedReleaseBuild=true`; see `gradle.properties` in thi
 
 Reproducible builds: If the resulting `freemarker.jar` is not identical with the official jar, see the build environment
 in the `.buildinfo` file packed into the official source distribution, and also into the Maven "sources" artifact! At
-least with identical Java versions, the resulting `freemarker.jar` meant to match exactly.
+least with identical Java versions, the resulting `freemarker.jar` is meant to match exactly.
 
 Note on trying things out with an ad-hoc class that has `main` method: Don't do that, instead write it as a JUnit test.
 FreeMarker needs to be loaded from `freemarker.jar` that contains the `META-INF/versions` directory (as per JEP 238,
@@ -150,14 +151,13 @@ To see how the project would be deployed to Maven Central, issue
 and check the `build/local-deployment` directory.
  
 To publish to the Apache Maven Repository (from where you can also promote releases to the Maven Central Repository)
-issue `.\gradlew publish`. Note that for this the following Gradle properties must be properly set
+issue `./gradlew publish`. Note that for this the following Gradle properties must be properly set
 (in `gradle.properties`, or pass them via `-P<name>=<value>` arguments):
 `freemarker.signMethod`, `freemarker.deploy.apache.user`, `freemarker.deploy.apache.password`.
 
-
 ### FreeMarker website related build tasks
 
-The website (the FreeMarker homepage) is build by the `freemarker-site` project, not this project (`freemaker`). Except,
+The website (the FreeMarker homepage) is built by the `freemarker-site` project, not this project (`freemarker`). Except,
 the Manual and the API documentation (javadoc) is generated in this project.
 
 The online API documentation is the same as the offline one, generated with `./gradlew javadoc`. The output is uploaded

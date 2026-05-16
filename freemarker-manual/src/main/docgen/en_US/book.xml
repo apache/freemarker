@@ -20,10 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:ns5="http://www.w3.org/2000/svg"
-      xmlns:ns4="http://www.w3.org/1998/Math/MathML"
-      xmlns:ns3="http://www.w3.org/1999/xhtml"
-      xmlns:ns="http://docbook.org/ns/docbook">
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:mml="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -11298,7 +11298,7 @@ TemplateHashModel fileStatics =
 
           <para>And you will get a template hash model that exposes all static
           methods and static fields (both final and non-final) of the
-          <literal>java.lang.System</literal> class as hash keys. Suppose that
+          <literal>java.io.File</literal> class as hash keys. Suppose that
           you put the previous model in your root model:</para>
 
           <programlisting role="unspecified">root.put("File", fileStatics);</programlisting>
@@ -11566,6 +11566,134 @@ TemplateHashModel roundingModeEnums =
           (<literal>Configurable.setLogTemplateExceptions(boolean)</literal>)
           setting to <literal>false</literal>.</para>
         </section>
+      </section>
+
+      <section xml:id="pgui_misc_graalvm_native">
+        <title>GraalVM native support</title>
+
+        <para>Apache FreeMarker is compatible with Ahead-of-Time (AOT)
+        compilation using GraalVM as of version 2.3.35, but with two big
+        caveats:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Custom Java classes that are exposed to the templates via
+            the data model must be explicitly listed in the GraalVM native
+            reflection configuration, or else the FreeMarker templates will
+            not see their members. That's because the templates are not
+            compiled, and has to be able to discover the exposed classes on
+            runtime via Java reflection.</para>
+          </listitem>
+
+          <listitem>
+            <para>If templates are stored as Java resources, the resources
+            also must be explicitly configured to be accessible on runtime, or
+            else FreeMarker will not find the templates.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Let's say you have this class:</para>
+
+        <programlisting role="unspecified">package com.example;
+
+public class User {
+    private String name;
+    private String email;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+}</programlisting>
+
+        <para>Then you put an instance of that into the data model with name
+        <literal>user</literal>, and access it from a template like this,
+        which you put into
+        <literal>src/main/resources/templates</literal>:</para>
+
+        <programlisting role="template">Hello ${user.name}!
+
+Your e-mail address is: ${user.email}</programlisting>
+
+        <para>Then you configure FreeMarker to load the templates from the
+        class path:</para>
+
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_...);
+...
+cfg.setClassForTemplateLoading(this.getClass(), "/templates");</programlisting>
+
+        <para>Under normal Java, all this would just work. But under GraalVM
+        native, if it finds the template at all, the template processing will
+        fail with <literal>freemarker.core.InvalidReferenceException</literal>
+        saying that <quote>user.name has evaluated to null or missing</quote>.
+        That's because FreeMarker tries to discover the methods of the
+        <literal>User</literal> class via Java reflection, but such
+        information is by default not available in GraalVM native. You need to
+        add a reflection configuration file like this, which we could put for
+        example into
+        <literal>src/main/graalvm-native-config/reflection-config.json</literal>:</para>
+
+        <programlisting role="unspecified">[
+  {
+    "name": "com.example.User",
+    "allPublicMethods": true
+  }
+]</programlisting>
+
+        <para>Then this has to be referred in the GraalVM native build. For
+        example in Gradle it would be something like this:</para>
+
+        <programlisting role="unspecified">graalvmNative {
+    binaries.all {
+        ...
+        configurationFileDirectories.from(file("src/main/graalvm-native-config"))
+        resources.autodetect() // Needed to find the templates
+        ...
+    }
+}</programlisting>
+
+        <para>If you are running <literal>native-image</literal> form command
+        line instead, then the corresponding command-line options are (here we
+        assume that template are in
+        <literal>src/main/resources/templates</literal>):</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>-H:ReflectionConfigurationFiles=./src/main/graalvm-native-config/reflection-config.json</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>-H:IncludeResources=^templates/.*</literal></para>
+          </listitem>
+        </itemizedlist>
+
+        <para>After these, the templates should now work.</para>
+
+        <note>
+          <para>This example was written for GraalVM 21. GraalVM and its
+          Gradle plugin is still evolving, so above can become outdated, or
+          not the best practice anymore. Feel free to report any such
+          issue!</para>
+        </note>
+
+        <para>You can also find a working example in the FreeMarker source
+        code; see the <literal>freemarker-test-graalvm-native</literal>
+        subproject there!</para>
+
+        <para>Please see the <link
+        xlink:href="https://www.graalvm.org/latest/docs/">GraalVM
+        documentation</link> for more details!</para>
       </section>
 
       <section xml:id="pgui_misc_servlet">
@@ -25234,9 +25362,8 @@ or
   &lt;#on <replaceable>refValue2, refValue3</replaceable>&gt;
     <replaceable>... (Handles both refValue2 and refValue3)</replaceable>)
   <replaceable>...</replaceable>
-  &lt;#case <replaceable>refValueN</replaceable>&gt;
+  &lt;#on <replaceable>refValueN</replaceable>&gt;
     <replaceable>...</replaceable>
-    &lt;#break&gt;
   &lt;#default&gt;
     <replaceable>...</replaceable>
 &lt;/#switch&gt;</literal></programlisting>
@@ -30458,6 +30585,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix role="changelog" xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_35">
+        <title>2.3.35</title>
+
+        <para>Release date: [TODO]</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added GraalVM native (AOT) support. But it doesn't
+              <quote>just work</quote>, as you have to explicitly configure
+              reflection and resource access for your application; <link
+              linkend="pgui_misc_graalvm_native">see more here</link>!</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-234">FREEMARKER-234</link>:
+              <literal>BeansWrapper</literal>, and therefore
+              <literal>DefaultObjectWrapper</literal>, now exposes
+              <literal>isFoo()</literal> methods that return
+              <literal>java.lang.Boolean</literal> (the wrapper class) as the
+              <literal>foo</literal> bean property, if you set the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> to 2.3.35 or higher. Earlier this only worked if
+              the return type was primitive <literal>boolean</literal>,
+              consistently with the JavaBeans specification.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_34">
         <title>2.3.34</title>

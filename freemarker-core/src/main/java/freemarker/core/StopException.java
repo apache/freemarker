@@ -42,7 +42,7 @@ public class StopException extends TemplateException {
         synchronized (pw) {
             String msg = this.getMessage();
             pw.print("Encountered stop instruction");
-            if (msg != null && !msg.equals("")) {
+            if (msg != null && !msg.isEmpty()) {
                 pw.println("\nCause given: " + msg);
             } else pw.println();
             super.printStackTrace(pw);
@@ -54,7 +54,7 @@ public class StopException extends TemplateException {
         synchronized (ps) {
             String msg = this.getMessage();
             ps.print("Encountered stop instruction");
-            if (msg != null && !msg.equals("")) {
+            if (msg != null && !msg.isEmpty()) {
                 ps.println("\nCause given: " + msg);
             } else ps.println();
             super.printStackTrace(ps);

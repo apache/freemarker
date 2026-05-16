@@ -154,6 +154,7 @@ class ClassIntrospector {
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
     final boolean treatDefaultMethodsAsBeanMembers;
+    final boolean treatBooleanWrapperIsMethodsAsPropertyReaders;
     final ZeroArgumentNonVoidMethodPolicy defaultZeroArgumentNonVoidMethodPolicy;
     final ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy;
     final private boolean recordAware;
@@ -198,6 +199,7 @@ class ClassIntrospector {
         this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         this.methodSorter = builder.getMethodSorter();
         this.treatDefaultMethodsAsBeanMembers = builder.getTreatDefaultMethodsAsBeanMembers();
+        this.treatBooleanWrapperIsMethodsAsPropertyReaders = builder.getTreatBooleanWrapperIsMethodsAsPropertyReaders();
         this.defaultZeroArgumentNonVoidMethodPolicy = builder.getDefaultZeroArgumentNonVoidMethodPolicy();
         this.recordZeroArgumentNonVoidMethodPolicy = builder.getRecordZeroArgumentNonVoidMethodPolicy();
         this.recordAware = defaultZeroArgumentNonVoidMethodPolicy != recordZeroArgumentNonVoidMethodPolicy;
@@ -471,11 +473,11 @@ class ClassIntrospector {
         List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
                 : Collections.<PropertyDescriptor>emptyList();
         
-        if (!treatDefaultMethodsAsBeanMembers) {
+        if (!treatDefaultMethodsAsBeanMembers && !treatBooleanWrapperIsMethodsAsPropertyReaders) {
             // java.beans.Introspector was good enough then.
             return introspectorPDs;
         }
-        
+
         // introspectorPDs contains each property exactly once. But as now we will search them manually too, it can
         // happen that we find the same property for multiple times. Worse, because of indexed properties, it's possible
         // that we have to merge entries (like one has the normal reader method, the other has the indexed reader
@@ -483,17 +485,26 @@ class ClassIntrospector {
         // which holds the methods belonging to the same property name. IndexedPropertyDescriptor is not good for that,
         // as it can't store two methods whose types are incompatible, and we have to wait until all the merging was
         // done to see if the incompatibility goes away.
-        
+
         // This could be Map<String, PropertyReaderMethodPair>, but since we rarely need to do merging, we try to avoid
         // creating those and use the source objects as much as possible. Also note that we initialize this lazily.
         LinkedHashMap<String, Object /*PropertyReaderMethodPair|Method|PropertyDescriptor*/> mergedPRMPs = null;
 
-        // Collect Java 8 default methods that look like property readers into mergedPRMPs: 
+        // Collect methods that look like property readers but that java.beans.Introspector doesn't report as such:
+        // - Java 8 default interface methods
+        // - isXxx() returning Boolean instead of primitive boolean (spec-wise Introspector only recognizes the last)
         // (Note that java.beans.Introspector discovers non-accessible public methods, and to emulate that behavior
         // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
         for (Method method : clazz.getMethods()) {
-            if (method.isDefault() && method.getReturnType() != void.class
-                    && !method.isBridge()) {
+            if (method.isBridge() || method.getReturnType() == void.class) {
+                continue;
+            }
+            boolean isDefaultMethodCandidate = treatDefaultMethodsAsBeanMembers && method.isDefault();
+            boolean isBooleanWrapperIsReadMethodCandidate = treatBooleanWrapperIsMethodsAsPropertyReaders
+                    && !Modifier.isStatic(method.getModifiers())
+                    && method.getReturnType() == Boolean.class
+                    && method.getName().startsWith("is");
+            if (isDefaultMethodCandidate || isBooleanWrapperIsReadMethodCandidate) {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
                         || paramTypes.length == 1 && paramTypes[0] == int.class /* indexed property reader */) {
@@ -514,9 +525,9 @@ class ClassIntrospector {
                 }
             }
         } // for clazz.getMethods()
-        
+
         if (mergedPRMPs == null) {
-            // We had no interfering Java 8 default methods, so we can chose the fast route.
+            // No methods needed supplementing, so we can chose the fast route.
             return introspectorPDs;
         }
         
@@ -1141,6 +1152,10 @@ class ClassIntrospector {
 
     boolean getTreatDefaultMethodsAsBeanMembers() {
         return treatDefaultMethodsAsBeanMembers;
+    }
+
+    boolean getTreatBooleanWrapperIsMethodsAsPropertyReaders() {
+        return treatBooleanWrapperIsMethodsAsPropertyReaders;
     }
 
     ZeroArgumentNonVoidMethodPolicy getDefaultZeroArgumentNonVoidMethodPolicy() {

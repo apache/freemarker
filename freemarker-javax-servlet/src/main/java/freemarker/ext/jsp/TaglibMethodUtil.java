@@ -59,7 +59,7 @@ final class TaglibMethodUtil {
             String params = m1.group(4).trim();
             Class [] paramTypes = null;
 
-            if ("".equals(params)) {
+            if (params.isEmpty()) {
                 paramTypes = new Class[0];
             } else {
                 String [] paramsArray = StringUtil.split(params, ',');

@@ -1,0 +1,6 @@
+[
+  {
+    "name": "org.freemarker.core.graal.HelloDataModel",
+    "allPublicMethods": true
+  }
+]

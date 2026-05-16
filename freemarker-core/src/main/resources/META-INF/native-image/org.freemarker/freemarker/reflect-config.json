@@ -1,0 +1,82 @@
+[ {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._SLF4JLoggerFactory",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log.SLF4JLoggerFactory",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._AvalonLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._CommonsLoggingLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._JULLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._Log4jLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._Log4jOverSLF4JTester.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log._NullLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "condition" : {
+    "typeReachable" : "freemarker.template.Configuration"
+  },
+  "name" : "freemarker.log.CommonsLoggingLoggerFactory.java",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}  ]

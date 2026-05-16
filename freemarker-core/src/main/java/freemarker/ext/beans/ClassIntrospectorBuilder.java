@@ -47,6 +47,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
     private boolean exposeFields;
     private MemberAccessPolicy memberAccessPolicy;
     private boolean treatDefaultMethodsAsBeanMembers;
+    private boolean treatBooleanWrapperIsMethodsAsPropertyReaders;
     private ZeroArgumentNonVoidMethodPolicy defaultZeroArgumentNonVoidMethodPolicy;
     private ZeroArgumentNonVoidMethodPolicy recordZeroArgumentNonVoidMethodPolicy;
     private MethodAppearanceFineTuner methodAppearanceFineTuner;
@@ -63,6 +64,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         exposeFields = ci.exposeFields;
         memberAccessPolicy = ci.memberAccessPolicy;
         treatDefaultMethodsAsBeanMembers = ci.treatDefaultMethodsAsBeanMembers;
+        treatBooleanWrapperIsMethodsAsPropertyReaders = ci.treatBooleanWrapperIsMethodsAsPropertyReaders;
         defaultZeroArgumentNonVoidMethodPolicy = ci.defaultZeroArgumentNonVoidMethodPolicy;
         recordZeroArgumentNonVoidMethodPolicy = ci.recordZeroArgumentNonVoidMethodPolicy;
         methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
@@ -75,6 +77,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         // to some version changes that affects BeansWrapper, but not the other way around.
         this.incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         treatDefaultMethodsAsBeanMembers = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_26;
+        treatBooleanWrapperIsMethodsAsPropertyReaders = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_35;
         defaultZeroArgumentNonVoidMethodPolicy = ZeroArgumentNonVoidMethodPolicy.METHOD_ONLY;
         recordZeroArgumentNonVoidMethodPolicy
                 = incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 && _Java16.INSTANCE.isSupported()
@@ -86,7 +89,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
     private static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         // All breakpoints here must occur in BeansWrapper.normalizeIncompatibleImprovements!
-        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
+        return incompatibleImprovements.intValue() >= _VersionInts.V_2_3_35 ? Configuration.VERSION_2_3_35
+                : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_33 ? Configuration.VERSION_2_3_33
                 : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_30 ? Configuration.VERSION_2_3_30
                 : incompatibleImprovements.intValue() >= _VersionInts.V_2_3_21 ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;
@@ -108,6 +112,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         result = prime * result + incompatibleImprovements.hashCode();
         result = prime * result + (exposeFields ? 1231 : 1237);
         result = prime * result + (treatDefaultMethodsAsBeanMembers ? 1231 : 1237);
+        result = prime * result + (treatBooleanWrapperIsMethodsAsPropertyReaders ? 1231 : 1237);
         result = prime * result + defaultZeroArgumentNonVoidMethodPolicy.hashCode();
         result = prime * result + recordZeroArgumentNonVoidMethodPolicy.hashCode();
         result = prime * result + exposureLevel;
@@ -127,6 +132,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
         if (exposeFields != other.exposeFields) return false;
         if (treatDefaultMethodsAsBeanMembers != other.treatDefaultMethodsAsBeanMembers) return false;
+        if (treatBooleanWrapperIsMethodsAsPropertyReaders != other.treatBooleanWrapperIsMethodsAsPropertyReaders) return false;
         if (defaultZeroArgumentNonVoidMethodPolicy != other.defaultZeroArgumentNonVoidMethodPolicy) return false;
         if (recordZeroArgumentNonVoidMethodPolicy != other.recordZeroArgumentNonVoidMethodPolicy) return false;
         if (exposureLevel != other.exposureLevel) return false;
@@ -165,6 +171,14 @@ final class ClassIntrospectorBuilder implements Cloneable {
 
     public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
         this.treatDefaultMethodsAsBeanMembers = treatDefaultMethodsAsBeanMembers;
+    }
+
+    public boolean getTreatBooleanWrapperIsMethodsAsPropertyReaders() {
+        return treatBooleanWrapperIsMethodsAsPropertyReaders;
+    }
+
+    public void setTreatBooleanWrapperIsMethodsAsPropertyReaders(boolean treatBooleanWrapperIsMethodsAsPropertyReaders) {
+        this.treatBooleanWrapperIsMethodsAsPropertyReaders = treatBooleanWrapperIsMethodsAsPropertyReaders;
     }
 
     /**

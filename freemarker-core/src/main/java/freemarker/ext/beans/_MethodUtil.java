@@ -39,10 +39,10 @@ import freemarker.template.utility.ClassUtil;
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */ 
+ * access things inside this package that users shouldn't.
+ */
 public final class _MethodUtil {
-    
+
     private _MethodUtil() {
         // Not meant to be instantiated
     }
@@ -50,32 +50,32 @@ public final class _MethodUtil {
     /**
      * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
      * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
-     * that since we don't have the value here, a boxed class is never seen as convertible to a primitive type. 
-     * 
+     * that since we don't have the value here, a boxed class is never seen as convertible to a primitive type.
+     *
      * @return 0 means {@code false}, non-0 means {@code true}.
-     *         That is, 0 is returned less specificity or incomparable specificity, also when if
-     *         then method was aborted because of {@code ifHigherThan}.
-     *         The absolute value of the returned non-0 number symbolizes how more specific it is:
-     *         <ul>
-     *           <li>1: The two classes are identical</li>
-     *           <li>2: The 1st type is primitive, the 2nd type is the corresponding boxing class</li>
-     *           <li>3: Both classes are numerical, and one is convertible into the other with widening conversion.
-     *                  E.g., {@code int} is convertible to {@code long} and {#code double}, hence {@code int} is more
-     *                  specific.
-     *                  This ignores primitive VS boxed mismatches, except that a boxed class is never seen as
-     *                  convertible to a primitive class.</li>
-     *           <li>4: One class is {@code instanceof} of the other, but they aren't identical.
-     *               But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
-     *         </ul> 
+     * That is, 0 is returned less specificity or incomparable specificity, also when if
+     * then method was aborted because of {@code ifHigherThan}.
+     * The absolute value of the returned non-0 number symbolizes how more specific it is:
+     * <ul>
+     *   <li>1: The two classes are identical</li>
+     *   <li>2: The 1st type is primitive, the 2nd type is the corresponding boxing class</li>
+     *   <li>3: Both classes are numerical, and one is convertible into the other with widening conversion.
+     *          E.g., {@code int} is convertible to {@code long} and {#code double}, hence {@code int} is more
+     *          specific.
+     *          This ignores primitive VS boxed mismatches, except that a boxed class is never seen as
+     *          convertible to a primitive class.</li>
+     *   <li>4: One class is {@code instanceof} of the other, but they aren't identical.
+     *       But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
+     * </ul>
      */
     public static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
-            int ifHigherThan) {
+                                                        int ifHigherThan) {
         if (ifHigherThan >= 4) return 0;
         if (generic.isAssignableFrom(specific)) {
             // Identity or widening reference conversion:
             return generic == specific ? 1 : 4;
         } else {
-            final boolean specificIsPrim = specific.isPrimitive(); 
+            final boolean specificIsPrim = specific.isPrimitive();
             final boolean genericIsPrim = generic.isPrimitive();
             if (specificIsPrim) {
                 if (genericIsPrim) {
@@ -83,7 +83,7 @@ public final class _MethodUtil {
                     return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
                 } else {  // => specificIsPrim && !genericIsPrim
                     if (bugfixed) {
-                        final Class specificAsBoxed = ClassUtil.primitiveClassToBoxingClass(specific); 
+                        final Class specificAsBoxed = ClassUtil.primitiveClassToBoxingClass(specific);
                         if (specificAsBoxed == generic) {
                             // A primitive class is more specific than its boxing class, because it can't store null
                             return 2;
@@ -117,22 +117,22 @@ public final class _MethodUtil {
     private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
         if (target == Short.TYPE && (source == Byte.TYPE)) {
             return true;
-        } else if (target == Integer.TYPE && 
-           (source == Short.TYPE || source == Byte.TYPE)) {
+        } else if (target == Integer.TYPE &&
+                (source == Short.TYPE || source == Byte.TYPE)) {
             return true;
-        } else if (target == Long.TYPE && 
-           (source == Integer.TYPE || source == Short.TYPE || 
-            source == Byte.TYPE)) {
+        } else if (target == Long.TYPE &&
+                (source == Integer.TYPE || source == Short.TYPE ||
+                        source == Byte.TYPE)) {
             return true;
-        } else if (target == Float.TYPE && 
-           (source == Long.TYPE || source == Integer.TYPE || 
-            source == Short.TYPE || source == Byte.TYPE)) {
+        } else if (target == Float.TYPE &&
+                (source == Long.TYPE || source == Integer.TYPE ||
+                        source == Short.TYPE || source == Byte.TYPE)) {
             return true;
-        } else if (target == Double.TYPE && 
-           (source == Float.TYPE || source == Long.TYPE || 
-            source == Integer.TYPE || source == Short.TYPE || 
-            source == Byte.TYPE)) {
-            return true; 
+        } else if (target == Double.TYPE &&
+                (source == Float.TYPE || source == Long.TYPE ||
+                        source == Integer.TYPE || source == Short.TYPE ||
+                        source == Byte.TYPE)) {
+            return true;
         } else {
             return false;
         }
@@ -141,22 +141,22 @@ public final class _MethodUtil {
     private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
         if (target == Short.class && source == Byte.class) {
             return true;
-        } else if (target == Integer.class && 
-           (source == Short.class || source == Byte.class)) {
+        } else if (target == Integer.class &&
+                (source == Short.class || source == Byte.class)) {
             return true;
-        } else if (target == Long.class && 
-           (source == Integer.class || source == Short.class || 
-            source == Byte.class)) {
+        } else if (target == Long.class &&
+                (source == Integer.class || source == Short.class ||
+                        source == Byte.class)) {
             return true;
-        } else if (target == Float.class && 
-           (source == Long.class || source == Integer.class || 
-            source == Short.class || source == Byte.class)) {
+        } else if (target == Float.class &&
+                (source == Long.class || source == Integer.class ||
+                        source == Short.class || source == Byte.class)) {
             return true;
-        } else if (target == Double.class && 
-           (source == Float.class || source == Long.class || 
-            source == Integer.class || source == Short.class || 
-            source == Byte.class)) {
-            return true; 
+        } else if (target == Double.class &&
+                (source == Float.class || source == Long.class ||
+                        source == Integer.class || source == Short.class ||
+                        source == Byte.class)) {
+            return true;
         } else {
             return false;
         }
@@ -170,7 +170,7 @@ public final class _MethodUtil {
         collectAssignables(c1, c2, s);
         return s;
     }
-    
+
     private static void collectAssignables(Class c1, Class c2, Set s) {
         if (c1.isAssignableFrom(c2)) {
             s.add(c1);
@@ -196,7 +196,7 @@ public final class _MethodUtil {
     }
 
     public static boolean isVarargs(Member member) {
-        if (member instanceof Method) { 
+        if (member instanceof Method) {
             return ((Method) member).isVarArgs();
         }
         if (member instanceof Constructor) {
@@ -212,13 +212,13 @@ public final class _MethodUtil {
         if (!(member instanceof Method || member instanceof Constructor)) {
             throw new IllegalArgumentException("\"member\" must be a Method or Constructor");
         }
-        
+
         StringBuilder sb = new StringBuilder();
-        
+
         if ((member.getModifiers() & Modifier.STATIC) != 0) {
             sb.append("static ");
         }
-        
+
         String className = ClassUtil.getShortClassName(member.getDeclaringClass());
         if (className != null) {
             sb.append(className);
@@ -239,16 +239,16 @@ public final class _MethodUtil {
             }
         }
         sb.append(')');
-        
+
         return sb.toString();
     }
 
     public static Object[] invocationErrorMessageStart(Member member) {
         return invocationErrorMessageStart(member, member instanceof Constructor);
     }
-    
+
     private static Object[] invocationErrorMessageStart(Object member, boolean isConstructor) {
-        return new Object[] { "Java ", isConstructor ? "constructor " : "method ", new _DelayedJQuote(member) };
+        return new Object[]{"Java ", isConstructor ? "constructor " : "method ", new _DelayedJQuote(member)};
     }
 
     public static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
@@ -273,7 +273,7 @@ public final class _MethodUtil {
                 callableMemberDescriptor.isConstructor(),
                 e);
     }
-    
+
     private static TemplateModelException newInvocationTemplateModelException(
             Object parentObject, Object member, boolean isStatic, boolean isConstructor, Throwable e) {
         while (e instanceof InvocationTargetException) {
@@ -288,36 +288,37 @@ public final class _MethodUtil {
         return new _TemplateModelException(e,
                 invocationErrorMessageStart(member, isConstructor),
                 " threw an exception",
-                isStatic || isConstructor ? "" : new Object[] {
-                    " when invoked on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
+                isStatic || isConstructor ? "" : new Object[]{
+                        " when invoked on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject)
                 },
                 "; see cause exception in the Java stack trace.");
     }
 
     /**
      * Extracts the JavaBeans property from a reader method name, or returns {@code null} if the method name doesn't
-     * look like a reader method name. 
+     * look like a reader method name. Note that starting from 2.3.35 this also supports the {@code Boolean isXxx}
+     * methods, even though the JavaBeans specification only supports {@code boolean isXxx}.
      */
     public static String getBeanPropertyNameFromReaderMethodName(String name, Class<?> returnType) {
         int start;
         if (name.startsWith("get")) {
             start = 3;
-        } else if (returnType == boolean.class && name.startsWith("is")) {
+        } else if ((returnType == boolean.class || returnType == Boolean.class) && name.startsWith("is")) {
             start = 2;
         } else {
             return null;
         }
         int ln = name.length();
-        
+
         if (start == ln) {
             return null;
         }
         char c1 = name.charAt(start);
-        
+
         return start + 1 < ln && Character.isUpperCase(name.charAt(start + 1)) && Character.isUpperCase(c1)
                 ? name.substring(start) // getFOOBar => "FOOBar" (not lower case) according the JavaBeans spec.
                 : new StringBuilder(ln - start).append(Character.toLowerCase(c1)).append(name, start + 1, ln)
-                        .toString();
+                  .toString();
     }
 
     /**
