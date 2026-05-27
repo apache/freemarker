@@ -33,6 +33,7 @@ import freemarker.core.LocalLambdaExpression.LambdaParameterList;
 import freemarker.template.*;
 import freemarker.template.utility.*;
 import java.io.*;
+import java.math.BigInteger;
 import java.util.*;
 import static freemarker.template.Configuration.*;
 
@@ -1253,6 +1254,8 @@ TOKEN:
     |
     <DECIMAL : <INTEGER> "." <INTEGER>>
     |
+    <HEX_INTEGER : "0" ["x", "X"] (["0"-"9", "a"-"f", "A"-"F"])+>
+    |
     <DOT : ".">
     |
     <DOT_DOT : "..">
@@ -2078,10 +2081,31 @@ Expression NumberLiteral() :
         t = <INTEGER>
         |
         t = <DECIMAL>
+        |
+        t = <HEX_INTEGER>
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
+        Number n;
+        if (t.kind == HEX_INTEGER) {
+            // Parse the digits after the "0x"/"0X" prefix. The value is narrowed to the
+            // smallest of Integer/Long that can represent it; beyond the range of a
+            // signed long it stays a BigInteger, so the number of digits isn't limited.
+            // (The token never carries a sign, so the value is always non-negative, and
+            // hence bitLength() is the number of significant bits.)
+            BigInteger hexValue = new BigInteger(s.substring(2), 16);
+            int bitLength = hexValue.bitLength();
+            if (bitLength <= 31) {
+                n = Integer.valueOf(hexValue.intValue());
+            } else if (bitLength <= 63) {
+                n = Long.valueOf(hexValue.longValue());
+            } else {
+                n = hexValue;
+            }
+        } else {
+            n = pCfg.getArithmeticEngine().toNumber(s);
+        }
+        Expression result = new NumberLiteral(n);
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
