@@ -13074,6 +13074,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_dedent">dedent</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">double</link></para>
           </listitem>
 
@@ -13151,6 +13155,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_html">html</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_indent">indent</link></para>
           </listitem>
 
           <listitem>
@@ -13354,6 +13362,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_pad_lines">pad_lines</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_parent">parent</link></para>
           </listitem>
 
@@ -13528,6 +13540,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link
             linkend="ref_builtin_word_list">word_list</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_wrap">wrap</link></para>
           </listitem>
 
           <listitem>
@@ -14039,6 +14055,52 @@ Green Mouse</programlisting>
           and a method and hash on the same time.</para>
         </section>
 
+        <section xml:id="ref_builtin_dedent">
+          <title>dedent</title>
+
+          <indexterm>
+            <primary>dedent built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>indentation</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Removes the string given as the parameter from the beginning of
+          each line, if that line starts with it. Lines that don't start with
+          the given prefix are left unchanged. This is the inverse of the <link
+          linkend="ref_builtin_indent"><literal>indent</literal></link>
+          built-in. Line breaks can be <literal>LF</literal>,
+          <literal>CR</literal>, or <literal>CRLF</literal>, and are kept as
+          is.</para>
+
+          <para>For example, this:</para>
+
+          <programlisting role="template">&lt;#assign code = "    int x;\n    int y;" /&gt;
+[${code?dedent("    ")}]</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">[int x;
+int y;]</programlisting>
+
+          <para>Lines that don't start with the prefix are unaffected, so with
+          a 4-space prefix:</para>
+
+          <programlisting role="template">&lt;#assign text = "  short\n      long" /&gt;
+${text?dedent("    ")}</programlisting>
+
+          <para>will output this (the first line had only 2 leading spaces, so
+          it's unchanged; the second had at least 4, so 4 were removed):</para>
+
+          <programlisting role="output">  short
+  long</programlisting>
+        </section>
+
         <section xml:id="ref_builtin_empty_to_null">
           <title>empty_to_null</title>
 
@@ -14332,6 +14394,54 @@ R&amp;amp;D</programlisting>
           chances of accidental mistakes by using the <link
           linkend="ref_directive_escape"><literal>escape</literal>
           directive</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_indent">
+          <title>indent</title>
+
+          <indexterm>
+            <primary>indent built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>indentation</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Prepends the string given as the parameter to the beginning of
+          each line. The parameter is most often some spaces or tabs used for
+          indentation, but can be any string. Lines that are empty (i.e., the
+          line break immediately follows the previous line break, or the line
+          is the empty last line) are not prefixed. Line breaks can be
+          <literal>LF</literal>, <literal>CR</literal>, or
+          <literal>CRLF</literal>, and are kept as is.</para>
+
+          <para>For example, this:</para>
+
+          <programlisting role="template">&lt;#assign code = "int x;\nint y;" /&gt;
+[${code?indent("    ")}]</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">[    int x;
+    int y;]</programlisting>
+
+          <para>Another example, using a non-whitespace prefix:</para>
+
+          <programlisting role="template">&lt;#assign text = "First line.\nSecond line." /&gt;
+${text?indent(" * ")}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output"> * First line.
+ * Second line.</programlisting>
+
+          <para>See also: the <link
+          linkend="ref_builtin_dedent"><literal>dedent</literal></link>
+          built-in, which is its inverse.</para>
         </section>
 
         <section xml:id="ref_builtin_index_of">
@@ -15002,6 +15112,54 @@ ${s?no_esc}</programlisting>
           <literal>arithmetic_engine</literal>, which is configuration
           setting. However, that method should behave similarly as described
           above.</phrase></para>
+        </section>
+
+        <section xml:id="ref_builtin_pad_lines">
+          <title>pad_lines</title>
+
+          <indexterm>
+            <primary>pad_lines built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>padding</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Pads each line of the string with spaces on the right until it
+          reaches the column (width) specified as the 1st parameter. Lines that
+          are already at least that long are left unchanged. Unlike <link
+          linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>,
+          which operates on the string as a whole, this operates on each line
+          separately, which is useful for aligning multi-line text. Empty lines
+          are not padded. Line breaks can be <literal>LF</literal>,
+          <literal>CR</literal>, or <literal>CRLF</literal>, and are kept as
+          is.</para>
+
+          <para>For example, this:</para>
+
+          <programlisting role="template">&lt;#assign code = "int x;\nString name;\nboolean active;" /&gt;
+${code?pad_lines(20)}done</programlisting>
+
+          <para>will output this (each line padded to column 20):</para>
+
+          <programlisting role="output">int x;
+String name;
+boolean active;     done</programlisting>
+
+          <para>If used with 2 parameters, the 2nd parameter specifies the fill
+          character to use instead of space. It must be a string exactly 1
+          character long. For example:</para>
+
+          <programlisting role="template">${"a\nbb"?pad_lines(5, ".")}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">a....
+bb...</programlisting>
         </section>
 
         <section xml:id="ref_builtin_replace">
@@ -15954,6 +16112,55 @@ ${x?url}</programlisting>
           <para>will output:</para>
 
           <programlisting role="output">[a][bcd,][.][1-2-3]</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_wrap">
+          <title>wrap</title>
+
+          <indexterm>
+            <primary>wrap built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>word wrapping</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Word-wraps the string so that no line is longer than the column
+          (width) given as the 1st parameter, breaking only between words
+          (runs of <link linkend="gloss.whiteSpace">white-space</link> in the
+          input are treated as word boundaries and collapsed to a single
+          space). The 2nd parameter is a prefix prepended to the first output
+          line; the optional 3rd parameter is a prefix prepended to all
+          subsequent lines (if omitted, the 2nd parameter is used for all
+          lines). The result always ends with a line break.</para>
+
+          <para>This is useful for generating wrapped comments, such as
+          documentation blocks. For example:</para>
+
+          <programlisting role="template">&lt;#assign text = "This is a long description that should be wrapped" /&gt;
+${text?wrap(40, " * @brief ", " *         ")}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output"> * @brief This is a long description
+ *         that should be wrapped</programlisting>
+
+          <para>With a single prefix used for all lines:</para>
+
+          <programlisting role="template">${"A comment that needs to be wrapped at a reasonable width"?wrap(40, "// ")}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">// A comment that needs to be wrapped at
+// a reasonable width</programlisting>
+
+          <para>The 1st parameter (width) must be at least 1. A single word
+          longer than the width is emitted on its own line without being
+          broken.</para>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
