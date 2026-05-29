@@ -15190,6 +15190,17 @@ boolean active;     done</programlisting>
 
           <programlisting role="output">a....
 bb...</programlisting>
+
+          <note>
+            <para>Widths are counted in Java <literal>char</literal>s (UTF-16
+            code units), not visual display columns — same as <link
+            linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>
+            and <link
+            linkend="ref_builtin_left_pad"><literal>left_pad</literal></link>.
+            A tab counts as one character, not as "advance to the next tab
+            stop". If you need visual alignment for content containing tabs,
+            expand the tabs to spaces first.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_replace">
@@ -16191,6 +16202,16 @@ ${text?wrap(40, " * @brief ", " *         ")}</programlisting>
           <para>The 1st parameter (width) must be at least 1. A single word
           longer than the width is emitted on its own line without being
           broken.</para>
+
+          <note>
+            <para>Widths are counted in Java <literal>char</literal>s (UTF-16
+            code units), not visual display columns. A tab counts as one
+            character. Words are split on Java's <literal>\s+</literal>
+            character class, which does <emphasis>not</emphasis> include
+            U+00A0 (the non-breaking space) — so a non-breaking space stays
+            inside a word and is never used as a break point. This is the
+            intended behaviour of non-breaking spaces.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
