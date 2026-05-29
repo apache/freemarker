@@ -189,6 +189,62 @@ public class IndentAndWrapBuiltInTest {
                 eval("text?indent('  ')?dedent('  ')", model));
     }
 
+    // ---- ?dedent (no-args, Python textwrap.dedent-style) tests ----
+
+    @Test
+    public void testDedentNoArgsUniformIndent() throws Exception {
+        assertEquals("a\nb\nc",
+                eval("'    a\\n    b\\n    c'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsMixedIndent() throws Exception {
+        // The longest common leading whitespace across non-empty lines is 2 spaces.
+        assertEquals("a\n  b\n    c",
+                eval("'  a\\n    b\\n      c'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsRespectsEmptyLines() throws Exception {
+        // Empty/whitespace-only lines are ignored when computing the common prefix
+        // and pass through unchanged.
+        assertEquals("a\n\nb",
+                eval("'    a\\n\\n    b'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsNoCommonPrefix() throws Exception {
+        // If lines have no common leading whitespace, nothing is stripped.
+        assertEquals("a\n    b",
+                eval("'a\\n    b'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsTabAndSpaceDistinct() throws Exception {
+        // A leading tab and a leading space have no common prefix.
+        // (Same behaviour as Python textwrap.dedent.)
+        assertEquals("\ta\n    b",
+                eval("'\\ta\\n    b'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsTabsOnly() throws Exception {
+        assertEquals("a\nb",
+                eval("'\\t\\ta\\n\\t\\tb'?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsEmptyString() throws Exception {
+        assertEquals("", eval("''?dedent()"));
+    }
+
+    @Test
+    public void testDedentNoArgsAlreadyDedented() throws Exception {
+        // No common leading whitespace => no change.
+        assertEquals("a\nb\nc",
+                eval("'a\\nb\\nc'?dedent()"));
+    }
+
     // ---- ?right_pad_lines tests ----
 
     @Test

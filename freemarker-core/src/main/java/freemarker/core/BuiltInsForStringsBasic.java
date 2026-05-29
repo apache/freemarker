@@ -551,8 +551,18 @@ class BuiltInsForStringsBasic {
             @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 1);
+                checkMethodArgCount(argCnt, 0, 1);
 
+                if (argCnt == 0) {
+                    // No-argument form: strip the longest common leading whitespace
+                    // (spaces and tabs) across all non-empty lines, like Python's
+                    // textwrap.dedent. Empty lines are ignored when computing the
+                    // common prefix.
+                    return new SimpleScalar(dedentCommonLeadingWhitespace(s));
+                }
+
+                // Explicit-prefix form: remove the given prefix from each line that
+                // starts with it; leave other lines unchanged.
                 String prefix = getStringMethodArg(args, 0);
 
                 if (s.isEmpty() || prefix.isEmpty()) {
@@ -600,6 +610,95 @@ class BuiltInsForStringsBasic {
                 }
                 return new SimpleScalar(sb.toString());
             }
+        }
+
+        /**
+         * Strip the longest leading-whitespace string (spaces and tabs only) that
+         * is a common prefix of every non-empty line. Empty lines are ignored when
+         * computing the prefix but remain empty in the output. Mirrors Python's
+         * textwrap.dedent semantics. Note: a leading tab and a leading space do
+         * not collapse — they're distinct characters with no common prefix.
+         */
+        private static String dedentCommonLeadingWhitespace(String s) {
+            if (s.isEmpty()) return s;
+            int len = s.length();
+
+            // First pass: walk lines, find the leading-whitespace run of each,
+            // and compute the common prefix among non-empty lines.
+            String commonPrefix = null;
+            int lineStart = 0;
+            for (int i = 0; i <= len; i++) {
+                boolean atEnd = (i == len);
+                char c = atEnd ? '\n' : s.charAt(i);
+                if (atEnd || c == '\n' || c == '\r') {
+                    int contentStart = lineStart;
+                    while (contentStart < i) {
+                        char cc = s.charAt(contentStart);
+                        if (cc != ' ' && cc != '\t') break;
+                        contentStart++;
+                    }
+                    boolean nonEmpty = contentStart < i;
+                    if (nonEmpty) {
+                        if (commonPrefix == null) {
+                            commonPrefix = s.substring(lineStart, contentStart);
+                        } else {
+                            int maxLen = Math.min(commonPrefix.length(), contentStart - lineStart);
+                            int matched = 0;
+                            while (matched < maxLen
+                                    && commonPrefix.charAt(matched) == s.charAt(lineStart + matched)) {
+                                matched++;
+                            }
+                            if (matched < commonPrefix.length()) {
+                                commonPrefix = commonPrefix.substring(0, matched);
+                            }
+                            if (commonPrefix.isEmpty()) break; // can't shrink further; finish quickly
+                        }
+                    }
+                    if (!atEnd) {
+                        // Step past \r\n if applicable
+                        if (c == '\r' && i + 1 < len && s.charAt(i + 1) == '\n') i++;
+                        lineStart = i + 1;
+                    }
+                }
+            }
+
+            if (commonPrefix == null || commonPrefix.isEmpty()) {
+                return s;
+            }
+
+            // Second pass: emit each line with the common prefix stripped (from
+            // non-empty lines only).
+            int prefixLen = commonPrefix.length();
+            StringBuilder sb = new StringBuilder(len);
+            lineStart = 0;
+            for (int i = 0; i <= len; i++) {
+                boolean atEnd = (i == len);
+                if (atEnd || s.charAt(i) == '\n' || s.charAt(i) == '\r') {
+                    int contentStart = lineStart;
+                    while (contentStart < i) {
+                        char cc = s.charAt(contentStart);
+                        if (cc != ' ' && cc != '\t') break;
+                        contentStart++;
+                    }
+                    boolean nonEmpty = contentStart < i;
+                    if (nonEmpty) {
+                        // Non-empty line: by construction it has the common prefix.
+                        sb.append(s, lineStart + prefixLen, i);
+                    } else {
+                        // Whitespace-only or empty line — keep as is.
+                        sb.append(s, lineStart, i);
+                    }
+                    if (!atEnd) {
+                        sb.append(s.charAt(i));
+                        if (s.charAt(i) == '\r' && i + 1 < len && s.charAt(i + 1) == '\n') {
+                            i++;
+                            sb.append('\n');
+                        }
+                        lineStart = i + 1;
+                    }
+                }
+            }
+            return sb.toString();
         }
 
         @Override

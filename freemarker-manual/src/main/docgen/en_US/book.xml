@@ -14071,15 +14071,44 @@ Green Mouse</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Removes the string given as the parameter from the beginning of
-          each line, if that line starts with it. Lines that don't start with
-          the given prefix are left unchanged. This is the inverse of the <link
+          <para>Removes a leading-whitespace prefix from each line of the
+          string. The built-in has two forms: a no-argument form that strips
+          common leading whitespace automatically, and an explicit-prefix form
+          for exact control. This is the inverse of the <link
           linkend="ref_builtin_indent"><literal>indent</literal></link>
           built-in. Line breaks can be <literal>LF</literal>,
           <literal>CR</literal>, or <literal>CRLF</literal>, and are kept as
           is.</para>
 
-          <para>For example, this:</para>
+          <para>The <emphasis>no-argument form</emphasis>
+          (<literal>?dedent()</literal>) finds the longest leading whitespace
+          (spaces and tabs only) that is a common prefix of every non-empty
+          line, and removes it. This is robust to imperfect input: lines with
+          different leading-whitespace amounts work as expected, and
+          empty/whitespace-only lines are ignored when computing the common
+          prefix. The semantics match Python's
+          <literal>textwrap.dedent</literal>.</para>
+
+          <para>For example:</para>
+
+          <programlisting role="template">&lt;#assign code = "  int x;\n    int y;\n  int z;" /&gt;
+[${code?dedent()}]</programlisting>
+
+          <para>will output this (the common prefix is 2 spaces):</para>
+
+          <programlisting role="output">[int x;
+  int y;
+int z;]</programlisting>
+
+          <para>A leading tab and a leading space are treated as distinct
+          characters (they have no common prefix), matching Python's
+          behaviour.</para>
+
+          <para>The <emphasis>explicit-prefix form</emphasis>
+          (<literal>?dedent(prefix)</literal>) removes the given prefix from
+          each line that starts with it. Lines that don't start with the prefix
+          are left unchanged. Use this when you want exact control rather than
+          automatic common-prefix detection. For example:</para>
 
           <programlisting role="template">&lt;#assign code = "    int x;\n    int y;" /&gt;
 [${code?dedent("    ")}]</programlisting>
