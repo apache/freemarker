@@ -267,7 +267,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("number_to_date", "numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
         putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
-        putBI("pad_lines", "padLines", new BuiltInsForStringsBasic.padLinesBI());
         putBI("parent", new parentBI());
         putBI("previous_sibling", "previousSibling", new previousSiblingBI());
         putBI("next_sibling", "nextSibling", new nextSiblingBI());
@@ -275,6 +274,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
         putBI("right_pad", "rightPad", new BuiltInsForStringsBasic.padBI(false));
+        putBI("right_pad_lines", "rightPadLines", new BuiltInsForStringsBasic.right_pad_linesBI());
         putBI("root", new rootBI());
         putBI("round", new roundBI());
         putBI("remove_ending", "removeEnding", new BuiltInsForStringsBasic.remove_endingBI());

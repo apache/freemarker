@@ -189,51 +189,51 @@ public class IndentAndWrapBuiltInTest {
                 eval("text?indent('  ')?dedent('  ')", model));
     }
 
-    // ---- ?pad_lines tests ----
+    // ---- ?right_pad_lines tests ----
 
     @Test
-    public void testPadLinesBasic() throws Exception {
+    public void testRightPadLinesBasic() throws Exception {
         assertEquals("a         \nbb        \nccc       \n",
-                eval("'a\\nbb\\nccc\\n'?pad_lines(10)"));
+                eval("'a\\nbb\\nccc\\n'?right_pad_lines(10)"));
     }
 
     @Test
-    public void testPadLinesWithFillChar() throws Exception {
+    public void testRightPadLinesWithFillChar() throws Exception {
         assertEquals("a.........\nbb........\n",
-                eval("'a\\nbb\\n'?pad_lines(10, '.')"));
+                eval("'a\\nbb\\n'?right_pad_lines(10, '.')"));
     }
 
     @Test
-    public void testPadLinesLinePastColumn() throws Exception {
+    public void testRightPadLinesLinePastColumn() throws Exception {
         // "long line" (9 chars) past column 5 — no padding
         // "ab" (2 chars) shorter than column 5 — padded
         assertEquals("long line\nab   \n",
-                eval("'long line\\nab\\n'?pad_lines(5)"));
+                eval("'long line\\nab\\n'?right_pad_lines(5)"));
     }
 
     @Test
-    public void testPadLinesNoTrailingNewline() throws Exception {
+    public void testRightPadLinesNoTrailingNewline() throws Exception {
         assertEquals("a         ",
-                eval("'a'?pad_lines(10)"));
+                eval("'a'?right_pad_lines(10)"));
     }
 
     @Test
-    public void testPadLinesEmpty() throws Exception {
-        assertEquals("", eval("''?pad_lines(10)"));
+    public void testRightPadLinesEmpty() throws Exception {
+        assertEquals("", eval("''?right_pad_lines(10)"));
     }
 
     @Test
-    public void testPadLinesCamelCase() throws Exception {
+    public void testRightPadLinesCamelCase() throws Exception {
         assertEquals("a    \nbb   \n",
-                eval("'a\\nbb\\n'?padLines(5)"));
+                eval("'a\\nbb\\n'?rightPadLines(5)"));
     }
 
     @Test
-    public void testPadLinesCodeAlignment() throws Exception {
+    public void testRightPadLinesCodeAlignment() throws Exception {
         // Practical use: align code for trailing comments
         Map<String, Object> model = new HashMap<>();
         model.put("code", "int x;\nString name;\nboolean active;\n");
-        String result = eval("code?pad_lines(20)", model);
+        String result = eval("code?right_pad_lines(20)", model);
         String[] lines = result.split("\n", -1);
         assertEquals("int x;              ", lines[0]);
         assertEquals("String name;        ", lines[1]);

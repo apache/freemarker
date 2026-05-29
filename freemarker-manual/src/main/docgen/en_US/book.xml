@@ -13362,10 +13362,6 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
-            <para><link linkend="ref_builtin_pad_lines">pad_lines</link></para>
-          </listitem>
-
-          <listitem>
             <para><link linkend="ref_builtin_parent">parent</link></para>
           </listitem>
 
@@ -13395,6 +13391,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link
             linkend="ref_builtin_right_pad">right_pad</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_right_pad_lines">right_pad_lines</link></para>
           </listitem>
 
           <listitem>
@@ -15114,11 +15115,11 @@ ${s?no_esc}</programlisting>
           above.</phrase></para>
         </section>
 
-        <section xml:id="ref_builtin_pad_lines">
-          <title>pad_lines</title>
+        <section xml:id="ref_builtin_right_pad_lines">
+          <title>right_pad_lines</title>
 
           <indexterm>
-            <primary>pad_lines built-in</primary>
+            <primary>right_pad_lines built-in</primary>
           </indexterm>
 
           <indexterm>
@@ -15130,8 +15131,8 @@ ${s?no_esc}</programlisting>
           </note>
 
           <para>Pads each line of the string with spaces on the right until it
-          reaches the column (width) specified as the 1st parameter. Lines that
-          are already at least that long are left unchanged. Unlike <link
+          reaches the width specified as the 1st parameter. Lines that are
+          already at least that long are left unchanged. Unlike <link
           linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>,
           which operates on the string as a whole, this operates on each line
           separately, which is useful for aligning multi-line text. Empty lines
@@ -15142,9 +15143,9 @@ ${s?no_esc}</programlisting>
           <para>For example, this:</para>
 
           <programlisting role="template">&lt;#assign code = "int x;\nString name;\nboolean active;" /&gt;
-${code?pad_lines(20)}done</programlisting>
+${code?right_pad_lines(20)}done</programlisting>
 
-          <para>will output this (each line padded to column 20):</para>
+          <para>will output this (each line padded to width 20):</para>
 
           <programlisting role="output">int x;
 String name;
@@ -15154,7 +15155,7 @@ boolean active;     done</programlisting>
           character to use instead of space. It must be a string exactly 1
           character long. For example:</para>
 
-          <programlisting role="template">${"a\nbb"?pad_lines(5, ".")}</programlisting>
+          <programlisting role="template">${"a\nbb"?right_pad_lines(5, ".")}</programlisting>
 
           <para>will output this:</para>
 

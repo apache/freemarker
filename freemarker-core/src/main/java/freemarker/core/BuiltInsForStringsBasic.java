@@ -674,7 +674,7 @@ class BuiltInsForStringsBasic {
         }
     }
 
-    static class padLinesBI extends BuiltInForString {
+    static class right_pad_linesBI extends BuiltInForString {
 
         private class BIMethod implements TemplateMethodModelEx {
 
