@@ -19,14 +19,41 @@
 
 package freemarker.template;
 
+import java.io.BufferedReader;
+import java.io.FilterReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
+
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
-import freemarker.core.*;
-
-import java.io.*;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.*;
+import freemarker.core.BugException;
+import freemarker.core.Configurable;
+import freemarker.core.Environment;
+import freemarker.core.FMParser;
+import freemarker.core.LibraryLoad;
+import freemarker.core.Macro;
+import freemarker.core.OutputFormat;
+import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
+import freemarker.core.TemplateConfiguration;
+import freemarker.core.TemplateElement;
+import freemarker.core.TextBlock;
+import freemarker.core.TokenMgrError;
+import freemarker.core._CoreAPI;
 
 /**
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
