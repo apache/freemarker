@@ -19,42 +19,14 @@
 
 package freemarker.template;
 
-import java.io.BufferedReader;
-import java.io.FilterReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Vector;
-
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
-import freemarker.core.BugException;
-import freemarker.core.Configurable;
-import freemarker.core.Environment;
-import freemarker.core.FMParser;
-import freemarker.core.LibraryLoad;
-import freemarker.core.Macro;
-import freemarker.core.OutputFormat;
-import freemarker.core.ParseException;
-import freemarker.core.ParserConfiguration;
-import freemarker.core.TemplateConfiguration;
-import freemarker.core.TemplateElement;
-import freemarker.core.TextBlock;
-import freemarker.core.TokenMgrError;
-import freemarker.core._CoreAPI;
-import freemarker.debug.impl.DebuggerService;
+import freemarker.core.*;
+
+import java.io.*;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.*;
 
 /**
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
@@ -275,7 +247,6 @@ public class Template extends Configurable {
         // Throws any exception that JavaCC has silently treated as EOF:
         ltbReader.throwFailure();
         
-        DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
@@ -303,7 +274,6 @@ public class Template extends Configurable {
     Template(String name, TemplateElement root, Configuration cfg) {
         this(name, null, cfg, (ParserConfiguration) null);
         this.rootElement = root;
-        DebuggerService.registerTemplate(this);
     }
     
     /**
@@ -336,7 +306,6 @@ public class Template extends Configurable {
             throw new BugException("Plain text template creation failed", e);
         }
         _CoreAPI.replaceText((TextBlock) template.rootElement, content);
-        DebuggerService.registerTemplate(template);
         return template;
     }
 

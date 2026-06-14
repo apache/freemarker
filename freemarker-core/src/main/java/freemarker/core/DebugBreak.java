@@ -19,16 +19,18 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-
-import freemarker.debug.impl.DebuggerService;
 import freemarker.template.TemplateException;
 
+import java.io.IOException;
+
 /**
- * <b>Internal API - subject to change: A debug breakpoint inserted into the template</b> 
- * 
+ * <b>Internal API - subject to change: A debug breakpoint inserted into the template</b>
+ *
+ * <p>Not used anymore: This was used by {@code freemarker.debug} package, which was removed. We left it here in case
+ * some tools that traverse the AST links to this class.</p>
+ *
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
- *             it.
+ * it.
  */
 @Deprecated
 public class DebugBreak extends TemplateElement {
@@ -36,15 +38,12 @@ public class DebugBreak extends TemplateElement {
         addChild(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
-    
+
     @Override
     protected TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        if (!DebuggerService.suspendEnvironment(
-                env, this.getTemplate().getSourceName(), getChild(0).getBeginLine())) {
-            return getChild(0).accept(env);
-        } else {
-            throw new StopException(env, "Stopped by debugger");
-        }
+        // This was conditional before freemarker.debug was removed. DebugBreak was kept to decrease the change of
+        // backward compatibility issues.
+        throw new StopException(env, "Stopped by debugger");
     }
 
     @Override
@@ -57,7 +56,7 @@ public class DebugBreak extends TemplateElement {
                 sb.append(" /-->");
             } else {
                 sb.append(" -->");
-                sb.append(getChild(0).getCanonicalForm());                
+                sb.append(getChild(0).getCanonicalForm());
                 sb.append("<#--/ debug break -->");
             }
             return sb.toString();
@@ -65,7 +64,7 @@ public class DebugBreak extends TemplateElement {
             return "debug break";
         }
     }
-    
+
     @Override
     String getNodeTypeSymbol() {
         return "#debug_break";
@@ -90,5 +89,5 @@ public class DebugBreak extends TemplateElement {
     boolean isNestedBlockRepeater() {
         return false;
     }
-        
+
 }
