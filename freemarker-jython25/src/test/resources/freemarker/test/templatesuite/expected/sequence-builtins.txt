@@ -402,3 +402,99 @@ Misc
 
 First of set 1: a
 First of set 2: a
+
+distinct scalars:
+----------------
+
+String distinct:
+- apple
+- banana
+- orange
+
+First: apple
+Last: orange
+Size 3
+
+Numerical distinct:
+- 123
+- 5
+- -324
+- -34
+- 0.11
+- 0
+- 111
+- 0.11
+- 123
+
+First: 123
+Last: 123
+Size 9
+
+Date/time distinct:
+- 08:05
+- 18:00
+- 06:05
+
+Boolean distinct:
+- true
+- false
+
+
+Distinct hashes:
+---------------
+
+Distinct by name:
+- 1
+- 2
+
+Distinct by name reverse:
+- 4
+- 1
+
+Distinct by age:
+- 1
+- 2
+- 4
+
+Distinct by age reverse:
+- 4
+- 3
+- 1
+
+Distinct by adult:
+- 1
+- 4
+
+Distinct by adult reverse:
+- 4
+- 3
+
+Distinct by birthday:
+- 1
+- 2
+- 3
+
+Distinct by birthday reverse:
+- 4
+- 3
+- 1
+
+Distinct by a.x.v:
+- 1
+- 2
+- 4
+
+Distinct by a.x.v reverse:
+- 4
+- 3
+- 1
+
+Distinct by a.y, which is a date:
+- 1
+- 3
+- 4
+
+Distinct by a.y reverse, which is a date:
+- 4
+- 3
+- 2

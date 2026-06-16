@@ -13073,6 +13073,14 @@ grant codeBase "file:/path/to/freemarker.jar"
             linkend="ref_builtin_date_if_unknown">datetime_if_unknown</link></para>
           </listitem>
 
+            <listitem>
+                <para><link linkend="ref_builtin_distinct">distinct</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link linkend="ref_builtin_distinct_by">distinct_by</link></para>
+            </listitem>
+
           <listitem>
             <para><link linkend="ref_builtin_numType">double</link></para>
           </listitem>
@@ -19099,6 +19107,123 @@ Filer for positives:
           <para>See also: <link
           linkend="ref_builtin_drop_while"><literal>drop_while</literal>
           built-in</link></para>
+        </section>
+
+        <section xml:id="ref_builtin_distinct">
+          <title>distinct</title>
+
+          <indexterm>
+            <primary>distinct built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>distinct</secondary>
+          </indexterm>
+
+          <para>Returns the sequence consisting of the distinct elements,
+            retaining the first accessed element. (For
+            retaining the last accessed element use <link linkend="ref_builtin_reverse">
+              <literal>reverse</literal> built
+              in</link> and then use this.) This will work only if all sub variables are strings,
+            or if all sub variables are numbers, or if all sub variables are date
+            values (date, time, or date+time), or if all sub variables are
+            booleans. If the sub variables are numbers, it uses
+            equals for distinct (<literal>123?float</literal> and <literal>123?byte</literal>
+            are not the same). For
+            example:</para>
+
+          <programlisting role="template">&lt;#assign ls = [1, 2?byte, 1, 2?float, 10]?distinct&gt;
+&lt;#list ls as i&gt;${i} &lt;/#list&gt;</programlisting>
+
+          <para>will print:</para>
+
+          <programlisting role="output">1 2 2 10</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_distinct_by">
+          <title>distinct_by</title>
+
+          <indexterm>
+            <primary>distinct_by built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>sequence</primary>
+
+            <secondary>distinct_by</secondary>
+          </indexterm>
+
+          <para>Returns the sequence consisting of the distinct elements by the given hash
+            subvariable, retaining the first accessed element. (For
+            retaining the last accessed element use <link linkend="ref_builtin_reverse"><literal>
+              reverse</literal> built
+              in</link> and then use this.)  The rules are the same as the
+            <link linkend="ref_builtin_distinct"><literal>distinct</literal> built in</link>,
+            except that the sub
+            variables of the sequence must be hashes, and you have to
+            give the name of a hash subvariable that will decide the order. For example:</para>
+
+          <programlisting role="template">&lt;#assign ls = [
+{"id": 1, "name": "name1", "age": 13, "adult": false, "birthday": '2024-01-01'?date('yyyy-MM-dd')},
+{"id": 2, "name": "name2", "age": 10, "adult": false, "birthday": '2024-02-01'?date('yyyy-MM-dd')},
+{"id": 3, "name": "name2", "age": 10, "adult": false, "birthday": '2024-03-01'?date('yyyy-MM-dd')},
+{"id": 4, "name": "name2", "age": 25, "adult": true,  "birthday": '2024-02-01'?date('yyyy-MM-dd')}
+]&gt;
+Distinct by name:
+&lt;#list ls?distinct_by("name") as i&gt;
+- ${i.id}
+&lt;/#list&gt;
+
+Distinct by name reverse:
+&lt;#list ls?reverse?distinct_by("name") as i&gt;
+- ${i.id}
+&lt;/#list&gt;</programlisting>
+
+          <para>will print:</para>
+
+          <programlisting role="output">Distinct by name:
+- 1
+- 2
+
+Distinct by name reverse:
+- 4
+- 1</programlisting>
+
+          <para>If the subvariable that you want to use for the distinct is on a deeper level (that
+            is, if it is a
+          subvariable of a subvariable and so on), then you can use a sequence as parameter, that
+            specifies the
+          names of the sub variables that lead down to the desired subvariable. For example:</para>
+
+          <programlisting role="template">&lt;#assign x = [
+  {"id": "1", "a": {"x": {"v": "xxxx", "w": "asd"}, "y": '1998-02-20'?date('yyyy-MM-dd')}},
+  {"id": "2", "a": {"x": {"v": "xx", "w": "asd"}, "y": '1998-02-20'?date('yyyy-MM-dd')}},
+  {"id": "3", "a": {"x": {"v": "xx", "w": "asd"}, "y": '1999-04-20'?date('yyyy-MM-dd')}},
+  {"id": "4", "a": {"x": {"v": "xxx", "w": "asd"}, "y": '1999-04-19'?date('yyyy-MM-dd')}}
+]&gt;
+Distinct by a.x.v:
+&lt;#list x?distinct_by(['a', 'x', 'v']) as i&gt;
+- ${i.id}
+&lt;/#list&gt;
+
+Distinct by a.x.v reverse:
+&lt;#list x?reverse?distinct_by(['a', 'x', 'v']) as i&gt;
+- ${i.id}
+&lt;/#list&gt;</programlisting>
+
+          <para>will print:</para>
+
+          <programlisting role="output">Distinct by a.x.v:
+- 1
+- 2
+- 4
+
+Distinct by a.x.v reverse:
+- 4
+- 3
+- 1</programlisting>
         </section>
       </section>
 

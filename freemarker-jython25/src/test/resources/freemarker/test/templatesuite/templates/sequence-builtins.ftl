@@ -359,3 +359,121 @@ Misc
 
 First of set 1: ${abcSet?first}
 First of set 2: ${abcSetNonSeq?first}
+
+distinct scalars:
+----------------
+
+String distinct:
+<#assign ls = ["apple", "apple", "banana", "apple", "orange"]?distinct>
+<#list ls as i>
+- ${i}
+</#list>
+
+First: ${ls?first}
+Last: ${ls?last}
+Size ${ls?size}
+
+Numerical distinct:
+<#assign ls = [123?byte, 5, -324, -34?float, 0.11, 0, 111?int, 0.11?double, 123, 5]?distinct>
+<#list ls as i>
+- ${i}
+</#list>
+
+First: ${ls?first}
+Last: ${ls?last}
+Size ${ls?size}
+
+Date/time distinct:
+<#assign x = [
+'08:05'?time('HH:mm'),
+'18:00'?time('HH:mm'),
+'06:05'?time('HH:mm'),
+'08:05'?time('HH:mm')]>
+<#list x?distinct as i>
+- ${i?string('HH:mm')}
+</#list>
+
+Boolean distinct:
+<#assign x = [
+true,
+false,
+false,
+true]>
+<#list x?distinct as i>
+- ${i}
+</#list>
+
+
+Distinct hashes:
+---------------
+
+<#assign ls = [
+{"id": 1, "name": "name1", "age": 13, "adult": false, "birthday": '2024-01-01'?date('yyyy-MM-dd')},
+{"id": 2, "name": "name2", "age": 10, "adult": false, "birthday": '2024-02-01'?date('yyyy-MM-dd')},
+{"id": 3, "name": "name2", "age": 10, "adult": false, "birthday": '2024-03-01'?date('yyyy-MM-dd')},
+{"id": 4, "name": "name2", "age": 25, "adult": true,  "birthday": '2024-02-01'?date('yyyy-MM-dd')}
+]>
+Distinct by name:
+<#list ls?distinct_by("name") as i>
+- ${i.id}
+</#list>
+
+Distinct by name reverse:
+<#list ls?reverse?distinct_by("name") as i>
+- ${i.id}
+</#list>
+
+Distinct by age:
+<#list ls?distinct_by("age") as i>
+- ${i.id}
+</#list>
+
+Distinct by age reverse:
+<#list ls?reverse?distinct_by("age") as i>
+- ${i.id}
+</#list>
+
+Distinct by adult:
+<#list ls?distinct_by("adult") as i>
+- ${i.id}
+</#list>
+
+Distinct by adult reverse:
+<#list ls?reverse?distinct_by("adult") as i>
+- ${i.id}
+</#list>
+
+Distinct by birthday:
+<#list ls?distinct_by("birthday") as i>
+- ${i.id}
+</#list>
+
+Distinct by birthday reverse:
+<#list ls?reverse?distinct_by("birthday") as i>
+- ${i.id}
+</#list>
+
+<#assign x = [
+{"id": "1", "a": {"x": {"v": "xxxx", "w": "asd"}, "y": '1998-02-20'?date('yyyy-MM-dd')}},
+{"id": "2", "a": {"x": {"v": "xx", "w": "asd"}, "y": '1998-02-20'?date('yyyy-MM-dd')}},
+{"id": "3", "a": {"x": {"v": "xx", "w": "asd"}, "y": '1999-04-20'?date('yyyy-MM-dd')}},
+{"id": "4", "a": {"x": {"v": "xxx", "w": "asd"}, "y": '1999-04-19'?date('yyyy-MM-dd')}}]>
+Distinct by a.x.v:
+<#list x?distinct_by(['a', 'x', 'v']) as i>
+- ${i.id}
+</#list>
+
+Distinct by a.x.v reverse:
+<#list x?reverse?distinct_by(['a', 'x', 'v']) as i>
+- ${i.id}
+</#list>
+
+Distinct by a.y, which is a date:
+<#list x?distinct_by(['a', 'y']) as i>
+- ${i.id}
+</#list>
+
+Distinct by a.y reverse, which is a date:
+<#list x?reverse?distinct_by(['a', 'y']) as i>
+- ${i.id}
+</#list>

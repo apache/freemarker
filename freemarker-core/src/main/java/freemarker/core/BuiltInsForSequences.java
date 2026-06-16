@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import freemarker.ext.beans.CollectionModel;
@@ -545,61 +546,7 @@ class BuiltInsForSequences {
         }
     }
 
-    static class sort_byBI extends sortBI {
-        class BIMethod implements TemplateMethodModelEx {
-            TemplateSequenceModel seq;
-            
-            BIMethod(TemplateSequenceModel seq) {
-                this.seq = seq;
-            }
-            
-            @Override
-            public Object exec(List args)
-                    throws TemplateModelException {
-                // Should be:
-                // checkMethodArgCount(args, 1);
-                // But for BC:
-                if (args.size() < 1) throw _MessageUtil.newArgCntError("?" + key, args.size(), 1);
-                
-                String[] subvars;
-                Object obj = args.get(0);
-                if (obj instanceof TemplateScalarModel) {
-                    subvars = new String[]{((TemplateScalarModel) obj).getAsString()};
-                } else if (obj instanceof TemplateSequenceModel) {
-                    TemplateSequenceModel seq = (TemplateSequenceModel) obj;
-                    int ln = seq.size();
-                    subvars = new String[ln];
-                    for (int i = 0; i < ln; i++) {
-                        Object item = seq.get(i);
-                        try {
-                            subvars[i] = ((TemplateScalarModel) item)
-                                    .getAsString();
-                        } catch (ClassCastException e) {
-                            if (!(item instanceof TemplateScalarModel)) {
-                                throw new _TemplateModelException(
-                                        "The argument to ?", key, "(key), when it's a sequence, must be a "
-                                        + "sequence of strings, but the item at index ", Integer.valueOf(i),
-                                        " is not a string.");
-                            }
-                        }
-                    }
-                } else {
-                    throw new _TemplateModelException(
-                            "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
-                            + "sequence of strings (the \"path\" to the subvariable).");
-                }
-                return sort(seq, subvars); 
-            }
-        }
-        
-        @Override
-        TemplateModel calculateResult(TemplateSequenceModel seq) {
-            return new BIMethod(seq);
-        }
-    }
-
-    static class sortBI extends BuiltInForSequence {
-        
+    static abstract class compareBI extends BuiltInForSequence {
         private static class BooleanKVPComparator implements Comparator, Serializable {
 
             @Override
@@ -625,13 +572,24 @@ class BuiltInsForSequences {
         /**
          * Stores a key-value pair.
          */
-        private static class KVP {
+        static class KVP {
             private Object key;
 
             private Object value;
             private KVP(Object key, Object value) {
                 this.key = key;
                 this.value = value;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof KVP
+                        && key.equals(((KVP) obj).key);
+            }
+
+            @Override
+            public int hashCode() {
+                return key.hashCode();
             }
         }
         private static class LexicalKVPComparator implements Comparator {
@@ -666,8 +624,67 @@ class BuiltInsForSequences {
                 }
             }
         }
-        
-        static TemplateModelException newInconsistentSortKeyTypeException(
+
+        static class TransFormResult {
+            private final ArrayList res;
+
+            private final Comparator keyComparator;
+
+            TransFormResult(ArrayList res, Comparator keyComparator) {
+                this.res = res;
+                this.keyComparator = keyComparator;
+            }
+        }
+
+        abstract class BIMethod implements TemplateMethodModelEx {
+            TemplateSequenceModel seq;
+
+            BIMethod(TemplateSequenceModel seq) {
+                this.seq = seq;
+            }
+
+            @Override
+            public Object exec(List args)
+                    throws TemplateModelException {
+                // Should be:
+                // checkMethodArgCount(args, 1);
+                // But for BC:
+                if (args.size() < 1) throw _MessageUtil.newArgCntError("?" + key, args.size(), 1);
+
+                String[] subvars;
+                Object obj = args.get(0);
+                if (obj instanceof TemplateScalarModel) {
+                    subvars = new String[]{((TemplateScalarModel) obj).getAsString()};
+                } else if (obj instanceof TemplateSequenceModel) {
+                    TemplateSequenceModel seq = (TemplateSequenceModel) obj;
+                    int ln = seq.size();
+                    subvars = new String[ln];
+                    for (int i = 0; i < ln; i++) {
+                        Object item = seq.get(i);
+                        try {
+                            subvars[i] = ((TemplateScalarModel) item)
+                                    .getAsString();
+                        } catch (ClassCastException e) {
+                            if (!(item instanceof TemplateScalarModel)) {
+                                throw new _TemplateModelException(
+                                        "The argument to ?", key, "(key), when it's a sequence, must be a "
+                                        + "sequence of strings, but the item at index ", Integer.valueOf(i),
+                                        " is not a string.");
+                            }
+                        }
+                    }
+                } else {
+                    throw new _TemplateModelException(
+                            "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
+                            + "sequence of strings (the \"path\" to the subvariable).");
+                }
+                return apply(seq, subvars);
+            }
+
+            abstract Object apply(TemplateSequenceModel seq, String[] subvars) throws TemplateModelException;
+        }
+
+        static TemplateModelException newInconsistentCompareKeyTypeException(
                 int keyNamesLn, String firstType, String firstTypePlural, int index, TemplateModel key) {
             String valueInMsg;
             String valuesInMsg;
@@ -687,24 +704,10 @@ class BuiltInsForSequences {
                     new _DelayedFTLTypeDescription(key), ".");
         }
 
-        /**
-         * Sorts a sequence for the {@code sort} and {@code sort_by}
-         * built-ins.
-         * 
-         * @param seq the sequence to sort.
-         * @param keyNames the name of the subvariable whose value is used for the
-         *     sorting. If the sorting is done by a sub-subvaruable, then this
-         *     will be of length 2, and so on. If the sorting is done by the
-         *     sequene items directly, then this argument has to be 0 length
-         *     array or <code>null</code>.
-         * @return a new sorted sequence, or the original sequence if the
-         *     sequence length was 0.
-         */
-        static TemplateSequenceModel sort(TemplateSequenceModel seq, String[] keyNames)
+        static TransFormResult transform(TemplateSequenceModel seq, String[] keyNames)
                 throws TemplateModelException {
             int ln = seq.size();
-            if (ln == 0) return seq;
-            
+
             ArrayList res = new ArrayList(ln);
 
             int keyNamesLn = keyNames == null ? 0 : keyNames.length;
@@ -723,9 +726,9 @@ class BuiltInsForSequences {
                             throw new _TemplateModelException(
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
-                                            ? "Sequence items must be hashes when using ?sort_by. "
+                                            ? "Sequence items must be hashes when using ?sort_by or ?distinct_by. "
                                             : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])),
-                                    " subvariable is not a hash, so ?sort_by ",
+                                    " subvariable is not a hash, so ?sort_by or ?distinct_by ",
                                     "can't proceed with getting the ",
                                     new _DelayedJQuote(keyNames[keyNameI]),
                                     " subvariable.");
@@ -759,7 +762,8 @@ class BuiltInsForSequences {
                     } else {
                         throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "Values used for sorting must be numbers, strings, date/times or booleans.");
+                                "Values used for sorting or distincting must be numbers, strings, date/times or " +
+                                        "booleans.");
                     }
                 }
                 switch(keyType) {
@@ -770,7 +774,7 @@ class BuiltInsForSequences {
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateScalarModel)) {
-                                throw newInconsistentSortKeyTypeException(
+                                throw newInconsistentCompareKeyTypeException(
                                         keyNamesLn, "string", "strings", i, key);
                             } else {
                                 throw e;
@@ -785,7 +789,7 @@ class BuiltInsForSequences {
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateNumberModel)) {
-                                throw newInconsistentSortKeyTypeException(
+                                throw newInconsistentCompareKeyTypeException(
                                         keyNamesLn, "number", "numbers", i, key);
                             }
                         }
@@ -798,7 +802,7 @@ class BuiltInsForSequences {
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateDateModel)) {
-                                throw newInconsistentSortKeyTypeException(
+                                throw newInconsistentCompareKeyTypeException(
                                         keyNamesLn, "date/time", "date/times", i, key);
                             }
                         }
@@ -811,7 +815,7 @@ class BuiltInsForSequences {
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateBooleanModel)) {
-                                throw newInconsistentSortKeyTypeException(
+                                throw newInconsistentCompareKeyTypeException(
                                         keyNamesLn, "boolean", "booleans", i, key);
                             }
                         }
@@ -821,6 +825,118 @@ class BuiltInsForSequences {
                         throw new BugException("Unexpected key type");
                 }
             }
+            return new TransFormResult(res, keyComparator);
+        }
+
+        static Object[] startErrorMessage(int keyNamesLn, int index) {
+            return new Object[] {
+                    (keyNamesLn == 0 ? "?sort/distinct" : "?sort_by/distinct_by(...)"),
+                    " failed at sequence index ", Integer.valueOf(index),
+                    (index == 0 ? ": " : " (0-based): ") };
+        }
+
+        static final int KEY_TYPE_NOT_YET_DETECTED = 0;
+
+        static final int KEY_TYPE_STRING = 1;
+
+        static final int KEY_TYPE_NUMBER = 2;
+
+        static final int KEY_TYPE_DATE = 3;
+
+        static final int KEY_TYPE_BOOLEAN = 4;
+
+    }
+
+    static class distinctBI extends compareBI {
+
+        static TemplateModel distinct(TemplateSequenceModel seq, String[] keyNames) throws TemplateModelException {
+            int ln = seq.size();
+            if (ln <= 1) {
+                return seq;
+            }
+
+            TransFormResult transform = transform(seq, keyNames);
+            ArrayList res = transform.res;
+
+            LinkedHashSet set = new LinkedHashSet();
+            set.addAll(res);
+
+            ArrayList result = new ArrayList();
+            for (Object o : set) {
+                if (!result.contains(o)) {
+                    result.add(((KVP) o).value);
+                }
+            }
+            return new TemplateModelListSequence(result);
+        }
+
+        @Override
+        TemplateModel calculateResult(TemplateSequenceModel seq) throws TemplateModelException {
+            return distinct(seq, null);
+        }
+    }
+
+    static class distinctByBI extends distinctBI {
+        class DistinctByBIMethod extends BIMethod {
+            DistinctByBIMethod(TemplateSequenceModel seq) {
+                super(seq);
+            }
+
+            @Override
+            Object apply(TemplateSequenceModel seq, String[] subvars) throws TemplateModelException {
+                return distinct(seq, subvars);
+            }
+        }
+
+        @Override
+        TemplateModel calculateResult(TemplateSequenceModel seq) {
+            return new DistinctByBIMethod(seq);
+        }
+    }
+
+    static class sort_byBI extends sortBI {
+
+        class SortByBIMethod extends BIMethod {
+            SortByBIMethod(TemplateSequenceModel seq) {
+                super(seq);
+            }
+
+            @Override
+            Object apply(TemplateSequenceModel seq, String[] subvars) throws TemplateModelException {
+                return sort(seq, subvars);
+            }
+        }
+
+        @Override
+        TemplateModel calculateResult(TemplateSequenceModel seq) {
+            return new SortByBIMethod(seq);
+        }
+    }
+
+    static class sortBI extends compareBI {
+
+        /**
+         * Sorts a sequence for the {@code sort} and {@code sort_by}
+         * built-ins.
+         *
+         * @param seq the sequence to sort.
+         * @param keyNames the name of the subvariable whose value is used for the
+         *     sorting. If the sorting is done by a sub-subvaruable, then this
+         *     will be of length 2, and so on. If the sorting is done by the
+         *     sequene items directly, then this argument has to be 0 length
+         *     array or <code>null</code>.
+         * @return a new sorted sequence, or the original sequence if the
+         *     sequence length was 0.
+         */
+        static TemplateSequenceModel sort(TemplateSequenceModel seq, String[] keyNames)
+                throws TemplateModelException {
+            int ln = seq.size();
+            if (ln == 0) return seq;
+            int keyNamesLn = keyNames == null ? 0 : keyNames.length;
+
+            TransFormResult transform = transform(seq, keyNames);
+            ArrayList res = transform.res;
+            Comparator keyComparator = transform.keyComparator;
 
             // Sort the List[KVP]:
             try {
@@ -838,33 +954,16 @@ class BuiltInsForSequences {
             return new TemplateModelListSequence(res);
         }
 
-        static Object[] startErrorMessage(int keyNamesLn) {
-            return new Object[] { (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"), " failed: " };
-        }
-        
-        static Object[] startErrorMessage(int keyNamesLn, int index) {
-            return new Object[] {
-                    (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"),
-                    " failed at sequence index ", Integer.valueOf(index),
-                    (index == 0 ? ": " : " (0-based): ") };
-        }
-        
-        static final int KEY_TYPE_NOT_YET_DETECTED = 0;
-
-        static final int KEY_TYPE_STRING = 1;
-
-        static final int KEY_TYPE_NUMBER = 2;
-
-        static final int KEY_TYPE_DATE = 3;
-        
-        static final int KEY_TYPE_BOOLEAN = 4;
-        
         @Override
         TemplateModel calculateResult(TemplateSequenceModel seq)
                 throws TemplateModelException {
             return sort(seq, null);
         }
-        
+
+        static Object[] startErrorMessage(int keyNamesLn) {
+            return new Object[] { (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"), " failed: " };
+        }
+
     }
 
     static class sequenceBI extends BuiltIn {
