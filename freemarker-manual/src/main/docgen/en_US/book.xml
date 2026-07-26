@@ -11298,8 +11298,8 @@ TemplateHashModel fileStatics =
 
           <para>And you will get a template hash model that exposes all static
           methods and static fields (both final and non-final) of the
-          <literal>java.io.File</literal> class as hash keys. Suppose that
-          you put the previous model in your root model:</para>
+          <literal>java.io.File</literal> class as hash keys. Suppose that you
+          put the previous model in your root model:</para>
 
           <programlisting role="unspecified">root.put("File", fileStatics);</programlisting>
 
@@ -14071,17 +14071,17 @@ Green Mouse</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Removes a leading-whitespace prefix from each line of the
-          string. The built-in has two forms: a no-argument form that strips
-          common leading whitespace automatically, and an explicit-prefix form
-          for exact control. This is the inverse of the <link
+          <para>Removes a leading prefix from each line of the string. The
+          built-in has two forms: a no-argument form that strips common
+          leading whitespace automatically, and an explicit-prefix form for
+          exact control. This is the inverse of the <link
           linkend="ref_builtin_indent"><literal>indent</literal></link>
-          built-in. Line breaks can be <literal>LF</literal>,
-          <literal>CR</literal>, or <literal>CRLF</literal>, and are kept as
-          is.</para>
+          built-in. Line-breaks can be <literal>LF</literal> (Linux), or
+          <literal>CRLF</literal> (DOS/Windows), even <literal>CR</literal>
+          (old Mac), and are kept as is.</para>
 
           <para>The <emphasis>no-argument form</emphasis>
-          (<literal>?dedent()</literal>) finds the longest leading whitespace
+          (<literal>?dedent</literal>) finds the longest leading whitespace
           (spaces and tabs only) that is a common prefix of every non-empty
           line, and removes it. This is robust to imperfect input: lines with
           different leading-whitespace amounts work as expected, and
@@ -14091,14 +14091,15 @@ Green Mouse</programlisting>
 
           <para>For example:</para>
 
-          <programlisting role="template">&lt;#assign code = "  int x;\n    int y;\n  int z;" /&gt;
-[${code?dedent()}]</programlisting>
+          <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+[${code?dedent}]</programlisting>
 
-          <para>will output this (the common prefix is 2 spaces):</para>
+          <para>will output this (the common prefix was 2 spaces, which was
+          removed):</para>
 
-          <programlisting role="output">[int x;
-  int y;
-int z;]</programlisting>
+          <programlisting role="output">if (x) {
+  foo();
+}</programlisting>
 
           <para>A leading tab and a leading space are treated as distinct
           characters (they have no common prefix), matching Python's
@@ -14106,29 +14107,38 @@ int z;]</programlisting>
 
           <para>The <emphasis>explicit-prefix form</emphasis>
           (<literal>?dedent(prefix)</literal>) removes the given prefix from
-          each line that starts with it. Lines that don't start with the prefix
-          are left unchanged. Use this when you want exact control rather than
-          automatic common-prefix detection. For example:</para>
+          each line that starts with it. Lines that don't start with the
+          prefix are left unchanged. Use this when you want exact control
+          rather than automatic common-prefix detection. For example:</para>
 
-          <programlisting role="template">&lt;#assign code = "    int x;\n    int y;" /&gt;
-[${code?dedent("    ")}]</programlisting>
+          <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+${code?dedent(" ")}</programlisting>
 
-          <para>will output this:</para>
+          <para>will output this (removed just 1 space of indentation, so the
+          1st line still has 1 space of indentation, and the 2nd has 3 spaces
+          of indentation):</para>
 
-          <programlisting role="output">[int x;
-int y;]</programlisting>
+          <programlisting role="output"> if (x) {
+   foo();
+ }</programlisting>
 
           <para>Lines that don't start with the prefix are unaffected, so with
           a 4-space prefix:</para>
 
-          <programlisting role="template">&lt;#assign text = "  short\n      long" /&gt;
-${text?dedent("    ")}</programlisting>
+          <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+${code?dedent("    ")}</programlisting>
 
-          <para>will output this (the first line had only 2 leading spaces, so
-          it's unchanged; the second had at least 4, so 4 were removed):</para>
+          <para>will output this (the second line had at least 4 space
+          indentation, so 4 were removed, the other lines only had 2 spaces,
+          so they were left alone):</para>
 
-          <programlisting role="output">  short
-  long</programlisting>
+          <programlisting role="output">  if (x) {
+foo();
+  }</programlisting>
+
+          <para>See also the <link
+          linkend="ref_builtin_indent"><literal>indent</literal>
+          built-in</link>, which is its inverse.</para>
         </section>
 
         <section xml:id="ref_builtin_empty_to_null">
@@ -14445,19 +14455,20 @@ R&amp;amp;D</programlisting>
           each line. The parameter is most often some spaces or tabs used for
           indentation, but can be any string. Lines that are empty (i.e., the
           line break immediately follows the previous line break, or the line
-          is the empty last line) are not prefixed. Line breaks can be
-          <literal>LF</literal>, <literal>CR</literal>, or
-          <literal>CRLF</literal>, and are kept as is.</para>
+          is the empty last line) are not prefixed. Line-breaks can be
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac), and are kept as
+          is.</para>
 
           <para>For example, this:</para>
 
           <programlisting role="template">&lt;#assign code = "int x;\nint y;" /&gt;
-[${code?indent("    ")}]</programlisting>
+${code?indent("    ")}</programlisting>
 
           <para>will output this:</para>
 
-          <programlisting role="output">[    int x;
-    int y;]</programlisting>
+          <programlisting role="output">    int x;
+    int y;</programlisting>
 
           <para>Another example, using a non-whitespace prefix:</para>
 
@@ -14469,9 +14480,9 @@ ${text?indent(" * ")}</programlisting>
           <programlisting role="output"> * First line.
  * Second line.</programlisting>
 
-          <para>See also: the <link
-          linkend="ref_builtin_dedent"><literal>dedent</literal></link>
-          built-in, which is its inverse.</para>
+          <para>See also the <link
+          linkend="ref_builtin_dedent"><literal>dedent</literal>
+          built-in</link>, which is its inverse.</para>
         </section>
 
         <section xml:id="ref_builtin_index_of">
@@ -15164,25 +15175,28 @@ ${s?no_esc}</programlisting>
           already at least that long are left unchanged. Unlike <link
           linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>,
           which operates on the string as a whole, this operates on each line
-          separately, which is useful for aligning multi-line text. Empty lines
-          are not padded. Line breaks can be <literal>LF</literal>,
-          <literal>CR</literal>, or <literal>CRLF</literal>, and are kept as
-          is.</para>
+          separately, which is useful for aligning multi-line text. Empty
+          lines are not padded. Line-breaks can be <literal>LF</literal>
+          (Linux), or <literal>CRLF</literal> (DOS/Windows), even
+          <literal>CR</literal> (old Mac), and are kept as is.</para>
 
           <para>For example, this:</para>
 
           <programlisting role="template">&lt;#assign code = "int x;\nString name;\nboolean active;" /&gt;
 ${code?right_pad_lines(20)}done</programlisting>
 
-          <para>will output this (each line padded to width 20):</para>
+          <para>will output this (each line padded to width 20, the <phrase
+          role="markedInvisibleText">[BR]</phrase> is only shown below to
+          illustrate the line-break):</para>
 
-          <programlisting role="output">int x;
-String name;
+          <programlisting role="output">int x;              <phrase
+              role="markedInvisibleText">[BR]</phrase>
+String name;        <phrase role="markedInvisibleText">[BR]</phrase>
 boolean active;     done</programlisting>
 
-          <para>If used with 2 parameters, the 2nd parameter specifies the fill
-          character to use instead of space. It must be a string exactly 1
-          character long. For example:</para>
+          <para>If used with 2 parameters, the 2nd parameter specifies the
+          fill character to use instead of space. It must be a string exactly
+          1 character long. For example:</para>
 
           <programlisting role="template">${"a\nbb"?right_pad_lines(5, ".")}</programlisting>
 
@@ -16170,48 +16184,83 @@ ${x?url}</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Word-wraps the string so that no line is longer than the column
-          (width) given as the 1st parameter, breaking only between words
-          (runs of <link linkend="gloss.whiteSpace">white-space</link> in the
-          input are treated as word boundaries and collapsed to a single
-          space). The 2nd parameter is a prefix prepended to the first output
-          line; the optional 3rd parameter is a prefix prepended to all
-          subsequent lines (if omitted, the 2nd parameter is used for all
-          lines). The result always ends with a line break.</para>
+          <para>Word-wraps the string so that if possible, no line is longer
+          than the width given as the 1st parameter. It breaks line at <link
+          linkend="gloss.whiteSpace">white-space</link> only. A section
+          without white-space that's longer than the width is emitted on its
+          own line without being broken.</para>
 
-          <para>This is useful for generating wrapped comments, such as
-          documentation blocks. For example:</para>
+          <para><link linkend="gloss.whiteSpace">White-space</link>
+          treatment:</para>
 
-          <programlisting role="template">&lt;#assign text = "This is a long description that should be wrapped" /&gt;
+          <itemizedlist>
+            <listitem>
+              <para>Each continuous sequence of white-space characters in the
+              input is in effect collapsed to a single space, or removed if
+              they are before a word-wrapping line-break</para>
+            </listitem>
+
+            <listitem>
+              <para>The result always ends with a single line-break</para>
+            </listitem>
+
+            <listitem>
+              <para>All leading and trailing whitespace of the input
+              (including line-breaks!) is removed in effect</para>
+            </listitem>
+
+            <listitem>
+              <para>Non-breaking space (U+00A0) is <emphasis>not</emphasis>
+              treated as white-space by this built-in. <phrase
+              role="forProgrammers">(We treat the Java regular expression
+              <literal>\s</literal> as white-space, which does
+              <emphasis>not</emphasis> include the non-breaking
+              space.)</phrase></para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${"Some long text that need to be wrapper at reasonable width"?wrap(25)}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">Some long text that need
+to be wrapper at
+reasonable width
+</programlisting>
+
+          <para>The width parameter is truncated to integer, and must be at
+          least 1.</para>
+
+          <section>
+            <title>Adding line suffixed</title>
+
+            <para>An optional 2nd parameter is a prefix prepended to the first
+            output line. The optional 3rd parameter is a prefix prepended to
+            all subsequent lines. If the 3rd parameter is omitted, the 2nd
+            parameter is used for all lines.</para>
+
+            <para>This is useful for generating wrapped comments, such as
+            documentation blocks. For example:</para>
+
+            <programlisting role="template">&lt;#assign text = "This is a long description that should be wrapped" /&gt;
 ${text?wrap(40, " * @brief ", " *         ")}</programlisting>
 
-          <para>will output this:</para>
+            <para>will output this:</para>
 
-          <programlisting role="output"> * @brief This is a long description
+            <programlisting role="output"> * @brief This is a long description
  *         that should be wrapped</programlisting>
 
-          <para>With a single prefix used for all lines:</para>
+            <para>With a single prefix used for all lines:</para>
 
-          <programlisting role="template">${"A comment that needs to be wrapped at a reasonable width"?wrap(40, "// ")}</programlisting>
+            <programlisting role="template">${"A comment that needs to be wrapped at a reasonable width"?wrap(40, "// ")}</programlisting>
 
-          <para>will output this:</para>
+            <para>will output this:</para>
 
-          <programlisting role="output">// A comment that needs to be wrapped at
+            <programlisting role="output">// A comment that needs to be wrapped at
 // a reasonable width</programlisting>
-
-          <para>The 1st parameter (width) must be at least 1. A single word
-          longer than the width is emitted on its own line without being
-          broken.</para>
-
-          <note>
-            <para>Widths are counted in Java <literal>char</literal>s (UTF-16
-            code units), not visual display columns. A tab counts as one
-            character. Words are split on Java's <literal>\s+</literal>
-            character class, which does <emphasis>not</emphasis> include
-            U+00A0 (the non-breaking space) — so a non-breaking space stays
-            inside a word and is never used as a break point. This is the
-            intended behaviour of non-breaking spaces.</para>
-          </note>
+          </section>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
@@ -30848,6 +30897,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <title>2.3.35</title>
 
         <para>Release date: [TODO]</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>New built-ins, mostly useful for source code (or
+              configuration file) generation: <link
+              linkend="ref_builtin_dedent">dedent</link>, <link
+              linkend="ref_builtin_indent">indent</link>, <link
+              linkend="ref_builtin_right_pad_lines">right_pad_lines</link>,
+              <link linkend="ref_builtin_wrap">wrap</link></para>
+            </listitem>
+          </itemizedlist>
+        </section>
 
         <section>
           <title>Changes on the Java side</title>

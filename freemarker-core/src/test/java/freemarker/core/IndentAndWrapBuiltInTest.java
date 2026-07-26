@@ -20,279 +20,120 @@ package freemarker.core;
 
 import static org.junit.Assert.*;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import org.junit.Test;
 
 import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.test.TemplateTest;
 
-public class IndentAndWrapBuiltInTest {
+/**
+ * Checks indent/dedend/wrap built-ns; for the thorough testing of the text transformations see the
+ * {@link _CoreStringUtilsTest}!
+ */
+public class IndentAndWrapBuiltInTest extends TemplateTest {
 
-    private String eval(String expr) throws Exception {
-        return eval(expr, new HashMap<String, Object>());
-    }
-
-    private String eval(String expr, Map<String, Object> model) throws Exception {
-        String templateContent = "${" + expr + "}";
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
-        Template t = new Template("test.ftl", new StringReader(templateContent), cfg);
-        StringWriter sw = new StringWriter();
-        t.process(model, sw);
-        return sw.toString();
-    }
-
-    // ---- ?indent tests ----
-
-    @Test
-    public void testIndentSingleLine() throws Exception {
-        assertEquals("    hello", eval("'hello'?indent('    ')"));
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        return new Configuration(Configuration.VERSION_2_3_35);
     }
 
     @Test
-    public void testIndentMultiLine() throws Exception {
-        assertEquals("  line1\n  line2\n  line3",
-                eval("'line1\\nline2\\nline3'?indent('  ')"));
+    public void testIndentBasic() throws Exception {
+        assertExpOutput("'line1\\nline2'?indent(' * ')", " * line1\n * line2");
     }
 
     @Test
-    public void testIndentWithPrefix() throws Exception {
-        assertEquals(" * line1\n * line2",
-                eval("'line1\\nline2'?indent(' * ')"));
+    public void testIndentBadNumberOfArgs() {
+        assertErrorContains("${''?indent()}",  "?indent", "expects 1 argument");
+        assertErrorContains("${''?indent(1, 2)}",  "?indent", "expects 1 argument");
     }
 
     @Test
-    public void testIndentEmptyString() throws Exception {
-        assertEquals("", eval("''?indent('  ')"));
+    public void testWrap1Arg() throws Exception {
+        assertExpOutput("'Hello world'?wrap(4)", "Hello\nworld\n");
+        assertExpOutput("'Hello world'?wrap(40)", "Hello world\n");
     }
 
     @Test
-    public void testIndentPreservesBlankLines() throws Exception {
-        assertEquals("  a\n\n  b",
-                eval("'a\\n\\nb'?indent('  ')"));
+    public void testWrap2Arg() throws Exception {
+        assertExpOutput("'Hello world'?wrap(4, '* ')", "* Hello\n* world\n");
     }
 
     @Test
-    public void testIndentTrailingNewline() throws Exception {
-        assertEquals("  a\n  b\n",
-                eval("'a\\nb\\n'?indent('  ')"));
-    }
-
-    // ---- ?wrap tests ----
-
-    @Test
-    public void testWrapBasic() throws Exception {
-        assertEquals(" * @brief Hello world.\n",
-                eval("'Hello world.'?wrap(40, ' * @brief ')"));
+    public void testWrap3Args() throws Exception {
+        assertExpOutput("'Hello world'?wrap(4, '* ', '  ')", "* Hello\n  world\n");
     }
 
     @Test
-    public void testWrapLongText() throws Exception {
-        String text = "This is a long description that should be wrapped at the specified width";
-        Map<String, Object> model = new HashMap<>();
-        model.put("text", text);
-        String result = eval("text?wrap(40, ' * ', ' * ')", model);
-        // Every line should end with \n and be <= 40 chars (excluding \n)
-        String[] lines = result.split("\n", -1);
-        // Last element is empty after trailing \n
-        for (int i = 0; i < lines.length - 1; i++) {
-            assertTrue("Line " + i + " too long: [" + lines[i] + "] (" + lines[i].length() + " chars)",
-                    lines[i].length() <= 40);
-        }
-        assertTrue(result.startsWith(" * This"));
+    public void testWrapNoArgTypeCoercion() throws Exception {
+        assertErrorContains("${''?wrap(4, 1)}", "string as argument #2");
     }
 
     @Test
-    public void testWrapWithDifferentPrefixes() throws Exception {
-        String text = "This is a description that needs wrapping to fit within bounds";
-        Map<String, Object> model = new HashMap<>();
-        model.put("text", text);
-        String result = eval("text?wrap(40, ' * @brief ', ' *          ')", model);
-        assertTrue(result.startsWith(" * @brief "));
-        // Second line should start with rest prefix
-        String[] lines = result.split("\n");
-        if (lines.length > 1) {
-            assertTrue("Second line should start with rest prefix",
-                    lines[1].startsWith(" *          "));
-        }
+    public void testWrapBadNumberOfArgs() {
+        assertErrorContains("${''?wrap()}",  "?wrap", "expects 1 to 3 arguments");
+        assertErrorContains("${''?wrap(4, '*', '**', '***')}",  "?wrap", "expects 1 to 3 arguments");
     }
 
     @Test
-    public void testWrapSamePrefix() throws Exception {
-        // Two-arg form: same prefix for all lines
-        assertEquals("// hello world\n",
-                eval("'hello world'?wrap(40, '// ')"));
+    public void testWrapArg1AtLeast1() throws TemplateException, IOException {
+        assertErrorContains("${''?wrap(0, '* ')}", "width", "at least 1");
+        assertErrorContains("${''?wrap(-1, '* ')}", "width", "at least 1");
     }
 
     @Test
-    public void testWrapSingleLongWord() throws Exception {
-        // A single word longer than width — can't break, just emit it
-        String result = eval("'superlongword'?wrap(5, '')");
-        assertEquals("superlongword\n", result);
-    }
-
-    @Test(expected = TemplateException.class)
-    public void testWrapZeroWidthThrows() throws Exception {
-        eval("'hello'?wrap(0, '')");
-    }
-
-    // ---- ?dedent tests ----
-
-    @Test
-    public void testDedentBasic() throws Exception {
-        assertEquals("int x;\nint y;\n",
-                eval("'    int x;\\n    int y;\\n'?dedent('    ')"));
+    public void testWrapBadArgTypeError() {
+        assertErrorContains("${''?wrap('4', '*')}",  "number as argument #1");
     }
 
     @Test
-    public void testDedentNoMatch() throws Exception {
-        // Line doesn't start with prefix — left unchanged
-        // "  short" has only 2 spaces, doesn't match 4-space prefix → unchanged
-        // "    full" has 4 spaces, matches prefix → stripped
-        assertEquals("  short\nfull\n",
-                eval("'  short\\n    full\\n'?dedent('    ')"));
+    public void testDedent1Arg() throws Exception {
+        assertExpOutput("'    int x;\\n    int y;\\n'?dedent('    ')", "int x;\nint y;\n");
+        assertExpOutput("'  hello'?dedent('')", "  hello");
     }
 
     @Test
-    public void testDedentMixed() throws Exception {
-        // Some lines match, some don't
-        assertEquals("a\n  b\nc\n",
-                eval("'  a\\n    b\\n  c\\n'?dedent('  ')"));
+    public void testDedent0Arg() throws Exception {
+        assertExpOutput("'  a\\n   b\\n  c'?dedent", "a\n b\nc");
     }
 
     @Test
-    public void testDedentEmptyString() throws Exception {
-        assertEquals("", eval("''?dedent('  ')"));
+    public void testDedentBadNumberOfArgs() {
+        assertErrorContains("${''?dedent()}",  "?dedent", "expects 1 argument");
+        assertErrorContains("${''?dedent('  ', 2)}",  "?dedent", "expects 1 argument");
     }
 
     @Test
-    public void testDedentEmptyPrefix() throws Exception {
-        assertEquals("  hello", eval("'  hello'?dedent('')"));
+    public void testDedentNoArgTypeCoercion() throws Exception {
+        assertErrorContains("${''?dedent(1)}", "string as argument #1");
     }
 
     @Test
-    public void testDedentNoTrailingNewline() throws Exception {
-        assertEquals("hello",
-                eval("'    hello'?dedent('    ')"));
+    public void testRightPad1Arg() throws Exception {
+        assertExpOutput("'a\nbb\nccc'?right_pad_lines(5)", "a    \nbb   \nccc  ");
     }
 
     @Test
-    public void testDedentSymmetryWithIndent() throws Exception {
-        // indent then dedent should round-trip
-        Map<String, Object> model = new HashMap<>();
-        model.put("text", "line1\nline2\nline3");
-        assertEquals("line1\nline2\nline3",
-                eval("text?indent('  ')?dedent('  ')", model));
-    }
-
-    // ---- ?dedent (no-args, Python textwrap.dedent-style) tests ----
-
-    @Test
-    public void testDedentNoArgsUniformIndent() throws Exception {
-        assertEquals("a\nb\nc",
-                eval("'    a\\n    b\\n    c'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsMixedIndent() throws Exception {
-        // The longest common leading whitespace across non-empty lines is 2 spaces.
-        assertEquals("a\n  b\n    c",
-                eval("'  a\\n    b\\n      c'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsRespectsEmptyLines() throws Exception {
-        // Empty/whitespace-only lines are ignored when computing the common prefix
-        // and pass through unchanged.
-        assertEquals("a\n\nb",
-                eval("'    a\\n\\n    b'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsNoCommonPrefix() throws Exception {
-        // If lines have no common leading whitespace, nothing is stripped.
-        assertEquals("a\n    b",
-                eval("'a\\n    b'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsTabAndSpaceDistinct() throws Exception {
-        // A leading tab and a leading space have no common prefix.
-        // (Same behaviour as Python textwrap.dedent.)
-        assertEquals("\ta\n    b",
-                eval("'\\ta\\n    b'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsTabsOnly() throws Exception {
-        assertEquals("a\nb",
-                eval("'\\t\\ta\\n\\t\\tb'?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsEmptyString() throws Exception {
-        assertEquals("", eval("''?dedent()"));
-    }
-
-    @Test
-    public void testDedentNoArgsAlreadyDedented() throws Exception {
-        // No common leading whitespace => no change.
-        assertEquals("a\nb\nc",
-                eval("'a\\nb\\nc'?dedent()"));
-    }
-
-    // ---- ?right_pad_lines tests ----
-
-    @Test
-    public void testRightPadLinesBasic() throws Exception {
-        assertEquals("a         \nbb        \nccc       \n",
-                eval("'a\\nbb\\nccc\\n'?right_pad_lines(10)"));
-    }
-
-    @Test
-    public void testRightPadLinesWithFillChar() throws Exception {
-        assertEquals("a.........\nbb........\n",
-                eval("'a\\nbb\\n'?right_pad_lines(10, '.')"));
-    }
-
-    @Test
-    public void testRightPadLinesLinePastColumn() throws Exception {
-        // "long line" (9 chars) past column 5 — no padding
-        // "ab" (2 chars) shorter than column 5 — padded
-        assertEquals("long line\nab   \n",
-                eval("'long line\\nab\\n'?right_pad_lines(5)"));
-    }
-
-    @Test
-    public void testRightPadLinesNoTrailingNewline() throws Exception {
-        assertEquals("a         ",
-                eval("'a'?right_pad_lines(10)"));
-    }
-
-    @Test
-    public void testRightPadLinesEmpty() throws Exception {
-        assertEquals("", eval("''?right_pad_lines(10)"));
+    public void testRightPad2Arg() throws Exception {
+        assertExpOutput("'a\nbb\nccc'?right_pad_lines(5, '.')", "a....\nbb...\nccc..");
     }
 
     @Test
     public void testRightPadLinesCamelCase() throws Exception {
-        assertEquals("a    \nbb   \n",
-                eval("'a\\nbb\\n'?rightPadLines(5)"));
+        assertExpOutput("'a\nbb\nccc'?rightPadLines(5, '.')", "a....\nbb...\nccc..");
     }
 
     @Test
-    public void testRightPadLinesCodeAlignment() throws Exception {
-        // Practical use: align code for trailing comments
-        Map<String, Object> model = new HashMap<>();
-        model.put("code", "int x;\nString name;\nboolean active;\n");
-        String result = eval("code?right_pad_lines(20)", model);
-        String[] lines = result.split("\n", -1);
-        assertEquals("int x;              ", lines[0]);
-        assertEquals("String name;        ", lines[1]);
-        assertEquals("boolean active;     ", lines[2]);
+    public void testRightPadLinesBadNumberOfArgs() {
+        assertErrorContains("${''?right_pad_lines()}",  "?right_pad_lines", "expects 1 or 2 arguments");
+        assertErrorContains("${''?rightPadLines(1, '.', 3)}",  "?rightPadLines", "expects 1 or 2 arguments");
+    }
+
+    @Test
+    public void testRightPadLinesNoArgTypeCoercion() throws Exception {
+        assertErrorContains("${''?right_pad_lines('1', '.')}", "number as argument #1");
+        assertErrorContains("${''?right_pad_lines(1, 2)}", "string as argument #2");
     }
 }
