@@ -507,8 +507,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     /**
      * Gets a method argument and checks if it's a boolean; it does NOT check if {@code args} is big enough.
      */
-    protected final boolean getBooleanMethodArg(List args, int argIdx)
-            throws TemplateModelException {
+    protected final boolean getBooleanMethodArg(List args, int argIdx) throws TemplateModelException {
         TemplateModel arg = (TemplateModel) args.get(argIdx);
         if (!(arg instanceof TemplateBooleanModel)) {
             throw _MessageUtil.newMethodArgMustBeBooleanException("?" + key, argIdx, arg);

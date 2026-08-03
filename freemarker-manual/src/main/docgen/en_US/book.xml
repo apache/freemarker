@@ -14066,59 +14066,63 @@ Green Mouse</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Removes a leading prefix from each line of the string. The
-          built-in has two forms: a no-argument form that strips common
-          leading whitespace automatically, and an explicit-prefix form for
-          exact control. This is the inverse of the <link
-          linkend="ref_builtin_indent"><literal>indent</literal></link>
+          <para>Removes a leading prefix (usually indentation) from each line
+          of the string. The built-in has two forms: a no-argument form that
+          strips common leading whitespace automatically, and an
+          explicit-prefix form for exact control. This is the inverse of the
+          <link linkend="ref_builtin_indent"><literal>indent</literal></link>
           built-in. Line-breaks can be <literal>LF</literal> (Linux), or
           <literal>CRLF</literal> (DOS/Windows), even <literal>CR</literal>
           (old Mac), and are kept as is.</para>
 
           <para>The <emphasis>no-argument form</emphasis>
-          (<literal>?dedent</literal>) finds the longest leading whitespace
-          (spaces and tabs only) that is a common prefix of every non-empty
-          line, and removes it. This is robust to imperfect input: lines with
-          different leading-whitespace amounts work as expected, and lines that
-          are empty or contain whitespace only are ignored when computing the
-          common prefix (and are empty in the output, as their whitespace was
-          accidental anyway). The semantics match Python's
-          <literal>textwrap.dedent</literal>.</para>
+          (<literal>?dedent</literal>) finds the longest indentation (spaces
+          and tabs only) that is a common prefix and removes it. Lines that
+          are empty or only contain spaces and tabs are treated specially;
+          they don't influence the computation of the longest indentation, and
+          will be replaced with an empty (line-break only) line in the output.
+          (These semantics match Python's
+          <literal>textwrap.dedent</literal>.)</para>
 
           <para>For example:</para>
 
           <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
-[${code?dedent}]</programlisting>
+// &lt;- touches left margin
+${code?dedent}</programlisting>
 
-          <para>will output this (the common prefix was 2 spaces, which was
-          removed):</para>
+          <para>will output this (the common indentation prefix was 2 spaces,
+          which was now removed from each line):</para>
 
-          <programlisting role="output">if (x) {
+          <programlisting role="output">// &lt;- touches left margin
+if (x) {
   foo();
 }</programlisting>
 
           <para>A leading tab and a leading space are treated as distinct
-          characters (they have no common prefix), matching Python's
-          behaviour.</para>
+          characters (we don't resolve tabs to space or vice versa).</para>
 
           <para>The <emphasis>explicit-prefix form</emphasis>
           (<literal>?dedent(prefix)</literal>) removes from each line the
-          longest prefix of the <literal>prefix</literal> parameter that the
-          line actually starts with. So a line that carries the whole prefix
-          loses all of it, a line that carries only part of it loses that
-          part, and a line that has nothing in common with it is left
-          unchanged. Use this form when you want to specify the amount of
-          indentation to remove, rather than letting it be detected. For
-          example:</para>
+          longest leading section of the <literal>prefix</literal> parameter
+          that the line starts with. So for
+          <literal>?dedent("1234")</literal>, the line <quote>1234x</quote> is
+          reduced <quote>x</quote>, and so are <quote>123x</quote>,
+          <quote>12x</quote>, and <quote>1x</quote> too, as they start the
+          same as <quote>1234</quote>. But a line like <quote>x1234x</quote>
+          or <quote>234x</quote>, would remain unchanged. Use this form when
+          you want to specify the amount of indentation to remove, rather than
+          letting it be detected. For example:</para>
 
           <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+// &lt;- touches left margin
 ${code?dedent(" ")}</programlisting>
 
           <para>will output this (removed just 1 space of indentation, so the
           1st line still has 1 space of indentation, and the 2nd has 3 spaces
           of indentation):</para>
 
-          <programlisting role="output"> if (x) {
+          <programlisting role="output">// &lt;- touches left margin
+ if (x) {
    foo();
  }</programlisting>
 
@@ -14126,33 +14130,31 @@ ${code?dedent(" ")}</programlisting>
           that simply lose all the indentation they have:</para>
 
           <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+// &lt;- touches left margin
 ${code?dedent("    ")}</programlisting>
 
           <para>will output this (the 2nd line had 4 spaces, so all 4 were
-          removed; the other lines only had 2, so those 2 were removed):</para>
+          removed; the other lines only had 2, so those 2 were
+          removed):</para>
 
-          <programlisting role="output">if (x) {
+          <programlisting role="output">// &lt;- touches left margin
+if (x) {
 foo();
 }</programlisting>
 
           <note>
             <para>Partial matches are shortened rather than ignored on
-            purpose. As <link
-            linkend="ref_builtin_indent"><literal>indent</literal></link> adds
-            the prefix to every line unconditionally, an all-or-nothing dedent
-            could leave a line that was originally the least indented as the
-            most indented one, which is more surprising than flattening the
-            indentation unevenly.</para>
+            purpose. This is what's familiar from code text editors, when you
+            repeatedly dedent a block of text, and some lines already have too
+            low indentation. Also, an all-or-nothing dedent could leave a line
+            that was originally the least indented as the most indented one,
+            which is a more confusing result than partially flattening
+            indentation hierarchy.</para>
           </note>
-
-          <para>Since a line containing whitespace only can't carry more than
-          whitespace, such a line loses its whitespace up to the length of the
-          prefix; that's why it ends up behaving like an empty line
-          here.</para>
 
           <para>See also the <link
           linkend="ref_builtin_indent"><literal>indent</literal>
-          built-in</link>, which is its inverse.</para>
+          built-in</link>, which is its inverse (roughly).</para>
         </section>
 
         <section xml:id="ref_builtin_empty_to_null">
@@ -14465,13 +14467,14 @@ R&amp;amp;D</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Prepends the string given as the 1st parameter to the beginning
-          of each line, then removes the trailing whitespace of each resulting
-          line (unless that's switched off with the 2nd parameter). The 1st
-          parameter is most often some spaces or tabs used for indentation, but
-          can be any string. Line-breaks can be <literal>LF</literal> (Linux),
-          or <literal>CRLF</literal> (DOS/Windows), even <literal>CR</literal>
-          (old Mac), and are kept as is.</para>
+          <para>Prepends the string given as the 1st parameter to the
+          beginning of each line, then removes the trailing whitespace of each
+          resulting line (unless that's switched off with the 2nd parameter).
+          The 1st parameter is most often some spaces or tabs used for
+          indentation, but can be any string. Line-breaks can be
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac), and are kept as
+          is.</para>
 
           <para>For example, this:</para>
 
@@ -14494,10 +14497,11 @@ ${text?indent(" * ")}</programlisting>
  * Second line.</programlisting>
 
           <para>The prefix is added to <emphasis>every</emphasis> line,
-          including lines that are empty or contain whitespace only. That would
-          leave a trailing prefix on such lines, which is why the trailing
-          whitespace of each line is removed afterwards. Consider commenting
-          out a block of text with a <literal>"# "</literal> prefix:</para>
+          including lines that are empty or contain whitespace only. That
+          would leave a trailing prefix on such lines, which is why the
+          trailing whitespace of each line is removed afterwards. Consider
+          commenting out a block of text with a <literal>"# "</literal>
+          prefix:</para>
 
           <programlisting role="template">&lt;#assign text = "First paragraph.\n\nSecond paragraph." /&gt;
 ${text?indent("# ")}</programlisting>
@@ -14511,9 +14515,9 @@ ${text?indent("# ")}</programlisting>
 #
 # Second paragraph.</programlisting>
 
-          <para>With a whitespace-only prefix this leaves empty lines empty, so
-          the trimming is only visible with prefixes like the above. It also
-          means that lines that are empty and lines that only contain
+          <para>With a whitespace-only prefix this leaves empty lines empty,
+          so the trimming is only visible with prefixes like the above. It
+          also means that lines that are empty and lines that only contain
           whitespace give the same result, and that accidental trailing
           whitespace is removed from the other lines as well.</para>
 
@@ -14531,7 +14535,7 @@ ${text?indent("# ")}</programlisting>
 
           <para>See also the <link
           linkend="ref_builtin_dedent"><literal>dedent</literal>
-          built-in</link>, which is its inverse.</para>
+          built-in</link>, which is its inverse (roughly).</para>
         </section>
 
         <section xml:id="ref_builtin_index_of">
@@ -16188,7 +16192,7 @@ ${x?url}</programlisting>
             </listitem>
 
             <listitem>
-              <para>The result always ends with a single line-break</para>
+              <para>The result always ends with a line-break</para>
             </listitem>
 
             <listitem>

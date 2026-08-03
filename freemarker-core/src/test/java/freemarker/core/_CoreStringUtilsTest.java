@@ -276,8 +276,8 @@ public class _CoreStringUtilsTest {
     public void testDedentPartialPrefixNonWhitespace() {
         // Every one of these loses whatever it shares with "---", so all end up as "a".
         assertEquals(
-                "a\na\na\na\n",
-                _CoreStringUtils.dedent("a\n-a\n--a\n---a\n", "---")
+                "a\na\na\na\nx123a\n23a",
+                _CoreStringUtils.dedent("a\n1a\n12a\n123a\nx123a\n23a", "123")
         );
     }
 
@@ -291,12 +291,12 @@ public class _CoreStringUtilsTest {
     }
 
     @Test
-    public void testDedentWhitespaceOnlyLineBecomesEmpty() {
+    public void testDedentWhitespaceOnlyLineIsNotTrimmed() {
         // The 2 spaces are all this line shares with the 4-space prefix, so it's left empty
         // instead of keeping accidental trailing whitespace.
         assertEquals(
-                "a\n\nb\n",
-                _CoreStringUtils.dedent("    a\n  \n    b\n", "    ")
+                "a\n\nb\n \n",
+                _CoreStringUtils.dedent("    a\n  \n    b\n     \n", "    ")
         );
     }
 
@@ -360,6 +360,16 @@ public class _CoreStringUtilsTest {
         assertEquals(
                 "a\n  b\n    c",
                 _CoreStringUtils.dedent("  a\n    b\n      c")
+        );
+    }
+
+    // !!T
+    @Test
+    public void testDedentNoArgsMixedIndentCrLf() {
+        // The longest common leading whitespace across non-empty lines is 2 spaces.
+        assertEquals(
+                "a\r\n  b\r\n    c",
+                _CoreStringUtils.dedent("  a\r\n    b\r\n      c")
         );
     }
 
