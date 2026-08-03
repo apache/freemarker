@@ -509,10 +509,11 @@ class BuiltInsForStringsBasic {
             @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 1);
+                checkMethodArgCount(argCnt, 1, 2);
 
                 String prefix = getStringMethodArg(args, 0);
-                return new SimpleScalar(_CoreStringUtils.indent(s, prefix));
+                boolean rightTrim = getOptBooleanMethodArg(args, 1, true);
+                return new SimpleScalar(_CoreStringUtils.indent(s, prefix, rightTrim));
             }
         }
 
@@ -591,49 +592,6 @@ class BuiltInsForStringsBasic {
                     }
                 } else {
                     throw new BugException("Unexpected argCnt");
-                }
-
-                return new SimpleScalar(result);
-            }
-        }
-
-        @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
-            return new BIMethod(s);
-        }
-    }
-
-    static class right_pad_linesBI extends BuiltInForString {
-
-        private class BIMethod implements TemplateMethodModelEx {
-
-            private final String s;
-
-            private BIMethod(String s) {
-                this.s = s;
-            }
-
-            @Override
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 2);
-
-                int width = getNumberMethodArg(args, 0).intValue();
-                if (width < 0) {
-                    throw new _TemplateModelException(
-                            "?", key, "(...) argument #1 must be non-negative.");
-                }
-
-                String result;
-                if (argCnt > 1) {
-                    String filling = getStringMethodArg(args, 1);
-                    if (filling.length() != 1) {
-                        throw new _TemplateModelException(
-                                "?", key, "(...) argument #2 must be a single character string.");
-                    }
-                    result = _CoreStringUtils.rightPadLines(s, width, filling.charAt(0));
-                } else {
-                    result = _CoreStringUtils.rightPadLines(s, width);
                 }
 
                 return new SimpleScalar(result);

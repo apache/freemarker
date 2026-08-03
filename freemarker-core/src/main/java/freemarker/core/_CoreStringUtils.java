@@ -156,27 +156,62 @@ public final class _CoreStringUtils {
         return sb.toString();
     }
 
+    /**
+     * Same as {@link #indent(String, String, boolean)} with {@code rightTrim} set to {@code true}.
+     */
     public static String indent(String s, String prefix) {
-        if (s == null || s.isEmpty() || prefix.isEmpty()) {
+        return indent(s, prefix, true);
+    }
+
+    /**
+     * Prepends {@code prefix} to each line, then, if {@code rightTrim} is {@code true}, removes the trailing
+     * whitespace of each resulting line.
+     *
+     * <p>The prefix is added unconditionally, including to lines that are empty or contain whitespace only. The
+     * right-trimming is what keeps that from leaving junk behind: with a prefix like {@code "# "} an empty line
+     * becomes {@code "#"} rather than a line with a trailing space, and with a whitespace-only prefix it becomes
+     * empty. That's also why empty and whitespace-only lines end up treated alike, without either being a special
+     * case in the code.
+     *
+     * <p>Note that a non-breaking space (U+00A0) isn't whitespace as far as trimming is concerned, so it's kept;
+     * that's the point of a non-breaking space.
+     */
+    public static String indent(String s, String prefix, boolean rightTrim) {
+        if (s == null || s.isEmpty() || (prefix.isEmpty() && !rightTrim)) {
             return s;
         }
 
-        StringBuilder sb = new StringBuilder(s.length() + prefix.length() * 10);
         int len = s.length();
-        boolean atLineStart = true;
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if (atLineStart && c != '\n' && c != '\r') {
-                sb.append(prefix);
+        StringBuilder sb = new StringBuilder(len + prefix.length() * 8);
+        int i = 0;
+        while (i < len) {
+            int lineEnd = findLineEnd(s, i);
+
+            int lineStartInSb = sb.length();
+            sb.append(prefix);
+            sb.append(s, i, lineEnd);
+            if (rightTrim) {
+                int end = sb.length();
+                while (end > lineStartInSb && isTrimmableSpace(sb.charAt(end - 1))) {
+                    end--;
+                }
+                sb.setLength(end);
             }
-            sb.append(c);
-            atLineStart = (c == '\n' || (c == '\r' && (i + 1 >= len || s.charAt(i + 1) != '\n')));
+
+            i = appendEol(s, lineEnd, sb);
         }
         return sb.toString();
     }
 
     /**
-     * Remove the given prefix from each line that starts with it; leave other lines unchanged.
+     * Removes from each line the longest prefix of {@code prefix} that the line starts with. Lines that carry the
+     * whole prefix lose all of it; lines that only carry part of it lose that part; lines that share nothing with it
+     * are left alone.
+     *
+     * <p>This deliberately doesn't require an exact match. Since {@link #indent(String, String, boolean)} adds the
+     * prefix unconditionally, an all-or-nothing dedent could leave a line that was originally the least indented as
+     * the most indented one — so partial matches are shortened rather than ignored. Whitespace-only lines lose their
+     * whitespace up to the length of the prefix, which is what makes them behave like empty lines here.
      */
     public static String dedent(String s, String prefix) {
         if (s == null || s.isEmpty() || prefix.isEmpty()) {
@@ -184,53 +219,71 @@ public final class _CoreStringUtils {
         }
 
         int prefixLen = prefix.length();
-        StringBuilder sb = new StringBuilder(s.length());
         int len = s.length();
-        boolean atLineStart = true;
-        int matchPos = 0;
-        boolean stripping = true;
+        StringBuilder sb = new StringBuilder(len);
+        int i = 0;
+        while (i < len) {
+            int lineEnd = findLineEnd(s, i);
 
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if (atLineStart && stripping) {
-                if (matchPos < prefixLen && c == prefix.charAt(matchPos)) {
-                    matchPos++;
-                    if (matchPos == prefixLen) {
-                        stripping = false;
-                    }
-                    continue; // consume prefix char
-                } else {
-                    // Prefix didn't match — emit what we skipped
-                    sb.append(prefix, 0, matchPos);
-                    stripping = false;
-                }
+            int matched = 0;
+            while (matched < prefixLen && i + matched < lineEnd
+                    && s.charAt(i + matched) == prefix.charAt(matched)) {
+                matched++;
             }
-            sb.append(c);
-            if (c == '\n') {
-                atLineStart = true;
-                matchPos = 0;
-                stripping = true;
-            } else if (c == '\r') {
-                atLineStart = true;
-                matchPos = 0;
-                stripping = true;
-            } else {
-                atLineStart = false;
-            }
-        }
-        // Handle trailing partial match (line without newline)
-        if (stripping && matchPos > 0 && matchPos < prefixLen) {
-            sb.append(prefix, 0, matchPos);
+            sb.append(s, i + matched, lineEnd);
+
+            i = appendEol(s, lineEnd, sb);
         }
         return sb.toString();
     }
 
     /**
+     * Returns the index of the first line-terminator character at or after {@code from}, or the length of {@code s}
+     * if there's none.
+     */
+    private static int findLineEnd(String s, int from) {
+        int len = s.length();
+        int i = from;
+        while (i < len && s.charAt(i) != '\n' && s.charAt(i) != '\r') {
+            i++;
+        }
+        return i;
+    }
+
+    /**
+     * Appends the line terminator found at {@code lineEnd} (if any, treating {@code "\r\n"} as one) to {@code sb},
+     * and returns the index at which the next line starts.
+     */
+    private static int appendEol(String s, int lineEnd, StringBuilder sb) {
+        int len = s.length();
+        if (lineEnd >= len) {
+            return len;
+        }
+        char c = s.charAt(lineEnd);
+        sb.append(c);
+        if (c == '\r' && lineEnd + 1 < len && s.charAt(lineEnd + 1) == '\n') {
+            sb.append('\n');
+            return lineEnd + 2;
+        }
+        return lineEnd + 1;
+    }
+
+    /**
+     * Whether the character counts as trailing whitespace for right-trimming purposes. Line terminators are
+     * excluded, as they're handled separately, and so is anything that {@link Character#isWhitespace(char)} rejects
+     * (notably the non-breaking space).
+     */
+    private static boolean isTrimmableSpace(char c) {
+        return c != '\n' && c != '\r' && Character.isWhitespace(c);
+    }
+
+    /**
      * Strip the longest leading-whitespace string (spaces and tabs only) that
-     * is a common prefix of every non-empty line. Empty lines are ignored when
-     * computing the prefix but remain empty in the output. Mirrors Python's
-     * textwrap.dedent semantics. Note: a leading tab and a leading space do
-     * not collapse — they're distinct characters with no common prefix.
+     * is a common prefix of every non-empty line. Lines that are empty or
+     * contain whitespace only are ignored when computing the prefix, and are
+     * empty in the output. Mirrors Python's textwrap.dedent semantics. Note: a
+     * leading tab and a leading space do not collapse — they're distinct
+     * characters with no common prefix.
      */
     public static String dedent(String s) {
         if (s.isEmpty()) {
@@ -299,10 +352,10 @@ public final class _CoreStringUtils {
                 if (nonEmpty) {
                     // Non-empty line: by construction it has the common prefix.
                     sb.append(s, lineStart + prefixLen, i);
-                } else {
-                    // Whitespace-only or empty line — keep as is.
-                    sb.append(s, lineStart, i);
                 }
+                // Else: a whitespace-only line, which is normalized to empty rather than kept as is. Its
+                // whitespace is accidental (whatever the emitting loop happened to produce), and keeping it would
+                // mean leaving trailing whitespace behind. This also matches textwrap.dedent.
                 if (!atEnd) {
                     sb.append(s.charAt(i));
                     if (s.charAt(i) == '\r' && i + 1 < len && s.charAt(i + 1) == '\n') {
@@ -366,44 +419,5 @@ public final class _CoreStringUtils {
         return sb.toString();
     }
 
-    public static String rightPadLines(String s, int width) {
-        return rightPadLines(s, width, ' ');
-    }
-
-    public static String rightPadLines(String s, int width, char fillChar) {
-        if (s.isEmpty()) {
-            return s;
-        }
-
-        if (width < 0) {
-            throw new IllegalArgumentException("width must be non-negative");
-        }
-
-        StringBuilder sb = new StringBuilder(s.length() + width);
-        int lineStart = 0;
-        int len = s.length();
-        for (int i = 0; i <= len; i++) {
-            if (i == len || s.charAt(i) == '\n' || s.charAt(i) == '\r') {
-                int lineLen = i - lineStart;
-                sb.append(s, lineStart, i);
-                // Pad to column (skip empty lines)
-                if (lineLen > 0) {
-                    for (int p = lineLen; p < width; p++) {
-                        sb.append(fillChar);
-                    }
-                }
-                // Append the line ending
-                if (i < len) {
-                    sb.append(s.charAt(i));
-                    if (s.charAt(i) == '\r' && i + 1 < len && s.charAt(i + 1) == '\n') {
-                        i++;
-                        sb.append('\n');
-                    }
-                }
-                lineStart = i + 1;
-            }
-        }
-        return sb.toString();
-    }
 
 }

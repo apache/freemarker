@@ -45,9 +45,26 @@ public class IndentAndWrapBuiltInTest extends TemplateTest {
     }
 
     @Test
+    public void testIndent2Arg() throws Exception {
+        assertExpOutput("'a\\n\\nb'?indent('# ', true)", "# a\n#\n# b");
+        assertExpOutput("'a\\n\\nb'?indent('# ', false)", "# a\n# \n# b");
+    }
+
+    @Test
+    public void testIndentRightTrimDefaultsToTrue() throws Exception {
+        assertExpOutput("'a\\n\\nb'?indent('# ')", "# a\n#\n# b");
+    }
+
+    @Test
     public void testIndentBadNumberOfArgs() {
-        assertErrorContains("${''?indent()}",  "?indent", "expects 1 argument");
-        assertErrorContains("${''?indent(1, 2)}",  "?indent", "expects 1 argument");
+        assertErrorContains("${''?indent()}",  "?indent", "expects 1 or 2 arguments");
+        assertErrorContains("${''?indent(1, 2, 3)}",  "?indent", "expects 1 or 2 arguments");
+    }
+
+    @Test
+    public void testIndentArgTypeCoercion() {
+        assertErrorContains("${''?indent(1)}", "string as argument #1");
+        assertErrorContains("${''?indent(' ', 'yes')}", "boolean as argument #2");
     }
 
     @Test
@@ -110,30 +127,4 @@ public class IndentAndWrapBuiltInTest extends TemplateTest {
         assertErrorContains("${''?dedent(1)}", "string as argument #1");
     }
 
-    @Test
-    public void testRightPad1Arg() throws Exception {
-        assertExpOutput("'a\nbb\nccc'?right_pad_lines(5)", "a    \nbb   \nccc  ");
-    }
-
-    @Test
-    public void testRightPad2Arg() throws Exception {
-        assertExpOutput("'a\nbb\nccc'?right_pad_lines(5, '.')", "a....\nbb...\nccc..");
-    }
-
-    @Test
-    public void testRightPadLinesCamelCase() throws Exception {
-        assertExpOutput("'a\nbb\nccc'?rightPadLines(5, '.')", "a....\nbb...\nccc..");
-    }
-
-    @Test
-    public void testRightPadLinesBadNumberOfArgs() {
-        assertErrorContains("${''?right_pad_lines()}",  "?right_pad_lines", "expects 1 or 2 arguments");
-        assertErrorContains("${''?rightPadLines(1, '.', 3)}",  "?rightPadLines", "expects 1 or 2 arguments");
-    }
-
-    @Test
-    public void testRightPadLinesNoArgTypeCoercion() throws Exception {
-        assertErrorContains("${''?right_pad_lines('1', '.')}", "number as argument #1");
-        assertErrorContains("${''?right_pad_lines(1, 2)}", "string as argument #2");
-    }
 }

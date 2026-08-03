@@ -73,6 +73,53 @@ public class _CoreStringUtilsTest {
                 _CoreStringUtils.indent("a\nb\n", "  "));
     }
 
+    @Test
+    public void testIndentNonWhitespacePrefixOnBlankLine() {
+        // The prefix is added to the blank line too, then right-trimmed, so it becomes "#" rather
+        // than "# " — the space in "# " is a separator, only wanted when there's content after it.
+        assertEquals(
+                "# a\n#\n# b",
+                _CoreStringUtils.indent("a\n\nb", "# "));
+    }
+
+    @Test
+    public void testIndentWhitespaceOnlyLineTreatedAsBlank() {
+        // A line of accidental spaces behaves the same as a truly empty one.
+        assertEquals(
+                "# a\n#\n# b",
+                _CoreStringUtils.indent("a\n   \nb", "# "));
+    }
+
+    @Test
+    public void testIndentRightTrimOff() {
+        assertEquals(
+                "# a\n# \n# b",
+                _CoreStringUtils.indent("a\n\nb", "# ", false));
+    }
+
+    @Test
+    public void testIndentRemovesTrailingWhitespaceFromContentLines() {
+        assertEquals(
+                "  a\n  b",
+                _CoreStringUtils.indent("a   \nb\t", "  "));
+    }
+
+    @Test
+    public void testIndentKeepsNonBreakingSpace() {
+        // U+00A0 isn't whitespace for trimming purposes — that's the point of a non-breaking space.
+        assertEquals(
+                "  a\u00A0",
+                _CoreStringUtils.indent("a\u00A0", "  "));
+    }
+
+    @Test
+    public void testIndentDedentRoundTrip() {
+        String original = "int x;\n\nint y;\n";
+        assertEquals(
+                original,
+                _CoreStringUtils.dedent(_CoreStringUtils.indent(original, "    "), "    "));
+    }
+
     // ---- wrap tests ----
 
     @Test
@@ -215,13 +262,41 @@ public class _CoreStringUtilsTest {
     }
 
     @Test
-    public void testDedentNoMatch() {
-        // Line doesn't start with prefix — left unchanged
-        // "  short" has only 2 spaces, doesn't match 4-space prefix → unchanged
-        // "    full" has 4 spaces, matches prefix → stripped
+    public void testDedentPartialPrefixIsShortened() {
+        // A line carrying only part of the prefix loses that part, rather than being left alone.
+        // "  short" shares 2 characters with the 4-space prefix → those 2 are removed.
+        // "    full" carries the whole prefix → all 4 are removed.
         assertEquals(
-                "  short\nfull\n",
+                "short\nfull\n",
                 _CoreStringUtils.dedent("  short\n    full\n", "    ")
+        );
+    }
+
+    @Test
+    public void testDedentPartialPrefixNonWhitespace() {
+        // Every one of these loses whatever it shares with "---", so all end up as "a".
+        assertEquals(
+                "a\na\na\na\n",
+                _CoreStringUtils.dedent("a\n-a\n--a\n---a\n", "---")
+        );
+    }
+
+    @Test
+    public void testDedentUnrelatedPrefixLeftAlone() {
+        // Shares nothing with the prefix → untouched.
+        assertEquals(
+                "xa\nyb\n",
+                _CoreStringUtils.dedent("xa\nyb\n", "---")
+        );
+    }
+
+    @Test
+    public void testDedentWhitespaceOnlyLineBecomesEmpty() {
+        // The 2 spaces are all this line shares with the 4-space prefix, so it's left empty
+        // instead of keeping accidental trailing whitespace.
+        assertEquals(
+                "a\n\nb\n",
+                _CoreStringUtils.dedent("    a\n  \n    b\n", "    ")
         );
     }
 
@@ -290,11 +365,25 @@ public class _CoreStringUtilsTest {
 
     @Test
     public void testDedentNoArgsRespectsEmptyLines() {
-        // Empty/whitespace-only lines are ignored when computing the common prefix
-        // and pass through unchanged.
+        // Empty/whitespace-only lines are ignored when computing the common prefix.
         assertEquals(
                 "a\n\nb",
                 _CoreStringUtils.dedent("    a\n\n    b")
+        );
+    }
+
+    @Test
+    public void testDedentNoArgsNormalizesWhitespaceOnlyLines() {
+        // A whitespace-only line doesn't constrain the common prefix, and comes out empty rather
+        // than keeping whitespace that was accidental to begin with. Same as textwrap.dedent.
+        assertEquals(
+                "a\n\nb",
+                _CoreStringUtils.dedent("    a\n  \n    b")
+        );
+        // Including when it's longer than the common prefix.
+        assertEquals(
+                "a\n\nb",
+                _CoreStringUtils.dedent("    a\n        \n    b")
         );
     }
 
@@ -340,70 +429,6 @@ public class _CoreStringUtilsTest {
                 "a\nb\nc",
                 _CoreStringUtils.dedent("a\nb\nc")
         );
-    }
-
-    // ---- rightPadLines tests ----
-
-    @Test
-    public void testRightPadLinesBasic() {
-        assertEquals(
-                "a         \nbb        \nccc       \n",
-                _CoreStringUtils.rightPadLines("a\nbb\nccc\n", 10)
-        );
-    }
-
-    @Test
-    public void testRightPadLinesWithFillChar() {
-        assertEquals(
-                "a.........\nbb........\n",
-                _CoreStringUtils.rightPadLines("a\nbb\n", 10, '.')
-        );
-    }
-
-    @Test
-    public void testRightPadLinesLinePastColumn() {
-        // "long line" (9 chars) past column 5 — no padding
-        // "ab" (2 chars) shorter than column 5 — padded
-        assertEquals(
-                "long line\nab   \n",
-                _CoreStringUtils.rightPadLines("long line\nab\n", 5)
-        );
-    }
-
-    @Test
-    public void testRightPadLinesNoTrailingNewline() {
-        assertEquals(
-                "a         ",
-                _CoreStringUtils.rightPadLines("a", 10)
-        );
-    }
-
-    @Test
-    public void testRightPadLinesEmpty() {
-        assertEquals(
-                "",
-                _CoreStringUtils.rightPadLines("", 10)
-        );
-    }
-
-    @Test
-    public void testRightPadLinesCamelCase() {
-        assertEquals(
-                "a    \nbb   \n",
-                _CoreStringUtils.rightPadLines("a\nbb\n", 5)
-        );
-    }
-
-    @Test
-    public void testRightPadLinesCodeAlignment() {
-        // Practical use: align code for trailing comments
-        String code = "int x;\nString name;\nboolean active;\n";
-        String result = _CoreStringUtils.rightPadLines(code, 20);
-        String[] lines = result.split("\n", -1);
-        assertEquals("int x;              ", lines[0]);
-        assertEquals("String name;        ", lines[1]);
-        assertEquals("boolean active;     ", lines[2]);
-        assertEquals("", lines[3]);
     }
 
 }

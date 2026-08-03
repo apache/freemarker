@@ -13394,11 +13394,6 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
-            <para><link
-            linkend="ref_builtin_right_pad_lines">right_pad_lines</link></para>
-          </listitem>
-
-          <listitem>
             <para><link linkend="ref_builtin_rounding">round</link></para>
           </listitem>
 
@@ -14084,9 +14079,10 @@ Green Mouse</programlisting>
           (<literal>?dedent</literal>) finds the longest leading whitespace
           (spaces and tabs only) that is a common prefix of every non-empty
           line, and removes it. This is robust to imperfect input: lines with
-          different leading-whitespace amounts work as expected, and
-          empty/whitespace-only lines are ignored when computing the common
-          prefix. The semantics match Python's
+          different leading-whitespace amounts work as expected, and lines that
+          are empty or contain whitespace only are ignored when computing the
+          common prefix (and are empty in the output, as their whitespace was
+          accidental anyway). The semantics match Python's
           <literal>textwrap.dedent</literal>.</para>
 
           <para>For example:</para>
@@ -14106,10 +14102,14 @@ Green Mouse</programlisting>
           behaviour.</para>
 
           <para>The <emphasis>explicit-prefix form</emphasis>
-          (<literal>?dedent(prefix)</literal>) removes the given prefix from
-          each line that starts with it. Lines that don't start with the
-          prefix are left unchanged. Use this when you want exact control
-          rather than automatic common-prefix detection. For example:</para>
+          (<literal>?dedent(prefix)</literal>) removes from each line the
+          longest prefix of the <literal>prefix</literal> parameter that the
+          line actually starts with. So a line that carries the whole prefix
+          loses all of it, a line that carries only part of it loses that
+          part, and a line that has nothing in common with it is left
+          unchanged. Use this form when you want to specify the amount of
+          indentation to remove, rather than letting it be detected. For
+          example:</para>
 
           <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
 ${code?dedent(" ")}</programlisting>
@@ -14122,19 +14122,33 @@ ${code?dedent(" ")}</programlisting>
    foo();
  }</programlisting>
 
-          <para>Lines that don't start with the prefix are unaffected, so with
-          a 4-space prefix:</para>
+          <para>With a 4-space prefix, lines that have less indentation than
+          that simply lose all the indentation they have:</para>
 
           <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
 ${code?dedent("    ")}</programlisting>
 
-          <para>will output this (the second line had at least 4 space
-          indentation, so 4 were removed, the other lines only had 2 spaces,
-          so they were left alone):</para>
+          <para>will output this (the 2nd line had 4 spaces, so all 4 were
+          removed; the other lines only had 2, so those 2 were removed):</para>
 
-          <programlisting role="output">  if (x) {
+          <programlisting role="output">if (x) {
 foo();
-  }</programlisting>
+}</programlisting>
+
+          <note>
+            <para>Partial matches are shortened rather than ignored on
+            purpose. As <link
+            linkend="ref_builtin_indent"><literal>indent</literal></link> adds
+            the prefix to every line unconditionally, an all-or-nothing dedent
+            could leave a line that was originally the least indented as the
+            most indented one, which is more surprising than flattening the
+            indentation unevenly.</para>
+          </note>
+
+          <para>Since a line containing whitespace only can't carry more than
+          whitespace, such a line loses its whitespace up to the length of the
+          prefix; that's why it ends up behaving like an empty line
+          here.</para>
 
           <para>See also the <link
           linkend="ref_builtin_indent"><literal>indent</literal>
@@ -14451,14 +14465,13 @@ R&amp;amp;D</programlisting>
             <para>This built-in is available since FreeMarker 2.3.35.</para>
           </note>
 
-          <para>Prepends the string given as the parameter to the beginning of
-          each line. The parameter is most often some spaces or tabs used for
-          indentation, but can be any string. Lines that are empty (i.e., the
-          line break immediately follows the previous line break, or the line
-          is the empty last line) are not prefixed. Line-breaks can be
-          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
-          (DOS/Windows), even <literal>CR</literal> (old Mac), and are kept as
-          is.</para>
+          <para>Prepends the string given as the 1st parameter to the beginning
+          of each line, then removes the trailing whitespace of each resulting
+          line (unless that's switched off with the 2nd parameter). The 1st
+          parameter is most often some spaces or tabs used for indentation, but
+          can be any string. Line-breaks can be <literal>LF</literal> (Linux),
+          or <literal>CRLF</literal> (DOS/Windows), even <literal>CR</literal>
+          (old Mac), and are kept as is.</para>
 
           <para>For example, this:</para>
 
@@ -14479,6 +14492,42 @@ ${text?indent(" * ")}</programlisting>
 
           <programlisting role="output"> * First line.
  * Second line.</programlisting>
+
+          <para>The prefix is added to <emphasis>every</emphasis> line,
+          including lines that are empty or contain whitespace only. That would
+          leave a trailing prefix on such lines, which is why the trailing
+          whitespace of each line is removed afterwards. Consider commenting
+          out a block of text with a <literal>"# "</literal> prefix:</para>
+
+          <programlisting role="template">&lt;#assign text = "First paragraph.\n\nSecond paragraph." /&gt;
+${text?indent("# ")}</programlisting>
+
+          <para>will output this, where the empty line became
+          <literal>"#"</literal> rather than <literal>"# "</literal>, as the
+          space in <literal>"# "</literal> was only meant to separate the
+          prefix from the content of a line:</para>
+
+          <programlisting role="output"># First paragraph.
+#
+# Second paragraph.</programlisting>
+
+          <para>With a whitespace-only prefix this leaves empty lines empty, so
+          the trimming is only visible with prefixes like the above. It also
+          means that lines that are empty and lines that only contain
+          whitespace give the same result, and that accidental trailing
+          whitespace is removed from the other lines as well.</para>
+
+          <para>Set the optional 2nd parameter to <literal>false</literal> to
+          switch the trimming off, and thus get the prefix on every line
+          verbatim:</para>
+
+          <programlisting role="template">${text?indent("# ", false)}</programlisting>
+
+          <note>
+            <para>A non-breaking space (<literal>U+00A0</literal>) isn't
+            treated as whitespace when trimming, so it's kept; that's the
+            purpose of a non-breaking space.</para>
+          </note>
 
           <para>See also the <link
           linkend="ref_builtin_dedent"><literal>dedent</literal>
@@ -15153,68 +15202,6 @@ ${s?no_esc}</programlisting>
           <literal>arithmetic_engine</literal>, which is configuration
           setting. However, that method should behave similarly as described
           above.</phrase></para>
-        </section>
-
-        <section xml:id="ref_builtin_right_pad_lines">
-          <title>right_pad_lines</title>
-
-          <indexterm>
-            <primary>right_pad_lines built-in</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>padding</primary>
-          </indexterm>
-
-          <note>
-            <para>This built-in is available since FreeMarker 2.3.35.</para>
-          </note>
-
-          <para>Pads each line of the string with spaces on the right until it
-          reaches the width specified as the 1st parameter. Lines that are
-          already at least that long are left unchanged. Unlike <link
-          linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>,
-          which operates on the string as a whole, this operates on each line
-          separately, which is useful for aligning multi-line text. Empty
-          lines are not padded. Line-breaks can be <literal>LF</literal>
-          (Linux), or <literal>CRLF</literal> (DOS/Windows), even
-          <literal>CR</literal> (old Mac), and are kept as is.</para>
-
-          <para>For example, this:</para>
-
-          <programlisting role="template">&lt;#assign code = "int x;\nString name;\nboolean active;" /&gt;
-${code?right_pad_lines(20)}done</programlisting>
-
-          <para>will output this (each line padded to width 20, the <phrase
-          role="markedInvisibleText">[BR]</phrase> is only shown below to
-          illustrate the line-break):</para>
-
-          <programlisting role="output">int x;              <phrase
-              role="markedInvisibleText">[BR]</phrase>
-String name;        <phrase role="markedInvisibleText">[BR]</phrase>
-boolean active;     done</programlisting>
-
-          <para>If used with 2 parameters, the 2nd parameter specifies the
-          fill character to use instead of space. It must be a string exactly
-          1 character long. For example:</para>
-
-          <programlisting role="template">${"a\nbb"?right_pad_lines(5, ".")}</programlisting>
-
-          <para>will output this:</para>
-
-          <programlisting role="output">a....
-bb...</programlisting>
-
-          <note>
-            <para>Widths are counted in Java <literal>char</literal>s (UTF-16
-            code units), not visual display columns — same as <link
-            linkend="ref_builtin_right_pad"><literal>right_pad</literal></link>
-            and <link
-            linkend="ref_builtin_left_pad"><literal>left_pad</literal></link>.
-            A tab counts as one character, not as "advance to the next tab
-            stop". If you need visual alignment for content containing tabs,
-            expand the tabs to spaces first.</para>
-          </note>
         </section>
 
         <section xml:id="ref_builtin_replace">
@@ -30907,8 +30894,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               configuration file) generation: <link
               linkend="ref_builtin_dedent">dedent</link>, <link
               linkend="ref_builtin_indent">indent</link>, <link
-              linkend="ref_builtin_right_pad_lines">right_pad_lines</link>,
-              <link linkend="ref_builtin_wrap">wrap</link></para>
+              linkend="ref_builtin_wrap">wrap</link></para>
             </listitem>
           </itemizedlist>
         </section>

@@ -67,6 +67,7 @@ import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
 import freemarker.core.BuiltInsForStringsMisc.evalJsonBI;
 import freemarker.template.Configuration;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -274,7 +275,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
         putBI("right_pad", "rightPad", new BuiltInsForStringsBasic.padBI(false));
-        putBI("right_pad_lines", "rightPadLines", new BuiltInsForStringsBasic.right_pad_linesBI());
         putBI("root", new rootBI());
         putBI("round", new roundBI());
         putBI("remove_ending", "removeEnding", new BuiltInsForStringsBasic.remove_endingBI());
@@ -495,6 +495,28 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
     
+    /**
+     * Same as {@link #getBooleanMethodArg}, but checks if {@code args} is big enough, and returns {@code defaultValue}
+     * if it isn't.
+     */
+    protected final boolean getOptBooleanMethodArg(List args, int argIdx, boolean defaultValue)
+            throws TemplateModelException {
+        return args.size() > argIdx ? getBooleanMethodArg(args, argIdx) : defaultValue;
+    }
+
+    /**
+     * Gets a method argument and checks if it's a boolean; it does NOT check if {@code args} is big enough.
+     */
+    protected final boolean getBooleanMethodArg(List args, int argIdx)
+            throws TemplateModelException {
+        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        if (!(arg instanceof TemplateBooleanModel)) {
+            throw _MessageUtil.newMethodArgMustBeBooleanException("?" + key, argIdx, arg);
+        } else {
+            return ((TemplateBooleanModel) arg).getAsBoolean();
+        }
+    }
+
     protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
         return _MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }
