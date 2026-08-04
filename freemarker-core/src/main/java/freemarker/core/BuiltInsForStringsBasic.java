@@ -537,10 +537,11 @@ class BuiltInsForStringsBasic {
             @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1);
+                checkMethodArgCount(argCnt, 1, 2);
 
                 String prefix = getStringMethodArg(args, 0);
-                return new SimpleScalar(_CoreStringUtils.dedent(targetAsString, prefix));
+                boolean rightTrim = getOptBooleanMethodArg(args, 1, true);
+                return new SimpleScalar(_CoreStringUtils.dedent(targetAsString, prefix, rightTrim));
             }
 
             @Override

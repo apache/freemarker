@@ -117,9 +117,26 @@ public class IndentAndWrapBuiltInTest extends TemplateTest {
     }
 
     @Test
+    public void testDedent2Arg() throws Exception {
+        assertExpOutput("'    a\\n     \\n    b'?dedent('    ', true)", "a\n\nb");
+        assertExpOutput("'    a\\n     \\n    b'?dedent('    ', false)", "a\n \nb");
+    }
+
+    @Test
+    public void testDedentRightTrimDefaultsToTrue() throws Exception {
+        assertExpOutput("'    a\\n     \\n    b'?dedent('    ')", "a\n\nb");
+    }
+
+    @Test
     public void testDedentBadNumberOfArgs() {
-        assertErrorContains("${''?dedent()}",  "?dedent", "expects 1 argument");
-        assertErrorContains("${''?dedent('  ', 2)}",  "?dedent", "expects 1 argument");
+        assertErrorContains("${''?dedent()}",  "?dedent", "expects 1 or 2 arguments");
+        assertErrorContains("${''?dedent('  ', true, 3)}",  "?dedent", "expects 1 or 2 arguments");
+    }
+
+    @Test
+    public void testDedentArgTypeCoercion() {
+        assertErrorContains("${''?dedent(1)}", "string as argument #1");
+        assertErrorContains("${''?dedent('  ', 2)}", "boolean as argument #2");
     }
 
     @Test

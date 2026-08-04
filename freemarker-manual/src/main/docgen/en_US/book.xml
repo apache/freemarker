@@ -14152,6 +14152,19 @@ foo();
             indentation hierarchy.</para>
           </note>
 
+          <para>The explicit-prefix form also removes the trailing whitespace
+          of each resulting line. This matters because removing a prefix can
+          leave whitespace behind that only looks like indentation: a line that
+          contains whitespace only loses just as much of it as the prefix is
+          long, so with a 4 character long prefix a line of 5 spaces would keep
+          1 space. With the trimming, such a line becomes empty instead, like
+          it does with <link
+          linkend="ref_builtin_indent"><literal>indent</literal></link>, which
+          also trims. Set the optional 2nd parameter to
+          <literal>false</literal> to switch the trimming off:</para>
+
+          <programlisting role="template">${code?dedent("    ", false)}</programlisting>
+
           <para>See also the <link
           linkend="ref_builtin_indent"><literal>indent</literal>
           built-in</link>, which is its inverse (roughly).</para>

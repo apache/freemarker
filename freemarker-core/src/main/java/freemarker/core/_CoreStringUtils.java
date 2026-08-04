@@ -178,7 +178,9 @@ public final class _CoreStringUtils {
      * <p>Note that a non-breaking space (U+00A0) isn't whitespace as far as trimming is concerned, so it's kept.
      */
     public static String indent(String s, String prefix, boolean rightTrim) {
-        if (s == null || s.isEmpty() || (prefix.isEmpty() && !rightTrim)) {
+        // An empty prefix adds nothing, so this does nothing at all then, not even trimming; that's the least
+        // surprising behavior for something called "indent".
+        if (s == null || s.isEmpty() || prefix.isEmpty()) {
             return s;
         }
 
@@ -217,6 +219,22 @@ public final class _CoreStringUtils {
      * indented one, which is much more confusing that a (partially) flattened hierarchy.
      */
     public static String dedent(String s, String prefixToRemove) {
+        return dedent(s, prefixToRemove, true);
+    }
+
+    /**
+     * Same as {@link #dedent(String, String)}, but you can also specify if the trailing whitespace of each resulting
+     * line should be removed.
+     *
+     * <p>The trimming matters because removing a prefix can leave whitespace behind that only looks like indentation:
+     * a line that contains whitespace only loses just as much of it as the prefix is long, so with a 4 character long
+     * prefix a line of 5 spaces would keep 1 space. Trimming removes such remains, and so a line that contains
+     * whitespace only becomes empty. It also keeps this symmetrical with
+     * {@link #indent(String, String, boolean)}, which trims too.
+     */
+    public static String dedent(String s, String prefixToRemove, boolean rightTrim) {
+        // An empty prefix removes nothing, so this does nothing at all then, not even trimming; same as with
+        // indent.
         if (s == null || s.isEmpty() || prefixToRemove.isEmpty()) {
             return s;
         }
@@ -233,7 +251,15 @@ public final class _CoreStringUtils {
                     && s.charAt(lineStartPos + matchedLen) == prefixToRemove.charAt(matchedLen)) {
                 matchedLen++;
             }
+            int lineStartPosSb = sb.length();
             sb.append(s, lineStartPos + matchedLen, lineBreakPos);
+            if (rightTrim) {
+                int end = sb.length();
+                while (end > lineStartPosSb && isTrimmableInlineWhitespace(sb.charAt(end - 1))) {
+                    end--;
+                }
+                sb.setLength(end);
+            }
 
             lineStartPos = appendSameTypeLineBreak(sb, s, lineBreakPos);
         }
