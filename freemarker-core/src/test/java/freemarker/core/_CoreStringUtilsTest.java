@@ -21,8 +21,11 @@ package freemarker.core;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -36,8 +39,8 @@ import freemarker.test.hamcerst.Matchers;
 public class _CoreStringUtilsTest {
 
     /**
-     * Tests of {@code indent} and {@code dedent}, repeated for each line-break type, and with and without a
-     * line-break at the end of the input.
+     * Tests of {@code indent} and {@code dedent}, repeated for each line-break type, and with and without a line-break
+     * at the end of the input.
      *
      * <p>The test data is written with {@code "\n"} as the line-break and with no line-break at the end;
      * {@link #lb(String)} adapts both the input and the expected value to the parameters of the actual run. So
@@ -50,9 +53,9 @@ public class _CoreStringUtilsTest {
         @Parameters(name = "{0}, trailingLineBreak={2}")
         public static Collection<Object[]> parameters() {
             Collection<Object[]> result = new ArrayList<>();
-            for (String[] lineBreak : new String[][] { { "LF", "\n" }, { "CRLF", "\r\n" }, { "CR", "\r" } }) {
-                for (boolean trailingLineBreak : new boolean[] { false, true }) {
-                    result.add(new Object[] { lineBreak[0], lineBreak[1], trailingLineBreak });
+            for (String[] lineBreak : new String[][]{{"LF", "\n"}, {"CRLF", "\r\n"}, {"CR", "\r"}}) {
+                for (boolean trailingLineBreak : new boolean[]{false, true}) {
+                    result.add(new Object[]{lineBreak[0], lineBreak[1], trailingLineBreak});
                 }
             }
             return result;
@@ -191,6 +194,7 @@ public class _CoreStringUtilsTest {
         @Test
         public void testDedentWhitespaceOnlyLineKeptWithTrimOff() {
             assertDedent("a\n\nb\n ", "    a\n  \n    b\n     ", "    ", false);
+            assertDedent("  a\n  \n  b\n   ", "    a\n    \n    b\n     ", "  ", false);
         }
 
         @Test
@@ -223,6 +227,10 @@ public class _CoreStringUtilsTest {
             // what the trimming of both built-ins ensures.
             String s = lb("line1\n line2\n\nline3");
             assertEquals(s, _CoreStringUtils.dedent(_CoreStringUtils.indent(s, prefix), prefix));
+
+            // With trim false, it always round trips:
+            s = lb("line1\n line2 \n\nline3");
+            assertEquals(s, _CoreStringUtils.dedent(_CoreStringUtils.indent(s, prefix, false), prefix, false));
         }
 
         // ---- dedent with no prefix (Python textwrap.dedent-style) ----
@@ -265,6 +273,12 @@ public class _CoreStringUtilsTest {
         }
 
         @Test
+        public void testDedentNoArgsOnlySeesTabAndSpaceAsIndentation() {
+            assertTrue(Character.isWhitespace('\f'));
+            assertDedent("\f a\n b", " \f a\n  b");
+        }
+
+        @Test
         public void testDedentNoArgsTabsOnly() {
             assertDedent("a\nb", "\t\ta\n\t\tb");
         }
@@ -287,10 +301,34 @@ public class _CoreStringUtilsTest {
     public static class WrapTest {
 
         @Test
-        public void testWrapBasic() {
+        public void testWrapOneOffs() {
             assertEquals(
-                    " * @brief Hello world.\n",
-                    _CoreStringUtils.wrap("Hello world.", 40, " * @brief "));
+                    "--- Hello world from FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 33, "--- "));
+            assertEquals(
+                    "--- Hello world from FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 32, "--- "));
+
+            assertEquals(
+                    "--- Hello world from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 31, "--- "));
+            assertEquals(
+                    "--- Hello world from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 30, "--- "));
+            assertEquals(
+                    "--- Hello world from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 20, "--- "));
+
+            assertEquals(
+                    "--- Hello world\n--- from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 19, "--- "));
+            assertEquals(
+                    "--- Hello world\n--- from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 15, "--- "));
+
+            assertEquals(
+                    "--- Hello\n--- world from\n--- FreeMarker!\n",
+                    _CoreStringUtils.wrap("Hello world from FreeMarker!", 14, "--- "));
         }
 
         @Test
@@ -309,13 +347,16 @@ public class _CoreStringUtilsTest {
         }
 
         private void testWrapLongText(String firstPrefix, String restPrefix) {
-            for (int width = 30; width <= 100; width += 10) {
+            for (int width = 10; width <= 100; width += 10) {
                 testWrapLongText(width, firstPrefix, restPrefix);
             }
         }
 
         private void testWrapLongText(int width, String firstPrefix, String restPrefix) {
-            String text = "This is a description that needs wrapping to fit within bounds. Also it's a very long text.";
+            String text = "This is a description that needs wrapping to fit within bounds. " +
+                    "Also it's a very-long-word-in-it.\n\n"
+                    + "It has multiple paragraphs even.";
+            List<String> expectedWordList = getWrapWords(text);
 
             String result =
                     firstPrefix == null ? _CoreStringUtils.wrap(text, width)
@@ -328,26 +369,37 @@ public class _CoreStringUtilsTest {
             assertTrue(result.startsWith(effFirstPrefix));
 
             // Second line should start with rest prefix
+            List<String> actualWordList = new ArrayList<>();
             String[] lines = result.split("\n", -1);
-            for (int i = 1; i < lines.length - 1; i++) {
+            for (int i = 0; i < lines.length - 1; i++) {
                 String line = lines[i];
-                if (line.length() > width) {
-                    fail("Line " + i + " is too long: " + StringUtil.jQuote(line));
-                }
-                if (!line.startsWith(effRestPrefix)) {
+
+                String expectedLinePrefix = i == 0 ? effFirstPrefix : effRestPrefix;
+                if (!line.startsWith(expectedLinePrefix)) {
                     fail("Line " + i + " doesn't start as expected: " + StringUtil.jQuote(line));
                 }
+
+                String lineWithoutPrefix = line.substring(expectedLinePrefix.length());
+
+                List<String> lineWords = getWrapWords(lineWithoutPrefix);
+
+                if (line.length() > width) {
+                    if (lineWords.size() != 1 || expectedLinePrefix.length() + lineWords.get(0).length() <= width) {
+                        fail("Line " + i + " is wider than " + width + ": " + StringUtil.jQuote(line));
+                    }
+                }
+
+                actualWordList.addAll(lineWords);
             }
 
             assertEquals("", lines[lines.length - 1]);
             assertTrue(result.endsWith("\n"));
+
+            assertEquals(expectedWordList, actualWordList);
         }
 
-        @Test
-        public void testWrapSamePrefix() {
-            assertEquals(
-                    "// hello world\n",
-                    _CoreStringUtils.wrap("hello world", 40, "// "));
+        private static @NonNull List<String> getWrapWords(String text) {
+            return Arrays.asList(text.split("\\s+"));
         }
 
         @Test
@@ -365,8 +417,8 @@ public class _CoreStringUtilsTest {
         @Test
         public void testWrapCollapsesWhitespaces() {
             assertEquals(
-                    "a b c d e\n",
-                    _CoreStringUtils.wrap("  a  \n b \n c\t\td   e  ", 40, ""));
+                    "a b c d e f g h\n",
+                    _CoreStringUtils.wrap("  a  \n b \n c\t\td   e\r\nf\rg\n\nh  ", 40, ""));
         }
 
         @Test
