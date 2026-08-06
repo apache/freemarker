@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -35,7 +36,9 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelListSequence;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template._ObjectWrappers;
 import freemarker.template.utility.StringUtil;
 
@@ -682,7 +685,29 @@ class BuiltInsForStringsBasic {
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new SplitMethod(s);
         }
+    }
 
+    static class linesBI extends BuiltInForString {
+
+        @Override
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            List<TemplateModel> result = new ArrayList<>();
+            int lineStartPos = 0;
+            for (int pos = 0; pos < s.length(); pos++) {
+                char c = s.charAt(pos);
+                if (c == '\r' || c == '\n') {
+                    result.add(new SimpleScalar(s.substring(lineStartPos, pos)));
+                    if (c == '\r' && pos + 1 < s.length() && s.charAt(pos + 1) == '\n') {
+                        pos++;
+                    }
+                    lineStartPos = pos + 1;
+                }
+            }
+            if (lineStartPos < s.length()) {
+                result.add(new SimpleScalar(s.substring(lineStartPos)));
+            }
+            return new TemplateModelListSequence(result);
+        }
     }
 
     static class starts_withBI extends BuiltInForString {

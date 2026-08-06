@@ -13285,6 +13285,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_lines">lines</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">long</link></para>
           </listitem>
 
@@ -15026,6 +15030,48 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           to human consumption), use the <link
           linkend="ref_builtin_c_lower_case"><literal>c_lower_case</literal>
           built-in</link> instead!</para>
+        </section>
+
+        <section xml:id="ref_builtin_lines">
+          <title>lines</title>
+
+          <indexterm>
+            <primary>lines built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Splits the string at the line breaks to a sequence of lines.
+          The resulting lines themselves don't contain the line-break
+          character. All kind of line-breaks are recognized:
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac).</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#assign text = "Line 1\nLine 2\Line 3\n"&gt;
+&lt;#list text?lines as line&gt;
+  - ${line}
+&lt;/#list&gt;</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">- Line 1
+- Line 2
+- Line 3</programlisting>
+
+          <para>The basic approach is that each line should end with a
+          line-break, including the last line. But if the text doesn't end
+          with line-break, then it's implied to have line-break at the end.
+          Therefore, with <literal>&lt;#assign text = "Line 1\nLine 2\Line
+          3"&gt;</literal> (no <literal>\n</literal> at the end), you would
+          get the same output like above.</para>
+
+          <para>With <literal>&lt;#assign text = "Line 1\nLine 2\Line
+          3\n\n"&gt;</literal> (two <literal>\n</literal>-s at the end), you
+          would get and additional empty line in the output.</para>
         </section>
 
         <section xml:id="ref_builtin_matches">
@@ -30941,11 +30987,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New built-ins, mostly useful for source code (or
-              configuration file) generation: <link
-              linkend="ref_builtin_dedent">dedent</link>, <link
-              linkend="ref_builtin_indent">indent</link>, <link
-              linkend="ref_builtin_wrap">wrap</link></para>
+              <para>New multi-line text built-ins, mostly useful for source
+              code (or configuration file) generation: </para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Dedent or indent each line of a string: <link
+                  linkend="ref_builtin_dedent">dedent</link>, <link
+                  linkend="ref_builtin_indent">indent</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Reflow text to lines of the specified maximum width:
+                  <link linkend="ref_builtin_wrap">wrap</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Split string to a sequence of lines: <link
+                  linkend="ref_builtin_lines">lines</link></para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

@@ -73,7 +73,11 @@ public class _CoreStringUtilsTest {
          * Adapts test data written with {@code "\n"} and without a trailing line-break to the parameters of this run.
          */
         private String lb(String s) {
-            return s.replace("\n", lineBreak) + (trailingLineBreak ? lineBreak : "");
+            return lbTypeOnly(s) + (trailingLineBreak ? lineBreak : "");
+        }
+
+        private @NonNull String lbTypeOnly(String s) {
+            return s.replace("\n", lineBreak);
         }
 
         private void assertIndent(String expected, String s, String prefix) {
@@ -291,6 +295,57 @@ public class _CoreStringUtilsTest {
         @Test
         public void testDedentNoArgsAlreadyDedented() {
             assertDedent("a\nb\nc", "a\nb\nc");
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    public static class IndentAndDedentLineEndingTests {
+
+        private final String lineBreak;
+
+        public IndentAndDedentLineEndingTests(String lineBreakName, String lineBreak) {
+            this.lineBreak = lineBreak;
+        }
+
+        @Parameterized.Parameters(name = "{0}")
+        public static Collection<Object[]> parameters() {
+            return List.of(
+                    new Object[]{"LF", "\n"},
+                    new Object[]{"CRLF", "\r\n"},
+                    new Object[]{"CR", "\r"});
+        }
+
+        private String lb(String s) {
+            return s.replace("\n", lineBreak);
+        }
+
+        @Test
+        public void testIndentTrailingEmptyLineTreatment() {
+            // The \n after the last non-whitespace line is significant, but doesn't create a new logical line.
+            assertEquals(lb("-1\n-b"), lb(_CoreStringUtils.indent("1\nb", "-")));
+            assertEquals(lb("-2\n-b\n"), lb(_CoreStringUtils.indent("2\nb\n", "-")));
+            assertEquals(lb("-2\n-b\n-\n"), lb(_CoreStringUtils.indent("2\nb\n\n", "-")));
+            assertEquals(lb("-3\n-b\n-\n-\n"), lb(_CoreStringUtils.indent("3\nb\n\n\n", "-")));
+        }
+
+        @Test
+        public void testDedentTrailingEmptyLineTreatment() {
+            // The \n after the last non-whitespace line is significant, but doesn't create a new logical line.
+            assertEquals(lb("1\nb"), lb(_CoreStringUtils.dedent("-1\n-b", "-")));
+            assertEquals(lb("2\nb\n"), lb(_CoreStringUtils.dedent("-2\n-b\n", "-")));
+            assertEquals(lb("2\nb\n"), lb(_CoreStringUtils.dedent("-2\n-b\n-", "-")));
+            assertEquals(lb("2\nb\n\n"), lb(_CoreStringUtils.dedent("-2\n-b\n-\n", "-")));
+            assertEquals(lb("2\nb\n\n"), lb(_CoreStringUtils.dedent("-2\n-b\n-\n-", "-")));
+            assertEquals(lb("3\nb\n\n\n"), lb(_CoreStringUtils.dedent("-3\n-b\n-\n-\n", "-")));
+        }
+
+        @Test
+        public void testIndentTrailingWhiteSpaceLineNotRemoved() {
+            assertEquals(lb("-2\n-b\n-"), lb(_CoreStringUtils.indent("2\nb\n ", "-")));
+            assertEquals(lb("-2\n-b\n- "), lb(_CoreStringUtils.indent("2\nb\n ", "-", false)));
+
+            assertEquals(lb("-3\n-b\n-\n-\n-"), lb(_CoreStringUtils.indent("3\nb\n \n \n ", "-")));
+            assertEquals(lb("-3\n-b\n- \n- \n- "), lb(_CoreStringUtils.indent("3\nb\n \n \n ", "-", false)));
         }
     }
 
