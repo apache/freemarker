@@ -19,36 +19,55 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.ClassUtil;
 import freemarker.test.TemplateTest;
 
 public class HexLiteralTest extends TemplateTest {
 
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        Configuration conf = super.createConfiguration();
+        conf.setNumberFormat("c");
+        return conf;
+    }
+
     @Test
-    public void testBasicHex() throws IOException, TemplateException {
-        assertOutput("${0xFF?c}", "255");
-        assertOutput("${0xff?c}", "255");
-        assertOutput("${0x0?c}", "0");
-        assertOutput("${0x1?c}", "1");
-        assertOutput("${0x10?c}", "16");
-        assertOutput("${0xA?c}", "10");
-        assertOutput("${0xDEAD?c}", "57005");
+    public void testBasicValues() throws IOException, TemplateException {
+        assertExpOutput("0xFF", "255");
+        assertExpOutput("0x0", "0");
+        assertExpOutput("0x1", "1");
+        assertExpOutput("0x10", "16");
+        assertExpOutput("0xA", "10");
+        assertExpOutput("0xDEAD", "57005");
+    }
+
+    @Test
+    public void testCaseInsensitive() throws IOException, TemplateException {
+        for (String hex : List.of("0xCAFE", "0XCAFE", "0Xcafe", "0xCafE")) {
+            assertExpOutput(hex, "51966");
+        }
     }
 
     @Test
     public void testHexInExpressions() throws IOException, TemplateException {
-        assertOutput("${(0xFF + 1)?c}", "256");
-        assertOutput("${(0x10 * 2)?c}", "32");
-        assertOutput("${(0xFF - 0x0F)?c}", "240");
+        assertExpOutput("0xFF + 1", "256");
+        assertExpOutput("0x10 * 2", "32");
+        assertExpOutput("0xFF - 0x0F", "240");
     }
 
     @Test
     public void testHexAssignment() throws IOException, TemplateException {
-        assertOutput("<#assign x = 0xFF>${x?c}", "255");
-        assertOutput("<#assign x = 0x00FF00>${x?c}", "65280");
+        assertOutput("<#assign x = 0xFF>${x}", "255");
+        assertOutput("<#assign x = 0x00FF00>${x}", "65280");
     }
 
     @Test
@@ -58,37 +77,54 @@ public class HexLiteralTest extends TemplateTest {
     }
 
     @Test
-    public void testHexLargeValues() throws IOException, TemplateException {
+    public void testHexValueTypes() throws IOException, TemplateException {
+        addDumpMethod();
+
         // Values that fit in int
-        assertOutput("${0x7FFFFFFF?c}", "2147483647");
+        assertExpOutput("dump(0x0)", "Integer 0");
+        assertExpOutput("dump(0x7FFFFFFF)", "Integer 2147483647");
+
         // Values that require long
-        assertOutput("${0x80000000?c}", "2147483648");
-        assertOutput("${0xFFFFFFFF?c}", "4294967295");
-        assertOutput("${0x100000000?c}", "4294967296");
+        assertExpOutput("dump(0x80000000)", "Long 2147483648");
+        assertExpOutput("dump(0xFFFFFFFF)", "Long 4294967295");
+        assertExpOutput("dump(0x100000000)", "Long 4294967296");
         // Highest value that still fits in a signed long
-        assertOutput("${0x7FFFFFFFFFFFFFFF?c}", "9223372036854775807");
+        assertExpOutput("dump(0x7FFFFFFFFFFFFFFF)", "Long 9223372036854775807");
+
+        // Values too large for a signed long become BigInteger:
+        assertExpOutput(
+                "dump(0x8000000000000000)", "java.math.BigInteger 9223372036854775808");
+        assertExpOutput(
+                "dump(0xFFFFFFFFFFFFFFFF)", "java.math.BigInteger 18446744073709551615");
+        assertExpOutput(
+                "dump(0x100000000000000000000000000000000)",
+                "java.math.BigInteger 340282366920938463463374607431768211456");
     }
 
     @Test
-    public void testHexBeyondLongRange() throws IOException, TemplateException {
-        // Values too large for a signed long stay exact (BigInteger), rather than
-        // overflowing or failing to parse.
-        assertOutput("${0x8000000000000000?c}", "9223372036854775808");
-        assertOutput("${0xFFFFFFFFFFFFFFFF?c}", "18446744073709551615");
-        // Arbitrarily many digits: 0x1 followed by 32 zeros is 16^32.
-        assertOutput("${0x100000000000000000000000000000000?c}",
-                "340282366920938463463374607431768211456");
-    }
+    public void testHexLeadingZerosDoNotChangeValueOrType() throws IOException, TemplateException {
+        addDumpMethod();
 
-    @Test
-    public void testHexLeadingZerosDoNotChangeValue() throws IOException, TemplateException {
         // Leading zeros must not push a small value into a wider type.
-        assertOutput("${0x00000000000000000000FF?c}", "255");
+        assertExpOutput("dump(0x000000000000007FFFFFFF)", "Integer 2147483647");
+        assertExpOutput("dump(0x0000007FFFFFFFFFFFFFFF)", "Long 9223372036854775807");
+        assertExpOutput(
+                "dump(0x0000008000000000000000)", "java.math.BigInteger 9223372036854775808");
     }
 
     @Test
-    public void testHexUppercaseX() throws IOException, TemplateException {
-        assertOutput("${0XFF?c}", "255");
-        assertOutput("${0Xff?c}", "255");
+    public void testNegativeValues() throws IOException, TemplateException {
+        assertExpOutput("-0xFF", "-255");
+        assertExpOutput("-0x80000000", "-2147483648");
+    }
+
+    private void addDumpMethod() {
+        addToDataModel("dump", new TemplateMethodModelEx() {
+            @Override
+            public Object exec(List arguments) throws TemplateModelException {
+                Number arg = ((TemplateNumberModel) arguments.get(0)).getAsNumber();
+                return ClassUtil.getShortClassNameOfObject(arg) + " " + arg;
+            }
+        });
     }
 }

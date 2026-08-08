@@ -2437,21 +2437,24 @@ C:\foo\bar</programlisting>
             <literal>${+8}</literal>, <literal>${8.00}</literal> and
             <literal>${8}</literal> will all print exactly same.</para>
 
-            <para role="forProgrammers">Since FreeMarker 2.3.35, whole numbers
-            can also be written in hexadecimal notation, using the
-            <literal>0x</literal> (or <literal>0X</literal>) prefix followed by
-            hexadecimal digits (<literal>0</literal>-<literal>9</literal>,
+            <para>Since FreeMarker 2.3.35, hexadecimal literals are also
+            supported, using the <literal>0x</literal> (or
+            <literal>0X</literal>) prefix followed by hexadecimal digits
+            (<literal>0</literal>-<literal>9</literal>,
             <literal>a</literal>-<literal>f</literal>,
             <literal>A</literal>-<literal>F</literal>). For example
             <literal>0xFF</literal> is the number 255, and
             <literal>0x100</literal> is 256. Hexadecimal literals can only
-            specify whole numbers (no fractional part, no sign, no scientific
-            notation). The sign can still be applied as a separate operator, as
-            in <literal>-0x10</literal>. There's no limit on the number of
-            digits: the value is created as an <literal>Integer</literal> if it
-            fits into a 32-bit signed integer, as a <literal>Long</literal> if it
-            fits into a 64-bit signed integer, and as a
-            <literal>BigInteger</literal> otherwise.</para>
+            specify whole numbers. <phrase role="forProgrammers">There's no
+            limit on the number of digits: the value is created as an
+            <literal>Integer</literal> if it fits into a 32-bit signed
+            integer, as a <literal>Long</literal> if it fits into a 64-bit
+            signed integer, and as a <literal>BigInteger</literal> otherwise
+            (though this can be customized via a custom
+            <literal>freemarker.core.ArithmeticEngine</literal>). Unless a
+            <literal>-</literal> sign is prepended, as in
+            <literal>-0x10</literal>, hexadecimal literals are always
+            interpreted as positive numbers.</phrase></para>
           </section>
 
           <section xml:id="dgui_template_exp_direct_boolean">
@@ -31003,8 +31006,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added support for hexadecimal literals, like
+              <literal>0xFF</literal>, or <literal>0xCAFEBABE</literal>. See
+              more <link
+              linkend="dgui_template_exp_direct_number">here...</link></para>
+            </listitem>
+
+            <listitem>
               <para>New multi-line text built-ins, mostly useful for source
-              code (or configuration file) generation: </para>
+              code (or configuration file) generation:</para>
 
               <itemizedlist>
                 <listitem>
