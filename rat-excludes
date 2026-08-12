@@ -80,3 +80,15 @@ AGENTS.md
 SECURITY.md
 gradlew.bat
 .buildinfo
+
+# Well known AI directories that we don't commit at the moment:
+# ATTENTION: Keep this in sync with .gitignore!
+.cursor
+.cursorrules
+.kilo
+.kilocode
+.windsurf
+.aider.conf.yml
+.continue
+.clinerules
+.claude

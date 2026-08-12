@@ -58,3 +58,15 @@ bnd.bnd
 AdhocTest*.*
 
 junit*.properties
+
+# Well known AI directories that we don't commit at the moment:
+# ATTENTION: If you remove one of them from here, also remove it from the rat-excludes file!
+.cursor
+.cursorrules
+.kilo
+.kilocode
+.windsurf
+.aider.conf.yml
+.continue
+.clinerules
+.claude

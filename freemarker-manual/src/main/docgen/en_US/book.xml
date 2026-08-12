@@ -20,16 +20,14 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:svg="http://www.w3.org/2000/svg"
-      xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:db="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.34</productname>
+    <productname>Freemarker 2.3.35</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -2436,6 +2434,25 @@ C:\foo\bar</programlisting>
             the number eight. Thus, <literal>${08}</literal>,
             <literal>${+8}</literal>, <literal>${8.00}</literal> and
             <literal>${8}</literal> will all print exactly same.</para>
+
+            <para>Since FreeMarker 2.3.35, hexadecimal literals are also
+            supported, using the <literal>0x</literal> (or
+            <literal>0X</literal>) prefix followed by hexadecimal digits
+            (<literal>0</literal>-<literal>9</literal>,
+            <literal>a</literal>-<literal>f</literal>,
+            <literal>A</literal>-<literal>F</literal>). For example
+            <literal>0xFF</literal> is the number 255, and
+            <literal>0x100</literal> is 256. Hexadecimal literals can only
+            specify whole numbers. <phrase role="forProgrammers">There's no
+            limit on the number of digits: the value is created as an
+            <literal>Integer</literal> if it fits into a 32-bit signed
+            integer, as a <literal>Long</literal> if it fits into a 64-bit
+            signed integer, and as a <literal>BigInteger</literal> otherwise
+            (though this can be customized via a custom
+            <literal>freemarker.core.ArithmeticEngine</literal>). Unless a
+            <literal>-</literal> sign is prepended, as in
+            <literal>-0x10</literal>, hexadecimal literals are always
+            interpreted as positive numbers.</phrase></para>
           </section>
 
           <section xml:id="dgui_template_exp_direct_boolean">
@@ -6661,9 +6678,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.34) do you want to apply the fixes that are not 100%
+// version (here 2.3.35) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_34);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_35);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -10438,14 +10455,14 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_34)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_35)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_34)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_35)</programlisting>
             </listitem>
 
             <listitem>
@@ -10453,7 +10470,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.34</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.35</programlisting>
             </listitem>
 
             <listitem>
@@ -10464,7 +10481,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.34&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.35&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -11298,8 +11315,8 @@ TemplateHashModel fileStatics =
 
           <para>And you will get a template hash model that exposes all static
           methods and static fields (both final and non-final) of the
-          <literal>java.io.File</literal> class as hash keys. Suppose that
-          you put the previous model in your root model:</para>
+          <literal>java.io.File</literal> class as hash keys. Suppose that you
+          put the previous model in your root model:</para>
 
           <programlisting role="unspecified">root.put("File", fileStatics);</programlisting>
 
@@ -13074,6 +13091,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_dedent">dedent</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">double</link></para>
           </listitem>
 
@@ -13151,6 +13172,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_html">html</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_indent">indent</link></para>
           </listitem>
 
           <listitem>
@@ -13274,6 +13299,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_length">length</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_lines">lines</link></para>
           </listitem>
 
           <listitem>
@@ -13528,6 +13557,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link
             linkend="ref_builtin_word_list">word_list</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_wrap">wrap</link></para>
           </listitem>
 
           <listitem>
@@ -14039,6 +14072,142 @@ Green Mouse</programlisting>
           and a method and hash on the same time.</para>
         </section>
 
+        <section xml:id="ref_builtin_dedent">
+          <title>dedent</title>
+
+          <indexterm>
+            <primary>dedent built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>indentation</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Removes a leading prefix (usually indentation) from each line
+          of the string. The built-in has two forms: a no-argument form that
+          strips common leading whitespace automatically, and an
+          explicit-prefix form for exact control. Line-breaks can be
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac), and are kept as
+          is.</para>
+
+          <para>See also the <link
+          linkend="ref_builtin_indent"><literal>indent</literal>
+          built-in</link>, which the inverse of this (roughly).</para>
+
+          <section>
+            <title>No-argument form</title>
+
+            <para>The <emphasis>no-argument form</emphasis>
+            (<literal>?dedent</literal>) finds the longest indentation (spaces
+            and tabs only) that is a common prefix in all lines, and removes
+            it. Lines that are empty or only contain spaces and tabs are
+            treated specially; they don't influence the computation of the
+            longest indentation, and will be replaced with an empty
+            (line-break only) line in the output. (These semantics match
+            Python's <literal>textwrap.dedent</literal>.)</para>
+
+            <para>For example:</para>
+
+            <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+// &lt;- touches left margin
+${code?dedent}</programlisting>
+
+            <para>will output this (the common indentation prefix was 2
+            spaces, which was now removed from each line):</para>
+
+            <programlisting role="output">// &lt;- touches left margin
+if (x) {
+  foo();
+}</programlisting>
+
+            <para>A leading tab and a leading space are treated as distinct
+            characters (we don't resolve tabs to space or vice versa).</para>
+          </section>
+
+          <section>
+            <title>Explicit-prefix form</title>
+
+            <para>The <emphasis>explicit-prefix form</emphasis>
+            (<literal>?dedent(prefix)</literal>) removes from each line the
+            longest leading section of the <literal>prefix</literal> parameter
+            that the line starts with. So for
+            <literal>?dedent("1234")</literal>, the line <quote>1234x</quote>
+            is reduced <quote>x</quote>, and so are <quote>123x</quote>,
+            <quote>12x</quote>, and <quote>1x</quote> too, as they start the
+            same as <quote>1234</quote>. But a line like <quote>x1234x</quote>
+            or <quote>234x</quote>, would remain unchanged. Use this form when
+            you want to specify the amount of indentation to remove, rather
+            than letting it be detected. For example:</para>
+
+            <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+// &lt;- touches left margin
+${code?dedent(" ")}</programlisting>
+
+            <para>will output this (removed just 1 space of indentation, so
+            the 1st line still has 1 space of indentation, and the 2nd has 3
+            spaces of indentation):</para>
+
+            <programlisting role="output">// &lt;- touches left margin
+ if (x) {
+   foo();
+ }</programlisting>
+
+            <para>With a 4-space prefix, lines that have less indentation than
+            that simply lose all the indentation they have:</para>
+
+            <programlisting role="template">&lt;#assign code = "  if (x) {\n    foo();\n  }" /&gt;
+// &lt;- touches left margin
+${code?dedent("    ")}</programlisting>
+
+            <para>will output this (the 2nd line had 4 spaces, so all 4 were
+            removed; the other lines only had 2, so those 2 were
+            removed):</para>
+
+            <programlisting role="output">// &lt;- touches left margin
+if (x) {
+foo();
+}</programlisting>
+
+            <note>
+              <para>Partial matches are shortened rather than ignored on
+              purpose. This is what's familiar from code text editors, when
+              you repeatedly dedent a block of text, and some lines already
+              have too low indentation. Also, an all-or-nothing dedent could
+              leave a line that was originally the least indented as the most
+              indented one, which is a more confusing result than partially
+              flattening indentation hierarchy.</para>
+            </note>
+
+            <para>All <literal>dedent(prefix)</literal> removes the trailing
+            whitespace of each resulting line. (As a result, if after removing
+            a prefix a line only contains whitespace, it becomes an empty
+            line.) To disable trimming, set the optional 2nd parameter to
+            <literal>false</literal>:</para>
+
+            <programlisting role="template">${code?dedent("    ", false)}</programlisting>
+
+            <para>Notes on trailing whitespace removal:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Whitespace there means any UNICODE whitespace, and does
+                not include non-breaking space.</para>
+              </listitem>
+
+              <listitem>
+                <para>If the provided prefix argument is a 0-length string,
+                then <literal>dedent</literal> will return the string as is,
+                and will not trim the lines.</para>
+              </listitem>
+            </itemizedlist>
+          </section>
+        </section>
+
         <section xml:id="ref_builtin_empty_to_null">
           <title>empty_to_null</title>
 
@@ -14332,6 +14501,109 @@ R&amp;amp;D</programlisting>
           chances of accidental mistakes by using the <link
           linkend="ref_directive_escape"><literal>escape</literal>
           directive</link>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_indent">
+          <title>indent</title>
+
+          <indexterm>
+            <primary>indent built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>indentation</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Prepends the string given as the 1st parameter to the
+          beginning of each line, then removes the trailing whitespace of each
+          resulting line (unless that's switched off with the 2nd parameter).
+          The 1st parameter is most often some spaces or tabs used for
+          indentation, but can be any string. Line-breaks can be
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac), and are kept as
+          is.</para>
+
+          <para>See also the <link
+          linkend="ref_builtin_dedent"><literal>dedent</literal>
+          built-in</link>, which the inverse of this (roughly).</para>
+
+          <para>Example of indenting each line with 4 spaces:</para>
+
+          <programlisting role="template">&lt;#assign code = "int x;\nint y;" /&gt;
+// &lt;- touches left margin
+${code?indent("    ")}</programlisting>
+
+          <para>will output this :</para>
+
+          <programlisting role="output">// &lt;- touches left margin
+    int x;
+    int y;</programlisting>
+
+          <para>Another example, using a non-whitespace prefix:</para>
+
+          <programlisting role="template">&lt;#assign text = "First line.\nSecond line." /&gt;
+${text?indent(" * ")}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output"> * First line.
+ * Second line.</programlisting>
+
+          <para>The prefix is added to <emphasis>every</emphasis> line,
+          including lines that are empty or contain whitespace only. That
+          would leave a trailing prefix on such lines, which is why the
+          trailing whitespace of each line is removed afterwards. Consider
+          commenting out a block of text with a <literal>"# "</literal>
+          prefix:</para>
+
+          <programlisting role="template">&lt;#assign text = "First paragraph.\n\nSecond paragraph." /&gt;
+${text?indent("# ")}</programlisting>
+
+          <para>will output this, where the empty line became
+          <literal>"#"</literal> rather than <literal>"# "</literal>, as the
+          space in <literal>"# "</literal> was only meant to separate the
+          prefix from the content of a line:</para>
+
+          <programlisting role="output"># First paragraph.
+#
+# Second paragraph.</programlisting>
+
+          <para>With a whitespace-only prefix this leaves empty lines empty,
+          so the trimming is only visible with prefixes like the above. It
+          also means that lines that are empty and lines that only contain
+          whitespace give the same result, and that accidental trailing
+          whitespace is removed from the other lines as well.</para>
+
+          <para>Set the optional 2nd parameter to <literal>false</literal> to
+          switch the trimming off, and thus get the prefix on every line
+          verbatim:</para>
+
+          <programlisting role="template">${text?indent("# ", false)}</programlisting>
+
+          <note>
+            <para>A non-breaking space (<literal>U+00A0</literal>) isn't
+            treated as whitespace when trimming, so it's kept; that's the
+            purpose of a non-breaking space.</para>
+          </note>
+
+          <para>Notes on trailing whitespace removal:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Whitespace there means any UNICODE whitespace, and does
+              not include non-breaking space.</para>
+            </listitem>
+
+            <listitem>
+              <para>If the provided prefix argument is a 0-length string, then
+              <literal>ident</literal> will return the string as is, and will
+              not trim the lines.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="ref_builtin_index_of">
@@ -14775,6 +15047,48 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           to human consumption), use the <link
           linkend="ref_builtin_c_lower_case"><literal>c_lower_case</literal>
           built-in</link> instead!</para>
+        </section>
+
+        <section xml:id="ref_builtin_lines">
+          <title>lines</title>
+
+          <indexterm>
+            <primary>lines built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Splits the string at the line breaks to a sequence of lines.
+          The resulting lines themselves don't contain the line-break
+          character. All kind of line-breaks are recognized:
+          <literal>LF</literal> (Linux), or <literal>CRLF</literal>
+          (DOS/Windows), even <literal>CR</literal> (old Mac).</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#assign text = "Line 1\nLine 2\Line 3\n"&gt;
+&lt;#list text?lines as line&gt;
+  - ${line}
+&lt;/#list&gt;</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">- Line 1
+- Line 2
+- Line 3</programlisting>
+
+          <para>The basic approach is that each line should end with a
+          line-break, including the last line. But if the text doesn't end
+          with line-break, then it's implied to have line-break at the end.
+          Therefore, with <literal>&lt;#assign text = "Line 1\nLine 2\Line
+          3"&gt;</literal> (no <literal>\n</literal> at the end), you would
+          get the same output like above.</para>
+
+          <para>With <literal>&lt;#assign text = "Line 1\nLine 2\Line
+          3\n\n"&gt;</literal> (two <literal>\n</literal>-s at the end), you
+          would get and additional empty line in the output.</para>
         </section>
 
         <section xml:id="ref_builtin_matches">
@@ -15954,6 +16268,100 @@ ${x?url}</programlisting>
           <para>will output:</para>
 
           <programlisting role="output">[a][bcd,][.][1-2-3]</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_wrap">
+          <title>wrap</title>
+
+          <indexterm>
+            <primary>wrap built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>word wrapping</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.35.</para>
+          </note>
+
+          <para>Word-wraps the string so that if possible, no line is longer
+          than the width given as the 1st parameter. It breaks line at <link
+          linkend="gloss.whiteSpace">white-space</link> only. A section
+          without white-space that's longer than the width is emitted on its
+          own line without being broken.</para>
+
+          <para><link linkend="gloss.whiteSpace">White-space</link>
+          treatment:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Each continuous sequence of white-space characters in the
+              input is in effect collapsed to a single space, or removed if
+              they are before a word-wrapping line-break</para>
+            </listitem>
+
+            <listitem>
+              <para>The result always ends with a line-break</para>
+            </listitem>
+
+            <listitem>
+              <para>All leading and trailing whitespace of the input
+              (including line-breaks!) is removed in effect</para>
+            </listitem>
+
+            <listitem>
+              <para>Non-breaking space (U+00A0) is <emphasis>not</emphasis>
+              treated as white-space by this built-in. <phrase
+              role="forProgrammers">(We treat the Java regular expression
+              <literal>\s</literal> as white-space, which does
+              <emphasis>not</emphasis> include the non-breaking
+              space.)</phrase></para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${"Some long text that need to be wrapper at reasonable width"?wrap(25)}</programlisting>
+
+          <para>will output this:</para>
+
+          <programlisting role="output">Some long text that need
+to be wrapper at
+reasonable width
+</programlisting>
+
+          <para>The width parameter is truncated to integer, and must be at
+          least 1.</para>
+
+          <section>
+            <title>Adding line suffixed</title>
+
+            <para>An optional 2nd parameter is a prefix prepended to the first
+            output line. The optional 3rd parameter is a prefix prepended to
+            all subsequent lines. If the 3rd parameter is omitted, the 2nd
+            parameter is used for all lines.</para>
+
+            <para>This is useful for generating wrapped comments, such as
+            documentation blocks. For example:</para>
+
+            <programlisting role="template">&lt;#assign text = "This is a long description that should be wrapped" /&gt;
+${text?wrap(40, " * @brief ", " *         ")}</programlisting>
+
+            <para>will output this:</para>
+
+            <programlisting role="output"> * @brief This is a long description
+ *         that should be wrapped</programlisting>
+
+            <para>With a single prefix used for all lines:</para>
+
+            <programlisting role="template">${"A comment that needs to be wrapped at a reasonable width"?wrap(40, "// ")}</programlisting>
+
+            <para>will output this:</para>
+
+            <programlisting role="output">// A comment that needs to be wrapped at
+// a reasonable width</programlisting>
+          </section>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
@@ -30589,7 +30997,43 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_35">
         <title>2.3.35</title>
 
-        <para>Release date: [TODO]</para>
+        <para>Release date: 2026-08-12 + release process</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added support for hexadecimal literals, like
+              <literal>0xFF</literal>, or <literal>0xCAFEBABE</literal>. See
+              more <link
+              linkend="dgui_template_exp_direct_number">here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>New multi-line text built-ins, mostly useful for source
+              code (or configuration file) generation:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Dedent or indent each line of a string: <link
+                  linkend="ref_builtin_dedent">dedent</link>, <link
+                  linkend="ref_builtin_indent">indent</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Reflow text to lines of the specified maximum width:
+                  <link linkend="ref_builtin_wrap">wrap</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Split string to a sequence of lines: <link
+                  linkend="ref_builtin_lines">lines</link></para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+        </section>
 
         <section>
           <title>Changes on the Java side</title>

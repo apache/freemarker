@@ -67,6 +67,7 @@ import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
 import freemarker.core.BuiltInsForStringsMisc.evalJsonBI;
 import freemarker.template.Configuration;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -85,7 +86,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<>();
-    static final int NUMBER_OF_BIS = 302;
+    static final int NUMBER_OF_BIS = 308;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap<>(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static final String BI_NAME_SNAKE_CASE_WITH_ARGS = "with_args";
@@ -115,6 +116,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("date_if_unknown", "dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
         putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
         putBI("datetime_if_unknown", "datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
+        putBI("dedent", new BuiltInsForStringsBasic.dedentBI());
         putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
         putBI("drop_while", "dropWhile", new BuiltInsForSequences.drop_whileBI());
@@ -138,6 +140,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("has_next", "hasNext", new BuiltInsForLoopVariables.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
         putBI("if_exists", "ifExists", new BuiltInsForExistenceHandling.if_existsBI());
+        putBI("indent", new BuiltInsForStringsBasic.indentBI());
         putBI("index", new BuiltInsForLoopVariables.indexBI());
         putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
@@ -247,6 +250,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("last", new lastBI());
         putBI("left_pad", "leftPad", new BuiltInsForStringsBasic.padBI(true));
         putBI("length", new BuiltInsForStringsBasic.lengthBI());
+        putBI("lines", new BuiltInsForStringsBasic.linesBI());
         putBI("long", new longBI());
         putBI("lower_abc", "lowerAbc", new BuiltInsForNumbers.lower_abcBI());
         putBI("lower_case", "lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
@@ -315,6 +319,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI(BI_NAME_SNAKE_CASE_WITH_ARGS_LAST, BI_NAME_CAMEL_CASE_WITH_ARGS_LAST,
                 new BuiltInsForCallables.with_args_lastBI());
         putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
+        putBI("wrap", new BuiltInsForStringsBasic.wrapBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
         putBI("matches", new BuiltInsForStringsRegexp.matchesBI());
@@ -491,6 +496,27 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
     
+    /**
+     * Same as {@link #getBooleanMethodArg}, but checks if {@code args} is big enough, and returns {@code defaultValue}
+     * if it isn't.
+     */
+    protected final boolean getOptBooleanMethodArg(List args, int argIdx, boolean defaultValue)
+            throws TemplateModelException {
+        return args.size() > argIdx ? getBooleanMethodArg(args, argIdx) : defaultValue;
+    }
+
+    /**
+     * Gets a method argument and checks if it's a boolean; it does NOT check if {@code args} is big enough.
+     */
+    protected final boolean getBooleanMethodArg(List args, int argIdx) throws TemplateModelException {
+        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        if (!(arg instanceof TemplateBooleanModel)) {
+            throw _MessageUtil.newMethodArgMustBeBooleanException("?" + key, argIdx, arg);
+        } else {
+            return ((TemplateBooleanModel) arg).getAsBoolean();
+        }
+    }
+
     protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
         return _MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }

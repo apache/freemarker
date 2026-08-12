@@ -33,6 +33,7 @@ import freemarker.core.LocalLambdaExpression.LambdaParameterList;
 import freemarker.template.*;
 import freemarker.template.utility.*;
 import java.io.*;
+import java.math.BigInteger;
 import java.util.*;
 import static freemarker.template.Configuration.*;
 
@@ -1253,6 +1254,8 @@ TOKEN:
     |
     <DECIMAL : <INTEGER> "." <INTEGER>>
     |
+    <HEX_INTEGER : "0" ["x", "X"] (["0"-"9", "a"-"f", "A"-"F"])+>
+    |
     <DOT : ".">
     |
     <DOT_DOT : "..">
@@ -2078,10 +2081,15 @@ Expression NumberLiteral() :
         t = <INTEGER>
         |
         t = <DECIMAL>
+        |
+        t = <HEX_INTEGER>
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
+        Number n = t.kind == HEX_INTEGER
+                ? pCfg.getArithmeticEngine().hexadecimalToNumber(s)
+                : pCfg.getArithmeticEngine().toNumber(s);
+        Expression result = new NumberLiteral(n);
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
