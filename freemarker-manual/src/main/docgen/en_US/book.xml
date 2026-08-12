@@ -20,8 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:html="http://www.w3.org/1999/xhtml"
->
+      xmlns:db="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -31058,6 +31060,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting</link> to 2.3.35 or higher. Earlier this only worked if
               the return type was primitive <literal>boolean</literal>,
               consistently with the JavaBeans specification.</para>
+            </listitem>
+
+            <listitem>
+              <para>Removed <literal>freemarker.debug</literal> package
+              entirely, because of its dependency on RMI, which often caused
+              security scan alerts (even though it wasn't active by default).
+              This was an old effort to support remote debugging of templates,
+              and probably wasn't used by anyone anymore.</para>
             </listitem>
           </itemizedlist>
         </section>
