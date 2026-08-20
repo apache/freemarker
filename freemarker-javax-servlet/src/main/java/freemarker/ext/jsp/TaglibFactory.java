@@ -1314,9 +1314,8 @@ public class TaglibFactory implements TemplateHashModel {
                     return entryUrl.openStream();
                 } catch (Exception e) {
                     if (fallbackRawJarContentInputStreamFactory == null) {
-                        // Java 7 (Java 6?): We could just re-throw `e`
                         if (e instanceof IOException) {
-                            throw (IOException) e;
+                            throw e;
                         }
                         if (e instanceof RuntimeException) {
                             throw (RuntimeException) e;

@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import freemarker.template.Configuration;
@@ -44,10 +43,10 @@ public class MapBiTest extends TemplateTest {
         }
     }
 
-    private static final List<TestParam> TEST_PARAMS = ImmutableList.of(
-            new TestParam(ImmutableList.of("a", "b", "c"), "A, B, C"),
-            new TestParam(ImmutableList.of("a"), "A"),
-            new TestParam(ImmutableList.of(), "")
+    private static final List<TestParam> TEST_PARAMS = List.of(
+            new TestParam(List.of("a", "b", "c"), "A, B, C"),
+            new TestParam(List.of("a"), "A"),
+            new TestParam(List.of(), "")
     );
 
     @Override
@@ -118,7 +117,7 @@ public class MapBiTest extends TemplateTest {
 
     @Test
     public void testWithNumberElements() throws Exception {
-        addToDataModel("xs", ImmutableList.of(1, 1.55, 3));
+        addToDataModel("xs", List.of(1, 1.55, 3));
         addToDataModel("obj", new MapperObject());
         assertOutput(
                 "<#list xs?map(n -> n * 10) as x>${x}<#sep>, </#list>",
@@ -134,7 +133,7 @@ public class MapBiTest extends TemplateTest {
 
     @Test
     public void testWithBeanElements() throws Exception {
-        addToDataModel("xs", ImmutableList.of(new User("a"), new User("b"), new User("c")));
+        addToDataModel("xs", List.of(new User("a"), new User("b"), new User("c")));
         addToDataModel("obj", new MapperObject());
         assertOutput(
                 "<#list xs?map(user -> user.name) as x>${x}<#sep>, </#list>",

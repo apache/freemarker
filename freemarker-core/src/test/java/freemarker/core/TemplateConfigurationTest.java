@@ -44,7 +44,6 @@ import java.util.TimeZone;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.cache.StringTemplateLoader;
@@ -196,7 +195,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("lazyImports", Boolean.TRUE);
         SETTING_ASSIGNMENTS.put("lazyAutoImports", Boolean.FALSE);
         SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
-        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
+        SETTING_ASSIGNMENTS.put("autoIncludes", List.of("/lib/b.ftl"));
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
@@ -378,14 +377,14 @@ public class TemplateConfigurationTest {
     @Test
     public void testMergeListSettings() throws Exception {
         TemplateConfiguration tc1 = new TemplateConfiguration();
-        tc1.setAutoIncludes(ImmutableList.of("a.ftl", "x.ftl", "b.ftl"));
+        tc1.setAutoIncludes(List.of("a.ftl", "x.ftl", "b.ftl"));
         
         TemplateConfiguration tc2 = new TemplateConfiguration();
-        tc2.setAutoIncludes(ImmutableList.of("c.ftl", "x.ftl", "d.ftl"));
+        tc2.setAutoIncludes(List.of("c.ftl", "x.ftl", "d.ftl"));
         
         tc1.merge(tc2);
         
-        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tc1.getAutoIncludes());
+        assertEquals(List.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tc1.getAutoIncludes());
     }
     
     @Test
@@ -502,7 +501,7 @@ public class TemplateConfigurationTest {
             tc.setParentConfiguration(cfg);
             tc.setBooleanFormat("Y,N");
             tc.setAutoImports(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"));
-            tc.setAutoIncludes(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"));
+            tc.setAutoIncludes(List.of("i1.ftl", "i2.ftl", "i3.ftl"));
             tc.setCustomNumberFormats(ImmutableMap.of(
                     "a", HexTemplateNumberFormatFactory.INSTANCE,
                     "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
@@ -511,15 +510,15 @@ public class TemplateConfigurationTest {
         }
         assertEquals("Y,N", t.getBooleanFormat());
         assertEquals(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
-        assertEquals(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
+        assertEquals(List.of("a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
+        assertEquals(List.of("i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
         
         {
             TemplateConfiguration  tc = new TemplateConfiguration();
             tc.setParentConfiguration(cfg);
             tc.setBooleanFormat("J,N");
             tc.setAutoImports(ImmutableMap.of("b", "b2.ftl", "d", "d.ftl"));
-            tc.setAutoIncludes(ImmutableList.of("i2.ftl", "i4.ftl"));
+            tc.setAutoIncludes(List.of("i2.ftl", "i4.ftl"));
             tc.setCustomNumberFormats(ImmutableMap.of(
                     "b", BaseNTemplateNumberFormatFactory.INSTANCE,
                     "c", BaseNTemplateNumberFormatFactory.INSTANCE));
@@ -528,8 +527,8 @@ public class TemplateConfigurationTest {
         }
         assertEquals("Y,N", t.getBooleanFormat());
         assertEquals(ImmutableMap.of("d", "d.ftl", "a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
-        assertEquals(ImmutableList.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
+        assertEquals(List.of("d", "a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
+        assertEquals(List.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
         assertEquals(ImmutableMap.of( //
                 "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, //
                 "c", BaseNTemplateNumberFormatFactory.INSTANCE, //
@@ -758,7 +757,7 @@ public class TemplateConfigurationTest {
     @Test
     public void testAutoIncludes() throws TemplateException, IOException {
         TemplateConfiguration tc = new TemplateConfiguration();
-        tc.setAutoIncludes(ImmutableList.of("t1.ftl", "t2.ftl"));
+        tc.setAutoIncludes(List.of("t1.ftl", "t2.ftl"));
         tc.setParent(DEFAULT_CFG);
         assertOutputWithoutAndWithTC(tc, "<#include 't3.ftl'>", "In t3;", "In t1;In t2;In t3;");
     }

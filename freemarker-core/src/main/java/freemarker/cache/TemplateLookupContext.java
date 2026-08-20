@@ -25,29 +25,28 @@ import java.util.Locale;
 import freemarker.template.Configuration;
 
 /**
- * Used as the parameter of {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}.
- * You can't create instances of this, only receive them from FreeMarker.
- * 
+ * Used as the parameter of {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}. You can't create instances of
+ * this, only receive them from FreeMarker.
+ *
  * @since 2.3.22
  */
 public abstract class TemplateLookupContext {
-    
+
     private final String templateName;
     private final Locale templateLocale;
     private final Object customLookupCondition;
 
     /**
-     * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so called acquisition),
+     * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so-called acquisition),
      * otherwise it just calls {@link TemplateLoader#findTemplateSource(String)}.
-     * 
+     *
      * @param templateName
-     *            Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among
-     *            others, it starts with {@code /}, or contains {@code .} or {@code ..} path steps, or it uses
-     *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" path steps
-     *            (acquisition).
-     * 
+     *         Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among others,
+     *         it starts with {@code /}, or contains {@code .} or {@code ..} path steps, or it uses backslash
+     *         ({@code \}) instead of {@code /}. A normalized name might contains "*" path steps (acquisition).
+     *
      * @return The result of the lookup. Not {@code null}; check {@link TemplateLookupResult#isPositive()} to see if the
-     *         lookup has found anything.
+     * lookup has found anything.
      */
     public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String templateName) throws IOException;
 
@@ -55,14 +54,16 @@ public abstract class TemplateLookupContext {
      * Finds the template source based on its <em>normalized</em> name; tries localized variations going from most
      * specific to less specific, and for each variation it delegates to {@link #lookupWithAcquisitionStrategy(String)}.
      * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedLookup()} is
-     * {@code false})), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
+     * {@code false}), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
      * the default strategy of FreeMarker (at least in 2.3.x), so for more information, see
      * {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      */
     public abstract TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(String templateName,
             Locale templateLocale) throws IOException;
-    
-    /** Default visibility to prevent extending the class from outside this package. */
+
+    /**
+     * Default visibility to prevent extending the class from outside this package.
+     */
     TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
         this.templateName = templateName;
         this.templateLocale = templateLocale;
@@ -70,7 +71,7 @@ public abstract class TemplateLookupContext {
     }
 
     /**
-     * The normalized name (path) of the template (relatively to the {@link TemplateLoader}). Not {@code null}. 
+     * The normalized name (path) of the template (relatively to the {@link TemplateLoader}). Not {@code null}.
      */
     public String getTemplateName() {
         return templateName;
@@ -104,5 +105,5 @@ public abstract class TemplateLookupContext {
     public TemplateLookupResult createNegativeLookupResult() {
         return TemplateLookupResult.createNegativeResult();
     }
-    
+
 }

@@ -26,8 +26,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-
 import freemarker.template.Configuration;
 import freemarker.template.DefaultIterableAdapter;
 import freemarker.template.utility.DateUtil;
@@ -43,20 +41,20 @@ public class MinMaxBITest extends TemplateTest {
         
         ObjectWrapperWithAPISupport ow = (ObjectWrapperWithAPISupport) getConfiguration().getObjectWrapper();
         for (boolean exposeAsSeq : new boolean[] { true, false }) { // Expose xs as SequenceTM or as CollectionTM
-            for (InputMinMax testParams : ImmutableList.of(
+            for (InputMinMax testParams : List.of(
                     // Test parameters:             List (xs), Expected result for `?min`, For `?max`
-                    new InputMinMax(ImmutableList.of(1, 2, 3), "1", "3"),
-                    new InputMinMax(ImmutableList.of(3, 2, 1), "1", "3"),
-                    new InputMinMax(ImmutableList.of(1, 3, 2), "1", "3"),
-                    new InputMinMax(ImmutableList.of(2, 1, 3), "1", "3"),
-                    new InputMinMax(ImmutableList.of(2), "2", "2"),
+                    new InputMinMax(List.of(1, 2, 3), "1", "3"),
+                    new InputMinMax(List.of(3, 2, 1), "1", "3"),
+                    new InputMinMax(List.of(1, 3, 2), "1", "3"),
+                    new InputMinMax(List.of(2, 1, 3), "1", "3"),
+                    new InputMinMax(List.of(2), "2", "2"),
                     new InputMinMax(Collections.emptyList(), "-", "-"),
-                    new InputMinMax(ImmutableList.of(1.5, -0.5, 1L, 2.25), "-0.5", "2.25"),
-                    new InputMinMax(ImmutableList.of(Double.NEGATIVE_INFINITY, 1, Double.POSITIVE_INFINITY),
+                    new InputMinMax(List.of(1.5, -0.5, 1L, 2.25), "-0.5", "2.25"),
+                    new InputMinMax(List.of(Double.NEGATIVE_INFINITY, 1, Double.POSITIVE_INFINITY),
                             "-\u221E", "\u221E"), // \u221E = ∞
                     new InputMinMax(Arrays.asList(new Object[] { null, 1, null, 2, null }), "1", "2"),
                     new InputMinMax(Arrays.asList(new Object[] { null, null, null }), "-", "-"),
-                    new InputMinMax(ImmutableList.of(new Time(2000), new Time(3000), new Time(1000)),
+                    new InputMinMax(List.of(new Time(2000), new Time(3000), new Time(1000)),
                             "00:00:01", "00:00:03")
                     )) {
                 addToDataModel("xs",

@@ -1496,18 +1496,22 @@ public class ObjectBuilderSettingsTest {
     
     public static class DummyTemplateLoader implements TemplateLoader {
 
+        @Override
         public Object findTemplateSource(String name) throws IOException {
             return null;
         }
 
+        @Override
         public long getLastModified(Object templateSource) {
             return 0;
         }
 
+        @Override
         public Reader getReader(Object templateSource, String encoding) throws IOException {
             return null;
         }
 
+        @Override
         public void closeTemplateSource(Object templateSource) throws IOException {
         }
         

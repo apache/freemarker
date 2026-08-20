@@ -24,10 +24,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
 
 import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
@@ -46,38 +45,38 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t", "${.outputFormat}");
         addTemplate("t.xml", "${.outputFormat}");
         addTemplate("tWithHeader", "<#ftl outputFormat='HTML'>${.outputFormat}");
-        
+
         Configuration cfg = getConfiguration();
         for (OutputFormat cfgOutputFormat
-                : new OutputFormat[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
+                : new OutputFormat[]{UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE}) {
             if (!cfgOutputFormat.equals(UndefinedOutputFormat.INSTANCE)) {
                 cfg.setOutputFormat(cfgOutputFormat);
             }
-            
+
             assertEquals(cfgOutputFormat, cfg.getOutputFormat());
-            
+
             {
                 Template t = cfg.getTemplate("t");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
+
             {
                 Template t = cfg.getTemplate("t.xml");
                 assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
+
             {
                 Template t = cfg.getTemplate("tWithHeader");
                 assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
+
             cfg.clearTemplateCache();
         }
     }
-    
+
     @Test
     public void testStandardFileExtensions() throws Exception {
         String commonContent = "${.outputFormat}";
@@ -90,76 +89,76 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.FTLX", commonContent);
         addTemplate("t.fTlX", commonContent);
         addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
-        
+
         Configuration cfg = getConfiguration();
         for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
             final OutputFormat cfgOutputFormat;
             final OutputFormat ftlhOutputFormat;
             final OutputFormat ftlxOutputFormat;
             switch (setupNumber) {
-            case 1:
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
-                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
-                break;
-            case 2:
-                cfgOutputFormat = RTFOutputFormat.INSTANCE;
-                cfg.setOutputFormat(cfgOutputFormat);
-                ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
-                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
-                break;
-            case 3:
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                cfg.unsetOutputFormat();
-                TemplateConfiguration tcXml = new TemplateConfiguration();
-                tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
-                cfg.setTemplateConfigurations(
-                        new ConditionalTemplateConfigurationFactory(
-                                new OrMatcher(
-                                        new FileNameGlobMatcher("*.ftlh"),
-                                        new FileNameGlobMatcher("*.FTLH"),
-                                        new FileNameGlobMatcher("*.fTlH")),
-                                tcXml));
-                ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
-                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
-                break;
-            case 4:
-                cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = XMLOutputFormat.INSTANCE; // now gets overidden
-                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
-                break;
-            case 5:
-                cfg.setTemplateConfigurations(null);
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
-                break;
-            default:
-                throw new AssertionError();
+                case 1:
+                    cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
+                    ftlxOutputFormat = XMLOutputFormat.INSTANCE;
+                    break;
+                case 2:
+                    cfgOutputFormat = RTFOutputFormat.INSTANCE;
+                    cfg.setOutputFormat(cfgOutputFormat);
+                    ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
+                    ftlxOutputFormat = XMLOutputFormat.INSTANCE;
+                    break;
+                case 3:
+                    cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    cfg.unsetOutputFormat();
+                    TemplateConfiguration tcXml = new TemplateConfiguration();
+                    tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
+                    cfg.setTemplateConfigurations(
+                            new ConditionalTemplateConfigurationFactory(
+                                    new OrMatcher(
+                                            new FileNameGlobMatcher("*.ftlh"),
+                                            new FileNameGlobMatcher("*.FTLH"),
+                                            new FileNameGlobMatcher("*.fTlH")),
+                                    tcXml));
+                    ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
+                    ftlxOutputFormat = XMLOutputFormat.INSTANCE;
+                    break;
+                case 4:
+                    cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+                    cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    ftlhOutputFormat = XMLOutputFormat.INSTANCE; // now gets overidden
+                    ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    break;
+                case 5:
+                    cfg.setTemplateConfigurations(null);
+                    cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    ftlhOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
+                    break;
+                default:
+                    throw new AssertionError();
             }
-            
+
             assertEquals(cfgOutputFormat, cfg.getOutputFormat());
-            
+
             {
                 Template t = cfg.getTemplate("t");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
+
             {
                 Template t = cfg.getTemplate("t.ftl");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
-            for (String name : new String[] { "t.ftlh", "t.FTLH", "t.fTlH" }) {
+
+            for (String name : new String[]{"t.ftlh", "t.FTLH", "t.fTlH"}) {
                 Template t = cfg.getTemplate(name);
                 assertEquals(ftlhOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
-            for (String name : new String[] { "t.ftlx", "t.FTLX", "t.fTlX" }) {
+
+            for (String name : new String[]{"t.ftlx", "t.FTLX", "t.fTlX"}) {
                 Template t = cfg.getTemplate(name);
                 assertEquals(ftlxOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
@@ -170,18 +169,18 @@ public class OutputFormatTest extends TemplateTest {
                 assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
-            
+
             cfg.clearTemplateCache();
         }
     }
-    
+
     @Test
     public void testStandardFileExtensionsSettingOverriding() throws Exception {
         addTemplate("t.ftlx",
                 "${\"'\"} ${\"'\"?esc} ${\"'\"?noEsc}");
         addTemplate("t.ftl",
                 "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
-        
+
         TemplateConfiguration tcHTML = new TemplateConfiguration();
         tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
         ConditionalTemplateConfigurationFactory tcfHTML = new ConditionalTemplateConfigurationFactory(
@@ -199,7 +198,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        
+
         cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);  // Extensions has no effect
@@ -212,13 +211,13 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlx", "&#39; &#39; '");
         cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "' &apos; '");
-        
+
         cfg.setRecognizeStandardFileExtensions(true);
         cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        
+
         cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
@@ -253,7 +252,7 @@ public class OutputFormatTest extends TemplateTest {
             t.process(null, out);
             assertEquals("&#39;", out.toString());
         }
-        
+
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
         {
             Template t = new Template("foo.ftlx", commonFTL, cfg);
@@ -263,7 +262,7 @@ public class OutputFormatTest extends TemplateTest {
             assertEquals("'", out.toString());
         }
     }
-    
+
     @Test
     public void testStandardFileExtensionsFormatterImplOverriding() throws Exception {
         addTemplate("t.ftlh", "${'a&x'}");
@@ -273,24 +272,24 @@ public class OutputFormatTest extends TemplateTest {
         getConfiguration().setRegisteredCustomOutputFormats(Collections.<OutputFormat>emptyList());
         assertOutputForNamed("t.ftlh", "a&amp;x");
     }
-    
+
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
         addTemplate("tWithHeaderFalse", "<#ftl autoEsc=false>${'a&b'}");
         addTemplate("tWithHeaderTrue", "<#ftl autoEsc=true>${'a&b'}");
-        
+
         Configuration cfg = getConfiguration();
-        
+
         assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
-        
+
         cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
-        
-        for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
+
+        for (boolean cfgAutoEscaping : new boolean[]{true, false}) {
             if (!cfgAutoEscaping) {
                 cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
             }
-            
+
             {
                 Template t = cfg.getTemplate("t");
                 if (cfgAutoEscaping) {
@@ -301,23 +300,23 @@ public class OutputFormatTest extends TemplateTest {
                     assertOutput(t, "a&b");
                 }
             }
-            
+
             {
                 Template t = cfg.getTemplate("tWithHeaderFalse");
                 assertFalse(t.getAutoEscaping());
                 assertOutput(t, "a&b");
             }
-            
+
             {
                 Template t = cfg.getTemplate("tWithHeaderTrue");
                 assertTrue(t.getAutoEscaping());
                 assertOutput(t, "a&amp;b");
             }
-            
+
             cfg.clearTemplateCache();
         }
     }
-    
+
     @Test
     public void testNumericalInterpolation() throws IOException, TemplateException {
         getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(DummyOutputFormat.INSTANCE));
@@ -331,7 +330,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl outputFormat='HTML'>#{1.5}", "1.5");
         assertOutput("#{1.5}", "1.5");
     }
-    
+
     @Test
     public void testUndefinedOutputFormat() throws IOException, TemplateException {
         assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h&#39;}; <p>c");
@@ -346,7 +345,7 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains("<#ftl outputFormat='plainText'>${'x'?esc}", "plainText", "escaping", "?esc");
         assertErrorContains("<#ftl outputFormat='plainText'>${'x'?noEsc}", "plainText", "escaping", "?noEsc");
     }
-    
+
     @Test
     public void testAutoEscapingOnMOs() throws IOException, TemplateException {
         for (int autoEsc = 0; autoEsc < 2; autoEsc++) {
@@ -358,47 +357,47 @@ public class OutputFormatTest extends TemplateTest {
                 getConfiguration().setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
                 assertOutput(commonAutoEscFtl, "&");
             }
-            
+
             assertOutput(
                     "<#ftl outputFormat='RTF'>"
-                    + "${rtfPlain} ${rtfMarkup} "
-                    + "${htmlPlain} "
-                    + "${xmlPlain}",
+                            + "${rtfPlain} ${rtfMarkup} "
+                            + "${htmlPlain} "
+                            + "${xmlPlain}",
                     "\\\\par a & b \\par c "
-                    + "a < \\{h'\\} "
-                    + "a < \\{x'\\}");
+                            + "a < \\{h'\\} "
+                            + "a < \\{x'\\}");
             assertOutput(
                     "<#ftl outputFormat='HTML'>"
-                    + "${htmlPlain} ${htmlMarkup} "
-                    + "${xmlPlain} "
-                    + "${rtfPlain}",
+                            + "${htmlPlain} ${htmlMarkup} "
+                            + "${xmlPlain} "
+                            + "${rtfPlain}",
                     "a &lt; {h&#39;} <p>c "
-                    + "a &lt; {x&#39;} "
-                    + "\\par a &amp; b");
+                            + "a &lt; {x&#39;} "
+                            + "\\par a &amp; b");
             assertOutput(
                     "<#ftl outputFormat='XML'>"
-                    + "${xmlPlain} ${xmlMarkup} "
-                    + "${htmlPlain} "
-                    + "${rtfPlain}",
+                            + "${xmlPlain} ${xmlMarkup} "
+                            + "${htmlPlain} "
+                            + "${rtfPlain}",
                     "a &lt; {x&apos;} <p>c</p> "
-                    + "a &lt; {h&apos;} "
-                    + "\\par a &amp; b");
+                            + "a &lt; {h&apos;} "
+                            + "\\par a &amp; b");
             assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
             assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
             assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
             assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
             assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
             assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
-            
+
             for (int hasHeader = 0; hasHeader < 2; hasHeader++) {
                 assertOutput(
                         (hasHeader == 1 ? "<#ftl outputFormat='undefined'>" : "")
-                        + "${xmlPlain} ${xmlMarkup} "
-                        + "${htmlPlain} ${htmlMarkup} "
-                        + "${rtfPlain} ${rtfMarkup}",
+                                + "${xmlPlain} ${xmlMarkup} "
+                                + "${htmlPlain} ${htmlMarkup} "
+                                + "${rtfPlain} ${rtfMarkup}",
                         "a &lt; {x&apos;} <p>c</p> "
-                        + "a &lt; {h&#39;} <p>c "
-                        + "\\\\par a & b \\par c");
+                                + "a &lt; {h&#39;} <p>c "
+                                + "\\\\par a & b \\par c");
             }
         }
     }
@@ -407,13 +406,13 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringLiteralsUseUndefinedOF() throws IOException, TemplateException {
         String expectedOut = "&amp; (&) &amp;";
         String ftl = "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc} ${'&'}";
-        
+
         assertOutput(ftl, expectedOut);
-        
+
         addTemplate("t.xml", ftl);
         assertOutputForNamed("t.xml", expectedOut);
     }
-    
+
     @Test
     public void testUnparsedTemplate() throws IOException, TemplateException {
         String content = "<#ftl>a<#foo>b${x}";
@@ -424,7 +423,7 @@ public class OutputFormatTest extends TemplateTest {
             assertEquals(content, sw.toString());
             assertEquals(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
         }
-        
+
         {
             getConfiguration().setOutputFormat(HTMLOutputFormat.INSTANCE);
             Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
@@ -439,7 +438,7 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringLiteralInterpolation() throws IOException, TemplateException {
         Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
         assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
-        
+
         assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}",
                 "undefined undefined undefined");
         assertOutput("<#ftl outputFormat='HTML'>${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}",
@@ -452,7 +451,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl outputFormat='XML'>${'${xmlMarkup?esc} ${\"<\"?esc} ${\">\"} ${\"&amp;\"?noEsc}'}",
                 "<p>c</p> &lt; &gt; &amp;");
     }
-    
+
     @Test
     public void testStringBIsFail() {
         assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "markup_output");
@@ -508,7 +507,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(
                 "<#ftl outputFormat='RTF'>${'\\'' + xmlPlain}",
                 "'a < \\{x'\\}");
-        
+
         assertOutput(
                 "<#assign x = '\\''><#assign x += xmlMarkup>${x}",
                 "&apos;<p>c</p>");
@@ -522,15 +521,15 @@ public class OutputFormatTest extends TemplateTest {
                 "<#assign x = xmlMarkup><#assign x += htmlMarkup>${x}",
                 "HTML", "XML", "Conversion", "common");
     }
-    
+
     @Test
     public void testBlockAssignment() throws Exception {
-        for (String d : new String[] { "assign", "global", "local" }) {
+        for (String d : new String[]{"assign", "global", "local"}) {
             String commonFTL =
                     "<#macro m>"
-                    + "<#" + d + " x><p>${'&'}</#" + d + ">${x?isString?c} ${x} ${'&'} "
-                    + "<#" + d + " x></#" + d + ">${x?isString?c}"
-                    + "</#macro><@m />";
+                            + "<#" + d + " x><p>${'&'}</#" + d + ">${x?isString?c} ${x} ${'&'} "
+                            + "<#" + d + " x></#" + d + ">${x?isString?c}"
+                            + "</#macro><@m />";
             assertOutput(
                     commonFTL,
                     "true <p>& & true");
@@ -543,26 +542,26 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testSpecialVariables() throws Exception {
         String commonFTL = "${.outputFormat} ${.autoEsc?c}";
-        
+
         addTemplate("t.ftlx", commonFTL);
         assertOutputForNamed("t.ftlx", "XML true");
-        
+
         addTemplate("t.ftlh", commonFTL);
         assertOutputForNamed("t.ftlh", "HTML true");
 
         addTemplate("t.ftl", commonFTL);
         assertOutputForNamed("t.ftl", "undefined false");
-        
+
         addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
         addTemplate("tX.ftlx", commonFTL);
         assertOutputForNamed("t.ftlx", "XML true");
-        
+
         addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
         assertOutputForNamed("tN.ftl", "RTF false");
-        
+
         assertOutput("${.output_format} ${.auto_esc?c}", "undefined false");
     }
-    
+
     @Test
     public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
         String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
@@ -577,12 +576,12 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testEscAndNoEscBIsOnMOs() throws IOException, TemplateException {
         String xmlHdr = "<#ftl outputFormat='XML'>";
-        
+
         assertOutput(
                 xmlHdr + "${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
                 "&amp; &amp; & &");
-        
-        for (String bi : new String[] { "esc", "noEsc" } ) {
+
+        for (String bi : new String[]{"esc", "noEsc"}) {
             assertOutput(
                     xmlHdr + "${rtfPlain?" + bi + "}",
                     "\\par a &amp; b");
@@ -621,20 +620,20 @@ public class OutputFormatTest extends TemplateTest {
     public void testOutputFormatDirective() throws Exception {
         assertOutput(
                 "${.outputFormat}${'\\''} "
-                + "<#outputFormat 'HTML'>"
-                + "${.outputFormat}${'\\''} "
-                + "<#outputFormat 'XML'>${.outputFormat}${'\\''}</#outputFormat> "
-                + "${.outputFormat}${'\\''} "
-                + "</#outputFormat>"
-                + "${.outputFormat}${'\\''}",
+                        + "<#outputFormat 'HTML'>"
+                        + "${.outputFormat}${'\\''} "
+                        + "<#outputFormat 'XML'>${.outputFormat}${'\\''}</#outputFormat> "
+                        + "${.outputFormat}${'\\''} "
+                        + "</#outputFormat>"
+                        + "${.outputFormat}${'\\''}",
                 "undefined' HTML&#39; XML&apos; HTML&#39; undefined'");
         assertOutput(
                 "<#ftl output_format='XML'>"
-                + "${.output_format}${'\\''} "
-                + "<#outputformat 'HTML'>${.output_format}${'\\''}</#outputformat> "
-                + "${.output_format}${'\\''}",
+                        + "${.output_format}${'\\''} "
+                        + "<#outputformat 'HTML'>${.output_format}${'\\''}</#outputformat> "
+                        + "${.output_format}${'\\''}",
                 "XML&apos; HTML&#39; XML&apos;");
-        
+
         // Custom format:
         assertErrorContains(
                 "<#outputFormat 'dummy'></#outputFormat>",
@@ -643,7 +642,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(
                 "<#outputFormat 'dummy'>${.outputFormat}</#outputFormat>",
                 "dummy");
-        
+
         // Parse-time param expression:
         assertOutput(
                 "<#outputFormat 'plain' + 'Text'>${.outputFormat}</#outputFormat>",
@@ -657,7 +656,7 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains(
                 "<#outputFormat true></#outputFormat>",
                 "string", "boolean");
-        
+
         // Naming convention:
         assertErrorContains(
                 "<#outputFormat 'HTML'></#outputformat>",
@@ -665,21 +664,21 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains(
                 "<#outputformat 'HTML'></#outputFormat>",
                 "convention", "#outputFormat", "#outputformat");
-        
+
         // Empty block:
         assertOutput(
                 "${.output_format} "
-                + "<#outputformat 'HTML'></#outputformat>"
-                + "${.output_format}",
+                        + "<#outputformat 'HTML'></#outputformat>"
+                        + "${.output_format}",
                 "undefined undefined");
-        
+
         // WS stripping:
         assertOutput(
                 "${.output_format}\n"
-                + "<#outputformat 'HTML'>\n"
-                + "  x\n"
-                + "</#outputformat>\n"
-                + "${.output_format}",
+                        + "<#outputformat 'HTML'>\n"
+                        + "  x\n"
+                        + "</#outputformat>\n"
+                        + "${.output_format}",
                 "undefined\n  x\nundefined");
     }
 
@@ -687,21 +686,21 @@ public class OutputFormatTest extends TemplateTest {
     public void testAutoEscAndNoAutoEscDirectives() throws Exception {
         assertOutput(
                 "<#ftl outputFormat='XML'>"
-                + "${.autoEsc?c}${'&'} "
-                + "<#noAutoEsc>"
-                + "${.autoEsc?c}${'&'} "
-                + "<#autoEsc>${.autoEsc?c}${'&'}</#autoEsc> "
-                + "${.autoEsc?c}${'&'} "
-                + "</#noAutoEsc>"
-                + "${.autoEsc?c}${'&'}",
+                        + "${.autoEsc?c}${'&'} "
+                        + "<#noAutoEsc>"
+                        + "${.autoEsc?c}${'&'} "
+                        + "<#autoEsc>${.autoEsc?c}${'&'}</#autoEsc> "
+                        + "${.autoEsc?c}${'&'} "
+                        + "</#noAutoEsc>"
+                        + "${.autoEsc?c}${'&'}",
                 "true&amp; false& true&amp; false& true&amp;");
         assertOutput(
                 "<#ftl auto_esc=false output_format='XML'>"
-                + "${.auto_esc?c}${'&'} "
-                + "<#autoesc>${.auto_esc?c}${'&'}</#autoesc> "
-                + "${.auto_esc?c}${'&'}",
+                        + "${.auto_esc?c}${'&'} "
+                        + "<#autoesc>${.auto_esc?c}${'&'}</#autoesc> "
+                        + "${.auto_esc?c}${'&'}",
                 "false& true&amp; false&");
-        
+
         // Bad came case:
         assertErrorContains(
                 "<#noAutoesc></#noAutoesc>",
@@ -711,24 +710,24 @@ public class OutputFormatTest extends TemplateTest {
                 "Unknown directive");
 
         getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
-        
+
         // Empty block:
         assertOutput(
                 "${.auto_esc?c} "
-                + "<#noautoesc></#noautoesc>"
-                + "${.auto_esc?c}",
+                        + "<#noautoesc></#noautoesc>"
+                        + "${.auto_esc?c}",
                 "true true");
-        
+
         // WS stripping:
         assertOutput(
                 "${.auto_esc?c}\n"
-                + "<#noautoesc>\n"
-                + "  x\n"
-                + "</#noautoesc>\n"
-                + "${.auto_esc?c}",
+                        + "<#noautoesc>\n"
+                        + "  x\n"
+                        + "</#noautoesc>\n"
+                        + "${.auto_esc?c}",
                 "true\n  x\ntrue");
-        
-        
+
+
         // Naming convention:
         assertErrorContains(
                 "<#autoEsc></#autoesc>",
@@ -743,7 +742,7 @@ public class OutputFormatTest extends TemplateTest {
                 "<#noautoesc></#noAutoEsc>",
                 "convention", "#noAutoEsc", "#noautoesc");
     }
-    
+
     @Test
     public void testMixedContent() throws Exception {
         getConfiguration().setOutputFormat(DummyOutputFormat.INSTANCE);
@@ -763,7 +762,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl autoEsc=true outputFormat='HTML'>", "");
         assertOutput("<#ftl outputFormat='HTML' autoEsc=true>", "");
         assertOutput("<#ftl autoEsc=false>", "");
-        
+
         assertErrorContains("<#autoEsc></#autoEsc>", "can't do escaping", "undefined");
         assertErrorContains("<#ftl outputFormat='plainText'><#autoEsc></#autoEsc>", "can't do escaping", "plainText");
         assertOutput("<#ftl outputFormat='plainText'><#outputFormat 'XML'><#autoEsc></#autoEsc></#outputFormat>", "");
@@ -774,88 +773,88 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testAutoEscPolicy() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setRegisteredCustomOutputFormats(ImmutableList.of(
+        cfg.setRegisteredCustomOutputFormats(List.of(
                 SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
         assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
-        
+
         String commonFTL = "${'.'} ${.autoEsc?c}";
         String notEsced = ". false";
         String esced = "\\. true";
 
-        for (int autoEscPolicy : new int[] {
+        for (int autoEscPolicy : new int[]{
                 Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,
                 Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY,
-                Configuration.DISABLE_AUTO_ESCAPING_POLICY }) {
+                Configuration.DISABLE_AUTO_ESCAPING_POLICY}) {
             cfg.setAutoEscapingPolicy(autoEscPolicy);
-            
+
             String sExpted = autoEscPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY ? esced : notEsced;
             cfg.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
             assertOutput(commonFTL, sExpted);
             cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
             assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, sExpted);
             assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", sExpted);
-            
+
             String dExpted = autoEscPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY ? notEsced : esced;
             cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
             assertOutput(commonFTL, dExpted);
             cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
             assertOutput("<#ftl outputFormat='dummy'>" + commonFTL, dExpted);
             assertOutput("<#outputFormat 'dummy'>" + commonFTL + "</#outputFormat>", dExpted);
-            
+
             cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
             assertOutput(
                     commonFTL
-                    + "<#outputFormat 'seldomEscaped'>"
-                        + commonFTL
-                        + "<#outputFormat 'dummy'>"
+                            + "<#outputFormat 'seldomEscaped'>"
                             + commonFTL
-                        + "</#outputFormat>"
-                        + commonFTL
-                        + "<#outputFormat 'plainText'>"
+                            + "<#outputFormat 'dummy'>"
                             + commonFTL
-                        + "</#outputFormat>"
-                        + commonFTL
-                        + "<#noAutoEsc>"
+                            + "</#outputFormat>"
                             + commonFTL
-                        + "</#noAutoEsc>"
-                        + commonFTL
-                        + "<#autoEsc>"
+                            + "<#outputFormat 'plainText'>"
                             + commonFTL
-                        + "</#autoEsc>"
-                        + commonFTL
-                    + "</#outputFormat>"
-                    + commonFTL
-                    + "<#noAutoEsc>"
-                        + commonFTL
-                    + "</#noAutoEsc>"
-                    + commonFTL
-                    + "<#autoEsc>"
-                        + commonFTL
-                    + "</#autoEsc>"
-                    + commonFTL
+                            + "</#outputFormat>"
+                            + commonFTL
+                            + "<#noAutoEsc>"
+                            + commonFTL
+                            + "</#noAutoEsc>"
+                            + commonFTL
+                            + "<#autoEsc>"
+                            + commonFTL
+                            + "</#autoEsc>"
+                            + commonFTL
+                            + "</#outputFormat>"
+                            + commonFTL
+                            + "<#noAutoEsc>"
+                            + commonFTL
+                            + "</#noAutoEsc>"
+                            + commonFTL
+                            + "<#autoEsc>"
+                            + commonFTL
+                            + "</#autoEsc>"
+                            + commonFTL
                     ,
                     dExpted
-                        + sExpted
+                            + sExpted
                             + dExpted
-                        + sExpted
+                            + sExpted
                             + notEsced
-                        + sExpted
+                            + sExpted
                             + notEsced
-                        + sExpted
+                            + sExpted
                             + esced
-                        + sExpted
-                    + dExpted
-                        + notEsced
-                    + dExpted
-                        + esced
-                    + dExpted);
+                            + sExpted
+                            + dExpted
+                            + notEsced
+                            + dExpted
+                            + esced
+                            + dExpted);
         }
     }
 
     @Test
     public void testForcedAutoEsc() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setRegisteredCustomOutputFormats(ImmutableList.of(
+        cfg.setRegisteredCustomOutputFormats(List.of(
                 SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
         cfg.setAutoEscapingPolicy(Configuration.FORCE_AUTO_ESCAPING_POLICY);
 
@@ -896,13 +895,13 @@ public class OutputFormatTest extends TemplateTest {
     public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
         // Dynamic parser BI-s are supposed to use the parserConfiguration of the calling template, and ignore anything
         // inside the calling template itself. Except, the outputFormat has to come from the calling lexical context.
-        
+
         String commonFTL
                 = "Eval: ${'.outputFormat'?eval}; "
-                  + "Interpret: <#assign ipd = r\"${.outputFormat} ${'{&}'}\"?interpret><@ipd/>";
+                + "Interpret: <#assign ipd = r\"${.outputFormat} ${'{&}'}\"?interpret><@ipd/>";
         addTemplate("t.ftlh", commonFTL);
         addTemplate("t2.ftlh", "<#outputFormat 'RTF'>" + commonFTL + "</#outputFormat>");
-        
+
         assertOutputForNamed(
                 "t.ftlh",
                 "Eval: HTML; Interpret: HTML {&amp;}");
@@ -914,43 +913,43 @@ public class OutputFormatTest extends TemplateTest {
                 "Eval: undefined; Interpret: undefined {&}");
         assertOutput(
                 "<#ftl outputFormat='RTF'>" + commonFTL + "\n"
-                + "<#outputFormat 'XML'>" + commonFTL + "</#outputFormat>",
+                        + "<#outputFormat 'XML'>" + commonFTL + "</#outputFormat>",
                 "Eval: RTF; Interpret: RTF \\{&\\}\n"
-                + "Eval: XML; Interpret: XML {&amp;}");
-        
+                        + "Eval: XML; Interpret: XML {&amp;}");
+
         // parser.autoEscapingPolicy is inherited too:
         assertOutput(
                 "<#ftl autoEsc=false outputFormat='XML'>"
-                + commonFTL + " ${'.autoEsc'?eval?c}",
+                        + commonFTL + " ${'.autoEsc'?eval?c}",
                 "Eval: XML; Interpret: XML {&} false");
         assertOutput(
                 "<#ftl outputFormat='XML'>"
-                + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
+                        + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
                 "Eval: XML; Interpret: XML {&} false");
         assertOutput(
                 "<#ftl autoEsc=false outputFormat='XML'>"
-                + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
+                        + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
                 "Eval: XML; Interpret: XML {&} false");
         assertOutput(
                 "<#ftl autoEsc=false outputFormat='XML'>"
-                + "<#autoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#autoEsc>",
+                        + "<#autoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#autoEsc>",
                 "Eval: XML; Interpret: XML {&amp;} true");
         assertOutput(
                 "${.outputFormat}<#assign ftl='<#ftl outputFormat=\\'RTF\\'>$\\{.outputFormat}'> <@ftl?interpret/>",
                 "undefined RTF");
         assertOutput(
                 "${.outputFormat}<#outputFormat 'RTF'>"
-                + "<#assign ftl='$\\{.outputFormat}'> <@ftl?interpret/> ${'.outputFormat'?eval}"
-                + "</#outputFormat>",
+                        + "<#assign ftl='$\\{.outputFormat}'> <@ftl?interpret/> ${'.outputFormat'?eval}"
+                        + "</#outputFormat>",
                 "undefined RTF RTF");
     }
 
     @Test
     public void testBannedBIsWhenAutoEscaping() throws Exception {
-        for (String biName : new String[] { "html", "xhtml", "rtf", "xml" }) {
-            for (Version ici : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_24 }) {
+        for (String biName : new String[]{"html", "xhtml", "rtf", "xml"}) {
+            for (Version ici : new Version[]{Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_24}) {
                 getConfiguration().setIncompatibleImprovements(ici);
-                
+
                 String commonFTL = "${'x'?" + biName + "}";
                 assertOutput(commonFTL, "x");
                 assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL,
@@ -979,19 +978,19 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains("${xmlMarkup?xhtml}", "?xhtml", "string", "markup_output", "XML");
         assertErrorContains("${rtfPlain?xhtml}", "?xhtml", "string", "markup_output", "RTF");
         assertErrorContains("${rtfMarkup?xhtml}", "?xhtml", "string", "markup_output", "RTF");
-        
+
         assertOutput("${xmlPlain?xml} ${xmlMarkup?xml}", "a &lt; {x&apos;} <p>c</p>");
         assertOutput("${htmlPlain?xml} ${htmlMarkup?xml}", "a &lt; {h&#39;} <p>c");
         assertErrorContains("${rtfPlain?xml}", "?xml", "string", "markup_output", "RTF");
         assertErrorContains("${rtfMarkup?xml}", "?xml", "string", "markup_output", "RTF");
-        
+
         assertOutput("${rtfPlain?rtf} ${rtfMarkup?rtf}", "\\\\par a & b \\par c");
         assertErrorContains("${xmlPlain?rtf}", "?rtf", "string", "markup_output", "XML");
         assertErrorContains("${xmlMarkup?rtf}", "?rtf", "string", "markup_output", "XML");
         assertErrorContains("${htmlPlain?rtf}", "?rtf", "string", "markup_output", "HTML");
         assertErrorContains("${htmlMarkup?rtf}", "?rtf", "string", "markup_output", "HTML");
     }
-    
+
     @Test
     public void testBannedDirectivesWhenAutoEscaping() throws Exception {
         String commonFTL = "<#escape x as x?html>x</#escape>";
@@ -1002,7 +1001,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
         assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>", "x");
     }
-    
+
     @Test
     public void testCombinedOutputFormats() throws Exception {
         assertOutput(
@@ -1011,7 +1010,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(
                 "<#outputFormat 'HTML{RTF{XML}}'>${'<a=\\'{}\\' />'}</#outputFormat>",
                 "&amp;lt;a=&amp;apos;\\{\\}&amp;apos; /&amp;gt;");
-        
+
         String commonFtl = "${'\\''} <#outputFormat '{HTML}'>${'\\''}</#outputFormat>";
         String commonOutput = "&apos; &amp;#39;";
         assertOutput(
@@ -1024,7 +1023,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed(
                 "t.ftlx",
                 commonOutput);
-        
+
         assertErrorContains(
                 commonFtl,
                 ParseException.class, "{...}", "markup", UndefinedOutputFormat.INSTANCE.getName());
@@ -1044,21 +1043,21 @@ public class OutputFormatTest extends TemplateTest {
                 "<#outputFormat 'HTML{noSuchFormat}'></#outputFormat>",
                 ParseException.class, "noSuchFormat", "registered");
     }
-    
+
     @Test
     public void testHasContentBI() throws Exception {
         assertOutput("${htmlMarkup?hasContent?c} ${htmlPlain?hasContent?c}", "true true");
         assertOutput("<#ftl outputFormat='HTML'>${''?esc?hasContent?c} ${''?noEsc?hasContent?c}", "false false");
     }
-    
+
     @Test
     public void testMissingVariables() throws Exception {
-        for (String ftl : new String[] {
+        for (String ftl : new String[]{
                 "${noSuchVar}",
                 "<#ftl outputFormat='XML'>${noSuchVar}",
                 "<#ftl outputFormat='XML'>${noSuchVar?esc}",
                 "<#ftl outputFormat='XML'>${'x'?esc + noSuchVar}"
-                }) {
+        }) {
             assertErrorContains(ftl, InvalidReferenceException.class, "noSuchVar", "null or missing");
         }
     }
@@ -1071,11 +1070,11 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("${m1?isMarkupOutput?c} ${m2?isMarkupOutput?c} ${s?isMarkupOutput?c}", "true true false");
         assertOutput("${m1?is_markup_output?c}", "true");
     }
-    
+
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
-        
+
         TemplateConfiguration xmlTC = new TemplateConfiguration();
         xmlTC.setOutputFormat(XMLOutputFormat.INSTANCE);
         cfg.setTemplateConfigurations(
@@ -1087,8 +1086,8 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setSharedVariable("htmlMarkup", HTMLOutputFormat.INSTANCE.fromMarkup("<p>c"));
         cfg.setSharedVariable("xmlPlain", XMLOutputFormat.INSTANCE.fromPlainTextByEscaping("a < {x'}"));
         cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
-        
+
         return cfg;
     }
-    
+
 }

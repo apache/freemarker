@@ -27,13 +27,13 @@ import freemarker.template.Configuration;
  * Returns the merged results of all the child factories. The factories are merged in the order as they were added.
  * {@code null} results from the child factories will be ignored. If all child factories return {@code null}, the result
  * of this factory will be {@code null} too.
- * 
+ *
  * @since 2.3.24
  */
 public class MergingTemplateConfigurationFactory extends TemplateConfigurationFactory {
-    
+
     private final TemplateConfigurationFactory[] templateConfigurationFactories;
-    
+
     public MergingTemplateConfigurationFactory(TemplateConfigurationFactory... templateConfigurationFactories) {
         this.templateConfigurationFactories = templateConfigurationFactories;
     }
@@ -55,7 +55,7 @@ public class MergingTemplateConfigurationFactory extends TemplateConfigurationFa
                             throw new IllegalStateException(
                                     "The TemplateConfigurationFactory wasn't associated to a Configuration yet.");
                         }
-                        
+
                         mergedTC = new TemplateConfiguration();
                         mergedTC.setParentConfiguration(cfg);
                         mergedTC.merge(resultTC);
@@ -67,7 +67,7 @@ public class MergingTemplateConfigurationFactory extends TemplateConfigurationFa
         }
         return resultTC;
     }
-    
+
     @Override
     protected void setConfigurationOfChildren(Configuration cfg) {
         for (TemplateConfigurationFactory templateConfigurationFactory : templateConfigurationFactories) {

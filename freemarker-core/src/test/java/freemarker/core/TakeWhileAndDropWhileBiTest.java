@@ -24,8 +24,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.test.TemplateTest;
@@ -55,38 +53,38 @@ public class TakeWhileAndDropWhileBiTest extends TemplateTest {
         return cfg;
     }
 
-    private static final List<TestParam> TEST_PARAMS = ImmutableList.of(
-            new TestParam(ImmutableList.of(),
+    private static final List<TestParam> TEST_PARAMS = List.of(
+            new TestParam(List.of(),
                     "",
                     ""),
-            new TestParam(ImmutableList.of("a"),
+            new TestParam(List.of("a"),
                     "a",
                     "a"),
-            new TestParam(ImmutableList.of("a", "b", "c"),
+            new TestParam(List.of("a", "b", "c"),
                     "a, b, c",
                     "a, b, c"),
-            new TestParam(ImmutableList.of("aX"),
+            new TestParam(List.of("aX"),
                     "",
                     ""),
-            new TestParam(ImmutableList.of("aX", "b"),
+            new TestParam(List.of("aX", "b"),
                     "",
                     "b"),
-            new TestParam(ImmutableList.of("aX", "b", "c"),
+            new TestParam(List.of("aX", "b", "c"),
                     "",
                     "b, c"),
-            new TestParam(ImmutableList.of("a", "bX", "c"),
+            new TestParam(List.of("a", "bX", "c"),
                     "a",
                     "a, bX, c"),
-            new TestParam(ImmutableList.of("a", "b", "cX"),
+            new TestParam(List.of("a", "b", "cX"),
                     "a, b",
                     "a, b, cX"),
-            new TestParam(ImmutableList.of("aX", "bX", "c"),
+            new TestParam(List.of("aX", "bX", "c"),
                     "",
                     "c"),
-            new TestParam(ImmutableList.of("aX", "bX", "cX"),
+            new TestParam(List.of("aX", "bX", "cX"),
                     "",
                     ""),
-            new TestParam(ImmutableList.of("aX", "b", "cX"),
+            new TestParam(List.of("aX", "b", "cX"),
                     "",
                     "b, cX")
     );
@@ -124,13 +122,13 @@ public class TakeWhileAndDropWhileBiTest extends TemplateTest {
     public void testBetween() throws Exception {
         String ftl = "<#list xs?dropWhile(it -> it < 0)?takeWhile(it -> it >= 0) as x>${x}<#sep>, </#list>";
 
-        addToDataModel("xs", ImmutableList.of(-1, -2, 3, 4, -5, -6));
+        addToDataModel("xs", List.of(-1, -2, 3, 4, -5, -6));
         assertOutput(ftl,  "3, 4");
 
-        addToDataModel("xs", ImmutableList.of(-1, -2, -5, -6));
+        addToDataModel("xs", List.of(-1, -2, -5, -6));
         assertOutput(ftl,  "");
 
-        addToDataModel("xs", ImmutableList.of(1, 2, 3));
+        addToDataModel("xs", List.of(1, 2, 3));
         assertOutput(ftl,  "1, 2, 3");
 
         addToDataModel("xs", Collections.emptyList());
@@ -139,7 +137,7 @@ public class TakeWhileAndDropWhileBiTest extends TemplateTest {
 
     @Test
     public void testSnakeCaseNames() throws Exception {
-        addToDataModel("xs", ImmutableList.of(-1, -2, 3, 4, -5, -6));
+        addToDataModel("xs", List.of(-1, -2, 3, 4, -5, -6));
         assertOutput(
                 "<#list xs?drop_while(it -> it < 0)?take_while(it -> it >= 0) as x>${x}<#sep>, </#list>",
                 "3, 4");

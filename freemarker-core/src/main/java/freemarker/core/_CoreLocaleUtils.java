@@ -21,10 +21,10 @@ package freemarker.core;
 import java.util.Locale;
 
 /**
- * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */ 
+ * For internal use only; don't depend on this, there's no backward compatibility guarantee at all! This class is to
+ * work around the lack of module system in Java, i.e., so that other FreeMarker packages can access things inside this
+ * package that users shouldn't.
+ */
 public class _CoreLocaleUtils {
 
     /**
@@ -32,14 +32,13 @@ public class _CoreLocaleUtils {
      */
     public static Locale getLessSpecificLocale(Locale locale) {
         String country = locale.getCountry();
-        if (locale.getVariant().length() != 0) {
-            String language = locale.getLanguage();
-            return country != null ? new Locale(language, country) : new Locale(language);
+        if (!locale.getVariant().isEmpty()) {
+            return new Locale(locale.getLanguage(), country);
         }
-        if (country.length() != 0) {
+        if (!country.isEmpty()) {
             return new Locale(locale.getLanguage());
         }
         return null;
     }
-    
+
 }

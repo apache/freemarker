@@ -21,9 +21,10 @@ package freemarker.ext.beans;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
@@ -41,7 +42,7 @@ public class BeansWrapperBasics {
             assertWrappingResult(StringModel.class, bw.wrap("s"));
             assertWrappingResult(NumberModel.class, bw.wrap(1.5));
             assertWrappingResult(BooleanModel.class, bw.wrap(true));
-            assertWrappingResult(CollectionModel.class, bw.wrap(ImmutableList.of(1)));
+            assertWrappingResult(CollectionModel.class, bw.wrap(List.of(1)));
             assertWrappingResult(MapModel.class, bw.wrap(ImmutableMap.of("a", 1)));
         }
         

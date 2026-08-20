@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -1294,7 +1295,7 @@ public final class Environment extends Configurable {
         TimeZone prevTimeZone = getSQLDateAndTimeTimeZone();
         super.setSQLDateAndTimeTimeZone(timeZone);
 
-        if (!nullSafeEquals(timeZone, prevTimeZone)) {
+        if (!Objects.equals(timeZone, prevTimeZone)) {
             if (cachedTempDateFormatArray != null) {
                 for (int i = CACHED_TDFS_SQL_D_T_TZ_OFFS; i < CACHED_TDFS_LENGTH; i++) {
                     TemplateDateFormat format = cachedTempDateFormatArray[i];
@@ -1311,13 +1312,6 @@ public final class Environment extends Configurable {
 
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
-    }
-
-    // Replace with Objects.equals in Java 7
-    private static boolean nullSafeEquals(Object o1, Object o2) {
-        if (o1 == o2) return true;
-        if (o1 == null || o2 == null) return false;
-        return o1.equals(o2);
     }
 
     /**

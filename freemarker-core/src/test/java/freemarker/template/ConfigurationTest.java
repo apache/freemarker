@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.RunWith;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -1066,7 +1065,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
                 "[freemarker.core.CustomHTMLOutputFormat(), freemarker.core.DummyOutputFormat()]");
         assertEquals(
-                ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
+                List.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
                 new ArrayList(cfg.getRegisteredCustomOutputFormats()));
         
         try {
@@ -1968,7 +1967,7 @@ public class ConfigurationTest extends TestCase {
     static {
         try {
             CONFIG_TEST_MEMBER_ACCESS_POLICY = new WhitelistMemberAccessPolicy(MemberSelectorListMemberAccessPolicy.MemberSelector.parse(
-                    ImmutableList.of(
+                    List.of(
                             File.class.getName() + ".getName()",
                             File.class.getName() + ".isFile()"),
                     false,

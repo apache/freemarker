@@ -99,7 +99,6 @@ public abstract class TemplateTest {
         assertOutput(createTemplate(ftl), expectedOut, false);
     }
 
-    // !!T exchange params
     protected void assertExpOutput(String ftlExpression, String expectedOut) throws IOException, TemplateException {
         assertOutput("${" + ftlExpression + "}", expectedOut);
     }
