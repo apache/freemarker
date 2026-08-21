@@ -126,6 +126,11 @@ public class DefaultMemberAccessPolicyTest {
             ClassMemberAccessPolicy classPolicy = POLICY.forClass(URL.class);
             assertFalse(classPolicy.isMethodExposed(URL.class.getMethod("openConnection")));
         }
+        {
+            ClassMemberAccessPolicy classPolicy = POLICY.forClass(System.class);
+            assertFalse(classPolicy.isMethodExposed(System.class.getMethod("exit", int.class)));
+            assertFalse(classPolicy.isMethodExposed(System.class.getMethod("getProperties")));
+        }
     }
 
     public static class ThreadSubclass extends Thread {

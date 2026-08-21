@@ -20,10 +20,8 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:svg="http://www.w3.org/2000/svg"
-      xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:db="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -31068,6 +31066,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               security scan alerts (even though it wasn't active by default).
               This was an old effort to support remote debugging of templates,
               and probably wasn't used by anyone anymore.</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved
+              <literal>DefaultMemberAccessPolicy-rules</literal> (used by
+              default) to block listing Java system properties. Note that no
+              matter how much we tweak this, it will never provide proper
+              security if you have untrusted templates! See <link
+              linkend="faq_template_uploading_security">this in the
+              FAQ</link>!</para>
             </listitem>
           </itemizedlist>
         </section>
