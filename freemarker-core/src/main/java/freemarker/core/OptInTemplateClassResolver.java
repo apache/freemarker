@@ -25,10 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateClassResolver} that resolves only the classes whose name was specified in the constructor.
@@ -117,29 +117,79 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
         if (template == null) return null;
 
         String name = template.getName();
-        if (name == null) return null;
-
-        // Detect exploits, return null if one is suspected:
-        String decodedName = name;
-        if (decodedName.indexOf('%') != -1) {
-            decodedName = StringUtil.replace(decodedName, "%2e", ".", false, false);
-            decodedName = StringUtil.replace(decodedName, "%2E", ".", false, false);
-            decodedName = StringUtil.replace(decodedName, "%2f", "/", false, false);
-            decodedName = StringUtil.replace(decodedName, "%2F", "/", false, false);
-            decodedName = StringUtil.replace(decodedName, "%5c", "\\", false, false);
-            decodedName = StringUtil.replace(decodedName, "%5C", "\\", false, false);
-        }
-        int dotDotIdx = decodedName.indexOf("..");
-        if (dotDotIdx != -1) {
-            int before = dotDotIdx - 1 >= 0 ? decodedName.charAt(dotDotIdx - 1) : -1;
-            int after = dotDotIdx + 2 < decodedName.length() ? decodedName.charAt(dotDotIdx + 2) : -1;
-            if ((before == -1 || before == '/' || before == '\\')
-                    && (after == -1 || after == '/' || after == '\\')) {
-                return null;
-            }
+        if (name == null || mayContainsBackStep(name)) {
+            return null;
         }
 
         return name.startsWith("/") ? name.substring(1) : name;
+    }
+
+    private static final int DOT_NAME_START_TOKEN = -1;
+    private static final int DOT_DOT_NAME_START_TOKEN = -2;
+
+    /**
+     * Checks if a path contains a name that's {@code ".."} (stepping higher in the hierarchy), but it assumes that any
+     * %xx URL escaping will be resolved (though a good behaving {@link TemplateLoader} shouldn't do that), and that
+     * backslash will be interpreted as {@code \\}. For example, for {@code "../x"} the result is {@code true}, while
+     * for {@code "..x"} it's {@code false} (as {@code "..x"} has no special meaning). It's assumed that the bounds of
+     * the input stings are also the bounds of the path, so {@code foo/..} and {@code ../foo} are both considered to
+     * contain {@code ".."}. And so does {@code ".."} in itself.
+     *
+     * <p>Note that this algorithm errs on the side of caution. It's unlikely that legitimate template names trigger
+     * it though.
+     *
+     * <p>Note that we also block the character with code point 0, as some native methods might interpret it as
+     * end-of-string. However, we don't block {@code %00} as that would a bit too backward-incompatible, and also
+     * exploiting that requires two weakly implemented components in a row, so it's less likely exploitable.
+     */
+    static boolean mayContainsBackStep(String path) {
+        int len = path.length();
+        int pos = 0;
+
+        int lastToken = '/';
+        while (pos < len) {
+            char c = path.charAt(pos++);
+
+            if (c == '%' && pos + 1 < len) {
+                char hexDigit1 = path.charAt(pos);
+                if (hexDigit1 == '2' || hexDigit1 == '5') {
+                    char hexDigit2 = path.charAt(pos + 1);
+                    if (hexDigit1 == '2') {
+                        if (hexDigit2 == 'e' || hexDigit2 == 'E') {
+                            c = '.';
+                            pos += 2;
+                        } else if (hexDigit2 == 'f' || hexDigit2 == 'F') {
+                            c = '/';
+                            pos += 2;
+                        }
+                    } else if (hexDigit2 == 'c' || hexDigit2 == 'C') {
+                        c = '/'; // %5C is '\', but we normalize it to '/'
+                        pos += 2;
+                    }
+                }
+            } else if (c == '\\') {
+                c = '/';
+            } else if (c == 0) {
+                return true;
+            }
+
+            // Now c is the logical character: relevant %xx-s are decoded, and \ is normalized to /
+
+            if (c == '.') {
+                if (lastToken == '/') {
+                    lastToken = DOT_NAME_START_TOKEN;
+                } else if (lastToken == DOT_NAME_START_TOKEN) {
+                    lastToken = DOT_DOT_NAME_START_TOKEN;
+                } else {
+                    lastToken = c;
+                }
+            } else if (c == '/' && lastToken == DOT_DOT_NAME_START_TOKEN) {
+                return true;
+            } else {
+                lastToken = c;
+            }
+        }
+        return lastToken == DOT_DOT_NAME_START_TOKEN;
     }
 
     private boolean hasMatchingPrefix(String name) {
