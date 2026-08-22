@@ -19,7 +19,6 @@
  
 package freemarker.ext.dom;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.w3c.dom.Attr;
@@ -42,7 +41,7 @@ class NodeOutputter {
     private String defaultNS;
     private boolean hasDefaultNS;
     private boolean explicitDefaultNSPrefix;
-    private LinkedHashMap<String, String> namespacesToPrefixLookup = new LinkedHashMap<>();
+    private final LinkedHashMap<String, String> namespacesToPrefixLookup = new LinkedHashMap<>();
     private String namespaceDecl;
     int nextGeneratedPrefixNumber = 1;
     
@@ -60,7 +59,7 @@ class NodeOutputter {
         this.contextNode = contextNode;
         this.env = Environment.getCurrentEnvironment();
         this.defaultNS = env.getDefaultNS();
-        this.hasDefaultNS = defaultNS != null && defaultNS.length() > 0;
+        this.hasDefaultNS = defaultNS != null && !defaultNS.isEmpty();
         namespacesToPrefixLookup.put(null, "");
         namespacesToPrefixLookup.put("", "");
         buildPrefixLookup(contextNode);
@@ -72,7 +71,7 @@ class NodeOutputter {
     
     private void buildPrefixLookup(Node n) {
         String nsURI = n.getNamespaceURI();
-        if (nsURI != null && nsURI.length() > 0) {
+        if (nsURI != null && !nsURI.isEmpty()) {
             String prefix = env.getPrefixForNamespace(nsURI);
             if (prefix == null) {
                 prefix = namespacesToPrefixLookup.get(nsURI);
@@ -104,9 +103,8 @@ class NodeOutputter {
             buf.append(defaultNS);
             buf.append("\"");
         }
-        for (Iterator<String> it = namespacesToPrefixLookup.keySet().iterator(); it.hasNext(); ) {
-            String nsURI = it.next();
-            if (nsURI == null || nsURI.length() == 0) {
+        for (String nsURI : namespacesToPrefixLookup.keySet()) {
+            if (nsURI == null || nsURI.isEmpty()) {
                 continue;
             }
             String prefix = namespacesToPrefixLookup.get(nsURI);
@@ -114,7 +112,7 @@ class NodeOutputter {
                 throw new BugException("No xmlns prefix was associated to URI: " + nsURI);
             }
             buf.append(" xmlns");
-            if (prefix.length() > 0) {
+            if (!prefix.isEmpty()) {
                 buf.append(":");
                 buf.append(prefix);
             }
@@ -127,7 +125,7 @@ class NodeOutputter {
     
     private void outputQualifiedName(Node n, StringBuilder buf) {
         String nsURI = n.getNamespaceURI();
-        if (nsURI == null || nsURI.length() == 0) {
+        if (nsURI == null || nsURI.isEmpty()) {
             buf.append(n.getNodeName());
         } else {
             String prefix = namespacesToPrefixLookup.get(nsURI);
@@ -135,7 +133,7 @@ class NodeOutputter {
                 //REVISIT!
                 buf.append(n.getNodeName());
             } else {
-                if (prefix.length() > 0) {
+                if (!prefix.isEmpty()) {
                     buf.append(prefix);
                     buf.append(':');
                 }
@@ -160,7 +158,8 @@ class NodeOutputter {
                 buf.append("<!--").append(n.getNodeValue()).append("-->");
                 break;
             }
-            case Node.DOCUMENT_NODE: {
+            case Node.DOCUMENT_NODE:
+            case Node.ENTITY_NODE: {
                 outputContent(n.getChildNodes(), buf);
                 break;
             }
@@ -198,10 +197,6 @@ class NodeOutputter {
                 }
                 break;
             }
-            case Node.ENTITY_NODE: {
-                outputContent(n.getChildNodes(), buf);
-                break;
-            }
             case Node.ENTITY_REFERENCE_NODE: {
                 buf.append('&').append(n.getNodeName()).append(';');
                 break;
@@ -210,11 +205,6 @@ class NodeOutputter {
                 buf.append("<?").append(n.getNodeName()).append(' ').append(n.getNodeValue()).append("?>");
                 break;
             }
-            /*            
-                        case Node.CDATA_SECTION_NODE: {
-                            buf.append("<![CDATA[").append(n.getNodeValue()).append("]]>");
-                            break;
-                        }*/
             case Node.CDATA_SECTION_NODE:
             case Node.TEXT_NODE: {
                 buf.append(StringUtil.XMLEncNQG(n.getNodeValue()));
