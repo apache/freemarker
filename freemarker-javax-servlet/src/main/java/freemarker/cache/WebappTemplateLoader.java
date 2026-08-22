@@ -36,6 +36,7 @@ import javax.servlet.ServletContext;
 
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -43,6 +44,10 @@ import freemarker.template.utility.StringUtil;
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source
  * of templates.
+ *
+ * <p>Since FreeMarker 2.3.35 this checks if the provided template name backs out from the base package, and if so
+ * will throw {@link MalformedTemplateNameException}. This check is normally done by the {@link TemplateCache}, but see
+ * in the description of {@link TemplateLoader} why it's better to also check it here.
  *
  * <p>Note that this is for the legacy "javax" Servlet API; for Jakarta (that is, in modern Servlet containers), use
  * {@code freemarker.ext.jakarta.servlet.WebappTemplateLoader} instead (since 2.3.33).
@@ -100,6 +105,14 @@ public class WebappTemplateLoader implements TemplateLoader {
 
     @Override
     public Object findTemplateSource(String name) throws IOException {
+        // Some doesn't use TemplateCache, which does path normalization/checking, so better check this here too,
+        // just like TemplateFileLoader always did.
+        if (!_TemplatePathUtils.isInsideBaseDir(name)) {
+            throw new MalformedTemplateNameException(
+                    name,
+                    _TemplatePathUtils.BACKING_OUT_FROM_ROOT_NOT_ALLOWED_MESSAGE);
+        }
+
         String fullPath = subdirPath + name;
 
         if (attemptFileAccess) {

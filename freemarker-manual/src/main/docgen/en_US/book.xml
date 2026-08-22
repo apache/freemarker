@@ -20,8 +20,10 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:html="http://www.w3.org/1999/xhtml"
->
+      xmlns:db="http://docbook.org/ns/docbook">
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -11819,8 +11821,8 @@ cfg.setClassForTemplateLoading(this.getClass(), "/templates");</programlisting>
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   
-  &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
-  &lt;!-- Or freemarker.ext.<emphasis>jakarta</emphasis>.servlet.FreemarkerServlet! --&gt;
+  &lt;servlet-class&gt;<emphasis>freemarker.ext.jakarta.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
+  &lt;!-- Or on pre-Jakarta containers: freemarker.ext.servlet.FreemarkerServlet! --&gt;
 
   &lt;!--
     Init-param documentation:
@@ -11850,7 +11852,7 @@ cfg.setClassForTemplateLoading(this.getClass(), "/templates");</programlisting>
   &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.35&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
       See: https://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
@@ -31058,6 +31060,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting</link> to 2.3.35 or higher. Earlier this only worked if
               the return type was primitive <literal>boolean</literal>,
               consistently with the JavaBeans specification.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>ClassTemplateLoader</literal> and
+              <literal>WebappTemplateLoader</literal> now checks against
+              backing out from the base directory (and throws
+              <literal>MalformedTemplateNameException</literal> if that
+              happens), instead of only relying on
+              <literal>TemplateCache</literal> for that. (Note that
+              <literal>FileTemplateLoader</literal> always did this check.) In
+              principle, this is the responsibility of
+              <literal>TemplateCache</literal>, however, not everyone gets
+              <literal>Template</literal>-s through
+              <literal>Configuration.getTemplate</literal>, and so through
+              <literal>TemplateCache</literal>. While the
+              <literal>TemplateLoader</literal> contract doesn't promise any
+              such checks, it's relatively cheap to do in these case, and adds
+              an extra layer of security.</para>
             </listitem>
 
             <listitem>

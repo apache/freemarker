@@ -19,9 +19,11 @@
 
 package freemarker.cache;
 
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Objects;
 
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -29,6 +31,10 @@ import freemarker.template.utility.StringUtil;
  * A {@link TemplateLoader} that can load templates from the "classpath". Naturally, it can load from jar files, or from
  * anywhere where Java can load classes from. Internally, it uses {@link Class#getResource(String)} or
  * {@link ClassLoader#getResource(String)} to load templates.
+ *
+ * <p>Since FreeMarker 2.3.35 this checks if the provided template name backs out from the base package, and if so
+ * will throw {@link MalformedTemplateNameException}. This check is normally done by the {@link TemplateCache}, but see
+ * in the description of {@link TemplateLoader} why it's better to also check it here.
  */
 public class ClassTemplateLoader extends URLTemplateLoader {
 
@@ -142,6 +148,14 @@ public class ClassTemplateLoader extends URLTemplateLoader {
 
     @Override
     protected URL getURL(String name) {
+        // Some doesn't use TemplateCache, which does path normalization/checking, so better check this here too,
+        // just like TemplateFileLoader always did.
+        if (!_TemplatePathUtils.isInsideBaseDir(name)) {
+            throw new UncheckedIOException(new MalformedTemplateNameException(
+                    name,
+                    _TemplatePathUtils.BACKING_OUT_FROM_ROOT_NOT_ALLOWED_MESSAGE));
+        }
+
         String fullPath = basePackagePath + name;
 
         // Block java.net.URLClassLoader exploits:

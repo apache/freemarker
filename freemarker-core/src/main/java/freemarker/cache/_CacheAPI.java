@@ -22,16 +22,16 @@ package freemarker.cache;
 import freemarker.template.MalformedTemplateNameException;
 
 /**
- * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */ 
+ * For internal use only; don't depend on this, there's no backward compatibility guarantee at all! This class is to
+ * work around the lack of module system in Java, i.e., so that other FreeMarker packages can access things inside this
+ * package that users shouldn't.
+ */
 public final class _CacheAPI {
 
     private _CacheAPI() {
         // Not meant to be instantiated
     }
-    
+
     public static String toRootBasedName(TemplateNameFormat templateNameFormat, String baseName, String targetName)
             throws MalformedTemplateNameException {
         return templateNameFormat.toRootBasedName(baseName, targetName);
@@ -46,5 +46,5 @@ public final class _CacheAPI {
             throws MalformedTemplateNameException {
         return templateNameFormat.rootBasedNameToAbsoluteName(rootBasedName);
     }
-    
+
 }

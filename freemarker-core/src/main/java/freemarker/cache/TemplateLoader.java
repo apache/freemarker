@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
 
 /**
@@ -45,6 +46,16 @@ import freemarker.template.TemplateNotFoundException;
  * <p>For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
  * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly by the
  * {@link TemplateCache}, and templates are get via the {@link TemplateCache} API-s.
+ *
+ * <p>SECURITY WARNING: The contract of this interface does not require checking the template name against
+ * directory traversal attacks! If users or external systems can specify any part of the template name (of the template
+ * path), ensure that it's restricted in format (like ban special characters, ensure that you have a template file
+ * extension at the end), or check if the {@link TemplateLoader} you are using checks against path traversal attacks. In
+ * principle, normalizing template names and basic traversal limitation is the responsibility of the
+ * {@link TemplateCache}, however, not everyone gets {@link Template}-s through
+ * {@link Configuration#getTemplate(String)}, and so through {@link TemplateCache}. Also, a concrete
+ * {@link TemplateLoader} implementation can have storage-specific syntax that {@link TemplateCache} doesn't recognize,
+ * but allows path traversal.
  */
 public interface TemplateLoader {
 

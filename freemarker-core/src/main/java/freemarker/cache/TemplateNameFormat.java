@@ -476,7 +476,7 @@ public abstract class TemplateNameFormat {
     }
 
     private static MalformedTemplateNameException newRootLeavingException(final String name) {
-        return new MalformedTemplateNameException(name, "Backing out from the root directory is not allowed");
+        return new MalformedTemplateNameException(name, _TemplatePathUtils.BACKING_OUT_FROM_ROOT_NOT_ALLOWED_MESSAGE);
     }
 
 }

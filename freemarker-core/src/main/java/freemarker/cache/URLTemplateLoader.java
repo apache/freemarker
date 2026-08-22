@@ -23,6 +23,7 @@ package freemarker.cache;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -41,7 +42,12 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     @Override
     public Object findTemplateSource(String name)
             throws IOException {
-        URL url = getURL(name);
+        URL url;
+        try {
+            url = getURL(name);
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        }
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
 
@@ -101,6 +107,11 @@ public abstract class URLTemplateLoader implements TemplateLoader {
      *         {@link TemplateLoader#findTemplateSource(String)}; see rules there.
      *
      * @return an URL that points to the template source, or {@code null} if the template does not exist.
+     *
+     * @throws UncheckedIOException
+     *         Throw this instead if {@link IOException}, and it will be unwrapper and re-thrown as is (since
+     *         FreeMarker 2.3.35). At least by {@link #findTemplateSource(String)}, which is where it's normally
+     *         called from.
      */
     protected abstract URL getURL(String name);
 
