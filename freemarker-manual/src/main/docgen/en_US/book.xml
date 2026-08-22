@@ -31095,9 +31095,45 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>DefaultMemberAccessPolicy-rules</literal> (used by
               default) to block listing Java system properties. Note that no
               matter how much we tweak this, it will never provide proper
-              security if you have untrusted templates! See <link
+              security if you have untrusted template authors! See <link
               linkend="faq_template_uploading_security">this in the
               FAQ</link>!</para>
+            </listitem>
+
+            <listitem>
+              <para>Deleted some long deprecated <literal>main</literal>
+              methods (CLI entry points), and usually the entire class they
+              were in. These are often flagged as security issues, while they
+              were hardly ever used:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>freemarker.core.CommandLine</literal> class.
+                  This was the <literal>Main-Class</literal> of
+                  <literal>freemarker.jar</literal>, and it just printed the
+                  version number.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.ext.dom.Transform</literal> class:
+                  Was a very minimalist utility to run a template with an XML
+                  document as the model</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.ext.jdom.NodeListModel.main</literal>
+                  method: The even older minimalist utility to run a template
+                  with an XML document as the model. (The
+                  <literal>freemarker.ext.jdom</literal> package itself is
+                  also long deprecated.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.template.utility.ToCanonical</literal>
+                  class: This has outputted the specified template files in
+                  canonical format</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
