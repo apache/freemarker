@@ -30997,7 +30997,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_35">
         <title>2.3.35</title>
 
-        <para>Release date: 2026-08-12 + release process</para>
+        <para>Release date: 2026-08-22 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -31078,6 +31078,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               attributes. These are URL-s, that could for example contain
               <literal>&amp;</literal> character, and the output XML was
               broken earlier.</para>
+            </listitem>
+
+            <listitem>
+              <para>In <literal>freemarker.ext.dom.NodeModel</literal> used
+              for XML DOM wrapping, marked static utility methods as
+              <literal>@Deprecated</literal>, as by default they use a
+              <literal>DocumentBuilderFactory</literal> that resolved external
+              entities, which opens the possibility of XXE attacks. While this
+              was documented, it was easy to miss, and now the deprecation
+              marking draws attention to it.</para>
             </listitem>
 
             <listitem>
