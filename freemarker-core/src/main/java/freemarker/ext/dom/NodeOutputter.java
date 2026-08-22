@@ -99,9 +99,7 @@ class NodeOutputter {
     private void constructNamespaceDecl() {
         StringBuilder buf = new StringBuilder();
         if (explicitDefaultNSPrefix) {
-            buf.append(" xmlns=\"");
-            buf.append(defaultNS);
-            buf.append("\"");
+            buf.append(" xmlns=\"").append(StringUtil.XMLEncNA(defaultNS)).append("\"");
         }
         for (String nsURI : namespacesToPrefixLookup.keySet()) {
             if (nsURI == null || nsURI.isEmpty()) {
@@ -116,9 +114,7 @@ class NodeOutputter {
                 buf.append(":");
                 buf.append(prefix);
             }
-            buf.append("=\"");
-            buf.append(nsURI);
-            buf.append("\"");
+            buf.append("=\"").append(StringUtil.XMLEncNA(nsURI)).append("\"");
         }
         this.namespaceDecl = buf.toString();
     }

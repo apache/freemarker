@@ -31069,6 +31069,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Fixed issue with in XML DOM <link
+              linkend="xgui_imperative_formal">imperative XML
+              processing</link>, where the <literal>@@markup</literal> and
+              <literal>@@nested_markup</literal> keys did not XML-escape the
+              values of the <literal>xmlns</literal> or
+              <literal>xmlnx:<replaceable>prefix</replaceable></literal>
+              attributes. These are URL-s, that could for example contain
+              <literal>&amp;</literal> character, and the output XML was
+              broken earlier.</para>
+            </listitem>
+
+            <listitem>
               <para>Improved
               <literal>DefaultMemberAccessPolicy-rules</literal> (used by
               default) to block listing Java system properties. Note that no

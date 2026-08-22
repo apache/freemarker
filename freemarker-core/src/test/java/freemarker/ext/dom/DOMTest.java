@@ -81,6 +81,20 @@ public class DOMTest extends TemplateTest {
         assertThat(getOutput(ftlHeader + "${doc?children[0].@@start_tag}"), startsWith("<root"));
         assertThat(getOutput(ftlHeader + "${doc?children[0]?children[1].@@start_tag}"), startsWith("<n2:b"));
     }
+
+    @Test
+    public void testMarkupXmlAttrs() throws Exception {
+        addDocToDataModel("<root " +
+                "xmlns='http://example.com/ns1/a&amp;b' xmlns:ns2='http://example.com/ns2/a&amp;b'>" +
+                "<ns2:e/>" +
+                "</root>");
+        assertOutput("<#ftl ns_prefixes={'D':'http://example.com/ns1/a&b', 'ns2':'http://example.com/ns2/a&b'}>" +
+                        "${doc.@@markup}",
+                "<root " +
+                        "xmlns=\"http://example.com/ns1/a&amp;b\" xmlns:ns2=\"http://example.com/ns2/a&amp;b\">" +
+                        "<ns2:e />" +
+                        "</root>");
+    }
     
     @Test
     public void namespaceUnaware() throws Exception {
