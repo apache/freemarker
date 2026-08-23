@@ -24,7 +24,7 @@ import java.io.IOException;
  * @since 2.3.24
  */
 public abstract class TemplateSourceMatcher {
-    
+
     abstract boolean matches(String sourceName, Object templateSource) throws IOException;
-    
+
 }

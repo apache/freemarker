@@ -22,19 +22,19 @@ import java.io.IOException;
 
 /**
  * Matches the file extension; unlike other matchers, by default case <em>insensitive</em>. A name (a path) is
- * considered to have the given extension exactly if it ends with a dot plus the extension. 
- * 
+ * considered to have the given extension exactly if it ends with a dot plus the extension.
+ *
  * @since 2.3.24
  */
 public class FileExtensionMatcher extends TemplateSourceMatcher {
 
     private final String extension;
     private boolean caseInsensitive = true;
-    
+
     /**
      * @param extension
-     *            The file extension (without the initial dot). Can't contain there characters:
-     *            {@code '/'}, {@code '*'}, {@code '?'}. May contains {@code '.'}, but can't start with it.
+     *         The file extension (without the initial dot). Can't contain there characters: {@code '/'}, {@code '*'},
+     *         {@code '?'}. May contains {@code '.'}, but can't start with it.
      */
     public FileExtensionMatcher(String extension) {
         if (extension.indexOf('/') != -1) {
@@ -59,21 +59,21 @@ public class FileExtensionMatcher extends TemplateSourceMatcher {
         if (ln < extLn + 1 || sourceName.charAt(ln - extLn - 1) != '.') {
             return false;
         }
-        
+
         return sourceName.regionMatches(caseInsensitive, ln - extLn, extension, 0, extLn);
     }
-    
+
     public boolean isCaseInsensitive() {
         return caseInsensitive;
     }
-    
+
     /**
-     * Sets if the matching will be case insensitive (UNICODE compliant); default is {@code true}.
+     * Sets if the matching will be case-insensitive (UNICODE compliant); default is {@code true}.
      */
     public void setCaseInsensitive(boolean caseInsensitive) {
         this.caseInsensitive = caseInsensitive;
     }
-    
+
     /**
      * Fluid API variation of {@link #setCaseInsensitive(boolean)}
      */
@@ -81,5 +81,5 @@ public class FileExtensionMatcher extends TemplateSourceMatcher {
         setCaseInsensitive(caseInsensitive);
         return this;
     }
-    
+
 }

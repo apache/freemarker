@@ -19,10 +19,11 @@
 
 /**
  * Classes for two-way FreeMarker-JSP integration. It contains both a JSP custom tag that allows embedding of FreeMarker
- * templates inside JSP pages, as well as the infrastructure that allows JSP custom tags to be used inside FreeMarker
+ * templates inside JSP pages, and the infrastructure that allows JSP custom tags to be used inside FreeMarker
  * templates.
  *
- * Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers),
- * use the <code>freemarker.ext.jakarta.jsp</code> package instead (since 2.3.33).
+ * <p>Note that there are two variants of this package: The one for the legacy "javax" Servlet API is
+ * {@code freemarker.ext}{@code .jsp}, and other for the newer Jakarta Servlet API is
+ * {@code freemarker.ext}{@code .jakarta.jsp} (since 2.3.33). Use the variant that fits your Servlet container!
  */
 package freemarker.ext.jsp;

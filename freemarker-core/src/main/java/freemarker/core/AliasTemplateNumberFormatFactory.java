@@ -21,12 +21,13 @@ package freemarker.core;
 import java.util.Locale;
 import java.util.Map;
 
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
 /**
  * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather
  * than as a concrete pattern or other kind of format string.
- * 
+ *
  * @since 2.3.24
  */
 public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
@@ -36,27 +37,27 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
 
     /**
      * @param targetFormatString
-     *            The format string this format will be an alias to
+     *         The format string this format will be an alias to
      */
     public AliasTemplateNumberFormatFactory(String targetFormatString) {
-        this.defaultTargetFormatString = targetFormatString;
-        localizedTargetFormatStrings = null;
+        this(targetFormatString, null);
     }
 
     /**
      * @param defaultTargetFormatString
-     *            The format string this format will be an alias to if there's no locale-specific format string for the
-     *            requested locale in {@code localizedTargetFormatStrings}
+     *         The format string this format will be an alias to if there's no locale-specific format string for the
+     *         requested locale in {@code localizedTargetFormatStrings}. Not {@code null}.
      * @param localizedTargetFormatStrings
-     *            Maps {@link Locale}-s to format strings. If the desired locale doesn't occur in the map, a less
-     *            specific locale is tried, repeatedly until only the language part remains. For example, if locale is
-     *            {@code new Locale("en", "US", "Linux")}, then these keys will be attempted untol a match is found, in
-     *            this order: {@code new Locale("en", "US", "Linux")}, {@code new Locale("en", "US")},
-     *            {@code new Locale("en")}. If there's still no matching key, the value of the
-     *            {@code targetFormatString} will be used.
+     *         Maps {@link Locale}-s to format strings (maybe {@code null}). If the desired locale doesn't occur in the
+     *         map, a less specific locale is tried, repeatedly until only the language part remains. For example, if
+     *         locale is {@code new Locale("en", "US", "Linux")}, then these keys will be attempted until a match is
+     *         found, in this order: {@code new Locale("en", "US", "Linux")}, {@code new Locale("en", "US")},
+     *         {@code new Locale("en")}. If there's still no matching key, the value of the {@code targetFormatString}
+     *         will be used.
      */
     public AliasTemplateNumberFormatFactory(
             String defaultTargetFormatString, Map<Locale, String> localizedTargetFormatStrings) {
+        NullArgumentException.check("defaultTargetFormatString", defaultTargetFormatString);
         this.defaultTargetFormatString = defaultTargetFormatString;
         this.localizedTargetFormatStrings = localizedTargetFormatStrings;
     }

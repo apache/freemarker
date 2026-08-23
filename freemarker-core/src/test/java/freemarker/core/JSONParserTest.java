@@ -26,11 +26,11 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.TemplateModel;
@@ -53,7 +53,7 @@ public class JSONParserTest {
 
     @Test
     public void testLists() throws JSONParser.JSONParseException {
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("[1, 2]"));
+        assertEquals(List.of(1, 2), JSONParser.parse("[1, 2]"));
         assertEquals(Collections.emptyList(), JSONParser.parse("[]"));
     }
 
@@ -102,9 +102,9 @@ public class JSONParserTest {
 
     @Test
     public void testBlockComments() throws JSONParser.JSONParseException {
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("/**/[/**/1/**/, /**/2/**/]/**/"));
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("/*x*/[/*x*/1/*x*/, /*x*/2/*x*/]/*x*/"));
-        assertEquals(ImmutableList.of(1), JSONParser.parse(" /*x*/ /**//**/ [ /*x*/ /*\n*//***/ 1 ]"));
+        assertEquals(List.of(1, 2), JSONParser.parse("/**/[/**/1/**/, /**/2/**/]/**/"));
+        assertEquals(List.of(1, 2), JSONParser.parse("/*x*/[/*x*/1/*x*/, /*x*/2/*x*/]/*x*/"));
+        assertEquals(List.of(1), JSONParser.parse(" /*x*/ /**//**/ [ /*x*/ /*\n*//***/ 1 ]"));
         try {
             JSONParser.parse("/*");
             fail();
@@ -121,15 +121,15 @@ public class JSONParserTest {
 
     @Test
     public void testLineComments() throws JSONParser.JSONParseException {
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("//c1\n[ //c2\n1, //c3\n 2//c5\n] //c4"));
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("// c1\n//\r// c2\r\n// c3\r\n[ 1, 2 ]//"));
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("[1, 2]\n//\n"));
+        assertEquals(List.of(1, 2), JSONParser.parse("//c1\n[ //c2\n1, //c3\n 2//c5\n] //c4"));
+        assertEquals(List.of(1, 2), JSONParser.parse("// c1\n//\r// c2\r\n// c3\r\n[ 1, 2 ]//"));
+        assertEquals(List.of(1, 2), JSONParser.parse("[1, 2]\n//\n"));
     }
 
     @Test
     public void testWhitespace() throws JSONParser.JSONParseException {
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("  [  1  ,\n2  ]  "));
-        assertEquals(ImmutableList.of(1, 2), JSONParser.parse("\uFEFF[\u00A01\u00A0,2]"));
+        assertEquals(List.of(1, 2), JSONParser.parse("  [  1  ,\n2  ]  "));
+        assertEquals(List.of(1, 2), JSONParser.parse("\uFEFF[\u00A01\u00A0,2]"));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class JSONParserTest {
         m.put("x", 1);
         m.put("y", null);
         assertEquals(
-                ImmutableList.of(
+                List.of(
                         ImmutableMap.of("a", Collections.emptyMap()),
                         ImmutableMap.of("b",
                                 Arrays.asList(

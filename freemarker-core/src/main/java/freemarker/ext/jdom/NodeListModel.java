@@ -19,7 +19,6 @@
 
 package freemarker.ext.jdom;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -49,9 +48,7 @@ import org.jdom.ProcessingInstruction;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 
-import freemarker.template.SimpleHash;
 import freemarker.template.SimpleScalar;
-import freemarker.template.Template;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModel;
@@ -60,7 +57,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template._ObjectWrappers;
 
 /**
  * Provides a template for wrapping JDOM objects. It is capable of storing not only
@@ -1153,29 +1149,6 @@ implements
             }
             return createNodeListModel(list, namespaces);
         }
-    }
-
-    /**
-     * Loads a template from a file passed as the first argument, loads an XML
-     * document from the standard input, passes it to the template as variable
-     * {@code document} and writes the result of template processing to
-     * standard output.
-     * 
-     * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
-     */
-    @Deprecated
-    public static void main(String[] args)
-    throws Exception {
-        org.jdom.input.SAXBuilder builder = new org.jdom.input.SAXBuilder();
-        Document document = builder.build(System.in);
-        SimpleHash model = new SimpleHash(_ObjectWrappers.SAFE_OBJECT_WRAPPER);
-        model.put("document", new NodeListModel(document));
-        FileReader fr = new FileReader(args[0]);
-        Template template = new Template(args[0], fr);
-        Writer w = new java.io.OutputStreamWriter(System.out);
-        template.process(model, w);
-        w.flush();
-        w.close();
     }
 
     private static final class AttributeXMLOutputter extends XMLOutputter {

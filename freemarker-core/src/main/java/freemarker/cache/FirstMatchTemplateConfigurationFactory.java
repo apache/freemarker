@@ -29,11 +29,11 @@ import freemarker.template.utility.StringUtil;
  * factories are called in the order as they were added.
  */
 public class FirstMatchTemplateConfigurationFactory extends TemplateConfigurationFactory {
-    
+
     private final TemplateConfigurationFactory[] templateConfigurationFactories;
     private boolean allowNoMatch;
     private String noMatchErrorDetails;
-    
+
     public FirstMatchTemplateConfigurationFactory(TemplateConfigurationFactory... templateConfigurationFactories) {
         this.templateConfigurationFactories = templateConfigurationFactories;
     }
@@ -42,7 +42,7 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
     public TemplateConfiguration get(String sourceName, Object templateSource)
             throws IOException, TemplateConfigurationFactoryException {
         for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
-            TemplateConfiguration tc = tcf.get(sourceName, templateSource); 
+            TemplateConfiguration tc = tcf.get(sourceName, templateSource);
             if (tc != null) {
                 return tc;
             }
@@ -50,10 +50,10 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
         if (!allowNoMatch) {
             throw new TemplateConfigurationFactoryException(
                     FirstMatchTemplateConfigurationFactory.class.getSimpleName()
-                    + " has found no matching choice for source name "
-                    + StringUtil.jQuote(sourceName) + ". "
-                    + (noMatchErrorDetails != null
-                            ? "Error details: " + noMatchErrorDetails 
+                            + " has found no matching choice for source name "
+                            + StringUtil.jQuote(sourceName) + ". "
+                            + (noMatchErrorDetails != null
+                            ? "Error details: " + noMatchErrorDetails
                             : "(Set the noMatchErrorDetails property of the factory bean to give a more specific error "
                                     + "message. Set allowNoMatch to true if this shouldn't be an error.)"));
         }
@@ -70,7 +70,7 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
     /**
      * Use this to specify if having no matching choice is an error. The default is {@code false}, that is, it's an
      * error if there was no matching choice.
-     * 
+     *
      * @see #setNoMatchErrorDetails(String)
      */
     public void setAllowNoMatch(boolean allowNoMatch) {
@@ -78,22 +78,22 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
     }
 
     /**
-     * Use this to specify the text added to the exception error message when there was no matching choice.
-     * The default is {@code null} (no error details).
-     * 
+     * Use this to specify the text added to the exception error message when there was no matching choice. The default
+     * is {@code null} (no error details).
+     *
      * @see #setAllowNoMatch(boolean)
      */
     public String getNoMatchErrorDetails() {
         return noMatchErrorDetails;
     }
 
-    
+
     public void setNoMatchErrorDetails(String noMatchErrorDetails) {
         this.noMatchErrorDetails = noMatchErrorDetails;
     }
-    
+
     /**
-     * Same as {@link #setAllowNoMatch(boolean)}, but return this object to support "fluent API" style. 
+     * Same as {@link #setAllowNoMatch(boolean)}, but return this object to support "fluent API" style.
      */
     public FirstMatchTemplateConfigurationFactory allowNoMatch(boolean allow) {
         setAllowNoMatch(allow);
@@ -101,7 +101,7 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
     }
 
     /**
-     * Same as {@link #setNoMatchErrorDetails(String)}, but return this object to support "fluent API" style. 
+     * Same as {@link #setNoMatchErrorDetails(String)}, but return this object to support "fluent API" style.
      */
     public FirstMatchTemplateConfigurationFactory noMatchErrorDetails(String message) {
         setNoMatchErrorDetails(message);
@@ -114,5 +114,5 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
             templateConfigurationFactory.setConfiguration(cfg);
         }
     }
-    
+
 }

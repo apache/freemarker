@@ -57,7 +57,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-16, JavaSE-15, JavaSE-14, JavaSE-13,
 -noextraheaders: true
 
 # Non-OSGi meta:
-Main-Class: freemarker.core.CommandLine
 Extension-name: FreeMarker
 Specification-Title: FreeMarker
 Specification-Version: ${versionForMf}

@@ -19,10 +19,10 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -36,13 +36,13 @@ import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
 public class ListBreakContinueTest extends TemplateTest {
-    
+
     @Test
     public void testNonHash() throws IOException, TemplateException {
-        testNonHash(ImmutableList.of(1, 2, 3, 4, 5)); // Listing a TemplateSequenceModel
+        testNonHash(List.of(1, 2, 3, 4, 5)); // Listing a TemplateSequenceModel
         testNonHash(ImmutableSet.of(1, 2, 3, 4, 5)); // Listing a TemplateCollectionModel
     }
-    
+
     private void testNonHash(Object listed) throws IOException, TemplateException {
         addToDataModel("listed", listed);
         assertOutput(
@@ -66,10 +66,11 @@ public class ListBreakContinueTest extends TemplateTest {
                 "<#list listed as k, v>B(${k}=${v}) <#if k == 'c'>Break!<#break></#if>A(${k}=${v})<#sep>, </#list>",
                 "B(a=1) A(a=1), B(b=2) A(b=2), B(c=3) Break!");
         assertOutput(
-                "<#list listed as k, v>B(${k}=${v}) <#if k == 'c'>Continue! <#continue></#if>A(${k}=${v})<#sep>, </#list>",
+                "<#list listed as k, v>B(${k}=${v}) <#if k == 'c'>Continue! <#continue></#if>A(${k}=${v})<#sep>, " +
+                        "</#list>",
                 "B(a=1) A(a=1), B(b=2) A(b=2), B(c=3) Continue! B(d=4) A(d=4), B(e=5) A(e=5)");
     }
-    
+
     @Override
     protected Configuration createConfiguration() throws Exception {
         Configuration conf = super.createConfiguration();
@@ -78,8 +79,10 @@ public class ListBreakContinueTest extends TemplateTest {
         conf.setObjectWrapper(owb.build());
         return conf;
     }
-    
-    /** Hides the Ex2 features of another hash */
+
+    /**
+     * Hides the Ex2 features of another hash
+     */
     static class NonEx2Hash implements TemplateHashModelEx {
         private final TemplateHashModelEx delegate;
 
@@ -107,5 +110,5 @@ public class ListBreakContinueTest extends TemplateTest {
             return delegate.values();
         }
     }
-    
+
 }

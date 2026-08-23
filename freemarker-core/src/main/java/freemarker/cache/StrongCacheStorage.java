@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
     
-    private final Map map = new ConcurrentHashMap();
+    private final Map<Object, Object> map = new ConcurrentHashMap<>();
 
     /**
      * Always returns {@code true}.

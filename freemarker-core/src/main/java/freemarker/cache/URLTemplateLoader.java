@@ -23,6 +23,7 @@ package freemarker.cache;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -35,38 +36,43 @@ import freemarker.template.Configuration;
  * {@link #getURL(String)} method.
  */
 public abstract class URLTemplateLoader implements TemplateLoader {
-    
+
     private Boolean urlConnectionUsesCaches;
-    
+
     @Override
     public Object findTemplateSource(String name)
-    throws IOException {
-        URL url = getURL(name);
+            throws IOException {
+        URL url;
+        try {
+            url = getURL(name);
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        }
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
-    
+
     @Override
     public long getLastModified(Object templateSource) {
         return ((URLTemplateSource) templateSource).lastModified();
     }
-    
+
     @Override
     public Reader getReader(Object templateSource, String encoding)
-    throws IOException {
+            throws IOException {
         return new InputStreamReader(
                 ((URLTemplateSource) templateSource).getInputStream(),
                 encoding);
     }
-    
+
     @Override
     public void closeTemplateSource(Object templateSource)
-    throws IOException {
+            throws IOException {
         ((URLTemplateSource) templateSource).close();
     }
 
     /**
      * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
-     * 
+     *
      * @since 2.3.21
      */
     public Boolean getURLConnectionUsesCaches() {
@@ -76,17 +82,17 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     /**
      * Sets if {@link URLConnection#setUseCaches(boolean)} will be called, and with what value. By default this is
      * {@code null}; see the behavior then below. The recommended value is {@code false}, so that FreeMarker can always
-     * reliably detect when a template was changed. The default is {@code null} only for backward compatibility,
-     * and certainly will be changed to {@code false} in 2.4.0. As FreeMarker has its own template cache with its
-     * own update delay setting ({@link Configuration#setTemplateUpdateDelay(int)}), setting this to {@code false}
-     * shouldn't cause performance problems.
-     * 
+     * reliably detect when a template was changed. The default is {@code null} only for backward compatibility, and
+     * certainly will be changed to {@code false} in 2.4.0. As FreeMarker has its own template cache with its own update
+     * delay setting ({@link Configuration#setTemplateUpdateDelay(int)}), setting this to {@code false} shouldn't cause
+     * performance problems.
+     *
      * <p>Regarding {@code null} value: By default then {@link URLConnection#setUseCaches(boolean)} won't be called,
      * and so the default of the {@link URLConnection} subclass will be in effect (usually {@code true}). That's the
      * 2.3.0-compatible mode. However, if {@link Configuration#getIncompatibleImprovements()} is at least 2.3.21, then
      * when {@code Configuration.getTemplate} is used, {@code null} will mean {@code false}. Note that this 2.3.21 trick
-     * only works if the template is loaded through {@code Configuration.getTemplate} (or {@link TemplateCache}). 
-     * 
+     * only works if the template is loaded through {@code Configuration.getTemplate} (or {@link TemplateCache}).
+     *
      * @since 2.3.21
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
@@ -94,29 +100,37 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     }
 
     /**
-     * Given a template name (plus potential locale decorations) retrieves
-     * an URL that points the template source.
-     * @param name the name of the sought template, including the locale
-     * decorations.
+     * Given a template name (plus potential locale decorations) retrieves an URL that points the template source.
+     *
+     * @param name
+     *         the name of the sought template, including the locale decorations; same as the parameter to
+     *         {@link TemplateLoader#findTemplateSource(String)}; see rules there.
+     *
      * @return an URL that points to the template source, or {@code null} if the template does not exist.
+     *
+     * @throws UncheckedIOException
+     *         Throw this instead if {@link IOException}, and it will be unwrapper and re-thrown as is (since
+     *         FreeMarker 2.3.35). At least by {@link #findTemplateSource(String)}, which is where it's normally
+     *         called from.
      */
     protected abstract URL getURL(String name);
-    
+
     /**
      * Can be used by subclasses to canonicalize URL path prefixes.
-     * @param prefix the path prefix to canonicalize
-     * @return the canonicalized prefix. All backslashes are replaced with
-     * forward slashes, and a trailing slash is appended if the original
-     * prefix wasn't empty and didn't already end with a slash.
+     *
+     * @param prefix
+     *         the path prefix to canonicalize
+     *
+     * @return the canonicalized prefix. All backslashes are replaced with forward slashes, and a trailing slash is
+     * appended if the original prefix wasn't empty and didn't already end with a slash.
      */
     protected static String canonicalizePrefix(String prefix) {
-        // make it foolproof
-        prefix = prefix.replace('\\', '/');
-        // ensure there's a trailing slash
-        if (prefix.length() > 0 && !prefix.endsWith("/")) {
-            prefix += "/";
+        if (prefix.isEmpty()) {
+            return prefix;
         }
-        return prefix;
+
+        prefix = prefix.replace('\\', '/');
+        return prefix.endsWith("/") ? prefix : prefix + "/";
     }
-    
+
 }

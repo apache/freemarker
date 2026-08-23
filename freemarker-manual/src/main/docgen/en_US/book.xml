@@ -20,10 +20,8 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:svg="http://www.w3.org/2000/svg"
-      xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:db="http://docbook.org/ns/docbook">
+>
   <info>
     <title>Apache FreeMarker Manual</title>
 
@@ -11821,8 +11819,8 @@ cfg.setClassForTemplateLoading(this.getClass(), "/templates");</programlisting>
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   
-  &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
-  &lt;!-- Or freemarker.ext.<emphasis>jakarta</emphasis>.servlet.FreemarkerServlet! --&gt;
+  &lt;servlet-class&gt;<emphasis>freemarker.ext.jakarta.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
+  &lt;!-- Or on pre-Jakarta containers: freemarker.ext.servlet.FreemarkerServlet! --&gt;
 
   &lt;!--
     Init-param documentation:
@@ -11852,7 +11850,7 @@ cfg.setClassForTemplateLoading(this.getClass(), "/templates");</programlisting>
   &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.35&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
       See: https://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
@@ -30999,7 +30997,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_35">
         <title>2.3.35</title>
 
-        <para>Release date: 2026-08-12 + release process</para>
+        <para>Release date: 2026-08-23 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -31063,11 +31061,97 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>ClassTemplateLoader</literal> and
+              <literal>WebappTemplateLoader</literal> now checks against
+              backing out from the base directory (and throws
+              <literal>MalformedTemplateNameException</literal> if that
+              happens), instead of only relying on
+              <literal>TemplateCache</literal> for that. (Note that
+              <literal>FileTemplateLoader</literal> always did this check.) In
+              principle, this is the responsibility of
+              <literal>TemplateCache</literal>, however, not everyone gets
+              <literal>Template</literal>-s through
+              <literal>Configuration.getTemplate</literal>, and so through
+              <literal>TemplateCache</literal>. While the
+              <literal>TemplateLoader</literal> contract doesn't promise any
+              such checks, it's relatively cheap to do in this case, and adds
+              an extra layer of security.</para>
+            </listitem>
+
+            <listitem>
               <para>Removed <literal>freemarker.debug</literal> package
               entirely, because of its dependency on RMI, which often caused
               security scan alerts (even though it wasn't active by default).
               This was an old effort to support remote debugging of templates,
               and probably wasn't used by anyone anymore.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed issue with in XML DOM <link
+              linkend="xgui_imperative_formal">imperative XML
+              processing</link>, where the <literal>@@markup</literal> and
+              <literal>@@nested_markup</literal> keys did not XML-escape the
+              values of the <literal>xmlns</literal> or
+              <literal>xmlnx:<replaceable>prefix</replaceable></literal>
+              attributes. These are URL-s, that could for example contain
+              <literal>&amp;</literal> character, and the output XML was
+              broken earlier.</para>
+            </listitem>
+
+            <listitem>
+              <para>In <literal>freemarker.ext.dom.NodeModel</literal> used
+              for XML DOM wrapping, marked static utility methods as
+              <literal>@Deprecated</literal>, as by default they use a
+              <literal>DocumentBuilderFactory</literal> that resolved external
+              entities, which opens the possibility of XXE attacks. While this
+              was documented, it was easy to miss, and now the deprecation
+              marking draws attention to it.</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved
+              <literal>DefaultMemberAccessPolicy-rules</literal> (used by
+              default) to block listing Java system properties. Note that no
+              matter how much we tweak this, it will never provide proper
+              security if you have untrusted template authors! See <link
+              linkend="faq_template_uploading_security">this in the
+              FAQ</link>!</para>
+            </listitem>
+
+            <listitem>
+              <para>Deleted some long deprecated <literal>main</literal>
+              methods (CLI entry points), and usually the entire class they
+              were in. These are often flagged as security issues, while they
+              were hardly ever used:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>freemarker.core.CommandLine</literal> class.
+                  This was the <literal>Main-Class</literal> of
+                  <literal>freemarker.jar</literal>, and it just printed the
+                  version number.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.ext.dom.Transform</literal> class:
+                  Was a very minimalist utility to run a template with an XML
+                  document as the model</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.ext.jdom.NodeListModel.main</literal>
+                  method: The even older minimalist utility to run a template
+                  with an XML document as the model. (The
+                  <literal>freemarker.ext.jdom</literal> package itself is
+                  also long deprecated.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>freemarker.template.utility.ToCanonical</literal>
+                  class: This has outputted the specified template files in
+                  canonical format</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

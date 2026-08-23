@@ -20,18 +20,19 @@
 package freemarker.cache;
 
 /**
- * Cache storage abstracts away the storage aspects of a cache - associating
- * an object with a key, retrieval and removal via the key. It is actually a
- * small subset of the {@link java.util.Map} interface. 
- * The implementations can be coded in a non-threadsafe manner as the natural
- * user of the cache storage, {@link TemplateCache} does the necessary
+ * Cache storage abstracts away the storage aspects of a cache - associating an object with a key, retrieval and removal
+ * via the key. It is actually a small subset of the {@link java.util.Map} interface. The implementations can be coded
+ * in a non-threadsafe manner as the natural user of the cache storage, {@link TemplateCache} does the necessary
  * synchronization.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
 public interface CacheStorage {
-    public Object get(Object key);
-    public void put(Object key, Object value);
-    public void remove(Object key);
-    public void clear();
+    Object get(Object key);
+
+    void put(Object key, Object value);
+
+    void remove(Object key);
+
+    void clear();
 }

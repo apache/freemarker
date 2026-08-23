@@ -22,13 +22,13 @@ import java.io.IOException;
 
 /**
  * Logical "not" operation on the given matcher.
- * 
+ *
  * @since 2.3.24
  */
 public class NotMatcher extends TemplateSourceMatcher {
-    
+
     private final TemplateSourceMatcher matcher;
-    
+
     public NotMatcher(TemplateSourceMatcher matcher) {
         this.matcher = matcher;
     }

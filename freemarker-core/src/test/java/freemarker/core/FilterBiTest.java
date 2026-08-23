@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import freemarker.template.Configuration;
@@ -60,12 +59,12 @@ public class FilterBiTest extends TemplateTest {
         return cfg;
     }
 
-    private static final List<TestParam> TEST_PARAMS = ImmutableList.of(
-            new TestParam(ImmutableList.of("a", "aX", "bX", "b", "cX", "c"), "a, b, c"),
-            new TestParam(ImmutableList.of("a", "b", "c"), "a, b, c"),
-            new TestParam(ImmutableList.of("aX", "bX", "a", "b", "c", "cX", "cX"), "a, b, c"),
-            new TestParam(ImmutableList.of("aX", "bX", "cX"), ""),
-            new TestParam(ImmutableList.of(), "")
+    private static final List<TestParam> TEST_PARAMS = List.of(
+            new TestParam(List.of("a", "aX", "bX", "b", "cX", "c"), "a, b, c"),
+            new TestParam(List.of("a", "b", "c"), "a, b, c"),
+            new TestParam(List.of("aX", "bX", "a", "b", "c", "cX", "cX"), "a, b, c"),
+            new TestParam(List.of("aX", "bX", "cX"), ""),
+            new TestParam(List.of(), "")
     );
 
     @Test
@@ -116,7 +115,7 @@ public class FilterBiTest extends TemplateTest {
 
     @Test
     public void testWithNumberElements() throws Exception {
-        addToDataModel("xs", ImmutableList.of(1, 1.5, 2, 2.3, 3));
+        addToDataModel("xs", List.of(1, 1.5, 2, 2.3, 3));
         addToDataModel("obj", new FilterObject());
         assertOutput(
                 "<#list xs?filter(n -> n == n?int) as x>${x}<#sep>, </#list>",

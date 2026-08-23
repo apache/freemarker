@@ -43,7 +43,7 @@ public class URLTemplateSource {
         this.conn = url.openConnection();
         this.useCaches = useCaches;
         if (useCaches != null) {
-            conn.setUseCaches(useCaches.booleanValue());
+            conn.setUseCaches(useCaches);
         }
     }
 
@@ -138,7 +138,7 @@ public class URLTemplateSource {
     void setUseCaches(boolean useCaches) {
         if (this.conn != null) {
             conn.setUseCaches(useCaches);
-            this.useCaches = Boolean.valueOf(useCaches);
+            this.useCaches = useCaches;
         }
     }
     

@@ -18,11 +18,11 @@
  */
 
 /**
- * Servlet for legacy "Model 2" frameworks that allows using FreeMarker
- * templates instead of JSP as the MVC View (see <a href="https://freemarker.apache.org/docs/pgui_misc_servlet.html"
- * target="_blank">in the Manual</a>).</p>
+ * Servlet for legacy "Model 2" frameworks that allows using FreeMarker templates instead of JSP as the MVC View (see <a
+ * href="https://freemarker.apache.org/docs/pgui_misc_servlet.html" target="_blank">in the Manual</a>).</p>
  *
- * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers),
- * use the {@code freemarker.ext.jakarta.servlet} package instead (since 2.3.33).
+ * <p>Note that there are two variants of this package: One for the legacy "javax" Servlet API is
+ * {@code freemarker.ext}{@code .servlet}, and another for the newer Jakarta Servlet API is
+ * {@code freemarker.ext}{@code .jakarta.servlet} (since 2.3.33). Use the variant that fits your Servlet container!
  */
 package freemarker.ext.servlet;

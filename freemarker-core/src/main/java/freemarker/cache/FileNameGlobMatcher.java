@@ -65,7 +65,7 @@ public class FileNameGlobMatcher extends TemplateSourceMatcher {
     }
     
     /**
-     * Sets if the matching will be case insensitive (UNICODE compliant); default is {@code false}.
+     * Sets if the matching will be case-insensitive (UNICODE compliant); default is {@code false}.
      */
     public void setCaseInsensitive(boolean caseInsensitive) {
         boolean lastCaseInsensitive = this.caseInsensitive;

@@ -24,12 +24,11 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
+import java.util.List;
 import java.util.Locale;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
 
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -64,7 +63,7 @@ public class TemplateCacheTest {
                 // Still 1 - returned cached exception
                 assertThat(e2.getMessage(),
                         Matchers.allOf(Matchers.containsString("There was an error loading the template on an " +
-                        "earlier attempt")));
+                                "earlier attempt")));
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getFindCount());
                 try {
@@ -79,7 +78,7 @@ public class TemplateCacheTest {
             }
         }
     }
-    
+
     @Test
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
@@ -99,20 +98,22 @@ public class TemplateCacheTest {
 
     private static class MockTemplateLoader implements TemplateLoader {
         private boolean throwException;
-        private int findCount; 
-        
+        private int findCount;
+
         public void setThrowException(boolean throwException) {
-           this.throwException = throwException;
+            this.throwException = throwException;
         }
-        
+
         public int getFindCount() {
             return findCount;
         }
-        
+
+        @Override
         public void closeTemplateSource(Object templateSource)
                 throws IOException {
         }
 
+        @Override
         public Object findTemplateSource(String name) throws IOException {
             ++findCount;
             if (throwException) {
@@ -121,17 +122,19 @@ public class TemplateCacheTest {
             return null;
         }
 
+        @Override
         public long getLastModified(Object templateSource) {
             return 0;
         }
 
+        @Override
         public Reader getReader(Object templateSource, String encoding)
                 throws IOException {
             return null;
         }
-        
+
     }
-    
+
     @Test
     public void testManualRemovalPlain() throws IOException {
         Configuration cfg = new Configuration();
@@ -139,23 +142,23 @@ public class TemplateCacheTest {
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
         cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
-        
+
         loader.putTemplate("1.ftl", "1 v1");
         loader.putTemplate("2.ftl", "2 v1");
-        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); 
+        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString());
         assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
-        
+
         loader.putTemplate("1.ftl", "1 v2");
         loader.putTemplate("2.ftl", "2 v2");
         assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); // no change 
         assertEquals("2 v1", cfg.getTemplate("2.ftl").toString()); // no change
-        
+
         cfg.removeTemplateFromCache("1.ftl");
         assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); // changed 
         assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
-        
+
         cfg.removeTemplateFromCache("2.ftl");
-        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); 
+        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString());
         assertEquals("2 v2", cfg.getTemplate("2.ftl").toString()); // changed
     }
 
@@ -167,37 +170,37 @@ public class TemplateCacheTest {
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
         cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
-        
+
         loader.putTemplate("1_en_US.ftl", "1_en_US v1");
         loader.putTemplate("1_en.ftl", "1_en v1");
         loader.putTemplate("1.ftl", "1 v1");
-        
-        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+
+        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
         assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
-        
+
         loader.putTemplate("1_en_US.ftl", "1_en_US v2");
         loader.putTemplate("1_en.ftl", "1_en v2");
         loader.putTemplate("1.ftl", "1 v2");
-        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
         assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
-        
+
         cfg.removeTemplateFromCache("1.ftl");
-        assertEquals("1_en_US v2", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1_en_US v2", cfg.getTemplate("1.ftl").toString());
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
         assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
         assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.ITALY).toString());
-        
+
         cfg.removeTemplateFromCache("1.ftl", Locale.GERMANY);
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
         assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
 
         cfg.removeTemplateFromCache("1.ftl", Locale.CANADA);
         assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
-        
+
         cfg.removeTemplateFromCache("1.ftl", Locale.UK);
-        assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());
     }
 
     @Test
@@ -212,40 +215,40 @@ public class TemplateCacheTest {
             loader.putTemplate("t.ftl", "v" + i, i);
             assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
         }
-        
+
         loader.putTemplate("t.ftl", "v10", 10);
         assertEquals("v10", cfg.getTemplate("t.ftl").toString());
         loader.putTemplate("t.ftl", "v11", 10); // same time stamp, different content
         assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
         assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
     }
-    
+
     @Test
     public void testIncompatibleImprovementsChangesURLConCaching() throws IOException {
         Version newVersion = Configuration.VERSION_2_3_21;
         Version oldVersion = Configuration.VERSION_2_3_20;
-        
+
         {
             Configuration cfg = new Configuration(oldVersion);
             cfg.setTemplateUpdateDelay(0);
             final MonitoredClassTemplateLoader templateLoader = new MonitoredClassTemplateLoader();
             assertNull(templateLoader.getURLConnectionUsesCaches());
             cfg.setTemplateLoader(templateLoader);
-            
+
             assertNull(templateLoader.getLastTemplateSourceModification());
             cfg.getTemplate("test.ftl");
             assertNull(templateLoader.getLastTemplateSourceModification());
-            
+
             cfg.setIncompatibleImprovements(newVersion);
             assertNull(templateLoader.getLastTemplateSourceModification());
             cfg.getTemplate("test.ftl");
             assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
-            
+
             templateLoader.setURLConnectionUsesCaches(Boolean.valueOf(true));
             templateLoader.setLastTemplateSourceModification(null);
             cfg.getTemplate("test.ftl");
             assertNull(templateLoader.getLastTemplateSourceModification());
-            
+
             templateLoader.setURLConnectionUsesCaches(Boolean.valueOf(false));
             templateLoader.setLastTemplateSourceModification(null);
             cfg.getTemplate("test.ftl");
@@ -255,77 +258,77 @@ public class TemplateCacheTest {
             templateLoader.setLastTemplateSourceModification(null);
             cfg.getTemplate("test.ftl");
             assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
-            
+
             templateLoader.setURLConnectionUsesCaches(null);
             cfg.setIncompatibleImprovements(oldVersion);
             templateLoader.setLastTemplateSourceModification(null);
             cfg.getTemplate("test.ftl");
             assertNull(templateLoader.getLastTemplateSourceModification());
-            
+
             cfg.setTemplateLoader(new MultiTemplateLoader(
-                    new TemplateLoader[] { new MultiTemplateLoader(
-                                    new TemplateLoader[] { templateLoader }) }));
+                    new TemplateLoader[]{new MultiTemplateLoader(
+                            new TemplateLoader[]{templateLoader})}));
             cfg.setIncompatibleImprovements(newVersion);
             cfg.getTemplate("test.ftl");
             assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
         }
     }
-    
+
     @Test
     public void testWrongEncodingReload() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setLocale(Locale.US);
-        
+
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Foo");
         tl.putTemplate("utf-8.ftl", "Bar");
         cfg.setTemplateLoader(tl);
-        
+
         {
             Template t = cfg.getTemplate("utf-8.ftl", "Utf-8");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
             assertEquals("Utf-8", t.getEncoding());
             assertEquals("Foo", t.toString());
-            
+
             assertEquals(
-                    ImmutableList.of(
+                    List.of(
                             new FindTemplateSourceEvent("utf-8_en_US.ftl", false),
                             new FindTemplateSourceEvent("utf-8_en.ftl", true),
                             new GetLastModifiedEvent("utf-8_en.ftl"),
                             new GetReaderEvent("utf-8_en.ftl"), // Attempt 1
-                            new CloseTemplateSourceEvent("utf-8_en.ftl")),                
+                            new CloseTemplateSourceEvent("utf-8_en.ftl")),
                     tl.getEvents());
         }
-        
+
         {
             tl.clearEvents();
-            
+
             Template t = cfg.getTemplate("utf-8.ftl", "Utf-16");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
             assertEquals("utf-8", t.getEncoding());
             assertEquals("Foo", t.toString());
-            
+
             assertEquals(
-                    ImmutableList.of(
+                    List.of(
                             new FindTemplateSourceEvent("utf-8_en_US.ftl", false),
                             new FindTemplateSourceEvent("utf-8_en.ftl", true),
                             new GetLastModifiedEvent("utf-8_en.ftl"),
                             new GetReaderEvent("utf-8_en.ftl"), // Attempt 1
                             new GetReaderEvent("utf-8_en.ftl"), // Attempt 2
-                            new CloseTemplateSourceEvent("utf-8_en.ftl")),                
+                            new CloseTemplateSourceEvent("utf-8_en.ftl")),
                     tl.getEvents());
         }
     }
-    
+
     @Test
     public void testEncodingSelection() throws IOException {
-        Locale hungary = new Locale("hu", "HU"); 
-                
+        Locale hungary = new Locale("hu", "HU");
+
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setDefaultEncoding("utf-8");
-        
+
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("t.ftl", "Foo");
         tl.putTemplate("t_de.ftl", "Vuu");
@@ -341,7 +344,7 @@ public class TemplateCacheTest {
             assertEquals("utf-8", t.getEncoding());
             assertEquals("Vuu", t.toString());
         }
-        
+
         cfg.setEncoding(Locale.GERMANY, "ISO-8859-1");
         cfg.setEncoding(hungary, "ISO-8859-2");
         {
@@ -365,7 +368,7 @@ public class TemplateCacheTest {
             assertEquals("ISO-8859-2", t.getEncoding());
             assertEquals("Foo", t.toString());
         }
-        
+
         // #ftl header overrides:
         {
             Template t = cfg.getTemplate("t2.ftl", Locale.CHINESE);
@@ -389,11 +392,12 @@ public class TemplateCacheTest {
             assertEquals("Foo", t.toString());
         }
     }
-    
+
     @Test
-    public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+    public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException,
+            MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        
+
         assertNull(cfg.getTemplate("../x", null, null, null, true, true));
         try {
             cfg.getTemplate("../x");
@@ -401,9 +405,9 @@ public class TemplateCacheTest {
         } catch (TemplateNotFoundException e) {
             // expected
         }
-        
+
         // [2.4] Test it with IcI 2.4
-        
+
         cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
         try {
             cfg.getTemplate("../x", null, null, null, true, true);
@@ -418,9 +422,9 @@ public class TemplateCacheTest {
             // expected
         }
     }
-    
+
     private static class MonitoredClassTemplateLoader extends ClassTemplateLoader {
-        
+
         private Boolean lastTemplateSourceModification;
 
         public MonitoredClassTemplateLoader() {
@@ -441,9 +445,9 @@ public class TemplateCacheTest {
         void setLastTemplateSourceModification(Boolean lastTemplateSourceModification) {
             this.lastTemplateSourceModification = lastTemplateSourceModification;
         }
-        
+
         private class SpyingURLTemplateSource extends URLTemplateSource {
-            
+
             SpyingURLTemplateSource(URL url, Boolean useCaches) throws IOException {
                 super(url, useCaches);
             }
@@ -453,9 +457,9 @@ public class TemplateCacheTest {
                 setLastTemplateSourceModification(Boolean.valueOf(useCaches));
                 super.setUseCaches(useCaches);
             }
-            
+
         }
-        
+
     }
 
 }
