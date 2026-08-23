@@ -35,6 +35,23 @@ group = "org.freemarker"
 
 val fmExt = freemarkerRoot
 
+
+/*
+* Additional diagnostic output when you want to find output
+* which Java version is used for which part.
+* enable with <i>--info</i>
+*/
+tasks.withType<JavaCompile>().configureEach {
+    doFirst {
+        val md = javaCompiler.get().metadata
+        logger.info(
+            "TOOLCHAIN ${path}: lang=${md.languageVersion.asInt()} " +
+                "vendor=${md.vendor} runtime=${md.javaRuntimeVersion} " +
+                "home=${md.installationPath.asFile}"
+        )
+    }
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
@@ -61,8 +78,8 @@ freemarkerRoot {
     configureSourceSet("jython20")
     configureSourceSet("jython22")
     configureSourceSet("jython25") { enableTests() }
-    configureSourceSet("core9", "9") { enableTests() }
-    configureSourceSet("core16", "16") {
+    configureSourceSet("core9", javaVersionUsedFor(9).toString()) { enableTests() }
+    configureSourceSet("core16", javaVersionUsedFor(16).toString()) {
         enableTests();
         addDependencySourceSet("core9");
     }
@@ -732,4 +749,9 @@ dependencies {
     "testUtilsImplementation"("com.google.guava:guava:29.0-jre")
     "testUtilsImplementation"("commons-collections:commons-collections:3.1")
     "testUtilsImplementation"("commons-lang:commons-lang:2.6")
+}
+
+fun javaVersionUsedFor(requestedVersion: Int): Int {
+    val overrideVersion = project.findProperty("freemarker.javaVersionUsedFor.$requestedVersion")?.toString()?.toIntOrNull()
+    return overrideVersion ?: requestedVersion
 }

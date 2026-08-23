@@ -251,3 +251,24 @@ Gradle project. After that, it's recommended to set these preferences (based on 
   - Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
+
+
+## Troubleshooting
+
+### Problems building on MacOS / Apple Silicon / aarch64
+
+If you run into build problems on MacOS (e.g. `No matching toolchains found for requested specification: {languageVersion=9, vendor=any, implementation=vendor-specific} for MAC_OS on aarch64.`) that means that you don't have JDK9 / JDK16 installed on your system. 
+
+You override the java versions used for JDK9 and JDK16:
+
+```
+./gradlew -Pfreemarker.javaVersionUsedFor.9=11 -Pfreemarker.javaVersionUsedFor.16=17 jar
+```
+
+This is helpful if you don't have a JDK9 / JDK16 for MacOS installed on your system and just want to build e.g. with another replacement locally during development.
+
+You can append `--info` to get diagnostic output like this:
+
+```
+TOOLCHAIN :compileCore16Java: lang=17 vendor=Eclipse Temurin runtime=17.0.11+9 home=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
+```
