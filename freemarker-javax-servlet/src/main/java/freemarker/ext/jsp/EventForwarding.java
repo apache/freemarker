@@ -41,8 +41,9 @@ import freemarker.log.Logger;
  * the {@code web.xml} descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
  *
- * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
- * {@code freemarker.ext.jakarta.jsp.EventForwarding} instead (since 2.3.33).
+ * <p>Note that there are two variants of this class: One for the legacy "javax" Servlet API in the
+ * {@code freemarker.ext}{@code .jsp} package, and another for the newer Jakarta Servlet API in the
+ * {@code freemarker.ext}{@code .jakarta.jsp} package (since 2.3.33). Use the variant that fits your Servlet container!
  */
 public class EventForwarding
     implements

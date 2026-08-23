@@ -49,8 +49,9 @@ import freemarker.template.utility.StringUtil;
  * will throw {@link MalformedTemplateNameException}. This check is normally done by the {@link TemplateCache}, but see
  * in the description of {@link TemplateLoader} why it's better to also check it here.
  *
- * <p>Note that this is for the legacy "javax" Servlet API; for Jakarta (that is, in modern Servlet containers), use
- * {@code freemarker.ext.jakarta.servlet.WebappTemplateLoader} instead (since 2.3.33).
+ * <p>Note that there are two variants of this class: One for the legacy "javax" Servlet API in the
+ * {@link freemarker.cache} package, and another for the newer Jakarta Servlet API in the
+ * {@code freemarker.ext}{@code .jakarta.servlet} package (since 2.3.33). Use the variant that fits your Servlet container!
  */
 public class WebappTemplateLoader implements TemplateLoader {
 
@@ -64,13 +65,11 @@ public class WebappTemplateLoader implements TemplateLoader {
     private boolean attemptFileAccess = true;
 
     /**
-     * Creates a template loader that will use the specified servlet context to load the resources. It will use
-     * the base path of <code>"/"</code> meaning templates will be resolved relative to the servlet context root
-     * location.
-     * 
+     * Creates a template loader that will use the specified servlet context to load the resources. It will use the base
+     * path of <code>"/"</code> meaning templates will be resolved relative to the servlet context root location.
+     *
      * @param servletContext
-     *            the servlet context whose {@link ServletContext#getResource(String)} will be used to load the
-     *            templates.
+     *         the servlet context whose {@link ServletContext#getResource(String)} will be used to load the templates.
      */
     public WebappTemplateLoader(ServletContext servletContext) {
         this(servletContext, "/");
@@ -81,12 +80,11 @@ public class WebappTemplateLoader implements TemplateLoader {
      * specified base path, which is interpreted relatively to the context root (does not mater if you start it with "/"
      * or not). Path components should be separated by forward slashes independently of the separator character used by
      * the underlying operating system.
-     * 
+     *
      * @param servletContext
-     *            the servlet context whose {@link ServletContext#getResource(String)} will be used to load the
-     *            templates.
+     *         the servlet context whose {@link ServletContext#getResource(String)} will be used to load the templates.
      * @param subdirPath
-     *            the base path to template resources.
+     *         the base path to template resources.
      */
     public WebappTemplateLoader(ServletContext servletContext, String subdirPath) {
         NullArgumentException.check("servletContext", servletContext);
@@ -176,7 +174,7 @@ public class WebappTemplateLoader implements TemplateLoader {
 
     /**
      * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
-     * 
+     *
      * @since 2.3.21
      */
     public Boolean getURLConnectionUsesCaches() {
@@ -185,7 +183,7 @@ public class WebappTemplateLoader implements TemplateLoader {
 
     /**
      * It does the same as {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)}; see there.
-     * 
+     *
      * @since 2.3.21
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
@@ -194,7 +192,7 @@ public class WebappTemplateLoader implements TemplateLoader {
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
+     *
      * @since 2.3.21
      */
     @Override
@@ -205,7 +203,9 @@ public class WebappTemplateLoader implements TemplateLoader {
                 + ", displayName=" + StringUtil.jQuote(servletContext.getServletContextName()) + "})";
     }
 
-    /** Gets the context path if we are on Servlet 2.5+, or else returns failure description string. */
+    /**
+     * Gets the context path if we are on Servlet 2.5+, or else returns failure description string.
+     */
     private String getContextPath() {
         try {
             Method m = servletContext.getClass().getMethod("getContextPath", CollectionUtils.EMPTY_CLASS_ARRAY);
@@ -217,7 +217,7 @@ public class WebappTemplateLoader implements TemplateLoader {
 
     /**
      * Getter pair of {@link #setAttemptFileAccess(boolean)}.
-     * 
+     *
      * @since 2.3.23
      */
     public boolean getAttemptFileAccess() {
@@ -232,7 +232,7 @@ public class WebappTemplateLoader implements TemplateLoader {
      * with {@link #setURLConnectionUsesCaches(Boolean)}, which is also the default behavior with
      * {@link Configuration#setIncompatibleImprovements(freemarker.template.Version) incompatible_improvements} 2.3.21
      * and later.
-     * 
+     *
      * @since 2.3.23
      */
     public void setAttemptFileAccess(boolean attemptLoadingFromFile) {

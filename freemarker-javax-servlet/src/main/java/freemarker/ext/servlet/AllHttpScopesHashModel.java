@@ -44,16 +44,17 @@ import freemarker.template.utility.NullArgumentException;
  * {@code preTemplateProcess}) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
  *
- * <p>Note that this is for the legacy "javax" Servlet/JSP API; for Jakarta (that is, in modern Servlet containers), use
- * {@code freemarker.ext.jakarta.servlet.AllHttpScopesHashModel} instead (since 2.3.33).
+ * <p>Note that there are two variants of this class: One for the legacy "javax" Servlet API in the
+ * {@code freemarker.ext}{@code .servlet} package, and another for the newer Jakarta Servlet API in the
+ * {@code freemarker.ext}{@code .jakarta.servlet} package (since 2.3.33). Use the variant that fits your Servlet container!
  */
 public class AllHttpScopesHashModel extends SimpleHash {
     private final ServletContext context;
     private final HttpServletRequest request;
     private final Map unlistedModels = new HashMap();
-     
+
     /**
-     * Creates a new instance of AllHttpScopesHashModel for handling a single 
+     * Creates a new instance of AllHttpScopesHashModel for handling a single
      * HTTP servlet request.
      * @param objectWrapper the object wrapper to use; not {@code null}.
      * @param context the servlet context of the web application
@@ -66,7 +67,7 @@ public class AllHttpScopesHashModel extends SimpleHash {
         this.context = context;
         this.request = request;
     }
-    
+
     /**
      * Stores a model in the hash so that it doesn't show up in {@code keys()}
      * and {@code values()} methods. Used to put the Application, Session,
@@ -91,7 +92,7 @@ public class AllHttpScopesHashModel extends SimpleHash {
         if (model != null) {
             return model;
         }
-        
+
         // Lookup in request scope
         Object obj = request.getAttribute(key);
         if (obj != null) {
