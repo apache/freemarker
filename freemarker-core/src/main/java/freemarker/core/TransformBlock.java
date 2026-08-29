@@ -22,12 +22,11 @@ package freemarker.core;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import freemarker.template.EmptyMap;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateTransformModel;
@@ -40,14 +39,14 @@ import freemarker.template.TemplateTransformModel;
 final class TransformBlock extends TemplateElement {
 
     private Expression transformExpression;
-    Map namedArgs;
-    private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
+    Map<String, Expression> namedArgs;
+    private transient volatile SoftReference<List<Map.Entry<String,Expression>>> sortedNamedArgsCache;
 
     /**
      * Creates new TransformBlock, with a given transformation
      */
     TransformBlock(Expression transformExpression, 
-                   Map namedArgs,
+                   Map<String, Expression> namedArgs,
                    TemplateElements children) {
         this.transformExpression = transformExpression;
         this.namedArgs = namedArgs;
@@ -59,18 +58,17 @@ final class TransformBlock extends TemplateElement {
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {
-            Map args;
+            Map<String, TemplateModel> args;
             if (namedArgs != null && !namedArgs.isEmpty()) {
-                args = new HashMap();
-                for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    String key = (String) entry.getKey();
-                    Expression valueExp = (Expression) entry.getValue();
+                args = new HashMap<>();
+                for (Map.Entry<String, Expression> entry : namedArgs.entrySet()) {
+                    String key = entry.getKey();
+                    Expression valueExp = entry.getValue();
                     TemplateModel value = valueExp.eval(env);
                     args.put(key, value);
                 }
             } else {
-                args = EmptyMap.instance;
+                args = Collections.emptyMap();
             }
             env.visitAndTransform(getChildBuffer(), ttm, args);
         } else {
@@ -90,12 +88,11 @@ final class TransformBlock extends TemplateElement {
         sb.append(' ');
         sb.append(transformExpression);
         if (namedArgs != null) {
-            for (Iterator it = getSortedNamedArgs().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) it.next();
+            for (Map.Entry<String, Expression> entry : getSortedNamedArgs()) {
                 sb.append(' ');
                 sb.append(entry.getKey());
                 sb.append('=');
-                _MessageUtil.appendExpressionAsUntearable(sb, (Expression) entry.getValue());
+                _MessageUtil.appendExpressionAsUntearable(sb, entry.getValue());
             }
         }
         if (canonical) {
@@ -121,7 +118,7 @@ final class TransformBlock extends TemplateElement {
         if (idx == 0) {
             return transformExpression;
         } else if (namedArgs != null && idx - 1 < namedArgs.size() * 2) {
-            Map.Entry namedArg = (Map.Entry) getSortedNamedArgs().get((idx - 1) / 2);
+            Map.Entry<String, Expression> namedArg = getSortedNamedArgs().get((idx - 1) / 2);
             return (idx - 1) % 2 == 0 ? namedArg.getKey() : namedArg.getValue();
         } else {
             throw new IndexOutOfBoundsException();
@@ -143,15 +140,15 @@ final class TransformBlock extends TemplateElement {
      * Returns the named args by source-code order; it's not meant to be used during template execution, too slow for
      * that!
      */
-    private List/*<Map.Entry<String, Expression>>*/ getSortedNamedArgs() {
-        Reference ref = sortedNamedArgsCache;
+    private List<Map.Entry<String, Expression>> getSortedNamedArgs() {
+        Reference<List<Map.Entry<String,Expression>>> ref = sortedNamedArgsCache;
         if (ref != null) {
-            List res = (List) ref.get();
+            List<Map.Entry<String, Expression>>  res = ref.get();
             if (res != null) return res;
         }
         
-        List res = MiscUtil.sortMapOfExpressions(namedArgs);
-        sortedNamedArgsCache = new SoftReference(res);
+        List<Map.Entry<String, Expression>>  res = MiscUtil.sortMapOfExpressions(namedArgs);
+        sortedNamedArgsCache = new SoftReference<>(res);
         return res;
     }
 
