@@ -44,7 +44,7 @@ public class _SortedArraySet<E> extends _UnmodifiableSet<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new _ArrayIterator(array);
+        return new _ArrayIterator<>(array);
     }
 
     @Override
