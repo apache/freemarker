@@ -61,6 +61,7 @@ import freemarker.template.TemplateModelException;
 public class Execute implements freemarker.template.TemplateMethodModel {
 
     private final static int OUTPUT_BUFFER_SIZE = 1024;
+    private final static boolean DISABLE_EXECUTE = SecurityUtilities.getSystemProperty("freemarker.template.disableExecute", null) != null;
 
     /**
      * Executes a method call.
@@ -74,6 +75,9 @@ public class Execute implements freemarker.template.TemplateMethodModel {
         String aExecute;
         StringBuilder    aOutputBuffer = new StringBuilder();
 
+        if ( DISABLE_EXECUTE ) {
+            throw new TemplateModelException( "Execution disabled" );
+        }
         if ( arguments.size() < 1 ) {
             throw new TemplateModelException( "Need an argument to execute" );
         }
