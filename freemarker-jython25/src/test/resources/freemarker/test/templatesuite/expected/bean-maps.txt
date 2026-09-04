@@ -42,61 +42,79 @@ nothing (3):
   location         : San Francisco
   name             : Chris
 
-all, shadow (28):
+all, shadow (37):
   age              : 27
   class            : class freemarker.test.templatesuite.TemplateTestCase$TestMapBean
   clear            : UNKNOWN
   clone            : UNKNOWN
+  compute          : UNKNOWN
+  computeIfAbsent  : UNKNOWN
+  computeIfPresent : UNKNOWN
   containsKey      : UNKNOWN
   containsValue    : UNKNOWN
   empty            : false
   entrySet         : UNKNOWN
   equals           : UNKNOWN
+  forEach          : UNKNOWN
   get              : UNKNOWN
   getClass         : UNKNOWN
   getLuckyNumber   : UNKNOWN
   getName          : UNKNOWN
+  getOrDefault     : UNKNOWN
   hashCode         : UNKNOWN
   isEmpty          : UNKNOWN
   keySet           : UNKNOWN
   location         : San Francisco
   luckyNumber      : 7
+  merge            : UNKNOWN
   name             : Christopher
   notify           : UNKNOWN
   notifyAll        : UNKNOWN
   put              : UNKNOWN
   putAll           : UNKNOWN
+  putIfAbsent      : UNKNOWN
   remove           : UNKNOWN
+  replace          : UNKNOWN
+  replaceAll       : UNKNOWN
   size             : UNKNOWN
   toString         : UNKNOWN
   values           : UNKNOWN
   wait             : UNKNOWN
 
-all (28):
+all (37):
   age              : 27
   class            : class freemarker.test.templatesuite.TemplateTestCase$TestMapBean
   clear            : UNKNOWN
   clone            : UNKNOWN
+  compute          : UNKNOWN
+  computeIfAbsent  : UNKNOWN
+  computeIfPresent : UNKNOWN
   containsKey      : UNKNOWN
   containsValue    : UNKNOWN
   empty            : false
   entrySet         : UNKNOWN
   equals           : UNKNOWN
+  forEach          : UNKNOWN
   get              : UNKNOWN
   getClass         : UNKNOWN
   getLuckyNumber   : UNKNOWN
   getName          : UNKNOWN
+  getOrDefault     : UNKNOWN
   hashCode         : UNKNOWN
   isEmpty          : UNKNOWN
   keySet           : UNKNOWN
   location         : San Francisco
   luckyNumber      : 7
+  merge            : UNKNOWN
   name             : Chris
   notify           : UNKNOWN
   notifyAll        : UNKNOWN
   put              : UNKNOWN
   putAll           : UNKNOWN
+  putIfAbsent      : UNKNOWN
   remove           : UNKNOWN
+  replace          : UNKNOWN
+  replaceAll       : UNKNOWN
   size             : UNKNOWN
   toString         : UNKNOWN
   values           : UNKNOWN
