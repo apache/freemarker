@@ -88,6 +88,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private OutputFormat outputFormat;
     private String encoding;
     private Integer tabSize;
+    private String normalizedEol;
+    private boolean normalizedEolSet;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
@@ -224,6 +226,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isOutputEncodingSet()) {
             setOutputEncoding(tc.getOutputEncoding());
         }
+        if (tc.isNormalizedEolSet()) {
+            setNormalizedEol(tc.getNormalizedEol());
+        }
         if (tc.isOutputFormatSet()) {
             setOutputFormat(tc.getOutputFormat());
         }
@@ -265,6 +270,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (tc.isTabSizeSet()) {
             setTabSize(tc.getTabSize());
+        }
+        if (tc.isNormalizedEolSet()) {
+            setNormalizedEol(tc.getNormalizedEol());
         }
         if (tc.isLazyImportsSet()) {
             setLazyImports(tc.getLazyImports());
@@ -644,6 +652,35 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public int getTabSize() {
         return tabSize != null ? tabSize.intValue()
                 : getNonNullParentConfiguration().getTabSize();
+    }
+
+    /**
+     * See {@link Configuration#setNormalizedEol(String)}.
+     *
+     * @since 2.3.36
+     */
+    public void setNormalizedEol(String normalizedEol) {
+        this.normalizedEol = normalizedEol;
+        this.normalizedEolSet = true;
+    }
+
+    /**
+     * Getter pair of {@link #setNormalizedEol(String)}.
+     *
+     * @since 2.3.36
+     */
+    @Override
+    public String getNormalizedEol() {
+        return normalizedEolSet ? normalizedEol : getNonNullParentConfiguration().getNormalizedEol();
+    }
+
+    /**
+     * Tells if this setting is set in this object, as opposed to being inherited.
+     *
+     * @since 2.3.36
+     */
+    public boolean isNormalizedEolSet() {
+        return normalizedEolSet;
     }
     
     /**
