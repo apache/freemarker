@@ -19,14 +19,33 @@
 
 package freemarker.template;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.EnumerationModel;
-import freemarker.ext.beans.HashAdapter;
-import freemarker.ext.beans.WhitelistMemberAccessPolicy;
-import freemarker.ext.jython.JythonSequenceModel;
-import freemarker.ext.util.WrapperTemplateModel;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.python.core.PyString;
@@ -34,17 +53,15 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
-import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.EnumerationModel;
+import freemarker.ext.beans.HashAdapter;
+import freemarker.ext.beans.WhitelistMemberAccessPolicy;
+import freemarker.ext.jython.JythonSequenceModel;
+import freemarker.ext.util.WrapperTemplateModel;
 
 public class DefaultObjectWrapperTest {
 
@@ -71,41 +88,47 @@ public class DefaultObjectWrapperTest {
     
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
-        List<Version> expected = new ArrayList<>();
+        Map<Version, Version> expectedVerToLastBPVer = new LinkedHashMap<>();
         for (int u = 0; u < 21; u++) {
-            expected.add(Configuration.VERSION_2_3_0);
+            expectedVerToLastBPVer.put(new Version(2, 3, u), Configuration.VERSION_2_3_0);
         }
-        expected.add(Configuration.VERSION_2_3_21);
-        expected.add(Configuration.VERSION_2_3_22);
-        expected.add(Configuration.VERSION_2_3_22); // no non-BC change in 2.3.23
-        expected.add(Configuration.VERSION_2_3_24);
-        expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.25
-        expected.add(Configuration.VERSION_2_3_26);
-        expected.add(Configuration.VERSION_2_3_27);
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.28
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.29
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.30
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.31
-        expected.add(Configuration.VERSION_2_3_27); // no non-BC change in 2.3.32
-        expected.add(Configuration.VERSION_2_3_33);
-        expected.add(Configuration.VERSION_2_3_33); // no non-BC change in 2.3.34
-        expected.add(Configuration.VERSION_2_3_35); // no non-BC change in 2.3.35
+        // See the Javadoc of freemarker.template.Configuration.Configuration(freemarker.template.Version) for the list
+        // of changes activated by IncompatibleImprovements!
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_21);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_22, Configuration.VERSION_2_3_22);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_23, Configuration.VERSION_2_3_22); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_24, Configuration.VERSION_2_3_24);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_25, Configuration.VERSION_2_3_24); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_26, Configuration.VERSION_2_3_26);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_27, Configuration.VERSION_2_3_27);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_28, Configuration.VERSION_2_3_27); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_29, Configuration.VERSION_2_3_27); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_30, Configuration.VERSION_2_3_27); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_31, Configuration.VERSION_2_3_27); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_32, Configuration.VERSION_2_3_27); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_33, Configuration.VERSION_2_3_33);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_34, Configuration.VERSION_2_3_33); // no non-BC change
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_35, Configuration.VERSION_2_3_35);
+        expectedVerToLastBPVer.put(Configuration.VERSION_2_3_36, Configuration.VERSION_2_3_35); // no non-BC change
 
-        List<Version> actual = new ArrayList<>();
+        Map<Version, Version> actualVerToLastBPVer = new LinkedHashMap<>();
         for (int i = _VersionInts.V_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;
             final Version version = new Version(major, minor, micro);
-            final Version normalizedVersion = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(version);
-            actual.add(normalizedVersion);
 
+            final Version normalizedVersion = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(version);
+            actualVerToLastBPVer.put(version, normalizedVersion);
+
+            // Check if DefaultObjectWrapperBuilder normalizes as expected:
             final DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(version);
             assertEquals(normalizedVersion, builder.getIncompatibleImprovements());
             assertEquals(normalizedVersion, builder.build().getIncompatibleImprovements());
         }
 
-        assertEquals(expected, actual);
+        // Check we have covered all the versions:
+        assertEquals(expectedVerToLastBPVer, actualVerToLastBPVer);
     }
 
     @Test
