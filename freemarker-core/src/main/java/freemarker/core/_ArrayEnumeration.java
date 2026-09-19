@@ -23,13 +23,13 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
 /** Don't use this; used internally by FreeMarker, might change without notice. */
-public class _ArrayEnumeration implements Enumeration {
+public class _ArrayEnumeration<E> implements Enumeration<E> {
 
-    private final Object[] array;
+    private final E[] array;
     private final int size;
     private int nextIndex;
 
-    public _ArrayEnumeration(Object[] array, int size) {
+    public _ArrayEnumeration(E[] array, int size) {
         this.array = array;
         this.size = size;
         this.nextIndex = 0;
@@ -41,7 +41,7 @@ public class _ArrayEnumeration implements Enumeration {
     }
 
     @Override
-    public Object nextElement() {
+    public E nextElement() {
         if (nextIndex >= size) {
             throw new NoSuchElementException();
         }
