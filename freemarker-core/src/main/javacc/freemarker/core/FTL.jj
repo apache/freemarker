@@ -3612,8 +3612,9 @@ CompressedBlock Compress() :
 TemplateElement UnifiedMacroTransform() :
 {
     Token start = null, end, t;
-    HashMap namedArgs = null;
-    ArrayList positionalArgs = null, bodyParameters = null;
+    HashMap<String, Expression> namedArgs = null;
+    ArrayList<Expression> positionalArgs = null;
+    ArrayList<String> bodyParameters = null;
     Expression startTagNameExp;
     TemplateElements children;
     Expression exp;
@@ -3647,7 +3648,7 @@ TemplateElement UnifiedMacroTransform() :
     )
     [
         <SEMICOLON>
-        { bodyParameters = new ArrayList(4); }
+        { bodyParameters = new ArrayList<>(4); }
         [
             [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
             (
@@ -3717,8 +3718,8 @@ TemplateElement UnifiedMacroTransform() :
 TemplateElement Call() :
 {
     Token start, end, id;
-    HashMap namedArgs = null;
-    ArrayList positionalArgs = null;
+    HashMap<String, Expression> namedArgs = null;
+    ArrayList<Expression> positionalArgs = null;
     Identifier macroName= null;
 }
 {
@@ -3754,9 +3755,9 @@ TemplateElement Call() :
     }
 }
 
-HashMap NamedArgs() :
+HashMap<String, Expression> NamedArgs() :
 {
-    HashMap result = new HashMap();
+    HashMap<String, Expression> result = new HashMap<>();
     Token t;
     Expression exp;
 }
@@ -3779,9 +3780,9 @@ HashMap NamedArgs() :
     }
 }
 
-ArrayList PositionalArgs() :
+ArrayList<Expression> PositionalArgs() :
 {
-    ArrayList result = new ArrayList();
+    ArrayList<Expression> result = new ArrayList<>();
     Expression arg;
 }
 {
@@ -3858,7 +3859,7 @@ TransformBlock Transform() :
     Token start, end, argName;
     Expression exp, argExp;
     TemplateElements children = null;
-    HashMap args = null;
+    HashMap<String, Expression> args = null;
 }
 {
     start = <TRANSFORM>
@@ -3869,7 +3870,7 @@ TransformBlock Transform() :
         <EQUALS>
         argExp = Expression()
         {
-            if (args == null) args = new HashMap();
+            if (args == null) args = new HashMap<>();
             args.put(argName.image, argExp);
         }
     )*

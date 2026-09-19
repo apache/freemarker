@@ -22,12 +22,11 @@ package freemarker.core;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import freemarker.template.EmptyMap;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -41,15 +40,15 @@ import freemarker.template.utility.StringUtil;
 final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     private Expression nameExp;
-    private Map<String, ? extends Expression> namedArgs;
-    private List<? extends Expression> positionalArgs;
+    private Map<String, Expression> namedArgs;
+    private List<Expression> positionalArgs;
     private List<String> bodyParameterNames;
     boolean legacySyntax;
-    private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
+    private transient volatile SoftReference<List<Map.Entry<String,Expression>>> sortedNamedArgsCache;
     private CustomDataHolder customDataHolder;
 
     UnifiedCall(Expression nameExp,
-         Map<String, ? extends Expression> namedArgs,
+         Map<String, Expression> namedArgs,
          TemplateElements children,
          List<String> bodyParameterNames) {
         this.nameExp = nameExp;
@@ -59,7 +58,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     UnifiedCall(Expression nameExp,
-         List<? extends Expression> positionalArgs,
+         List<Expression> positionalArgs,
          TemplateElements children,
          List<String> bodyParameterNames) {
         this.nameExp = nameExp;
@@ -84,18 +83,17 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {
-                Map args;
+                Map<String, TemplateModel> args;
                 if (namedArgs != null && !namedArgs.isEmpty()) {
-                    args = new HashMap();
-                    for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        String key = (String) entry.getKey();
-                        Expression valueExp = (Expression) entry.getValue();
+                    args = new HashMap<>();
+                    for (Map.Entry<String, Expression> entry : namedArgs.entrySet()) {
+                        String key = entry.getKey();
+                        Expression valueExp = entry.getValue();
                         TemplateModel value = valueExp.eval(env);
                         args.put(key, value);
                     }
                 } else {
-                    args = EmptyMap.instance;
+                    args = Collections.emptyMap();
                 }
                 if (isDirectiveModel) {
                     env.visit(getChildBuffer(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
@@ -128,12 +126,11 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 sb.append(argExp.getCanonicalForm());
             }
         } else {
-            List entries = getSortedNamedArgs();
-            for (int i = 0; i < entries.size(); i++) {
-                Map.Entry entry = (Map.Entry) entries.get(i);
-                Expression argExp = (Expression) entry.getValue();
+            List<Map.Entry<String, Expression>> entries = getSortedNamedArgs();
+            for (Map.Entry<String, Expression> entry : entries) {
+                Expression argExp = entry.getValue();
                 sb.append(' ');
-                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
+                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(entry.getKey()));
                 sb.append('=');
                 _MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
@@ -191,7 +188,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 base += positionalArgsSize;
                 final int namedArgsSize = namedArgs != null ? namedArgs.size() : 0;
                 if (idx - base < namedArgsSize * 2) {
-                    Map.Entry namedArg = (Map.Entry) getSortedNamedArgs().get((idx - base) / 2);
+                    Map.Entry<String, Expression> namedArg = getSortedNamedArgs().get((idx - base) / 2);
                     return (idx - base) % 2 == 0 ? namedArg.getKey() : namedArg.getValue();
                 } else {
                     base += namedArgsSize * 2;
@@ -237,15 +234,15 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
      * Returns the named args by source-code order; it's not meant to be used during template execution, too slow for
      * that!
      */
-    private List/*<Map.Entry<String, Expression>>*/ getSortedNamedArgs() {
-        Reference ref = sortedNamedArgsCache;
+    private List<Map.Entry<String, Expression>> getSortedNamedArgs() {
+        Reference<List<Map.Entry<String,Expression>>> ref = sortedNamedArgsCache;
         if (ref != null) {
-            List res = (List) ref.get();
+            List<Map.Entry<String, Expression>>  res = ref.get();
             if (res != null) return res;
         }
-        
-        List res = MiscUtil.sortMapOfExpressions(namedArgs);
-        sortedNamedArgsCache = new SoftReference(res);
+
+        List<Map.Entry<String, Expression>> res = MiscUtil.sortMapOfExpressions(namedArgs);
+        sortedNamedArgsCache = new SoftReference<>(res);
         return res;
     }
 
