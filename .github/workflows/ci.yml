@@ -64,31 +64,26 @@ jobs:
         with:
           java-version: 21
           distribution: graalvm
-        # test pipeline to check native support
+        # Test pipeline to check GraalVM native image support:
         #
-        # - GraalVM is added to the runner
-        # - A simple native project is build and run
-        #
-        # At the something like that should be found in the log :
-        #
-        # INFO: name : FreeMarker Native Demo, version : 2.3.35-nightly
-        # Jan 15, 2025 4:28:19 PM freemarker.log._JULLoggerFactory$JULLogger info
-        # INFO: result :
-        # <html>
-        #    <head>
-        #        <title>Hello : FreeMarker GraalVM Native Demo</title>
-        #    </head>
-        #    <body>
-        #        <h1>Hello : FreeMarker GraalVM Native Demo</h1>
-        #        <p>Test template for Apache FreeMarker GraalVM native support (2.3.35-nightly)</p>
-        #    </body>
-        # </html>
+        # - GraalVM 21 is added to the runner
+        # - The freemarker-test-graalvm-native executable is built (nativeCompile) and executed
+        # - The JUnit 5 native test suite is compiled and executed as a native image (nativeTest),
+        #   exercising a broad percentage of the FreeMarker codebase across core directives,
+        #   ranges/slicing, variadic/recursive macros and functions, built-ins, lambdas, dynamic
+        #   evaluation (?eval, ?eval_json, ?interpret), BeansWrapper (Java records, enums, static
+        #   models, overloaded methods, default/whitelist/blacklist/legacy member access policies),
+        #   template loaders (#include, #import, auto_include, auto_import), TemplateConfiguration
+        #   matchers, output formats, custom directives/methods, custom number/date formats,
+        #   arithmetic engines, exception handlers, XML DOM NodeModel, Properties-based
+        #   configuration, and logger resolution.
       - name: Test GraalVM native support (build and run)
         id: native_test
         if: runner.os != 'Windows'
         run: |
           ./gradlew :freemarker-test-graalvm-native:nativeCompile
           ./freemarker-test-graalvm-native/build/native/nativeCompile/freemarker-test-graalvm-native
+          ./gradlew :freemarker-test-graalvm-native:nativeTest
       - name: Upload Failed Report
         uses: actions/upload-artifact@v4
         if: failure() && steps.build_step.outcome == 'failure'
