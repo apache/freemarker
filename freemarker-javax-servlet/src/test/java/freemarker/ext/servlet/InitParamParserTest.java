@@ -161,6 +161,7 @@ public class InitParamParserTest {
         
         try {
             InitParamParser.parseCommaSeparatedTemplatePaths("a?foo(x=1, y=2)");
+            fail();
         } catch (Exception e) {
             assertThat(e.getMessage(), containsString("settings"));
         }

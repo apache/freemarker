@@ -190,6 +190,7 @@ public class DefaultObjectWrapperMemberAccessPolicyTest {
             TemplateHashModel staticModel = (TemplateHashModel) ow.getStaticModels().get(C.class.getName());
             try {
                 assertNull(staticModel.get("M1"));
+                fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsString("No such key"));
             }
