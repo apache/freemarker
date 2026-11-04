@@ -19,11 +19,33 @@
 
 package org.freemarker.core.graal;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import freemarker.ext.beans.TemplateAccessible;
+
 public class HelloDataModel {
+
+    public enum Status {
+        ACTIVE,
+        PENDING,
+        ARCHIVED
+    }
+
+    public record Item(String title, BigDecimal price, boolean inStock, List<String> tags) {
+    }
+
+    public String exposedNote = "public-field-ok";
 
     private String name;
 
     private String version;
+
+    private Status status = Status.ACTIVE;
+
+    private List<Item> items = new ArrayList<>();
 
     public String getVersion() {
         return version;
@@ -33,12 +55,50 @@ public class HelloDataModel {
         this.version = version;
     }
 
+    @TemplateAccessible
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public List<Item> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = new ArrayList<>(items);
+    }
+
+    public String formatItem(String label, int quantity) {
+        return label + " x" + quantity;
+    }
+
+    public String formatItem(String label, String note) {
+        return label + " (" + note + ")";
+    }
+
+    @TemplateAccessible
+    public String whitelistedAction() {
+        return "allowed:" + name;
+    }
+
+    public String getRestrictedSecret() {
+        return "top-secret";
+    }
+
+    public static String staticGreeting(String target) {
+        return "Hello from static, " + target + "!";
     }
 
 }

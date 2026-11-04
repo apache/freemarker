@@ -1,4 +1,4 @@
-# freemarker-test-graalvm-natice
+# freemarker-test-graalvm-native
 
 Test project for GraalVM support. This is not built by default.
 
@@ -37,6 +37,12 @@ Test project for GraalVM support. This is not built by default.
            <p>Test template for Apache FreeMarker GraalVM native support (2.3.35-nightly)</p>
        </body>
    </html>
+   ```
+
+4. Run the JUnit test suite inside a GraalVM native image:
+
+   ```shell
+   ./gradlew :freemarker-test-graalvm-native:nativeTest
    ```
 
 ## CI (GitHub workflow)
