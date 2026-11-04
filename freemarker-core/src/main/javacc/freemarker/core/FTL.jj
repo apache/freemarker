@@ -220,6 +220,8 @@ public class FMParser {
                     template.getParserConfiguration().getRecognizeStandardFileExtensions());
             lpCfg.setTabSizeIfNotSet(
                     template.getParserConfiguration().getTabSize());
+            lpCfg.setNormalizedEolIfNotSet(
+                    template.getConfiguration().getNormalizedEol());
         }
 
         int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
@@ -392,6 +394,48 @@ public class FMParser {
      */
     public int _getLastNamingConvention() {
         return token_source.namingConvention;
+    }
+
+    /**
+     * Replaces the line breaks of static template text with the {@code normalized_eol} setting value, if that
+     * setting is set. Done here, when the template is parsed, so that executing it costs nothing.
+     *
+     * @return {@code s} itself if there's nothing to replace.
+     */
+    private String normalizeEol(String s) {
+        String normalizedEol = pCfg.getNormalizedEol();
+        if (normalizedEol == null) {
+            return s;
+        }
+
+        int len = s.length();
+        boolean needsReplacement = false;
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if (c == '\r' || (c == '\n' && !normalizedEol.equals("\n"))) {
+                needsReplacement = true;
+                break;
+            }
+        }
+        if (!needsReplacement) {
+            return s;
+        }
+
+        StringBuilder sb = new StringBuilder(len + 16);
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if (c == '\r') {
+                sb.append(normalizedEol);
+                if (i + 1 < len && s.charAt(i + 1) == '\n') {
+                    i++; // CRLF is one line break
+                }
+            } else if (c == '\n') {
+                sb.append(normalizedEol);
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -1224,7 +1268,7 @@ TOKEN:
     <#ESCAPED_CHAR :
         "\\"
         (
-            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "\\" | "'" | "\"" | "{" | "=")
+            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "R" | "\\" | "'" | "\"" | "{" | "=")
             |
             ("x" ["0"-"9", "A"-"F", "a"-"f"])
         )
@@ -2510,7 +2554,7 @@ StringLiteral StringLiteral(boolean interpolate) :
             s = t.image.substring(2, t.image.length() -1);
         } else {
 	        try {
-	            s = StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1));
+	            s = StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1), pCfg.getNormalizedEol());
 	        } catch (ParseException pe) {
 	            pe.lineNumber = t.beginLine;
 	            pe.columnNumber = t.beginColumn;
@@ -3847,7 +3891,7 @@ TextBlock NoParse() :
     start = <NOPARSE>
     end = UnparsedContent(start, buf)
     {
-        TextBlock result = new TextBlock(buf.toString(), true);
+        TextBlock result = new TextBlock(normalizeEol(buf.toString()), true);
         result.setLocation(template, start, end);
         return result;
     }
@@ -4374,7 +4418,7 @@ TextBlock PCData() :
     {
         if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
 
-        TextBlock result = new TextBlock(buf.toString(), false);
+        TextBlock result = new TextBlock(normalizeEol(buf.toString()), false);
         result.setLocation(template, start, t);
         return result;
     }
@@ -4389,7 +4433,7 @@ TextBlock WhitespaceText() :
     {
         if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
 
-        TextBlock result = new TextBlock(t.image, false);
+        TextBlock result = new TextBlock(normalizeEol(t.image), false);
         result.setLocation(template, t, t);
         return result;
     }

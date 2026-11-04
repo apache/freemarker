@@ -89,4 +89,12 @@ public interface ParserConfiguration {
      */
     int getTabSize();
 
+    /**
+     * See {@link Configuration#setNormalizedEol(String)}; {@code null} if the output shouldn't be made to use any
+     * particular line break.
+     *
+     * @since 2.3.36
+     */
+    String getNormalizedEol();
+
 }
