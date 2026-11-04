@@ -501,7 +501,7 @@ public class DateUtil {
     /**
      * Parses an W3C XML Schema time string (not date or date-time).
      * If the time string doesn't specify the time zone offset explicitly,
-     * the value of the {@code defaultTZ} paramter will be used. 
+     * the value of the {@code defaultTZ} parameter will be used. 
      */  
     public static Date parseXSTime(
             String timeStr, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
