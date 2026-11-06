@@ -58,6 +58,7 @@ public class VersionTest {
         assertEquals(3, v.getMicro());
     }
     
+    @Test
     public void testFromNumberIncubating() {
         Version v = new Version(2, 3, 24, "rc01-incubating", Boolean.FALSE, new Date(5000));
         assertEquals("2.3.24-rc01-incubating", v.toString());

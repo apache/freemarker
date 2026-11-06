@@ -998,6 +998,7 @@ public class ConfigurationTest extends TestCase {
        
        try {
            cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
+           fail();
        } catch (SettingValueAssignmentException e) {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }

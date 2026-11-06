@@ -31,7 +31,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.ObjectConstructor;
-import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 @RunWith(JUnit38ClassRunner.class)
@@ -102,24 +101,15 @@ public class OptInTemplateClassResolverTest extends TestCase {
         testTrusted_checkFails("lib%2f%2E%2e%5cfoo.ftl");
         testTrusted_checkFails("/lib%5C%.%2e%2Efoo.ftl");
         
-        try {
-            testTrusted_checkFails("lib/./foo.ftl");
-            fail();
-        } catch (AssertionFailedError e) {
-            // good
-        }
-        try {
-            testTrusted_checkFails("lib/foo..ftl");
-            fail();
-        } catch (AssertionFailedError e) {
-            // good
-        }
-        try {
-            testTrusted_checkFails("lib/%2e/foo.ftl");
-            fail();
-        } catch (AssertionFailedError e) {
-            // good
-        }
+        // None of these has a ".." segment, so mayContainsBackStep must not reject them:
+        assertTrusted("lib/./foo.ftl");
+        assertTrusted("lib/foo..ftl");
+        assertTrusted("lib/%2e/foo.ftl");
+    }
+    
+    private void assertTrusted(String templateName) throws TemplateException {
+        assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
+                Template.getPlainTextTemplate(templateName, "", dummyCfg)));
     }
     
     public void testTrusted_checkFails(String templateName) {

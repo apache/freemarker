@@ -98,12 +98,14 @@ public class TemplateConfigurationFactoryTest {
 
         try {
             assertNotApplicable(tcf, "x.ftl");
+            fail();
         } catch (TemplateConfigurationFactoryException e) {
             assertThat(e.getMessage(), containsString("x.ftl"));
         }
         tcf.setNoMatchErrorDetails("Test details");
         try {
             assertNotApplicable(tcf, "x.ftl");
+            fail();
         } catch (TemplateConfigurationFactoryException e) {
             assertThat(e.getMessage(), containsString("Test details"));
         }

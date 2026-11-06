@@ -44,6 +44,7 @@ public class ErrorMessagesTest {
         
         try {
             thm.get("foo");
+            fail();
         } catch (TemplateModelException e) {
             e.printStackTrace();
             final String msg = e.getMessage();

@@ -942,6 +942,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(1, ow.unwrap(((TemplateHashModel) ow.wrap(sortedMapS)).get("a")));
             try {
                 ((TemplateHashModel) ow.wrap(sortedMapC)).get("a");
+                fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
             }
@@ -951,6 +952,7 @@ public class DefaultObjectWrapperTest {
             assertNull(((TemplateHashModel) ow.wrap(sortedMapS)).get("b"));
             try {
                 ((TemplateHashModel) ow.wrap(sortedMapC)).get("b");
+                fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
             }
@@ -1034,6 +1036,7 @@ public class DefaultObjectWrapperTest {
          iterator = enumAdapter.iterator();
          try {
              iterator.hasNext();
+             fail();
          } catch (TemplateException e) {
              assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
          }

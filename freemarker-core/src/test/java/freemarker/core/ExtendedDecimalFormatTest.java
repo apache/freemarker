@@ -54,6 +54,7 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
         }
         try {
             ExtendedDecimalFormatParser.parse(";", LOC);
+            fail();
         } catch (ParseException e) {
             // Expected
         }
@@ -251,6 +252,7 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
         assertFormatted(Locale.GERMANY, "0 \u00A4\u00A4;; currencyCode=EUR", 10, "10 EUR");
         try {
             assertFormatted("0;; currencyCode=USDX", 10, "10");
+            fail();
         } catch (ParseException e) {
             assertThat(e.getMessage(), containsString("ISO 4217"));
         }
