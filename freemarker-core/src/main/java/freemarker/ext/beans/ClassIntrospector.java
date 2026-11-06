@@ -425,6 +425,18 @@ class ClassIntrospector {
                         } else if (previous instanceof OverloadedMethods) {
                             // Already overloaded method - add new overload
                             ((OverloadedMethods) previous).addMethod(method);
+                        } else if (previous instanceof FastPropertyDescriptor
+                                && ((FastPropertyDescriptor) previous).isMethodInsteadOfPropertyValueBeforeCall()) {
+                            FastPropertyDescriptor propertyDescriptor = (FastPropertyDescriptor) previous;
+                            OverloadedMethods overloadedMethods = propertyDescriptor.getOverloadedMethods();
+                            if (overloadedMethods == null) {
+                                overloadedMethods = new OverloadedMethods(is2321Bugfixed());
+                                addMethodIfMissing(overloadedMethods, propertyDescriptor.getReadMethod());
+                            }
+                            addMethodIfMissing(overloadedMethods, method);
+                            introspData.put(exposedMethodName, new FastPropertyDescriptor(
+                                    propertyDescriptor.getReadMethod(), propertyDescriptor.getIndexedReadMethod(),
+                                    true, overloadedMethods));
                         } else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof FastPropertyDescriptor)) {
                             // Simple method (so far)
@@ -442,6 +454,12 @@ class ClassIntrospector {
                 }
             } // for each in mds
         } // end if (exposureLevel < EXPOSE_PROPERTIES_ONLY)
+    }
+
+    private static void addMethodIfMissing(OverloadedMethods overloadedMethods, Method method) {
+        if (method != null && !overloadedMethods.getMethods().contains(method)) {
+            overloadedMethods.addMethod(method);
+        }
     }
 
     private static boolean isExistingIntropsDataNotPropertyOrNewAddsMethodSupport(
@@ -768,9 +786,24 @@ class ClassIntrospector {
         }
         
         if (readMethod != null || indexedReadMethod != null) {
+            OverloadedMethods overloadedMethods = null;
+            if (methodInsteadOfPropertyValueBeforeCall && readMethod != null) {
+                Object previous = introspData.get(pd.getName());
+                if (previous instanceof Method || previous instanceof OverloadedMethods) {
+                    overloadedMethods = new OverloadedMethods(is2321Bugfixed());
+                    addMethodIfMissing(overloadedMethods, readMethod);
+                    if (previous instanceof Method) {
+                        addMethodIfMissing(overloadedMethods, (Method) previous);
+                    } else {
+                        for (Method previousMethod : ((OverloadedMethods) previous).getMethods()) {
+                            addMethodIfMissing(overloadedMethods, previousMethod);
+                        }
+                    }
+                }
+            }
             introspData.put(pd.getName(), new FastPropertyDescriptor(
                     readMethod, indexedReadMethod,
-                    methodInsteadOfPropertyValueBeforeCall));
+                    methodInsteadOfPropertyValueBeforeCall, overloadedMethods));
         }
 
         if (readMethod != null && beanPropertyReadMethodNameCollector != null) {

@@ -52,9 +52,9 @@ public enum ZeroArgumentNonVoidMethodPolicy {
      * like {@code obj["m"]()}), and therefore the dot, or square bracket key operator knows that you will call the
      * result of it. In such case, if the {@linkplain ObjectWrapper wrapped} {@code obj} implements
      * {@link MethodCallAwareTemplateHashModel}, the operator will call
-     * {@link MethodCallAwareTemplateHashModel#getBeforeMethodCall(String)} instead of
-     * {@link TemplateHashModel#get(String)}. Also note that at least in 2.3.33 it's only done if the method call has
-     * 0 arguments.
+     * {@link MethodCallAwareTemplateHashModel#getBeforeMethodCall(String, int)} instead of
+     * {@link TemplateHashModel#get(String)}. This also lets wrappers resolve overloads when the zero-argument method
+     * shares its name with methods that take arguments.
      *
      * <p>The practical reason for this feature is that the convention of using {@code SomeType something()} instead
      * of {@code SomeType getSomething()} spreads in the Java ecosystem (and is a standard in some other JVM languages),

@@ -29,10 +29,9 @@ import freemarker.ext.beans.ZeroArgumentNonVoidMethodPolicy;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Adds an extra getter method to {@link TemplateHashModel} that can return different result than {@link #get(String)},
- * knowing that the result of it will be called as a method. At least as of 2.3.33, this is only used by the
- * template language for 0-argument method calls that are <em>directly</em> after the dot operator and the key (like in
- * {@code obj.m()}, where the "()" is directly after the key "m"), or for the equivalent of that with square brackets
+ * Adds extra getter methods to {@link TemplateHashModel} that can return different results than {@link #get(String)},
+ * knowing that the result will be called as a method. The template language uses these for method calls that are
+ * <em>directly</em> after the dot operator and key (like {@code obj.m()}), or the equivalent with square brackets
  * ({@code obj["m"]()}).
  *
  * <p>Background knowledge needed to understand this: In the FreeMarker template language, methods/functions are
@@ -44,16 +43,15 @@ import freemarker.template.utility.NullArgumentException;
  *
  * For example, if in the template you have {@code someRecord.someComponent()}, and there {@code someRecord} was wrapped
  * by the {@link ObjectWrapper} into a {@link TemplateHashModel} that also implements this interface, then the dot
- * operator will call {@link #getBeforeMethodCall(String) getBeforeMethodCall("someComponent")}, rather than
+ * operator will call {@link #getBeforeMethodCall(String, int) getBeforeMethodCall("someComponent", 0)}, rather than
  * {@link #get(String) get("someComponent")}. This is needed to implement subtle features like
  * {@link BeansWrapper.MethodAppearanceDecision#setMethodInsteadOfPropertyValueBeforeCall(boolean)},
  * which is needed to implement
  * {@link ZeroArgumentNonVoidMethodPolicy#BOTH_METHOD_AND_PROPERTY_UNLESS_BEAN_PROPERTY_READ_METHOD}.
  *
- * <p>While technically we could do the same for method calls with more the 0 arguments, as of 2.3.33 at least, we
- * don't want to generalize this to that case. This is a workaround we added to address the issue with accessing
- * components in Java records, which are 0-argument methods (see that at
- * {@link BeansWrapper.MethodAppearanceDecision#setMethodInsteadOfPropertyValueBeforeCall(boolean)}).
+ * <p>The argument-count overload defaults to the historical behavior for zero-argument calls and to {@link #get(String)}
+ * for calls with arguments, so existing implementations remain compatible. Implementations that need argument-aware
+ * overload resolution can override it.
  *
  * <p>Objects wrapped with {@link BeansWrapper}, and hence with {@link DefaultObjectWrapper}, will implement this
  * interface when they are "generic" objects (that is, when they are not classes with special wrapper, like
@@ -87,6 +85,18 @@ public interface MethodCallAwareTemplateHashModel extends TemplateHashModel {
      */
     TemplateModel getBeforeMethodCall(String key)
             throws TemplateModelException, ShouldNotBeGetAsMethodException;
+
+    /**
+     * Called when the key is immediately followed by a method call. Implementations that can resolve overloads based
+     * on the number of arguments may override this; existing implementations retain the historical zero-argument
+     * behavior and use {@link #get(String)} for calls with arguments.
+     *
+     * @since 2.3.36
+     */
+    default TemplateModel getBeforeMethodCall(String key, int argumentCount)
+            throws TemplateModelException, ShouldNotBeGetAsMethodException {
+        return argumentCount == 0 ? getBeforeMethodCall(key) : get(key);
+    }
 
     /**
      * Thrown by {@link #getBeforeMethodCall(String)}; see there.

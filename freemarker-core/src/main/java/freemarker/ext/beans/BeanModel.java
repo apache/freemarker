@@ -240,8 +240,23 @@ implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, Temp
      */
     protected TemplateModel getBeforeMethodCall(String key)
             throws TemplateModelException, MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException {
-        TemplateModel result = get(key, true);
-        if (result instanceof  TemplateMethodModelEx || result == null) {
+        return getBeforeMethodCall(key, 0);
+    }
+
+    protected TemplateModel getBeforeMethodCall(String key, int argumentCount)
+            throws TemplateModelException, MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException {
+        if (argumentCount > 0) {
+            Map<Object, Object> classInfo = wrapper.getClassIntrospector().get(object.getClass());
+            Object descriptor = classInfo.get(key);
+            if (descriptor instanceof FastPropertyDescriptor) {
+                OverloadedMethods overloadedMethods = ((FastPropertyDescriptor) descriptor).getOverloadedMethods();
+                if (overloadedMethods != null) {
+                    return new OverloadedMethodsModel(object, overloadedMethods, wrapper);
+                }
+            }
+        }
+        TemplateModel result = get(key, argumentCount == 0);
+        if (result instanceof TemplateMethodModelEx || result == null) {
             return result;
         }
         throw new MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException(result, null);

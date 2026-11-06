@@ -69,4 +69,10 @@ public class GenericObjectModel extends StringModel implements MethodCallAwareTe
             ShouldNotBeGetAsMethodException {
         return super.getBeforeMethodCall(key);
     }
+
+    @Override
+    public TemplateModel getBeforeMethodCall(String key, int argumentCount) throws TemplateModelException,
+            ShouldNotBeGetAsMethodException {
+        return super.getBeforeMethodCall(key, argumentCount);
+    }
 }
