@@ -149,6 +149,24 @@ public class TestZeroArgumentNonVoidMethodPolicy extends TemplateTest {
     }
 
     @Test
+    public void testOverloadedMethodsWithZeroArgumentNonVoidMethodPolicy() throws TemplateException, IOException {
+        DefaultObjectWrapper beansWrapper = new DefaultObjectWrapper(VERSION_2_3_33);
+        beansWrapper.setDefaultZeroArgumentNonVoidMethodPolicy(
+                ZeroArgumentNonVoidMethodPolicy.BOTH_METHOD_AND_PROPERTY_UNLESS_BEAN_PROPERTY_READ_METHOD);
+        for (boolean cacheTopLevelVars : List.of(true, false)) {
+            setupDataModel(() -> beansWrapper, cacheTopLevelVars);
+            addToDataModel("overloaded", new TestOverloaded());
+
+            assertOutput("${overloaded.value}", "zero");
+            assertOutput("${overloaded.value()}", "zero");
+            assertOutput("${overloaded.value('x')}", "arg:x");
+            assertOutput("${overloaded['value']}", "zero");
+            assertOutput("${overloaded['value']()}", "zero");
+            assertOutput("${overloaded['value']('x')}", "arg:x");
+        }
+    }
+
+    @Test
     public void testSettings() throws TemplateException, IOException {
             getConfiguration().setSetting(
                     "objectWrapper",
@@ -313,6 +331,16 @@ public class TestZeroArgumentNonVoidMethodPolicy extends TemplateTest {
          */
         public void voidMethod() {
             // do nothing
+        }
+    }
+
+    public static class TestOverloaded {
+        public String value() {
+            return "zero";
+        }
+
+        public String value(String argument) {
+            return "arg:" + argument;
         }
     }
 

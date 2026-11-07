@@ -2479,12 +2479,10 @@ MethodCall MethodArgs(Expression exp) :
         end = <CLOSE_PAREN>
         {
             args.trimToSize();
-            if (args.isEmpty()) {
-                if (exp instanceof Dot) {
-                    exp = new DotBeforeMethodCall((Dot) exp);
-                } else if (exp instanceof DynamicKeyName) {
-                    exp = new DynamicKeyNameBeforeMethodCall((DynamicKeyName) exp);
-                }
+            if (exp instanceof Dot) {
+                exp = new DotBeforeMethodCall((Dot) exp, args.size());
+            } else if (exp instanceof DynamicKeyName) {
+                exp = new DynamicKeyNameBeforeMethodCall((DynamicKeyName) exp, args.size());
             }
             MethodCall result = new MethodCall(exp, args);
             result.setLocation(template, exp, end);

@@ -31,12 +31,20 @@ final class FastPropertyDescriptor {
     private final Method readMethod;
     private final Method indexedReadMethod;
     private final boolean methodInsteadOfPropertyValueBeforeCall;
+    private final OverloadedMethods overloadedMethods;
 
     public FastPropertyDescriptor(
             Method readMethod, Method indexedReadMethod, boolean methodInsteadOfPropertyValueBeforeCall) {
+        this(readMethod, indexedReadMethod, methodInsteadOfPropertyValueBeforeCall, null);
+    }
+
+    FastPropertyDescriptor(
+            Method readMethod, Method indexedReadMethod, boolean methodInsteadOfPropertyValueBeforeCall,
+            OverloadedMethods overloadedMethods) {
         this.readMethod = readMethod;
         this.indexedReadMethod = indexedReadMethod;
         this.methodInsteadOfPropertyValueBeforeCall = methodInsteadOfPropertyValueBeforeCall;
+        this.overloadedMethods = overloadedMethods;
     }
 
     public Method getReadMethod() {
@@ -55,5 +63,9 @@ final class FastPropertyDescriptor {
      */
     public boolean isMethodInsteadOfPropertyValueBeforeCall() {
         return methodInsteadOfPropertyValueBeforeCall;
+    }
+
+    OverloadedMethods getOverloadedMethods() {
+        return overloadedMethods;
     }
 }
