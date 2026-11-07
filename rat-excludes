@@ -67,6 +67,7 @@ gradle/**
 .LSOverride
 .directory
 .Trash*
+buildSrc/.kotlin/**
 
 # ignore for freemarker-test-graalvm-native module (only used for GraalVM native support compliance)
 freemarker-test-graalvm-native/build/**
