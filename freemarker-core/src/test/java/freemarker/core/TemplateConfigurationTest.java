@@ -192,6 +192,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", true);
         SETTING_ASSIGNMENTS.put("tabSize", 1);
+        SETTING_ASSIGNMENTS.put("normalizedEol", "\r\n");
         SETTING_ASSIGNMENTS.put("lazyImports", Boolean.TRUE);
         SETTING_ASSIGNMENTS.put("lazyAutoImports", Boolean.FALSE);
         SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
@@ -694,7 +695,17 @@ public class TemplateConfigurationTest {
                     "13", "8");
             testedProps.add(Configuration.TAB_SIZE_KEY_CAMEL_CASE);
         }
-        
+
+        {
+            TemplateConfiguration tc = new TemplateConfiguration();
+            tc.setLogTemplateExceptions(false);
+            tc.setParentConfiguration(new Configuration(new Version(2, 3, 22)));
+            tc.setNormalizedEol("\r\n");
+            // The line breaks of the static text are replaced when the template is parsed:
+            assertOutputWithoutAndWithTC(tc, "a\nb", "a\nb", "a\r\nb");
+            testedProps.add("normalizedEol");
+        }
+
         assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
     }
     

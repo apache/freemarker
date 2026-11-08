@@ -90,5 +90,10 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     public int getTabSize() {
         return wrappedPCfg.getTabSize();
     }
-    
+
+    @Override
+    public String getNormalizedEol() {
+        return wrappedPCfg.getNormalizedEol();
+    }
+
 }

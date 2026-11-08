@@ -37,6 +37,8 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private OutputFormat outputFormat;
     private Boolean recognizeStandardFileExtensions;
     private Integer tabSize;
+    private String normalizedEol;
+    private boolean normalizedEolSet;
     private final Version incompatibleImprovements;
 
     LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping,
@@ -149,6 +151,21 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
             throw new IllegalStateException();
         }
         return tabSize.intValue();
+    }
+
+    @Override
+    public String getNormalizedEol() {
+        if (!normalizedEolSet) {
+            throw new IllegalStateException();
+        }
+        return normalizedEol;
+    }
+
+    void setNormalizedEolIfNotSet(String normalizedEol) {
+        if (!normalizedEolSet) {
+            this.normalizedEol = normalizedEol;
+            this.normalizedEolSet = true;
+        }
     }
     
     void setTabSizeIfNotSet(int tabSize) {

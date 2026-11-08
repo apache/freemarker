@@ -573,6 +573,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private int interpolationSyntax = LEGACY_INTERPOLATION_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x
+    private String normalizedEol;
     private boolean fallbackOnNullLoopVariable = true;  // Default for backward compatibility
     private boolean preventStrippings;
 
@@ -2806,6 +2807,52 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public int getTabSize() {
         return tabSize;
+    }
+
+    /**
+     * Sets the end-of-line (line break) string that the output of the templates should use, or {@code null} (the
+     * default) to not prescribe any. This is a parser-level setting, as it's applied when the template is parsed;
+     * it therefore can't be changed with the {@code setting} directive from inside a template, but it can differ
+     * per template, via {@link TemplateConfiguration}.
+     *
+     * <p>It affects two things:
+     *
+     * <ul>
+     *   <li>The line breaks of the static text of the template (the text outside <code>${...}</code> and FTL tags).
+     *       If this setting is non-{@code null} they are all replaced with this value, and so the line breaks that
+     *       the template file happens to use — which depends on the editor and operating system of whoever last
+     *       saved it — don't leak into the output. If it's {@code null}, they are output as they are in the file,
+     *       which is what FreeMarker did before 2.3.36.
+     *   <li>The <code>\R</code> escape of string literals, which is replaced with this value, or with a line feed
+     *       (U+000A) if this setting is {@code null}. Unlike <code>\n</code>, which always gives a line feed,
+     *       <code>\R</code> gives whatever the output is supposed to use.
+     * </ul>
+     *
+     * <p>Note that the values inserted by <code>${...}</code> are never affected; this setting is about the
+     * template, not about the data.
+     *
+     * <p>Usually you set this to {@code "\n"} or {@code "\r\n"}. Prefer specifying the line break explicitly
+     * rather than deriving it from the machine the template is executed on, as then the output doesn't depend on
+     * that, which matters if it's stored in a version control system, for example.
+     *
+     * @param normalizedEol
+     *            The line break to use, or {@code null} to not prescribe any. Should be {@code "\n"},
+     *            {@code "\r\n"} or {@code "\r"}, though other values aren't rejected.
+     *
+     * @since 2.3.36
+     */
+    public void setNormalizedEol(String normalizedEol) {
+        this.normalizedEol = normalizedEol;
+    }
+
+    /**
+     * The getter pair of {@link #setNormalizedEol(String)}.
+     *
+     * @since 2.3.36
+     */
+    @Override
+    public String getNormalizedEol() {
+        return normalizedEol;
     }
 
     /**

@@ -2316,6 +2316,20 @@ this is a backslash: \</programlisting>
                 </tr>
 
                 <tr>
+                  <td><literal>\R</literal></td>
+
+                  <td>The end-of-line (line break) that the output should use;
+                  that is, the value of the <literal>normalized_eol</literal>
+                  setting (see
+                  <literal>Configuration.setNormalizedEol(String)</literal>),
+                  or a line feed (u000A) if that setting isn't set.
+                  Unlike <literal>\n</literal> and <literal>\r\n</literal>,
+                  which always give the same characters, this adapts to how the
+                  output is supposed to look. (Supported since FreeMarker
+                  2.3.36.)</td>
+                </tr>
+
+                <tr>
                   <td><literal>\t</literal></td>
 
                   <td>Horizontal tabulation (a.k.a. tab) (u0009)</td>
@@ -30995,6 +31009,43 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix role="changelog" xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_36">
+        <title>2.3.36</title>
+
+        <para>Release date: Not released yet</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added the <literal>normalized_eol</literal> setting, which
+              prescribes the end-of-line (line break) that the output should
+              use. When it's set, the line breaks of the static text of the
+              template are all replaced with it, and so the line breaks that
+              the template file happens to use don't leak into the output.
+              Values inserted by
+              <literal>${<replaceable>...</replaceable>}</literal> are never
+              affected. It defaults to not being set, in which case FreeMarker
+              behaves like before. It's a parser-level setting, applied when
+              the template is parsed, so it can't be changed with the
+              <literal>setting</literal> directive, but it can differ per
+              template via <literal>TemplateConfiguration</literal>. See
+              <literal>Configuration.setNormalizedEol(String)</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added the <literal>\R</literal> escape sequence of string
+              literals, which gives the value of the
+              <literal>normalized_eol</literal> setting (or a line feed, if
+              that setting isn't set). Unlike <literal>\n</literal>, it
+              adapts to how the output is supposed to look. See more <link
+              linkend="topic.escapeSequence">here...</link></para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_35">
         <title>2.3.35</title>

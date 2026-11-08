@@ -39,7 +39,7 @@ import freemarker.template.Version;
  *  Some text related utilities.
  */
 public class StringUtil {
-    
+
     /**
      *  Used to look up if the chars with low code needs to be escaped, but note that it gives bad result for '=', as
      *  there the it matters if it's after '['.
@@ -557,6 +557,18 @@ public class StringUtil {
      * @throws ParseException if there string contains illegal escapes
      */
     public static String FTLStringLiteralDec(String s) throws ParseException {
+        return FTLStringLiteralDec(s, null);
+    }
+
+    /**
+     * Same as {@link #FTLStringLiteralDec(String)}, but you can say what the <code>\R</code> escape stands for.
+     *
+     * @param normalizedEol
+     *            The value of the {@code normalized_eol} setting, or {@code null} for a line feed.
+     *
+     * @since 2.3.36
+     */
+    public static String FTLStringLiteralDec(String s, String normalizedEol) throws ParseException {
 
         int idx = s.indexOf('\\');
         if (idx == -1) {
@@ -587,6 +599,10 @@ public class StringUtil {
                     break;
                 case 'n':
                     buf.append('\n');
+                    bidx = idx + 2;
+                    break;
+                case 'R':
+                    buf.append(normalizedEol != null ? normalizedEol : "\n");
                     bidx = idx + 2;
                     break;
                 case 'r':
