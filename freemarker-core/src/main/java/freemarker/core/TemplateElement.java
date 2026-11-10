@@ -220,8 +220,8 @@ abstract public class TemplateElement extends TemplateObject implements Template
      */
     public Enumeration children() {
         return childBuffer != null
-                ? new _ArrayEnumeration(childBuffer, childCount)
-                : Collections.enumeration(Collections.EMPTY_LIST);
+                ? new _ArrayEnumeration<>(childBuffer, childCount)
+                : Collections.emptyEnumeration();
     }
 
     /**
