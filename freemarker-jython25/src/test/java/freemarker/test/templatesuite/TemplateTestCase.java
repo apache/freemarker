@@ -56,7 +56,6 @@ import freemarker.core.ASTPrinter;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.BooleanModel;
-import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
@@ -208,13 +207,13 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("set", ImmutableSet.of("a", "b", "c"));
             dataModel.put("s", "test");
         } else if (simpleTestName.equals("bean-maps")) {
-            BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w4 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w5 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w6 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w7 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w1 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w2 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w3 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w4 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w5 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w6 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            BeansWrapper w7 = new BeansWrapper(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     
             w1.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
             w2.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
