@@ -1621,6 +1621,7 @@ public final class Environment extends Configurable {
     }
 
     static final String COMPUTER_FORMAT_STRING = "computer";
+    static final String SCALE_PRESERVING_FORMAT_STRING = "scalePreserving";
 
     /**
      * Returns the {@link TemplateNumberFormat} for the given parameters without using the {@link Environment}-level
@@ -1662,6 +1663,8 @@ public final class Environment extends Configurable {
         } else if (formatStringLen >= 1 && formatString.charAt(0) == 'c'
                 && (formatStringLen == 1 || formatString.equals(COMPUTER_FORMAT_STRING))) {
             return getCTemplateNumberFormatWithPre2331IcIBug();
+        } else if (formatString.equals(SCALE_PRESERVING_FORMAT_STRING)) {
+            return ScalePreservingTemplateNumberFormatFactory.INSTANCE.get("", locale, this);
         } else {
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
