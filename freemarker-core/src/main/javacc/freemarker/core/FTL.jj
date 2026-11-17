@@ -4180,7 +4180,10 @@ AutoEscBlock AutoEsc() :
     {
         checkCurrentOutputFormatCanEscape(start);
         lastAutoEscapingPolicy = autoEscapingPolicy;
-        autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+        // Don't downgrade "force", or else its bans (?no_esc, <#noautoesc>) stop working.
+        if (autoEscapingPolicy != Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+            autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+        }
         recalculateAutoEscapingField();
     }
     children = MixedContentElements()
@@ -4647,7 +4650,10 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
-                                autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+                                // Don't downgrade "force", or else its bans (?no_esc, <#noautoesc>) stop working.
+                                if (autoEscapingPolicy != Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+                                    autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+                                }
                             } else {
                                 if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
                                     throw new ParseException(
