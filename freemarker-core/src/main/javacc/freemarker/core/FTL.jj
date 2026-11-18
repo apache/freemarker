@@ -372,6 +372,36 @@ public class FMParser {
         }
     }
 
+    /**
+     * Sets the {@link #autoEscapingPolicy} field, then updates the {@link #autoEscaping} field. Apart from the initial
+     * value set in the constructor, the policy must only be changed through this method, because it never replaces
+     * {@link Configuration#FORCE_AUTO_ESCAPING_POLICY}: while that's the current policy, changing it to
+     * {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY} is ignored (auto-escaping stays on anyway), and
+     * changing it to any other policy is an error.
+     *
+     * @param caller
+     *            What wants to change the policy, as it should be shown in the error message, like
+     *            {@code "<#noautoesc>"}
+     * @param callerLocation
+     *            The location to report the error at; a {@link Token} or a {@link TemplateObject}
+     */
+    private void setAutoEscapingPolicy(int newAutoEscapingPolicy, String caller, Object callerLocation)
+            throws ParseException {
+        if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
+            if (newAutoEscapingPolicy != Configuration.FORCE_AUTO_ESCAPING_POLICY
+                    && newAutoEscapingPolicy != Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY) {
+                String message = forcedAutoEscapingPolicyExceptionMessage(caller);
+                if (callerLocation instanceof Token) {
+                    throw new ParseException(message, template, (Token) callerLocation);
+                }
+                throw new ParseException(message, (TemplateObject) callerLocation);
+            }
+        } else {
+            autoEscapingPolicy = newAutoEscapingPolicy;
+        }
+        recalculateAutoEscapingField();
+    }
+
     MarkupOutputFormat getMarkupOutputFormat() {
         return outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null;
     }
@@ -4180,11 +4210,7 @@ AutoEscBlock AutoEsc() :
     {
         checkCurrentOutputFormatCanEscape(start);
         lastAutoEscapingPolicy = autoEscapingPolicy;
-        // Don't downgrade "force", or else its bans (?no_esc, <#noautoesc>) stop working.
-        if (autoEscapingPolicy != Configuration.FORCE_AUTO_ESCAPING_POLICY) {
-            autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
-        }
-        recalculateAutoEscapingField();
+        setAutoEscapingPolicy(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, "<#autoesc>", start);
     }
     children = MixedContentElements()
     end = <END_AUTOESC>
@@ -4192,8 +4218,7 @@ AutoEscBlock AutoEsc() :
         AutoEscBlock result = new AutoEscBlock(children);
         result.setLocation(template, start, end);
         
-        autoEscapingPolicy = lastAutoEscapingPolicy; 
-        recalculateAutoEscapingField();
+        setAutoEscapingPolicy(lastAutoEscapingPolicy, "</#autoesc>", end);
         return result;
     }
 }
@@ -4207,15 +4232,11 @@ NoAutoEscBlock NoAutoEsc() :
 {
     start = <NOAUTOESC>
     {
-        if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
-            throw new ParseException(
-                    forcedAutoEscapingPolicyExceptionMessage(
-                            "<#" + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noAutoEsc" : "noautoesc") + ">"),
-                    template, start);
-        }
         lastAutoEscapingPolicy = autoEscapingPolicy;
-        autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
-        recalculateAutoEscapingField();
+        setAutoEscapingPolicy(
+                Configuration.DISABLE_AUTO_ESCAPING_POLICY,
+                "<#" + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noAutoEsc" : "noautoesc") + ">",
+                start);
     }
     children = MixedContentElements()
     end = <END_NOAUTOESC>
@@ -4223,8 +4244,7 @@ NoAutoEscBlock NoAutoEsc() :
         NoAutoEscBlock result = new NoAutoEscBlock(children);
         result.setLocation(template, start, end);
         
-        autoEscapingPolicy = lastAutoEscapingPolicy;
-        recalculateAutoEscapingField(); 
+        setAutoEscapingPolicy(lastAutoEscapingPolicy, "</#noautoesc>", end);
         return result;
     }
 }
@@ -4650,19 +4670,12 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
-                                // Don't downgrade "force", or else its bans (?no_esc, <#noautoesc>) stop working.
-                                if (autoEscapingPolicy != Configuration.FORCE_AUTO_ESCAPING_POLICY) {
-                                    autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
-                                }
+                                setAutoEscapingPolicy(
+                                        Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, ks + "=true", exp);
                             } else {
-                                if (autoEscapingPolicy == Configuration.FORCE_AUTO_ESCAPING_POLICY) {
-                                    throw new ParseException(
-                                            forcedAutoEscapingPolicyExceptionMessage(ks + "=false"),
-                                            exp);
-                                }
-                                autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
+                                setAutoEscapingPolicy(
+                                        Configuration.DISABLE_AUTO_ESCAPING_POLICY, ks + "=false", exp);
                             }
-                            recalculateAutoEscapingField();
                             _TemplateAPI.setAutoEscaping(template, autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
