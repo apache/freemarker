@@ -22,13 +22,15 @@ import java.io.IOException;
 import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
-import freemarker.core._TemplateModelException;
-import freemarker.core._DelayedToString;
 
+/**
+ * Output format that escapes {@code '.'} and {@code '\'} with backslash. Also overrides
+ * {@link #outputForeign(TemplateMarkupOutputModel, Writer)} to only allow HTML.
+ */
 public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
-    
+
     public static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
-    
+
     private DummyOutputFormat() {
         // hide
     }
@@ -54,11 +56,13 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOut
     }
 
     @Override
-    public <MO extends TemplateMarkupOutputModel<MO>> void outputForeign(MO mo, Writer out) throws IOException, TemplateModelException {
+    public <MO extends TemplateMarkupOutputModel<MO>> void outputForeign(MO mo, Writer out) throws IOException,
+            TemplateModelException {
         if (mo.getOutputFormat().getMimeType().equals("text/html")) {
             mo.getOutputFormat().output(mo, out);
         } else {
-            throw new _TemplateModelException("DummyOutputFormat is incompatible with ", new _DelayedToString(mo.getOutputFormat()));
+            throw new _TemplateModelException("DummyOutputFormat is incompatible with ",
+                    new _DelayedToString(mo.getOutputFormat()));
         }
     }
 
@@ -76,5 +80,5 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOut
     protected TemplateDummyOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         return new TemplateDummyOutputModel(plainTextContent, markupContent);
     }
-    
+
 }

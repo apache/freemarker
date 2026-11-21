@@ -23,10 +23,14 @@ import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
 
+/**
+ * Output format with {@code false} {@link #isAutoEscapedByDefault()}; when escapes it prepends {@code '.'} and
+ * {@code '\'} with backslash.
+ */
 public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<TemplateSeldomEscapedOutputModel> {
-    
+
     public static final SeldomEscapedOutputFormat INSTANCE = new SeldomEscapedOutputFormat();
-    
+
     private SeldomEscapedOutputFormat() {
         // hide
     }
@@ -66,5 +70,5 @@ public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<Template
             String plainTextContent, String markupContent) {
         return new TemplateSeldomEscapedOutputModel(plainTextContent, markupContent);
     }
-    
+
 }

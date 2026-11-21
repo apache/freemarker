@@ -304,7 +304,7 @@ public abstract class TemplateTest {
                 t = new Template("adhoc", ftl, getConfiguration());
             }
             t.process(getDataModel(), new StringWriter());
-            fail("The template had to fail");
+            fail("The template had to fail:\n" + (ftl != null ? ftl : t.toString()));
             return null;
         } catch (TemplateException e) {
             if (exceptionClass != null) {

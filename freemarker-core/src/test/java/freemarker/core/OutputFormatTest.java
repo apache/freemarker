@@ -861,6 +861,10 @@ public class OutputFormatTest extends TemplateTest {
         String commonFTL = "${'.'} ${.autoEsc?c}";
         String esced = "\\. true";
 
+        // Note:
+        // - SeldomEscapedOutputFormat is not auto-escaped by default, but the policy will force it.
+        // - DummyOutputFormat is auto-escaped by default
+
         cfg.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
         assertOutput(commonFTL, esced);
 
@@ -877,17 +881,62 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains("", IllegalArgumentException.class,
                 "plainText", "auto_escaping_policy", "force");
         cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
-        assertErrorContains("<#ftl auto_esc=false>", ParseException.class,
-                "auto_esc=false", "auto_escaping_policy", "force");
-        assertErrorContains("<#outputformat 'plainText'></#outputformat>", ParseException.class,
+
+        for (TemplatesBannedWithForceAutoEscapingPolicyVariant variant :
+                TemplatesBannedWithForceAutoEscapingPolicyVariant.values()) {
+            assertTemplatesBannedWithForceAutoEscapingPolicy(variant);
+        }
+    }
+
+    enum TemplatesBannedWithForceAutoEscapingPolicyVariant {
+        SIMPLE("", "", "", ""),
+        WITH_HEADER(
+                "<#ftl auto_esc=true>", "<#ftl autoEsc=true>",
+                "", ""),
+        WITH_DIRECTIVE(
+                "<#autoesc>", "<#autoEsc>",
+                "</#autoesc>", "</#autoEsc>");
+
+        private final String prefixLegacyCase;
+        private final String prefixCamelCase;
+        private final String suffixLegacyCase;
+        private final String suffixCamelCase;
+
+        TemplatesBannedWithForceAutoEscapingPolicyVariant(String prefixLegacyCase, String prefixCamelCase,
+                String suffixLegacyCase, String suffixCamelCase) {
+            this.prefixLegacyCase = prefixLegacyCase;
+            this.prefixCamelCase = prefixCamelCase;
+            this.suffixLegacyCase = suffixLegacyCase;
+            this.suffixCamelCase = suffixCamelCase;
+        }
+    }
+
+    private void assertTemplatesBannedWithForceAutoEscapingPolicy(
+            TemplatesBannedWithForceAutoEscapingPolicyVariant variant) {
+        if (variant == TemplatesBannedWithForceAutoEscapingPolicyVariant.SIMPLE) {
+            assertErrorContains("<#ftl auto_esc=false>", ParseException.class,
+                    "auto_esc=false", "auto_escaping_policy", "force");
+        }
+
+        assertErrorContains(
+                variant.prefixLegacyCase + "<#outputformat 'plainText'></#outputformat>" + variant.suffixLegacyCase,
+                ParseException.class,
                 "plainText", "auto_escaping_policy", "force");
-        assertErrorContains("<#noAutoEsc></#noAutoEsc>", ParseException.class,
+        assertErrorContains(
+                variant.prefixCamelCase + "<#noAutoEsc></#noAutoEsc>" + variant.suffixCamelCase,
+                ParseException.class,
                 "noAutoEsc", "auto_escaping_policy", "force");
-        assertErrorContains("<#noautoesc></#noautoesc>", ParseException.class,
+        assertErrorContains(
+                variant.prefixLegacyCase + "<#noautoesc></#noautoesc>" + variant.suffixLegacyCase,
+                ParseException.class,
                 "noautoesc", "auto_escaping_policy", "force");
-        assertErrorContains("<#assign foo='bar'>${foo?no_esc}", ParseException.class,
+        assertErrorContains(
+                variant.prefixLegacyCase + "<#assign foo='bar'>${foo?no_esc}" + variant.suffixLegacyCase,
+                ParseException.class,
                 "?no_esc", "auto_escaping_policy", "force");
-        assertErrorContains("<#assign foo='bar'>${foo?noEsc}", ParseException.class,
+        assertErrorContains(
+                variant.prefixCamelCase + "<#assign foo='bar'>${foo?noEsc}" + variant.suffixCamelCase,
+                ParseException.class,
                 "?noEsc", "auto_escaping_policy", "force");
     }
 
