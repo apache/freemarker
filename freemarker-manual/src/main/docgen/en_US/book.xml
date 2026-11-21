@@ -29,7 +29,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.35</productname>
+    <productname>Freemarker 2.3.36</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -30995,6 +30995,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix role="changelog" xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_36">
+        <title>2.3.36</title>
+
+        <para>Release date: TODO</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/projects/FREEMARKER/issues/FREEMARKER-237">FREEMARKER-237</link>:
+              "force" auto-escaping policy was downgraded to unforced
+              auto-escaped by <literal>&lt;#ftl auto_esc=true&gt;</literal>
+              and <literal>&lt;#autoesc&gt;</literal>. Now it will always
+              remain forced.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>TODO</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_35">
         <title>2.3.35</title>
