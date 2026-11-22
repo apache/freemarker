@@ -75,7 +75,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
     private List unwrappedList;
 
     /**
-     * Constructs an empty simple sequence that will use the the default object 
+     * Constructs an empty simple sequence that will use the default object 
      * wrapper set in 
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
      * 
