@@ -241,7 +241,7 @@ public abstract class TemplateObject {
      * index of the other parameters won't shift.
      *
      *  @return {@code null} or any kind of {@link Object}, very often an {@link Expression}. However, if there's
-     *      a {@link TemplateObject} stored inside the returned value, it must itself be be a {@link TemplateObject}
+     *      a {@link TemplateObject} stored inside the returned value, it must itself be a {@link TemplateObject}
      *      too, otherwise the AST couldn't be (easily) fully traversed. That is, non-{@link TemplateObject} values
      *      can only be used for leafs. 
      *  
