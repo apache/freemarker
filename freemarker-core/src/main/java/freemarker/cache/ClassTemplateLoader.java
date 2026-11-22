@@ -47,7 +47,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
 
     /**
      * Creates a template loader that will use the {@link Class#getResource(String)} method of its own class to load the
-     * resources, and {@code "/"} as base package path. This means that that template paths will be resolved relatively
+     * resources, and {@code "/"} as base package path. This means that template paths will be resolved relatively
      * the root package of the class hierarchy, so you hardly ever should use this constructor, rather do something like
      * this:<br>
      * {@link #ClassTemplateLoader(Class, String) new ClassTemplateLoader(com.example.myapplication.SomeClass.class,
