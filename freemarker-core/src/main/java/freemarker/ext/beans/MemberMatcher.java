@@ -27,7 +27,7 @@ import java.util.Set;
 
 /**
  * For implementing a whitelist or blacklist of class members in {@link MemberAccessPolicy} implementations.
- * A {@link MemberMatcher} filters by name and/or signature, but not by by visibility, as
+ * A {@link MemberMatcher} filters by name and/or signature, but not by visibility, as
  * the visibility condition is orthogonal to the whitelist or blacklist content.
  *
  * @since 2.3.30
