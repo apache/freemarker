@@ -232,7 +232,7 @@ public abstract class TemplateObject {
     
     /**
      * Returns the value of the parameter identified by the index. For example, the binary "+" operator will have an
-     * LHO {@link Expression} at index 0, and and RHO {@link Expression} at index 1. Or, the binary "." operator will
+     * LHO {@link Expression} at index 0, and RHO {@link Expression} at index 1. Or, the binary "." operator will
      * have an LHO {@link Expression} at index 0, and an RHO {@link String}(!) at index 1. Or, the {@code #include}
      * directive will have a path {@link Expression} at index 0, a "parse" {@link Expression} at index 1, etc.
      * 
