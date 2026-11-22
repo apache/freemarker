@@ -137,7 +137,7 @@ public final class TemplateModelUtils {
      *            Hash-like objects whose union the result hash will be. The content of these hash-like objects must not
      *            change, or else the behavior of the resulting hash can be erratic. If multiple hash-like object
      *            contains the same key, then the value from the last such hash-like object wins. The oder of keys is
-     *            kept, with the keys of earlier hash-like object object coming first (even if their values were
+     *            kept, with the keys of earlier hash-like object coming first (even if their values were
      *            replaced by a later hash-like object). This argument can't be {@code null}, but the list can contain
      *            {@code null} elements, which will be silently ignored. The list can be empty, in which case the result
      *            is an empty hash.
