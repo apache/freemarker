@@ -25,8 +25,11 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 
 class DynamicKeyNameBeforeMethodCall extends DynamicKeyName {
-    DynamicKeyNameBeforeMethodCall(DynamicKeyName dynamicKeyName) {
+    private final int argumentCount;
+
+    DynamicKeyNameBeforeMethodCall(DynamicKeyName dynamicKeyName, int argumentCount) {
         super(dynamicKeyName);
+        this.argumentCount = argumentCount;
     }
 
     @Override
@@ -34,7 +37,7 @@ class DynamicKeyNameBeforeMethodCall extends DynamicKeyName {
             throws TemplateException {
         if (targetModel instanceof MethodCallAwareTemplateHashModel) {
             try {
-                return ((MethodCallAwareTemplateHashModel) targetModel).getBeforeMethodCall(key);
+                return ((MethodCallAwareTemplateHashModel) targetModel).getBeforeMethodCall(key, argumentCount);
             } catch (MethodCallAwareTemplateHashModel.ShouldNotBeGetAsMethodException e) {
                 String hint = e.getHint();
                 throw new NonMethodException(

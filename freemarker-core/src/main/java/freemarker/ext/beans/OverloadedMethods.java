@@ -21,6 +21,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ final class OverloadedMethods {
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
     private final boolean bugfixed;
+    private final List<Method> methods = new ArrayList<>();
     
     OverloadedMethods(boolean bugfixed) {
         this.bugfixed = bugfixed;
@@ -53,8 +55,13 @@ final class OverloadedMethods {
     }
     
     void addMethod(Method method) {
+        methods.add(method);
         final Class[] paramTypes = method.getParameterTypes();
         addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(method, paramTypes));
+    }
+
+    List<Method> getMethods() {
+        return methods;
     }
 
     void addConstructor(Constructor constr) {
