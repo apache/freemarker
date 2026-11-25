@@ -31,6 +31,11 @@ public class HelloFreeMarker {
     private final static Logger log = Logger.getLogger(HelloFreeMarker.class.getName());
 
     public static void main(String[] args) throws Exception {
+        String output = executeHelloWorld();
+        log.info(String.format("result :\n%s", output));
+    }
+
+    public static String executeHelloWorld() throws Exception {
         // To test native configuration
         Class.forName("freemarker.ext.jython.JythonModel");
 
@@ -48,7 +53,7 @@ public class HelloFreeMarker {
             // Process template
             Template template = cfg.getTemplate("hello-world.ftlh");
             template.process(dataModel, buffer);
-            log.info(String.format("result :\n%s", buffer));
+            return buffer.toString();
         }
     }
 

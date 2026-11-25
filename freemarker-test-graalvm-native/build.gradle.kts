@@ -70,6 +70,7 @@ graalvmNative {
     binaries.all {
         fallback.set(false)
         verbose.set(true)
+        buildArgs.add("--add-exports=java.xml/com.sun.org.apache.xml.internal.utils=ALL-UNNAMED")
         configurationFileDirectories.from(file("src/main/graalvm-native-config"))
         resources.autodetect()
     }
