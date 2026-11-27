@@ -9861,6 +9861,20 @@ cfg.setTemplateConfigurations(
               see <link
               linkend="dgui_misc_autoescaping">auto-escaping</link>.)</para>
             </listitem>
+
+            <listitem>
+              <para>Registering formats provided by FreeMarker under your own
+              name: Some <literal>TemplateNumberFormatFactory</literal>
+              implementations that FreeMarker comes with are public classes,
+              so just like your own implementations, they can be registered
+              as custom formats under an application-specific name. Currently
+              there's one such format,
+              <literal>freemarker.core.ScalePreservingTemplateNumberFormatFactory</literal>
+              (since 2.3.36), which is the implementation behind the
+              <literal>scalePreserving</literal> built-in format name. <link
+              linkend="pgui_config_custom_formats_ex_provided">See example
+              below</link>.</para>
+            </listitem>
           </itemizedlist>
 
           <para>Custom formats can be registered with the
@@ -10384,6 +10398,115 @@ cfg.setCustomNumberFormats(customNumberFormats);
 
 // Note: "0.####;; roundingMode=halfUp" is a standard format specified in FreeMarker.
 cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_provided">
+          <title>The scale preserving number format</title>
+
+          <para><literal>freemarker.core.ScalePreservingTemplateNumberFormatFactory</literal>
+          (since 2.3.36) provides a locale-sensitive number format that,
+          unlike the standard <literal>number</literal> format, keeps the
+          scale of <literal>java.math.BigDecimal</literal>-s, and so shows
+          exactly as many fraction digits as the scale of the
+          <literal>BigDecimal</literal> specifies, including trailing 0-s.
+          This is useful when the data-model is created by a system that
+          knows the desired number of fraction digits, and hence sets the
+          scale-s accordingly.</para>
+
+          <para>This format is available under the built-in format name
+          <literal>scalePreserving</literal>, so no registration is needed.
+          Assuming <literal>x</literal> is a
+          <literal>java.math.BigDecimal</literal> created as <literal>new
+          BigDecimal("1.500")</literal> (so with a scale of 3), and the
+          locale is <literal>en_US</literal>, this:</para>
+
+          <programlisting role="template">${x?string.scalePreserving}</programlisting>
+
+          <para>will print this (while the standard <literal>number</literal>
+          format would print <literal>1.5</literal>):</para>
+
+          <programlisting role="output">1.500</programlisting>
+
+          <para>You can also set it as the default number format, so that
+          plain <literal>${x}</literal> uses it too:</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("scalePreserving");</programlisting>
+
+          <para>Numbers that aren't <literal>BigDecimal</literal>-s (like
+          <literal>Double</literal>-s, or <literal>Integer</literal>-s) carry
+          no scale, so there's nothing to preserve for them, and thus they
+          are formatted with another number format instead. By default that's
+          the standard <literal>number</literal> format, but you can specify
+          it in the format string in two ways:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>scalePreserving|<replaceable>otherFormat</replaceable></literal>,
+              where <literal><replaceable>otherFormat</replaceable></literal>
+              is anything that would work as a number format string on its
+              own (like a Java decimal number format pattern, or
+              <literal>percent</literal>, or a custom format like
+              <literal>@foo</literal>). That format will be used for
+              non-<literal>BigDecimal</literal>-s. For example, with
+              <literal>scalePreserving|0.00##</literal>
+              non-<literal>BigDecimal</literal>-s are shown with 2 to 4
+              fraction digits.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>scalePreserving_<replaceable>max</replaceable></literal>,
+              or
+              <literal>scalePreserving_<replaceable>min</replaceable>_<replaceable>max</replaceable></literal>,
+              which is a shorthand for formatting
+              non-<literal>BigDecimal</literal>-s like the standard
+              <literal>number</literal> format does, but showing at least
+              <literal><replaceable>min</replaceable></literal> (0 if
+              omitted), and at most
+              <literal><replaceable>max</replaceable></literal> fraction
+              digits. For example, with <literal>scalePreserving_2_6</literal>
+              non-<literal>BigDecimal</literal>-s are shown with 2 to 6
+              fraction digits. This form can also be used like
+              <literal>${x?string.scalePreserving_2_6}</literal>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>For example, assuming <literal>d</literal> is a
+          <literal>Double</literal> with value 1.5, and <literal>x</literal>
+          is still the above <literal>BigDecimal</literal>:</para>
+
+          <programlisting role="template">&lt;#setting number_format="scalePreserving|0.00##"&gt;
+${x} ${d}</programlisting>
+
+          <programlisting role="output">1.500 1.50</programlisting>
+
+          <para>Be aware that the results of arithmetic operations in
+          templates are also <literal>BigDecimal</literal>-s (unless the
+          <literal>arithmetic_engine</literal> setting was changed), whose
+          scale follows the rules of <literal>BigDecimal</literal>
+          arithmetic. This is the most apparent with division, where
+          FreeMarker uses a scale of at least 12, and so
+          <literal>${6 / 2}</literal> prints
+          <literal>3.000000000000</literal> with this format. This format
+          deliberately doesn't hide that, as its purpose is showing
+          <literal>BigDecimal</literal>-s as is. If that's a problem, either
+          format the result of such calculations explicitly with another
+          format (like <literal>${(a / b)?string.number}</literal>), or use
+          an <literal>ArithmeticEngine</literal> whose division doesn't
+          return a <literal>BigDecimal</literal> when the result can't be
+          represented exactly with a reasonable scale.</para>
+
+          <para>As the factory class is public, you can also register it as a
+          custom format, which is only useful if you want to refer to it with
+          an application-specific name, like
+          <literal>${x?string.@price}</literal>:</para>
+
+          <programlisting role="unspecified">cfg.setCustomNumberFormats(
+        Collections.singletonMap(
+                "price", ScalePreservingTemplateNumberFormatFactory.INSTANCE));</programlisting>
+
+          <para>The parameters described above work then as well, like
+          <literal>@price |0.00##</literal>, or
+          <literal>@price_2_6</literal>.</para>
         </section>
       </section>
 
@@ -17298,18 +17421,31 @@ rif: foo XYr baar</programlisting>
           configuration settings. You can also specify a number format
           explicitly with this built-in, as it will be shown later.</para>
 
-          <para>There are four predefined number formats: <literal>c</literal>
+          <para>There are five predefined number formats: <literal>c</literal>
           (since 2.3.32, before that it was called
           <literal>computer</literal>, which still works),
-          <literal>currency</literal>, <literal>number</literal>, and
-          <literal>percent</literal>. The exact meaning of these is locale
-          (nationality) specific, and is controlled by the Java platform
-          installation, not by FreeMarker, except for <literal>c</literal>,
+          <literal>currency</literal>, <literal>number</literal>,
+          <literal>percent</literal>, and
+          <literal>scalePreserving</literal> (since 2.3.36). The exact meaning
+          of these is locale (nationality) specific, and is controlled by the
+          Java platform installation, not by FreeMarker, except for
+          <literal>c</literal>,
           which uses the same formatting as <link linkend="ref_builtin_c">the
           <literal>c</literal> built-in</link> (assuming <link
           linkend="pgui_config_incompatible_improvements">incompatible
           improvements</link> set to 2.3.31, or higher, or else infinity and
-          NaN isn't formatted like that). There can also be programmer-defined
+          NaN isn't formatted like that), and
+          <literal>scalePreserving</literal>, which formats like
+          <literal>number</literal>, except that it keeps the scale of
+          <literal>java.math.BigDecimal</literal> values, and so shows exactly
+          as many fraction digits as the scale of the
+          <literal>BigDecimal</literal> specifies, including trailing 0-s.
+          How it formats other kind of numbers can be specified like
+          <literal>scalePreserving|<replaceable>otherFormat</replaceable></literal>,
+          or
+          <literal>scalePreserving_<replaceable>min</replaceable>_<replaceable>max</replaceable></literal>
+          (<link linkend="pgui_config_custom_formats_ex_provided">see more
+          here...</link>). There can also be programmer-defined
           formats, whose name starts with <literal>@</literal> (programmers
           <link linkend="pgui_config_custom_formats">see more here...</link>).
           You can use these predefined formats like this:</para>
@@ -25265,6 +25401,23 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
+                  <para><literal>scalePreserving</literal> since 2.3.36,
+                  which formats like <literal>number</literal>, except that it
+                  keeps the scale of <literal>java.math.BigDecimal</literal>
+                  values, and so shows exactly as many fraction digits as the
+                  scale of the <literal>BigDecimal</literal> specifies,
+                  including trailing 0-s. Other kind of numbers are formatted
+                  like with <literal>number</literal>, unless specified
+                  otherwise like
+                  <literal>scalePreserving|<replaceable>otherFormat</replaceable></literal>,
+                  or
+                  <literal>scalePreserving_<replaceable>min</replaceable>_<replaceable>max</replaceable></literal>.
+                  <link
+                  linkend="pgui_config_custom_formats_ex_provided">See more
+                  here...</link></para>
+                </listitem>
+
+                <listitem>
                   <para>Format pattern written in <link
                   xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
                   decimal number format syntax</link>, for example
@@ -31021,7 +31174,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>TODO</para>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-232">FREEMARKER-232</link>:
+              Added new built-in number format name,
+              <literal>scalePreserving</literal> (implemented by the also new
+              public class
+              <literal>freemarker.core.ScalePreservingTemplateNumberFormatFactory</literal>).
+              This is a locale-sensitive number format that, unlike the
+              standard <literal>number</literal> format, keeps the scale of
+              <literal>java.math.BigDecimal</literal>-s, and so shows exactly
+              as many fraction digits as the scale of the
+              <literal>BigDecimal</literal> specifies, including trailing 0-s.
+              Numbers that aren't <literal>BigDecimal</literal>-s are
+              formatted like with <literal>number</literal>, unless another
+              format is specified for them like
+              <literal>scalePreserving|<replaceable>otherFormat</replaceable></literal>
+              (where <literal><replaceable>otherFormat</replaceable></literal>
+              is any number format string), or their fraction digits are
+              limited like
+              <literal>scalePreserving_<replaceable>min</replaceable>_<replaceable>max</replaceable></literal>.
+              Use it in templates like
+              <literal>${x?string.scalePreserving}</literal>, or set it as
+              the default number format with
+              <literal>cfg.setNumberFormat("scalePreserving")</literal>. <link
+              linkend="pgui_config_custom_formats_ex_provided">See more
+              here...</link></para>
             </listitem>
           </itemizedlist>
         </section>

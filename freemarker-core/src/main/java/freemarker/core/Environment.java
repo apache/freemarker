@@ -1621,6 +1621,7 @@ public final class Environment extends Configurable {
     }
 
     static final String COMPUTER_FORMAT_STRING = "computer";
+    static final String SCALE_PRESERVING_FORMAT_STRING = "scalePreserving";
 
     /**
      * Returns the {@link TemplateNumberFormat} for the given parameters without using the {@link Environment}-level
@@ -1662,9 +1663,37 @@ public final class Environment extends Configurable {
         } else if (formatStringLen >= 1 && formatString.charAt(0) == 'c'
                 && (formatStringLen == 1 || formatString.equals(COMPUTER_FORMAT_STRING))) {
             return getCTemplateNumberFormatWithPre2331IcIBug();
-        } else {
-            return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
+
+        String scalePreservingFormatParams = getScalePreservingFormatParams(formatString);
+        if (scalePreservingFormatParams != null) {
+            return ScalePreservingTemplateNumberFormatFactory.INSTANCE.get(scalePreservingFormatParams, locale, this);
+        }
+
+        return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
+    }
+
+    /**
+     * @return The parameters for {@link ScalePreservingTemplateNumberFormatFactory}, or {@code null} if the format
+     * string isn't {@value #SCALE_PRESERVING_FORMAT_STRING}, optionally followed by {@code |} or {@code _} and the
+     * parameters.
+     */
+    static String getScalePreservingFormatParams(String formatString) {
+        if (!formatString.startsWith(SCALE_PRESERVING_FORMAT_STRING)) {
+            return null;
+        }
+        int nameLen = SCALE_PRESERVING_FORMAT_STRING.length();
+        if (formatString.length() == nameLen) {
+            return "";
+        }
+        char c = formatString.charAt(nameLen);
+        if (c == ScalePreservingTemplateNumberFormatFactory.NON_BIG_DECIMAL_FORMAT_STRING_PREFIX) {
+            return formatString.substring(nameLen);
+        }
+        if (c == '_') {
+            return formatString.substring(nameLen + 1);
+        }
+        return null;
     }
 
     /**
@@ -1737,7 +1766,25 @@ public final class Environment extends Configurable {
                 cachedTemplateNumberFormats.remove(C_FORMAT_STRING);
                 cachedTemplateNumberFormats.remove(COMPUTER_FORMAT_STRING);
             }
+            removeCachedScalePreservingTemplateNumberFormats();
             clearCachedTrueAndFalseString();
+        }
+    }
+
+    /**
+     * Needed when the {@code c_format} setting changes, as a {@link ScalePreservingTemplateNumberFormat} may wrap the
+     * {@code c} format (as in {@code "scalePreserving|c"}), which it has resolved when it was created.
+     */
+    private void removeCachedScalePreservingTemplateNumberFormats() {
+        if (cachedTemplateNumberFormat instanceof ScalePreservingTemplateNumberFormat) {
+            cachedTemplateNumberFormat = null;
+        }
+        if (cachedTemplateNumberFormats != null) {
+            for (Iterator<TemplateNumberFormat> it = cachedTemplateNumberFormats.values().iterator(); it.hasNext(); ) {
+                if (it.next() instanceof ScalePreservingTemplateNumberFormat) {
+                    it.remove();
+                }
+            }
         }
     }
 
