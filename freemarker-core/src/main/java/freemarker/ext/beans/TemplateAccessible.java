@@ -29,7 +29,7 @@ import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 
 /**
- * Indicates that the the annotated member can be exposed to templates; if the annotated member will be actually
+ * Indicates that the annotated member can be exposed to templates; if the annotated member will be actually
  * exposed depends on the {@link ObjectWrapper} in use, and how that was configured. When used with
  * {@link BeansWrapper} or its subclasses, most notably with {@link DefaultObjectWrapper}, and you also set the
  * {@link MemberAccessPolicy} to a {@link WhitelistMemberAccessPolicy}, it will acts as if the members annotated with

@@ -28,7 +28,7 @@ import java.util.List;
 import freemarker.template.TemplateModelException;
 
 /**
- * <p>Gives FreeMarker the the ability to execute external commands. Will fork
+ * <p>Gives FreeMarker the ability to execute external commands. Will fork
  * a process, and inline anything that process sends to stdout in the template.
  * Based on a patch submitted by Peter Molettiere.</p>
  *

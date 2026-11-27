@@ -600,7 +600,7 @@ public class Template extends Configurable {
     }
 
     /**
-     * The encoding that was (allegedly) used to read this template; also the the default character encoding used for
+     * The encoding that was (allegedly) used to read this template; also the default character encoding used for
      * reading files included from this template. Possibly {@code null}, in which case you are supposed to use
      * {@link Configuration#getEncoding(Locale)}. 
      */

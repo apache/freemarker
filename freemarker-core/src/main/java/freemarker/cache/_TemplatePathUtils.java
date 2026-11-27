@@ -32,7 +32,7 @@ public class _TemplatePathUtils {
      * Checks if the path doesn't back out from the directory it starts from. We recognize {@code "."} and {@code ".."}
      * as the reserved navigating names. Both {@code '/'} and {@code '\'} are assumed to be name separators. The path is
      * allowed to be both absolute or relative. If it's absolute, we will still block backing out from the root (like
-     * {@code "/.."}). The repeated occurence of the name separator counts as a single name separator, following the
+     * {@code "/.."}). The repeated occurrence of the name separator counts as a single name separator, following the
      * logic of most shells (i.e. {@code "foo/bar"} is the same as {@code "foo///bar"})
      *
      * @param name

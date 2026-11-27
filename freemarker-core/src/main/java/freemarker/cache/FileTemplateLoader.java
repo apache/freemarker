@@ -80,7 +80,7 @@ public class FileTemplateLoader implements TemplateLoader {
      * <code>user.dir</code> as the base directory for loading templates. It will not allow access to template files
      * that are accessible through symlinks that point outside the base directory.
      *
-     * @deprecated Relying on what the current directory is is a bad practice; use
+     * @deprecated Relying on what the current directory is a bad practice; use
      * {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     @Deprecated

@@ -164,7 +164,7 @@ import freemarker.template.utility.StringUtil;
  * If none of the above gives a MIME type, then this init-param does. Defaults to {@code "text/html"}. If and only if
  * the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING} init-param is set to {@value #INIT_PARAM_VALUE_LEGACY} (which is
  * the default of it), the content type may include the charset (as in {@code "text/html; charset=utf-8"}), in which
- * case that specifies the actual charset of the output. If the the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
+ * case that specifies the actual charset of the output. If the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
  * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the
  * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.</li>
  *

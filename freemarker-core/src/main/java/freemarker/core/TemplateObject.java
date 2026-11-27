@@ -232,7 +232,7 @@ public abstract class TemplateObject {
     
     /**
      * Returns the value of the parameter identified by the index. For example, the binary "+" operator will have an
-     * LHO {@link Expression} at index 0, and and RHO {@link Expression} at index 1. Or, the binary "." operator will
+     * LHO {@link Expression} at index 0, and RHO {@link Expression} at index 1. Or, the binary "." operator will
      * have an LHO {@link Expression} at index 0, and an RHO {@link String}(!) at index 1. Or, the {@code #include}
      * directive will have a path {@link Expression} at index 0, a "parse" {@link Expression} at index 1, etc.
      * 
@@ -241,7 +241,7 @@ public abstract class TemplateObject {
      * index of the other parameters won't shift.
      *
      *  @return {@code null} or any kind of {@link Object}, very often an {@link Expression}. However, if there's
-     *      a {@link TemplateObject} stored inside the returned value, it must itself be be a {@link TemplateObject}
+     *      a {@link TemplateObject} stored inside the returned value, it must itself be a {@link TemplateObject}
      *      too, otherwise the AST couldn't be (easily) fully traversed. That is, non-{@link TemplateObject} values
      *      can only be used for leafs. 
      *  

@@ -163,7 +163,7 @@ class JaxenXPathSupport implements XPathSupport {
     };
     
     /**
-     * Stores the the template parsed as {@link Document} in the template itself.
+     * Stores the template parsed as {@link Document} in the template itself.
      */
     private static final CustomAttribute FM_DOM_NAVIAGOTOR_CACHED_DOM
             = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
