@@ -25,33 +25,53 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
 /**
- * The {@link TemplateNumberFormat} implementation behind {@link ScalePreservingTemplateNumberFormatFactory}; see the
- * behavior described there. Wraps a locale-specific {@link NumberFormat}, whose minimum and maximum fraction digits
- * are adjusted for each formatted number (which is also why instances aren't thread-safe, as allowed by the
- * {@link TemplateNumberFormat} contract).
+ * The {@link TemplateNumberFormat} behind {@link ScalePreservingTemplateNumberFormatFactory}. Not thread-safe, as it
+ * adjusts the fraction digits of the wrapped {@link NumberFormat} for each {@link BigDecimal}.
  */
 class ScalePreservingTemplateNumberFormat extends TemplateNumberFormat {
 
     private final NumberFormat javaNumberFormat;
+    private final TemplateNumberFormat nonBigDecimalNumberFormat;
 
-    ScalePreservingTemplateNumberFormat(NumberFormat javaNumberFormat) {
+    /**
+     * @param javaNumberFormat
+     *         Formats the {@link BigDecimal}-s; must not be shared, as its fraction digits will be modified.
+     * @param nonBigDecimalNumberFormat
+     *         Formats all other numbers.
+     */
+    ScalePreservingTemplateNumberFormat(
+            NumberFormat javaNumberFormat, TemplateNumberFormat nonBigDecimalNumberFormat) {
         this.javaNumberFormat = javaNumberFormat;
+        this.nonBigDecimalNumberFormat = nonBigDecimalNumberFormat;
     }
 
     @Override
     public String formatToPlainText(TemplateNumberModel numberModel)
-            throws UnformattableValueException, TemplateModelException {
+            throws TemplateValueFormatException, TemplateModelException {
         Number number = TemplateFormatUtil.getNonNullNumber(numberModel);
-        if (number instanceof BigDecimal) {
-            // NumberFormat treats a negative fraction digit count as 0, which is also what we need for a
-            // negative scale (as then there are no fraction digits to preserve).
-            int scale = ((BigDecimal) number).scale();
-            javaNumberFormat.setMinimumFractionDigits(scale);
-            javaNumberFormat.setMaximumFractionDigits(scale);
-        } else {
-            javaNumberFormat.setMinimumFractionDigits(0);
-            javaNumberFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
-        }
+        return number instanceof BigDecimal
+                ? formatBigDecimal((BigDecimal) number)
+                : nonBigDecimalNumberFormat.formatToPlainText(numberModel);
+    }
+
+    /**
+     * Overridden to keep the markup output of the non-{@link BigDecimal} format.
+     */
+    @Override
+    public Object format(TemplateNumberModel numberModel)
+            throws TemplateValueFormatException, TemplateModelException {
+        Number number = TemplateFormatUtil.getNonNullNumber(numberModel);
+        return number instanceof BigDecimal
+                ? formatBigDecimal((BigDecimal) number)
+                : nonBigDecimalNumberFormat.format(numberModel);
+    }
+
+    private String formatBigDecimal(BigDecimal number) throws UnformattableValueException {
+        // NumberFormat treats a negative fraction digit count as 0, which is also what we need for a
+        // negative scale (as then there are no fraction digits to preserve).
+        int scale = number.scale();
+        javaNumberFormat.setMinimumFractionDigits(scale);
+        javaNumberFormat.setMaximumFractionDigits(scale);
         try {
             return javaNumberFormat.format(number);
         } catch (ArithmeticException e) {
@@ -67,7 +87,8 @@ class ScalePreservingTemplateNumberFormat extends TemplateNumberFormat {
 
     @Override
     public String getDescription() {
-        return "scale preserving number format";
+        return "scale preserving number format (non-BigDecimal-s are formatted with: "
+                + nonBigDecimalNumberFormat.getDescription() + ")";
     }
 
 }

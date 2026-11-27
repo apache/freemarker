@@ -888,10 +888,12 @@ public class Configurable {
      *   <li>{@code "computer"}: The old (deprecated) name for {@code "c"}. Recognized by all FreeMarker versions.</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "scalePreserving"} (recognized since 2.3.36): Like {@code "number"}, but keeps the
-     *       {@linkplain java.math.BigDecimal#scale() scale} of {@link java.math.BigDecimal}-s, and so shows exactly as
-     *       many fraction digits as the scale of the {@link java.math.BigDecimal} specifies, including trailing 0-s.
-     *       See {@link ScalePreservingTemplateNumberFormatFactory} for details.</li>
+     *   <li>{@code "scalePreserving"} (recognized since 2.3.36): Like {@code "number"}, but shows
+     *       {@link java.math.BigDecimal}-s with exactly as many fraction digits as their
+     *       {@linkplain java.math.BigDecimal#scale() scale}, so trailing 0-s are kept. Other numbers are formatted
+     *       like with {@code "number"}. To change that, use {@code "scalePreserving|<otherFormat>"} (like
+     *       {@code "scalePreserving|0.00##"}), or {@code "scalePreserving_<min>_<max>"} to set their minimum and
+     *       maximum fraction digits. See {@link ScalePreservingTemplateNumberFormatFactory}.</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
      *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
